@@ -6,8 +6,8 @@ env.Append( CPPPATH= ['/opt/local/include','../uhal/include'])
 env.Append( LIBPATH = ['/opt/local/lib','../uhal/lib'])
 env.Append( LIBS = ['boost_unit_test_framework','boost_program_options','uhal'])
 
-env.Program('examples','src/common/examples.cpp')
-env.Program('test_testing_tools', 'src/common/test_testing_tools.cpp')
-env.Program('test_uhal', 'src/common/test_uhal.cpp')
-env.Program('test_performance','src/common/test_performance.cpp')
+env.Program('bin/examples','src/common/examples.cpp')
+env.Program('bin/test_testing_tools', 'src/common/test_testing_tools.cpp')
+env.Program('bin/test_uhal', 'src/common/test_uhal.cpp')
+env.Program('bin/test_performance','src/common/test_performance.cpp')
 

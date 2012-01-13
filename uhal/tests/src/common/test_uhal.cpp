@@ -33,14 +33,12 @@ BOOST_AUTO_TEST_CASE(navigation_and_traversal_test) {
 
   
   uhal::NodePermission a = node1.getPermission();
-  uint32_t addr = node1.getAddress();
   uint32_t mask = node1.getMask();
   std::string id = node1.getId();
   BOOST_CHECK(id=="SYSTEM.REGISTER");
 
   uhal::Node branch(hw.getNode("SYSTEM"));
   BOOST_CHECK_THROW(branch.getPermission(),std::exception);
-  BOOST_CHECK_THROW(branch.getAddress(),std::exception);
   BOOST_CHECK_THROW(branch.getMask(),std::exception);
   BOOST_CHECK_THROW(branch.read(),std::exception);
   BOOST_CHECK_THROW(branch.write(rand()),std::exception);
@@ -54,16 +52,11 @@ BOOST_AUTO_TEST_CASE(read_test) {
 
   //read register
   uhal::ValMem mem1 = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
-  std::cout << "sizeof(ValMem) = " << sizeof(uhal::ValMem) << std::endl;
-  std::cout << "sizeof(mem1) = " << sizeof(mem1) << std::endl;
-  
   uhal::ValMem mem2 = hw.getNode("SYSTEM.TTC.ADDRESS").read();
   hw.dispatch();
   
   BOOST_CHECK(mem1.getValid() && mem2.getValid());
   BOOST_CHECK(mem1.getValue() == mem2.getValue());
-  BOOST_CHECK(mem1.getAddress() == mem2.getAddress());
-  BOOST_CHECK(mem1.getAddress() == hw.getNode("SYSTEM.TTC.ADDRESS").getAddress());
 
   //read memory
   uint32_t SIZE=1024;
@@ -75,10 +68,8 @@ BOOST_AUTO_TEST_CASE(read_test) {
   BOOST_CHECK(block2.size() == SIZE);
   BOOST_CHECK(block1.begin()->getValid() && block2.begin()->getValid());
   BOOST_CHECK(block1.begin()->getValue() == block2.begin()->getValue());
-  BOOST_CHECK(block1.begin()->getAddress() == block2.begin()->getAddress());
   BOOST_CHECK(block1.rbegin()->getValid() && block2.rbegin()->getValid());
   BOOST_CHECK(block1.rbegin()->getValue() == block2.rbegin()->getValue());
-  BOOST_CHECK(block1.rbegin()->getAddress() == block2.rbegin()->getAddress());
 
   //read FIFO
   block1.clear();
@@ -91,10 +82,8 @@ BOOST_AUTO_TEST_CASE(read_test) {
   BOOST_CHECK(block2.size() == SIZE);
   BOOST_CHECK(block1.begin()->getValid() && block2.begin()->getValid());
   BOOST_CHECK(block1.begin()->getValue() == block2.begin()->getValue());
-  BOOST_CHECK(block1.begin()->getAddress() == block2.begin()->getAddress());
   BOOST_CHECK(block1.rbegin()->getValid() && block2.rbegin()->getValid());
   BOOST_CHECK(block1.rbegin()->getValue() == block2.rbegin()->getValue());
-  BOOST_CHECK(block1.rbegin()->getAddress() == block2.rbegin()->getAddress());
   
 }
 
@@ -124,8 +113,6 @@ BOOST_AUTO_TEST_CASE(write_test) {
   hw.dispatch();
   
   BOOST_CHECK(block.size() == SIZE);
-  BOOST_CHECK(block.begin()->getAddress() == hw.getNode("SYSTEM.MEMORY").getAddress());
-  BOOST_CHECK(block.rbegin()->getAddress() == hw.getNode("SYSTEM.MEMORY").getAddress()+SIZE-1);
   BOOST_CHECK(block.begin()->getValid() && block.rbegin()->getValid());
   BOOST_CHECK(block.begin()->getValue() == *vals.begin());
   BOOST_CHECK(block.rbegin()->getValue() == *vals.rbegin());

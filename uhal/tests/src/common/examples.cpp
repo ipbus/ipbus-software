@@ -67,10 +67,16 @@ void test_copysharedpointer() {
   c1.print();
 }
 
+void  test_sizeof_shared_ptr() {
+  std::cout << "sizeof(boost::shared_ptr<uint32_t>) = " << sizeof(boost::shared_ptr<uint32_t>) << std::endl;
+
+}
+
 int main() {
   test_reference_initialization();
   test_sharedptr_equallity();
   test_sharedptr_counting();
   test_constpointer();
   test_copysharedpointer();
+  test_sizeof_shared_ptr();
 }

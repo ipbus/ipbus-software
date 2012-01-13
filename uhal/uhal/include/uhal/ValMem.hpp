@@ -10,18 +10,9 @@ namespace uhal {
   class NonValidatedMemory: public std::exception {  };
   
   class ValMem {
-  public:
-    
-    ValMem(const uint32_t& addr):
+  public:    
+    ValMem(const uint32_t& value):
       valid_(new bool(false)),
-      addr_(new uint32_t(addr)),
-      value_(new uint32_t())
-    { 
-    };
-    
-    ValMem(const uint32_t& addr,const uint32_t& value):
-      valid_(new bool(false)),
-      addr_(new uint32_t(addr)),
       value_(new uint32_t(value))
     { 
     };
@@ -49,17 +40,6 @@ namespace uhal {
     operator uint32_t() {
       return getValue();
     };
-
-    uint32_t getAddress() {
-      if (*valid_) 
-	return *value_;
-      else
-	throw NonValidatedMemory();
-    };
-
-    void setAddress(uint32_t addr) {
-      *addr_ = addr;
-    };
     
     //!Just for cout
     friend std::ostream &operator<<(std::ostream &out, ValMem v) {
@@ -72,7 +52,6 @@ namespace uhal {
 
   private:
     boost::shared_ptr<bool> valid_;
-    boost::shared_ptr<uint32_t> addr_;
     boost::shared_ptr<uint32_t> value_;
 
   };

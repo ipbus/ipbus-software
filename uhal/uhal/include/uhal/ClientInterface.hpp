@@ -18,21 +18,22 @@ namespace uhal {
     virtual std::string url() {return "not implemented";}
 
     virtual void write(const uint32_t addr, const uint32_t val) {
-      ValMem r(addr,val);
+      ValMem r(val);
       tovalidate_.push_back(val);
       
     }
 
     virtual void write(const uint32_t& addr, const uint32_t& val, const uint32_t& mask) {
-      ValMem r(addr,val);
+      uint32_t v = (val << trailing_right_bits(mask)) && mask;
+      
+      ValMem r(v);
       tovalidate_.push_back(val);
       
     }
 
     virtual void writeBlock(const uint32_t& addr, const std::vector<uint32_t>& val, const BlockReadWriteMode mode=NON_INCREMENTAL) {
-      uint32_t acount(addr);
-      for(std::vector<uint32_t>::const_iterator i(val.begin()); i!=val.end();++i,++acount) {
-	ValMem v(acount,*i);
+      for(std::vector<uint32_t>::const_iterator i(val.begin()); i!=val.end();++i) {
+	ValMem v(*i);
 	tovalidate_.push_back(v);
 	
       }
@@ -40,13 +41,15 @@ namespace uhal {
     }
     
     virtual ValMem read(const uint32_t& addr) {
-      ValMem r(addr);
+      ValMem r(rand());
       tovalidate_.push_back(r);
       return r;
     }
     
     virtual ValMem read(const uint32_t& addr, const uint32_t& mask) {
-      ValMem r(addr);
+      uint32_t val = rand();
+      val = (val & mask) >> trailing_right_bits(mask);
+      ValMem r(val);
       tovalidate_.push_back(r);
       return r;
     }
@@ -75,6 +78,19 @@ namespace uhal {
 	tovalidate_.clear();
 	throw;
       }
+    }
+  private:
+    unsigned int trailing_right_bits(uint32_t v) {
+      unsigned int c = sizeof(v)*8; // c will be the number of zero bits on the right
+      v &= -signed(v);
+      if (v) c--;
+      if (v & 0x0000FFFF) c -= 16;
+      if (v & 0x00FF00FF) c -= 8;
+      if (v & 0x0F0F0F0F) c -= 4;
+      if (v & 0x33333333) c -= 2;
+      if (v & 0x55555555) c -= 1;
+
+      return c;
     }
   private:
     std::vector<ValMem> tovalidate_;
