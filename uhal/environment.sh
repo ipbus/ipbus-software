@@ -1,0 +1,1 @@
+export LD_LIBRARY_PATH=uhal/lib:$LD_LIBRARY_PATH
