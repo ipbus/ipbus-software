@@ -3,9 +3,9 @@ import glob
 env = Environment()
 
 env.Append( CXXFLAGS=['-Wall'])
-env.Append( CPPPATH= ['/usr/include','include'])
+env.Append( CPPPATH= ['include'])
 
-env.Append( LIBS = ['boost_unit_test_framework','boost_program_options'])
+#env.Append( LIBS = ['boost_unit_test_framework','boost_program_options'])
 
 env.SharedLibrary('lib/uhal',glob.glob('src/common/*.cpp'))
 

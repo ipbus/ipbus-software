@@ -4,11 +4,10 @@ env.Append( CXXFLAGS=['-Wall'])
 env.Append( CPPPATH= ['../uhal/include'])
 
 env.Append( LIBPATH = ['/usr/lib64','../uhal/lib'])
-env.Append( LIBS = ['boost_program_options','uhal'])
+env.Append( LIBS = ['uhal'])
 
-env.Program('bin/boost_test_example','src/common/boost_test_example.cpp')
+env.Program('bin/test_uhal', 'src/common/test_uhal.cpp')
 #env.Program('bin/examples','src/common/examples.cpp')
 #env.Program('bin/test_testing_tools', 'src/common/test_testing_tools.cpp')
-#env.Program('bin/test_uhal', 'src/common/test_uhal.cpp')
-env.Program('bin/test_performance','src/common/test_performance.cpp')
+#env.Program('bin/test_performance','src/common/test_performance.cpp')
 
