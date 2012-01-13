@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="LATIN1"?>
+
+<!--_System_interface_-->
+
+<module name="SYSTEM" mask="0x00FF">
+	<leaf name="ENABLES" address="0x0000" />
+	<leaf name="CLKBUF" address="0x0001" />
+	<leaf name="QPLL" address="0x0002" />
+	<branch name="SERDES">
+		<leaf name="CONFIG" address="0x0003" />
+		<leaf name="ENABLE" address="0x0004" />
+	</branch>
+	<leaf name="OPTO_TEMP_STATUS" address="0x0005" />
+	<leaf name="FIRMWARE_VERSION" address="0x0006" />
+	<leaf name="ROUTING_MODE" address="0x0007" />
+	<branch name="TTC">
+		<leaf name="INFO" address="0x0008" />
+		<leaf name="DEBUG" address="0x0009" />
+		<leaf name="CODES" address="0x000A" />
+		<leaf name="ADDRESS" address="0x000C" />
+		<leaf name="ADDR_LATCH" address="0x000D" />
+	</branch>
+</module>
+
+

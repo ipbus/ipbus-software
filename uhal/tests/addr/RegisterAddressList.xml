@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="LATIN1"?>
+
+<!-- ----------------------------------------------------
+Register Address list of the current CMS GCT Source Cards
+----------------------------------------------------- -->
+
+<chip name="FPGA1">
+
+<!--_Receiver_interface_-->
+
+	<branch name="RECEIVER" address="0x0700" mask="0x00FF" >
+		<leaf name="CONFIG" address="0x0000" permission="r"/>
+		<leaf name="MAX_CAPTURE" address="0x0001" permission="read"/>
+		<leaf name="CONFIG_RESET" address="0x0002" permission="rw"/>
+		<leaf name="CAPTURE_AMT" address="0x0002"  permission="wr"/>
+		<branch name="CRC">
+			<leaf name="RECEIVED" address="0x0003"  permission="readwrite"//>
+			<leaf name="CALCULATED" address="0x0004" permission="writeread"/>
+			<branch name="GOOD">
+				<leaf name="CNT_H" address="0x0005" permission="w" />
+				<leaf name="CNT_M" address="0x0006" permission="write" />
+				<leaf name="CNT_L" address="0x0007" />
+			</branch>
+			<branch name="BAD">
+				<leaf name="CNT_H" address="0x0008" />
+				<leaf name="CNT_M" address="0x0009" />
+				<leaf name="CNT_L" address="0x000A" />
+			</branch>
+		</branch>
+	</branch>
+
+<!--_JTAG_interface_-->
+
+	<leaf name="JTAG_BASE_ADDR" address="0x0600" />
+
+<!--_System_interface_>
+
+	<branch name="SYSTEM">
+		<leaf name="ENABLES" address="0x0500" />
+		<leaf name="CLKBUF" address="0x0501" />
+		<leaf name="QPLL" address="0x0502" />
+		<branch name="SERDES">
+			<leaf name="CONFIG" address="0x0503" />
+			<leaf name="ENABLE" address="0x0504" />
+		</branch>
+		<leaf name="OPTO_TEMP_STATUS" address="0x0505" />
+		<leaf name="FIRMWARE_VERSION" address="0x0506" />
+		<leaf name="ROUTING_MODE" address="0x0507" />
+		<branch name="TTC">
+			<leaf name="INFO" address="0x0508" />
+			<leaf name="DEBUG" address="0x0509" />
+			<leaf name="CODES" address="0x050A" />
+			<leaf name="ADDRESS" address="0x050C" />
+			<leaf name="ADDR_LATCH" address="0x050D" />
+		</branch>
+	</branch> -->
+
+	<module path="addr/SystemCore.xml" name="SYSTEM" address="0x0500"/>
+	
+	
+<!--_Transmitter_control_interface_-->
+
+	<branch name="TRANSMITTER" address="0x0100" mask="0x00FF">
+		<leaf name="CONFIG" address="0x0000" />
+		<leaf name="FSM_MODE" address="0x0001" />
+		<leaf name="TRIGGER_MODE" address="0x0002" />
+		<leaf name="BRAM_ADDRESS" address="0x0003" />
+		<leaf name="BRAM_DATA" address="0x0004" />
+		<leaf name="RUNNING_PERIOD" address="0x0005" />
+		<leaf name="LOOP_PERIOD" address="0x0007" />
+		<leaf name="DELAY_PERIOD" address="0x0008" />
+		<branch name="MASK">
+			<leaf name="A" address="0x0009" />
+			<leaf name="B" address="0x000A" />
+			<leaf name="C" address="0x000B" />
+			<leaf name="D" address="0x000C" />
+		</branch>
+		<leaf name="TRIGGER_RST" address="0x000D" />
+		<branch name="PHASE">
+			<leaf name="STATUS" address="0x000D" />
+			<leaf name="TTC" address="0x000E" />
+			<leaf name="RCT" address="0x000F" />
+		</branch>
+		<branch name="FPN_REG">
+			<leaf name="A" address="0x0011" />
+			<leaf name="B" address="0x0012" />
+			<leaf name="C" address="0x0013" />
+			<leaf name="D" address="0x0014" />
+		</branch>
+		<branch name="DATA_MODE">
+			<leaf name="A" address="0x0015" />
+			<leaf name="B" address="0x0016" />
+			<leaf name="C" address="0x0017" />
+			<leaf name="D" address="0x0018" />
+		</branch>
+		<branch name="PERIOD">
+			<leaf name="RCT_BC0" address="0x0019" />
+			<leaf name="TTC_BC0" address="0x001A" />
+			<leaf name="TTC_RESYNC" address="0x001B" />
+		</branch>
+		<leaf name="BRIDGE_FIFO_STATUS" address="0x001C" />
+		<leaf name="BC0_SWITCH_CONTROL" address="0x0020" />
+	</branch>
+
+<!--_RCT_data_capture_interface_-->
+
+	<branch name="RCT_CAPTURE" address="0x0200" mask="0x00FF">
+		<leaf name="SYNC_RESET" address="0x0000" />
+		<leaf name="LENGTHS" address="0x0001" />
+		<leaf name="TRIGGER_MODE" address="0x0002" />
+		<leaf name="STATUS" address="0x0002" />
+		<leaf name="SOFTWARE_TRIGGER" address="0x0003" />
+		<leaf name="DELAY_PERIOD" address="0x0004" />
+		<branch name="BUFFER">
+			<leaf name="ADDRESS" address="0x0005" />
+			<leaf name="DATA" address="0x0006" />
+		</branch>
+		<branch name="PATTERN">
+			<leaf name="A" address="0x0007" />
+			<leaf name="B" address="0x0008" />
+			<leaf name="C" address="0x0009" />
+			<leaf name="D" address="0x000A" />
+		</branch>
+		<branch name="MASK">
+			<leaf name="A" address="0x000B" />
+			<leaf name="B" address="0x000C" />
+			<leaf name="C" address="0x000D" />
+			<leaf name="D" address="0x000E" />
+		</branch>
+		<branch name="PATTERN_COUNT">
+			<branch name="GOOD">
+				<leaf name="CNT_H" address="0x000F" />
+				<leaf name="CNT_M" address="0x0010" />
+				<leaf name="CNT_L" address="0x0011" />
+			</branch>
+			<branch name="BAD">
+				<leaf name="CNT_H" address="0x0012" />
+				<leaf name="CNT_M" address="0x0013" />
+				<leaf name="CNT_L" address="0x0014" />
+			</branch>
+		</branch>
+		<branch name="INPUT">
+			<leaf name="MASK_0" address="0x0018" />
+			<leaf name="MASK_1" address="0x0019" />
+			<leaf name="MASK_2" address="0x001A" />
+			<leaf name="MASK_3" address="0x001B" />
+		</branch>
+	</branch>
+
+<!--_I2C_interfaces_for_TTCrx_&_LM83_-->
+
+	<branch name="I2C_TEMP" address="0x0300" mask="0x00FF">
+		<leaf name="RESET" address="0x0000" />
+		<leaf name="DATA" address="0x0001" />
+		<leaf name="TRIGGER" address="0x0002" />
+		<leaf name="STATUS" address="0x0002" />
+	</branch>
+	<branch name="I2C_TTCRX" address="0x0400" mask="0x00FF">
+		<leaf name="RESET" address="0x0000" />
+		<leaf name="DATA" address="0x0001" />
+		<leaf name="TRIGGER" address="0x0002" />
+		<leaf name="STATUS" address="0x0002" />
+	</branch>
+
+</chip>

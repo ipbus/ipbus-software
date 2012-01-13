@@ -1,0 +1,140 @@
+
+* TTCvi address map
+*****************************************************************************************************************
+*  key                 AM       width    address     mask      read write   description
+*****************************************************************************************************************
+
+* short format asynchronous broadcast command
+BChannelShortBroadcast  39       2        000000c4    000000ff    0    1
+
+* long-format async adressed access (broadcast if addr = 0)
+* write starts after LSB is loaded. No need to reload MSB if unchanged.
+BChannelLongData        39       2        000000c0    000000ff    0    1
+BChannelLongSubAddr     39       2        000000c0    0000ff00    0    1
+BChannelLongMSB         39       2        000000c0    0000ffff    0    1
+BChannelLongExt         39       2        000000c2    00000001    0    1    0= int, 1=ext regs
+BChannelLongAddr        39       2        000000c2    00007ffe    0    1    14 bit TTCrx addr
+BChannelLongOne         39       2        000000c2    00008000    0    1    always set to 1
+BChannelLongLSB         39       2        000000c2    0000ffff    0    1
+
+* CSR1
+L1ATriggerSelect        39       2        00000080    00000007    1    1  4:VME 5:random 0-3:front panel
+OrbitSignalSelect       39       2        00000080    00000008    1    1	0=external 
+L1AFIFOFull             39       2        00000080    00000010    1    0
+L1AFIFOEmpty            39       2        00000080    00000020    1    0
+L1AFIFOReset            39       2        00000080    00000040    0    1
+VMETransferPending      39       2        00000080    00000080    1    0
+BCDelay                 39       2        00000080    00000F00    1    0      Must be inverted
+RandomTriggerRate       39       2        00000080    00007000    1    1
+CountSelect		39       2        00000080    00008000    1    1      0=event 1=orbit
+
+*CSR2 : FIFO status
+BGoFIFO0Empty           39       2        00000082    00000001    1    0
+BGoFIFO0Full            39       2        00000082    00000002    1    0
+BGoFIFO1Empty           39       2        00000082    00000004    1    0
+BGoFIFO1Full            39       2        00000082    00000008    1    0
+BGoFIFO2Empty           39       2        00000082    00000010	1    0
+BGoFIFO2Full            39       2        00000082    00000020	1    0
+BGoFIFO3Empty           39       2        00000082    00000040	1    0
+BGoFIFO3Full            39       2        00000082    00000080	1    0
+BGoFIFO0Retransmit      39       2        00000082    00000100	1    1     set to 0 when empty 
+BGoFIFO1Retransmit      39       2        00000082    00000200	1    1     set to 0 when empty 
+BGoFIFO2Retransmit      39       2        00000082    00000400	1    1     set to 0 when empty 
+BGoFIFO3Retransmit      39       2        00000082    00000800	1    1     set to 0 when empty
+BGoFIFO0Reset           39       2        00000082    00001000	1    1     set to 1
+BGoFIFO1Reset    	39       2        00000082    00002000	1    1     set to 1
+BGoFIFO2Reset	        39       2        00000082    00004000	1    1     set to 1
+BGoFIFO3Reset	        39       2        00000082    00008000	1    1     set to 1
+
+SoftReset               39       2        00000084    00000000	0    1     data-less
+
+L1ASend                	39       2        00000086    00000000	0    1     data-less
+
+CounterMSB		39       2        00000088    000000ff	1    1   bits 23 to 16, event or orbit
+CounterLSB		39       2        0000008a    0000ffff	1    1   bits 15 to 0, event or orbit
+
+CounterReset		39       2        0000008c    00000000	0    1   data-less, event or orbit 
+
+Inhibit0Delay		39       2        00000092    00000fff	1    1
+Inhibit0Duration	39       2        00000094    000000ff	1    1   no inhibit[0] if =0
+Inhibit1Delay		39       2        0000009a    00000fff	1    1
+Inhibit1Duration	39       2        0000009c    000000ff	1    1   no inhibit[1] if =0
+Inhibit2Delay		39       2        000000a2    00000fff	1    1
+Inhibit2Duration	39       2        000000a4    000000ff	1    1   no inhibit[2] if =0
+Inhibit3Delay		39       2        000000aa    00000fff	1    1
+Inhibit3Duration	39       2        000000ac    000000ff	1    1   no inhibit[3] if =0
+
+BGo0Enable		39       2        00000090    00000001    1    1   0=enable 1=disable
+BGo0Sync		39       2        00000090    00000002    1    1   0=sync 1=async
+BGo0Single		39       2        00000090    00000004    1    1   0=single 1=repeat
+BGo0FIFO		39       2        00000090    00000008    1    1   0=start if not empty 1=ignore
+BGo0Zero		39       2        00000090    00000010	1    1   must be 0
+BGo0Send		39       2        00000096    00000000	0    1   dataless
+
+BGo1Enable		39       2        00000098    00000001    1    1   0=enable 1=disable
+BGo1Sync		39       2        00000098    00000002    1    1   0=sync 1=async
+BGo1Single		39       2        00000098    00000004    1    1   0=single 1=repeat
+BGo1FIFO		39       2        00000098    00000008    1    1   0=start if not empty 1=ignore
+BGo1Zero		39       2        00000098    00000010	1    1   must be 0
+BGo1Send		39       2        0000009e    00000000	0    1   dataless
+
+BGo2Enable		39       2        000000a0    00000001    1    1   0=enable 1=disable
+BGo2Sync		39       2        000000a0    00000002    1    1   0=sync 1=async
+BGo2Single		39       2        000000a0    00000004    1    1   0=single 1=repeat
+BGo2FIFO		39       2        000000a0    00000008    1    1   0=start if not empty 1=ignore
+BGo2Zero		39       2        000000a0    00000010	1    1   must be 0
+BGo2Send		39       2        000000a6    00000000	0    1   dataless
+
+BGo3Enable		39       2        000000a8    00000001    1    1   0=enable 1=disable
+BGo3Sync		39       2        000000a8    00000002    1    1   0=sync 1=async
+BGo3Single		39       2        000000a8    00000004    1    1   0=single 1=repeat
+BGo3FIFO		39       2        000000a8    00000008    1    1   0=start if not empty 1=ignore
+BGo3Zero		39       2        000000a8    00000010	1    1   must be 0
+BGo3Send		39       2        000000ae    00000000	0    1   dataless
+
+TrigWordAddress		39       2        000000c8    00003fff	1    1
+TrigWordSubAddress	39       2        000000ca    000000fc	1    1
+TrigWordSize		39       2        000000ca    00000200	1    1	0=short frames= no counter/trig type transfer
+TrigWordIE		39       2        000000ca    00000100	1    1	0=int 1=ext
+
+BData0LongData		39       2        000000b2    000000ff  	1    1
+BData0LongSubAddr	39       2        000000b2    0000ff00  	1    1
+BData0LongE		39       2        000000b0    00000001  	1    1	??
+BData0LongAddr		39       2        000000b0    00007ffe  	1    1	14 bit TTCrx address
+BData0One		39       2        000000b0    00008000  	1    1	must be 1
+BData0ShortCommand	39       2        000000b0    00007f80  	1    1	8 bit command
+
+BData1LongData		39       2        000000b6    000000ff  	1    1
+BData1LongSubAddr	39       2        000000b6    0000ff00  	1    1
+BData1LongE		39       2        000000b4    00000001  	1    1	??
+BData1LongAddr		39       2        000000b4    00007ffe  	1    1	14 bit TTCrx address
+BData1One		39       2        000000b4    00008000  	1    1	must be 1
+BData1ShortCommand	39       2        000000b4    00007f80  	1    1	8 bit command
+
+BData2LongData		39       2        000000ba    000000ff  	1    1
+BData2LongSubAddr	39       2        000000ba    0000ff00  	1    1
+BData2LongE		39       2        000000b8    00000001  	1    1	??
+BData2LongAddr		39       2        000000b8    00007ffe  	1    1	14 bit TTCrx address
+BData2One		39       2        000000b8    00008000  	1    1	must be 1
+BData2ShortCommand	39       2        000000b8    00007f80  	1    1	8 bit command
+
+BData3LongData		39       2        000000be    000000ff  	1    1
+BData3LongSubAddr	39       2        000000be    0000ff00  	1    1
+BData3LongE		39       2        000000bc    00000001  	1    1	??
+BData3LongAddr		39       2        000000bc    00007ffe  	1    1	14 bit TTCrx address
+BData3One		39       2        000000bc    00008000  	1    1	must be 1
+BData3ShortCommand	39       2        000000bc    00007f80  	1    1	8 bit command
+
+Manufacturer2		39       2        00000026    000000ff	1    1  MSByte
+Manufacturer1		39       2        0000002a    000000ff	1    1
+Manufacturer0		39       2        0000002e    000000ff	1    1  LSByte
+SerialNo3		39       2        00000032    000000ff	1    1  MSByte
+SerialNo2		39       2        00000036    000000ff	1    1
+SerialNo1		39       2        0000003a    000000ff	1    1
+SerialNo0		39       2        0000003e    000000ff	1    1  LSByte
+Revision3		39       2        00000042    000000ff	1    1  MSByte
+Revision2		39       2        00000046    000000ff	1    1
+Revision1		39       2        0000004a    000000ff	1    1
+Revision0		39       2        0000004e    000000ff	1    1  LSByte
+
+

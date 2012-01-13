@@ -1,0 +1,65 @@
+* Example microhal_connection_config.txt file
+* -------------------------------------------
+
+* This is just an example of the content - not a finished file format.  I leave the decision about the
+* formatting of the file to a later date.  Obviously it should be both easy to edit, easy to parse, and
+* easy to understand.
+
+
+
+* If true, all IPbus packets are routed directly to the devices using the DeviceName to IPaddress map
+* futher down - i.e. there is no intermediary ControlHub; this mode is useful for benchtop testing, etc.
+* If false, packets are routed to the appropriate ControlHub, as according to either the DeviceName to
+* ControlHub mapping below, or as according to the IPbus Name Server (see "use_ipbus_name_server" option).
+use_direct_access_mode = false | true
+
+* If set to false, MicroHAL will use a local mapping of DeviceName to ControlHub (see further down)
+* If set to true, MicroHAL will query an IPbus Name Server (address specified below) to get a globally
+* maintained mapping of DeviceName to ControlHub.
+* Note: If use_direct_access_mode = true, then this setting is ignored.
+use_ipbus_name_server = false | true
+
+* The addresses of the primary/backup IPbus Name Server services.
+ipbus_name_server_addr_primary = "http://ipbusNameServer1.cms:10203"
+ipbus_name_server_addr_backup = "http://ipbusNameServer2.cms:10203"
+
+
+* The table below is referred to by MicroHAL if:
+*   1)  use_direct_access_mode = true
+*   2)  use_direct_access_mode = false   AND   use_ipbus_name_server = false
+*
+---------------------------------------------------------------------------------------------------------------------
+        DeviceName          |  Locally Defined ControlHub Mapping   |    DirectAccessIPaddr    |   DeviceProtocol
+---------------------------------------------------------------------------------------------------------------------
+* Crate 1 and 2 share a control hub
+* Define Crate 1
+"hcal.crate1.slot1"            http://hcal.controlhub1.cms:10203         192.168.1.1:50001            UDP
+"hcal.crate1.slot2"            http://hcal.controlhub1.cms:10203         192.168.1.2:50001            UDP
+"hcal.crate1.slot3"            http://hcal.controlhub1.cms:10203         192.168.1.3:50001            UDP 
+  ...etc...
+"hcal.crate1.slot12"           http://hcal.controlhub1.cms:10203         192.168.1.12:50001           UDP
+
+* Define Crate 2
+"hcal.crate2.slot1"            http://hcal.controlhub1.cms:10203         192.168.2.1:50001            UDP
+"hcal.crate2.slot2"            http://hcal.controlhub1.cms:10203         192.168.2.2:50001            UDP
+"hcal.crate2.slot3"            http://hcal.controlhub1.cms:10203         192.168.2.3:50001            UDP
+  ...etc...
+"hcal.crate2.slot12"           http://hcal.controlhub1.cms:10203         192.168.2.12:50001           UDP
+
+
+* Crate 3 and 4 share a control hub
+* Define Crate 3
+"hcal.crate3.slot1"            http://hcal.controlhub2.cms:10203         192.168.3.1:50001            UDP
+"hcal.crate3.slot2"            http://hcal.controlhub2.cms:10203         192.168.3.2:50001            UDP
+"hcal.crate3.slot3"            http://hcal.controlhub2.cms:10203         192.168.3.3:50001            UDP
+  ...etc...
+"hcal.crate3.slot12"           http://hcal.controlhub2.cms:10203         192.168.3.12:50001           UDP
+
+* Define Crate 4
+"hcal.crate4.slot1"            http://hcal.controlhub2.cms:10203         192.168.4.1:50001            UDP
+"hcal.crate4.slot2"            http://hcal.controlhub2.cms:10203         192.168.4.2:50001            UDP
+"hcal.crate4.slot3"            http://hcal.controlhub2.cms:10203         192.168.4.3:50001            UDP
+  ...etc...
+"hcal.crate4.slot12"           http://hcal.controlhub2.cms:10203         192.168.4.12:50001           UDP
+-------------------------------------------------------------------------------------------------------------------
+
