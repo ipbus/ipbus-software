@@ -13,6 +13,8 @@ namespace uhal {
     ClientInterface(const std::string& id, const std::string& host,const int& port)
       :id_(id)
     {}
+    virtual ~ClientInterface() {}
+
     std::string id() { return id_;}
     virtual bool ping() {return true;}
     virtual std::string url() {return "not implemented";}
