@@ -30,12 +30,13 @@ BOOST_AUTO_TEST_CASE(navigation_and_traversal_test) {
   uhal::Node node1(hw.getNode("SYSTEM.REGISTER"));
   uhal::Node node2(hw.getNode("SYSTEM").getNode("REGISTER"));
   BOOST_CHECK(node1 == node2);
+
   
   uhal::NodePermission a = node1.getPermission();
   uint32_t addr = node1.getAddress();
   uint32_t mask = node1.getMask();
   std::string id = node1.getId();
-  BOOST_CHECK(id="SYSTEM.REGISTER");
+  BOOST_CHECK(id=="SYSTEM.REGISTER");
 
   uhal::Node branch(hw.getNode("SYSTEM"));
   BOOST_CHECK_THROW(branch.getPermission(),std::exception);
@@ -53,6 +54,9 @@ BOOST_AUTO_TEST_CASE(read_test) {
 
   //read register
   uhal::ValMem mem1 = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
+  std::cout << "sizeof(ValMem) = " << sizeof(uhal::ValMem) << std::endl;
+  std::cout << "sizeof(mem1) = " << sizeof(mem1) << std::endl;
+  
   uhal::ValMem mem2 = hw.getNode("SYSTEM.TTC.ADDRESS").read();
   hw.dispatch();
   
@@ -111,7 +115,7 @@ BOOST_AUTO_TEST_CASE(write_test) {
   //write memory
   uint32_t SIZE=1024;
   std::vector<uint32_t> vals;
-  for(i=0;i!=SIZE;i++)
+  for(uint32_t i=0;i!=SIZE;i++)
     vals.push_back(static_cast<uint32_t>(rand()));
 
   hw.getNode("SYSTEM.MEMORY").writeBlock(vals);
@@ -143,7 +147,7 @@ BOOST_AUTO_TEST_CASE(read_write_mask) {
   hw.getNode("REGISTER_MASK_0xF0").write(val);
   mem = hw.getNode("REGISTER_MASK_0xF0").read();
   hw.dispatch();
-  BOOST_CHECK(mem.getValue == val);
+  BOOST_CHECK(mem.getValue() == val);
 }
 
 BOOST_AUTO_TEST_CASE(read_write_permissions) {
@@ -151,7 +155,7 @@ BOOST_AUTO_TEST_CASE(read_write_permissions) {
   uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
 
   //read write register 
-  uint32_t val = static_Cast<uint32_t>(rand());
+  uint32_t val = static_cast<uint32_t>(rand());
   hw.getNode("READ_WRITE_REGISTER").write(val);
   uhal::ValMem mem = hw.getNode("READ_WRITE_REGISTER").read();
 
@@ -159,22 +163,22 @@ BOOST_AUTO_TEST_CASE(read_write_permissions) {
   BOOST_CHECK(mem.getValue() == val);
 
   //read only register
-  uhal::ValMem mem = hw.getNode("READ_ONLY_REGISTER").read();
+  mem = hw.getNode("READ_ONLY_REGISTER").read();
   hw.dispatch();
 
-  BOOST_CHECK_THROW(hw.get("READ_ONLY_REGISTER").write(rand()),std::exception);
+  BOOST_CHECK_THROW(hw.getNode("READ_ONLY_REGISTER").write(rand()),std::exception);
 
   //write only register
-  val = static_Cast<uint32_t>(rand());
+  val = static_cast<uint32_t>(rand());
   hw.getNode("WRITE_ONLY_REGISTER").write(val);
   hw.dispatch();
   
-  BOOST_CHECK_THROW(hw.get("WRITE_ONLY_REGISTER").read(),std::exception);
+  BOOST_CHECK_THROW(hw.getNode("WRITE_ONLY_REGISTER").read(),std::exception);
   
   //read write memory
   uint32_t SIZE = 1024;
   std::vector<uint32_t> vals;
-  for(i=0;i!=SIZE;i++)
+  for(uint32_t i=0;i!=SIZE;i++)
     vals.push_back(static_cast<uint32_t>(rand()));
   
   hw.getNode("READ_WRITE_MEMORY").writeBlock(vals);
@@ -182,21 +186,21 @@ BOOST_AUTO_TEST_CASE(read_write_permissions) {
   hw.dispatch();
   
   BOOST_CHECK(block.size() == vals.size());
-  BOOST_CHECK(block.begin()->getValue() == vals.begin()->getValue());
-  BOOST_CHECK(block.rbegin()->getValue() == vals.rbegin()->getValue());
+  BOOST_CHECK(block.begin()->getValue() == *vals.begin());
+  BOOST_CHECK(block.rbegin()->getValue() == *vals.rbegin());
   
   //read only memory
-  BOOST_CHECK_THROW(hw.getNode("READ_ONLY_MEMORY").write(vals),std::exception);
+  BOOST_CHECK_THROW(hw.getNode("READ_ONLY_MEMORY").writeBlock(vals),std::exception);
 
-  std::vector<uhal::ValMem> block = hw.getNode("READ_ONLY_MEMORY").readBlock(SIZE);
+  block = hw.getNode("READ_ONLY_MEMORY").readBlock(SIZE);
   hw.dispatch();
   BOOST_CHECK(block.size() == vals.size());
-  BOOST_CHECK(block.begin()->getValue() == vals.begin()->getValue());
-  BOOST_CHECK(block.rbegin()->getValue() == vals.rbegin()->getValue());
+  BOOST_CHECK(block.begin()->getValue() == *vals.begin());
+  BOOST_CHECK(block.rbegin()->getValue() == *vals.rbegin());
   
   //write only memory
-  BOOST_CHECK_THROW(hw.getNode("READ_WRITE_MEMORY").readBlock(SIZE),std::exception);
-  hw.getNode("WRITE_ONLY_MEMORY").write(vals);
+  BOOST_CHECK_THROW(hw.getNode("WRITE_ONLY_MEMORY").readBlock(SIZE),std::exception);
+  hw.getNode("WRITE_ONLY_MEMORY").writeBlock(vals);
   hw.dispatch();
   
 
