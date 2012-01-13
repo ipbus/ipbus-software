@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--_System_interface_-->
+
+<node id="SYSTEM">
+  <node id="ENABLES" address="0x0000" />
+  <node id="CLKBUF" address="0x0001" />
+  <node id="QPLL" address="0x0002" />
+  <node id="SERDES">
+    <node id="CONFIG" address="0x0003" />
+    <node id="ENABLE" address="0x0004" />
+  </node>
+  <node id="OPTO_TEMP_STATUS" address="0x0005" />
+  <node id="FIRMWARE_VERSION" address="0x0006" />
+  <node id="ROUTING_MODE" address="0x0007" />
+  <node id="TTC">
+    <node id="INFO" address="0x0008" />
+    <node id="DEBUG" address="0x0009" />
+    <node id="CODES" address="0x000A" />
+    <node id="ADDRESS" address="0x000C" />
+    <node id="ADDR_LATCH" address="0x000D" />
+  </node>
+</node>
+
+
