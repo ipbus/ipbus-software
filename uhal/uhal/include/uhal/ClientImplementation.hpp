@@ -6,22 +6,22 @@
 namespace uhal {
   class IPBusUDPClient: public ClientInterface {
   public:
-    IPBusUDPClient(const std::string& id,const std::string& host,const int& port)
-      :ClientInterface(id,host,port) 
+    IPBusUDPClient(const std::string& id,const std::string& location)
+      :ClientInterface(id,location) 
     {};
   };
 
   class ControlHubClient: public ClientInterface {
   public:
-    ControlHubClient(const std::string& id,const std::string& host,const int& port)
-      :ClientInterface(id,host,port) 
+    ControlHubClient(const std::string& id,const std::string& location)
+      :ClientInterface(id,location) 
     {};
   };
 
   class DummyClient: public ClientInterface {
   public:
-    DummyClient(const std::string& id,const std::string& host,const int& port)
-      :ClientInterface(id,host,port) 
+    DummyClient(const std::string& id,const std::string& location)
+      :ClientInterface(id,location) 
     {};
   };
 

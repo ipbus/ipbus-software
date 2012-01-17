@@ -10,7 +10,7 @@
 namespace uhal {
   class ClientInterface {
   public:
-    ClientInterface(const std::string& id, const std::string& host,const int& port)
+    ClientInterface(const std::string& id, const std::string& location)
       :id_(id)
     {}
     virtual ~ClientInterface() {}
@@ -33,7 +33,7 @@ namespace uhal {
       
     }
 
-    virtual void writeBlock(const uint32_t& addr, const std::vector<uint32_t>& val, const BlockReadWriteMode mode=NON_INCREMENTAL) {
+    virtual void writeBlock(const uint32_t& addr, const std::vector<uint32_t>& val, const defs::BlockReadWriteMode mode=defs::NON_INCREMENTAL) {
       for(std::vector<uint32_t>::const_iterator i(val.begin()); i!=val.end();++i) {
 	ValMem v(*i);
 	tovalidate_.push_back(v);
@@ -56,7 +56,7 @@ namespace uhal {
       return r;
     }
 
-    virtual std::vector<ValMem> readBlock(const uint32_t& addr, const uint32_t& size, const BlockReadWriteMode mode=INCREMENTAL) {
+    virtual std::vector<ValMem> readBlock(const uint32_t& addr, const uint32_t& size, const defs::BlockReadWriteMode mode=defs::INCREMENTAL) {
       std::vector<ValMem> r;
       uint32_t acount(addr);
       for(uint32_t i(0); i!= size; ++i,++acount) {

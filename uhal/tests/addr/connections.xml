@@ -5,9 +5,10 @@
 <!-- xpath 1.0 expression to look for a given node: //connection[@id='hcal.crate1.slot1'] -->
 <!-- xpath 1.0 expression to look for a given pattern: //conntction[starts-with(@id, 'hcal.crate1') -->
 <connections>
-  <connection id="hcal.crate1.slot1" url="123.4.3.1:2000"       protocol="IpBus/UDP"               address_table="file://$HOME/crate1.xml" />
-  <connection id="hcal.crate1.slot2" url="controlhub1.hcal.cms" protocol="ControlHub/TCP"          addresses_table="file://$HOME/crate2.xml" />
-  <connection id="gt.crate1.psb1"    url="psb1.gt.cms:1234"     protocol="GoogleProtBuff/TCP"      addresses_table="http://gt.cms/psb.xml" />
-  <connection id="gt.crate1.psb2"    url="psb2.gt.cms:1234"     protocol="GoogleProtBuff/TCP"      addresses_table="http://gt.cms/psb.xml" />
+  <connection id="hcal.crate1.slot1" location="123.4.3.1:2000"            protocol="IpBus/UDP"               address_table="file://$HOME/crate1.xml" />
+  <connection id="hcal.crate1.slot2" location="controlhub1.hcal.cms:80/2" protocol="ControlHub/TCP"          addresses_table="file://$HOME/crate2.xml" />
+  <connection id="gt.crate1.psb1"    location="psb1.gt.cms:1234"          protocol="GoogleProtBuff/TCP"      addresses_table="http://gt.cms/psb.xml" />
+  <connection id="gt.crate1.psb2"    location="psb2.gt.cms:1234"          protocol="GoogleProtBuff/TCP"      addresses_table="http://gt.cms/psb.xml" />
+  <connection id="daq.crate1.slot3"  location="daq1.cms:1234/12"          protocol="PCIe/TCP"               addresses_table="file://etc/daq.conf/board1.xml" />
 
 </connections>

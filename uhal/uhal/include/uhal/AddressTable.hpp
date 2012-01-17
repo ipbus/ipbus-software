@@ -7,8 +7,6 @@
 
 #include <map>
 
-#define uhal_NOMASK = 0xFFFFFFFF;
-
 namespace uhal {
   class AddressTable {
   public:
@@ -21,11 +19,11 @@ namespace uhal {
     }
 
     uint32_t getMask(const std::string& fullid) {
-      return NOMASK;
+      return defs::NOMASK;
     }
 
-    NodePermission getPermission(const std::string& fullid) {
-      return READWRITE;
+    defs::NodePermission getPermission(const std::string& fullid) {
+      return defs::READWRITE;
     }
     
     std::vector<std::string> getChildren(const std::string& id) {

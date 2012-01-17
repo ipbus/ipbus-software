@@ -21,16 +21,16 @@ namespace uhal {
     return hw_->getAddressTable().getChildren(fullid_);
   }
     
-  void Node::writeBlock(const std::vector<uint32_t>& vals,BlockReadWriteMode mode) {
-    if (permission_ & WRITE)
+  void Node::writeBlock(const std::vector<uint32_t>& vals,defs::BlockReadWriteMode mode) {
+    if (permission_ & defs::WRITE)
       hw_->getClient().writeBlock(addr_,vals,mode);
     else
       throw WriteAccessDenied();
   }
     
   void Node::write(const uint32_t val) {
-    if (permission_ & WRITE) {
-      if (mask_ == NOMASK)
+    if (permission_ & defs::WRITE) {
+      if (mask_ == defs::NOMASK)
 	hw_->getClient().write(addr_,val);
       else
 	hw_->getClient().write(addr_,val,mask_);
@@ -39,16 +39,16 @@ namespace uhal {
     
   }
     
-  std::vector<ValMem> Node::readBlock(const uint32_t size, BlockReadWriteMode mode) {
-    if (permission_ & READ) 
+  std::vector<ValMem> Node::readBlock(const uint32_t size, defs::BlockReadWriteMode mode) {
+    if (permission_ & defs::READ) 
       return hw_->getClient().readBlock(size,mode);
     else
       throw ReadAccessDenied();
   }
     
   ValMem Node::read() {
-    if (permission_ & READ) {
-      if (mask_ == NOMASK)
+    if (permission_ & defs::READ) {
+      if (mask_ == defs::NOMASK)
 	return hw_->getClient().read(addr_);
       else
 	return hw_->getClient().read(addr_,mask_);

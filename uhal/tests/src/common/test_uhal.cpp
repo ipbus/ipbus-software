@@ -29,7 +29,7 @@ void navigation_and_traversal_test() {
   uhal::Node node2(hw.getNode("SYSTEM").getNode("REGISTER"));
 
   
-  uhal::NodePermission a = node1.getPermission();
+  uhal::defs::NodePermission a = node1.getPermission();
   uint32_t mask = node1.getMask();
   std::string id = node1.getId();
   //BOOST_CHECK(id=="SYSTEM.REGISTER");
@@ -70,9 +70,9 @@ void read_test() {
 
   //read FIFO
   block1.clear();
-  block1 = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE,uhal::NON_INCREMENTAL);
+  block1 = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
   block2.clear();
-  block2 = hw.getNode("SYSTEM.MEMORY").readBlock(SIZE,uhal::NON_INCREMENTAL);
+  block2 = hw.getNode("SYSTEM.MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
   hw.dispatch();
   
   //BOOST_CHECK(block1.size() == SIZE);
@@ -119,8 +119,8 @@ void write_test() {
   for(uint32_t i=0;i!=SIZE;i++)
     vals.push_back(static_cast<uint32_t>(rand()));
 
-  hw.getNode("SYSTEM").getNode("MEMORY").writeBlock(vals,uhal::NON_INCREMENTAL);
-  block = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE,uhal::NON_INCREMENTAL);
+  hw.getNode("SYSTEM").getNode("MEMORY").writeBlock(vals,uhal::defs::NON_INCREMENTAL);
+  block = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
   hw.dispatch();
   
 }

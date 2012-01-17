@@ -10,11 +10,17 @@ namespace uhal {
   class NonValidatedMemory: public std::exception {  };
   
   class ValMem {
-  public:    
+  public:
     ValMem(const uint32_t& value):
       valid_(new bool(false)),
       value_(new uint32_t(value))
     { 
+    };
+    
+    ValMem()
+      :valid_(new bool(false)),
+       value_(new uint32_t(0))
+    {
     };
 
     bool getValid() {
@@ -22,7 +28,7 @@ namespace uhal {
     };
     
     void setValid(bool valid) {
-      *valid_ = valid;
+	*valid_ = valid;
     };
 
     uint32_t getValue() {
@@ -47,9 +53,6 @@ namespace uhal {
       return out;
     };
     
-  private:
-    ValMem();
-
   private:
     boost::shared_ptr<bool> valid_;
     boost::shared_ptr<uint32_t> value_;

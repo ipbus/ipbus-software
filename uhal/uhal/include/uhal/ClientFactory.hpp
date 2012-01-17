@@ -24,12 +24,12 @@ namespace uhal {
       creators_[name] = new Creator<T>();
     }
 
-    ClientInterface getClient(const std::string& protocol, const std::string& id,const std::string& host,const int& port) {
+    ClientInterface getClient(const std::string& protocol, const std::string& id,const std::string& location) {
       std::map<std::string,CreatorInterface*>::const_iterator i(creators_.find(protocol));
       if (i == creators_.end())
 	throw ProtocolDoesNotExist();
       
-      return i->second->create(id,host,port);
+      return i->second->create(id,location);
       
     }
 
@@ -41,7 +41,7 @@ namespace uhal {
     public:
       virtual ~CreatorInterface() {;}
       
-      virtual ClientInterface create(const std::string& id,const std::string& host,const int& port) = 0;
+      virtual ClientInterface create(const std::string& id,const std::string& location) = 0;
     };
 
     template <class T>
@@ -49,8 +49,8 @@ namespace uhal {
     public:
       
       Creator() {};
-      ClientInterface create(const std::string& id,const std::string& host,const int& port) {
-	return T(id,host,port);
+      ClientInterface create(const std::string& id,const std::string& location) {
+	return T(id,location);
       }
     };
 

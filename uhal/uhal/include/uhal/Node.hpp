@@ -15,8 +15,8 @@ namespace uhal {
   class ReadAccessDenied: public std::exception {  };
 
   class Node {
+    friend class HwInterface;
   public:
-    Node(HwInterface* hw, const std::string& fullid);
     bool operator == (const Node& node) {
       return this->getAddress() == node.getAddress() && 
 	this->getMask() == node.getMask() &&
@@ -43,27 +43,28 @@ namespace uhal {
       return mask_;
     }
 
-    NodePermission getPermission() const {
+    defs::NodePermission getPermission() const {
       return permission_;
     }
 
     /**
      * Queues the corresponding operation. Id the permissions are insuficient or the node is not an end node, then it throws
      */
-    void writeBlock(const std::vector<uint32_t>& vals,const BlockReadWriteMode mode=NON_INCREMENTAL);
+    void writeBlock(const std::vector<uint32_t>& vals,const defs::BlockReadWriteMode mode=defs::NON_INCREMENTAL);
     
     void write(const uint32_t val);
     
-    std::vector<ValMem> readBlock(const uint32_t size, const BlockReadWriteMode mode=NON_INCREMENTAL);
+    std::vector<ValMem> readBlock(const uint32_t size, const defs::BlockReadWriteMode mode=defs::NON_INCREMENTAL);
     
     ValMem read();
-
+  private:
+    Node(HwInterface* hw, const std::string& fullid);
   private:
     HwInterface* hw_;
     std::string fullid_;
     uint32_t addr_;
     uint32_t mask_;
-    NodePermission permission_;
+    defs::NodePermission permission_;
     
   };
     
