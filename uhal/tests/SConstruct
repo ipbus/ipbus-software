@@ -1,13 +1,13 @@
 env = Environment()
 
 env.Append( CXXFLAGS=['-Wall'])
-env.Append( CPPPATH= ['../uhal/include'])
+env.Append( CPPPATH= ['../uhal/include','/opt/local/include'])
 
-env.Append( LIBPATH = ['/usr/lib64','../uhal/lib'])
+env.Append( LIBPATH = ['/usr/lib64','../uhal/lib','/opt/local/lib'])
 env.Append( LIBS = ['uhal'])
 
 env.Program('bin/test_uhal', 'src/common/test_uhal.cpp')
 #env.Program('bin/examples','src/common/examples.cpp')
 #env.Program('bin/test_testing_tools', 'src/common/test_testing_tools.cpp')
-#env.Program('bin/test_performance','src/common/test_performance.cpp')
+env.Program('bin/test_performance','src/common/test_performance.cpp')
 
