@@ -8,6 +8,8 @@
 #include <iostream>
 
 namespace uhal {
+  class AtomicTransactionSize: public std::exception {};
+
   class ClientInterface {
   public:
     ClientInterface(const std::string& id, const std::string& location)
@@ -70,7 +72,10 @@ namespace uhal {
     }
     
     //validation has to be moved to the descendants
-    virtual void dispatch() {
+    virtual void dispatch(defs::DispatchMode mode = defs::NON_ATOMIC) {
+      if (mode == defs::ATOMIC && tovalidate_.size() > MAX_REQUEST_PER_PAQUET)
+	throw AtomicTransactionSize();
+
       try{
 	for(std::vector<ValMem>::iterator i(tovalidate_.begin()); i!=tovalidate_.end();++i)
 	  i->setValid(true);
@@ -95,6 +100,7 @@ namespace uhal {
       return c;
     }
   private:
+    static const size_t MAX_REQUEST_PER_PAQUET = 1500/8/2;
     std::vector<ValMem> tovalidate_;
     std::string id_;
   };

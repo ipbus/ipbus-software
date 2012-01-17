@@ -3,7 +3,8 @@ import glob
 env = Environment()
 
 env.Append( CXXFLAGS=['-Wall'])
-env.Append( CPPPATH= ['include'])
+env.Append( CPPPATH= ['include','/opt/local/include'])
+env.Append( LIBPATH = ['/usr/lib64','/opt/local/lib'])
 
 #env.Append( LIBS = ['boost_unit_test_framework','boost_program_options'])
 

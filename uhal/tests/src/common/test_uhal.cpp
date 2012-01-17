@@ -195,6 +195,27 @@ void read_write_permissions() {
 
  }
 
+void synchronization_primitive() {
+  uhal::ConnectionManager manager("addr/connections.xml");
+  uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
+  
+  uint32_t SIZE = 10;
+  for(uint32_t i=0;i!=SIZE;i++)
+    uhal::ValMem tmp = hw.getNode("REG1").read();
+
+  hw.dispatch(uhal::defs::ATOMIC);
+
+  SIZE = 1024*1024;
+  for(uint32_t i=0;i!=SIZE;i++)
+    uhal::ValMem tmp = hw.getNode("REG1").read();
+  
+  //BOOST_CHECK_THROW(hw.dispatch(uhal::defs::ATOMIC),std::exception);
+  try {
+    hw.dispatch(uhal::defs::ATOMIC);
+  } catch(std::exception&) {}
+      
+}
+
 int main(int argc,char* argv[]) {
   hwInterface_creation();
   navigation_and_traversal_test();
@@ -202,4 +223,5 @@ int main(int argc,char* argv[]) {
   write_test();
   read_write_mask();
   read_write_permissions();
+  synchronization_primitive();
 }

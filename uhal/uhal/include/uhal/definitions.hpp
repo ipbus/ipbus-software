@@ -9,7 +9,7 @@ namespace uhal {
   
     enum BlockReadWriteMode {INCREMENTAL,NON_INCREMENTAL};
 
-    enum VerificationMode {VERIFY,NO_VERIFY};
+    enum DispatchMode {ATOMIC,NON_ATOMIC};
 
     const uint32_t NOMASK = 0xFFFFFFFF;
   }

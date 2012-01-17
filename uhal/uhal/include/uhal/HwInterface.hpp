@@ -19,8 +19,8 @@ namespace uhal {
       return client_;
     }
 
-    void dispatch() {
-      getClient().dispatch();
+    void dispatch(defs::DispatchMode mode = defs::NON_ATOMIC) {
+      getClient().dispatch(mode);
     }
     
     Node getNode(const std::string& id) {
