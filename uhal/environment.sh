@@ -1,1 +1,5 @@
+#MacOS
+export DYLD_LIBRARY_PATH=uhal/lib:$LD_LIBRARY_PATH
+
+#Linux
 export LD_LIBRARY_PATH=uhal/lib:$LD_LIBRARY_PATH
