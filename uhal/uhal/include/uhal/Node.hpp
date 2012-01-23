@@ -50,11 +50,11 @@ namespace uhal {
     /**
      * Queues the corresponding operation. Id the permissions are insuficient or the node is not an end node, then it throws
      */
-    void writeBlock(const std::vector<uint32_t>& vals,const defs::BlockReadWriteMode mode=defs::NON_INCREMENTAL);
+    void writeBlock(const std::vector<uint32_t>& vals,const defs::BlockReadWriteMode mode=defs::INCREMENTAL);
     
     void write(const uint32_t val);
     
-    std::vector<ValMem> readBlock(const uint32_t size, const defs::BlockReadWriteMode mode=defs::NON_INCREMENTAL);
+    std::vector<ValMem> readBlock(const uint32_t size, const defs::BlockReadWriteMode mode=defs::INCREMENTAL);
     
     ValMem read();
   private:

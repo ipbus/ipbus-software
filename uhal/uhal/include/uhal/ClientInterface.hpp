@@ -35,7 +35,7 @@ namespace uhal {
       
     }
 
-    virtual void writeBlock(const uint32_t& addr, const std::vector<uint32_t>& val, const defs::BlockReadWriteMode mode=defs::NON_INCREMENTAL) {
+    virtual void writeBlock(const uint32_t& addr, const std::vector<uint32_t>& val, const defs::BlockReadWriteMode mode=defs::INCREMENTAL) {
       for(std::vector<uint32_t>::const_iterator i(val.begin()); i!=val.end();++i) {
 	ValMem v(*i);
 	tovalidate_.push_back(v);
