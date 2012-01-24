@@ -21,68 +21,71 @@ namespace uhal {
     virtual bool ping() {return true;}
     virtual std::string url() {return "not implemented";}
 
-    virtual void write(const uint32_t addr, const uint32_t val) {
-      ValMem r(val);
-      tovalidate_.push_back(val);
+    virtual void write(const uint32_t addr, const uint32_t& value) {
+      ValWord v(value);
+      valwords_.push_back(v);
       
     }
 
-    virtual void write(const uint32_t& addr, const uint32_t& val, const uint32_t& mask) {
-      uint32_t v = (val << trailing_right_bits(mask)) && mask;
+    virtual void write(const uint32_t& addr, const uint32_t& value, const uint32_t& mask) {
       
-      ValMem r(v);
-      tovalidate_.push_back(val);
+      ValWord val((val << trailing_right_bits(mask)) && mask);
+      valwords_.push_back(val);
       
     }
 
-    virtual void writeBlock(const uint32_t& addr, const std::vector<uint32_t>& val, const defs::BlockReadWriteMode mode=defs::INCREMENTAL) {
-      for(std::vector<uint32_t>::const_iterator i(val.begin()); i!=val.end();++i) {
-	ValMem v(*i);
-	tovalidate_.push_back(v);
-	
-      }
-      
+    virtual void writeBlock(const uint32_t& addr, const std::vector<uint32_t>& values, const defs::BlockReadWriteMode mode=defs::INCREMENTAL) {
+      ValBlock v;
+      v.assign(values.begin(),values.end());
+      valblocks_.push_back(v);
     }
     
-    virtual ValMem read(const uint32_t& addr) {
-      ValMem r(rand());
-      tovalidate_.push_back(r);
-      return r;
+    virtual ValWord read(const uint32_t& addr) {
+      ValWord v(rand());
+      valwords_.push_back(v);
+      return v;
     }
     
-    virtual ValMem read(const uint32_t& addr, const uint32_t& mask) {
+    virtual ValWord read(const uint32_t& addr, const uint32_t& mask) {
       uint32_t val = rand();
       val = (val & mask) >> trailing_right_bits(mask);
-      ValMem r(val);
-      tovalidate_.push_back(r);
+      ValWord r(val);
+      valwords_.push_back(r);
       return r;
     }
 
-    virtual std::vector<ValMem> readBlock(const uint32_t& addr, const uint32_t& size, const defs::BlockReadWriteMode mode=defs::INCREMENTAL) {
-      std::vector<ValMem> r;
-      uint32_t acount(addr);
-      for(uint32_t i(0); i!= size; ++i,++acount) {
-	ValMem v(acount);
-	r.push_back(v);
-	tovalidate_.push_back(v);
-	  
+    virtual ValBlock readBlock(const uint32_t& addr, const uint32_t& size, const defs::BlockReadWriteMode mode=defs::INCREMENTAL) {
+      std::vector<uint32_t> r;
+      for(uint32_t i(0); i!= size; ++i) {
+	r.push_back(rand());
       }
+      ValBlock v(r);
+      valblocks_.push_back(v);
+	  
       
-      return r;
+      return v;
     }
     
     //validation has to be moved to the descendants
     virtual void dispatch(defs::DispatchMode mode = defs::NON_ATOMIC) {
-      if (mode == defs::ATOMIC && tovalidate_.size() > MAX_REQUEST_PER_PAQUET)
+      if (mode == defs::ATOMIC && 
+	  (valblocks_.size()+valwords_.size()) > MAX_REQUEST_PER_PAQUET)
 	throw AtomicTransactionSize();
 
       try{
-	for(std::vector<ValMem>::iterator i(tovalidate_.begin()); i!=tovalidate_.end();++i)
-	  i->setValid(true);
-	tovalidate_.clear();
+	for(std::vector<ValWord>::iterator i(valwords_.begin()); i!=valwords_.end();++i)
+	  i->valid(true);
+	
+	valwords_.clear();
+	
+	for(std::vector<ValBlock>::iterator i(valblocks_.begin()); i!=valblocks_.end();++i)
+	  i->valid(true);
+	
+	valblocks_.clear();
+
       } catch(std::exception& e) {
-	//dispatch failure, do we allow partial failure?
-	tovalidate_.clear();
+	valwords_.clear();
+	valblocks_.clear();
 	throw;
       }
     }
@@ -101,7 +104,8 @@ namespace uhal {
     }
   private:
     static const size_t MAX_REQUEST_PER_PAQUET = 1500/8/2;
-    std::vector<ValMem> tovalidate_;
+    std::vector<ValWord> valwords_;
+    std::vector<ValBlock> valblocks_;
     std::string id_;
   };
   

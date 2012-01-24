@@ -28,7 +28,7 @@ namespace uhal {
       throw WriteAccessDenied();
   }
     
-  void Node::write(const uint32_t val) {
+  void Node::write(const uint32_t& val) {
     if (permission_ & defs::WRITE) {
       if (mask_ == defs::NOMASK)
 	hw_->getClient().write(addr_,val);
@@ -39,14 +39,14 @@ namespace uhal {
     
   }
     
-  std::vector<ValMem> Node::readBlock(const uint32_t size, defs::BlockReadWriteMode mode) {
+  ValBlock Node::readBlock(const uint32_t& size, defs::BlockReadWriteMode mode) {
     if (permission_ & defs::READ) 
       return hw_->getClient().readBlock(size,mode);
     else
       throw ReadAccessDenied();
   }
     
-  ValMem Node::read() {
+  ValWord Node::read() {
     if (permission_ & defs::READ) {
       if (mask_ == defs::NOMASK)
 	return hw_->getClient().read(addr_);

@@ -48,39 +48,37 @@ void read_test() {
   uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
 
   //read register
-  uhal::ValMem mem1 = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
-  uhal::ValMem mem2 = hw.getNode("SYSTEM.TTC.ADDRESS").read();
+  uhal::ValWord mem1 = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
+  uhal::ValWord mem2 = hw.getNode("SYSTEM.TTC.ADDRESS").read();
   hw.dispatch();
   
-  //BOOST_CHECK(mem1.getValid() && mem2.getValid());
-  //BOOST_CHECK(mem1.getValue() == mem2.getValue());
+  //BOOST_CHECK(mem1.valid() && mem2.valid());
+  //BOOST_CHECK(mem1.value() == mem2.value());
 
   //read memory
   uint32_t SIZE=1024;
-  std::vector<uhal::ValMem> block1 = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE);
-  std::vector<uhal::ValMem> block2 = hw.getNode("SYSTEM.MEMORY").readBlock(SIZE);
+  uhal::ValBlock block1 = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE);
+  uhal::ValBlock block2 = hw.getNode("SYSTEM.MEMORY").readBlock(SIZE);
   hw.dispatch();
   
   //BOOST_CHECK(block1.size() == SIZE);
   //BOOST_CHECK(block2.size() == SIZE);
-  //BOOST_CHECK(block1.begin()->getValid() && block2.begin()->getValid());
-  //BOOST_CHECK(block1.begin()->getValue() == block2.begin()->getValue());
-  //BOOST_CHECK(block1.rbegin()->getValid() && block2.rbegin()->getValid());
-  //BOOST_CHECK(block1.rbegin()->getValue() == block2.rbegin()->getValue());
+  //BOOST_CHECK(block1.begin()->valid() && block2.begin()->valid());
+  //BOOST_CHECK(*block1.begin() == *block2.begin());
+  //BOOST_CHECK(block1.rbegin()->valid() && block2.rbegin()->valid());
+  //BOOST_CHECK(*block1.rbegin() == *block2.rbegin());
 
   //read FIFO
-  block1.clear();
   block1 = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
-  block2.clear();
   block2 = hw.getNode("SYSTEM.MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
   hw.dispatch();
   
   //BOOST_CHECK(block1.size() == SIZE);
   //BOOST_CHECK(block2.size() == SIZE);
-  //BOOST_CHECK(block1.begin()->getValid() && block2.begin()->getValid());
-  //BOOST_CHECK(block1.begin()->getValue() == block2.begin()->getValue());
-  //BOOST_CHECK(block1.rbegin()->getValid() && block2.rbegin()->getValid());
-  //BOOST_CHECK(block1.rbegin()->getValue() == block2.rbegin()->getValue());
+  //BOOST_CHECK(block1.begin()->valid() && block2.begin()->valid());
+  //BOOST_CHECK(*block1.begin() == *block2.begin());
+  //BOOST_CHECK(block1.rbegin()->valid() && block2.rbegin()->valid());
+  //BOOST_CHECK(*block1.rbegin() == *block2.rbegin());
   
 }
 
@@ -91,12 +89,12 @@ void write_test() {
   //write register
   uint32_t val = static_cast<uint32_t>(rand());
   hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").write(val);
-  uhal::ValMem mem = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
+  uhal::ValWord mem = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
 
   hw.dispatch();
   
-  //BOOST_CHECK(mem.getValid());
-  //BOOST_CHECK(mem.getValue() == val);
+  //BOOST_CHECK(mem.valid());
+  //BOOST_CHECK(mem == val);
 
   //write memory
   uint32_t SIZE=1024;
@@ -105,14 +103,14 @@ void write_test() {
     vals.push_back(static_cast<uint32_t>(rand()));
 
   hw.getNode("SYSTEM.MEMORY").writeBlock(vals);
-  std::vector<uhal::ValMem> block = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE);
+  uhal::ValBlock block = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE);
   
   hw.dispatch();
   
   //BOOST_CHECK(block.size() == SIZE);
-  //BOOST_CHECK(block.begin()->getValid() && block.rbegin()->getValid());
-  //BOOST_CHECK(block.begin()->getValue() == *vals.begin());
-  //BOOST_CHECK(block.rbegin()->getValue() == *vals.rbegin());
+  //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
+  //BOOST_CHECK(*block.begin() == *vals.begin());
+  //BOOST_CHECK*(block.rbegin() == *vals.rbegin());
 
   //write FIFO
   vals.clear();
@@ -129,14 +127,14 @@ void read_write_mask() {
   uhal::ConnectionManager manager("addr/connections.xml");
   uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
   
-  uhal::ValMem mem = hw.getNode("REGISTER_MASK_0xF0").read();
-  //BOOST_CHECK(mem.getValue() >=0 && mem.getValue() <=0xF);
+  uhal::ValWord mem = hw.getNode("REGISTER_MASK_0xF0").read();
+  //BOOST_CHECK(mem >=0 && mem <=0xF);
 
   uint32_t val = 0x3;
   hw.getNode("REGISTER_MASK_0xF0").write(val);
   mem = hw.getNode("REGISTER_MASK_0xF0").read();
   hw.dispatch();
-  //BOOST_CHECK(mem.getValue() == val);
+  //BOOST_CHECK(mem == val);
 }
 
 void read_write_permissions() {
@@ -146,10 +144,10 @@ void read_write_permissions() {
   //read write register 
   uint32_t val = static_cast<uint32_t>(rand());
   hw.getNode("READ_WRITE_REGISTER").write(val);
-  uhal::ValMem mem = hw.getNode("READ_WRITE_REGISTER").read();
+  uhal::ValWord mem = hw.getNode("READ_WRITE_REGISTER").read();
 
   hw.dispatch();
-  //BOOST_CHECK(mem.getValue() == val);
+  //BOOST_CHECK(mem == val);
 
   //read only register
   mem = hw.getNode("READ_ONLY_REGISTER").read();
@@ -171,12 +169,12 @@ void read_write_permissions() {
     vals.push_back(static_cast<uint32_t>(rand()));
   
   hw.getNode("READ_WRITE_MEMORY").writeBlock(vals);
-  std::vector<uhal::ValMem> block = hw.getNode("READ_WRITE_MEMORY").readBlock(SIZE);
+  uhal::ValBlock block = hw.getNode("READ_WRITE_MEMORY").readBlock(SIZE);
   hw.dispatch();
   
   //BOOST_CHECK(block.size() == vals.size());
-  //BOOST_CHECK(block.begin()->getValue() == *vals.begin());
-  //BOOST_CHECK(block.rbegin()->getValue() == *vals.rbegin());
+  //BOOST_CHECK(*block.begin() == *vals.begin());
+  //BOOST_CHECK*(block.rbegin() == *vals.rbegin());
   
   //read only memory
   //BOOST_CHECK_THROW(hw.getNode("READ_ONLY_MEMORY").writeBlock(vals),std::exception);
@@ -184,8 +182,8 @@ void read_write_permissions() {
   block = hw.getNode("READ_ONLY_MEMORY").readBlock(SIZE);
   hw.dispatch();
   //BOOST_CHECK(block.size() == vals.size());
-  //BOOST_CHECK(block.begin()->getValue() == *vals.begin());
-  //BOOST_CHECK(block.rbegin()->getValue() == *vals.rbegin());
+  //BOOST_CHECK(*block.begin() == *vals.begin());
+  //BOOST_CHECK(*block.rbegin() == *vals.rbegin());
   
   //write only memory
   //BOOST_CHECK_THROW(hw.getNode("WRITE_ONLY_MEMORY").readBlock(SIZE),std::exception);
@@ -201,13 +199,13 @@ void synchronization_primitive() {
   
   uint32_t SIZE = 10;
   for(uint32_t i=0;i!=SIZE;i++)
-    uhal::ValMem tmp = hw.getNode("REG1").read();
+    uhal::ValWord tmp = hw.getNode("REG1").read();
 
   hw.dispatch(uhal::defs::ATOMIC);
 
   SIZE = 1024*1024;
   for(uint32_t i=0;i!=SIZE;i++)
-    uhal::ValMem tmp = hw.getNode("REG1").read();
+    uhal::ValWord tmp = hw.getNode("REG1").read();
   
   //BOOST_CHECK_THROW(hw.dispatch(uhal::defs::ATOMIC),std::exception);
   try {

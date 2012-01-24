@@ -9,7 +9,9 @@
 
 namespace uhal {
   class HwInterface;
-  class ValMem;
+  class ValWord;
+  class ValBlock;
+  
 
   class WriteAccessDenied: public std::exception {  };
   class ReadAccessDenied: public std::exception {  };
@@ -52,11 +54,11 @@ namespace uhal {
      */
     void writeBlock(const std::vector<uint32_t>& vals,const defs::BlockReadWriteMode mode=defs::INCREMENTAL);
     
-    void write(const uint32_t val);
+    void write(const uint32_t& val);
     
-    std::vector<ValMem> readBlock(const uint32_t size, const defs::BlockReadWriteMode mode=defs::INCREMENTAL);
+    ValBlock readBlock(const uint32_t& size, const defs::BlockReadWriteMode mode=defs::INCREMENTAL);
     
-    ValMem read();
+    ValWord read();
   private:
     Node(HwInterface* hw, const std::string& fullid);
   private:

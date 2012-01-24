@@ -13,16 +13,14 @@ const size_t SIZE=2.5*1024*1024;
 void int_performance() {
   std::vector<int> v(SIZE);
   for(size_t i=0;i!=SIZE;++i) {
-    int x(0);
-    v.push_back(x);
+    v.push_back(rand());
   }
  
 }
 void valmem_performance() {
-  std::vector<uhal::ValMem> v(SIZE);
+  uhal::ValBlock v;
   for(size_t i=0;i!=SIZE;++i) {
-    uhal::ValMem x(0);
-    v.push_back(x);
+    v.push_back(rand());
   }
  
 }
