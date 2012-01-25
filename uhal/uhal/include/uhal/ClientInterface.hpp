@@ -12,7 +12,7 @@ namespace uhal {
 
   class ClientInterface {
   public:
-    ClientInterface(const std::string& id, const std::string& location)
+    ClientInterface(const std::string& id, const std::string& uri)
       :id_(id)
     {}
     virtual ~ClientInterface() {}

@@ -24,7 +24,7 @@ namespace uhal {
      * Retrieves the address table file from the connection file to create the HwInterface.
      */
     HwInterface getDevice(const std::string& id) {
-      ClientInterface c = ClientFactory::getInstance().getClient("IpBus/UDP",id,"hcal.cern.ch:1234");
+      ClientInterface c = ClientFactory::getInstance().getClient(id,"ipbusudp://hcal.cern.ch:1234");
       return HwInterface(c,"addr/addresses.xml");
     }
     

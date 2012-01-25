@@ -16,32 +16,36 @@ namespace uhal {
     static ClientFactory& getInstance();
 
     template <class T> 
-    void add(const std::string& name) {
-      std::map<std::string,CreatorInterface*>::const_iterator i(creators_.find(name));
+    void add(const std::string& protocol) {
+      std::map<std::string,CreatorInterface*>::const_iterator i(creators_.find(protocol));
       if (i != creators_.end())
 	throw ProtocolAlreadyExist();
  		
-      creators_[name] = new Creator<T>();
+      creators_[protocol] = new Creator<T>();
     }
 
-    ClientInterface getClient(const std::string& protocol, const std::string& id,const std::string& location) {
+    ClientInterface getClient(const std::string& id,const std::string& uri) {
+      std::string protocol = getProtocol(uri);
       std::map<std::string,CreatorInterface*>::const_iterator i(creators_.find(protocol));
       if (i == creators_.end())
 	throw ProtocolDoesNotExist();
       
-      return i->second->create(id,location);
+      return i->second->create(id,uri);
       
     }
 
   private:
     ClientFactory() {}
+    std::string getProtocol(const std::string& uri)  {
+      return "ipbusudp";
+    }
 
   private:
     class CreatorInterface {
     public:
       virtual ~CreatorInterface() {;}
       
-      virtual ClientInterface create(const std::string& id,const std::string& location) = 0;
+      virtual ClientInterface create(const std::string& id,const std::string& uri) = 0;
     };
 
     template <class T>
@@ -49,8 +53,8 @@ namespace uhal {
     public:
       
       Creator() {};
-      ClientInterface create(const std::string& id,const std::string& location) {
-	return T(id,location);
+      ClientInterface create(const std::string& id,const std::string& uri) {
+	return T(id,uri);
       }
     };
 

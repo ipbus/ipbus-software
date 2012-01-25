@@ -10,11 +10,14 @@ namespace uhal {
     if (instance_ == 0) {
       instance_ = new ClientFactory();
       
-      instance_->add<uhal::IPBusUDPClient>("IpBus/UDP");
+      instance_->add<uhal::IPBusUDPClient>("ipbusudp");
 
-      instance_->add<uhal::ControlHubClient>("ControlHub/TCP");
+      instance_->add<uhal::IPBusTCPClient>("ipbustcp");
+
+      instance_->add<uhal::ControlHubClient>("controlhuptcp");
       
-      instance_->add<uhal::DummyClient>("Dummy");
+      instance_->add<uhal::DummyClient>("dummy");
+
 
     } 
     
