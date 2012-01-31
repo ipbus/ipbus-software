@@ -1,0 +1,10 @@
+## Sconstruct file for the IPbusClient package
+#	@author Andrew W. Rose
+#	@date 2012
+
+import os
+
+env = Environment( ENV = os.environ )
+Export('env')
+
+SConscript('SConscript')
