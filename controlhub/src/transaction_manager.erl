@@ -18,15 +18,18 @@
 %% API Functions
 %%
 
--define(TCP_OPTIONS, [binary, {packet, 4}, {reuseaddr, true}, {active, true}, {backlog, 3}]).
+-define(TCP_OPTIONS, [binary, {packet, 4}, {reuseaddr, true}, {active, true}, {backlog, ?MAX_CONCURRENT_CLIENT_CONNECTIONS}]).
 
 start_transaction_manager_tcp_listen_pool() ->
-    start_transaction_manager_tcp_listen_pool(5, 10203).
+    start_transaction_manager_tcp_listen_pool(?MAX_CONCURRENT_CLIENT_CONNECTIONS, 10203).
 
 start_transaction_manager_tcp_listen_pool(PoolSize, Port) when is_integer(PoolSize), PoolSize > 0,
                                                                is_integer(Port), Port > 0 ->
     case gen_tcp:listen(Port, ?TCP_OPTIONS) of
         {ok, TcpListenSocket} -> create_pool(PoolSize, TcpListenSocket);
+        {error, eaddrinuse} ->
+           io:format("~n*****~nError starting Control Hub: port ~p is already in use!~n*****~n~n", [Port]),
+           exit(eaddrinuse);
         {error, What} -> exit(What)
     end.
 
