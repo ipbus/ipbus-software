@@ -2,14 +2,137 @@
 #	@author Andrew W. Rose
 #	@date 2012
 import inspect, os
+import subprocess, platform
 
 ## Import the environment from the SConstruct File
 Import('env')
 
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+def CreateRpmEmitter(target, source, env):
+	target = []
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# This function generates the names of the RPM files that rpmbuild will produce
+# It is not the cleanest method in the world but could find no other way to do it.
+# If anyone has any bright ideas, please let me know!
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# get the value of the machine architecture that rpmbuild will use	
+	arch = subprocess.Popen([ 'rpm' , '-E' , '%{_arch}' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE ).communicate()[0].strip()
+# get the list of RPM module names that rpmbuild will produce
+	files_list_output = subprocess.Popen([ 'rpmbuild' , '-bl' , str(source[0]) ], stdout=subprocess.PIPE, stderr=subprocess.PIPE ).communicate()[0].split('\n')
+
+	print files_list_output
+
+# strip out the irrelevant info and convert to file names
+	for line in files_list_output:
+		if line.find( 'Processing files: ' ) != -1:
+			line = line[18:].strip()
+			if line.find( 'debuginfo' ) != -1:
+				target.append( 'rpmbuild/RPMS/'+arch+'/'+line+'.'+arch+'.rpm' )
+			else:
+				target.append( 'rpmbuild/RPMS/'+arch+'/'+line+'.'+arch+'.rpm' )
+				target.append( 'rpmbuild/SRPMS/'+line+'.src.rpm' )
+				
+#return like SCons expects				
+	return target, source
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+def CreateRpmGenerator (source, target, env, for_signature ):
+
+	path = os.path.abspath( 'rpmbuild' )
+	specsfile = os.path.abspath( str(source[0]) )
+	cmdline = 'rpmbuild -v --short-circuit -bi --define "_topdir ' + path + '" ' + specsfile
+#return like SCons expects	
+	return cmdline 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+env['BUILDERS']['CreateRPM'] = Builder( generator=CreateRpmGenerator , emitter=CreateRpmEmitter )
+	
+
+"""	
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+def InstallRpmEmitter(target, source, env):
+
+	target = []
+	for i in source:
+		files_list_output = subprocess.Popen([ 'rpm' , '-qlp' , str(i) ], stdout=subprocess.PIPE, stderr=subprocess.PIPE ).communicate()[0].split('\n')
+		for j in files_list_output:
+			#test if it is a regular filename...
+			if j.find('.') != -1: 
+				target.append( j.replace( '/usr', os.path.abspath(env.InstallPath) ) )
+
+#return like SCons expects				
+	return target, source
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+def InstallRpmGenerator (source, target, env, for_signature ):
+	cmdline = 'rpm -i --relocate /usr='+os.path.abspath(str(target[0])) #os.path.abspath(env.InstallPath)
+	for i in source:
+		cmdline += ' ' + str(i)
+		
+	return cmdline 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+env['BUILDERS']['InstallRPM'] = Builder(generator=InstallRpmGenerator ) #, emitter=InstallRpmEmitter )
+"""
+
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+def BuildFromSpecEmitter(target, source, env):
+	target = [ Dir('include') , Dir('lib') , Dir('doc') ]
+#return like SCons expects				
+	return target, source
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+def BuildFromSpecGenerator (source, target, env, for_signature ):
+	path = os.path.abspath( 'rpmbuild' )
+	specsfile = os.path.abspath( str(source[0]) )
+	cmdline = 'rpmbuild -v -bc --define "_topdir ' + path + '" ' + specsfile
+	return cmdline 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+env['BUILDERS']['BuildFromSpec'] = Builder( generator=BuildFromSpecGenerator , emitter=BuildFromSpecEmitter )
+
+
+
+
+	
+
+
 localenv = env.Clone()
 
-current_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
+localenv.InstallPath = "./install"
 
-instructions = [ 'rpmbuild -ba --define "_topdir '+current_dir+'/rpmbuild" ' + current_dir + '/rpmbuild/SPECS/boost.spec' ]
+FromSpec = localenv.BuildFromSpec( 'rpmbuild/SPECS/boost.spec' )
 
-Execute(instructions)
+rpms = localenv.CreateRPM( 'rpmbuild/SPECS/boost.spec' )
+
+#localenv.InstallRPM( Dir(localenv.InstallPath) , rpms )
+
+
+
+
+
+
+
