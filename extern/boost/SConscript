@@ -1,7 +1,7 @@
 ## Sconstruct file for the IPbusClient package
 #	@author Andrew W. Rose
 #	@date 2012
-import subprocess
+import subprocess, os
 
 ## Import the environment from the SConstruct File
 Import('env')
@@ -58,11 +58,16 @@ LocalTargets = [ Dir('doc') , Dir('include') , Dir('lib') ]
 # Control the build based on commandline arguments
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------
 if localenv.GetOption('clean'): #clean everything
-	localenv.CleanRPM( BoostRpms )
 	localenv.Command( BoostRpmFiles , '' , Delete( "$TARGET" ) )
 #	localenv.Command( LocalTargets , '', Delete( "$TARGET" ) ) # turns out Scons does not like deleting directories, so do it manually...
 	for i in LocalTargets:
 		localenv.Execute( 'rm -rf '+str(i) )
+
+	if not os.access("/var/lib/rpm", os.W_OK):
+		print 'Insufficient access priveleges to modify RPM installation. Try running as sudo.'
+		Exit( 1 )
+		
+	localenv.CleanRPM( BoostRpms )
 
 		
 elif localenv.GetOption('dist') == 'rpm' : #generate the RPM from the tarball/specs combo
@@ -70,6 +75,10 @@ elif localenv.GetOption('dist') == 'rpm' : #generate the RPM from the tarball/sp
 
 	
 elif localenv.GetOption('install-rpm') : #install the rpm to the directory specified in commandline argument
+	if not os.access("/var/lib/rpm", os.W_OK):
+		print 'Insufficient access priveleges to modify RPM installation. Try running as sudo.'
+		Exit( 1 )
+		
 	localenv.CleanRPM( BoostRpms )
 	localenv.CreateRPM( BoostRpmFiles , BoostSources )
 	localenv.InstallRPM( BoostInstallFiles )
