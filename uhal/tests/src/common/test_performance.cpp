@@ -1,7 +1,7 @@
 
 #include "uhal/uhal.hpp"
 
-#include <iostreaM>
+#include <iostream>
 #include <string>
 
 #include <cstdlib>

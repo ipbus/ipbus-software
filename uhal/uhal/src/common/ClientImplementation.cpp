@@ -2,26 +2,28 @@
 
 #include "uhal/ClientFactory.hpp"
 
-namespace uhal {
-  
-  ClientFactory* ClientFactory::instance_ = 0;
+namespace uhal
+{
 
-  ClientFactory& ClientFactory::getInstance() {
-    if (instance_ == 0) {
-      instance_ = new ClientFactory();
-      
-      instance_->add<uhal::IPBusUDPClient>("ipbusudp");
+    ClientFactory* ClientFactory::mInstance = 0;
 
-      instance_->add<uhal::IPBusTCPClient>("ipbustcp");
+    ClientFactory& ClientFactory::getInstance()
+    {
+        if ( mInstance == 0 ) {
+            mInstance = new ClientFactory();
 
-      instance_->add<uhal::ControlHubClient>("controlhuptcp");
-      
-      instance_->add<uhal::DummyClient>("dummy");
+            mInstance->add<uhal::IPBusUDPClient>( "ipbusudp" );
+
+            mInstance->add<uhal::IPBusTCPClient>( "ipbustcp" );
+
+            mInstance->add<uhal::ControlHubClient>( "controlhuptcp" );
+
+            mInstance->add<uhal::DummyClient>( "dummy" );
 
 
-    } 
-    
-    return *instance_;
-    
-  }
+        }
+
+        return *mInstance;
+
+    }
 }

@@ -5,42 +5,48 @@
 #include "uhal/ClientInterface.hpp"
 #include "uhal/Node.hpp"
 
-namespace uhal {
-  class HwInterface {
-  public:
-    HwInterface(const ClientInterface& client,const std::string& address_file)
-      : client_(client),
-	addressTable_(address_file)
-    {
-      
-    }
-    
-    ClientInterface& getClient() {
-      return client_;
-    }
+namespace uhal
+{
+	class HwInterface
+	{
+		public:
+			HwInterface ( const ClientInterface& aClientInterface , const std::string& aFileName )
+				: mClientInterface ( aClientInterface ),
+				  mAddressTable ( aFileName )
+			{
+			}
 
-    void dispatch(defs::DispatchMode mode = defs::NON_ATOMIC) {
-      getClient().dispatch(mode);
-    }
-    
-    Node getNode(const std::string& id) {
-      return Node(this,id);
-    }
+			ClientInterface& getClient()
+			{
+				return mClientInterface;
+			}
 
-    std::vector<std::string> getNodes() {
-      return addressTable_.getChildren("");
-    }
+			void dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC )
+			{
+				getClient().dispatch ( aMode );
+			}
 
-    AddressTable& getAddressTable() {
-      return addressTable_;
-    }
+			Node getNode ( const std::string& aId )
+			{
+				return Node ( this , aId );
+			}
 
-  private:
-    ClientInterface client_;
-    AddressTable addressTable_;
-  };
-  
-    
+			std::vector<std::string> getNodes()
+			{
+				return mAddressTable.getChildren ( "" );
+			}
+
+			AddressTable& getAddressTable()
+			{
+				return mAddressTable;
+			}
+
+		private:
+			ClientInterface mClientInterface;
+			AddressTable mAddressTable;
+	};
+
+
 }
 
-#endif 
+#endif

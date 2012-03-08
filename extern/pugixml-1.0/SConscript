@@ -1,0 +1,89 @@
+## Sconstruct file for the IPbusClient package
+#	@author Andrew W. Rose
+#	@date 2012
+import subprocess, os
+
+## Import the environment from the SConstruct File
+Import('env')
+localenv = env.Clone()
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Set the attributes of the build here - these must match the values in the specs file!
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+attributes = {
+	'name' :'pugixml' ,
+	'major' : 1 ,
+	'minor' : 0  
+}
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Convert the attributes to some lists of files which will be used by the various build processes
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+PugiXmlSources = [
+	'rpmbuild/SPECS/%(name)s.spec' % attributes ,
+	'rpmbuild/SOURCES/%(name)s-%(major)i.%(minor)i.zip' % attributes
+]
+# print 'PugiXmlSources', PugiXmlSources
+
+PugiXmlRpms = [
+	'%(name)s-%(major)i.%(minor)i-0' % attributes , 
+]
+# print 'PugiXmlRpms', PugiXmlRpms
+
+# Extract the architecture that rpmbuild will produce for
+Arch = subprocess.Popen([ 'rpm' , '-E' , '%{_arch}' ], stdout=subprocess.PIPE, stderr=subprocess.PIPE ).communicate()[0].strip()
+
+PugiXmlRpmFiles = [
+	'rpmbuild/RPMS/'+Arch+'/'+PugiXmlRpms[0]+'.'+Arch+'.rpm',
+	'rpmbuild/SRPMS/'+PugiXmlRpms[0]+'.src.rpm'
+]
+# print 'PugiXmlRpmFiles', PugiXmlRpmFiles
+
+PugiXmlInstallFiles = PugiXmlRpmFiles[0:1]
+# print 'PugiXmlInstallFiles', PugiXmlInstallFiles
+
+LocalTargets = [ Dir('include') , Dir('lib') ]
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Control the build based on commandline arguments
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+if localenv.GetOption('clean'): #clean everything
+	localenv.Command( PugiXmlRpmFiles , '' , Delete( "$TARGET" ) )
+#	localenv.Command( LocalTargets , '', Delete( "$TARGET" ) ) # turns out Scons does not like deleting directories, so do it manually...
+	for i in LocalTargets:
+		localenv.Execute( 'rm -rf '+str(i) )
+
+	if not os.access("/var/lib/rpm", os.W_OK):
+		print 'Insufficient access priveleges to modify RPM installation. Try running as sudo.'
+		Exit( 1 )
+		
+	localenv.CleanRPM( PugiXmlRpms )
+
+		
+elif localenv.GetOption('dist') == 'rpm' : #generate the RPM from the tarball/specs combo
+	localenv.CreateRPM( PugiXmlRpmFiles , PugiXmlSources )
+
+	
+elif localenv.GetOption('install-rpm') : #install the rpm to the directory specified in commandline argument
+	if not os.access("/var/lib/rpm", os.W_OK):
+		print 'Insufficient access priveleges to modify RPM installation. Try running as sudo.'
+		Exit( 1 )
+		
+	localenv.CleanRPM( PugiXmlRpms )
+	localenv.CreateRPM( PugiXmlRpmFiles , PugiXmlSources )
+	localenv.InstallRPM( PugiXmlInstallFiles )
+
+
+else : #we are not cleaning, distributing or installing, so build locally from tarball
+	localenv.BuildFromSpec( LocalTargets , PugiXmlSources )
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+

@@ -7,61 +7,77 @@
 
 #include <map>
 
-namespace uhal {
-  class ProtocolAlreadyExist: public std::exception {  };
-  class ProtocolDoesNotExist: public std::exception {  };
-  
-  class ClientFactory: private boost::noncopyable {
-  public:
-    static ClientFactory& getInstance();
+namespace uhal
+{
+	class ProtocolAlreadyExist: public std::exception {  };
+	class ProtocolDoesNotExist: public std::exception {  };
 
-    template <class T> 
-    void add(const std::string& protocol) {
-      std::map<std::string,CreatorInterface*>::const_iterator i(creators_.find(protocol));
-      if (i != creators_.end())
-	throw ProtocolAlreadyExist();
- 		
-      creators_[protocol] = new Creator<T>();
-    }
+	class ClientFactory: private boost::noncopyable
+	{
+		public:
+			static ClientFactory& getInstance();
 
-    ClientInterface getClient(const std::string& id,const std::string& uri) {
-      std::string protocol = getProtocol(uri);
-      std::map<std::string,CreatorInterface*>::const_iterator i(creators_.find(protocol));
-      if (i == creators_.end())
-	throw ProtocolDoesNotExist();
-      
-      return i->second->create(id,uri);
-      
-    }
+			template <class T>
+			void add ( const std::string& aProtocol )
+			{
+				std::map<std::string,CreatorInterface*>::const_iterator i ( mCreators.find ( aProtocol ) );
 
-  private:
-    ClientFactory() {}
-    std::string getProtocol(const std::string& uri)  {
-      return "ipbusudp";
-    }
+				if ( i != mCreators.end() )
+				{
+					throw ProtocolAlreadyExist();
+				}
 
-  private:
-    class CreatorInterface {
-    public:
-      virtual ~CreatorInterface() {;}
-      
-      virtual ClientInterface create(const std::string& id,const std::string& uri) = 0;
-    };
+				mCreators[aProtocol] = new Creator<T>();
+			}
 
-    template <class T>
-    class Creator: public CreatorInterface {
-    public:
-      
-      Creator() {};
-      ClientInterface create(const std::string& id,const std::string& uri) {
-	return T(id,uri);
-      }
-    };
+			ClientInterface getClient ( const std::string& aId,const std::string& aUri )
+			{
+				std::string lProtocol = getProtocol ( aUri );
+				std::map<std::string,CreatorInterface*>::const_iterator i ( mCreators.find ( lProtocol ) );
 
-  private:
-    static ClientFactory* instance_;
-    std::map<std::string,CreatorInterface*> creators_;
-  };
+				if ( i == mCreators.end() )
+				{
+					throw ProtocolDoesNotExist();
+				}
+
+				return i->second->create ( aId , aUri );
+			}
+
+		private:
+			ClientFactory() {}
+			std::string getProtocol ( const std::string& aUri )
+			{
+				return "ipbusudp";
+			}
+
+		private:
+			class CreatorInterface
+			{
+				public:
+					virtual ~CreatorInterface()
+					{
+						;
+					}
+
+					virtual ClientInterface create ( const std::string& aId,const std::string& aUri ) = 0;
+			};
+
+			template <class T>
+			class Creator: public CreatorInterface
+			{
+				public:
+
+					Creator() {};
+					ClientInterface create ( const std::string& aId,const std::string& aUri )
+					{
+						return T ( aId , aUri );
+					}
+			};
+
+		private:
+			static ClientFactory* mInstance;
+			std::map<std::string,CreatorInterface*> mCreators;
+	};
 }
 
-#endif 
+#endif

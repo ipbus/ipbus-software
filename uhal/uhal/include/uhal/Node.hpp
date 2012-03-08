@@ -2,74 +2,122 @@
 #define _uhal_Node_hpp_
 
 #include "uhal/definitions.hpp"
+#include "uhal/ValMem.hpp"
 
 #include <exception>
 #include <vector>
-#include <string> 
+#include <string>
 
-namespace uhal {
-  class HwInterface;
-  class ValWord;
-  class ValBlock;
-  
+namespace uhal
+{
+	class HwInterface;
 
-  class WriteAccessDenied: public std::exception {  };
-  class ReadAccessDenied: public std::exception {  };
+	class WriteAccessDenied: public std::exception {  };
+	class ReadAccessDenied: public std::exception {  };
 
-  class Node {
-    friend class HwInterface;
-  public:
-    bool operator == (const Node& node) {
-      return this->getAddress() == node.getAddress() && 
-	this->getMask() == node.getMask() &&
-	this->getPermission() == node.getPermission() &&
-	this->getId() == node.getId();
-    }
+	class Node
+	{
+			friend class HwInterface;
+		public:
+			bool operator == ( const Node& aNode )
+			{
+				return this->getAddress() == aNode.getAddress() &&
+					   this->getMask() == aNode.getMask() &&
+					   this->getPermission() == aNode.getPermission() &&
+					   this->getId() == aNode.getId();
+			}
 
 
-    /** 
-     * Retrieve node with the relative id. If the node does not exist throws
-     */
-    Node getNode(const std::string& id);
-    std::vector<std::string> getNodes();
+			/**
+			 * Retrieve node with the relative id. If the node does not exist throws
+			 */
+			Node getNode ( const std::string& aId );
+			
+			std::vector<std::string> getNodes();
 
-    std::string getId() const{
-      return fullid_;
-    }
+			std::string getId() const
+			{
+				return mFullId;
+			}
 
-    uint32_t getAddress() const {
-      return addr_;
-    }
+			uint32_t getAddress() const
+			{
+				return mAddr;
+			}
 
-    uint32_t getMask() const {
-      return mask_;
-    }
+			uint32_t getMask() const
+			{
+				return mMask;
+			}
 
-    defs::NodePermission getPermission() const {
-      return permission_;
-    }
+			defs::NodePermission getPermission() const
+			{
+				return mPermission;
+			}
 
-    /**
-     * Queues the corresponding operation. Id the permissions are insuficient or the node is not an end node, then it throws
-     */
-    void writeBlock(const std::vector<uint32_t>& vals,const defs::BlockReadWriteMode mode=defs::INCREMENTAL);
-    
-    void write(const uint32_t& val);
-    
-    ValBlock readBlock(const uint32_t& size, const defs::BlockReadWriteMode mode=defs::INCREMENTAL);
-    
-    ValWord read();
-  private:
-    Node(HwInterface* hw, const std::string& fullid);
-  private:
-    HwInterface* hw_;
-    std::string fullid_;
-    uint32_t addr_;
-    uint32_t mask_;
-    defs::NodePermission permission_;
-    
-  };
-    
+			/**
+			 * Queues the corresponding operation. Id the permissions are insuficient or the node is not an end node, then it throws
+			 */
+/*			template< typename T >
+			void writeBlock ( const std::vector< T >& aValues , const defs::BlockReadWriteMode aMode=defs::INCREMENTAL )
+			{
+				if ( mPermission & defs::WRITE ) {
+					mHw->getClient().writeBlock< T >( mAddr , aValues , aMode );
+				} else {
+					throw WriteAccessDenied();
+				}
+			}
+	
+			template< typename T >
+			void write ( const T& aValue )
+			{
+				if ( mPermission & defs::WRITE ) {
+					if ( mMask == defs::NOMASK ) {
+						mHw->getClient().write< T >( mAddr , aValue );
+					} else {
+						mHw->getClient().write< T >( mAddr , aValue , mMask );
+					}
+				} else {
+					throw WriteAccessDenied();
+				}
+			}
+			
+			template< typename T >
+			ValVector<T> readBlock ( const uint32_t& aSize, const defs::BlockReadWriteMode aMode=defs::INCREMENTAL )
+			{
+				if ( mPermission & defs::READ ) {
+					return mHw->getClient().readBlock< T >( aSize , aMode );
+				} else {
+					throw ReadAccessDenied();
+				}
+			}			
+
+			template< typename T >
+			ValWord<T> read()
+			{
+				if ( mPermission & defs::READ ) {
+					if ( mMask == defs::NOMASK ) {
+						return mHw->getClient().read< T >( mAddr );
+					} else {
+						return mHw->getClient().read< T >( mAddr , mMask );
+					}
+				} else {
+					throw ReadAccessDenied();
+				}
+			}		*/	
+			
+		private:
+			Node ( HwInterface* aHwInterface, const std::string& aFullid );
+			
+		private:
+			HwInterface* mHw;
+			std::string mFullId;
+			uint32_t mAddr;
+			uint32_t mMask;
+			defs::NodePermission mPermission;
+
+	};
+
 }
 
-#endif 
+#endif

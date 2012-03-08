@@ -7,37 +7,42 @@
 
 #include <map>
 
-namespace uhal {
-  class AddressTable {
-  public:
-    AddressTable(const std::string& filename)
-      :filename_(filename) 
-    {}
+namespace uhal
+{
+	class AddressTable
+	{
+		public:
+			AddressTable ( const std::string& aFilename )
+				:mFilename ( aFilename )
+			{}
 
-    uint32_t getAddress(const std::string& fullid) {
-      return 0x32;
-    }
+			uint32_t getAddress ( const std::string& aFullId )
+			{
+				return 0x32;
+			}
 
-    uint32_t getMask(const std::string& fullid) {
-      return defs::NOMASK;
-    }
+			uint32_t getMask ( const std::string& aFullId )
+			{
+				return defs::NOMASK;
+			}
 
-    defs::NodePermission getPermission(const std::string& fullid) {
-      return defs::READWRITE;
-    }
-    
-    std::vector<std::string> getChildren(const std::string& id) {
-      std::vector<std::string> result;
-      result.push_back(id + "." + "REG1");
-      result.push_back(id + "." + "REG2");
-      result.push_back(id + "." + "REG3");
-      
-      return result;
-    }
-    
-  private:
-    std::string filename_;
-  };
+			defs::NodePermission getPermission ( const std::string& aFullId )
+			{
+				return defs::READWRITE;
+			}
+
+			std::vector<std::string> getChildren ( const std::string& aId )
+			{
+				std::vector<std::string> lResult;
+				lResult.push_back ( aId + "." + "REG1" );
+				lResult.push_back ( aId + "." + "REG2" );
+				lResult.push_back ( aId + "." + "REG3" );
+				return lResult;
+			}
+
+		private:
+			std::string mFilename;
+	};
 }
 
-#endif 
+#endif
