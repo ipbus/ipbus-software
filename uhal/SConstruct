@@ -1,1 +1,20 @@
-SConscript(['BoostSpiritGrammars/SConstruct','uhal/SConstruct','tests/SConstruct'])
+## Sconstruct file for the CACTUS project
+#	@author Andrew W. Rose
+#	@author Simon Fayer
+#	@date 2010
+
+## Get the standard cactus environment
+import os
+env = SConscript( "./.SConscript.cactus" )
+
+env.Append( 
+	CPPPATH = [ os.path.abspath('./BoostSpiritGrammars/include') , os.path.abspath('./uhal/include') , os.path.abspath('/opt/local/include') ]
+) 
+
+Export('env')
+
+## Build the relevant directories
+SConscript( [ 'BoostSpiritGrammars/SConscript' , 'uhal/SConscript' , 'tests/SConscript'] )
+
+
+

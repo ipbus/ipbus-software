@@ -1,0 +1,21 @@
+## Sconstruct file for the IPbusClient package
+#	@author Andrew W. Rose
+#	@author Simon Fayer
+#	@date 2010
+
+## Import the environment from the SConstruct File
+Import('env')
+
+localenv = env.Clone()
+localenv.VariantDir( localenv.SrcBuildPath , 'src/common' , duplicate=0 )
+
+## Add default libs
+localenv.Append( 
+	LIBS = [ 'uhal' , 'BoostSpiritGrammars' , 'boost_system' , 'boost_filesystem' , 'boost_regex' , 'PugiXML' ] 
+)  
+
+## Compile the IPbusClient Unit Test as an executable
+localenv.Program( 
+	target = localenv.SrcBuildPath+'/test_uhal', 
+	source = [ localenv.SrcBuildPath+'/test_uhal.cpp' ]
+)

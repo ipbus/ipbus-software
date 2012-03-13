@@ -13,8 +13,10 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/bind/bind.hpp>
 
-#include "../../BoostSpiritGrammars/include/BoostSpiritGrammars/BoostSpiritGrammars.hpp"
-#include "uhal/UtilityTypes.hpp"
+#include "BoostSpiritGrammars/SemicolonDelimitedUriListGrammar.hpp"
+#include "BoostSpiritGrammars/HttpResponseGrammar.hpp"
+#include "BoostSpiritGrammars/URLGrammar.hpp"
+
 
 #include "pugixml/pugixml.hpp"
 
@@ -28,7 +30,7 @@ namespace uhal
 		void ParseSemicolonDelimitedUriList( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
 		{
 		
-			SemicolonDelimitedUriListGrammar lGrammar;
+			BoostSpiritGrammars::SemicolonDelimitedUriListGrammar lGrammar;
 			boost::spirit::qi::phrase_parse( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
 			
 			if( DebugInfo ){
@@ -123,7 +125,7 @@ namespace uhal
 		bool HttpGet( const std::string& aURL , HttpResponseType& aResponse ){
 			if( DebugInfo ) std::cout << "Retrieving URL http://" << aURL << std::endl;
 		
-			URLGrammar lGrammar;
+			BoostSpiritGrammars::URLGrammar lGrammar;
 			std::pair<std::string, std::string> lURLPair;
 			boost::spirit::qi::phrase_parse( aURL.begin() , aURL.end() , lGrammar , boost::spirit::ascii::space , lURLPair );
 								
@@ -197,7 +199,7 @@ namespace uhal
 			mBuffer.resize(lSize);
 
 			//Parse the recieved data into an HttpResponseType object
-			HttpResponseGrammar lGrammar2;
+			BoostSpiritGrammars::HttpResponseGrammar lGrammar2;
 			boost::spirit::qi::phrase_parse( mBuffer.begin() , mBuffer.end() , lGrammar2 , boost::spirit::ascii::space , aResponse );
 		
 			if( DebugInfo ) 

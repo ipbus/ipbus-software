@@ -1,13 +1,10 @@
-env = Environment()
+## Sconstruct file for the IPbusClient package
+#	@author Andrew W. Rose
+#	@author Simon Fayer
+#	@date 2010
 
-env.Append( CXXFLAGS=['-Wall'])
-env.Append( CPPPATH= ['../uhal/include','/opt/local/include'])
+## Get the standard boost environment
+env = SConscript('../.SConscript.cactus')
+Export('env')
 
-env.Append( LIBPATH = ['/usr/lib64','/opt/local/lib','/opt/uhal/lib'])
-env.Append( LIBS = [ 'uhal' , 'BoostSpiritGrammars' , 'boost_system' , 'boost_filesystem' , 'boost_regex' , 'PugiXML' ])
-
-env.Program('bin/test_uhal', 'src/common/test_uhal.cpp')
-#env.Program('bin/examples','src/common/examples.cpp')
-#env.Program('bin/test_testing_tools', 'src/common/test_testing_tools.cpp')
-#env.Program('bin/test_performance','src/common/test_performance.cpp')
-
+SConscript('SConscript')

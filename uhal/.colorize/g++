@@ -1,0 +1,5 @@
+#!/bin/bash
+
+/usr/bin/g++ $@ 2>&1 | sed -f "${ColorizePath}/sedrc"
+
+exit $PIPESTATUS

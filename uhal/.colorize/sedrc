@@ -1,0 +1,80 @@
+#make prototype errors bright red
+s|\(.*\):\([0-9]\+\): error: prototype for '\([^']*\)' \([^']*\) '\([^']*\)'|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0mPrototype for\n        \o033[1;36m\3\o033[0m\n    \4\n        \o033[1;36m\5\o033[0m|g
+
+#make overload errors bright red
+s|\(.*\):\([0-9]\+\): error: '\(.*\)' cannot be overloaded|\o033[1;31m\n>>Error at \1 - line \2\n    \o033[0mCannot overload\n        \o033[1;36m\3\o033[0m|g
+s|\(.*\):\([0-9]\+\): error: with '\(.*\)'|    and\n        \o033[1;36m\3\o033[0m\n            from \1 - line \2|g
+
+#make no-match-for errors bright red
+s|\(.*\):\([0-9]\+\): error: dependent-name '\([^']*\)' \([^']*\)|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0mDependent-name\n        \o033[1;34m\3\o033[0m\n    \4|g
+s|\(.*\):\([0-9]\+\): note: say '\(.*\)' if a type is meant|    If a type is meant say\n        \o033[1;32m\3\o033[0m|g
+
+#make conversion errors bright red
+s|\(.*\):\([0-9]\+\): error: conversion from '\([^']*\)' \([^']*\) '\([^']*\)' requested|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0mConversion requested from\n        \o033[1;34m\3\o033[0m\n    \4\n        \o033[1;34m\5\o033[0m|g
+
+#make no-match-for errors bright red
+s|\(.*\):\([0-9]\+\): error: no match for '\([^']*\)' \([^']*\) '\([^']*\)'|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0mNo match for\n        \o033[1;34m\3\o033[0m\n    \4\n        \o033[1;34m\5\o033[0m|g
+
+
+#make no-matching-function errors bright red
+s|\(.*\):\([0-9]\+\): error: no matching function for call to '\([^']*\)'|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0mNo matching function for call to\n        \o033[1;34m\3\o033[0m|g
+
+
+#make no-member-named errors bright red
+s|\(.*\):\([0-9]\+\): error: 'class \([^']*\)' has no member named '\([^']*\)'|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0mClass\n        \o033[1;34m\3\o033[0m\n    has no member named\n        \o033[1;34m\4\o033[0m|g
+s|\(.*\):\([0-9]\+\): error: 'struct \([^']*\)' has no member named '\([^']*\)'|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0mStruct\n        \o033[1;34m\3\o033[0m\n    has no member named\n        \o033[1;34m\4\o033[0m|g
+
+#make not of class type errors bright red
+s|\(.*\):\([0-9]\+\): error: '\([^']*\)' does not have class type|\o033[1;31m\n>> Error at \1 - line \2\n    \o033[1;34m\3\o033[0m\n        does not have class type\n            \o033[1;32mHint : have you forgotten function braces?\o033[0m|g
+
+
+#format candidates
+s|\(.*\):\([0-9]\+\): note:[ ]*synthesized method '\(.*\)' first required here|    requires\n        \o033[1;32m\3\o033[0m\n            to be synthesized first\n                \1 - line \2|g
+
+s|\(.*\):\([0-9]\+\): error: candidate[^:]*: \(.*\)|    Candidates are\n        \o033[1;32m\3\o033[0m\n            from \1 - line \2|g
+s|\(.*\):\([0-9]\+\): error:  \+\(.*\)|        \o033[1;32m\3\o033[0m\n            from \1 - line \2|g
+s|\(.*\):\([0-9]\+\): note: candidates are[^:]*: \(.*\)|    Candidates are\n        \o033[1;32m\3\o033[0m\n            from \1 - line \2|g
+s|\(.*\):\([0-9]\+\): note:[ ]*\(.*\)|        \o033[1;32m\3\o033[0m\n            from \1 - line \2|g
+
+#private
+#s|\(.*\):\([0-9]\+\): error: '\([^ ]*\) \([^']*\)' is private|\o033[1;31m\n>> Error at \1 - line \2\n\o033[0m    \3\n        \o033[1;34m\4\o033[0m\n            is private|g
+s|\(.*\):\([0-9]\+\): error: '\(.*\)' is private|\o033[1;31m\n>> Error at \1 - line \2\n\o033[0m    \o033[1;34m\3\o033[0m\n            is private|g
+s|\(.*\):\([0-9]\+\): error: '\(.*\)' is inaccessible|\o033[1;31m\n>> Error at \1 - line \2\n\o033[0m    \o033[1;34m\3\o033[0m\n            is inaccessible|g
+
+
+#make generic errors bright red
+s|\(.*\):\([0-9]\+\): error: |\o033[1;31m\n>> Error at \1 - line \2\n    \o033[0m|g
+
+#make warnings orange
+s|\(.*\):\([0-9]\+\): warning: *|\o033[0;33m\n>> Warning at \1 - line \2\n    \o033[0m|g
+
+#make origin tracking orange and blue
+s|\(.*\): In member function '\(.*\)':|\o033[0;33m\n>> From\o033[0m\n    Member function\n        \o033[1;34m\2\o033[0m\n            in file \1|g
+s|\(.*\): In static member function '\(.*\)':|\o033[0;33m\n>> From\o033[0m\n    Static member function\n        \o033[1;34m\2\o033[0m\n            in file \1|g
+s|\(.*\): In function '\(.*\)':|\o033[0;33m\n>> From\o033[0m\n    Function\n        \o033[1;34m\2\o033[0m\n            in file \1|g
+s|\(.*\): In constructor '\(.*\)':|\o033[0;33m\n>> From\o033[0m\n    Constructor\n        \o033[1;34m\2\o033[0m\n            in file \1|g
+s|\(.*\): In copy constructor '\(.*\)':|\o033[0;33m\n>> From\o033[0m\n    Copy constructor\n        \o033[1;34m\2\o033[0m\n            in file \1|g
+s|\(.*\): In destructor '\(.*\)':|\o033[0;33m\n>> From\o033[0m\n    Destructor\n        \o033[1;34m\2\o033[0m\n            in file \1|g
+
+s|\(.*\): At global scope:|\o033[0;33m\n>> From global scope\o033[0m\n    in file \1|g
+
+
+s|\(.*\):\([0-9]\+\): *instantiated from here|    instantiated at\n        \1 - line \2|g
+s|\(.*\):\([0-9]\+\): *instantiated from '\(.*\)'|    instantiated by\n        \o033[1;34m\3\o033[0m\n            from \1 - line \2|g
+
+#expand template arguments onto new line
+s|\[with \(.*\)]|\n        \o033[0mwith\o033[1;35m        \1|g
+s|,* \([a-zA-Z0-9_]\+\) =|\n        \1\o033[0m =\o033[1;35m|g
+
+	
+
+#s|\(.*[0-9]\+: note: \)|\o033[1;32m\1\n\o033[0m|g
+s|\(.*\): In function `\(.*\)'|\o033[1;36m>>Linking \1\o033[0m\n    In function\n        \o033[1;31m\2\o033[0m|g
+s|\(.*:\) undefined reference to `\(.*\)'|    undefined reference to\n        \o033[1;31m\2\o033[0m|g
+#s|\(.*:\) \(warning:.*\)|\o033[1;31m\1\o033[0m\n\2\n|g
+
+#new line at end of changes
+${/^$/!s/$/\n\o033[41;1;31m\n\o033[0m\n/;}
+
+#new line at start of changes
+1s/^/\o033[41;1;31m\n\o033[0m\n/

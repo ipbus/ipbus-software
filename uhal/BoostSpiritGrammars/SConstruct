@@ -1,20 +1,10 @@
-import glob
+## Sconstruct file for the IPbusClient package
+#	@author Andrew W. Rose
+#	@author Simon Fayer
+#	@date 2010
 
-env = Environment()
+## Get the standard boost environment
+env = SConscript('../.SConscript.cactus')
+Export('env')
 
-env.Append( CXXFLAGS=['-Wall'] )
-env.Append( CPPPATH= ['include','/opt/local/include'] )
-env.Append( LIBPATH = ['/usr/lib64','/opt/local/lib','/opt/uhal/lib'] )
-
-#env.Append( LIBS = ['boost_unit_test_framework','boost_program_options'])
-
-BoostSpiritGrammars = env.SharedLibrary(
-			target = 'lib/BoostSpiritGrammars',
-			source = [ glob.glob('src/common/*.cpp') ]
-		)	
-	
-## Install the libraries
-env.Install( '/opt/uhal/lib' , BoostSpiritGrammars )
-env.Alias( 'install', '/opt/uhal/lib' )
-
-
+SConscript('SConscript')

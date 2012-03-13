@@ -1,0 +1,65 @@
+## Sconstruct file setting up the environment for building microHAL and related C++ projects
+##   @author Simon Fayer
+##   @author Andrew W. Rose
+##   @date 2010
+
+import os
+import platform
+import sys
+import struct
+import subprocess
+
+
+env = Environment( ENV = os.environ )
+
+
+AddOption( "--prefix" , action="store" , dest="prefix" , default="/opt/uhal" , help="install directory" ) 
+
+
+if env['PLATFORM'] == 'win32':
+	env = Environment( tools=['mingw'] , ENV = os.environ , WINDOWS_INSERT_DEF=1 )
+	print 'Including WINDOWS sockets in compiler dependencies'
+	env.Append( 
+		LIBS = [ 'wsock32' , 'ws2_32' ] 
+	)
+	env.Append( 
+		CCFLAGS = [ '-D__USE_W32_SOCKETS' , '-D_WIN32_WINNT=0x0501' ] 
+	)
+
+env.InstallPath = os.path.normpath( GetOption('prefix')+"/lib" )
+
+if env['PLATFORM'] != 'win32':
+	env.MachineArchitecture = "Linux"+str( 8 * struct.calcsize("P") )
+else:	
+	env.MachineArchitecture = "Windows"+str( 8 * struct.calcsize("P") )
+
+
+env.BuildPath = '.build/'+env.MachineArchitecture+'/' 
+env.LibPath = env.BuildPath+'/libs/' 
+env.SrcBuildPath = 'bin/exe-'+env.MachineArchitecture+'/' 
+
+
+## Add default libs
+env.Append( 
+	LIBPATH = [ '/opt/local/lib' , env.InstallPath ] 
+) 
+
+## Add default libs
+env.Append( 
+	LIBS = [ ] 
+)  
+
+## Turn on GCC optimization
+env.Append( 
+	CCFLAGS = [ '-O3' , '-Wall' ] 
+)
+
+#configure where scons puts its temporary file
+#env['CONFIGUREDIR'] = env['ENV']['microhal_path']+"/.sconf_temp"
+#SConsignFile( env['ENV']['microhal_path']+"/.sconsign" ) 
+
+#RPM configuration options
+Export('env')
+SConscript(".SConscript.colour" )
+
+Return('env')
