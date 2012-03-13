@@ -4,7 +4,7 @@
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
 
-#include "uhal/UtilityTypes.hpp"
+#include "../../uhal/include/uhal/UtilityTypes.hpp"
 
 #include <string>
 #include <vector>

@@ -1,1 +1,1 @@
-SConscript(['uhal/SConstruct','tests/SConstruct'])
+SConscript(['BoostSpiritGrammars/SConstruct','uhal/SConstruct','tests/SConstruct'])

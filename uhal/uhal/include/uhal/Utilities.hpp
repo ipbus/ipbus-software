@@ -13,7 +13,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/bind/bind.hpp>
 
-#include "uhal/BoostSpiritGrammars.hpp"
+#include "../../BoostSpiritGrammars/include/BoostSpiritGrammars/BoostSpiritGrammars.hpp"
 #include "uhal/UtilityTypes.hpp"
 
 #include "pugixml/pugixml.hpp"
