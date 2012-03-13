@@ -30,7 +30,7 @@ namespace uhal
 				mCreators[aProtocol] = new Creator<T>();
 			}
 
-			ClientInterface getClient ( const std::string& aId,const std::string& aUri )
+			ClientInterface getClient ( const std::string& aId , const std::string& aUri )
 			{
 				std::string lProtocol = getProtocol ( aUri );
 				std::map<std::string,CreatorInterface*>::const_iterator i ( mCreators.find ( lProtocol ) );
@@ -45,6 +45,8 @@ namespace uhal
 
 		private:
 			ClientFactory() {}
+			virtual ~ClientFactory() {}
+			
 			std::string getProtocol ( const std::string& aUri )
 			{
 				return "ipbusudp";

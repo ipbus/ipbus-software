@@ -1,25 +1,22 @@
 #ifndef _uhal_ConnectionManager_hpp_
 #define _uhal_ConnectionManager_hpp_
 
+#include "uhal/Node.hpp"
+#include "uhal/AddressTableBuilder.hpp"
 #include "uhal/ClientInterface.hpp"
-#include "uhal/HwInterface.hpp"
 #include "uhal/ClientFactory.hpp"
-
+#include "uhal/HwInterface.hpp"
 #include "uhal/Utilities.hpp"
 
-
-
-#include "boost/utility.hpp"
+#include <boost/utility.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 
 #include "pugixml/pugixml.hpp"
 
 #include <vector>
+#include <set>
 #include <iostream>
-
-
-
 
 
 namespace uhal
@@ -59,47 +56,15 @@ namespace uhal
 		public:
 			//!Given a glob expression, parse all the files matching it (e.g. $BUILD/config/*.xml). If one parsing fails throw an exception and return filename and line number
 			ConnectionManager ( const std::string& aFilenameExpr )
-				:mFilenameExpr ( aFilenameExpr )
 			{
-				
-				uhal::utilities::ParseSemicolonDelimitedUriList<true>( aFilenameExpr , mConnectionFiles );
-
-				pugi::xml_document lXMLdocument;
 			
+				uhal::utilities::ParseSemicolonDelimitedUriList<true>( aFilenameExpr , mConnectionFiles );
 				for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = mConnectionFiles.begin() ; lIt != mConnectionFiles.end() ; ++lIt ){
-					if( lIt->first == "file" ){
-						std::vector< boost::filesystem::path > lFilePaths;
-						uhal::utilities::ShellExpandFilenameExpr<true>( lIt->second , &lFilePaths );
-					
-						for( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 ){
-							pugi::xml_parse_result lLoadResult = lXMLdocument.load_file( lIt2->c_str() );
-							if( !lLoadResult ){
-								//Mark says to throw on this condition, I will leave it continuing for now...
-								std::cout << "Failed to parse file " << *lIt2 << ". PugiXML returned the following description \"" << lLoadResult.description() << "\". Continuing for now but be aware!" << std::endl;
-							}else{
-								ParseConnectionsFile( lXMLdocument );
-							}
-						}
-					
-					}else if( lIt->first == "http" ){
-						utilities::HttpResponseType lHttpResponse;
-						uhal::utilities::HttpGet<true>( lIt->second , lHttpResponse );
-
-						pugi::xml_parse_result lLoadResult = lXMLdocument.load_buffer( &(lHttpResponse.content[0]) , lHttpResponse.content.size() );
-						if( !lLoadResult ){
-							//Mark says to throw on this condition, I will leave it continuing for now...
-							std::cout << "Failed to parse file " << (lIt->second) << ". PugiXML returned the following description \"" << lLoadResult.description() << "\". Continuing for now but be aware!" << std::endl;
-						}else{
-							ParseConnectionsFile( lXMLdocument );
-						}
-							
-					}else{
-					
-					}
-
+					uhal::utilities::OpenFile( lIt->first , lIt->second , boost::bind( &ConnectionManager::CallBack, boost::ref(*this) , _1 , _2 , _3 ) );	
 				}
 			}
 			
+			virtual ~ConnectionManager () {}
 			
 			
 			/**
@@ -116,7 +81,8 @@ namespace uhal
 				}
 				
 				ClientInterface lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
-				return HwInterface ( lClientInterface , lIt->second.address_table );
+				Node lAddressTable = AddressTableBuilder::getInstance().getAddressTable( lIt->second.address_table );
+				return HwInterface ( lClientInterface , lAddressTable );
 			}
 
 			
@@ -150,9 +116,29 @@ namespace uhal
 
 
 		private:
-			void ParseConnectionsFile( pugi::xml_document& aXmlDocument ){
+		
+		
+
+			void CallBack( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile ){
+		
+				std::pair< std::set< std::string >::iterator , bool > lInsert = mPreviouslyOpenedFiles.insert( aProtocol+(aPath.string()) );
+				if( ! lInsert.second )
+				{
+					std::cout << "File \"" << (aProtocol+(aPath.string())) << "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" << std::endl;
+					return;
+				}
 				
-				pugi::xpath_node_set lConnections = aXmlDocument.select_nodes("/connections/connection" );
+				pugi::xml_document lXmlDocument;
+
+				pugi::xml_parse_result lLoadResult = lXmlDocument.load_buffer_inplace( &(aFile[0]) , aFile.size() );
+				if( !lLoadResult ){
+					//Mark says to throw on this condition, I will leave it continuing for now...
+					uhal::utilities::PugiXMLParseResultPrettifier( lLoadResult , aPath , aFile );			
+					std::cout << "Continuing with next document for now but be aware!" << std::endl;
+					return;
+				}
+				
+				pugi::xpath_node_set lConnections = lXmlDocument.select_nodes("/connections/connection" );
 				
 				for (pugi::xpath_node_set::const_iterator lConnectionIt = lConnections.begin(); lConnectionIt != lConnections.end(); ++lConnectionIt )
 				{
@@ -162,8 +148,7 @@ namespace uhal
 					if ( lSuccess ){
 						std::pair< std::map< std::string, tConnectionDescriptor >::iterator , bool > lInsert = mConnectionDescriptors.insert( std::make_pair( lDescriptor.id , lDescriptor ) );
 						if( !lInsert.second ){
-							 tConnectionDescriptor& lExistingDescriptor( lInsert.first->second );
-							if( lExistingDescriptor == lDescriptor ){
+							if( lInsert.first->second == lDescriptor ){
 								std::cout << "Duplicate connection entry found:" << std::endl;
 								std::cout << " > id = " << lDescriptor.id << std::endl;
 								std::cout << " > uri = " << lDescriptor.uri << std::endl;
@@ -175,18 +160,20 @@ namespace uhal
 							}
 						}								
 					}else{
-						std::cout << "Construction of Connection Descriptor failed. Continuing for now but be aware!" << std::endl;
+						std::cout << "Construction of Connection Descriptor failed. Continuing with next Connection Descriptor for now but be aware!" << std::endl;
 					}
 						
 				}
+					
 			}
 			
+				
 			
 
 		private:
-			std::string mFilenameExpr;
 			std::vector< std::pair<std::string, std::string> >  mConnectionFiles;
 			std::map< std::string, tConnectionDescriptor >  mConnectionDescriptors;
+			std::set< std::string > mPreviouslyOpenedFiles;
 						
 	};
 

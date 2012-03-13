@@ -4,12 +4,14 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
 
 #include <wordexp.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "uhal/BoostSpiritGrammars.hpp"
 #include "uhal/UtilityTypes.hpp"
@@ -100,7 +102,7 @@ namespace uhal
 		
 
 		template < bool DebugInfo >
-		void ShellExpandFilenameExpr( const std::string& aFilenameExpr , std::vector< boost::filesystem::path > * aFiles , std::vector< boost::filesystem::path > * aDirectories = NULL )
+		void ShellExpandFilenameExpr( const std::string& aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
 		{
 			ShellExpandFilenameExpr< DebugInfo >( aFilenameExpr.c_str() , aFiles , aDirectories );
 		}
@@ -218,6 +220,163 @@ namespace uhal
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
 		
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace uhal
+{
+	namespace utilities
+	{	
+	
+		template < typename R , typename F , typename L> 
+		void OpenFileLocal( const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder , std::vector< R >& aReturn ){
+			std::vector< boost::filesystem::path > lFilePaths;
+			uhal::utilities::ShellExpandFilenameExpr<true>( aFilenameExpr , &lFilePaths );
+		
+			for( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 ){
+
+				std::ifstream lStr( lIt2->c_str() );
+				if ( !lStr.is_open() ){
+					std::cout << "Failed to open " << *lIt2 << ". Continuing with next document for now but be aware!" << std::endl;
+				} else {
+					lStr.seekg (0, std::ios::end);
+					std::vector<uint8_t> lFile( lStr.tellg() , 0 );
+					lStr.seekg (0, std::ios::beg);
+					lStr.read ( (char*) &(lFile[0]) , lFile.size() );
+					aReturn.push_back( aBinder( std::string("file") , *lIt2 , boost::ref(lFile) ) );
+				}
+				lStr.close();	
+			}
+		}
+		
+		template < typename F , typename L> 
+		void OpenFileLocal( const std::string& aFilenameExpr , boost::_bi::bind_t<void,F,L> aBinder ){
+			std::vector< boost::filesystem::path > lFilePaths;
+			uhal::utilities::ShellExpandFilenameExpr<true>( aFilenameExpr , &lFilePaths );
+		
+			for( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 ){
+
+				std::ifstream lStr( lIt2->c_str() );
+				if ( !lStr.is_open() ){
+					std::cout << "Failed to open " << *lIt2 << ". Continuing with next document for now but be aware!" << std::endl;
+				} else {
+					lStr.seekg (0, std::ios::end);
+					std::vector<uint8_t> lFile( lStr.tellg() , 0 );
+					lStr.seekg (0, std::ios::beg);
+					lStr.read ( (char*) &(lFile[0]) , lFile.size() );
+					aBinder( std::string("file") , *lIt2 , boost::ref(lFile) );
+				}
+				lStr.close();	
+			}	
+		}
+		
+		
+		template < typename R , typename F , typename L> 
+		void OpenFileHttp( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder , std::vector< R >& aReturn ){
+			HttpResponseType lHttpResponse;
+						
+			if( ! uhal::utilities::HttpGet<true>( aURL , lHttpResponse ) ){
+				std::cout << "Failed to download file " << aURL << ". Continuing for now but be aware!" << std::endl;
+				return;
+			}
+			
+			boost::filesystem::path lFilePath = boost::filesystem::path( aURL );
+			aReturn.push_back( aBinder( std::string("http") , lFilePath , boost::ref(lHttpResponse.content) ) );
+		}
+				
+		template < typename F , typename L> 
+		void OpenFileHttp( const std::string& aURL , boost::_bi::bind_t<void,F,L> aBinder ){
+			HttpResponseType lHttpResponse;
+						
+			if( ! uhal::utilities::HttpGet<true>( aURL , lHttpResponse ) ){
+				std::cout << "Failed to download file " << aURL << ". Continuing for now but be aware!" << std::endl;
+				return;
+			}
+			
+			boost::filesystem::path lFilePath = boost::filesystem::path( aURL );
+			aBinder( std::string("http") , lFilePath , boost::ref(lHttpResponse.content) );
+		}		
+		
+		
+		
+		template < typename R , typename F , typename L> 
+		void OpenFile( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder , std::vector< R >& aReturn ){
+			if( aProtocol == "file" ){
+				uhal::utilities::OpenFileLocal( aFilenameExpr , aBinder , aReturn );
+			}else if( aProtocol == "http" ){
+				uhal::utilities::OpenFileHttp( aFilenameExpr , aBinder , aReturn );	
+			}else{
+				std::cout << "Protocol \"" << aProtocol << "\" is unknown and I am, thus, ignoring file \"" << aFilenameExpr << "\". Continuing for now but be aware!" << std::endl;
+			}
+		}
+
+		template < typename F , typename L> 
+		void OpenFile( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<void,F,L> aBinder ){
+			if( aProtocol == "file" ){
+				uhal::utilities::OpenFileLocal( aFilenameExpr , aBinder );
+			}else if( aProtocol == "http" ){
+				uhal::utilities::OpenFileHttp( aFilenameExpr , aBinder );	
+			}else{
+				std::cout << "Protocol \"" << aProtocol << "\" is unknown and I am, thus, ignoring file \"" << aFilenameExpr << "\". Continuing for now but be aware!" << std::endl;
+			}
+		}		
+		
+	}
+}
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace uhal
+{
+	namespace utilities
+	{
+		void PugiXMLParseResultPrettifier( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile )
+		{
+				std::cout << "Failed to parse file " << aPath << ". PugiXML returned the following description \"" << aLoadResult.description() << "\"." << std::endl;
+					
+				std::size_t lLineCounter(1);	
+				std::vector<uint8_t>::const_iterator lIt0 ( aFile.begin() );
+				std::vector<uint8_t>::const_iterator lIt1 ( aFile.begin() + aLoadResult.offset );
+				std::vector<uint8_t>::const_iterator lIt2 (lIt1);
+
+				
+				for(  ; lIt0!=lIt1 ; ++lIt0 ){
+					if( *lIt0 == '\n' )  lLineCounter++;
+				}
+				std::cout << "Error occured at line number : " << lLineCounter << std::endl;		
+				
+				for( ; lIt1 != aFile.begin() ; --lIt1 ){
+					if ( *lIt1 == '\n' ){
+						++lIt1;
+						break;
+					}
+				}
+
+				for( ; lIt2 != aFile.end() ; ++lIt2 ){
+					if ( *lIt2 == '\n' ){
+						break;
+					}
+				}				
+							
+				std::size_t lDist0( lIt0 - lIt1 );
+				std::size_t lDist1( lIt2 - lIt0 );
+				
+				std::cout << "LINE           : ";
+				for (  ; lIt1 != lIt2 ; ++lIt1 ){
+					if( isprint( *lIt1 ) || *lIt1==10 ) std::cout << *lIt1;
+					else std::cout << '#';
+				}
+				std::cout << std::endl;
+				std::cout << "ERROR LOCATION : " << std::string( lDist0 , '_') << '^' << std::string( lDist1 , '_') << std::endl;		
+		
+		
+		
+		}
+		
+	}
+}
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 		
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

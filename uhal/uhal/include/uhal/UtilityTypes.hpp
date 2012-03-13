@@ -34,13 +34,12 @@ namespace uhal
 
 		std::ostream& operator<< ( std::ostream& aStream , const HttpResponseType& aHttpResponse )
 		{
-			aStream << std::endl;
-			aStream << " > method : " << aHttpResponse.method << "\n";
-			aStream << " > version : " << aHttpResponse.version << "\n";
-			aStream << " > status : " << aHttpResponse.status << "\n";
-			aStream << " > status_string : " << aHttpResponse.status_string << "\n";
-			aStream << " > NameValuePairs :\n" << aHttpResponse.headers << "\n";
-			aStream << " > Content :\n";
+			aStream << " > method = " << aHttpResponse.method << "\n";
+			aStream << " > version = " << aHttpResponse.version << "\n";
+			aStream << " > status = " << aHttpResponse.status << "\n";
+			aStream << " > status_string = " << aHttpResponse.status_string << "\n";
+			aStream << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
+			aStream << " > Content =\n";
 			for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt ){
 				aStream << char(*lIt);
 			}
@@ -62,6 +61,64 @@ BOOST_FUSION_ADAPT_STRUCT(
 	(std::vector< uint8_t >, content)
 );	
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		
 	
+
+	
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace uhal
+{
+	namespace utilities
+	{
+	
+		//! Struct to store an http response received from a server when parsed by boost spirit 
+		struct OldHalEntryType
+		{
+			//! the HAL key
+			std::string key;
+			//! the HAL AM
+			uint8_t AM;
+			//! the HAL width
+			std::string width;
+			//! the HAL address
+			std::string address;
+			//! the HAL mask
+			std::string mask;
+			//! the HAL read
+			std::string read;
+			//! the HAL write
+			std::string write;
+			//! the HAL description
+			std::string description;
+		};	
+		
+
+		std::ostream& operator<< ( std::ostream& aStream , const OldHalEntryType& aOldHalEntry )
+		{
+			aStream << " > key = '" << aOldHalEntry.key << "'\n";
+			aStream << " > AM = '" << aOldHalEntry.AM << "'\n";
+			aStream << " > width = '" << aOldHalEntry.width << "'\n";
+			aStream << " > address = '" << aOldHalEntry.address << "'\n";
+			aStream << " > mask = '" << aOldHalEntry.mask << "'\n";
+			//aStream << " > permissions = " << (aOldHalEntry.read?"r":"") << (aOldHalEntry.write?"w":"") << "\n";
+			aStream << " > description = '" << aOldHalEntry.description << "'" << std::endl;
+			return aStream;
+		}
+		
+	}
+}
+
+// Call to BOOST_FUSION_ADAPT_STRUCT must be at global scope
+BOOST_FUSION_ADAPT_STRUCT(
+	uhal::utilities::OldHalEntryType,
+	(std::string , key)
+	(uint8_t , AM)
+	(std::string , width)
+	(std::string , address)
+	(std::string , mask)
+	(std::string , read)
+	(std::string , write)
+	(std::string , description)
+);	
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		
 #endif

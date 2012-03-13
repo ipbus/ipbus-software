@@ -11,11 +11,16 @@
 #include <cstdlib>
 
 void hwInterface_creation() {
-  uhal::ConnectionManager manager("     file://tests/addr*/*connections.xml   ; file://~/*.xml  ;    http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=25      ");
+
+  uhal::ConnectionManager manager("     file://tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  ");// http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
+
   uhal::HwInterface hw=manager.getDevice("hcal.crate1.slot1");
   //BOOST_CHECK(manager.ping());
 
-  std::vector<std::string> ids = manager.getDevices("hcal\\.crate1.*");
+ // manager.getDevice("hcal.crate1.slot2");
+  
+  
+  std::vector<std::string> ids = manager.getDevices("hcal.crate1.*");
   for(std::vector<std::string>::const_iterator i(ids.begin()); i != ids.end(); ++i)
     //BOOST_CHECK(manager.getDevice(*i).getClient().ping();
     ;

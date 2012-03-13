@@ -58,6 +58,37 @@ namespace uhal
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			
 
+
+	struct OldHalSkipParser : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator > {
+		OldHalSkipParser();
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator > skip; 
+	}; 
+			
+			
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	struct OldHalEntryGrammar : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator , std::vector< utilities::OldHalEntryType >() , OldHalSkipParser > {
+		OldHalEntryGrammar();
+	
+		//! Boost spirit parsing rule for parsing the incoming http packet info
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator,		std::vector< utilities::OldHalEntryType >(),						OldHalSkipParser > OldHalEntryVector;
+		//! Boost spirit parsing rule for parsing the incoming http packet
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		utilities::OldHalEntryType(),										OldHalSkipParser > OldHalEntry;
+		
+		
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),														OldHalSkipParser > key;
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		uint8_t(),															OldHalSkipParser > AM;
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),															OldHalSkipParser > width;
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),															OldHalSkipParser > address;
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),															OldHalSkipParser > mask;
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),																OldHalSkipParser > read;
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),																OldHalSkipParser > write;
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),														OldHalSkipParser > description;
+		
+		
+		                                            
+	};
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+				
 	
 }	
 	

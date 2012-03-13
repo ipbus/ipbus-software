@@ -9,20 +9,21 @@ env.Append( LIBPATH = ['/usr/lib64','/opt/local/lib'] )
 #env.Append( LIBS = ['boost_unit_test_framework','boost_program_options'])
 
 BoostSpiritGrammars = env.SharedLibrary(
-			target = 'lib/BoostSpiritGrammars',
+			target = 'BoostSpiritGrammars',
 			source = [ 'src/common/BoostSpiritGrammars.cpp' ]
 		)	
 		
 uHAL = env.SharedLibrary(
-			target = 'lib/uhal',
-			source = [ 'src/common/ClientImplementation.cpp' , 'src/common/Node.cpp' , 'src/common/ValMem.cpp' ],
+			target = 'uhal',
+			source = [ 'src/common/ClientImplementation.cpp' , 'src/common/Node.cpp' , 'src/common/ValMem.cpp' , 'src/common/AddressTableBuilder.cpp' ],
 			LIBS = [ BoostSpiritGrammars ]
 		)
 		
 	
 
 ## Install the libraries
-env.Install( '/opt/uhal/lib' , [ BoostSpiritGrammars , uHAL ] )
+env.Install( '/opt/uhal/lib' , BoostSpiritGrammars )
+env.Install( '/opt/uhal/lib' , uHAL )
 env.Alias( 'install', '/opt/uhal/lib' )
 
 

@@ -5,11 +5,11 @@
 namespace uhal
 {
 
-    ClientFactory* ClientFactory::mInstance = 0;
+    ClientFactory* ClientFactory::mInstance = NULL;
 
     ClientFactory& ClientFactory::getInstance()
     {
-        if ( mInstance == 0 ) {
+        if ( mInstance == NULL ) {
             mInstance = new ClientFactory();
 
             mInstance->add<uhal::IPBusUDPClient>( "ipbusudp" );

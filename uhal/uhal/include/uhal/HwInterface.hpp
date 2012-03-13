@@ -1,7 +1,7 @@
 #ifndef _uhal_HwInterface_hpp_
 #define _uhal_HwInterface_hpp_
 
-#include "uhal/AddressTable.hpp"
+#include "uhal/Node.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/Node.hpp"
 
@@ -10,9 +10,9 @@ namespace uhal
 	class HwInterface
 	{
 		public:
-			HwInterface ( const ClientInterface& aClientInterface , const std::string& aFileName )
+			HwInterface ( const ClientInterface& aClientInterface , const Node& aAddressTable )
 				: mClientInterface ( aClientInterface ),
-				  mAddressTable ( aFileName )
+				  mAddressTable ( aAddressTable )
 			{
 			}
 
@@ -26,24 +26,25 @@ namespace uhal
 				getClient().dispatch ( aMode );
 			}
 
-			Node getNode ( const std::string& aId )
+			Node& getNode ( const std::string& aId )
 			{
-				return Node ( this , aId );
+				//return Node ( this , aId );
 			}
 
 			std::vector<std::string> getNodes()
 			{
-				return mAddressTable.getChildren ( "" );
+				//return mAddressTable.getChildren ( "" );
 			}
 
-			AddressTable& getAddressTable()
-			{
-				return mAddressTable;
-			}
+			// Node& getAddressTable()
+			// {
+				// return mAddressTable;
+			// }
 
 		private:
 			ClientInterface mClientInterface;
-			AddressTable mAddressTable;
+			Node mAddressTable;
+
 	};
 
 

@@ -4,9 +4,13 @@
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
 
+#include <boost/spirit/include/qi.hpp>
+
 #include <exception>
 #include <vector>
 #include <string>
+
+#include "pugixml/pugixml.hpp"
 
 namespace uhal
 {
@@ -15,10 +19,17 @@ namespace uhal
 	class WriteAccessDenied: public std::exception {  };
 	class ReadAccessDenied: public std::exception {  };
 
+	class NodeMustHaveUID: public std::exception {  };
+	
+	
 	class Node
 	{
 			friend class HwInterface;
+			
 		public:
+		
+			virtual ~Node(){}
+		
 			bool operator == ( const Node& aNode )
 			{
 				return this->getAddress() == aNode.getAddress() &&
@@ -37,7 +48,7 @@ namespace uhal
 
 			std::string getId() const
 			{
-				return mFullId;
+				return mUid;
 			}
 
 			uint32_t getAddress() const
@@ -106,15 +117,40 @@ namespace uhal
 				}
 			}		*/	
 			
-		private:
-			Node ( HwInterface* aHwInterface, const std::string& aFullid );
+		//private:
+			//Node ( HwInterface* aHwInterface, const std::string& aFullid );
+			Node( const pugi::xml_node& aXmlNode  );
+			
 			
 		private:
 			HwInterface* mHw;
-			std::string mFullId;
+			// std::string mFullId;
+			std::string mUid;
 			uint32_t mAddr;
 			uint32_t mMask;
 			defs::NodePermission mPermission;
+			
+			boost::shared_ptr< std::vector< Node > > mChildren;
+			
+			
+			
+			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>
+			{
+				permissions_lut()
+				{
+					add
+						("r"			, defs::READ)
+						("w"			, defs::WRITE)
+						("read"			, defs::READ)
+						("write"		, defs::WRITE)
+						("rw"			, defs::READWRITE)
+						("wr"			, defs::READWRITE)
+						("readwrite"	, defs::READWRITE)
+						("writeread"	, defs::READWRITE)
+					;
+				}
+
+			} mPermissionsLut;
 
 	};
 

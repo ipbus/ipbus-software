@@ -3,19 +3,20 @@
 
 #include "uhal/definitions.hpp"
 
-#include "boost/utility.hpp"
-
-#include <map>
 
 namespace uhal
 {
+
+
+
 	class AddressTable
 	{
 		public:
-			AddressTable ( const std::string& aFilename )
-				:mFilename ( aFilename )
-			{}
+			AddressTable ( )
+			{	}
 
+			virtual ~AddressTable () { }
+			
 			uint32_t getAddress ( const std::string& aFullId )
 			{
 				return 0x32;
@@ -41,7 +42,8 @@ namespace uhal
 			}
 
 		private:
-			std::string mFilename;
+
+
 	};
 }
 
