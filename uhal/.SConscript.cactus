@@ -35,7 +35,7 @@ else:
 
 
 env.BuildPath = '.build/'+env.MachineArchitecture+'/' 
-env.LibPath = env.BuildPath+'/libs/' 
+env.LibPath = 'lib/' 
 env.SrcBuildPath = 'bin/exe-'+env.MachineArchitecture+'/' 
 
 
