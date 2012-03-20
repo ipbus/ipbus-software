@@ -28,15 +28,9 @@ namespace uhal
 			
 		public:
 		
-			virtual ~Node(){}
+			virtual ~Node();
 		
-			bool operator == ( const Node& aNode )
-			{
-				return this->getAddress() == aNode.getAddress() &&
-					   this->getMask() == aNode.getMask() &&
-					   this->getPermission() == aNode.getPermission() &&
-					   this->getId() == aNode.getId();
-			}
+			bool operator == ( const Node& aNode );
 
 
 			/**
@@ -46,25 +40,13 @@ namespace uhal
 			
 			std::vector<std::string> getNodes();
 
-			std::string getId() const
-			{
-				return mUid;
-			}
+			std::string getId() const;
 
-			uint32_t getAddress() const
-			{
-				return mAddr;
-			}
+			uint32_t getAddress() const;
 
-			uint32_t getMask() const
-			{
-				return mMask;
-			}
+			uint32_t getMask() const;
 
-			defs::NodePermission getPermission() const
-			{
-				return mPermission;
-			}
+			defs::NodePermission getPermission() const;
 
 			/**
 			 * Queues the corresponding operation. Id the permissions are insuficient or the node is not an end node, then it throws
@@ -136,20 +118,7 @@ namespace uhal
 			
 			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>
 			{
-				permissions_lut()
-				{
-					add
-						("r"			, defs::READ)
-						("w"			, defs::WRITE)
-						("read"			, defs::READ)
-						("write"		, defs::WRITE)
-						("rw"			, defs::READWRITE)
-						("wr"			, defs::READWRITE)
-						("readwrite"	, defs::READWRITE)
-						("writeread"	, defs::READWRITE)
-					;
-				}
-
+				permissions_lut();
 			} mPermissionsLut;
 
 	};

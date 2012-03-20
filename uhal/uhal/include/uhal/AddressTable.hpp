@@ -3,6 +3,8 @@
 
 #include "uhal/definitions.hpp"
 
+#include <string>
+#include <vector>
 
 namespace uhal
 {
@@ -12,34 +14,17 @@ namespace uhal
 	class AddressTable
 	{
 		public:
-			AddressTable ( )
-			{	}
+			AddressTable ( );
 
-			virtual ~AddressTable () { }
+			virtual ~AddressTable () ;
 			
-			uint32_t getAddress ( const std::string& aFullId )
-			{
-				return 0x32;
-			}
+			uint32_t getAddress ( const std::string& aFullId );
 
-			uint32_t getMask ( const std::string& aFullId )
-			{
-				return defs::NOMASK;
-			}
+			uint32_t getMask ( const std::string& aFullId );
 
-			defs::NodePermission getPermission ( const std::string& aFullId )
-			{
-				return defs::READWRITE;
-			}
+			defs::NodePermission getPermission ( const std::string& aFullId );
 
-			std::vector<std::string> getChildren ( const std::string& aId )
-			{
-				std::vector<std::string> lResult;
-				lResult.push_back ( aId + "." + "REG1" );
-				lResult.push_back ( aId + "." + "REG2" );
-				lResult.push_back ( aId + "." + "REG3" );
-				return lResult;
-			}
+			std::vector<std::string> getChildren ( const std::string& aId );
 
 		private:
 

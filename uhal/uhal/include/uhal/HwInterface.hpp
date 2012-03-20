@@ -3,47 +3,28 @@
 
 #include "uhal/Node.hpp"
 #include "uhal/ClientInterface.hpp"
-#include "uhal/Node.hpp"
+
 
 namespace uhal
 {
 	class HwInterface
 	{
 		public:
-			HwInterface ( const ClientInterface& aClientInterface , const Node& aAddressTable )
-				: mClientInterface ( aClientInterface ),
-				  mAddressTable ( aAddressTable )
-			{
-			}
+			HwInterface ( const ClientInterface& aClientInterface , const Node& aNode );
 
-			ClientInterface& getClient()
-			{
-				return mClientInterface;
-			}
+			ClientInterface& getClient();
 
-			void dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC )
-			{
-				getClient().dispatch ( aMode );
-			}
+			void dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC );
 
-			Node& getNode ( const std::string& aId )
-			{
-				//return Node ( this , aId );
-			}
+			Node& getNode ( const std::string& aId );
 
-			std::vector<std::string> getNodes()
-			{
-				//return mAddressTable.getChildren ( "" );
-			}
+			std::vector<std::string> getNodes();
 
-			// Node& getAddressTable()
-			// {
-				// return mAddressTable;
-			// }
+			// Node& getNode();
 
 		private:
 			ClientInterface mClientInterface;
-			Node mAddressTable;
+			Node mNode;
 
 	};
 

@@ -21,7 +21,7 @@ License: Boost Software License
 URL: http://www.boost.org/ 
 Group: System Environment/Libraries 
 Source: %{tarball_name}.tar.bz2 
-BuildRoot: %{_tmppath}/boost-%{version}-root 
+BuildRoot: %{_tmppath}/%{name}-%{version}-root 
 
 ###################################################################################################################################
 
@@ -93,7 +93,7 @@ find . -type f | xargs chmod 644
 mkdir -p $RPM_BUILD_ROOT%{_includedir}/%{name}-%{short_underscore_version}
 cd $RPM_BUILD_ROOT%{_includedir}
 cp -rf  %{working_dir}/include/* .
-ln -s %{name}-%{short_underscore_version}/%{name} ./%{name} 
+#ln -s %{name}-%{short_underscore_version}/%{name} ./%{name} 
 
 # copy libs to RPM_BUILD_ROOT and set aliases
 mkdir -p $RPM_BUILD_ROOT%{_libdir}
@@ -124,7 +124,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root) 
 %{_libdir}/*
 %{_includedir}/%{name} 
-%{_includedir}/%{name}-%{short_underscore_version}
+#%{_includedir}/%{name}-%{short_underscore_version}
 %{_docdir}/%{name}-%{short_underscore_version}
 
 ###################################################################################################################################

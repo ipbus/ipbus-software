@@ -4,6 +4,7 @@
 
 #include "uhal/Utilities.hpp"
 
+#include "uhal/log.hpp"
 
 namespace uhal
 {
@@ -26,51 +27,67 @@ namespace uhal
 		uhal::utilities::ParseSemicolonDelimitedUriList<true>( aFilenameExpr , lAddressFiles );
 	
 		if( lAddressFiles.size() != 1 ){
-			std::cout << "Exactly one address table file must be specified. The expression \"" << aFilenameExpr << "\" contains " << lAddressFiles.size() << " valid file expressions." << std::endl;
+			pantheios::log_ALERT ( "Exactly one address table file must be specified. The expression \"" , aFilenameExpr , "\" contains " , pantheios::integer(lAddressFiles.size()) , " valid file expressions." );
 			throw IncorrectAddressTableFileCount();
 		}
 
-		std::vector< Node > lAddressTables;
-		uhal::utilities::OpenFile( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind( &AddressTableBuilder::CallBack, boost::ref(*this) , _1 , _2 , _3 ) , lAddressTables );	
+		std::vector< Node > lNodes;
 		
-		
-		if( lAddressTables.size() != 1 ){
-			std::cout << "Exactly one address table file must be specified. The expression \"" << lAddressFiles[0].second << "\" contains " << lAddressTables.size() << " valid file expressions." << std::endl;
+		pantheios::log_LOCATION;
+		uhal::utilities::OpenFile( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind( &AddressTableBuilder::CallBack, boost::ref(*this) , _1 , _2 , _3 , boost::ref(lNodes) ) );	
+		pantheios::log_LOCATION;
+			
+		if( lNodes.size() != 1 ){
+			pantheios::log_ALERT ( "Exactly one address table file must be specified. The expression \"" , lAddressFiles[0].second , "\" contains " , pantheios::integer(lNodes.size()) , " valid file expressions." );
 			throw IncorrectAddressTableFileCount();
 		}
 		
-		return lAddressTables[0];
+		return lNodes[0];
 
 	}
 
 	
-	Node AddressTableBuilder::CallBack( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile ){
+	void AddressTableBuilder::CallBack( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< Node >& aNodes ){
 	
-		std::map< std::string , Node >::iterator lAddressTableIt = mAddressTables.find( aProtocol+(aPath.string()) );
-		if( lAddressTableIt != mAddressTables.end() ){
-			return lAddressTableIt->second;
+		std::map< std::string , Node >::iterator lNodeIt = mNodes.find( aProtocol+(aPath.string()) );
+		if( lNodeIt != mNodes.end() ){
+			aNodes.push_back( lNodeIt->second );
+			return;
 		}
 	
 		std::string lExtension( aPath.extension().string() );
 		if( lExtension == ".xml" ){
-			std::cout << "XML file" << std::endl;
+			pantheios::log_INFORMATIONAL ( "XML file" );
 			
 			pugi::xml_document lXmlDocument;
-
-			
 			
 			pugi::xml_parse_result lLoadResult = lXmlDocument.load_buffer_inplace( &(aFile[0]) , aFile.size() );
 			if( !lLoadResult ){
 				uhal::utilities::PugiXMLParseResultPrettifier( lLoadResult , aPath , aFile );			
 				throw FailedToParseAddressTableFile();
 			}
+
+			pantheios::log_LOCATION;
+			pugi::xml_node lXmlNode = lXmlDocument.child("node");
+			pantheios::log_LOCATION;
+
+			if( lXmlNode ){
+				pantheios::log_INFORMATIONAL ( "Returned Valid" );
+			}else{
+				pantheios::log_INFORMATIONAL ( "Returned Invalid" );			
+			}
 			
+			Node lNode( lXmlNode );
+			pantheios::log_LOCATION;
+
+			aNodes.push_back( lNode );
 			
-			pugi::xpath_node lTopNode = lXmlDocument.select_single_node("//node");
-			return Node( lTopNode.node() );
+			pantheios::log_LOCATION;
+		
+			return;
 					
 		}else if( lExtension == ".txt" ) {
-			std::cout << "TXT file" << std::endl;
+			//pantheios::log_INFORMATIONAL ( "TXT file" );
 			/*
 			uhal::OldHalEntryGrammar lGrammar;
 			uhal::OldHalSkipParser lParser;
@@ -82,14 +99,14 @@ namespace uhal
 			boost::spirit::qi::phrase_parse( lBegin , lEnd , lGrammar , lParser , lResponse );
 			
 			for( std::vector< utilities::OldHalEntryType >::iterator lIt = lResponse.begin() ; lIt != lResponse.end() ; ++lIt ){
-				std::cout << "---------------------------------------------------\n" << *lIt << std::endl;
+				//pantheios::log_INFORMATIONAL ( "---------------------------------------------------\n" , *lIt );
 			}
 			
-			std::cout << "Remaining:" << std::endl;
+			//pantheios::log_INFORMATIONAL ( "Remaining:" );
 			for( ; lBegin != lEnd ; ++lBegin ){
-				std::cout << *lBegin;
+				//pantheios::log_INFORMATIONAL ( *lBegin;
 			}
-			std::cout << std::endl;
+			std::cout );
 			*/
 		}else{
 		

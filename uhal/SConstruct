@@ -4,12 +4,7 @@
 #	@date 2010
 
 ## Get the standard cactus environment
-import os
-env = SConscript( "./.SConscript.cactus" )
-
-env.Append( 
-	CPPPATH = [ os.path.abspath('./BoostSpiritGrammars/include') , os.path.abspath('./uhal/include') , os.path.abspath('/opt/local/include') ]
-) 
+env = SConscript( "./.SConscript.uhal" )
 
 Export('env')
 

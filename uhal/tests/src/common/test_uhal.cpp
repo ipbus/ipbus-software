@@ -13,10 +13,10 @@
 void hwInterface_creation() {
 
   uhal::ConnectionManager manager("     file://tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  ");// http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
-
+  
   uhal::HwInterface hw=manager.getDevice("hcal.crate1.slot1");
   //BOOST_CHECK(manager.ping());
-
+  
  // manager.getDevice("hcal.crate1.slot2");
   
   

@@ -44,15 +44,29 @@ env.Append(
 	LIBPATH = [ '/opt/local/lib' , env.InstallPath ] 
 ) 
 
-## Add default libs
-env.Append( 
-	LIBS = [ ] 
-)  
-
 ## Turn on GCC optimization
 env.Append( 
 	CCFLAGS = [ '-O3' , '-Wall' ] 
 )
+
+env.Append( 
+	CPPPATH = [	
+				os.path.abspath('./BoostSpiritGrammars/include') , 
+				os.path.abspath('./uhal/include') , 
+				os.path.abspath('/opt/local/include')
+			]
+) 
+
+
+# The logging library
+env.Append( 
+	LIBS = [  'pantheios.1.core.gcc41' , 'pantheios.1.be.fprintf.gcc41' , 'pantheios.1.bec.fprintf.gcc41' , 'pantheios.1.fe.all.gcc41' , 'pantheios.1.util.gcc41' , 'b64.1.pan.gcc41' , 'pantheios.1.core.gcc41' ] #core is needed a second time for gcc
+)  
+
+env.Append( 
+	CPPPATH = [  os.path.abspath('/opt/local/include/stlsoft/include')  ]
+) 
+
 
 #configure where scons puts its temporary file
 #env['CONFIGUREDIR'] = env['ENV']['microhal_path']+"/.sconf_temp"

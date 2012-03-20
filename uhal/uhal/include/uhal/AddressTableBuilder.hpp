@@ -35,7 +35,7 @@ namespace uhal
 			//bool BuildFromAddressFile( const std::string&  ){}
 			
 
-			Node CallBack( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile );
+			void CallBack( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< Node >& aAddressTable );
 
 
 
@@ -43,7 +43,8 @@ namespace uhal
 
 		private:
 			static AddressTableBuilder* mInstance;
-			std::map< std::string , Node > mAddressTables;
+			std::map< std::string , Node > mNodes;
+			
 	};
 }
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include <wordexp.h>
 
@@ -17,8 +18,9 @@
 #include "BoostSpiritGrammars/HttpResponseGrammar.hpp"
 #include "BoostSpiritGrammars/URLGrammar.hpp"
 
-
 #include "pugixml/pugixml.hpp"
+
+#include "uhal/log.hpp"
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace uhal
@@ -34,9 +36,9 @@ namespace uhal
 			boost::spirit::qi::phrase_parse( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
 			
 			if( DebugInfo ){
-				std::cout << "Parsed \"" << aSemicolonDelimitedUriList << "\" to:" << std::endl;
+				pantheios::log_INFORMATIONAL ( "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
 				for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt ){
-					std::cout << " > [" << lIt->first << "] \"" << lIt->second << "\"" << std::endl;
+					pantheios::log_INFORMATIONAL ( " > [" , lIt->first , "] \"" , lIt->second , "\"" );
 				}
 			}
 			
@@ -78,23 +80,23 @@ namespace uhal
 				}			
 
 			if( DebugInfo ){
-				if( aFiles || aDirectories ) std::cout << "Shell expansion of \"" << aFilenameExpr << "\" returned:" << std::endl;
+				if( aFiles || aDirectories ) //pantheios::log_INFORMATIONAL ( "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
 				if( aFiles ){
 					for( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt ){
-						std::cout << " > [file] " << *lIt << std::endl;				
+						pantheios::log_INFORMATIONAL ( " > [file] " , lIt->c_str() );				
 					}
 					
 					if ( ! aFiles->size() ){
-						std::cout << " > No matching files." << std::endl;
+						pantheios::log_INFORMATIONAL ( " > No matching files." );
 					}
 				}
 				if( aDirectories ){
 					for( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt ){
-						std::cout << " > [directory] " << *lIt << std::endl;				
+						pantheios::log_INFORMATIONAL ( " > [directory] " , lIt->c_str() );				
 					}
 						
 					if ( ! aDirectories->size() ){
-						std::cout << " > No matching files." << std::endl;
+						pantheios::log_INFORMATIONAL ( " > No matching files." );
 					}
 				}					
 			}
@@ -123,8 +125,11 @@ namespace uhal
 	
 		template < bool DebugInfo >
 		bool HttpGet( const std::string& aURL , HttpResponseType& aResponse ){
-			if( DebugInfo ) std::cout << "Retrieving URL http://" << aURL << std::endl;
-		
+			if( DebugInfo )
+			{
+				pantheios::log_INFORMATIONAL ( "Retrieving URL http://" , aURL );
+			}
+			
 			BoostSpiritGrammars::URLGrammar lGrammar;
 			std::pair<std::string, std::string> lURLPair;
 			boost::spirit::qi::phrase_parse( aURL.begin() , aURL.end() , lGrammar , boost::spirit::ascii::space , lURLPair );
@@ -149,7 +154,7 @@ namespace uhal
 				}
 				if (error) throw boost::system::system_error(error);
 			}catch( std::exception& aExc ){
-				std::cout << "Exception: " << aExc.what() << std::endl;
+				pantheios::log_ERROR ( "Exception: " , aExc.what() );
 				return false;
 			}					
 			
@@ -166,7 +171,7 @@ namespace uhal
 				boost::asio::write( socket , request , error );
 				if (error) throw boost::system::system_error(error);
 			}catch( std::exception& aExc ){
-				std::cout << "Exception: " << aExc.what() << std::endl;
+				pantheios::log_ERROR ( "Exception: " , aExc.what() );
 				return false;
 			}	
 			
@@ -192,7 +197,7 @@ namespace uhal
 					mBuffer.insert( mBuffer.end() , mDefaultBufferSize , uint8_t(0) );
 				}
 			}catch( std::exception& aExc ){
-				std::cout << "Exception: " << aExc.what() << std::endl;
+				pantheios::log_ERROR ( "Exception: " , aExc.what() );
 				return false;
 			}	
 			
@@ -204,10 +209,12 @@ namespace uhal
 		
 			if( DebugInfo ) 
 			{
-				std::cout << aResponse << std::endl;
+				std::stringstream lStr;
+				lStr << aResponse;
+				pantheios::log_INFORMATIONAL ( lStr.str() );
 			}
 
-			if ( aResponse.method != "HTTP" || aResponse.status != 200)
+			if ( aResponse.method != "HTTP" || aResponse.status != 200 )
 			{
 				return false;
 			}
@@ -230,7 +237,7 @@ namespace uhal
 	{	
 	
 		template < typename R , typename F , typename L> 
-		void OpenFileLocal( const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder , std::vector< R >& aReturn ){
+		void OpenFileLocal( const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder ){
 			std::vector< boost::filesystem::path > lFilePaths;
 			uhal::utilities::ShellExpandFilenameExpr<true>( aFilenameExpr , &lFilePaths );
 		
@@ -238,28 +245,7 @@ namespace uhal
 
 				std::ifstream lStr( lIt2->c_str() );
 				if ( !lStr.is_open() ){
-					std::cout << "Failed to open " << *lIt2 << ". Continuing with next document for now but be aware!" << std::endl;
-				} else {
-					lStr.seekg (0, std::ios::end);
-					std::vector<uint8_t> lFile( lStr.tellg() , 0 );
-					lStr.seekg (0, std::ios::beg);
-					lStr.read ( (char*) &(lFile[0]) , lFile.size() );
-					aReturn.push_back( aBinder( std::string("file") , *lIt2 , boost::ref(lFile) ) );
-				}
-				lStr.close();	
-			}
-		}
-		
-		template < typename F , typename L> 
-		void OpenFileLocal( const std::string& aFilenameExpr , boost::_bi::bind_t<void,F,L> aBinder ){
-			std::vector< boost::filesystem::path > lFilePaths;
-			uhal::utilities::ShellExpandFilenameExpr<true>( aFilenameExpr , &lFilePaths );
-		
-			for( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 ){
-
-				std::ifstream lStr( lIt2->c_str() );
-				if ( !lStr.is_open() ){
-					std::cout << "Failed to open " << *lIt2 << ". Continuing with next document for now but be aware!" << std::endl;
+					pantheios::log_ERROR ( "Failed to open \"" , lIt2->c_str() , "\". Continuing with next document for now but be aware!" );
 				} else {
 					lStr.seekg (0, std::ios::end);
 					std::vector<uint8_t> lFile( lStr.tellg() , 0 );
@@ -268,59 +254,34 @@ namespace uhal
 					aBinder( std::string("file") , *lIt2 , boost::ref(lFile) );
 				}
 				lStr.close();	
-			}	
+			}
 		}
-		
 		
 		template < typename R , typename F , typename L> 
-		void OpenFileHttp( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder , std::vector< R >& aReturn ){
+		void OpenFileHttp( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder ){
 			HttpResponseType lHttpResponse;
 						
 			if( ! uhal::utilities::HttpGet<true>( aURL , lHttpResponse ) ){
-				std::cout << "Failed to download file " << aURL << ". Continuing for now but be aware!" << std::endl;
-				return;
-			}
-			
-			boost::filesystem::path lFilePath = boost::filesystem::path( aURL );
-			aReturn.push_back( aBinder( std::string("http") , lFilePath , boost::ref(lHttpResponse.content) ) );
-		}
-				
-		template < typename F , typename L> 
-		void OpenFileHttp( const std::string& aURL , boost::_bi::bind_t<void,F,L> aBinder ){
-			HttpResponseType lHttpResponse;
-						
-			if( ! uhal::utilities::HttpGet<true>( aURL , lHttpResponse ) ){
-				std::cout << "Failed to download file " << aURL << ". Continuing for now but be aware!" << std::endl;
+				pantheios::log_ERROR ( "Failed to download file " , aURL , ". Continuing for now but be aware!" );
 				return;
 			}
 			
 			boost::filesystem::path lFilePath = boost::filesystem::path( aURL );
 			aBinder( std::string("http") , lFilePath , boost::ref(lHttpResponse.content) );
-		}		
-		
-		
-		
-		template < typename R , typename F , typename L> 
-		void OpenFile( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder , std::vector< R >& aReturn ){
-			if( aProtocol == "file" ){
-				uhal::utilities::OpenFileLocal( aFilenameExpr , aBinder , aReturn );
-			}else if( aProtocol == "http" ){
-				uhal::utilities::OpenFileHttp( aFilenameExpr , aBinder , aReturn );	
-			}else{
-				std::cout << "Protocol \"" << aProtocol << "\" is unknown and I am, thus, ignoring file \"" << aFilenameExpr << "\". Continuing for now but be aware!" << std::endl;
-			}
 		}
-
-		template < typename F , typename L> 
-		void OpenFile( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<void,F,L> aBinder ){
+				
+		template < typename R , typename F , typename L> 
+		void OpenFile( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder ){
 			if( aProtocol == "file" ){
 				uhal::utilities::OpenFileLocal( aFilenameExpr , aBinder );
 			}else if( aProtocol == "http" ){
 				uhal::utilities::OpenFileHttp( aFilenameExpr , aBinder );	
 			}else{
-				std::cout << "Protocol \"" << aProtocol << "\" is unknown and I am, thus, ignoring file \"" << aFilenameExpr << "\". Continuing for now but be aware!" << std::endl;
+				pantheios::log_ERROR ( "Protocol \"" , aProtocol , "\" is unknown and I am, thus, ignoring file \"" , aFilenameExpr , "\". Continuing for now but be aware!" );
 			}
-		}		
+		}
+
+
 		
 	}
 }
@@ -332,49 +293,7 @@ namespace uhal
 {
 	namespace utilities
 	{
-		void PugiXMLParseResultPrettifier( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile )
-		{
-				std::cout << "Failed to parse file " << aPath << ". PugiXML returned the following description \"" << aLoadResult.description() << "\"." << std::endl;
-					
-				std::size_t lLineCounter(1);	
-				std::vector<uint8_t>::const_iterator lIt0 ( aFile.begin() );
-				std::vector<uint8_t>::const_iterator lIt1 ( aFile.begin() + aLoadResult.offset );
-				std::vector<uint8_t>::const_iterator lIt2 (lIt1);
-
-				
-				for(  ; lIt0!=lIt1 ; ++lIt0 ){
-					if( *lIt0 == '\n' )  lLineCounter++;
-				}
-				std::cout << "Error occured at line number : " << lLineCounter << std::endl;		
-				
-				for( ; lIt1 != aFile.begin() ; --lIt1 ){
-					if ( *lIt1 == '\n' ){
-						++lIt1;
-						break;
-					}
-				}
-
-				for( ; lIt2 != aFile.end() ; ++lIt2 ){
-					if ( *lIt2 == '\n' ){
-						break;
-					}
-				}				
-							
-				std::size_t lDist0( lIt0 - lIt1 );
-				std::size_t lDist1( lIt2 - lIt0 );
-				
-				std::cout << "LINE           : ";
-				for (  ; lIt1 != lIt2 ; ++lIt1 ){
-					if( isprint( *lIt1 ) || *lIt1==10 ) std::cout << *lIt1;
-					else std::cout << '#';
-				}
-				std::cout << std::endl;
-				std::cout << "ERROR LOCATION : " << std::string( lDist0 , '_') << '^' << std::string( lDist1 , '_') << std::endl;		
-		
-		
-		
-		}
-		
+		void PugiXMLParseResultPrettifier( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile );		
 	}
 }
 
@@ -393,7 +312,7 @@ namespace uhal
 				aTarget = lAttr.value();
 				return true;
 			}else{
-				if( DebugInfo ) std::cout << "Failed to get attribute \"" << aAttrName << "\"" << std::endl;
+				if( DebugInfo ) pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
 				return false;
 			}
 		}
@@ -404,7 +323,7 @@ namespace uhal
 				aTarget = lAttr.value();
 				return true;
 			}else{
-				if( DebugInfo ) std::cout << "Failed to get attribute \"" << aAttrName << "\"" << std::endl;
+				if( DebugInfo ) pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
 				return false;
 			}
 		}
@@ -415,7 +334,7 @@ namespace uhal
 				aTarget = lAttr.as_int();
 				return true;
 			}else{
-				if( DebugInfo ) std::cout << "Failed to get attribute \"" << aAttrName << "\"" << std::endl;
+				if( DebugInfo ) pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
 				return false;
 			}
 		}
@@ -426,7 +345,7 @@ namespace uhal
 				aTarget = lAttr.as_uint();
 				return true;
 			}else{
-				if( DebugInfo ) std::cout << "Failed to get attribute \"" << aAttrName << "\"" << std::endl;
+				if( DebugInfo ) pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
 				return false;
 			}
 		}
@@ -437,7 +356,7 @@ namespace uhal
 				aTarget = lAttr.as_double();
 				return true;
 			}else{
-				if( DebugInfo ) std::cout << "Failed to get attribute \"" << aAttrName << "\"" << std::endl;
+				if( DebugInfo ) pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
 				return false;
 			}
 		}		
@@ -448,7 +367,7 @@ namespace uhal
 				aTarget = lAttr.as_float();
 				return true;
 			}else{
-				if( DebugInfo ) std::cout << "Failed to get attribute \"" << aAttrName << "\"" << std::endl;
+				if( DebugInfo ) pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
 				return false;
 			}
 		}
@@ -459,7 +378,7 @@ namespace uhal
 				aTarget = lAttr.as_bool();
 				return true;
 			}else{
-				if( DebugInfo ) std::cout << "Failed to get attribute \"" << aAttrName << "\"" << std::endl;
+				if( DebugInfo ) pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
 				return false;
 			}
 		}		

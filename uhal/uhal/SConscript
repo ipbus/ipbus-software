@@ -4,6 +4,7 @@
 #	@date 2010
 
 ## Import the environment from the SConstruct File
+import os
 Import('env')
 
 localenv = env.Clone()
@@ -11,8 +12,8 @@ localenv.VariantDir( localenv.BuildPath+'/src/common' , 'src/common' , duplicate
 
 ## Add default libs
 localenv.Append( 
-	LIBS = [  'BoostSpiritGrammars' ] 
-)  
+	LIBS = [  'BoostSpiritGrammars' ]
+)
 
 ## Build IPbusClient as a shared library
 lib = localenv.SharedLibrary( 
