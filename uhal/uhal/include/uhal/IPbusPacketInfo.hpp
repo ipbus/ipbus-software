@@ -86,38 +86,37 @@ IPbusPacketInfo is a class for the management of IPbusClient data before transmi
 		*/
 		friend bool (::operator==)( const IPbusPacketInfo &a1 , const IPbusPacketInfo &a2 );
 	
-	
-		struct tChunks{
-			/**
-				The transaction header associated with the payload
-				mTransactionHeader is always the IPbus transaction header as defined in \n
-					http://indico.cern.ch/getFile.py/access?contribId=3&resId=2&materialId=slides&confId=94579 \n
-			*/
-			uint32_t mTransactionHeader;
+		public:
+			struct tChunks{
+				/**
+					The transaction header associated with the payload
+					mTransactionHeader is always the IPbus transaction header as defined in \n
+						http://indico.cern.ch/getFile.py/access?contribId=3&resId=2&materialId=slides&confId=94579 \n
+				*/
+				uint32_t mTransactionHeader;
 
-			//!	mTransactionHeader is the base address for the transaction, if defined/required
-			uint32_t mBaseAddress;
+				//!	mTransactionHeader is the base address for the transaction, if defined/required
+				uint32_t mBaseAddress;
 
-			//! The header of the expected reply
-			uint32_t mExpectedReplyHeader;
-			
-			//! The Send Size of the chunk
-			uint32_t mSendSize;
-			
-			//! The Return Size of the chunk
-			uint32_t mReturnSize;
-			
-			//! A set of registers into which to write the transaction reply headers from each device			
-			std::vector< uint32_t > mReplyHeaders;
-
-			
-			//! A pointer to the start of a block of memory containing the data to send			
-			uint32_t* mSendPtr;								
-			
-			//! A set of pointers to the start of a block of memory into which to write the reply from each device			
-			std::vector< uint32_t* > mValMemPtr;				
-			
-		};
+				//! The header of the expected reply
+				uint32_t mExpectedReplyHeader;
+				
+				//! The Send Size of the chunk
+				uint32_t mSendSize;
+				
+				//! The Return Size of the chunk
+				uint32_t mReturnSize;
+				
+				//! A set of registers into which to write the transaction reply headers from each device			
+				std::vector< uint32_t > mReplyHeaders;
+				
+				//! A pointer to the start of a block of memory containing the data to send			
+				uint32_t* mSendPtr;								
+				
+				//! A set of pointers to the start of a block of memory into which to write the reply from each device			
+				std::vector< uint32_t* > mValMemPtr;				
+				
+			};
 
 			
 		public:
@@ -176,7 +175,7 @@ IPbusPacketInfo is a class for the management of IPbusClient data before transmi
 			void setValMem( ValWord< T >& aValWord ){
 				mValMemPtr.push_back( 
 					std::make_pair (
-						static_cast<uint32_t*>( &( aValWord.mMembers->value ) ) , 
+						reinterpret_cast<uint32_t*>( &( aValWord.mMembers->value ) ) , 
 						&( aValWord.mMembers->valid )
 					) 
 				);
@@ -189,7 +188,7 @@ IPbusPacketInfo is a class for the management of IPbusClient data before transmi
 			void setValMem( ValVector< T >& aValVector ){
 				mValMemPtr.push_back( 
 					std::make_pair (
-						static_cast<uint32_t*>( &( aValVector.mMembers->value[0] ) ) , 
+						reinterpret_cast<uint32_t*>( &( aValVector.mMembers->value[0] ) ) , 
 						&( aValVector.mMembers->valid )
 					) 
 				);			
@@ -313,8 +312,10 @@ IPbusPacketInfo is a class for the management of IPbusClient data before transmi
 			inline std::deque< tChunks >& getChunks(){ return mChunks; }
 			
 			inline const bool& hasBaseAddress(){ return mHasBaseAddress; }
+
+			inline const std::vector<uint32_t>& getDeviceIDs(){ return mDeviceIDs; }
+			
 				
-		protected:
 			/** A method to merge a list of device IDs to the list of devices which will receive the payload
 				@param aIPbusPacketInfo		A vector of unique device IDs
 			*/			

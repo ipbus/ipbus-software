@@ -58,32 +58,32 @@ namespace uhal
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	void ClientInterface::write ( const uint32_t aAddr, const uint32_t& aSource )
 	{
-		IPbusPacketInfo lPacketInfo; 
-		lPacketInfo.setHeader( WRITE , 1 , aAddr );					
-		lPacketInfo.setPayload( aSource );			
-		getPackingProtocol().pack( lPacketInfo );
+		IPbusPacketInfo lIPbusPacketInfo; 
+		lIPbusPacketInfo.setHeader( WRITE , 1 , aAddr );					
+		lIPbusPacketInfo.setPayload( aSource );			
+		pack( lIPbusPacketInfo );
 	}
 
 	void ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
 	{
-		IPbusPacketInfo lPacketInfo; 
-		lPacketInfo.setHeader( WRITE , 1 , aAddr );					
-		lPacketInfo.setPayload( ( aSource << utilities::TrailingRightBits ( aMask ) ) && aMask );			
-		getPackingProtocol().pack( lPacketInfo );		
+		IPbusPacketInfo lIPbusPacketInfo; 
+		lIPbusPacketInfo.setHeader( WRITE , 1 , aAddr );					
+		lIPbusPacketInfo.setPayload( ( aSource << utilities::TrailingRightBits ( aMask ) ) && aMask );			
+		pack( lIPbusPacketInfo );		
 	}
 
 	void ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode aMode )
 	{
-		IPbusPacketInfo lPacketInfo; 
+		IPbusPacketInfo lIPbusPacketInfo; 
 		
 		if (  aMode == defs::INCREMENTAL ){
-			lPacketInfo.setHeader( WRITE , aSource.size() , aAddr );					
+			lIPbusPacketInfo.setHeader( WRITE , aSource.size() , aAddr );					
 		}else{
-			lPacketInfo.setHeader( NI_WRITE , aSource.size() , aAddr );							
+			lIPbusPacketInfo.setHeader( NI_WRITE , aSource.size() , aAddr );							
 		}
 
-		lPacketInfo.setPayload( aSource );			
-		getPackingProtocol().pack( lPacketInfo );
+		lIPbusPacketInfo.setPayload( aSource );			
+		pack( lIPbusPacketInfo );
 	}
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -94,10 +94,10 @@ namespace uhal
 	{
 		ValWord< uint32_t > lValWord( 0x00000000 );
 
-		IPbusPacketInfo lPacketInfo; 
-		lPacketInfo.setHeader( READ , 1 , aAddr );
-		lPacketInfo.setValMem( lValWord );
-		getPackingProtocol().pack( lPacketInfo );
+		IPbusPacketInfo lIPbusPacketInfo; 
+		lIPbusPacketInfo.setHeader( READ , 1 , aAddr );
+		lIPbusPacketInfo.setValMem( lValWord );
+		pack( lIPbusPacketInfo );
 		
 		return lValWord;
 	}
@@ -106,10 +106,10 @@ namespace uhal
 	{
 		ValWord< uint32_t > lValWord( 0x00000000 , aMask );
 
-		IPbusPacketInfo lPacketInfo; 
-		lPacketInfo.setHeader( READ , 1 , aAddr );
-		lPacketInfo.setValMem( lValWord );
-		getPackingProtocol().pack( lPacketInfo );
+		IPbusPacketInfo lIPbusPacketInfo; 
+		lIPbusPacketInfo.setHeader( READ , 1 , aAddr );
+		lIPbusPacketInfo.setValMem( lValWord );
+		pack( lIPbusPacketInfo );
 		
 		return lValWord;
 	}
@@ -118,30 +118,81 @@ namespace uhal
 	{
 		ValVector< uint32_t > lValVector( aSize );
 		
-		IPbusPacketInfo lPacketInfo; 
+		IPbusPacketInfo lIPbusPacketInfo; 
 		if ( aMode == defs::INCREMENTAL ){
-			lPacketInfo.setHeader( READ , aSize , aAddr );
+			lIPbusPacketInfo.setHeader( READ , aSize , aAddr );
 		}else{
-			lPacketInfo.setHeader( NI_READ , aSize , aAddr );
+			lIPbusPacketInfo.setHeader( NI_READ , aSize , aAddr );
 		}
 		
-		lPacketInfo.setValMem( lValVector );
-		getPackingProtocol().pack( lPacketInfo );
+		lIPbusPacketInfo.setValMem( lValVector );
+		pack( lIPbusPacketInfo );
 
 		return lValVector;
 	}
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	ValVector< uint32_t > ClientInterface::readReservedAddressInfo (){
+		ValVector< uint32_t > lValVector( 2 );
 	
+		IPbusPacketInfo lIPbusPacketInfo; 
+		lIPbusPacketInfo.setHeader( R_A_I , 0 );
+		lIPbusPacketInfo.setValMem( lValVector );
+		pack( lIPbusPacketInfo );
+		
+		return lValVector;
+	}	
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	ValWord< uint32_t > ClientInterface::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
+	{
+		ValWord< uint32_t > lValWord;
+
+		IPbusPacketInfo lIPbusPacketInfo; 
+		lIPbusPacketInfo.setHeader( RMW_BITS , 2 , aAddr );
+		lIPbusPacketInfo.setPayload( aANDterm );
+		lIPbusPacketInfo.setPayload( aORterm );
+		lIPbusPacketInfo.setValMem( lValWord );
+		pack( lIPbusPacketInfo );
+		
+		return lValWord;
+	}
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	ValWord< int32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
+	{
+		ValWord< int32_t > lValWord;
+
+		IPbusPacketInfo lIPbusPacketInfo; 
+		lIPbusPacketInfo.setHeader( RMW_SUM , 1 , aAddr );
+		lIPbusPacketInfo.setPayload( aAddend );
+		lIPbusPacketInfo.setValMem( lValWord );
+		pack( lIPbusPacketInfo );
+		
+		return lValWord;
+	}	
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	void ClientInterface::pack( IPbusPacketInfo& aIPbusPacketInfo )
+	{
+		getPackingProtocol().pack( aIPbusPacketInfo );
+	}
+		
 	
-	
-	
-	
-	void ClientInterface::dispatch ( defs::DispatchMode aMode )
+	bool ClientInterface::dispatch ( defs::DispatchMode aMode )
 	{
 		getPackingProtocol().PreDispatch();
-		getTransportProtocol().Dispatch();
-		getPackingProtocol().PostDispatch();
+		if ( !getTransportProtocol().Dispatch() ) return false;
+		if ( !getPackingProtocol().PostDispatch() ) return false;
+		return true;
 	}
 			
 			

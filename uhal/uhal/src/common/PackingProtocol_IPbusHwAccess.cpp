@@ -25,19 +25,19 @@ namespace uhal
 
 	IPbusHwAccessPackingProtocol::~IPbusHwAccessPackingProtocol(){}
 
-	void IPbusHwAccessPackingProtocol::pack( IPbusPacketInfo& aInfo ){
+	void IPbusHwAccessPackingProtocol::pack( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t &aId ){
 	
 		//for local access we don't care if it already exists since we don't do any optimization, we just store it and add it to the queue
-		mPacketInfo.push_back( aInfo );
-		IPbusPacketInfo& lInfo = mPacketInfo.back();
-		lInfo.setDeviceID( 0 ); //just a dummy device ID
-		lInfo.splitChunks( mMaxPacketLength , mTransactionId );
+		mPacketInfo.push_back( aIPbusPacketInfo );
+		IPbusPacketInfo& lIPbusPacketInfo = mPacketInfo.back();
+		lIPbusPacketInfo.setDeviceID( aId ); //just a dummy device ID
+		lIPbusPacketInfo.splitChunks( mMaxPacketLength , mTransactionId );
 		
 		if( mAccumulatedPackets.size() == 0 ){
 			mAccumulatedPackets.push_back( tAccumulatedPacket() );
 		}
 		
-		for( std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lInfo.getChunks().begin() ; lChunksIt != lInfo.getChunks().end() ; ++lChunksIt ){
+		for( std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lIPbusPacketInfo.getChunks().begin() ; lChunksIt != lIPbusPacketInfo.getChunks().end() ; ++lChunksIt ){
 			//if the chunk will push the UDP packet over size, then add a new packet into the queue
 			bool lSendSizeBad( mAccumulatedPackets.back().mCumulativeSendSize + lChunksIt->mSendSize > mMaxPacketLength );
 			bool lReturnSizeBad( mAccumulatedPackets.back().mCumulativeReturnSize +  lChunksIt->mReturnSize > mMaxPacketLength );	
@@ -53,13 +53,13 @@ namespace uhal
 				mAccumulatedPackets.back().mCumulativeReturnSize=1;
 			}
 
-			std::size_t lSendPayloadSize = lChunksIt->mSendSize - lInfo.SendHeaderSize();					
+			std::size_t lSendPayloadSize = lChunksIt->mSendSize - lIPbusPacketInfo.SendHeaderSize();					
 			mAccumulatedPackets.back().mSendBuffers.push_back( boost::asio::buffer( &lChunksIt->mTransactionHeader , 4 ) ) ;
-			if(lInfo.hasBaseAddress())	mAccumulatedPackets.back().mSendBuffers.push_back( boost::asio::buffer( &lChunksIt->mBaseAddress , 4 ) ) ;
+			if(lIPbusPacketInfo.hasBaseAddress())	mAccumulatedPackets.back().mSendBuffers.push_back( boost::asio::buffer( &lChunksIt->mBaseAddress , 4 ) ) ;
 			if( lSendPayloadSize )		mAccumulatedPackets.back().mSendBuffers.push_back( boost::asio::buffer( lChunksIt->mSendPtr , lSendPayloadSize<<2 ) ) ;
 			mAccumulatedPackets.back().mCumulativeSendSize+=lChunksIt->mSendSize;					
 			
-			std::size_t lReturnPayloadSize = lChunksIt->mReturnSize - lInfo.ReturnHeaderSize();
+			std::size_t lReturnPayloadSize = lChunksIt->mReturnSize - lIPbusPacketInfo.ReturnHeaderSize();
 			mAccumulatedPackets.back().mReplyBuffers.push_back( boost::asio::mutable_buffer( &lChunksIt->mReplyHeaders.at(0) , 4 ) ) ; //IPbus HW access clients only talk to a single board, so always at 0
 			if( lReturnPayloadSize ){
 				mAccumulatedPackets.back().mReplyBuffers.push_back( boost::asio::mutable_buffer( lChunksIt->mValMemPtr.at(0) , lReturnPayloadSize<<2 ) ) ; //IPbus HW access clients only talk to a single board, so always at 0
@@ -93,9 +93,9 @@ namespace uhal
 				//for( std::vector< boost::uint32_t >::const_iterator lReplyHeaderIt = lChunkIt->mReplyHeaders.begin() ; lReplyHeaderIt != lChunkIt->mReplyHeaders.end() ; ++lReplyHeaderIt ){
 					if( lChunkIt->mReplyHeaders[0] != lChunkIt->mExpectedReplyHeader ){
 						pantheios::log_ERROR( "Reply header (" , 
-												pantheios::integer( lChunkIt->mReplyHeaders[0] , pantheios::fmt::fullHex | 8 ),
+												pantheios::integer( lChunkIt->mReplyHeaders[0] , pantheios::fmt::fullHex | 10 ),
 												") does not match expected (0x", 
-												pantheios::integer( lChunkIt->mExpectedReplyHeader , pantheios::fmt::fullHex | 8 ),
+												pantheios::integer( lChunkIt->mExpectedReplyHeader , pantheios::fmt::fullHex | 10 ),
 												")!" );
 						return false;
 					}

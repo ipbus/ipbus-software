@@ -12,7 +12,7 @@ namespace uhal
 
             mInstance->add< uhal::IPBusUDPClient >( "ipbusudp" );
             mInstance->add< uhal::IPBusTCPClient >( "ipbustcp" );
-            // mInstance->add< uhal::ControlHubClient >( "chtcp" );
+            mInstance->add< uhal::ControlHubClient >( "chtcp" );
             // mInstance->add< uhal::DummyClient >( "dummy" );
         }
 
@@ -42,7 +42,7 @@ namespace uhal
 		
 		pantheios::log_INFORMATIONAL ( "URI \"" , aUri , "\" parsed as:\n" , lazy_inserter(lUri) );			
 	
-		std::hash_map<std::string , CreatorInterface*>::const_iterator lIt = mCreators.find ( lUri.mProtocol );
+		std::hash_map< std::string , CreatorInterface* >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
 
 		if ( lIt == mCreators.end() )
 		{

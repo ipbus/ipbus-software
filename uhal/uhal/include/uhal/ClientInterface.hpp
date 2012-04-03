@@ -33,18 +33,25 @@ namespace uhal
 			std::string url();
 
 			virtual void write ( const uint32_t aAddr, const uint32_t& aValue );
-
 			virtual void write ( const uint32_t& aAddr, const uint32_t& aValue, const uint32_t& aMask );
-
 			virtual void writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& values, const defs::BlockReadWriteMode aMode=defs::INCREMENTAL );
 
 			virtual ValWord< uint32_t > read ( const uint32_t& aAddr );
-			
 			virtual ValWord< uint32_t > read ( const uint32_t& aAddr, const uint32_t& aMask );
-
 			virtual ValVector< uint32_t > readBlock ( const uint32_t& aAddr, const uint32_t& size, const defs::BlockReadWriteMode aMode=defs::INCREMENTAL );
 
-			void dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC );
+			
+			virtual ValVector< uint32_t > readReservedAddressInfo ();
+
+			virtual ValWord< uint32_t > rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
+
+			virtual ValWord< int32_t > rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend );
+
+
+			
+			virtual void pack( IPbusPacketInfo& aIPbusPacketInfo ) ;
+			
+			bool dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC );
 		
 		private:
 		

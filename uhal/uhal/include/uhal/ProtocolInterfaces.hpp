@@ -26,7 +26,7 @@ namespace uhal
 
 			virtual ~PackingProtocol(){}
 
-			virtual void pack( IPbusPacketInfo& aInfo ) = 0;
+			virtual void pack( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t &aId = 0 ) = 0;
 			
 			virtual void PreDispatch(){}
 

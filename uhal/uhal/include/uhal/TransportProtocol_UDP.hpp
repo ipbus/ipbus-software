@@ -81,14 +81,14 @@ namespace uhal
 
 		//#ifdef DEBUGGING
 					for( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt ){
-						std::cout << ">>> ----------------"  << std::hex << std::setfill('0') << std::endl;
+						pantheios::log_DEBUG( ">>> ----------------" );
 						std::size_t s1 = boost::asio::buffer_size( *lBufIt );
 						const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*>( *lBufIt );
 						for( unsigned int y=0; y!=s1>>2; ++y ){
-							std::cout << "SENDING  " << std::setw(8) << *(p1+y) << std::endl;
+							pantheios::log_DEBUG( "SENDING  " , pantheios::integer( *(p1+y) , pantheios::fmt::fullHex | 10 ) );
 						}
 					}	
-					std::cout << ">>> ----------------"  << std::dec << std::endl;
+					pantheios::log_DEBUG( ">>> ----------------" );
 		//#endif // DEBUGGING
 
 					
@@ -119,7 +119,7 @@ namespace uhal
 						lAccumulatedPacketIt->mReplyBuffers , 
 						boost::bind(
 							&PACKINGPROTOCOL::ReceiveHandler, 
-							mPackingProtocol, 
+							&mPackingProtocol, 
 							boost::asio::placeholders::error,
 							boost::asio::placeholders::bytes_transferred,
 							boost::ref( lReplyLength ),
@@ -139,14 +139,14 @@ namespace uhal
 
 		//#ifdef DEBUGGING
 					for( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt ){
-						std::cout << ">>> ----------------"  << std::hex << std::setfill('0') << std::endl;
+						pantheios::log_DEBUG( ">>> ----------------" );
 						std::size_t s1 = boost::asio::buffer_size( *lBufIt );
 						const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*>( *lBufIt );
 						for( unsigned int y=0; y!=s1>>2; ++y ){
-							std::cout << "RECEIVED " << std::setw(8) << *(p1+y) << std::endl;
+							pantheios::log_DEBUG( "RECEIVED " , pantheios::integer( *(p1+y) , pantheios::fmt::fullHex | 10 ) );
 						}
 					}	
-					std::cout << ">>> ----------------"  << std::dec << std::endl;
+					pantheios::log_DEBUG( ">>> ----------------" );
 		//#endif // DEBUGGING
 					
 					// std::cout << (mThis->mReplyLength>>2) << " vs. " << lAccumulatedPacketIt->mCumulativeReturnSize << std::endl;

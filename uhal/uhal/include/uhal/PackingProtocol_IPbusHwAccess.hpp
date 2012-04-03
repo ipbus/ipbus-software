@@ -15,7 +15,7 @@ namespace uhal
 
 			virtual ~IPbusHwAccessPackingProtocol();
 
-			void pack( IPbusPacketInfo& aInfo );
+			void pack( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t &aId = 0 );
 			
 			void PreDispatch();
 
