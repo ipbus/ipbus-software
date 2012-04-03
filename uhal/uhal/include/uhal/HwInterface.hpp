@@ -4,26 +4,32 @@
 #include "uhal/Node.hpp"
 #include "uhal/ClientInterface.hpp"
 
+#include <boost/regex.hpp>
+
 
 namespace uhal
 {
 	class HwInterface
 	{
 		public:
-			HwInterface ( const ClientInterface& aClientInterface , const Node& aNode );
+			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const Node& aNode );
 
-			ClientInterface& getClient();
+			boost::shared_ptr<ClientInterface> getClient();
 
 			void dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC );
 
 			Node& getNode ( const std::string& aId );
 
 			std::vector<std::string> getNodes();
+			
+			std::vector<std::string> getNodes ( const boost::regex& aRegex );
+			std::vector<std::string> getNodes ( const char* aRegex );
+			std::vector<std::string> getNodes ( const std::string& aRegex );			
 
 			// Node& getNode();
 
 		private:
-			ClientInterface mClientInterface;
+			boost::shared_ptr<ClientInterface> mClientInterface;
 			Node mNode;
 
 	};

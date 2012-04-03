@@ -10,7 +10,7 @@ namespace uhal
 		void PugiXMLParseResultPrettifier( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile )
 		{
 		
-			pantheios::log_ERROR ( "Failed to parse file \"" , aPath.c_str() , "\". PugiXML returned the following description \"" , aLoadResult.description() , "\"." );
+			pantheios::log_ERROR ( "Failed to parse file " , lazy_inserter(aPath) , ". PugiXML returned the following description \"" , aLoadResult.description() , "\"." );
 				
 			std::size_t lLineCounter(1);	
 			std::vector<uint8_t>::const_iterator lIt0 ( aFile.begin() );
@@ -56,4 +56,54 @@ namespace uhal
 		
 	}
 }
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace uhal
+{
+	namespace utilities
+	{
+	
+		unsigned int TrailingRightBits ( uint32_t aValue )
+		{
+			// unsigned int lReturn = sizeof ( aValue ) * 8; // lReturn will be the number of zero bits on the right
+			unsigned int lReturn = sizeof ( aValue ) << 3; // lReturn will be the number of zero bits on the right
+			aValue &= -signed ( aValue );
+
+			if ( aValue )
+			{
+				lReturn--;
+			}
+
+			if ( aValue & 0x0000FFFF )
+			{
+				lReturn -= 16;
+			}
+
+			if ( aValue & 0x00FF00FF )
+			{
+				lReturn -= 8;
+			}
+
+			if ( aValue & 0x0F0F0F0F )
+			{
+				lReturn -= 4;
+			}
+
+			if ( aValue & 0x33333333 )
+			{
+				lReturn -= 2;
+			}
+
+			if ( aValue & 0x55555555 )
+			{
+				lReturn -= 1;
+			}
+
+			return lReturn;
+		}
+		
+	}
+}
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -5,7 +5,6 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 #include <wordexp.h>
 
@@ -22,6 +21,32 @@
 
 #include "uhal/log.hpp"
 
+
+#ifdef __GNUC__
+	#include <ext/hash_map>
+#else
+	#include <hash_map>
+#endif
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace std{ using namespace __gnu_cxx;}
+
+//! Working in the __gnu_cxx namespace
+namespace __gnu_cxx                                                                                
+{                                                                                             
+	//! Add a hash function for a c++ std::string
+	template<> struct hash< std::string >                                                       
+	{
+		//! implement the hash by calling the hash for the equivalent c-string
+		size_t operator()( const std::string& x ) const                                           
+		{                                                                                         
+			return hash< const char* >()( x.c_str() );                                              
+		}                                                                                         
+	};                                                                                          
+}   
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace uhal
 {
@@ -29,19 +54,31 @@ namespace uhal
 	{
 
 		template < bool DebugInfo >
-		void ParseSemicolonDelimitedUriList( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
+		bool ParseSemicolonDelimitedUriList( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
 		{
 		
-			BoostSpiritGrammars::SemicolonDelimitedUriListGrammar lGrammar;
-			boost::spirit::qi::phrase_parse( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
+			try{
+				BoostSpiritGrammars::SemicolonDelimitedUriListGrammar lGrammar;
+				boost::spirit::qi::phrase_parse( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
+			}catch( std::exception& aExc ){
+				pantheios::log_ALERT( "Caught EXCEPTION \"" , aExc.what() , "\" in " , ThisLocation() );
+				pantheios::log_ALERT( "Expression \"" , aSemicolonDelimitedUriList , "\" must be a semicolon delimeted list and all files must be in the form \"protocol://address\"" );				
+				return false;
+			}
 			
 			if( DebugInfo ){
-				pantheios::log_INFORMATIONAL ( "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
-				for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt ){
-					pantheios::log_INFORMATIONAL ( " > [" , lIt->first , "] \"" , lIt->second , "\"" );
+				try{
+					pantheios::log_INFORMATIONAL ( "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
+					for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt ){
+						pantheios::log_INFORMATIONAL ( " > [" , lIt->first , "] \"" , lIt->second , "\"" );
+					}
+				}catch( std::exception& aExc ){
+					pantheios::log_ALERT( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
+					// Just debugging so although exception	is worrying, it is not critical
 				}
 			}
 			
+			return true;	
 		}
 	}
 }
@@ -56,59 +93,74 @@ namespace uhal
 	{
 
 	template < bool DebugInfo >
-		void ShellExpandFilenameExpr( const char* aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
+		bool ShellExpandFilenameExpr( const char* aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
 		{
-			//struct which will store the shell expansions of the expression
-			wordexp_t lShellExpansion;
+			try{
+				//struct which will store the shell expansions of the expression
+				wordexp_t lShellExpansion;
 
-			wordexp( aFilenameExpr , &lShellExpansion , 0 );
+				wordexp( aFilenameExpr , &lShellExpansion , 0 );
 
-			for ( std::size_t i = 0 ; i != lShellExpansion.we_wordc ; i++ ){			
-					boost::filesystem::path lPath( lShellExpansion.we_wordv[i] );
-					if ( boost::filesystem::exists( lPath ) ){
-						if( aFiles ){
-							if ( boost::filesystem::is_regular_file( lPath ) ){
-								aFiles->push_back(  boost::filesystem::absolute(lPath) );
+				for ( std::size_t i = 0 ; i != lShellExpansion.we_wordc ; i++ ){			
+						boost::filesystem::path lPath( lShellExpansion.we_wordv[i] );
+						if ( boost::filesystem::exists( lPath ) ){
+							if( aFiles ){
+								if ( boost::filesystem::is_regular_file( lPath ) ){
+									aFiles->push_back(  boost::filesystem::absolute(lPath) );
+								}
 							}
-						}
-						if( aDirectories ){
-							if ( boost::filesystem::is_directory( lPath ) ){
-								aDirectories->push_back(  boost::filesystem::absolute(lPath) );
+							if( aDirectories ){
+								if ( boost::filesystem::is_directory( lPath ) ){
+									aDirectories->push_back(  boost::filesystem::absolute(lPath) );
+								}
 							}
-						}
+						}			
 					}			
-				}			
+
+				wordfree(&lShellExpansion);	
+			}catch( std::exception& aExc ){
+				pantheios::log_ALERT( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() );
+				return false;
+			}
 
 			if( DebugInfo ){
-				if( aFiles || aDirectories ) //pantheios::log_INFORMATIONAL ( "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
-				if( aFiles ){
-					for( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt ){
-						pantheios::log_INFORMATIONAL ( " > [file] " , lIt->c_str() );				
+				try{	
+					if( aFiles || aDirectories )
+					{
+						pantheios::log_INFORMATIONAL ( "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
 					}
-					
-					if ( ! aFiles->size() ){
-						pantheios::log_INFORMATIONAL ( " > No matching files." );
-					}
-				}
-				if( aDirectories ){
-					for( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt ){
-						pantheios::log_INFORMATIONAL ( " > [directory] " , lIt->c_str() );				
-					}
+					if( aFiles ){
+						for( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt ){
+							pantheios::log_INFORMATIONAL ( " > [file] " , lazy_inserter(*lIt) );				
+						}
 						
-					if ( ! aDirectories->size() ){
-						pantheios::log_INFORMATIONAL ( " > No matching files." );
+						if ( ! aFiles->size() ){
+							pantheios::log_INFORMATIONAL ( " > No matching files." );
+						}
 					}
-				}					
-			}
-				
-			wordfree(&lShellExpansion);		
+					if( aDirectories ){
+						for( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt ){
+							pantheios::log_INFORMATIONAL ( " > [directory] " , lazy_inserter(*lIt) );				
+						}
+							
+						if ( ! aDirectories->size() ){
+							pantheios::log_INFORMATIONAL ( " > No matching files." );
+						}
+					}										
+				}catch( std::exception& aExc ){
+					pantheios::log_ALERT( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
+					// Just debugging so although exception	is worrying, it is not critical
+				}
+			}		
+			
+			return true;
 		}
 		
 
 		template < bool DebugInfo >
-		void ShellExpandFilenameExpr( const std::string& aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
+		bool ShellExpandFilenameExpr( const std::string& aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
 		{
-			ShellExpandFilenameExpr< DebugInfo >( aFilenameExpr.c_str() , aFiles , aDirectories );
+			return ShellExpandFilenameExpr< DebugInfo >( aFilenameExpr.c_str() , aFiles , aDirectories );
 		}
 		
 	}
@@ -125,15 +177,30 @@ namespace uhal
 	
 		template < bool DebugInfo >
 		bool HttpGet( const std::string& aURL , HttpResponseType& aResponse ){
+
 			if( DebugInfo )
 			{
-				pantheios::log_INFORMATIONAL ( "Retrieving URL http://" , aURL );
+				try{	
+					pantheios::log_INFORMATIONAL ( "Retrieving URL http://" , aURL );
+				}catch( std::exception& aExc ){
+					pantheios::log_ALERT( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
+					// Just debugging so although exception	is worrying, it is not critical
+				}
 			}
 			
-			BoostSpiritGrammars::URLGrammar lGrammar;
+			
 			std::pair<std::string, std::string> lURLPair;
-			boost::spirit::qi::phrase_parse( aURL.begin() , aURL.end() , lGrammar , boost::spirit::ascii::space , lURLPair );
-								
+
+			try{
+				BoostSpiritGrammars::URIGrammarShort lGrammar;
+				boost::spirit::qi::phrase_parse( aURL.begin() , aURL.end() , lGrammar , boost::spirit::ascii::space , lURLPair );
+			}catch( std::exception& aExc ){
+				pantheios::log_ALERT( "Caught EXCEPTION \"" , aExc.what() , "\" in " , ThisLocation() );
+				return false;
+			}
+
+			boost::system::error_code lErrorCode( boost::asio::error::host_not_found );
+			
 			// The IO service everything will go through
 			boost::asio::io_service io_service;
 			
@@ -145,16 +212,17 @@ namespace uhal
 
 			// Try each endpoint until we successfully establish a connection.
 			boost::asio::ip::tcp::socket socket(io_service);
-			boost::system::error_code error = boost::asio::error::host_not_found;
 			try{
-				while (error && endpoint_iterator != end)
+			
+				while (lErrorCode && endpoint_iterator != end)
 				{
 					socket.close();
-					socket.connect(*endpoint_iterator++, error);
+					socket.connect(*endpoint_iterator++, lErrorCode);
 				}
-				if (error) throw boost::system::system_error(error);
+				if (lErrorCode) throw boost::system::system_error(lErrorCode);
+				
 			}catch( std::exception& aExc ){
-				pantheios::log_ERROR ( "Exception: " , aExc.what() );
+				pantheios::log_ALERT( "Caught EXCEPTION \"" , aExc.what() , "\" in " , ThisLocation() );
 				return false;
 			}					
 			
@@ -166,12 +234,13 @@ namespace uhal
 			request_stream << "Accept: */*\r\n";
 			request_stream << "Connection: close\r\n\r\n";
 			
-			// Send the request...
 			try{
-				boost::asio::write( socket , request , error );
-				if (error) throw boost::system::system_error(error);
+			// Send the request...
+				boost::asio::write( socket , request , lErrorCode );
+				if (lErrorCode) throw boost::system::system_error(lErrorCode);
+				
 			}catch( std::exception& aExc ){
-				pantheios::log_ERROR ( "Exception: " , aExc.what() );
+				pantheios::log_ALERT( "Caught EXCEPTION \"" , aExc.what() , "\" in " , ThisLocation() );
 				return false;
 			}	
 			
@@ -186,18 +255,18 @@ namespace uhal
 			// Just keep reading and, if we have not reached the EOF, extend the buffer and read some more.
 			try{
 				while( true ){
-					lSize += boost::asio::read( socket, boost::asio::buffer( &mBuffer[lSize] , mDefaultBufferSize ) , error );
-					if ( error ){
-						if (error == boost::asio::error::eof ) {
+					lSize += boost::asio::read( socket, boost::asio::buffer( &mBuffer[lSize] , mDefaultBufferSize ) , lErrorCode );
+					if ( lErrorCode ){
+						if (lErrorCode == boost::asio::error::eof ) {
 							break;
 						}else{
-							throw boost::system::system_error(error);
+							throw boost::system::system_error(lErrorCode);
 						}
 					}
 					mBuffer.insert( mBuffer.end() , mDefaultBufferSize , uint8_t(0) );
 				}
 			}catch( std::exception& aExc ){
-				pantheios::log_ERROR ( "Exception: " , aExc.what() );
+				pantheios::log_ALERT( "Caught EXCEPTION \"" , aExc.what() , "\" in " , ThisLocation() );
 				return false;
 			}	
 			
@@ -209,17 +278,18 @@ namespace uhal
 		
 			if( DebugInfo ) 
 			{
-				std::stringstream lStr;
-				lStr << aResponse;
-				pantheios::log_INFORMATIONAL ( lStr.str() );
+				try{	
+					pantheios::log_INFORMATIONAL ( "HTTP response parsed as:\n" , lazy_inserter(aResponse) );
+				}catch( std::exception& aExc ){
+					pantheios::log_ALERT( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
+					// Just debugging so although exception	is worrying, it is not critical
+				}
 			}
 
 			if ( aResponse.method != "HTTP" || aResponse.status != 200 )
 			{
 				return false;
 			}
-
-			
 			
 			return true;		
 		}
@@ -237,47 +307,63 @@ namespace uhal
 	{	
 	
 		template < typename R , typename F , typename L> 
-		void OpenFileLocal( const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder ){
+		bool OpenFileLocal( const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder ){
 			std::vector< boost::filesystem::path > lFilePaths;
-			uhal::utilities::ShellExpandFilenameExpr<true>( aFilenameExpr , &lFilePaths );
+			
+			if( !uhal::utilities::ShellExpandFilenameExpr<true>( aFilenameExpr , &lFilePaths ) ) return false;
 		
 			for( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 ){
 
 				std::ifstream lStr( lIt2->c_str() );
 				if ( !lStr.is_open() ){
-					pantheios::log_ERROR ( "Failed to open \"" , lIt2->c_str() , "\". Continuing with next document for now but be aware!" );
+					pantheios::log_ERROR ( "Failed to open " , lazy_inserter(*lIt2) , ". Continuing with next document for now but be aware!" );
 				} else {
-					lStr.seekg (0, std::ios::end);
-					std::vector<uint8_t> lFile( lStr.tellg() , 0 );
-					lStr.seekg (0, std::ios::beg);
-					lStr.read ( (char*) &(lFile[0]) , lFile.size() );
-					aBinder( std::string("file") , *lIt2 , boost::ref(lFile) );
+					try{
+						lStr.seekg (0, std::ios::end);
+						std::vector<uint8_t> lFile( lStr.tellg() , 0 );
+						lStr.seekg (0, std::ios::beg);
+						lStr.read ( (char*) &(lFile[0]) , lFile.size() );
+						aBinder( std::string("file") , *lIt2 , boost::ref(lFile) );
+					}catch( std::exception& aExc ){
+						pantheios::log_ALERT( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() );
+						return false;
+					}						
 				}
 				lStr.close();	
 			}
+			
+			return true;
 		}
 		
 		template < typename R , typename F , typename L> 
-		void OpenFileHttp( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder ){
+		bool OpenFileHttp( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder ){
 			HttpResponseType lHttpResponse;
 						
 			if( ! uhal::utilities::HttpGet<true>( aURL , lHttpResponse ) ){
 				pantheios::log_ERROR ( "Failed to download file " , aURL , ". Continuing for now but be aware!" );
-				return;
+				return false;
 			}
 			
-			boost::filesystem::path lFilePath = boost::filesystem::path( aURL );
-			aBinder( std::string("http") , lFilePath , boost::ref(lHttpResponse.content) );
+			try{
+				boost::filesystem::path lFilePath = boost::filesystem::path( aURL );
+				aBinder( std::string("http") , lFilePath , boost::ref(lHttpResponse.content) );
+			}catch( std::exception& aExc ){
+				pantheios::log_ALERT( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() );
+				return false;
+			}
+			
+			return true;
 		}
 				
 		template < typename R , typename F , typename L> 
-		void OpenFile( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder ){
+		bool OpenFile( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder ){
 			if( aProtocol == "file" ){
-				uhal::utilities::OpenFileLocal( aFilenameExpr , aBinder );
+				return uhal::utilities::OpenFileLocal( aFilenameExpr , aBinder );
 			}else if( aProtocol == "http" ){
-				uhal::utilities::OpenFileHttp( aFilenameExpr , aBinder );	
+				return uhal::utilities::OpenFileHttp( aFilenameExpr , aBinder );	
 			}else{
 				pantheios::log_ERROR ( "Protocol \"" , aProtocol , "\" is unknown and I am, thus, ignoring file \"" , aFilenameExpr , "\". Continuing for now but be aware!" );
+				return false;
 			}
 		}
 
@@ -296,7 +382,17 @@ namespace uhal
 		void PugiXMLParseResultPrettifier( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile );		
 	}
 }
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace uhal
+{
+	namespace utilities
+	{
+		unsigned int TrailingRightBits ( uint32_t aValue );
+	}
+}
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 		
@@ -386,5 +482,6 @@ namespace uhal
 	}
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 #endif

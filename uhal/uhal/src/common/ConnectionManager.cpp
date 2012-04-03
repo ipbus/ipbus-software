@@ -50,24 +50,47 @@ namespace uhal
 	 */
 	HwInterface ConnectionManager::getDevice ( const std::string& aId )
 	{
+		if( mConnectionDescriptors.size() == 0 ){
+			pantheios::log_ALERT ( "Connection map contains no entries" );
+			pantheios::log_ALERT ( "Throwing at " , ThisLocation() );
+			throw ConnectionUIDDoesNotExist();			
+		}
+	
 		std::map< std::string, tConnectionDescriptor >::iterator lIt = mConnectionDescriptors.find( aId );
 		
 		if( lIt == mConnectionDescriptors.end() ){
 			pantheios::log_ALERT ( aId , " does not exist in connection map" );
+			pantheios::log_ALERT ( "Throwing at " , ThisLocation() );
 			throw ConnectionUIDDoesNotExist();
 		}
 		
-		ClientInterface lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
 		Node lNode = AddressTableBuilder::getInstance().getAddressTable( lIt->second.address_table );
+		pantheios::log_INFORMATIONAL ( "ConnectionManager created node tree: " , lazy_inserter(lNode) );
+
+		boost::shared_ptr<ClientInterface> lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );	
+		
 		return HwInterface ( lClientInterface , lNode );
 	}
 
-	
+
+	//Given a regex return the ids that match the
+	std::vector<std::string> ConnectionManager::getDevices ( )
+	{
+		std::vector<std::string> lDevices;
+		lDevices.reserve( mConnectionDescriptors.size() ); //prevent reallocations
+
+		for ( std::map< std::string, tConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt ){
+			lDevices.push_back ( lIt->first );
+		}
+		
+		return lDevices;
+	}	
 	
 	//Given a regex return the ids that match the
 	std::vector<std::string> ConnectionManager::getDevices ( const boost::regex& aRegex )
 	{
 		std::vector<std::string> lDevices;
+		lDevices.reserve( mConnectionDescriptors.size() ); //prevent reallocations
 
 		for ( std::map< std::string, tConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt ){
 			boost::cmatch lMatch;
@@ -108,7 +131,6 @@ namespace uhal
 		if( !lLoadResult ){
 			//Mark says to throw on this condition, I will leave it continuing for now...
 			uhal::utilities::PugiXMLParseResultPrettifier( lLoadResult , aPath , aFile );			
-			pantheios::log_ERROR ( "Continuing with next document for now but be aware!" );
 			return;
 		}
 		
@@ -130,11 +152,12 @@ namespace uhal
 														"\n Continuing for now but be aware!" );
 					}else{
 						pantheios::log_ALERT ( "Duplicate connection ID found but parameters do not match! Bailing!" );
+						pantheios::log_ALERT ( "Throwing at " , ThisLocation() );
 						throw DuplicatedUID();
 					}
 				}								
 			}else{
-				//pantheios::log_ERROR ( "Construction of Connection Descriptor failed. Continuing with next Connection Descriptor for now but be aware!" );
+				pantheios::log_ERROR ( "Construction of Connection Descriptor failed. Continuing with next Connection Descriptor for now but be aware!" );
 			}
 				
 		}

@@ -2,6 +2,7 @@
 #define _uhal_ConnectionManager_hpp_
 
 #include "uhal/HwInterface.hpp"
+#include "uhal/Utilities.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
@@ -45,6 +46,7 @@ namespace uhal
 			 */
 			HwInterface getDevice ( const std::string& aId );
 			
+			std::vector<std::string> getDevices ( );
 			//Given a regex return the ids that match the
 			std::vector<std::string> getDevices ( const boost::regex& aRegex );
 			std::vector<std::string> getDevices ( const char* aRegex );
@@ -54,9 +56,9 @@ namespace uhal
 			void CallBack( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile );
 
 		private:
-			std::vector< std::pair<std::string, std::string> >  mConnectionFiles;
-			std::map< std::string, tConnectionDescriptor >  mConnectionDescriptors;
-			std::set< std::string > mPreviouslyOpenedFiles;
+			std::vector< std::pair<std::string, std::string> >  mConnectionFiles;	//protocol, filename
+			std::map< std::string, tConnectionDescriptor >  mConnectionDescriptors;	//filename, parsed descriptor
+			std::set< std::string > mPreviouslyOpenedFiles;							//previously opened file names
 						
 	};
 

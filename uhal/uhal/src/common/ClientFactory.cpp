@@ -1,85 +1,59 @@
-#ifndef _uhal_ClientFactory_hpp_
-#define _uhal_ClientFactory_hpp_
+#include "uhal/ClientImplementation.hpp"
 
-#include "uhal/ClientInterface.hpp"
-
-#include "boost/utility.hpp"
-
-#include <map>
+#include "uhal/ClientFactory.hpp"
 
 namespace uhal
 {
-	class ProtocolAlreadyExist: public std::exception {  };
-	class ProtocolDoesNotExist: public std::exception {  };
 
-	class ClientFactory: private boost::noncopyable
+    ClientFactory& ClientFactory::getInstance()
+    {
+        if ( mInstance == NULL ) {
+            mInstance = new ClientFactory();
+
+            mInstance->add< uhal::IPBusUDPClient >( "ipbusudp" );
+            mInstance->add< uhal::IPBusTCPClient >( "ipbustcp" );
+            // mInstance->add< uhal::ControlHubClient >( "chtcp" );
+            // mInstance->add< uhal::DummyClient >( "dummy" );
+        }
+
+        return *mInstance;
+    }
+	
+	
+
+
+    ClientFactory* ClientFactory::mInstance = NULL;
+
+	ClientFactory::ClientFactory() {}
+	
+	ClientFactory::~ClientFactory() {}
+
+	
+	boost::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri )
 	{
-		public:
-			static ClientFactory& getInstance();
+	
+		URI lUri;
+		try{
+			BoostSpiritGrammars::URIGrammar lGrammar;
+			boost::spirit::qi::phrase_parse( aUri.begin() , aUri.end() , lGrammar , boost::spirit::ascii::space , lUri );
+		}catch( std::exception& aExc ){
+			pantheios::log_ALERT( "Caught EXCEPTION \"" , aExc.what() , "\" in " , ThisLocation() );
+		}
+		
+		pantheios::log_INFORMATIONAL ( "URI \"" , aUri , "\" parsed as:\n" , lazy_inserter(lUri) );			
+	
+		std::hash_map<std::string , CreatorInterface*>::const_iterator lIt = mCreators.find ( lUri.mProtocol );
 
-			template <class T>
-			void add ( const std::string& aProtocol )
-			{
-				std::map<std::string,CreatorInterface*>::const_iterator i ( mCreators.find ( aProtocol ) );
+		if ( lIt == mCreators.end() )
+		{
+			pantheios::log_ALERT ( "Protocol \"" , lUri.mProtocol , "\" does not exists in map of creators." );
+			pantheios::log_ALERT ( "Throwing at " , ThisLocation() );
+			throw ProtocolDoesNotExist();
+		}
 
-				if ( i != mCreators.end() )
-				{
-					throw ProtocolAlreadyExist();
-				}
-
-				mCreators[aProtocol] = new Creator<T>();
-			}
-
-			ClientInterface getClient ( const std::string& aId , const std::string& aUri )
-			{
-				std::string lProtocol = getProtocol ( aUri );
-				std::map<std::string,CreatorInterface*>::const_iterator i ( mCreators.find ( lProtocol ) );
-
-				if ( i == mCreators.end() )
-				{
-					throw ProtocolDoesNotExist();
-				}
-
-				return i->second->create ( aId , aUri );
-			}
-
-		private:
-			ClientFactory() {}
-			virtual ~ClientFactory() {}
-			
-			std::string getProtocol ( const std::string& aUri )
-			{
-				return "ipbusudp";
-			}
-
-		private:
-			class CreatorInterface
-			{
-				public:
-					virtual ~CreatorInterface()
-					{
-						;
-					}
-
-					virtual ClientInterface create ( const std::string& aId,const std::string& aUri ) = 0;
-			};
-
-			template <class T>
-			class Creator: public CreatorInterface
-			{
-				public:
-
-					Creator() {};
-					ClientInterface create ( const std::string& aId,const std::string& aUri )
-					{
-						return T ( aId , aUri );
-					}
-			};
-
-		private:
-			static ClientFactory* mInstance;
-			std::map<std::string,CreatorInterface*> mCreators;
-	};
+		return lIt->second->create ( aId , lUri );
+	}	
+	
+	
 }
 
-#endif

@@ -2,6 +2,8 @@
 #define _uhal_ClientFactory_hpp_
 
 #include "uhal/ClientInterface.hpp"
+#include "uhal/Utilities.hpp"
+#include "uhal/log.hpp"
 
 #include "boost/utility.hpp"
 
@@ -9,59 +11,33 @@
 
 namespace uhal
 {
-	class ProtocolAlreadyExist: public std::exception {  };
-	class ProtocolDoesNotExist: public std::exception {  };
+	class ProtocolAlreadyExist: public std::exception { };
+	class ProtocolDoesNotExist: public std::exception { };
 
 	class ClientFactory: private boost::noncopyable
 	{
+		
 		public:
 			static ClientFactory& getInstance();
 
 			template <class T>
-			void add ( const std::string& aProtocol )
-			{
-				std::map<std::string,CreatorInterface*>::const_iterator i ( mCreators.find ( aProtocol ) );
+			void add ( const std::string& aProtocol );
 
-				if ( i != mCreators.end() )
-				{
-					throw ProtocolAlreadyExist();
-				}
+			boost::shared_ptr<ClientInterface> getClient ( const std::string& aId , const std::string& aUri );
 
-				mCreators[aProtocol] = new Creator<T>();
-			}
-
-			ClientInterface getClient ( const std::string& aId , const std::string& aUri )
-			{
-				std::string lProtocol = getProtocol ( aUri );
-				std::map<std::string,CreatorInterface*>::const_iterator i ( mCreators.find ( lProtocol ) );
-
-				if ( i == mCreators.end() )
-				{
-					throw ProtocolDoesNotExist();
-				}
-
-				return i->second->create ( aId , aUri );
-			}
-
-		private:
-			ClientFactory() {}
-			virtual ~ClientFactory() {}
 			
-			std::string getProtocol ( const std::string& aUri )
-			{
-				return "ipbusudp";
-			}
-
+		private:
+			ClientFactory();
+			virtual ~ClientFactory();
+			
+			
 		private:
 			class CreatorInterface
 			{
 				public:
-					virtual ~CreatorInterface()
-					{
-						;
-					}
-
-					virtual ClientInterface create ( const std::string& aId,const std::string& aUri ) = 0;
+					CreatorInterface(){}
+					virtual ~CreatorInterface(){}
+					virtual boost::shared_ptr<ClientInterface> create ( const std::string& aId , const URI& aUri ) = 0;
 			};
 
 			template <class T>
@@ -69,17 +45,40 @@ namespace uhal
 			{
 				public:
 
-					Creator() {};
-					ClientInterface create ( const std::string& aId,const std::string& aUri )
+					Creator() {}
+					virtual ~Creator() {}
+					boost::shared_ptr<ClientInterface> create ( const std::string& aId , const URI& aUri )
 					{
-						return T ( aId , aUri );
+						return boost::shared_ptr<ClientInterface>( new T ( aId , aUri ) );
 					}
 			};
 
+			
 		private:
 			static ClientFactory* mInstance;
-			std::map<std::string,CreatorInterface*> mCreators;
+			std::hash_map< std::string , CreatorInterface* > mCreators; //map string name of each protocol to a creator for that protocol
+		
 	};
+	
+	
+	
+	template <class T>
+	void ClientFactory::add ( const std::string& aProtocol )
+	{
+		std::hash_map<std::string , CreatorInterface*>::const_iterator lIt = mCreators.find ( aProtocol ) ;
+
+		if ( lIt != mCreators.end() )
+		{
+			//pantheios::log_ALERT ( "Throwing at " , ThisLocation() );
+			//throw ProtocolAlreadyExist();
+			pantheios::log_WARNING ( "Protocol \"" , aProtocol , "\" already exists in map of creators. Continuing for now, but be warned." );
+			return;
+		}
+
+		mCreators[aProtocol] = new Creator<T>();
+	}
+	
+	
 }
 
 #endif

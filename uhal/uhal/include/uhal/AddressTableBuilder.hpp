@@ -14,7 +14,7 @@
 namespace uhal
 {
 	class IncorrectAddressTableFileCount: public std::exception {  };
-	class FailedToParseAddressTableFile: public std::exception {  };
+	class FailedToOpenAddressTableFile: public std::exception {  };
 
 
 	class AddressTableBuilder: private boost::noncopyable
@@ -28,22 +28,13 @@ namespace uhal
 		public:
 			static AddressTableBuilder& getInstance();
 				
-			Node getAddressTable( const std::string& aFilenameExpr );
-			
-			//bool BuildFromAddressFile( const pugi::xml_document& aXmlDocument ){}
-
-			//bool BuildFromAddressFile( const std::string&  ){}
-			
+			Node getAddressTable( const std::string& aFilenameExpr );		
 
 			void CallBack( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< Node >& aAddressTable );
 
-
-
-			
-
 		private:
 			static AddressTableBuilder* mInstance;
-			std::map< std::string , Node > mNodes;
+			std::hash_map< std::string , Node > mNodes;
 			
 	};
 }

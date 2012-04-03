@@ -12,49 +12,56 @@
 
 void hwInterface_creation() {
 
-  uhal::ConnectionManager manager("     file://tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  ");// http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
+  // uhal::ConnectionManager manager("     file://tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  ");// http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
   
-  uhal::HwInterface hw=manager.getDevice("hcal.crate1.slot1");
-  //BOOST_CHECK(manager.ping());
+  // uhal::HwInterface hw=manager.getDevice("hcal.crate1.slot1");
+  // //BOOST_CHECK(manager.ping());
   
- // manager.getDevice("hcal.crate1.slot2");
+  // // manager.getDevice("hcal.crate1.slot2");
   
+  // hw.dispatch();
   
-  std::vector<std::string> ids = manager.getDevices("hcal.crate1.*");
-  for(std::vector<std::string>::const_iterator i(ids.begin()); i != ids.end(); ++i)
-    //BOOST_CHECK(manager.getDevice(*i).getClient().ping();
-    ;
+  // std::vector<std::string> ids = manager.getDevices("hcal.crate1.*");
+  // for(std::vector<std::string>::const_iterator i(ids.begin()); i != ids.end(); ++i)
+    // //BOOST_CHECK(manager.getDevice(*i).getClient().ping();
+    // ;
 }
 
-// void navigation_and_traversal_test() {
-  // uhal::ConnectionManager manager("addr/connections.xml");
+void navigation_and_traversal_test() {
+  // uhal::ConnectionManager manager("file://tests/addr/connections.xml");
   // uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
+  // std::vector<std::string> lNodes = hw.getNodes();
+  // for( std::vector<std::string>::iterator lIt = lNodes.begin() ; lIt != lNodes.end() ; ++lIt ) std::cout << "Get nodes: " << *lIt << std::endl;
+ 
+  // lNodes = hw.getNodes( ".*ENABLE.*" );
+  // for( std::vector<std::string>::iterator lIt = lNodes.begin() ; lIt != lNodes.end() ; ++lIt ) std::cout << "Get nodes Regex: " << *lIt << std::endl;
   
-  // uhal::Node node1(hw.getNode("SYSTEM.REGISTER"));
-  // uhal::Node node2(hw.getNode("SYSTEM").getNode("REGISTER"));
+  
+  // uhal::Node node1(hw.getNode("RECEIVER.CONFIG"));
+  // uhal::Node node2(hw.getNode("RECEIVER").getNode("CONFIG"));
 
   
   // uhal::defs::NodePermission a = node1.getPermission();
   // uint32_t mask = node1.getMask();
   // std::string id = node1.getId();
-  // //BOOST_CHECK(id=="SYSTEM.REGISTER");
+  // //BOOST_CHECK(id=="RECEIVER.CONFIG");
 
-  // uhal::Node branch(hw.getNode("SYSTEM"));
+  // uhal::Node branch(hw.getNode("RECEIVER"));
   // //BOOST_CHECK_THROW(branch.getPermission(),std::exception);
   // //BOOST_CHECK_THROW(branch.getMask(),std::exception);
   // //BOOST_CHECK_THROW(branch.read(),std::exception);
   // //BOOST_CHECK_THROW(branch.write(rand()),std::exception);
 
   // std::vector<std::string> children = branch.getNodes();
-// }
+}
 
-// void read_test() {
-  // uhal::ConnectionManager manager("addr/connections.xml");
+void read_test() {
+  // uhal::ConnectionManager manager( "file://tests/addr/connections.xml" );
   // uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
 
   // //read register
-  // uhal::ValWord< uint32_t > mem1 = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
-  // uhal::ValWord< uint32_t > mem2 = hw.getNode("SYSTEM.TTC.ADDRESS").read();
+  // uhal::ValWord< uint32_t > mem1 = hw.getNode("RECEIVER").getNode("TTC").getNode("ADDRESS").read();
+  // uhal::ValWord< uint32_t > mem2 = hw.getNode("RECEIVER.TTC.ADDRESS").read();
   // hw.dispatch();
   
   // //BOOST_CHECK(mem1.valid() && mem2.valid());
@@ -62,8 +69,8 @@ void hwInterface_creation() {
 
   // //read memory
   // uint32_t SIZE=1024;
-  // uhal::ValVector< uint32_t > block1 = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE);
-  // uhal::ValVector< uint32_t > block2 = hw.getNode("SYSTEM.MEMORY").readBlock(SIZE);
+  // uhal::ValVector< uint32_t > block1 = hw.getNode("RECEIVER").getNode("MEMORY").readBlock(SIZE);
+  // uhal::ValVector< uint32_t > block2 = hw.getNode("RECEIVER.MEMORY").readBlock(SIZE);
   // hw.dispatch();
   
   // //BOOST_CHECK(block1.size() == SIZE);
@@ -74,8 +81,8 @@ void hwInterface_creation() {
   // //BOOST_CHECK(*block1.rbegin() == *block2.rbegin());
 
   // //read FIFO
-  // block1 = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
-  // block2 = hw.getNode("SYSTEM.MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
+  // block1 = hw.getNode("RECEIVER").getNode("MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
+  // block2 = hw.getNode("RECEIVER.MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
   // hw.dispatch();
   
   // //BOOST_CHECK(block1.size() == SIZE);
@@ -85,32 +92,59 @@ void hwInterface_creation() {
   // //BOOST_CHECK(block1.rbegin()->valid() && block2.rbegin()->valid());
   // //BOOST_CHECK(*block1.rbegin() == *block2.rbegin());
   
-// }
+}
 
-// void write_test() {
-  // uhal::ConnectionManager manager("addr/connections.xml");
-  // uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
+void write_test() {
+  uhal::ConnectionManager manager("file://tests/addr/connections.xml");
+  uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
   
-  // //write register
-  // uint32_t val = static_cast<uint32_t>(rand());
-  // hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").write(val);
-  // uhal::ValWord< uint32_t > mem = hw.getNode("SYSTEM").getNode("TTC").getNode("ADDRESS").read();
-
-  // hw.dispatch();
+  //write register
+  uint32_t val = static_cast<uint32_t>(rand());
+  
+  // hw.getNode("RECEIVER").getNode("TTC").getNode("ADDRESS").write(val);
+  // uhal::ValWord< uint32_t > mem = hw.getNode("RECEIVER").getNode("TTC").getNode("ADDRESS").read();
+  hw.getClient()->write( 0xBA5EADD4 , val );
+  uhal::ValWord< uint32_t > mem = hw.getClient()->read( 0xBA5EADD4 );
+   
+  hw.dispatch();
+  
+  if(mem==val){
+	std::cout << "ALL GOOD" << std::endl;
+  }else{
+	std::cout << "MISMATCH: " << val << " vs. " << mem.value() << std::endl;
+	throw 0;
+  }
   
   // //BOOST_CHECK(mem.valid());
   // //BOOST_CHECK(mem == val);
 
   // //write memory
-  // uint32_t SIZE=1024;
-  // std::vector<uint32_t> vals;
-  // for(uint32_t i=0;i!=SIZE;i++)
-    // vals.push_back(static_cast<uint32_t>(rand()));
+  uint32_t SIZE=128;
+  std::vector<uint32_t> vals;
+  for(uint32_t i=0;i!=SIZE;i++)
+    vals.push_back(static_cast<uint32_t>(rand()));
+    // vals.push_back(static_cast<uint32_t>(i));
 
-  // hw.getNode("SYSTEM.MEMORY").writeBlock(vals);
-  // uhal::ValVector< uint32_t > block = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE);
+  // hw.getNode("RECEIVER.MEMORY").writeBlock(vals);
+  // uhal::ValVector< uint32_t > block = hw.getNode("RECEIVER").getNode("MEMORY").readBlock(SIZE);
+  hw.getClient()->writeBlock( 0xBA5EADD4 , vals );
+  uhal::ValVector< uint32_t > block = hw.getClient()->readBlock( 0xBA5EADD4 , SIZE );
   
-  // hw.dispatch();
+  hw.dispatch();
+  
+  
+  uhal::ValVector< uint32_t >::const_iterator lReadIt = block.begin();
+  std::vector< uint32_t >::const_iterator lSourceIt = vals.begin();
+  int count = 0;
+  
+  for( ; lReadIt != block.end() && lSourceIt != vals.end() ; ++lReadIt , ++lSourceIt , ++count ){
+	if( *lReadIt != *lSourceIt ){
+		pantheios::log_ERROR( "MISMATCH AT " , pantheios::integer(count) , " : Source " , pantheios::integer( *lSourceIt , pantheios::fmt::fullHex | 8 ) , " vs. Found " , pantheios::integer( *lReadIt  ,  pantheios::fmt::fullHex | 8 ) );
+		throw 0;
+	}
+  }
+  
+  std::cout << "ALL GOOD" << std::endl;
   
   // //BOOST_CHECK(block.size() == SIZE);
   // //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
@@ -118,15 +152,35 @@ void hwInterface_creation() {
   // //BOOST_CHECK*(block.rbegin() == *vals.rbegin());
 
   // //write FIFO
-  // vals.clear();
-  // for(uint32_t i=0;i!=SIZE;i++)
-    // vals.push_back(static_cast<uint32_t>(rand()));
-
-  // hw.getNode("SYSTEM").getNode("MEMORY").writeBlock(vals,uhal::defs::NON_INCREMENTAL);
-  // block = hw.getNode("SYSTEM").getNode("MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
-  // hw.dispatch();
+  vals.clear();
+  for(uint32_t i=0;i!=SIZE;i++)
+    vals.push_back(static_cast<uint32_t>(rand()));
+    // vals.push_back(static_cast<uint32_t>(i));
+	
+  // hw.getNode("RECEIVER").getNode("MEMORY").writeBlock(vals,uhal::defs::NON_INCREMENTAL);
+  // block = hw.getNode("RECEIVER").getNode("MEMORY").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
   
-// }
+  hw.getClient()->writeBlock( 0xBA5EADD4 , vals , uhal::defs::NON_INCREMENTAL );
+  /*uhal::ValVector< uint32_t >*/ block = hw.getClient()->readBlock( 0xBA5EADD4 , SIZE , uhal::defs::NON_INCREMENTAL );
+
+  hw.dispatch();
+  
+  /*uhal::ValVector< uint32_t >::const_iterator*/ lReadIt = block.begin();
+  /*std::vector< uint32_t >::const_iterator*/ lSourceIt = vals.end();
+  lSourceIt--;
+  
+  /*int*/ count = 0;
+  
+  for( ; lReadIt != block.end() ; ++lReadIt , ++count ){
+	if( *lReadIt != *lSourceIt ){
+		pantheios::log_ERROR( "MISMATCH AT " , pantheios::integer(count) , " : Source " , pantheios::integer( *lSourceIt , pantheios::fmt::fullHex | 8 ) , " vs. Found " , pantheios::integer( *lReadIt  ,  pantheios::fmt::fullHex | 8 ) );
+		throw 0;
+	}
+  }
+  
+  std::cout << "ALL GOOD" << std::endl;
+  
+}
 
 // void read_write_mask() {
   // uhal::ConnectionManager manager("addr/connections.xml");
@@ -221,9 +275,9 @@ void hwInterface_creation() {
 
 int main(int argc,char* argv[]) {
   hwInterface_creation();
-  // navigation_and_traversal_test();
-  // read_test();
-  // write_test();
+  navigation_and_traversal_test();
+  read_test();
+  write_test();
   // read_write_mask();
   // read_write_permissions();
   // synchronization_primitive();

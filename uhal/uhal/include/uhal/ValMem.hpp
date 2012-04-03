@@ -6,35 +6,79 @@
 #include <vector>
 #include <iostream>
 
+
 namespace uhal
 {
 	class NonValidatedMemory: public std::exception {  };
 	class ValMemImutabilityViolation: public std::exception { };
 
+	// Forward declare IPbusPacketInfo so it can be our friend
+	class IPbusPacketInfo;	
+	
+	template< typename T > class ValWord;
+	template< typename T > class ValVector;
+	
+	template< typename T >
+	struct _ValWord_{
+		public:
+			T value;
+			bool valid;
+			uint32_t mask;
+		private:
+			friend class ValWord<T>;
+			_ValWord_( const T& aValue , const bool& aValid , const uint32_t aMask ) : value( aValue ) , valid( aValid ) , mask( aMask ) {}
+		public:
+			virtual ~_ValWord_(){}
+	};
+	
+	
+	template< typename T >
+	struct _ValVector_{
+		public:
+			std::vector<T> value;
+			bool valid;
+		private:
+			friend class ValVector<T>;
+			_ValVector_( const std::vector<T>& aValue , const bool& aValid ) : value( aValue ) , valid( aValid ) {}			
+		public:
+			virtual ~_ValVector_(){}
+	};	
+	
 
 	template< typename T >
 	class ValWord
 	{
+		friend class IPbusPacketInfo;
+
 		public:
-			ValWord ( const T& aValue );
+			ValWord ( const T& aValue , const uint32_t& aMask = 0xFFFFFFFF );
 			ValWord ( const ValWord<T>& aVal );
 			ValWord();
 			bool valid();
 			void valid ( bool aValid );
 			ValWord& operator = ( const T& aValue );
-			operator const T&();
-			const T& value() const;
+			// operator const T&();
+			// const T& value() const;
+			operator T();
+			T value() const;
+			
 			void value ( const T& aValue );
 
+			const uint32_t& mask() const;			
+			void mask( const uint32_t& aMask );			
+			
 		private:
-			boost::shared_ptr<bool> mValid;
-			boost::shared_ptr<T> mValue;
+			// boost::shared_ptr<bool> mValid;
+			// boost::shared_ptr<T> mValue;
+			boost::shared_ptr< _ValWord_<T> > mMembers;
 
 	};
 
 	template< typename T >
 	class ValVector
 	{
+		friend class IPbusPacketInfo;
+		
 		public:
 			typedef typename std::vector< T >::iterator iterator;
 			typedef typename std::vector< T >::const_iterator const_iterator;
@@ -51,9 +95,9 @@ namespace uhal
 			
 			template <class InputIterator> void assign ( InputIterator aFirst , InputIterator aLast )
 			{
-				if ( !*mValid )
+				if ( !/* *mValid */ mMembers->valid )
 				{
-					mValues->assign ( aFirst , aLast );
+					/* mValues-> */ mMembers->value.assign ( aFirst , aLast );
 				}
 				else
 				{
@@ -72,8 +116,9 @@ namespace uhal
 			const_reverse_iterator rend() const;
 
 		private:
-			boost::shared_ptr<bool> mValid;
-			boost::shared_ptr<std::vector<T> > mValues;
+			// boost::shared_ptr<bool> mValid;
+			// boost::shared_ptr<std::vector<T> > mValues;
+			boost::shared_ptr< _ValVector_<T> > mMembers;
 
 	};
 
