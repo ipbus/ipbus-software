@@ -9,33 +9,33 @@ namespace uhal
 	class TransportProtocol
 	{
 		public:
-			TransportProtocol(){}
+			TransportProtocol() {}
 
-			virtual ~TransportProtocol(){}
+			virtual ~TransportProtocol() {}
 
-			virtual bool Dispatch() = 0;
-			
+			virtual void Dispatch() = 0;
+
 	};
-	
-	
+
+
 	class PackingProtocol
 	{
 		public:
-		
-			PackingProtocol(){}
 
-			virtual ~PackingProtocol(){}
+			PackingProtocol() {}
 
-			virtual void pack( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t &aId = 0 ) = 0;
-			
-			virtual void PreDispatch(){}
+			virtual ~PackingProtocol() {}
 
-			virtual bool PostDispatch(){ return true; }
-			
-	};	
+			virtual void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId = 0 ) = 0;
 
-	
-	
+			virtual void PreDispatch() {}
+
+			virtual void PostDispatch() {}
+
+	};
+
+
+
 }
 
 #endif

@@ -13,7 +13,7 @@
 
 namespace uhal
 {
-	//! Struct to store an http response received from a server when parsed by boost spirit 
+	//! Struct to store an http response received from a server when parsed by boost spirit
 	struct OldHalEntryType
 	{
 		//! the HAL key
@@ -32,8 +32,8 @@ namespace uhal
 		std::string write;
 		//! the HAL description
 		std::string description;
-	};	
-	
+	};
+
 
 	std::ostream& operator<< ( std::ostream& aStream , const OldHalEntryType& aOldHalEntry )
 	{
@@ -50,38 +50,40 @@ namespace uhal
 }
 
 // Call to BOOST_FUSION_ADAPT_STRUCT must be at global scope
-BOOST_FUSION_ADAPT_STRUCT(
+BOOST_FUSION_ADAPT_STRUCT (
 	uhal::OldHalEntryType,
-	(std::string , key)
-	(uint8_t , AM)
-	(std::string , width)
-	(std::string , address)
-	(std::string , mask)
-	(std::string , read)
-	(std::string , write)
-	(std::string , description)
-);	
+	( std::string , key )
+	( uint8_t , AM )
+	( std::string , width )
+	( std::string , address )
+	( std::string , mask )
+	( std::string , read )
+	( std::string , write )
+	( std::string , description )
+);
 
 
 
 namespace BoostSpiritGrammars
 {
 
-	struct OldHalSkipParser : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator > {
+	struct OldHalSkipParser : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator >
+	{
 		OldHalSkipParser();
-		boost::spirit::qi::rule< std::vector<uint8_t>::iterator > skip; 
-	}; 
-			
-			
-	struct OldHalEntryGrammar : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator , std::vector< uhal::OldHalEntryType >() , OldHalSkipParser > {
+		boost::spirit::qi::rule< std::vector<uint8_t>::iterator > skip;
+	};
+
+
+	struct OldHalEntryGrammar : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator , std::vector< uhal::OldHalEntryType >() , OldHalSkipParser >
+	{
 		OldHalEntryGrammar();
-	
+
 		//! Boost spirit parsing rule for parsing the incoming http packet info
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator,		std::vector< uhal::OldHalEntryType >(),					OldHalSkipParser > OldHalEntryVector;
 		//! Boost spirit parsing rule for parsing the incoming http packet
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		uhal::OldHalEntryType(),								OldHalSkipParser > OldHalEntry;
-		
-		
+
+
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),											OldHalSkipParser > key;
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		uint8_t(),												OldHalSkipParser > AM;
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),											OldHalSkipParser > width;
@@ -90,15 +92,15 @@ namespace BoostSpiritGrammars
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),											OldHalSkipParser > read;
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),											OldHalSkipParser > write;
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, 		std::string(),											OldHalSkipParser > description;
-		                                            
-	};
-				
-	
-}	
-	
 
-	
-	
+	};
+
+
+}
+
+
+
+
 
 
 #endif

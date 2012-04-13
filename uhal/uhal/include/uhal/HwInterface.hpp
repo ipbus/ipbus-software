@@ -21,14 +21,18 @@ namespace uhal
 			Node& getNode ( const std::string& aId );
 
 			std::vector<std::string> getNodes();
-			
+
 			std::vector<std::string> getNodes ( const boost::regex& aRegex );
 			std::vector<std::string> getNodes ( const char* aRegex );
-			std::vector<std::string> getNodes ( const std::string& aRegex );			
+			std::vector<std::string> getNodes ( const std::string& aRegex );
 
 			// Node& getNode();
 
+			ValVector< uint32_t > readReservedAddressInfo ();
+
 		private:
+			void claimNode ( Node& aNode );
+
 			boost::shared_ptr<ClientInterface> mClientInterface;
 			Node mNode;
 
