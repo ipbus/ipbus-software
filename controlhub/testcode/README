@@ -1,0 +1,6 @@
+For reasons that totally escape me, if this directory is called "test" rather than something
+else, it stops the automatic running of the eunit tests that run via the Makefile. This
+problem just wasted 3 hours of my life.
+
+Hence =>
+   this directory is called testcode rather than test
