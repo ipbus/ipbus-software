@@ -18,19 +18,16 @@ OBJECTS=$(SOURCES:src/%.erl=ebin/%.beam)
 all: ebin_dir $(OBJECTS) test
 
 ebin_dir:
-	mkdir -p ebin
+	test -d $(OBJDIR) || mkdir $(OBJDIR)
 
 ebin/%.beam : src/%.erl $(INCLUDES)
 	erlc $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
 
 clean: 
-#	-rm $(OBJECTS)
 	rm -rf ebin
 
 test:
-	erl -noshell -pa ebin \
-		-eval 'eunit:test("ebin",[verbose])' \
-		-s init stop
+	erl -noshell -pa ebin -eval 'eunit:test("ebin",[verbose])' -s init stop
 
 release: clean
 	$(MAKE) ERLC_FLAGS="$(ERLC_FLAGS) -DNOTEST"

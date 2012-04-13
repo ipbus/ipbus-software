@@ -105,7 +105,7 @@ client_disconnected() -> gen_server:cast(?MODULE, client_disconnected).
 %% ---------------------------------------------------------------------
 client_request_in() -> gen_server:cast(?MODULE, client_request_in).
 
-
+random_test() -> ?assert(false).
 %% ---------------------------------------------------------------------
 %% @doc Inform the stats server that a user-client request was determined
 %%      to be malformed.

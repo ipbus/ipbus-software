@@ -6,8 +6,7 @@
 %%
 %% Include files
 %%
--include("global_constants.hrl").
--include("trace_macro.hrl").
+-include("ch_global.hrl").
 
 %%
 %% Exported Functions
@@ -75,14 +74,14 @@ tcp_receive_handler(TcpAcceptedSocket) ->
 
 
 check_and_process_packet(TcpAcceptedSocket, PacketBinary) ->
-  packet_stats:tcp_in(),
+  ch_stats:client_request_in(),
   case basic_packet_check(PacketBinary) of
       ok ->
           unpack_packet(TcpAcceptedSocket, PacketBinary);
       bad_packet ->
           ?DEBUG_TRACE("WARNING! Received and ignoring malformed packet."),
           ?PACKET_TRACE(PacketBinary, "WARNING!~n  Received and ignoring this malformed packet - did not pass basic packet checks:"),
-          packet_stats:tcp_malformed_in(),
+          ch_stats:client_request_malformed(),
           bad_packet_logged
   end.
 
@@ -125,7 +124,7 @@ unpack_packet(TcpAcceptedSocket, PacketBinary) ->
         _ ->
             ?DEBUG_TRACE("WARNING! Received and ignoring malformed packet."),
             ?PACKET_TRACE(PacketBinary, "WARNING!~n  Received and ignoring this malformed packet - did not pass Redwood packet checks:"),
-            packet_stats:tcp_malformed_in(),
+            ch_stats:client_request_malformed(),
             bad_packet_logged
     end.
 
@@ -183,14 +182,14 @@ send_responses_to_tcp_client(TcpAcceptedSocket, [{_DeviceID, ok, Response} | Rem
     ?DEBUG_TRACE("Sending response from DeviceID = ~p to Redwood.", [_DeviceID]),
     ?PACKET_TRACE(Response, "~n  Sending the following response packet to Redwood from DeviceID = ~p:", [_DeviceID]),
     gen_tcp:send(TcpAcceptedSocket, Response),
-    packet_stats:tcp_out(),
+    ch_stats:client_response_sent(),
     send_responses_to_tcp_client(TcpAcceptedSocket, RemainingResponses);
 
 send_responses_to_tcp_client(TcpAcceptedSocket, [{_DeviceID, udp_response_timeout, Response} | RemainingResponses]) ->
     ?DEBUG_TRACE("Sending UDP timeout response from DeviceID = ~p to Redwood.", [_DeviceID]),
     ?PACKET_TRACE(Response, "~n  Sending the following UDP timeout response packet to Redwood from DeviceID = ~p:", [_DeviceID]),
     gen_tcp:send(TcpAcceptedSocket, Response),
-    packet_stats:tcp_out(),
+    ch_stats:client_response_sent(),
     send_responses_to_tcp_client(TcpAcceptedSocket, RemainingResponses);
 
 send_responses_to_tcp_client(_TcpAcceptedSocket, []) -> ok.

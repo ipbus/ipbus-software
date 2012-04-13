@@ -8,7 +8,6 @@
 %%% @end
 %%% ---------------------------------------------------------------------------
 
-
 % Unit-test framework include - needed by ~all.
 -include_lib("eunit/include/eunit.hrl").
 

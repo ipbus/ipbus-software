@@ -10,8 +10,7 @@
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
--include("global_constants.hrl").
--include("trace_macro.hrl").
+-include("ch_global.hrl").
 
 %% --------------------------------------------------------------------
 %% External exports
@@ -104,19 +103,19 @@ handle_call(_Request, _From, State) ->
 %% --------------------------------------------------------------------
 handle_cast({send, Instructions, ClientPid}, State = #state{socket = Socket}) ->
     ?DEBUG_TRACE("Instructions received from Transaction Manager with PID = ~p.  Forwarding to DeviceID = ~p...", [ClientPid, get(deviceID)]),
-    packet_stats:udp_out(),
+    ch_stats:udp_out(),
     ok = gen_udp:send(Socket, get(deviceIP), get(devicePort), Instructions),
     Reply = receive
                 {udp, Socket, _, _, HardwareReplyBin} -> 
                     ?DEBUG_TRACE("Received response from DeviceID = ~p. Passing it to originating Transaction Manager...", [get(deviceID)]),
-                    packet_stats:udp_in(),
+                    ch_stats:udp_in(),
                     % Now prepend the deviceID to the front of the HardwareReplyBin
                     CompleteResponse = list_to_binary([<<(get(deviceID)):32>>, HardwareReplyBin]),
                     {device_client_response, get(deviceID), ok, CompleteResponse}
             after ?DEVICE_CLIENT_UDP_TIMEOUT ->
                 ?DEBUG_TRACE("TIMEOUT REACHED! No response from DeviceID = ~p. Generating and sending a timeout "
                              "response to originating Transaction Manager...", [get(deviceID)]),
-                packet_stats:udp_response_timeout(),
+                ch_stats:udp_response_timeout(),
                 TimeoutResponseBin = <<
                                        (get(deviceID)):32,
                                        16#00000000:32

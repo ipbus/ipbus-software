@@ -31,7 +31,7 @@ start(DeviceAddrFile) when is_list(DeviceAddrFile) ->
     
     % Start packet statistics server - this just keeps track of incoming + outgoing TCP/UDP
     % packets and also counts any malformed packets that are otherwised ignored.
-    packet_stats:start(),
+    ch_stats:start_link(),
     
     % Start the Device Client Index - this does two things as follows:  Firstly, as per the Board Address File,
     % it will create a Device Client process for each declared board in the system. Each Device Client will

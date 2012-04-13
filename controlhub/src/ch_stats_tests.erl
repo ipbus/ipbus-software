@@ -24,13 +24,15 @@
 %% ----------------------------------------------------------------------------
 %% 
 %% ----------------------------------------------------------------------------
-test_() ->
-    { setup,
-      fun ch_stats:start_link/0,
-      fun ch_stats:stop/0,
-      { with
-      [ ]
-    }.
+basic_test()->
+    ?assert(true).
 
-test_client_stats() ->
-    
+%% basic_test_() ->
+%%     { setup,
+%%       fun ch_stats:start_link/0,
+%%       fun ch_stats:stop/0,
+%%       [ fun test_client_stats/0 ]
+%%     }.
+%% 
+%% test_client_stats() ->
+%%     ?assertEqual(ch_stats:get_active_client(), 0).
