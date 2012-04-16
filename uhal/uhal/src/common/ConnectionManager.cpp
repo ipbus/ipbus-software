@@ -117,7 +117,7 @@ namespace uhal
 			}
 
 			Node lNode = AddressTableBuilder::getInstance().getAddressTable ( lIt->second.address_table );
-			pantheios::log_INFORMATIONAL ( "ConnectionManager created node tree: " , lazy_inserter ( lNode ) );
+			pantheios::log_NOTICE ( "ConnectionManager created node tree: " , lazy_inserter ( lNode ) );
 			boost::shared_ptr<ClientInterface> lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
 			return HwInterface ( lClientInterface , lNode );
 		}
@@ -215,7 +215,7 @@ namespace uhal
 
 			if ( ! lInsert.second )
 			{
-				pantheios::log_INFORMATIONAL ( "File \"" , ( aProtocol+ ( aPath.string() ) ) , "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
+				pantheios::log_NOTICE ( "File \"" , ( aProtocol+ ( aPath.string() ) ) , "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
 				return;
 			}
 
@@ -244,11 +244,11 @@ namespace uhal
 					{
 						if ( lInsert.first->second == lDescriptor )
 						{
-							pantheios::log_INFORMATIONAL ( "Duplicate connection entry found:"
-														   "\n > id = " , lDescriptor.id ,
-														   "\n > uri = " , lDescriptor.uri ,
-														   "\n > address_table = " , lDescriptor.address_table ,
-														   "\n Continuing for now but be aware!" );
+							pantheios::log_NOTICE ( "Duplicate connection entry found:"
+													"\n > id = " , lDescriptor.id ,
+													"\n > uri = " , lDescriptor.uri ,
+													"\n > address_table = " , lDescriptor.address_table ,
+													"\n Continuing for now but be aware!" );
 						}
 						else
 						{

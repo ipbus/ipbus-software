@@ -77,18 +77,19 @@ bool operator== ( const uhal::IPbusPacketInfo& a1 , const uhal::IPbusPacketInfo&
 			return false;
 		}
 
-		//we cannot have two identical device IDs in the same IPbus Packet as this causes merry hell.
-		for ( std::vector<uint32_t>::const_iterator lIt1 = a1.mDeviceIDs.begin() ; lIt1 != a1.mDeviceIDs.end() ; ++lIt1 )
-		{
-			for ( std::vector<uint32_t>::const_iterator lIt2 = a2.mDeviceIDs.begin() ; lIt2 != a2.mDeviceIDs.end() ; ++lIt2 )
-			{
-				if ( *lIt1 == *lIt2 )
+		/*
+				//we cannot have two identical device IDs in the same IPbus Packet as this causes merry hell.
+				for ( std::vector<uint32_t>::const_iterator lIt1 = a1.mDeviceIDs.begin() ; lIt1 != a1.mDeviceIDs.end() ; ++lIt1 )
 				{
-					return false;
+					for ( std::vector<uint32_t>::const_iterator lIt2 = a2.mDeviceIDs.begin() ; lIt2 != a2.mDeviceIDs.end() ; ++lIt2 )
+					{
+						if ( *lIt1 == *lIt2 )
+						{
+							return false;
+						}
+					}
 				}
-			}
-		}
-
+		*/
 		//so must be identical...
 		return true;
 	}

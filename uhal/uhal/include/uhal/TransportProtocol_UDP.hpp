@@ -93,12 +93,12 @@ namespace uhal
 					//It doesn't have to be like this, it just seemed like a nice idea...
 					if ( !mSocket )
 					{
-						pantheios::log_INFORMATIONAL ( "First call to dispatch for '" , mHostname , "' port " , mServiceOrPort , ". Attempting to create UDP connection now." );
+						pantheios::log_NOTICE ( "First call to dispatch for '" , mHostname , "' port " , mServiceOrPort , ". Attempting to create UDP connection now." );
 						mSocket = new boost::asio::ip::udp::socket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) ;
 						mResolver = new boost::asio::ip::udp::resolver ( mIOservice );
 						mQuery = new boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , mHostname , mServiceOrPort );
 						mIterator = mResolver->resolve ( *mQuery );
-						pantheios::log_INFORMATIONAL ( "UDP connection setup succeeded" );
+						pantheios::log_NOTICE ( "UDP connection setup succeeded" );
 					}
 
 					for ( tAccumulatedPackets::const_iterator lAccumulatedPacketIt = mPackingProtocol.getAccumulatedPackets().begin() ; lAccumulatedPacketIt != mPackingProtocol.getAccumulatedPackets().end() ; ++lAccumulatedPacketIt )

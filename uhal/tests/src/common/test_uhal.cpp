@@ -9,6 +9,9 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <boost/math/special_functions/factorials.hpp>
+
+#include "pantheios/frontends/fe.simple.h"
 
 void hwInterface_creation()
 {
@@ -33,11 +36,11 @@ void hwInterface_creation()
 	}
 }
 
+
 void rawClientAccess()
 {
 	try
 	{
-		pantheios::log_LOCATION();
 		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//write register
@@ -326,30 +329,41 @@ void write_test()
 		}
 
 		pantheios::log_INFORMATIONAL ( "ALL GOOD" ) ;
-		// // //BOOST_CHECK(block.size() == SIZE);
-		// // //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
-		// // //BOOST_CHECK(*block.begin() == *vals.begin());
-		// // //BOOST_CHECK*(block.rbegin() == *vals.rbegin());
-		// // //write FIFO
-		// vals.clear();
-		// for(uint32_t i=0;i!=SIZE;i++)
-		// vals.push_back(static_cast<uint32_t>(rand()));
-		// // vals.push_back(static_cast<uint32_t>(i));
-		// hw.getNode("TRANSMITTER").getNode("BRAM_DATA").writeBlock(vals,uhal::defs::NON_INCREMENTAL);
-		// block = hw.getNode("TRANSMITTER").getNode("BRAM_DATA").readBlock(SIZE,uhal::defs::NON_INCREMENTAL);
-		// hw.dispatch();
-		// /*uhal::ValVector< uint32_t >::const_iterator*/ lReadIt = block.begin();
-		// /*std::vector< uint32_t >::const_iterator*/ lSourceIt = vals.end();
-		// lSourceIt--;
-		// /*int*/ count = 0;
-		// for( ; lReadIt != block.end() ; ++lReadIt , ++count ){
-		// if( *lReadIt != *lSourceIt ){
-		// pantheios::log_ERROR( "MISMATCH AT " , pantheios::integer(count) , " : Source " , pantheios::integer( *lSourceIt , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer( *lReadIt  ,  pantheios::fmt::fullHex | 10 ) );
-		// pantheios::log_LOCATION();
-		// throw 0;
-		// }
-		// }
-		// pantheios::log_INFORMATIONAL(  "ALL GOOD" ) ;
+		// //BOOST_CHECK(block.size() == SIZE);
+		// //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
+		// //BOOST_CHECK(*block.begin() == *vals.begin());
+		// //BOOST_CHECK*(block.rbegin() == *vals.rbegin());
+		// //write FIFO
+		vals.clear();
+
+		for ( uint32_t i=0; i!=SIZE; i++ )
+		{
+			vals.push_back ( static_cast<uint32_t> ( rand() ) );
+		}
+
+		// vals.push_back(static_cast<uint32_t>(i));
+		hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).writeBlock ( vals,uhal::defs::NON_INCREMENTAL );
+		block = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE,uhal::defs::NON_INCREMENTAL );
+		hw.dispatch();
+		/*uhal::ValVector< uint32_t >::const_iterator*/
+		lReadIt = block.begin();
+		/*std::vector< uint32_t >::const_iterator*/
+		lSourceIt = vals.end();
+		lSourceIt--;
+		/*int*/
+		count = 0;
+
+		for ( ; lReadIt != block.end() ; ++lReadIt , ++count )
+		{
+			if ( *lReadIt != *lSourceIt )
+			{
+				pantheios::log_ERROR ( "MISMATCH AT " , pantheios::integer ( count ) , " : Source " , pantheios::integer ( *lSourceIt , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( *lReadIt  ,  pantheios::fmt::fullHex | 10 ) );
+				pantheios::log_LOCATION();
+				throw 0;
+			}
+		}
+
+		pantheios::log_INFORMATIONAL ( "ALL GOOD" ) ;
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -449,6 +463,200 @@ void write_test()
 
 // }
 
+
+void addOperationToQueue ( uhal::HwInterface& hw , const std::vector<int>& aOperationList , const uint32_t& val, const std::vector<uint32_t>& vals )
+{
+	try
+	{
+		for ( std::vector<int>::const_iterator lIt = aOperationList.begin() ; lIt != aOperationList.end() ; ++lIt )
+		{
+			switch ( *lIt )
+			{
+				case 0:
+					hw.getClient()->write ( 0xBA5EADD4 , val );
+					break;
+				case 1:
+					hw.getClient()->read ( 0xBA5EADD4 );
+					break;
+				case 2:
+					hw.getClient()->writeBlock ( 0xBA5EADD4 , vals );
+					break;
+				case 3:
+					hw.getClient()->readBlock ( 0xBA5EADD4 , vals.size() );
+					break;
+				case 4:
+					hw.getClient()->writeBlock ( 0xBA5EADD4 , vals , uhal::defs::NON_INCREMENTAL );
+					break;
+				case 5:
+					hw.getClient()->readBlock ( 0xBA5EADD4 , vals.size() , uhal::defs::NON_INCREMENTAL );
+					break;
+				case 6:
+					hw.getClient()->rmw_bits ( 0xBA5EADD4 , 0x00C0FFEE , 0xF00DF00D );
+					break;
+				case 7:
+					hw.getClient()->rmw_sum ( 0xBA5EADD4 , 0x0BADBABE );
+					break;
+				case 8:
+					hw.getClient()->write ( 0xADD4BA5E , val );
+					break;
+				case 9:
+					hw.getClient()->read ( 0xADD4BA5E );
+					break;
+				case 10:
+					hw.getClient()->writeBlock ( 0xADD4BA5E , vals );
+					break;
+				case 11:
+					hw.getClient()->readBlock ( 0xADD4BA5E , vals.size() );
+					break;
+				case 12:
+					hw.getClient()->writeBlock ( 0xADD4BA5E , vals , uhal::defs::NON_INCREMENTAL );
+					break;
+				case 13:
+					hw.getClient()->readBlock ( 0xADD4BA5E , vals.size() , uhal::defs::NON_INCREMENTAL );
+					break;
+				case 14:
+					hw.getClient()->rmw_bits ( 0xADD4BA5E , 0xDEADFACE , 0xFEEDFACE );
+					break;
+				case 15:
+					hw.getClient()->rmw_sum ( 0xADD4BA5E , 0xDEADBEEF );
+					break;
+				default:
+					throw 0;
+			}
+		}
+	}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+}
+
+
+
+
+void allInstructionPermutations()
+{
+	pantheios_fe_simple_setSeverityCeiling ( pantheios::informational );
+
+	try
+	{
+		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+		uint32_t BlockSize ( 2 );
+		uint32_t val = static_cast<uint32_t> ( rand() );
+		std::vector<uint32_t> vals;
+
+		for ( uint32_t i=0; i!=BlockSize; i++ )
+		{
+			vals.push_back ( static_cast<uint32_t> ( rand() ) );
+		}
+
+		std::vector<int> lOperationSequence;
+		int count;
+		double total;
+
+		// ----------------------------------------------------------------------------------------------------------------------------------------
+		try
+		{
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+			if ( true )
+			{
+				int lTemp[] = { 0,2,4,8,10,12 };
+				lOperationSequence = std::vector<int> ( lTemp , lTemp+6 );
+				count = 0;
+				total = boost::math::factorial<double> ( lOperationSequence.size() );
+
+				do
+				{
+					pantheios::log_INFORMATIONAL ( "all writes, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					addOperationToQueue ( hw , lOperationSequence , val , vals );
+					hw.dispatch();
+				}
+				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
+			}
+
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+			if ( true )
+			{
+				int lTemp[] = { 1,3,5,9,11,13 };
+				lOperationSequence = std::vector<int> ( lTemp , lTemp+6 );
+				count = 0;
+				total = boost::math::factorial<double> ( lOperationSequence.size() );
+
+				do
+				{
+					pantheios::log_INFORMATIONAL ( "all reads, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					addOperationToQueue ( hw , lOperationSequence , val , vals );
+					hw.dispatch();
+				}
+				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
+			}
+
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+			if ( true )
+			{
+				int lTemp[] = { 6,7,14,15 };
+				lOperationSequence = std::vector<int> ( lTemp , lTemp+4 );
+				count = 0;
+				total = boost::math::factorial<double> ( lOperationSequence.size() );
+
+				do
+				{
+					pantheios::log_INFORMATIONAL ( "read-modify-write, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					addOperationToQueue ( hw , lOperationSequence , val , vals );
+					hw.dispatch();
+				}
+				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
+			}
+
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+			if ( true )
+			{
+				int lTemp[] = { 0,1,2,3,4,5,6,7 };
+				lOperationSequence = std::vector<int> ( lTemp , lTemp+8 );
+				count = 0;
+				total = boost::math::factorial<double> ( lOperationSequence.size() );
+
+				do
+				{
+					pantheios::log_INFORMATIONAL ( "all types, same addr, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					addOperationToQueue ( hw , lOperationSequence , val , vals );
+					hw.dispatch();
+				}
+				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
+			}
+
+			// ----------------------------------------------------------------------------------------------------------------------------------------
+		}
+		catch ( const std::exception& aExc )
+		{
+			std::stringstream lStr;
+			std::string messages[] = { "write addr1" , "read addr1" , "writeBlock addr1" , "readBlock addr1" , "writeBlock non-incrementing addr1" , "readBlock non-incrementing addr1" , "rmw_bits addr1" , "rmw_sum addr1" ,
+									   "write addr2" , "read addr2" , "writeBlock addr2" , "readBlock addr2" , "writeBlock non-incrementing addr2" , "readBlock non-incrementing addr2" , "rmw_bits addr2" , "rmw_sum addr2"
+									 };
+
+			for ( std::vector<int>::iterator lIt = lOperationSequence.begin() ; lIt != lOperationSequence.end() ; ++lIt )
+			{
+				lStr << messages[ *lIt ] << ", ";
+			}
+
+			pantheios::log_EXCEPTION ( aExc );
+			pantheios::log_ERROR ( "TEST SEQUENCE WAS : " , lStr.str() );
+			throw uhal::exception ( aExc );
+		}
+	}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+}
+
+
 int main ( int argc,char* argv[] )
 {
 	try
@@ -461,6 +669,7 @@ int main ( int argc,char* argv[] )
 		// read_write_mask();
 		// read_write_permissions();
 		// synchronization_primitive();
+		allInstructionPermutations();
 	}
 	catch ( const std::exception& aExc )
 	{

@@ -16,7 +16,7 @@ namespace uhal
 
 			boost::shared_ptr<ClientInterface> getClient();
 
-			void dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC );
+			void dispatch ();
 
 			Node& getNode ( const std::string& aId );
 

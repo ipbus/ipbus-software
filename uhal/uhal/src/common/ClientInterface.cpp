@@ -378,7 +378,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	}
 
 
-	void ClientInterface::dispatch ( defs::DispatchMode aMode )
+	void ClientInterface::dispatch ()
 	{
 		try
 		{

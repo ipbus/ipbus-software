@@ -83,11 +83,11 @@ namespace uhal
 			{
 				try
 				{
-					pantheios::log_INFORMATIONAL ( "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
+					pantheios::log_NOTICE ( "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
 
 					for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
 					{
-						pantheios::log_INFORMATIONAL ( " > [" , lIt->first , "] \"" , lIt->second , "\"" );
+						pantheios::log_NOTICE ( " > [" , lIt->first , "] \"" , lIt->second , "\"" );
 					}
 				}
 				catch ( const std::exception& aExc )
@@ -158,19 +158,19 @@ namespace uhal
 				{
 					if ( aFiles || aDirectories )
 					{
-						pantheios::log_INFORMATIONAL ( "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
+						pantheios::log_NOTICE ( "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
 					}
 
 					if ( aFiles )
 					{
 						for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt )
 						{
-							pantheios::log_INFORMATIONAL ( " > [file] " , lazy_inserter ( *lIt ) );
+							pantheios::log_NOTICE ( " > [file] " , lazy_inserter ( *lIt ) );
 						}
 
 						if ( ! aFiles->size() )
 						{
-							pantheios::log_INFORMATIONAL ( " > No matching files." );
+							pantheios::log_NOTICE ( " > No matching files." );
 						}
 					}
 
@@ -178,12 +178,12 @@ namespace uhal
 					{
 						for ( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt )
 						{
-							pantheios::log_INFORMATIONAL ( " > [directory] " , lazy_inserter ( *lIt ) );
+							pantheios::log_NOTICE ( " > [directory] " , lazy_inserter ( *lIt ) );
 						}
 
 						if ( ! aDirectories->size() )
 						{
-							pantheios::log_INFORMATIONAL ( " > No matching files." );
+							pantheios::log_NOTICE ( " > No matching files." );
 						}
 					}
 				}
@@ -233,7 +233,7 @@ namespace uhal
 				{
 					try
 					{
-						pantheios::log_INFORMATIONAL ( "Retrieving URL http://" , aURL );
+						pantheios::log_NOTICE ( "Retrieving URL http://" , aURL );
 					}
 					catch ( const std::exception& aExc )
 					{
@@ -356,7 +356,7 @@ namespace uhal
 				{
 					try
 					{
-						pantheios::log_INFORMATIONAL ( "HTTP response parsed as:\n" , lazy_inserter ( aResponse ) );
+						pantheios::log_NOTICE ( "HTTP response parsed as:\n" , lazy_inserter ( aResponse ) );
 					}
 					catch ( const std::exception& aExc )
 					{

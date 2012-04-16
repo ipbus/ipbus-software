@@ -1,5 +1,7 @@
 #include "uhal/ClientImplementation.hpp"
 
+#include "boost/lexical_cast.hpp"
+
 namespace uhal
 {
 
@@ -13,7 +15,7 @@ ControlHubClient::ControlHubClient ( const std::string& aId , const URI& aUri ) 
 
 		if ( lIt == ControlHubClient::mMapNameAndPortToCHH.end() )
 		{
-			pantheios::log_INFORMATIONAL ( "Creating ControlHubClient Map entry for hostname " , mUri.mHostname , ", port " , mUri.mPort );
+			pantheios::log_NOTICE ( "Creating ControlHubClient Map entry for hostname " , mUri.mHostname , ", port " , mUri.mPort );
 			mPackingProtocolPtr = new tPackingProtocol ( mMaxPacketLength );
 			mTransportProtocolPtr = new tTransportProtocol ( mUri.mHostname , //hostname
 					mUri.mPort , //port number
@@ -32,13 +34,13 @@ ControlHubClient::ControlHubClient ( const std::string& aId , const URI& aUri ) 
 		}
 		else
 		{
-			pantheios::log_INFORMATIONAL ( "Found existing entry in ControlHubClient Map entry for hostname " , mUri.mHostname , ", port " , mUri.mPort );
+			pantheios::log_NOTICE ( "Found existing entry in ControlHubClient Map entry for hostname " , mUri.mHostname , ", port " , mUri.mPort );
 			mPackingProtocolPtr = lIt->second.first;
 			mTransportProtocolPtr = lIt->second.second;
 		}
 
 		mTargetId = boost::lexical_cast< uint32_t > ( mUri.mPath );
-		pantheios::log_INFORMATIONAL ( "Converted uri path \"" , mUri.mPath , "\" to device identifier " , pantheios::integer ( mTargetId  , pantheios::fmt::fullHex | 10 ) );
+		pantheios::log_NOTICE ( "Converted uri path \"" , mUri.mPath , "\" to device identifier " , pantheios::integer ( mTargetId  , pantheios::fmt::fullHex | 10 ) );
 	}
 	catch ( const std::exception& aExc )
 	{

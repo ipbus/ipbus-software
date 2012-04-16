@@ -91,13 +91,13 @@ namespace uhal
 					//It doesn't have to be like this, it just seemed like a nice idea...
 					if ( !mSocket )
 					{
-						pantheios::log_INFORMATIONAL ( "First call to dispatch for '" , mHostname , "' port " , mServiceOrPort , ". Attempting to create TCP connection now." );
+						pantheios::log_NOTICE ( "First call to dispatch for '" , mHostname , "' port " , mServiceOrPort , ". Attempting to create TCP connection now." );
 						mSocket = new boost::asio::ip::tcp::socket ( mIOservice ) ;
 						mResolver = new boost::asio::ip::tcp::resolver ( mIOservice );
 						mQuery = new boost::asio::ip::tcp::resolver::query ( mHostname , mServiceOrPort );
 						mIterator = mResolver->resolve ( *mQuery );
 						mSocket -> connect ( *mIterator );
-						pantheios::log_INFORMATIONAL ( "TCP connection succeeded" );
+						pantheios::log_NOTICE ( "TCP connection succeeded" );
 					}
 
 					for ( tAccumulatedPackets::const_iterator lAccumulatedPacketIt = mPackingProtocol.getAccumulatedPackets().begin() ; lAccumulatedPacketIt != mPackingProtocol.getAccumulatedPackets().end() ; ++lAccumulatedPacketIt )

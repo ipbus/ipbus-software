@@ -56,7 +56,7 @@ namespace uhal
 
 			virtual void pack ( IPbusPacketInfo& aIPbusPacketInfo ) ;
 
-			void dispatch ( defs::DispatchMode aMode = defs::NON_ATOMIC );
+			void dispatch ();
 
 		private:
 

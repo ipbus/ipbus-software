@@ -11,8 +11,6 @@ namespace uhal
 
 		enum BlockReadWriteMode {INCREMENTAL,NON_INCREMENTAL};
 
-		enum DispatchMode {ATOMIC,NON_ATOMIC};
-
 		const uint32_t NOMASK = 0xFFFFFFFF;
 	}
 }

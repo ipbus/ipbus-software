@@ -16,7 +16,7 @@ namespace uhal
 		public:
 			exception() :
 				std::exception() ,
-				mMessage ( NULL )
+				mMessage ( "" )
 			{}
 
 			exception ( const std::exception& aExc ) :
@@ -28,9 +28,9 @@ namespace uhal
 
 			virtual const char* what() const throw()
 			{
-				if ( mMessage )
+				if ( mMessage.size() )
 				{
-					return mMessage;
+					return mMessage.c_str();
 				}
 
 #ifdef __GNUG__
@@ -43,7 +43,7 @@ namespace uhal
 			}
 		private:
 
-			const char* mMessage;
+			std::string mMessage;
 
 	};
 

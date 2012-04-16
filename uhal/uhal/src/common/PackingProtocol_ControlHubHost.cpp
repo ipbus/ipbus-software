@@ -49,7 +49,7 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 				}
 			}
 
-			mLastInstruction[ aId ] = lLastInstruction;
+			mLastInstruction[ aId ] = lLastInstruction+1;
 
 			if ( lLastInstruction != lCount )
 			{

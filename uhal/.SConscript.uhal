@@ -60,12 +60,16 @@ env.Append(
 
 # The logging library
 env.Append( 
-	LIBS = [  'pantheios.1.core.gcc41' , 'pantheios.1.be.fprintf.gcc41' , 'pantheios.1.bec.fprintf.gcc41' , 'pantheios.1.fe.all.gcc41' , 'pantheios.1.util.gcc41' , 'b64.1.pan.gcc41' , 'pantheios.1.core.gcc41' ] #core is needed a second time for gcc
-)  
+	CPPPATH = [  os.path.abspath('/opt/local/include/stlsoft/include') , 
+				os.path.abspath('/usr/local/pantheios/include')
+			]
+) 
 
 env.Append( 
-	CPPPATH = [  os.path.abspath('/opt/local/include/stlsoft/include')  ]
-) 
+	LIBS = [  'pantheios.1.core.gcc41' , 'pantheios.1.be.fprintf.gcc41' , 'pantheios.1.bec.fprintf.gcc41' , 'pantheios.1.fe.simple.gcc41' , 'pantheios.1.util.gcc41' , 'b64.1.pan.gcc41' , 'pantheios.1.core.gcc41' ] #core is needed a second time for gcc
+)  
+
+
 
 
 #configure where scons puts its temporary file

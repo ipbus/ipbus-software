@@ -49,11 +49,11 @@ namespace uhal
 		}
 	}
 
-	void HwInterface::dispatch ( defs::DispatchMode aMode )
+	void HwInterface::dispatch ()
 	{
 		try
 		{
-			mClientInterface->dispatch ( aMode );
+			mClientInterface->dispatch ();
 		}
 		catch ( const std::exception& aExc )
 		{
