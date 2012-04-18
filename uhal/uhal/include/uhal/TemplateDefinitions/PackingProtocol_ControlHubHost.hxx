@@ -1,12 +1,11 @@
 
 
-#include "uhal/log.hpp"
-#include "uhal/PackingProtocol_ControlHubHost.hpp"
-
 namespace uhal
 {
 
-ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& aMaxPacketLength ) try :
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+
+ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProtocol ( const uint32_t& aMaxPacketLength ) try :
 		PackingProtocol(),
 						mMaxPacketLength ( aMaxPacketLength ),
 						mTransactionId ( 0 )
@@ -28,9 +27,11 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 		throw uhal::exception ( aExc );
 	}
 
-	ControlHubHostPackingProtocol::~ControlHubHostPackingProtocol() {}
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	ControlHubHostPackingProtocol< IPbusProtocolVersion >::~ControlHubHostPackingProtocol() {}
 
-	void ControlHubHostPackingProtocol::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId )
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId )
 	{
 		try
 		{
@@ -69,13 +70,14 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 
 
 
-	void ControlHubHostPackingProtocol::PreDispatch()
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::PreDispatch()
 	{
 		try
 		{
 			for ( tIPbusPacketInfoStorage::iterator lPacketInfoIt = mPacketInfo.begin() ; lPacketInfoIt != mPacketInfo.end() ; ++lPacketInfoIt )
 			{
-				lPacketInfoIt->splitChunks ( mMaxPacketLength , mTransactionId );
+				lPacketInfoIt->splitChunks< IPbusProtocolVersion > ( mMaxPacketLength , mTransactionId );
 				// std::cout << "PacketInfo Addr = " << &(*lPacketInfoIt) << std::endl;
 				// for( std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lPacketInfoIt->getChunks().begin() ; lChunksIt != lPacketInfoIt->getChunks().end() ; ++lChunksIt ){
 				// std::cout << "\tChunk Addr = " << &(*lChunksIt);
@@ -217,7 +219,8 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 		}
 	}
 
-	void ControlHubHostPackingProtocol::PostDispatch()
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::PostDispatch()
 	{
 		try
 		{
@@ -241,7 +244,8 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 	}
 
 
-	void ControlHubHostPackingProtocol::ReceiveHandler ( const boost::system::error_code& aErrorCode , std::size_t aReplyLength , std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef )
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::ReceiveHandler ( const boost::system::error_code& aErrorCode , std::size_t aReplyLength , std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef )
 	{
 		try
 		{
@@ -300,7 +304,8 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 
 
 
-	void ControlHubHostPackingProtocol::GotPreamble ( std::size_t aReplyLength , bool& aError )
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::GotPreamble ( std::size_t aReplyLength , bool& aError )
 	{
 		try
 		{
@@ -334,7 +339,8 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 
 
 
-	void ControlHubHostPackingProtocol::GotHeader ( std::size_t aReplyLength , bool& aError )
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::GotHeader ( std::size_t aReplyLength , bool& aError )
 	{
 		try
 		{
@@ -372,8 +378,8 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 										   " does not match expected " ,
 										   pantheios::integer ( lChunkPtr->mExpectedReplyHeader , pantheios::fmt::fullHex | 10 ) ,
 										   "!" );
-					pantheios::log_ERROR ( "Received : " , DebugIPbusHeader ( *mTransactionHeader ) );
-					pantheios::log_ERROR ( "Expected : " , DebugIPbusHeader ( lChunkPtr->mExpectedReplyHeader ) );
+					pantheios::log_ERROR ( "Received : " , DebugIPbusHeader< IPbusProtocolVersion > ( *mTransactionHeader ) );
+					pantheios::log_ERROR ( "Expected : " , DebugIPbusHeader< IPbusProtocolVersion > ( lChunkPtr->mExpectedReplyHeader ) );
 					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 					aError = true;
 					return;
@@ -454,7 +460,8 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 	}
 
 
-	void ControlHubHostPackingProtocol::GotPayload ( std::size_t aReplyLength , bool& aError )
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::GotPayload ( std::size_t aReplyLength , bool& aError )
 	{
 		try
 		{
@@ -505,6 +512,21 @@ ControlHubHostPackingProtocol::ControlHubHostPackingProtocol ( const uint32_t& a
 				// std::cout << "Next is Header" << std::endl;
 				mExpectedReplyType = ExpectHeader;
 			}
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	inline const tAccumulatedPackets& ControlHubHostPackingProtocol< IPbusProtocolVersion >::getAccumulatedPackets()
+	{
+		try
+		{
+			return mAccumulatedPackets;
 		}
 		catch ( const std::exception& aExc )
 		{

@@ -12,10 +12,24 @@ namespace uhal
 			if ( mInstance == NULL )
 			{
 				mInstance = new ClientFactory();
-				mInstance->add< uhal::IPBusUDPClient > ( "ipbusudp" );
-				mInstance->add< uhal::IPBusTCPClient > ( "ipbustcp" );
-				mInstance->add< uhal::ControlHubClient > ( "chtcp" );
+				// ---------------------------------------------------------------------
+				mInstance->add< uhal::IPBusUDPClient<IPbus_1_3> > ( "ipbusudp" );
+				mInstance->add< uhal::IPBusUDPClient<IPbus_1_3> > ( "ipbusudp-1.3" );
+				mInstance->add< uhal::IPBusUDPClient<IPbus_1_4> > ( "ipbusudp-1.4" );
+				mInstance->add< uhal::IPBusUDPClient<IPbus_2_0> > ( "ipbusudp-2.0" );
+				// ---------------------------------------------------------------------
+				mInstance->add< uhal::IPBusTCPClient<IPbus_1_3> > ( "ipbustcp" );
+				mInstance->add< uhal::IPBusTCPClient<IPbus_1_3> > ( "ipbustcp-1.3" );
+				mInstance->add< uhal::IPBusTCPClient<IPbus_1_4> > ( "ipbustcp-1.4" );
+				mInstance->add< uhal::IPBusTCPClient<IPbus_2_0> > ( "ipbustcp-2.0" );
+				// ---------------------------------------------------------------------
+				mInstance->add< uhal::ControlHubClient<IPbus_1_3> > ( "chtcp" );
+				mInstance->add< uhal::ControlHubClient<IPbus_1_3> > ( "chtcp-1.3" );
+				mInstance->add< uhal::ControlHubClient<IPbus_1_4> > ( "chtcp-1.4" );
+				mInstance->add< uhal::ControlHubClient<IPbus_2_0> > ( "chtcp-2.0" );
+				// ---------------------------------------------------------------------
 				// mInstance->add< uhal::DummyClient >( "dummy" );
+				// ---------------------------------------------------------------------
 			}
 
 			return *mInstance;
@@ -45,7 +59,7 @@ namespace uhal
 			BoostSpiritGrammars::URIGrammar lGrammar;
 			boost::spirit::qi::phrase_parse ( aUri.begin() , aUri.end() , lGrammar , boost::spirit::ascii::space , lUri );
 			pantheios::log_NOTICE ( "URI \"" , aUri , "\" parsed as:\n" , lazy_inserter ( lUri ) );
-			std::hash_map< std::string , CreatorInterface* >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
+			std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
 
 			if ( lIt == mCreators.end() )
 			{

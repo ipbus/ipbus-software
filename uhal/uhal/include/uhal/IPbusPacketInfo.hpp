@@ -50,10 +50,6 @@ bool operator== ( const uhal::IPbusPacketInfo& a1 , const uhal::IPbusPacketInfo&
 namespace uhal
 {
 
-	std::string DebugIPbusHeader ( const uint32_t& aHeader );
-
-
-
 	/** Enumerated type to define the IPbus transaction type.
 		Note that they are stored here as (raw_type << 3) so that the
 		LSL operation does not need to be performed every time a new transaction
@@ -72,6 +68,17 @@ namespace uhal
 		NI_READ = 0x40,
 		NI_WRITE = 0x48
 	};
+
+	enum eIPbusProtocolVersion
+	{
+		IPbus_1_2,
+		IPbus_1_3,
+		IPbus_1_4,
+		IPbus_2_0
+	};
+
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	std::string DebugIPbusHeader ( const uint32_t& aHeader );
 
 	/**
 	IPbusPacketInfo is a class for the management of IPbusClient data before transmission via the Udp or Tcp Client
@@ -183,263 +190,50 @@ namespace uhal
 				@param aDeviceID		The unique ID of the device
 			*/
 			template< typename T >
-			void setValMem ( ValWord< T >& aValWord )
-			{
-				try
-				{
-					mValMemPtr.push_back (
-						std::make_pair (
-							reinterpret_cast<uint32_t*> ( & ( aValWord.mMembers->value ) ) ,
-							& ( aValWord.mMembers->valid )
-						)
-					);
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			void setValMem ( ValWord< T >& aValWord );
 
 			/** A method to add a device ID to the list of devices which will receive the payload
 				@param aDeviceID		The unique ID of the device
 			*/
 			template< typename T >
-			void setValMem ( ValVector< T >& aValVector )
-			{
-				try
-				{
-					mValMemPtr.push_back (
-						std::make_pair (
-							reinterpret_cast<uint32_t*> ( & ( aValVector.mMembers->value[0] ) ) ,
-							& ( aValVector.mMembers->valid )
-						)
-					);
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			void setValMem ( ValVector< T >& aValVector );
 
 			void setAllValMemsValid();
 
 			//! @return the number of 32-bit words that will be sent by the current packet
-			inline std::size_t SendSize()
-			{
-				try
-				{
-					switch ( mType )
-					{
-						case B_O_T:
-						case R_A_I:
-							return 1;
-						case NI_READ:
-						case READ:
-							return 2;
-						case NI_WRITE:
-						case WRITE:
-							return mWordCount+2;
-						case RMW_SUM:
-							return 3;
-						case RMW_BITS:
-							return 4;
-					}
-
-					return 0;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline std::size_t SendSize() const;
 
 			//! @return the number of 32-bit words that will be sent by the current packet
-			inline std::size_t SendHeaderSize() const
-			{
-				try
-				{
-					switch ( mType )
-					{
-						case B_O_T:
-						case R_A_I:
-							return 1;
-						case NI_READ:
-						case READ:
-						case NI_WRITE:
-						case WRITE:
-						case RMW_SUM:
-						case RMW_BITS:
-							return 2;
-					}
-
-					return 0;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
-
+			inline std::size_t SendHeaderSize() const;
 
 			//! @return the number of 32-bit words that will be sent by the current packet
-			inline std::size_t SendPayloadSize() const
-			{
-				try
-				{
-					switch ( mType )
-					{
-						case B_O_T:
-						case R_A_I:
-						case NI_READ:
-						case READ:
-							return 0;
-						case NI_WRITE:
-						case WRITE:
-							return mWordCount;
-						case RMW_SUM:
-							return 1;
-						case RMW_BITS:
-							return 2;
-					}
-
-					return 0;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline std::size_t SendPayloadSize() const;
 
 			//! @return the number of 32-bit words that are expected to be returned by the current packet
-			inline std::size_t ReturnSize() const
-			{
-				try
-				{
-					switch ( mType )
-					{
-						case B_O_T:
-						case NI_WRITE:
-						case WRITE:
-							return 1;
-						case NI_READ:
-						case READ:
-							return mWordCount+1;
-						case RMW_SUM:
-						case RMW_BITS:
-							return 2;
-						case R_A_I:
-							return 3;
-					}
-
-					return 0;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline std::size_t ReturnSize() const;
 
 			//! @return the number of 32-bit words that are expected to be returned by the current packet
-			inline std::size_t ReturnHeaderSize() const
-			{
-				try
-				{
-					return 1;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline std::size_t ReturnHeaderSize() const;
 
 			//! @return the number of 32-bit words that are expected to be returned by the current packet
-			inline std::size_t ReturnPayloadSize() const
-			{
-				try
-				{
-					switch ( mType )
-					{
-						case B_O_T:
-						case NI_WRITE:
-						case WRITE:
-							return 0;
-						case NI_READ:
-						case READ:
-							return mWordCount;
-						case RMW_SUM:
-						case RMW_BITS:
-							return 1;
-						case R_A_I:
-							return 2;
-					}
-
-					return 0;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
-
-			uint32_t calculateHeader ( const uint32_t& aTransactionId );
-
-			uint32_t calculateReplyHeader ( const uint32_t& aTransactionId );
+			inline std::size_t ReturnPayloadSize() const;
 
 
+			template< eIPbusProtocolVersion IPbusProtocolVersion >
 			uint32_t calculateHeader ( const uint32_t& aTransactionId , const uint32_t& aWordCount );
 
+			template< eIPbusProtocolVersion IPbusProtocolVersion >
 			uint32_t calculateReplyHeader ( const uint32_t& aTransactionId , const uint32_t& aWordCount );
 
-
+			template< eIPbusProtocolVersion IPbusProtocolVersion >
 			void splitChunks ( const uint32_t& aMaxChunkSize , uint32_t& aTransactionId );
 
 
-			inline std::deque< tChunks >& getChunks()
-			{
-				try
-				{
-					return mChunks;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline std::deque< tChunks >& getChunks();
 
-			inline const bool& hasBaseAddress()
-			{
-				try
-				{
-					return mHasBaseAddress;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline const bool& hasBaseAddress();
 
-			inline const std::vector<uint32_t>& getDeviceIDs()
-			{
-				try
-				{
-					return mDeviceIDs;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline const std::vector<uint32_t>& getDeviceIDs();
 
 
 			/** A method to merge a list of device IDs to the list of devices which will receive the payload
@@ -470,10 +264,6 @@ namespace uhal
 			//! A set of managable size chunks
 			std::deque< tChunks > mChunks;
 
-			//! define the protocol version expected
-			uint32_t mVersion;
-
-
 	};
 
 
@@ -482,10 +272,6 @@ namespace uhal
 
 }
 
-
-
-
-
-
+#include "TemplateDefinitions/IPbusPacketInfo.hxx"
 
 #endif

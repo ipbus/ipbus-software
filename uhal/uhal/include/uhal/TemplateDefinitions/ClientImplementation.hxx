@@ -1,17 +1,17 @@
-#include "uhal/ClientImplementation.hpp"
 
-#include "boost/lexical_cast.hpp"
 
 namespace uhal
 {
 
-ControlHubClient::ControlHubClient ( const std::string& aId , const URI& aUri ) try :
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+
+ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& aId , const URI& aUri ) try :
 		ClientInterface ( aId , aUri ),
 						mPackingProtocolPtr ( NULL ),
 						mTransportProtocolPtr ( NULL )
 	{
 		std::string lHostId ( mUri.mHostname + ":" + mUri.mPort );
-		tMap::iterator lIt = ControlHubClient::mMapNameAndPortToCHH.find ( lHostId );
+		typename ControlHubClient< IPbusProtocolVersion >::tMap::iterator lIt = ControlHubClient< IPbusProtocolVersion >::mMapNameAndPortToCHH.find ( lHostId );
 
 		if ( lIt == ControlHubClient::mMapNameAndPortToCHH.end() )
 		{
@@ -48,12 +48,10 @@ ControlHubClient::ControlHubClient ( const std::string& aId , const URI& aUri ) 
 		throw uhal::exception ( aExc );
 	}
 
-	ControlHubClient::~ControlHubClient ()
-	{}
 
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	typename ControlHubClient< IPbusProtocolVersion >::tMap ControlHubClient< IPbusProtocolVersion >::mMapNameAndPortToCHH = typename ControlHubClient< IPbusProtocolVersion >::tMap();
 
-	ControlHubClient::tMap ControlHubClient::mMapNameAndPortToCHH = ControlHubClient::tMap();
 }
-
 
 

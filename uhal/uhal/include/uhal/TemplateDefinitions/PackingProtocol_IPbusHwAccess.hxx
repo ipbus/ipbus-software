@@ -1,12 +1,10 @@
 
-
-#include "uhal/log.hpp"
-#include "uhal/PackingProtocol_IPbusHwAccess.hpp"
-
 namespace uhal
 {
 
-IPbusHwAccessPackingProtocol::IPbusHwAccessPackingProtocol ( const uint32_t& aMaxPacketLength ) try :
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+
+IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtocol ( const uint32_t& aMaxPacketLength ) try :
 		PackingProtocol(),
 						mMaxPacketLength ( aMaxPacketLength ),
 						mTransactionId ( 0 )
@@ -28,9 +26,11 @@ IPbusHwAccessPackingProtocol::IPbusHwAccessPackingProtocol ( const uint32_t& aMa
 		throw uhal::exception ( aExc );
 	}
 
-	IPbusHwAccessPackingProtocol::~IPbusHwAccessPackingProtocol() {}
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::~IPbusHwAccessPackingProtocol() {}
 
-	void IPbusHwAccessPackingProtocol::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId )
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId )
 	{
 		try
 		{
@@ -38,7 +38,7 @@ IPbusHwAccessPackingProtocol::IPbusHwAccessPackingProtocol ( const uint32_t& aMa
 			mPacketInfo.push_back ( aIPbusPacketInfo );
 			IPbusPacketInfo& lIPbusPacketInfo = mPacketInfo.back();
 			lIPbusPacketInfo.setDeviceID ( aId ); //just a dummy device ID
-			lIPbusPacketInfo.splitChunks ( mMaxPacketLength , mTransactionId );
+			lIPbusPacketInfo.splitChunks< IPbusProtocolVersion > ( mMaxPacketLength , mTransactionId );
 
 			if ( mAccumulatedPackets.size() == 0 )
 			{
@@ -97,7 +97,8 @@ IPbusHwAccessPackingProtocol::IPbusHwAccessPackingProtocol ( const uint32_t& aMa
 		}
 	}
 
-	void IPbusHwAccessPackingProtocol::PreDispatch()
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::PreDispatch()
 	{
 		try
 		{
@@ -120,7 +121,8 @@ IPbusHwAccessPackingProtocol::IPbusHwAccessPackingProtocol ( const uint32_t& aMa
 		}
 	}
 
-	void IPbusHwAccessPackingProtocol::PostDispatch()
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::PostDispatch()
 	{
 		try
 		{
@@ -160,7 +162,8 @@ IPbusHwAccessPackingProtocol::IPbusHwAccessPackingProtocol ( const uint32_t& aMa
 	}
 
 
-	void IPbusHwAccessPackingProtocol::ReceiveHandler ( const boost::system::error_code& aErrorCode , std::size_t aReplyLength , std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef )
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::ReceiveHandler ( const boost::system::error_code& aErrorCode , std::size_t aReplyLength , std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef )
 	{
 		try
 		{
@@ -185,4 +188,22 @@ IPbusHwAccessPackingProtocol::IPbusHwAccessPackingProtocol ( const uint32_t& aMa
 		}
 	}
 
+
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	inline const tAccumulatedPackets& IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::getAccumulatedPackets()
+	{
+		try
+		{
+			return mAccumulatedPackets;
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
+
 }
+
+
+

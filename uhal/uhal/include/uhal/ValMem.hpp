@@ -29,18 +29,7 @@ namespace uhal
 			uint32_t mask;
 		private:
 			friend class ValWord<T>;
-
-		_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask ) try :
-				value ( aValue ) ,
-					  valid ( aValid ) ,
-					  mask ( aMask )
-				{}
-			catch ( const std::exception& aExc )
-			{
-				pantheios::log_EXCEPTION ( aExc );
-				throw uhal::exception ( aExc );
-			}
-
+			_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask );
 		public:
 			virtual ~_ValWord_() {}
 	};
@@ -54,17 +43,7 @@ namespace uhal
 			bool valid;
 		private:
 			friend class ValVector<T>;
-
-		_ValVector_ ( const std::vector<T>& aValue , const bool& aValid ) try :
-				value ( aValue ) ,
-					  valid ( aValid )
-				{}
-			catch ( const std::exception& aExc )
-			{
-				pantheios::log_EXCEPTION ( aExc );
-				throw uhal::exception ( aExc );
-			}
-
+			_ValVector_ ( const std::vector<T>& aValue , const bool& aValid );
 		public:
 			virtual ~_ValVector_() {}
 	};
@@ -86,15 +65,11 @@ namespace uhal
 			// const T& value() const;
 			operator T();
 			T value() const;
-
 			void value ( const T& aValue );
-
 			const uint32_t& mask() const;
 			void mask ( const uint32_t& aMask );
 
 		private:
-			// boost::shared_ptr<bool> mValid;
-			// boost::shared_ptr<T> mValue;
 			boost::shared_ptr< _ValWord_<T> > mMembers;
 
 	};
@@ -117,28 +92,7 @@ namespace uhal
 			ValVector();
 			bool valid();
 			void valid ( bool aValid );
-
-			template <class InputIterator> void assign ( InputIterator aFirst , InputIterator aLast )
-			{
-				try
-				{
-					if ( !/* *mValid */ mMembers->valid )
-					{
-						/* mValues-> */ mMembers->value.assign ( aFirst , aLast );
-					}
-					else
-					{
-						pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-						throw ValMemImutabilityViolation();
-					}
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
-
+			template <class InputIterator> void assign ( InputIterator aFirst , InputIterator aLast );
 			void push_back ( const T& aValue );
 			const T& operator[] ( std::size_t aSize ) const;
 			const T& at ( std::size_t aSize ) const;
@@ -150,16 +104,13 @@ namespace uhal
 			const_reverse_iterator rend() const;
 
 		private:
-			// boost::shared_ptr<bool> mValid;
-			// boost::shared_ptr<std::vector<T> > mValues;
 			boost::shared_ptr< _ValVector_<T> > mMembers;
 
 	};
 
-
-
-
 }
+
+#include "TemplateDefinitions/ValMem.hxx"
 
 #endif
 

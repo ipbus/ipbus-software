@@ -7,7 +7,9 @@
 
 namespace uhal
 {
+	class UnknownIPbusProtocolVersion2: public uhal::exception { };
 
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubHostPackingProtocol : public PackingProtocol
 	{
 		public:
@@ -27,18 +29,7 @@ namespace uhal
 			void GotHeader ( std::size_t aReplyLength , bool& aError );
 			void GotPayload ( std::size_t aReplyLength , bool& aError );
 
-			inline const tAccumulatedPackets& getAccumulatedPackets()
-			{
-				try
-				{
-					return mAccumulatedPackets;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline const tAccumulatedPackets& getAccumulatedPackets();
 
 		private:
 			tAccumulatedPackets mAccumulatedPackets;
@@ -92,8 +83,12 @@ namespace uhal
 			//! Instance of the deque storing the data to be sent and associated packet header information
 			tIPbusPacketInfoStorage mPacketInfo;
 
+
 	};
 
 }
+
+#include "TemplateDefinitions/PackingProtocol_ControlHubHost.hxx"
+
 
 #endif

@@ -9,7 +9,9 @@
 namespace uhal
 {
 	class ReplyHeaderExpectationFailure: public uhal::exception {};
+	class UnknownIPbusProtocolVersion1: public uhal::exception { };
 
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class IPbusHwAccessPackingProtocol : public PackingProtocol
 	{
 		public:
@@ -25,18 +27,7 @@ namespace uhal
 
 			void ReceiveHandler ( const boost::system::error_code& aErrorCode, std::size_t aReplyLength, std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef );
 
-			inline const tAccumulatedPackets& getAccumulatedPackets()
-			{
-				try
-				{
-					return mAccumulatedPackets;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			inline const tAccumulatedPackets& getAccumulatedPackets();
 
 		private:
 			tAccumulatedPackets mAccumulatedPackets;
@@ -61,5 +52,7 @@ namespace uhal
 	};
 
 }
+
+#include "TemplateDefinitions/PackingProtocol_IPbusHwAccess.hxx"
 
 #endif

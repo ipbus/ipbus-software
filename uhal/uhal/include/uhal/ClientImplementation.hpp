@@ -12,21 +12,26 @@
 #include "uhal/PackingProtocol_IPbusHwAccess.hpp"
 #include "uhal/PackingProtocol_ControlHubHost.hpp"
 
+#include "boost/lexical_cast.hpp"
+
 namespace uhal
 {
 
 
 	// ----------------------------------------------------------------------------------------------------------------
 
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class IPBusUDPClient : public ClientInterface
 	{
 			static const int mTimeoutPeriod = 10;
 			static const int mMaxPacketLength = 128;
 
+			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			typedef UdpTransportProtocol< tPackingProtocol > tTransportProtocol;
+
 		public:
 
-			IPBusUDPClient ( const std::string& aId , const URI& aUri ) try
-:
+		IPBusUDPClient ( const std::string& aId , const URI& aUri ) try :
 				ClientInterface ( aId , aUri ),
 								mPackingProtocol ( mMaxPacketLength ),
 								mTransportProtocol ( mUri.mHostname , //hostname
@@ -68,23 +73,26 @@ namespace uhal
 				}
 			}
 
-			IPbusHwAccessPackingProtocol mPackingProtocol;
-			UdpTransportProtocol< IPbusHwAccessPackingProtocol > mTransportProtocol;
+			tPackingProtocol mPackingProtocol;
+			tTransportProtocol mTransportProtocol;
 
 	};
 
 	// ----------------------------------------------------------------------------------------------------------------
 
 
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class IPBusTCPClient : public ClientInterface
 	{
 			static const int mTimeoutPeriod = 10;
 			static const int mMaxPacketLength = 128;
 
+			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			typedef TcpTransportProtocol< tPackingProtocol > tTransportProtocol;
+
 		public:
 
-			IPBusTCPClient ( const std::string& aId , const URI& aUri ) try
-:
+		IPBusTCPClient ( const std::string& aId , const URI& aUri ) try :
 				ClientInterface ( aId , aUri ),
 								mPackingProtocol ( mMaxPacketLength ),
 								mTransportProtocol ( mUri.mHostname , //hostname
@@ -126,27 +134,28 @@ namespace uhal
 				}
 			}
 
-			IPbusHwAccessPackingProtocol mPackingProtocol;
-			TcpTransportProtocol< IPbusHwAccessPackingProtocol > mTransportProtocol;
+			tPackingProtocol mPackingProtocol;
+			tTransportProtocol mTransportProtocol;
 
 	};
 
 
 	// ----------------------------------------------------------------------------------------------------------------
 
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubClient : public ClientInterface
 	{
 			static const int mTimeoutPeriod = 10;
 			static const int mMaxPacketLength = 128;
 
-			typedef ControlHubHostPackingProtocol tPackingProtocol;
+			typedef ControlHubHostPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
 			typedef TcpTransportProtocol< tPackingProtocol > tTransportProtocol;
 			typedef std::hash_map< std::string , std::pair< tPackingProtocol* , tTransportProtocol* > > tMap;
 
 		public:
 			ControlHubClient ( const std::string& aId , const URI& aUri );
 
-			virtual ~ControlHubClient ();
+			virtual ~ControlHubClient () {}
 
 			void pack ( IPbusPacketInfo& aIPbusPacketInfo )
 			{
@@ -220,5 +229,9 @@ namespace uhal
 	*/
 
 }
+
+#include "TemplateDefinitions/ClientImplementation.hxx"
+
+
 
 #endif
