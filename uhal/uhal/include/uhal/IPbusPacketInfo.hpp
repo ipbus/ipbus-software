@@ -1,7 +1,7 @@
 /**
 	@file
 	@author Andrew W. Rose
-	@date 2010
+	@date 2012
 */
 
 #ifndef IPbusPacketInfo_hpp
@@ -30,32 +30,20 @@ namespace uhal
 //	Declare the friend streaming class for aIPbusPacketInfo outside the uhal namespace.
 /**
 	A function to format the IPbusPacket info and place it on a stream
-	@return a stream for further appending
 	@param aStream a stream to output the time onto
 	@param aIPbusPacketInfo a IPbusPacketInfo to output
+	@return a stream for further appending
 */
 std::ostream& operator<< ( std::ostream& aStream, const uhal::IPbusPacketInfo& aIPbusPacketInfo );
-
-/**
-	A function to determine whether two PacketInfos are identical (excluding device list)
-	@return a stream for further appending
-	@param aL a IPbusPacketInfo to compare
-	@param aR a IPbusPacketInfo to compare
-*/
-bool operator== ( const uhal::IPbusPacketInfo& a1 , const uhal::IPbusPacketInfo& a2 );
-
 
 
 // Using the uhal namespace
 namespace uhal
 {
 
-	/** Enumerated type to define the IPbus transaction type.
-		Note that they are stored here as (raw_type << 3) so that the
-		LSL operation does not need to be performed every time a new transaction
-		is created
-		@author Andrew W. Rose
-		@date 2010
+	/**
+		Enumerated type to define the IPbus transaction type.
+		Note that they are stored here as (raw_type << 3) so that the LSL operation does not need to be performed every time a new transaction is created
 	*/
 	enum eIPbusTransactionType
 	{
@@ -69,6 +57,9 @@ namespace uhal
 		NI_WRITE = 0x48
 	};
 
+	/**
+		Enumerated type to define the IPbus protocol version.
+	*/
 	enum eIPbusProtocolVersion
 	{
 		IPbus_1_2,
@@ -77,6 +68,11 @@ namespace uhal
 		IPbus_2_0
 	};
 
+	/**
+		Function to unpack a raw IPbus header and format it in a readable fashion
+		@param aHeader a raw IPbus header to be unpacked
+		@return a human readable string representing the contents of the IPbus header
+	*/
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	std::string DebugIPbusHeader ( const uint32_t& aHeader );
 
@@ -84,7 +80,7 @@ namespace uhal
 	IPbusPacketInfo is a class for the management of IPbusClient data before transmission via the Udp or Tcp Client
 
 		@author Andrew W. Rose
-		@date 2010
+		@date 2012
 	*/
 	class IPbusPacketInfo
 	{
@@ -92,18 +88,12 @@ namespace uhal
 				friend streaming class for aIPbusPacketInfo
 				@param aStream			The stream to which to write
 				@param aIPbusPacketInfo The IPbusPacketInfo to write to the stream
+				@return a stream for further appending
 			*/
 			friend std::ostream& ( ::operator<< ) ( std::ostream& aStream, const IPbusPacketInfo& aIPbusPacketInfo );
 
-			/**
-				friend function to determine whether two PacketInfos are identical (excluding device list)
-				@return a stream for further appending
-				@param aL a IPbusPacketInfo to compare
-				@param aR a IPbusPacketInfo to compare
-			*/
-			friend bool ( ::operator== ) ( const IPbusPacketInfo& a1 , const IPbusPacketInfo& a2 );
-
 		public:
+			//! A struct to store a chunk of an IPbus transaction
 			struct tChunks
 			{
 				/**
@@ -142,10 +132,20 @@ namespace uhal
 			//! Default Constructor
 			IPbusPacketInfo();
 
-			//! Default Destructor
+			//! Destructor
 			virtual ~IPbusPacketInfo();
 
-			/** A method to create the transaction header for instruction packets with no base address
+
+			/**
+				A function to determine whether two PacketInfos are identical (excluding device list)
+				@param aIPbusPacketInfo a IPbusPacketInfo to compare
+				@return whether two PacketInfos are identical
+			*/
+			bool operator== ( const IPbusPacketInfo& aIPbusPacketInfo );
+
+
+			/**
+				A method to create the transaction header for instruction packets with no base address
 				@param aType			The enumerated type of the transaction
 				@param aWordCount		The number of words in the transaction payload
 			*/
@@ -153,7 +153,8 @@ namespace uhal
 							 const uint32_t& aWordCount
 						   );
 
-			/** A method to create the transaction header for instruction packets with a base address
+			/**
+				A method to create the transaction header for instruction packets with a base address
 				@param aType			The enumerated type of the transaction
 				@param aWordCount		The number of words in the transaction payload
 				@param aBaseAddress		The base-address of the device register to access
@@ -163,76 +164,126 @@ namespace uhal
 							 const uint32_t& aBaseAddress
 						   );
 
-			/** A method to set the data payload to be sent, in this case a single word
+			/**
+				A method to set the data payload to be sent, in this case a single word
 				@param aPayload			The single word to be sent
 			*/
 			void setPayload ( const uint32_t& aPayload );
 
-			/** A method to set the data payload to be sent
-				@param aWordCount		The number of words in the transaction payload
-				@param aPayload			A vector containing the payload to be sent. By definition, size must be greater than aWordCount.
+			/**
+				A method to set the data payload to be sent
+				@param aPayload			A vector containing the payload to be sent.
 			*/
-			void setPayload ( /*const uint32_t& aWordCount ,*/ const std::vector<uint32_t>& aPayload );
+			void setPayload ( const std::vector<uint32_t>& aPayload );
 
-			// /** A method to set the data payload to be sent
-			// @param aBegin			A starting iterator
-			// @param aEnd				An ending iterator
-			// */
-			// void setPayload( const std::vector<uint32_t>::const_iterator& aBegin , const std::vector<uint32_t>::const_iterator& aEnd );
 
-			/** A method to add a device ID to the list of devices which will receive the payload
+			/**
+				A method to add a device ID to the list of devices which will receive the payload
 				@param aDeviceID		The unique ID of the device
 			*/
 			void setDeviceID ( const uint32_t& aDeviceID );
 
 
-			/** A method to add a device ID to the list of devices which will receive the payload
-				@param aDeviceID		The unique ID of the device
+			/**
+				A method to add a Validated Memory which will receive the payload of the current transaction
+				@param aValWord a Validated Memory which will receive the payload of the current transaction
 			*/
 			template< typename T >
 			void setValMem ( ValWord< T >& aValWord );
 
-			/** A method to add a device ID to the list of devices which will receive the payload
-				@param aDeviceID		The unique ID of the device
+			/**
+				A method to add a Validated Memory which will receive the payload of the current transaction
+				@param aValVector a Validated Memory which will receive the payload of the current transaction
 			*/
 			template< typename T >
 			void setValMem ( ValVector< T >& aValVector );
 
+
+			/**
+				A method to set all Validated memories associated with this transaction as valid
+			*/
 			void setAllValMemsValid();
 
-			//! @return the number of 32-bit words that will be sent by the current packet
+			/**
+				A method to retrieve the number of 32-bit words that will be sent by the current packet
+				@return the number of 32-bit words that will be sent by the current packet
+			*/
 			inline std::size_t SendSize() const;
 
-			//! @return the number of 32-bit words that will be sent by the current packet
+			/**
+				A method to retrieve the number of 32-bit words that will be sent by the current packet
+				@return the number of 32-bit words that will be sent by the current packet
+			*/
 			inline std::size_t SendHeaderSize() const;
 
-			//! @return the number of 32-bit words that will be sent by the current packet
+			/**
+				A method to retrieve the number of 32-bit words that will be sent by the current packet
+				@return the number of 32-bit words that will be sent by the current packet
+			*/
 			inline std::size_t SendPayloadSize() const;
 
-			//! @return the number of 32-bit words that are expected to be returned by the current packet
+			/**
+				A method to retrieve the number of 32-bit words that are expected to be returned by the current packet
+				@return the number of 32-bit words that are expected to be returned by the current packet
+			*/
 			inline std::size_t ReturnSize() const;
 
-			//! @return the number of 32-bit words that are expected to be returned by the current packet
+			/**
+				A method to retrieve the number of 32-bit words that are expected to be returned by the current packet
+				@return the number of 32-bit words that are expected to be returned by the current packet
+			*/
 			inline std::size_t ReturnHeaderSize() const;
 
-			//! @return the number of 32-bit words that are expected to be returned by the current packet
+			/**
+				A method to retrieve the number of 32-bit words that are expected to be returned by the current packet
+				@return the number of 32-bit words that are expected to be returned by the current packet
+			*/
 			inline std::size_t ReturnPayloadSize() const;
 
-
+			/**
+				A method to calculate the IPbus header for a given IPbus Protocol Version, given a wordcount and transaction ID
+				It is calculated in this function because the process of chunking requires that each chunk has a different header
+				@param aTransactionId a Transaction ID for a chunk of the packet
+				@param aWordCount a Word count for a chunk of the packet
+				@return the IPbus header
+			*/
 			template< eIPbusProtocolVersion IPbusProtocolVersion >
 			uint32_t calculateHeader ( const uint32_t& aTransactionId , const uint32_t& aWordCount );
 
+			/**
+				A method to calculate the expected IPbus reply header for a given IPbus Protocol Version, given a wordcount and transaction ID
+				It is calculated in this function because the process of chunking requires that each chunk has a different header
+				@param aTransactionId a Transaction ID for a chunk of the packet
+				@param aWordCount a Word count for a chunk of the packet
+				@return the expected IPbus reply header
+			*/
 			template< eIPbusProtocolVersion IPbusProtocolVersion >
 			uint32_t calculateReplyHeader ( const uint32_t& aTransactionId , const uint32_t& aWordCount );
 
+			/**
+				A method to split oversized IPbus transactions into bite-sized chunks
+				@param aMaxChunkSize the maximum size of a chunk
+				@param aTransactionId the Transaction ID of the first chunk
+			*/
 			template< eIPbusProtocolVersion IPbusProtocolVersion >
 			void splitChunks ( const uint32_t& aMaxChunkSize , uint32_t& aTransactionId );
 
-
+			/**
+				A method to retrieve the list of chunks associated with the current IPbus packet
+				@return the list of chunks associated with the current IPbus packet
+			*/
 			inline std::deque< tChunks >& getChunks();
 
+			/**
+				Return whether the current IPbus packet is one which sends an address field
+				@return whether the current IPbus packet is one which sends an address field
+			*/
 			inline const bool& hasBaseAddress();
 
+			/**
+				Return a reference to the list of device IDs that this instruction should be be sent to
+				@return a reference to the list of device IDs that this instruction should be sent to
+			*/
 			inline const std::vector<uint32_t>& getDeviceIDs();
 
 
@@ -243,9 +294,13 @@ namespace uhal
 
 		private:
 
+			//! The enumerated type of this transaction
 			eIPbusTransactionType mType;
+			//! The word count of this transaction
 			uint32_t mWordCount;
+			//! The register address to which this transaction is to be sent (if there is one)
 			uint32_t mBaseAddress;
+			//! A flag to indicate whether the current instruction is expected to send an address field
 			bool mHasBaseAddress;
 
 			//! A vector of device IDs to which the payload is to be sent

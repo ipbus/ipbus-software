@@ -1,7 +1,7 @@
 /*
 	@file
 	@author Andrew W. Rose
-	@date 2010
+	@date 2012
 */
 
 #include "uhal/IPbusPacketInfo.hpp"
@@ -52,58 +52,56 @@ std::ostream& operator<< ( std::ostream& aStream, const uhal::IPbusPacketInfo& a
 	}
 }
 
-
-bool operator== ( const uhal::IPbusPacketInfo& a1 , const uhal::IPbusPacketInfo& a2 )
-{
-	try
-	{
-		if ( a1.mType != a2.mType )
-		{
-			return false;
-		}
-
-		if ( a1.mWordCount != a2.mWordCount )
-		{
-			return false;
-		}
-
-		if ( a1.mBaseAddress != a2.mBaseAddress )
-		{
-			return false;
-		}
-
-		if ( a1.mPayload != a2.mPayload )
-		{
-			return false;
-		}
-
-		/*
-				//we cannot have two identical device IDs in the same IPbus Packet as this causes merry hell.
-				for ( std::vector<uint32_t>::const_iterator lIt1 = a1.mDeviceIDs.begin() ; lIt1 != a1.mDeviceIDs.end() ; ++lIt1 )
-				{
-					for ( std::vector<uint32_t>::const_iterator lIt2 = a2.mDeviceIDs.begin() ; lIt2 != a2.mDeviceIDs.end() ; ++lIt2 )
-					{
-						if ( *lIt1 == *lIt2 )
-						{
-							return false;
-						}
-					}
-				}
-		*/
-		//so must be identical...
-		return true;
-	}
-	catch ( const std::exception& aExc )
-	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
-	}
-}
-
-
 // Using the uhal namespace
 namespace uhal
 {
+
+	bool IPbusPacketInfo::operator== ( const uhal::IPbusPacketInfo& aIPbusPacketInfo )
+	{
+		try
+		{
+			if ( aIPbusPacketInfo.mType != mType )
+			{
+				return false;
+			}
+
+			if ( aIPbusPacketInfo.mWordCount != mWordCount )
+			{
+				return false;
+			}
+
+			if ( aIPbusPacketInfo.mBaseAddress != mBaseAddress )
+			{
+				return false;
+			}
+
+			if ( aIPbusPacketInfo.mPayload != mPayload )
+			{
+				return false;
+			}
+
+			/*
+					//we cannot have two identical device IDs in the same IPbus Packet as this causes merry hell.
+					for ( std::vector<uint32_t>::const_iterator lIt1 = a1.mDeviceIDs.begin() ; lIt1 != a1.mDeviceIDs.end() ; ++lIt1 )
+					{
+						for ( std::vector<uint32_t>::const_iterator lIt2 = a2.mDeviceIDs.begin() ; lIt2 != a2.mDeviceIDs.end() ; ++lIt2 )
+						{
+							if ( *lIt1 == *lIt2 )
+							{
+								return false;
+							}
+						}
+					}
+			*/
+			//so must be identical...
+			return true;
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
 
 
 IPbusPacketInfo::IPbusPacketInfo() try :

@@ -1,3 +1,9 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
+
 #ifndef _uhal_log_hpp_
 #define _uhal_log_hpp_
 
@@ -9,11 +15,13 @@
 #include "pantheios/inserters.hpp"
 #include "pantheios/frontends/stock.h"
 
+//! Macro function to add a string specifying the current function and line in the file
+#define ThisLocation()  uhal::lazy_stream_inserter( uhal::Location( __PRETTY_FUNCTION__ , __FILE__ , __LINE__ ) )
 
-#define ThisLocation()  uhal::lazy_inserter( uhal::Location( __PRETTY_FUNCTION__ , __FILE__ , __LINE__ ) )
-
+//! Helper macro Function for debugging
 #define log_LOCATION() log_DEBUG( "In " , ThisLocation() )
 
+//! Helper macro function to format exception error messages
 #define log_EXCEPTION( AEXC ) log_ERROR( "Exception \"" , AEXC.what() , "\" caught at " , ThisLocation() );
 
 
@@ -66,35 +74,48 @@
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// forward declaration so that we can declare friends
 namespace uhal
 {
 	class Location;
 }
+
+/**
+	A streaming operator to format the location for display
+	@param aStream a stream to output the time onto
+	@param aLocation the location to be output
+	@return a stream for further appending
+*/
 std::ostream& operator<< ( std::ostream& aStream , const uhal::Location& aLocation );
 
 namespace uhal
 {
-
+	//! A class to wrap the function name, filename and line-number location of its construction for the purpose of debugging and tracking unwinding exceptions
 	class Location
 	{
-			friend std::ostream& ( ::operator<< ) ( std::ostream& aStream , const uhal::Location& aLocation )
-			{
-				aStream << "function \""  << aLocation.mFunction << "\" in " << aLocation.mFile << ", line " << aLocation.mLine << ".";
-				return aStream;
-			}
+			/**
+				A streaming operator to format the location for display
+				@param aStream a stream to output the time onto
+				@param aLocation the location to be output
+				@return a stream for further appending
+			*/
+			friend std::ostream& ( ::operator<< ) ( std::ostream& aStream , const uhal::Location& aLocation );
 
 		public:
-			Location ( const char* aFunction , const char* aFile , const uint32_t& aLine ) :
-				mFunction ( aFunction ),
-				mFile ( aFile ) ,
-				mLine ( aLine )
-			{}
-
-			virtual ~Location() {}
+			/**
+				Constructor
+				@param aFunction the name of the current function as returned by the __PRETTY_FUNCTION__ macro
+				@param aFile the name of the current file as returned by the __FILE__ macro
+				@param aLine the number of the current line as returned by the __LINE__ macro
+			*/
+			Location ( const char* aFunction , const char* aFile , const uint32_t& aLine );
 
 		private:
+			//! the name of the current function as returned by the __PRETTY_FUNCTION__ macro
 			const char* mFunction;
+			//! the name of the current file as returned by the __FILE__ macro
 			const char* mFile;
+			//! the number of the current line as returned by the __LINE__ macro
 			const uint32_t mLine;
 	};
 }
@@ -106,161 +127,108 @@ namespace uhal
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace uhal
 {
+	// forward declaration so that we can declare friends
+	template< typename T > class _lazy_stream_inserter_;
 
-	template< typename T > class _lazy_inserter_;
-	template< typename T > _lazy_inserter_<T> lazy_inserter ( const T& aT );
+	/**
+		A helper function to build templated types for us
+		@param aT an object to be wrapped by a lazy stream inserter
+		@return a templated lazy stream inserter wrapping the object that needed wrapping
+	*/
+	template< typename T > inline _lazy_stream_inserter_<T> lazy_stream_inserter ( const T& aT );
 
+	/**
+		A class to make life easier with pantheios.
+		Although pantheios is lightning fast, it does not use the std c++ style streams. This means that you run into a problem if you want to use a class with a stream style formatter (i.e. most external libraries).
+		You could just stream to a std::stringstream and convert that to a std::string, but that would be evaluated before the call to pantheios, and so would be performed even if the log level meant that this code was not going to be used.
+		Instead, this class can wrap a reference to the object and only evaluates the streaming function when the output is actually going to be used! Thus, no compromise on performance!
+	*/
 	template< typename T >
-	class _lazy_inserter_
+	class _lazy_stream_inserter_
 	{
-			friend _lazy_inserter_<T> lazy_inserter<T> ( const T& aT );
+
+			/**
+				A helper function to build templated types for us
+				@param aT an object to be wrapped by a lazy stream inserter
+			*/
+			friend _lazy_stream_inserter_<T> lazy_stream_inserter<T> ( const T& aT );
 
 		private:
-			_lazy_inserter_ ( const T& aT ) :
-				mT ( aT ),
-				mLength ( 0 ),
-				mValue ( NULL )
-			{
-			}
+			/**
+				Constructor
+				Private so that all construction is done through the helper function
+				@param aT an object to be wrapped by a lazy stream inserter
+			*/
+			_lazy_stream_inserter_ ( const T& aT );
 
 		public:
-			virtual ~_lazy_inserter_()
-			{
-				try
-				{
-					if ( mValue )
-					{
-						delete mValue;
-						mValue = NULL;
-					}
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Destructor
+			*/
+			virtual ~_lazy_stream_inserter_();
 
 		public:
-			char const* data() const
-			{
-				try
-				{
-					if ( !mValue )
-					{
-						construct();
-					}
+			/**
+				If it has not already been done, evaluate the streaming of the object, and then return the string of characters that the lazy_stream_inserter wants to output
+				@return a c-style string of characters that the lazy_stream_inserter wants to output
+			*/
+			char const* data() const;
 
-					return mValue;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
-
-			size_t length() const
-			{
-				try
-				{
-					if ( !mValue )
-					{
-						construct();
-					}
-
-					return mLength;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				If it has not already been done, evaluate the streaming of the object, and then return the number of characters that the stream wants to output
+				@return the number of characters that the stream wants to output
+			*/
+			size_t length() const;
 
 		private:
-			void construct() const
-			{
-				try
-				{
-					const_cast<_lazy_inserter_*> ( this )->construct();
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Function to perform the stream extraction of the object if it has not been done previously
+			*/
+			void construct() const;
 
-			void construct()
-			{
-				try
-				{
-					std::stringstream lStream;
-					lStream << mT;
-					std::string lStr ( lStream.str() );
-					mLength = lStr.size() +1;
-					mValue = new char [ mLength ];
-					strcpy ( mValue, lStr.c_str() );
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Function to perform the stream extraction of the object if it has not been done previously
+			*/
+			void construct();
 
 		private:
+			//! A const reference to the object which is to be displayed subject to lazy evaluation
 			const T&	mT;
+			//! The number of characters that the lazy_stream_inserter wants to output
 			size_t		mLength;
+			//! The c-style string of characters that the lazy_stream_inserter wants to output
 			char*		mValue;
 	};
 
 
-	template< typename T >
-	inline _lazy_inserter_<T> lazy_inserter ( const T& aT )
-	{
-		try
-		{
-			return _lazy_inserter_<T> ( aT );
-		}
-		catch ( const std::exception& aExc )
-		{
-			pantheios::log_EXCEPTION ( aExc );
-			throw uhal::exception ( aExc );
-		}
-	}
+	/**
+		One of the two functions which is required by pantheios to perform its lightning fast formatting, returning the string of characters that the lazy_stream_inserter wants to output
+		@param aLazyInserter aLazyInserter to be evaluated and output
+		@return a c-style string of characters that the lazy_stream_inserter wants to output
+	*/
+	template< typename T > inline char const* c_str_data_a ( const _lazy_stream_inserter_<T>& aLazyInserter );
 
-	template< typename T >
-	inline char const* c_str_data_a ( const _lazy_inserter_<T>& aLazyInserter )
-	{
-		try
-		{
-			return aLazyInserter.data();
-		}
-		catch ( const std::exception& aExc )
-		{
-			pantheios::log_EXCEPTION ( aExc );
-			throw uhal::exception ( aExc );
-		}
-	}
+	/**
+		One of the two functions which is required by pantheios to perform its lightning fast formatting, returning the number of characters that the lazy_stream_inserter wants to output
+		@param aLazyInserter aLazyInserter to be evaluated and output
+		@return the number of characters that the lazy_stream_inserter wants to output
+	*/
+	template< typename T > inline size_t c_str_len_a ( const _lazy_stream_inserter_<T>& aLazyInserter );
 
-	template< typename T >
-	inline size_t c_str_len_a ( const _lazy_inserter_<T>& aLazyInserter )
-	{
-		try
-		{
-			return aLazyInserter.length();
-		}
-		catch ( const std::exception& aExc )
-		{
-			pantheios::log_EXCEPTION ( aExc );
-			throw uhal::exception ( aExc );
-		}
-	}
+
 
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+/**
+	A streaming operator so that lazy_stream_inserters can also be used in streams
+	@param aStream a stream to output the time onto
+	@param aLazyInserter a LazyInserter to be evaluated and output
+	@return a stream for further appending
+*/
+template< typename T > std::ostream& operator<< ( std::ostream& aStream , const uhal::_lazy_stream_inserter_<T>& aLazyInserter );
+
+
+#include "TemplateDefinitions/log.hxx"
 
 #endif

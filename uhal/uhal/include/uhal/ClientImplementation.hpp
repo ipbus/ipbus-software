@@ -1,3 +1,10 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@author Marc Magrans De Abril
+	@date 2012
+*/
+
 #ifndef _uhal_ClientImplementation_hpp_
 #define _uhal_ClientImplementation_hpp_
 
@@ -20,60 +27,48 @@ namespace uhal
 
 	// ----------------------------------------------------------------------------------------------------------------
 
+	//! A class to directly access locally-connected devices via IPbus over UDP
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class IPBusUDPClient : public ClientInterface
 	{
+			//! The timeout period for UDP transactions in seconds
 			static const int mTimeoutPeriod = 10;
+			/**
+				The maximum allowed IPbus packet length.
+				@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
+			*/
 			static const int mMaxPacketLength = 128;
 
+			//! Typedef the packing protocol which will be used by this IPbus Client
 			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			//! Typedef the transport protocol which will be used by this IPbus Client
 			typedef UdpTransportProtocol< tPackingProtocol > tTransportProtocol;
 
 		public:
 
-		IPBusUDPClient ( const std::string& aId , const URI& aUri ) try :
-				ClientInterface ( aId , aUri ),
-								mPackingProtocol ( mMaxPacketLength ),
-								mTransportProtocol ( mUri.mHostname , //hostname
-													 mUri.mPort , //port number
-													 mPackingProtocol, //reference to a PackingProtocol object which implements a function to handle the BOOST::ASIO callback
-													 mTimeoutPeriod //the timeout period for the TCP transactions in seconds
-												   )
-				{}
-			catch ( const std::exception& aExc )
-			{
-				pantheios::log_EXCEPTION ( aExc );
-				throw uhal::exception ( aExc );
-			}
+			/**
+				Constructor
+				@param aId the uinique identifier that the client will be given.
+				@param aUri a struct containing the full URI of the target.
+			*/
+			IPBusUDPClient ( const std::string& aId , const URI& aUri );
 
 		private:
-			PackingProtocol& getPackingProtocol()
-			{
-				try
-				{
-					return mPackingProtocol;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Method to return the packing protocol. The base ClientInterface requires that this exists
+				@return a reference to an instance of the packing protocol
+			*/
+			PackingProtocol& getPackingProtocol();
 
-			TransportProtocol& getTransportProtocol()
-			{
-				try
-				{
-					return mTransportProtocol;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Method to return the transport protocol. The base ClientInterface requires that this exists
+				@return a reference to an instance of the transport protocol
+			*/
+			TransportProtocol& getTransportProtocol();
 
+			//! An instance of the packing protocol for this IPbus client
 			tPackingProtocol mPackingProtocol;
+			//! An instance of the transport protocol for this IPbus client
 			tTransportProtocol mTransportProtocol;
 
 	};
@@ -81,60 +76,48 @@ namespace uhal
 	// ----------------------------------------------------------------------------------------------------------------
 
 
+	//! A class to directly access locally-connected devices via IPbus over TCP
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class IPBusTCPClient : public ClientInterface
 	{
+			//! The timeout period for TCP transactions in seconds
 			static const int mTimeoutPeriod = 10;
+			/**
+				The maximum allowed IPbus packet length.
+				@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
+			*/
 			static const int mMaxPacketLength = 128;
 
+			//! Typedef the packing protocol which will be used by this IPbus Client
 			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			//! Typedef the transport protocol which will be used by this IPbus Client
 			typedef TcpTransportProtocol< tPackingProtocol > tTransportProtocol;
 
 		public:
 
-		IPBusTCPClient ( const std::string& aId , const URI& aUri ) try :
-				ClientInterface ( aId , aUri ),
-								mPackingProtocol ( mMaxPacketLength ),
-								mTransportProtocol ( mUri.mHostname , //hostname
-													 mUri.mPort , //port number
-													 mPackingProtocol, //reference to a PackingProtocol object which implements a function to handle the BOOST::ASIO callback
-													 mTimeoutPeriod //the timeout period for the TCP transactions in seconds
-												   )
-				{}
-			catch ( const std::exception& aExc )
-			{
-				pantheios::log_EXCEPTION ( aExc );
-				throw uhal::exception ( aExc );
-			}
+			/**
+				Constructor
+				@param aId the uinique identifier that the client will be given.
+				@param aUri a struct containing the full URI of the target.
+			*/
+			IPBusTCPClient ( const std::string& aId , const URI& aUri );
 
 		private:
-			PackingProtocol& getPackingProtocol()
-			{
-				try
-				{
-					return mPackingProtocol;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Method to return the packing protocol. The base ClientInterface requires that this exists
+				@return a reference to an instance of the packing protocol
+			*/
+			PackingProtocol& getPackingProtocol();
 
-			TransportProtocol& getTransportProtocol()
-			{
-				try
-				{
-					return mTransportProtocol;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Method to return the transport protocol. The base ClientInterface requires that this exists
+				@return a reference to an instance of the transport protocol
+			*/
+			TransportProtocol& getTransportProtocol();
 
+			//! An instance of the packing protocol for this IPbus client
 			tPackingProtocol mPackingProtocol;
+			//! An instance of the transport protocol for this IPbus client
 			tTransportProtocol mTransportProtocol;
 
 	};
@@ -142,65 +125,61 @@ namespace uhal
 
 	// ----------------------------------------------------------------------------------------------------------------
 
+	//! A class to indirectly access (via a Control Hub Host) devices via IPbus over UDP
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubClient : public ClientInterface
 	{
+			//! The timeout period for TCP transactions in seconds
 			static const int mTimeoutPeriod = 10;
+			/**
+				The maximum allowed IPbus packet length.
+				@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
+			*/
 			static const int mMaxPacketLength = 128;
 
+			//! Typedef the packing protocol which will be used by this IPbus Client
 			typedef ControlHubHostPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			//! Typedef the transport protocol which will be used by this IPbus Client
 			typedef TcpTransportProtocol< tPackingProtocol > tTransportProtocol;
+			//! Typedef a map of string identifiers to pairs a PackingProtocol/TransportProtocol pair
 			typedef std::hash_map< std::string , std::pair< tPackingProtocol* , tTransportProtocol* > > tMap;
 
 		public:
+			/**
+				Constructor
+				@param aId the uinique identifier that the client will be given.
+				@param aUri a struct containing the full URI of the target.
+			*/
 			ControlHubClient ( const std::string& aId , const URI& aUri );
 
-			virtual ~ControlHubClient () {}
-
-			void pack ( IPbusPacketInfo& aIPbusPacketInfo )
-			{
-				try
-				{
-					mPackingProtocolPtr->pack ( aIPbusPacketInfo , mTargetId );
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Overloaded version of the pack function which adds the target ID, as reguired by this packing protocol
+				@param aIPbusPacketInfo an IPbusPacketInfo to be packed into the stream
+			*/
+			void pack ( IPbusPacketInfo& aIPbusPacketInfo );
 
 		private:
-			PackingProtocol& getPackingProtocol()
-			{
-				try
-				{
-					return *mPackingProtocolPtr;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Method to return the packing protocol. The base ClientInterface requires that this exists
+				@return a reference to an instance of the packing protocol
+			*/
+			PackingProtocol& getPackingProtocol();
 
-			TransportProtocol& getTransportProtocol()
-			{
-				try
-				{
-					return *mTransportProtocolPtr;
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					throw uhal::exception ( aExc );
-				}
-			}
+			/**
+				Method to return the transport protocol. The base ClientInterface requires that this exists
+				@return a reference to an instance of the transport protocol
+			*/
+			TransportProtocol& getTransportProtocol();
 
+			//! The target ID with which this instance of the client is associated
 			uint32_t mTargetId;
+
+			//! A pointer to an instance of the packing protocol used by this IPbus client
 			tPackingProtocol* mPackingProtocolPtr;
+			//! A pointer to an instance of the transport protocol used by this IPbus client
 			tTransportProtocol* mTransportProtocolPtr;
 
+			//! Map association the address of the Control Hub Host with an instance of a PackingProtocol/TransportProtocol pair
 			static tMap mMapNameAndPortToCHH;
 	};
 

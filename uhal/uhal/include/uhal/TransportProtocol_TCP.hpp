@@ -1,3 +1,9 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
+
 #ifndef _uhal_TransportProtocol_TCP_hpp_
 #define _uhal_TransportProtocol_TCP_hpp_
 
@@ -18,16 +24,27 @@
 namespace uhal
 {
 
+	//! Exception class to handle the case where the TCP connection timed out. Uses the base uhal::exception implementation of what()
 	class TcpTimeout: public uhal::exception {  };
+	//! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
 	class ErrorInTcpCallback: public uhal::exception {  };
 
 	template < class PACKINGPROTOCOL >
 	class TcpTransportProtocol : public TransportProtocol
 	{
 		public:
-
+			/**
+				Constructor
+			*/
 			TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , PACKINGPROTOCOL& aPackingProtocol , uint32_t aTimeoutPeriod = 10 );
+			/**
+				Destructor
+			*/
 			virtual ~TcpTransportProtocol();
+
+			/**
+				Flush the queue of pending IPbus transactions
+			*/
 			void Dispatch();
 
 		private:
@@ -51,7 +68,7 @@ namespace uhal
 			//! Timeout period for TCP transactions;
 			boost::posix_time::seconds mTimeOut;
 
-			/// timer for the timeout conditions
+			//! timer for the timeout conditions
 			boost::asio::deadline_timer mDeadline;
 
 			bool mTimeoutFlag;

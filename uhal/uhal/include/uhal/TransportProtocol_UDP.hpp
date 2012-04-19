@@ -1,3 +1,9 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
+
 #ifndef _uhal_TransportProtocol_UDP_hpp_
 #define _uhal_TransportProtocol_UDP_hpp_
 
@@ -18,8 +24,11 @@
 namespace uhal
 {
 
+	//! Exception class to handle the case where the UDP connection timed out. Uses the base uhal::exception implementation of what()
 	class UdpTimeout: public uhal::exception {  };
+	//! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
 	class ErrorInUdpCallback: public uhal::exception {  };
+	//! Exception class to handle the case where the returned packet size does not match that expected. Uses the base uhal::exception implementation of what()
 	class ReturnSizeMismatch: public uhal::exception {  };
 
 
@@ -28,8 +37,18 @@ namespace uhal
 	{
 		public:
 
+			/**
+				Constructor
+			*/
 			UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , PACKINGPROTOCOL& aPackingProtocol , uint32_t aTimeoutPeriod = 10 );
+			/**
+				Destructor
+			*/
 			virtual ~UdpTransportProtocol();
+
+			/**
+				Flush the queue of pending IPbus transactions
+			*/
 			void Dispatch();
 
 		private:
@@ -53,7 +72,7 @@ namespace uhal
 			//! Timeout period for UDP transactions;
 			boost::posix_time::seconds mTimeOut;
 
-			/// timer for the timeout conditions
+			//! timer for the timeout conditions
 			boost::asio::deadline_timer mDeadline;
 
 			bool mTimeoutFlag;

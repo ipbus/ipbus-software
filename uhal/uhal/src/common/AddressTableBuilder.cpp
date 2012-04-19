@@ -100,7 +100,7 @@ namespace uhal
 
 				if ( !lXmlNode )
 				{
-					pantheios::log_ERROR ( "No XML node called \"node\" in file " , lazy_inserter ( aPath ) );
+					pantheios::log_ERROR ( "No XML node called \"node\" in file " , lazy_stream_inserter ( aPath ) );
 					return;
 				}
 

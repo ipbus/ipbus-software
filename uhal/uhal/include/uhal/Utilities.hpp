@@ -1,3 +1,9 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
+
 #ifndef _uhal_Utilities_hpp_
 #define _uhal_Utilities_hpp_
 
@@ -63,7 +69,12 @@ namespace uhal
 {
 	namespace utilities
 	{
-
+		/**
+			Parse a semicolon delimited list of URIs into a vector of protocol/address pairs
+			@param aSemicolonDelimitedUriList a string containing a semicolon delimited list of URIs
+			@param aUriList a vector to which the extracted protocol/address pairs are appended
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool ParseSemicolonDelimitedUriList ( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
 		{
@@ -110,10 +121,22 @@ namespace uhal
 {
 	namespace utilities
 	{
-
+		/**
+			Perform shell expansion of a linux shell expression ( e.g. "~/c*.xml" -> "/usr/home/awr/connections.xml" ) and convert into boost::filesystem::paths
+			@param aFilenameExpr a c-style string containing a linux shell expression to be expanded
+			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
+			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool ShellExpandFilenameExpr ( const char* aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
 		{
+			if ( !aFiles && !aDirectories )
+			{
+				// We have nowhere to write the data so don't bother expanding the expression
+				return true;
+			}
+
 			try
 			{
 				//struct which will store the shell expansions of the expression
@@ -165,7 +188,7 @@ namespace uhal
 					{
 						for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt )
 						{
-							pantheios::log_NOTICE ( " > [file] " , lazy_inserter ( *lIt ) );
+							pantheios::log_NOTICE ( " > [file] " , lazy_stream_inserter ( *lIt ) );
 						}
 
 						if ( ! aFiles->size() )
@@ -178,12 +201,12 @@ namespace uhal
 					{
 						for ( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt )
 						{
-							pantheios::log_NOTICE ( " > [directory] " , lazy_inserter ( *lIt ) );
+							pantheios::log_NOTICE ( " > [directory] " , lazy_stream_inserter ( *lIt ) );
 						}
 
 						if ( ! aDirectories->size() )
 						{
-							pantheios::log_NOTICE ( " > No matching files." );
+							pantheios::log_NOTICE ( " > No matching directories." );
 						}
 					}
 				}
@@ -197,7 +220,13 @@ namespace uhal
 			return true;
 		}
 
-
+		/**
+			Perform shell expansion of a linux shell expression ( e.g. "~/c*.xml" -> "/usr/home/awr/connections.xml" ) and convert into boost::filesystem::paths
+			@param aFilenameExpr a string containing a linux shell expression to be expanded
+			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
+			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool ShellExpandFilenameExpr ( const std::string& aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
 		{
@@ -223,7 +252,12 @@ namespace uhal
 {
 	namespace utilities
 	{
-
+		/**
+			Retrieve a file by HTTP
+			@param aURL a URL to retrieve
+			@param aResponse a structure into which the returned HTTP packet is parsed
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool HttpGet ( const std::string& aURL , HttpResponseType& aResponse )
 		{
@@ -356,7 +390,7 @@ namespace uhal
 				{
 					try
 					{
-						pantheios::log_NOTICE ( "HTTP response parsed as:\n" , lazy_inserter ( aResponse ) );
+						pantheios::log_NOTICE ( "HTTP response parsed as:\n" , lazy_stream_inserter ( aResponse ) );
 					}
 					catch ( const std::exception& aExc )
 					{
@@ -389,7 +423,12 @@ namespace uhal
 {
 	namespace utilities
 	{
-
+		/**
+			Given a linux shell expression, open all files which match it and call the callback function on each of them
+			@param aFilenameExpr a linux shell expression to be expanded
+			@param aBinder a callback function to be called on each file matching the linux shell expression
+			@return success/failure status
+		*/
 		template < typename R , typename F , typename L>
 		bool OpenFileLocal ( const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder )
 		{
@@ -408,7 +447,7 @@ namespace uhal
 
 					if ( !lStr.is_open() )
 					{
-						pantheios::log_ERROR ( "Failed to open " , lazy_inserter ( *lIt2 ) , ". Continuing with next document for now but be aware!" );
+						pantheios::log_ERROR ( "Failed to open " , lazy_stream_inserter ( *lIt2 ) , ". Continuing with next document for now but be aware!" );
 					}
 					else
 					{
@@ -439,6 +478,12 @@ namespace uhal
 			}
 		}
 
+		/**
+			Given a URL, retrieve the file and call the callback function on each of them
+			@param aURL a URL to retrieve
+			@param aBinder a callback function to be called on the retrieved URL
+			@return success/failure status
+		*/
 		template < typename R , typename F , typename L>
 		bool OpenFileHttp ( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder )
 		{
@@ -472,6 +517,13 @@ namespace uhal
 			}
 		}
 
+		/**
+			Given a protocol and either a URL or a linux shell expression, open the file and call the callback function on each of them
+			@param aProtocol the protocol to be used to retrieve the file
+			@param aFilenameExpr a linux shell expression to be expanded or a URL to be retrieved
+			@param aBinder a callback function to be called on the files
+			@return success/failure status
+		*/
 		template < typename R , typename F , typename L>
 		bool OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder )
 		{
@@ -510,6 +562,12 @@ namespace uhal
 {
 	namespace utilities
 	{
+		/**
+			Helper function to make debugging failures when parsing XML files easier
+			@param aLoadResult the result of the parsing
+			@param aPath the full filename of file whose parsing failed
+			@param aFile a byte vector containing the contents of the file (stored like this because the file could be either local or retrieved by HTTP)
+		*/
 		void PugiXMLParseResultPrettifier ( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile );
 	}
 }
@@ -521,6 +579,11 @@ namespace uhal
 {
 	namespace utilities
 	{
+		/**
+			Helper function to calculate the number of zero-bits at the righthand end of a 32-bit number
+			@param aValue a 32-bit number whose trailing zero-bits are to be counted
+			@return the number of trailing zero-bits
+		*/
 		unsigned int TrailingRightBits ( uint32_t aValue );
 	}
 }
@@ -533,6 +596,13 @@ namespace uhal
 	namespace utilities
 	{
 
+		/**
+			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+			@param aNode a node from which the attribute is to be extracted
+			@param aAttrName the name of the attribute to be extracted
+			@param aTarget a variable into which the attribute's value id to be written
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget )
 		{
@@ -560,6 +630,13 @@ namespace uhal
 			}
 		}
 
+		/**
+			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+			@param aNode a node from which the attribute is to be extracted
+			@param aAttrName the name of the attribute to be extracted
+			@param aTarget a variable into which the attribute's value id to be written
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget )
 		{
@@ -587,6 +664,13 @@ namespace uhal
 			}
 		}
 
+		/**
+			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+			@param aNode a node from which the attribute is to be extracted
+			@param aAttrName the name of the attribute to be extracted
+			@param aTarget a variable into which the attribute's value id to be written
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget )
 		{
@@ -614,6 +698,13 @@ namespace uhal
 			}
 		}
 
+		/**
+			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+			@param aNode a node from which the attribute is to be extracted
+			@param aAttrName the name of the attribute to be extracted
+			@param aTarget a variable into which the attribute's value id to be written
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget )
 		{
@@ -641,6 +732,13 @@ namespace uhal
 			}
 		}
 
+		/**
+			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+			@param aNode a node from which the attribute is to be extracted
+			@param aAttrName the name of the attribute to be extracted
+			@param aTarget a variable into which the attribute's value id to be written
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget )
 		{
@@ -668,6 +766,13 @@ namespace uhal
 			}
 		}
 
+		/**
+			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+			@param aNode a node from which the attribute is to be extracted
+			@param aAttrName the name of the attribute to be extracted
+			@param aTarget a variable into which the attribute's value id to be written
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget )
 		{
@@ -695,6 +800,13 @@ namespace uhal
 			}
 		}
 
+		/**
+			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+			@param aNode a node from which the attribute is to be extracted
+			@param aAttrName the name of the attribute to be extracted
+			@param aTarget a variable into which the attribute's value id to be written
+			@return success/failure status
+		*/
 		template < bool DebugInfo >
 		bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , bool& aTarget )
 		{

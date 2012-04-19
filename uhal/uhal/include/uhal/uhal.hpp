@@ -1,3 +1,9 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
+
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
 #include "uhal/ConnectionManager.hpp"

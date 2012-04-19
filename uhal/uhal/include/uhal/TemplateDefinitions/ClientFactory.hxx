@@ -27,4 +27,19 @@ namespace uhal
 	}
 
 
+	template <class T>
+	boost::shared_ptr<ClientInterface> ClientFactory::Creator<T>::create ( const std::string& aId , const URI& aUri )
+	{
+		try
+		{
+			return boost::shared_ptr<ClientInterface> ( new T ( aId , aUri ) );
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+
 }

@@ -58,7 +58,7 @@ namespace uhal
 			URI lUri;
 			BoostSpiritGrammars::URIGrammar lGrammar;
 			boost::spirit::qi::phrase_parse ( aUri.begin() , aUri.end() , lGrammar , boost::spirit::ascii::space , lUri );
-			pantheios::log_NOTICE ( "URI \"" , aUri , "\" parsed as:\n" , lazy_inserter ( lUri ) );
+			pantheios::log_NOTICE ( "URI \"" , aUri , "\" parsed as:\n" , lazy_stream_inserter ( lUri ) );
 			std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
 
 			if ( lIt == mCreators.end() )

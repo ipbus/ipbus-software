@@ -13,7 +13,7 @@ namespace uhal
 {
 
 
-	ConnectionManager::tConnectionDescriptor::tConnectionDescriptor ( const pugi::xml_node& aNode , bool& aSuccess ) try
+	ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , bool& aSuccess ) try
 	{
 		aSuccess=false;
 
@@ -40,7 +40,7 @@ namespace uhal
 		throw uhal::exception ( aExc );
 	}
 
-	bool ConnectionManager::tConnectionDescriptor::operator== ( const tConnectionDescriptor& aConnectionDescriptor ) const
+	bool ConnectionManager::ConnectionDescriptor::operator== ( const ConnectionDescriptor& aConnectionDescriptor ) const
 	{
 		try
 		{
@@ -72,7 +72,7 @@ namespace uhal
 
 
 
-	//!Given a glob expression, parse all the files matching it (e.g. $BUILD/config/*.xml). If one parsing fails throw an exception and return filename and line number
+	// Given a glob expression, parse all the files matching it (e.g. $BUILD/config/*.xml). If one parsing fails throw an exception and return filename and line number
 
 	ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr ) try
 	{
@@ -92,10 +92,10 @@ namespace uhal
 	ConnectionManager::~ConnectionManager () {}
 
 
-	/**
-	 * Retrieves protocol, host, and port from the connection file to create the ClientInterface.
-	 * Retrieves the address table file from the connection file to create the HwInterface.
-	 */
+	/*
+		Retrieves protocol, host, and port from the connection file to create the ClientInterface.
+		Retrieves the address table file from the connection file to create the HwInterface.
+	*/
 	HwInterface ConnectionManager::getDevice ( const std::string& aId )
 	{
 		try
@@ -107,7 +107,7 @@ namespace uhal
 				throw ConnectionUIDDoesNotExist();
 			}
 
-			std::map< std::string, tConnectionDescriptor >::iterator lIt = mConnectionDescriptors.find ( aId );
+			std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.find ( aId );
 
 			if ( lIt == mConnectionDescriptors.end() )
 			{
@@ -117,7 +117,7 @@ namespace uhal
 			}
 
 			Node lNode = AddressTableBuilder::getInstance().getAddressTable ( lIt->second.address_table );
-			pantheios::log_NOTICE ( "ConnectionManager created node tree: " , lazy_inserter ( lNode ) );
+			pantheios::log_NOTICE ( "ConnectionManager created node tree: " , lazy_stream_inserter ( lNode ) );
 			boost::shared_ptr<ClientInterface> lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
 			return HwInterface ( lClientInterface , lNode );
 		}
@@ -137,7 +137,7 @@ namespace uhal
 			std::vector<std::string> lDevices;
 			lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
-			for ( std::map< std::string, tConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
+			for ( std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
 			{
 				lDevices.push_back ( lIt->first );
 			}
@@ -159,7 +159,7 @@ namespace uhal
 			std::vector<std::string> lDevices;
 			lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
-			for ( std::map< std::string, tConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
+			for ( std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
 			{
 				boost::cmatch lMatch;
 
@@ -234,11 +234,11 @@ namespace uhal
 			for ( pugi::xpath_node_set::const_iterator lConnectionIt = lConnections.begin(); lConnectionIt != lConnections.end(); ++lConnectionIt )
 			{
 				bool lSuccess;
-				tConnectionDescriptor lDescriptor ( lConnectionIt->node() , lSuccess );
+				ConnectionDescriptor lDescriptor ( lConnectionIt->node() , lSuccess );
 
 				if ( lSuccess )
 				{
-					std::pair< std::map< std::string, tConnectionDescriptor >::iterator , bool > lInsert = mConnectionDescriptors.insert ( std::make_pair ( lDescriptor.id , lDescriptor ) );
+					std::pair< std::map< std::string, ConnectionDescriptor >::iterator , bool > lInsert = mConnectionDescriptors.insert ( std::make_pair ( lDescriptor.id , lDescriptor ) );
 
 					if ( !lInsert.second )
 					{

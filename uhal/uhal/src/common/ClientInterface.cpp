@@ -103,7 +103,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	void ClientInterface::write ( const uint32_t aAddr, const uint32_t& aSource )
+	void ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
 	{
 		try
 		{
@@ -123,9 +123,16 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
+			// If we are writing to a masked sub-field then we expect to preserve all the other sub-fields.
+			// We must, therefore, use Read-Modify-Write, rather than a plain old write
 			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( WRITE , 1 , aAddr );
+			// lIPbusPacketInfo.setHeader ( WRITE , 1 , aAddr );
+			// lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) && aMask );
+			mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 ) );
+			lIPbusPacketInfo.setHeader ( RMW_BITS , 2 , aAddr );
+			lIPbusPacketInfo.setPayload ( ~aMask );
 			lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) && aMask );
+			lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
 			pack ( lIPbusPacketInfo );
 		}
 		catch ( const std::exception& aExc )
@@ -135,7 +142,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 	}
 
-	void ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode aMode )
+	void ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
 	{
 		try
 		{
@@ -200,7 +207,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 	}
 
-	ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode aMode )
+	ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
 	{
 		try
 		{
@@ -267,7 +274,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 	}
 
-	ValVector< int32_t > ClientInterface::readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode aMode )
+	ValVector< int32_t > ClientInterface::readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
 	{
 		try
 		{

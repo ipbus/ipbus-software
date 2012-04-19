@@ -11,7 +11,7 @@
 namespace BoostSpiritGrammars
 {
 
-	/// The BOOST::SPIRIT grammar for parsing a URL
+	//! The BOOST::SPIRIT grammar for parsing a URL
 	struct URIGrammarShort : boost::spirit::qi::grammar< std::string::const_iterator , std::pair<std::string, std::string>() , boost::spirit::ascii::space_type >
 	{
 		URIGrammarShort();

@@ -11,7 +11,7 @@
 namespace BoostSpiritGrammars
 {
 
-	/// The BOOST::SPIRIT grammar for parsing the Semicolon delimited URI list
+	//! The BOOST::SPIRIT grammar for parsing the Semicolon delimited URI list
 	struct SemicolonDelimitedUriListGrammar : boost::spirit::qi::grammar< std::string::const_iterator , std::vector< std::pair<std::string, std::string> >() , boost::spirit::ascii::space_type >
 	{
 		SemicolonDelimitedUriListGrammar();

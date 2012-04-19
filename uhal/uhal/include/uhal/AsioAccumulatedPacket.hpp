@@ -1,3 +1,9 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
+
 #ifndef _uhal_AsioAccumulatedPacket_hpp_
 #define _uhal_AsioAccumulatedPacket_hpp_
 
@@ -22,6 +28,7 @@ struct tAccumulatedPacket
 	{}
 };
 
+//! Typedef a container for AccumulatedPackets
 typedef std::deque< tAccumulatedPacket > tAccumulatedPackets;
 
 

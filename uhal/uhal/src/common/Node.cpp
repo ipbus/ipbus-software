@@ -9,6 +9,22 @@
 
 #include <iomanip>
 
+
+std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode )
+{
+	try
+	{
+		aNode.stream ( aStream );
+		return aStream;
+	}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+}
+
+
 namespace uhal
 {
 
@@ -101,12 +117,12 @@ namespace uhal
 	}
 
 
-	void Node::stream ( std::ostream& aStream , std::size_t indent ) const
+	void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
 	{
 		try
 		{
 			aStream << std::hex << std::setfill ( '0' ) << std::uppercase;
-			aStream << '\n' << std::string ( indent , ' ' ) << "+ ";
+			aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
 			aStream << "Node \"" << mUid << "\", ";
 			aStream << "Address 0x" << std::setw ( 8 ) << mAddr << ", ";
 			aStream << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
@@ -116,7 +132,7 @@ namespace uhal
 			{
 				for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 				{
-					lIt->stream ( aStream , indent+2 );
+					lIt->stream ( aStream , aIndent+2 );
 				}
 			}
 		}
@@ -136,7 +152,7 @@ namespace uhal
 
 			if ( lIterator==mChildrenMap->end() )
 			{
-				pantheios::log_ERROR ( "No branch found with ID-path \"" , aId , "\". Tree structure is:" , lazy_inserter ( *this ) );
+				pantheios::log_ERROR ( "No branch found with ID-path \"" , aId , "\". Tree structure is:" , lazy_stream_inserter ( *this ) );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 				throw NoBranchFoundWithGivenUID();
 			}
@@ -415,6 +431,56 @@ Node::Node ( const pugi::xml_node& aXmlNode ) try :
 		}
 	}
 
+	ValWord< int32_t > Node::readSigned()
+	{
+		try
+		{
+			if ( mPermission & defs::READ )
+			{
+				if ( mMask == defs::NOMASK )
+				{
+					return mHw->getClient()->readSigned ( mAddr );
+				}
+				else
+				{
+					return mHw->getClient()->readSigned ( mAddr , mMask );
+				}
+			}
+			else
+			{
+				pantheios::log_ERROR ( "Node permissions denied read access" );
+				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				throw ReadAccessDenied();
+			}
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
 
+
+	ValVector< int32_t > Node::readBlockSigned ( const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+	{
+		try
+		{
+			if ( mPermission & defs::READ )
+			{
+				return mHw->getClient()->readBlockSigned ( mAddr , aSize , aMode );
+			}
+			else
+			{
+				pantheios::log_ERROR ( "Node permissions denied read access" );
+				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				throw ReadAccessDenied();
+			}
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
 
 }

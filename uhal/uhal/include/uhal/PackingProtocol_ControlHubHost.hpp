@@ -1,3 +1,9 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
+
 #ifndef _uhal_PackingProtocol_ControlHubHost_hpp_
 #define _uhal_PackingProtocol_ControlHubHost_hpp_
 
@@ -7,21 +13,38 @@
 
 namespace uhal
 {
-	class UnknownIPbusProtocolVersion2: public uhal::exception { };
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubHostPackingProtocol : public PackingProtocol
 	{
 		public:
+			/**
+				Constructor
+			*/
 			ControlHubHostPackingProtocol ( const uint32_t& aMaxPacketLength );
 
+			/**
+				Destructor
+			*/
 			virtual ~ControlHubHostPackingProtocol();
 
+			/**
+				A function which adds an IPbusPacketInfo to the queue of pending IPbus transactions
+				@param aIPbusPacketInfo an IPbusPacketInfo to be added to the queue of pending IPbus transactions
+				@param aId the identifier of the target device (IPbus client instance), since the control-hub host handles more than one device
+			*/
 			void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId = 0 );
 
+			/**
+				A function called immediately prior to a call to the Transport Protocol's Dispatch() function. Used for finalizing the queue for dispatch.
+			*/
 			void PreDispatch();
 
+			/**
+				A function called immediately after to a call to the Transport Protocol's Dispatch() function. Used for testing that the replys are as expected.
+			*/
 			void PostDispatch();
+
 
 			void ReceiveHandler ( const boost::system::error_code& aErrorCode, std::size_t aReplyLength, std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef );
 
@@ -32,8 +55,13 @@ namespace uhal
 			inline const tAccumulatedPackets& getAccumulatedPackets();
 
 		private:
+			//! The raw stream packets which will be sent by the transport protocol
 			tAccumulatedPackets mAccumulatedPackets;
 
+			/**
+				The maximum allowed size of a chunk
+				@todo Now that the chunking is templated, could this be moved into the IPbusPacketInfo?
+			*/
 			uint32_t mMaxPacketLength;
 
 			/** A register from which to issue byte order transactions
@@ -65,7 +93,7 @@ namespace uhal
 			*/
 			std::deque<uint32_t> mCounters;
 
-			/// A map of device IDs to reply packets.
+			//! A map of device IDs to reply packets.
 			typedef std::deque< std::pair< uint32_t , IPbusPacketInfo::tChunks* > > tChunkList;
 			typedef std::map< uint32_t , tChunkList > tReplyMap;
 			tReplyMap mReplyMap;

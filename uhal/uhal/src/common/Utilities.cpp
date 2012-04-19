@@ -11,7 +11,7 @@ namespace uhal
 		{
 			try
 			{
-				pantheios::log_ERROR ( "Failed to parse file " , lazy_inserter ( aPath ) , ". PugiXML returned the following description \"" , aLoadResult.description() , "\"." );
+				pantheios::log_ERROR ( "Failed to parse file " , lazy_stream_inserter ( aPath ) , ". PugiXML returned the following description \"" , aLoadResult.description() , "\"." );
 				std::size_t lLineCounter ( 1 );
 				std::vector<uint8_t>::const_iterator lIt0 ( aFile.begin() );
 				std::vector<uint8_t>::const_iterator lIt1 ( aFile.begin() + aLoadResult.offset );

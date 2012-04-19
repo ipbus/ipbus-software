@@ -6,11 +6,39 @@
 
 namespace uhal
 {
+
+	template< typename T >
+
+_ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask ) try :
+		value ( aValue ) ,
+			  valid ( aValid ) ,
+			  mask ( aMask )
+		{}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+
+
+	template< typename T >
+
+_ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid ) try :
+		value ( aValue ) ,
+			  valid ( aValid )
+		{}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+
+
+
+
 	template< typename T >
 
 ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) try :
-		// mValid ( new bool ( false ) ),
-		// mValue ( new T ( aValue ) )
 		mMembers ( new _ValWord_<T> ( aValue , false , aMask ) )
 	{
 	}
@@ -23,8 +51,6 @@ ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) try :
 	template< typename T >
 
 ValWord< T >::ValWord ( const ValWord<T>& aVal ) try :
-		// mValid ( aVal.mValid ),
-		// mValue ( aVal.mValue )
 		mMembers ( aVal.mMembers )
 	{
 	}
@@ -37,8 +63,6 @@ ValWord< T >::ValWord ( const ValWord<T>& aVal ) try :
 	template< typename T >
 
 ValWord< T >::ValWord() try :
-		// mValid ( new bool ( false ) ),
-		// mValue ( new T() )
 		mMembers ( new _ValWord_<T> ( T() , false , 0xFFFFFFFF ) )
 	{
 	}
@@ -53,7 +77,7 @@ ValWord< T >::ValWord() try :
 	{
 		try
 		{
-			return /* *mValid */ mMembers->valid;
+			return mMembers->valid;
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -67,7 +91,7 @@ ValWord< T >::ValWord() try :
 	{
 		try
 		{
-			/* *mValid */ mMembers->valid = aValid;
+			mMembers->valid = aValid;
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -81,7 +105,7 @@ ValWord< T >::ValWord() try :
 	{
 		try
 		{
-			/* *mValue */ mMembers->value = aValue ;
+			mMembers->value = aValue ;
 			return *this;
 		}
 		catch ( const std::exception& aExc )
@@ -100,9 +124,9 @@ ValWord< T >::ValWord() try :
 	// template< typename T >
 	// const T& ValWord< T >::value() const
 	// {
-	// if ( /* *mValid */ mMembers->valid )
+	// if ( mMembers->valid )
 	// {
-	// return /* *mValue */ mMembers->value;
+	// return mMembers->value;
 	// }
 	// else
 	// {
@@ -130,15 +154,38 @@ ValWord< T >::ValWord() try :
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			if ( mMembers->valid )
 			{
-				return /* *mValue */ ( mMembers->value & mMembers->mask ) >> utilities::TrailingRightBits ( mMembers->mask ) ;
+				return ( mMembers->value & mMembers->mask ) >> utilities::TrailingRightBits ( mMembers->mask ) ;
 			}
 			else
 			{
 				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
+			}
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+	template< typename T >
+	void ValWord< T >::value ( const T& aValue )
+	{
+		try
+		{
+			if ( !mMembers->valid )
+			{
+				mMembers->value = aValue;
+			}
+			else
+			{
+				pantheios::log_ERROR ( "Attempted  to modify validated memory" );
+				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				throw ValMemImutabilityViolation();
 			}
 		}
 		catch ( const std::exception& aExc )
@@ -177,28 +224,6 @@ ValWord< T >::ValWord() try :
 	}
 
 
-	template< typename T >
-	void ValWord< T >::value ( const T& aValue )
-	{
-		try
-		{
-			if ( !/* *mValid */ mMembers->valid )
-			{
-				/* *mValue */ mMembers->value = aValue;
-			}
-			else
-			{
-				pantheios::log_ERROR ( "Attempted  to modify validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-				throw ValMemImutabilityViolation();
-			}
-		}
-		catch ( const std::exception& aExc )
-		{
-			pantheios::log_EXCEPTION ( aExc );
-			throw uhal::exception ( aExc );
-		}
-	}
 
 
 
@@ -206,8 +231,6 @@ ValWord< T >::ValWord() try :
 	template< typename T >
 
 ValVector< T >::ValVector ( const std::vector<T>& aValues ) try :
-		// mValid ( new bool ( false ) ),
-		// mValues ( new std::vector<T> ( aValues ) )
 		mMembers ( new _ValVector_<T> ( aValues , false ) )
 	{
 	}
@@ -219,9 +242,7 @@ ValVector< T >::ValVector ( const std::vector<T>& aValues ) try :
 
 	template< typename T >
 
-ValVector< T >::ValVector ( const ValVector< T >::ValVector& aValues ) try :
-		// mValid ( aValues.mValid ),
-		// mValues ( aValues.mValues )
+ValVector< T >::ValVector ( const ValVector& aValues ) try :
 		mMembers ( aValues.mMembers )
 	{
 	}
@@ -234,8 +255,6 @@ ValVector< T >::ValVector ( const ValVector< T >::ValVector& aValues ) try :
 	template< typename T >
 
 ValVector< T >::ValVector ( uint32_t aSize ) try :
-		// mValid ( new bool ( false ) ),
-		// mValues ( new std::vector<T> ( aSize ) )
 		mMembers ( new _ValVector_<T> ( std::vector<T> ( aSize , T() ) , false ) )
 	{
 	}
@@ -248,8 +267,6 @@ ValVector< T >::ValVector ( uint32_t aSize ) try :
 	template< typename T >
 
 ValVector< T >::ValVector() try :
-		// mValid ( new bool ( false ) ),
-		// mValues ( new std::vector<T>() )
 		mMembers ( new _ValVector_<T> ( std::vector<T>() , false ) )
 	{
 	}
@@ -264,7 +281,7 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			return /* *mValid */ mMembers->valid;
+			return mMembers->valid;
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -278,7 +295,7 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			/* *mValid */ mMembers->valid = aValid;
+			mMembers->valid = aValid;
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -294,9 +311,9 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			if ( !/* *mValid */ mMembers->valid )
+			if ( !mMembers->valid )
 			{
-				/* mValues-> */ mMembers->value.push_back ( aValue );
+				mMembers->value.push_back ( aValue );
 			}
 			else
 			{
@@ -313,13 +330,13 @@ ValVector< T >::ValVector() try :
 	}
 
 	template< typename T >
-	const T& ValVector< T >::operator[] ( std::size_t aSize ) const
+	const T& ValVector< T >::operator[] ( std::size_t aIndex ) const
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			if ( mMembers->valid )
 			{
-				return ( /* *mValue */ mMembers->value ) [aSize];
+				return ( mMembers->value ) [aIndex];
 			}
 			else
 			{
@@ -336,13 +353,13 @@ ValVector< T >::ValVector() try :
 	}
 
 	template< typename T >
-	const T& ValVector< T >::at ( std::size_t aSize ) const
+	const T& ValVector< T >::at ( std::size_t aIndex ) const
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			if ( mMembers->valid )
 			{
-				return /* mValues-> */ mMembers->value.at ( aSize );
+				return  mMembers->value.at ( aIndex );
 			}
 			else
 			{
@@ -363,9 +380,11 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			return mMembers->value.size();
+			/*
+			if ( mMembers->valid )
 			{
-				return /* mValues-> */ mMembers->value.size();
+				return  mMembers->value.size();
 			}
 			else
 			{
@@ -373,6 +392,7 @@ ValVector< T >::ValVector() try :
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
+			*/
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -386,8 +406,7 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			/* *mValid */ mMembers->valid = false;
-			/* mValues-> */
+			mMembers->valid = false;
 			mMembers->value.clear();
 		}
 		catch ( const std::exception& aExc )
@@ -402,9 +421,9 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			if ( mMembers->valid )
 			{
-				return /* mValues-> */ mMembers->value.begin();
+				return  mMembers->value.begin();
 			}
 			else
 			{
@@ -425,9 +444,9 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			if ( mMembers->valid )
 			{
-				return /* mValues-> */ mMembers->value.end();
+				return  mMembers->value.end();
 			}
 			else
 			{
@@ -448,9 +467,9 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			if ( mMembers->valid )
 			{
-				return /* mValues-> */ mMembers->value.rbegin();
+				return  mMembers->value.rbegin();
 			}
 			else
 			{
@@ -471,9 +490,9 @@ ValVector< T >::ValVector() try :
 	{
 		try
 		{
-			if ( /* *mValid */ mMembers->valid )
+			if ( mMembers->valid )
 			{
-				return /* mValues-> */ mMembers->value.rend();
+				return  mMembers->value.rend();
 			}
 			else
 			{
@@ -490,6 +509,99 @@ ValVector< T >::ValVector() try :
 	}
 
 
+	/*
+		template< typename T >
+		typename ValVector< T >::iterator ValVector< T >::begin()
+		{
+			try
+			{
+				if ( !mMembers->valid )
+				{
+					return  mMembers->value.begin();
+				}
+				else
+				{
+					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
+					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					throw ValMemImutabilityViolation();
+				}
+			}
+			catch ( const std::exception& aExc )
+			{
+				pantheios::log_EXCEPTION ( aExc );
+				throw uhal::exception ( aExc );
+			}
+		}
+
+		template< typename T >
+		typename ValVector< T >::iterator ValVector< T >::end()
+		{
+			try
+			{
+				if ( !mMembers->valid )
+				{
+					return  mMembers->value.end();
+				}
+				else
+				{
+					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
+					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					throw ValMemImutabilityViolation();
+				}
+			}
+			catch ( const std::exception& aExc )
+			{
+				pantheios::log_EXCEPTION ( aExc );
+				throw uhal::exception ( aExc );
+			}
+		}
+
+		template< typename T >
+		typename ValVector< T >::reverse_iterator ValVector< T >::rbegin()
+		{
+			try
+			{
+				if ( !mMembers->valid )
+				{
+					return  mMembers->value.rbegin();
+				}
+				else
+				{
+					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_reverse_iterator." );
+					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					throw ValMemImutabilityViolation();
+				}
+			}
+			catch ( const std::exception& aExc )
+			{
+				pantheios::log_EXCEPTION ( aExc );
+				throw uhal::exception ( aExc );
+			}
+		}
+
+		template< typename T >
+		typename ValVector< T >::reverse_iterator ValVector< T >::rend()
+		{
+			try
+			{
+				if ( !mMembers->valid )
+				{
+					return  mMembers->value.rend();
+				}
+				else
+				{
+					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
+					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					throw ValMemImutabilityViolation();
+				}
+			}
+			catch ( const std::exception& aExc )
+			{
+				pantheios::log_EXCEPTION ( aExc );
+				throw uhal::exception ( aExc );
+			}
+		}
+	*/
 
 
 	template class ValWord< uint32_t >;

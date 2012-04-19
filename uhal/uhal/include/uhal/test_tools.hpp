@@ -1,3 +1,10 @@
+/**
+	@file
+	@author Andrew W. Rose
+	@author Marc Magrans De Abril
+	@date 2012
+*/
+
 #ifndef _uhal_test_tools_hpp_
 #define _uhal_test_tools_hpp_
 
