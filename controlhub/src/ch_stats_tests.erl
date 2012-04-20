@@ -16,10 +16,10 @@
 
 
 %%% ===========================================================================
-%%% Test Fixture
+%%% Test Fixtures
 %%% 
-%%% The fixture itself including the list of tests to be run, and the
-%%% setup and teardown functions used by the fixture.
+%%% The test fixtures, including the lists of tests to be run, and the
+%%% setup and teardown functions used by the fixtures.
 %%% ===========================================================================
 
 %% Test fixture 
