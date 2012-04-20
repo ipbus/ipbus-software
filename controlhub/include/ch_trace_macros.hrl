@@ -68,12 +68,12 @@
 
 -define(PACKET_TRACE(PACKET_BIN, MESSAGE),
         io:format(lists:append(lists:append("PACKET_TRACE : PID=~p : ~p : ", MESSAGE), "~n"), [self(), ?MODULE]),
-        utils:print_binary_as_hex(PACKET_BIN)
+        ch_utils:print_binary_as_hex(PACKET_BIN)
        ).
 
 -define(PACKET_TRACE(PACKET_BIN, MESSAGE, MESSAGE_DATA),
         io:format(lists:append(lists:append("PACKET_TRACE : PID=~p : ~p : ", MESSAGE), "~n"), [self(), ?MODULE | MESSAGE_DATA]),        
-        utils:print_binary_as_hex(PACKET_BIN)
+        ch_utils:print_binary_as_hex(PACKET_BIN)
        ).       
 
 -else.

@@ -22,7 +22,7 @@
          client_request_malformed/0,
          client_response_sent/0,
          udp_in/0,
-         udp_malformed_in/0,
+         udp_malformed/0,
          udp_out/0,
          udp_response_timeout/0,
          get_active_clients/0,
@@ -31,7 +31,7 @@
          get_total_client_malformed_requests/0,
          get_total_client_responses/0,
          get_udp_in/0,
-         get_udp_malformed_in/0,
+         get_udp_malformed/0,
          get_udp_out/0,
          get_udp_response_timeouts/0,
          report_to_console/0]).
@@ -46,7 +46,7 @@
                 malformed_request_count = 0,
                 response_count = 0,
                 udp_in = 0,
-                udp_malformed_in = 0,
+                udp_malformed = 0,
                 udp_out = 0,
                 udp_response_timeouts = 0}).
 
@@ -105,7 +105,6 @@ client_disconnected() -> gen_server:cast(?MODULE, client_disconnected).
 %% ---------------------------------------------------------------------
 client_request_in() -> gen_server:cast(?MODULE, client_request_in).
 
-random_test() -> ?assert(false).
 %% ---------------------------------------------------------------------
 %% @doc Inform the stats server that a user-client request was determined
 %%      to be malformed.
@@ -136,13 +135,13 @@ udp_in() -> gen_server:cast(?MODULE, udp_in).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a UDP packet arrived and was
-%%      determined to be malformed.
+%% @doc Inform the stats server that a UDP packet was determined
+%%      to be malformed.
 %%
-%% @spec udp_malformed_in() -> ok
+%% @spec udp_malformed() -> ok
 %% @end
 %% ---------------------------------------------------------------------
-udp_malformed_in() -> gen_server:cast(?MODULE, udp_malformed_in).
+udp_malformed() -> gen_server:cast(?MODULE, udp_malformed).
 
 
 %% ---------------------------------------------------------------------
@@ -227,10 +226,10 @@ get_udp_in() -> gen_server:call(?MODULE, get_udp_in).
 %% @doc Returns the current total of incoming UDP packets that have been
 %%      determined to be malformed.
 %%
-%% @spec get_udp_malformed_in() -> integer()
+%% @spec get_udp_malformed() -> integer()
 %% @end
 %% ----------------------------------------------------------------------------
-get_udp_malformed_in() -> gen_server:call(?MODULE, get_udp_malformed_in).
+get_udp_malformed() -> gen_server:call(?MODULE, get_udp_malformed).
 
 %% ----------------------------------------------------------------------------
 %% @doc Returns the current total of UDP packets that have been sent.
@@ -303,8 +302,8 @@ handle_call(get_total_client_responses, _From,  State) ->
 handle_call(get_udp_in, _From,  State) ->
     {reply, State#state.udp_in, State};
 
-handle_call(get_udp_malformed_in, _From,  State) ->
-    {reply, State#state.udp_malformed_in, State};
+handle_call(get_udp_malformed, _From,  State) ->
+    {reply, State#state.udp_malformed, State};
 
 handle_call(get_udp_out, _From,  State) ->
     {reply, State#state.udp_out, State};
@@ -353,8 +352,8 @@ handle_cast(udp_in, State = #state{udp_in = Packets}) ->
     NewState = State#state{udp_in = Packets+1},
     {noreply, NewState};
 
-handle_cast(udp_malformed_in, State = #state{udp_malformed_in = Packets}) ->
-    NewState = State#state{udp_malformed_in = Packets+1},
+handle_cast(udp_malformed, State = #state{udp_malformed = Packets}) ->
+    NewState = State#state{udp_malformed = Packets+1},
     {noreply, NewState};
 
 handle_cast(udp_out, State = #state{udp_out = Packets}) ->
@@ -380,7 +379,7 @@ handle_cast(report_to_console, State) ->
                State#state.malformed_request_count,
                State#state.response_count,
                State#state.udp_in,
-               State#state.udp_malformed_in,
+               State#state.udp_malformed,
                State#state.udp_out,
                State#state.udp_response_timeouts]),
     {noreply, State};
