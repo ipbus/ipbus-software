@@ -25,7 +25,14 @@ namespace uhal
 			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const Node& aNode );
 
 			/**
+				Copy constructor
+			*/
+			HwInterface ( const HwInterface& aHwInterface );
+
+			
+			/**
 				Get the underlying IPbus client
+				@return the underlying IPbus client
 			*/
 			boost::shared_ptr<ClientInterface> getClient();
 
@@ -33,7 +40,12 @@ namespace uhal
 				Make the IPbus client issue a dispatch
 			*/
 			void dispatch ();
-
+			
+			/**
+				Ping the target for this client
+			*/
+			void ping();
+			
 			/**
 				Retrieve the Node given by a full-stop delimeted name path relative, to the top-level node
 				@param aId a full-stop delimeted name path to a node, relative to the top-level node

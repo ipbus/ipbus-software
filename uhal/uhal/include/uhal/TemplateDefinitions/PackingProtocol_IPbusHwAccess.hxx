@@ -134,11 +134,13 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 					//for( std::vector< boost::uint32_t >::const_iterator lReplyHeaderIt = lChunkIt->mReplyHeaders.begin() ; lReplyHeaderIt != lChunkIt->mReplyHeaders.end() ; ++lReplyHeaderIt ){
 					if ( lChunkIt->mReplyHeaders[0] != lChunkIt->mExpectedReplyHeader )
 					{
-						pantheios::log_ERROR ( "Reply header (" ,
+						pantheios::log_ERROR ( "Reply header " ,
 											   pantheios::integer ( lChunkIt->mReplyHeaders[0] , pantheios::fmt::fullHex | 10 ),
-											   ") does not match expected (0x",
+											   " does not match expected ",
 											   pantheios::integer ( lChunkIt->mExpectedReplyHeader , pantheios::fmt::fullHex | 10 ),
-											   ")!" );
+											   "!" );
+						pantheios::log_ERROR ( "Received : " , DebugIPbusHeader< IPbusProtocolVersion > ( lChunkIt->mReplyHeaders[0] ) );
+						pantheios::log_ERROR ( "Expected : " , DebugIPbusHeader< IPbusProtocolVersion > ( lChunkIt->mExpectedReplyHeader ) );
 						pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 						throw ReplyHeaderExpectationFailure();
 					}

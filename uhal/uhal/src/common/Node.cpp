@@ -247,6 +247,7 @@ namespace uhal
 
 Node::Node ( const pugi::xml_node& aXmlNode ) try :
 		mHw ( NULL ),
+			mUid ( "" ),
 			mAddr ( 0x00000000 ),
 			mMask ( 0xFFFFFFFF ),
 			mPermission ( defs::READWRITE ),
@@ -325,6 +326,35 @@ Node::Node ( const pugi::xml_node& aXmlNode ) try :
 		throw uhal::exception ( aExc );
 	}
 
+	
+	Node::Node ( const Node& aNode ) try :
+			mHw ( aNode.mHw ),
+			mUid ( aNode.mUid ),
+			mAddr ( aNode.mAddr ),
+			mMask ( aNode.mMask ),
+			mPermission ( aNode.mPermission ),
+			mChildren ( new std::vector < Node > ( *(aNode.mChildren) ) ),
+			mChildrenMap ( new std::hash_map< std::string , Node* > )
+	{
+		for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
+		{
+			//add the immediate child to the lookup map
+			mChildrenMap->insert ( std::make_pair ( lIt->mUid , & ( *lIt ) ) );
+
+			//add all the entries in the child's look-up map to the paren't look-up map, prepended with the child's name followed by a '.'
+			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap->begin() ; lSubMapIt != lIt->mChildrenMap->end() ; ++lSubMapIt )
+			{
+				mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			}
+		}
+	}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+	
+	
 
 	void Node::write ( const uint32_t& aValue )
 	{
@@ -483,4 +513,18 @@ Node::Node ( const pugi::xml_node& aXmlNode ) try :
 		}
 	}
 
+
+	boost::shared_ptr<ClientInterface> Node::getClient()
+	{
+		try
+		{
+			return mHw->getClient();
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}	
+	
 }

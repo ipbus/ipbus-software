@@ -14,6 +14,7 @@ namespace uhal
 				mInstance = new ClientFactory();
 				// ---------------------------------------------------------------------
 				mInstance->add< uhal::IPBusUDPClient<IPbus_1_3> > ( "ipbusudp" );
+				mInstance->add< uhal::IPBusUDPClient<IPbus_1_2> > ( "ipbusudp-1.2" );
 				mInstance->add< uhal::IPBusUDPClient<IPbus_1_3> > ( "ipbusudp-1.3" );
 				mInstance->add< uhal::IPBusUDPClient<IPbus_1_4> > ( "ipbusudp-1.4" );
 				mInstance->add< uhal::IPBusUDPClient<IPbus_2_0> > ( "ipbusudp-2.0" );

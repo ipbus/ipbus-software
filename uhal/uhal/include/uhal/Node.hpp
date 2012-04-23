@@ -12,9 +12,11 @@
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
 #include "uhal/Utilities.hpp"
+#include "uhal/ClientInterface.hpp"
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/regex.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <exception>
 #include <vector>
@@ -203,7 +205,11 @@ namespace uhal
 						ValWord< int32_t > rmw_sum ( const int32_t& aAddend );
 			*/
 
-
+			/**
+				Get the underlying IPbus client
+				@return the IPbus client that will be used to issue a dispatch
+			*/
+			boost::shared_ptr<ClientInterface> getClient();
 
 
 			//private:
@@ -215,7 +221,12 @@ namespace uhal
 			*/
 			Node ( const pugi::xml_node& aXmlNode );
 
-
+			/**
+				Copy constructor
+				Need to clone the children, not copy the pointer!
+				@param aNode a node to copy
+			*/
+			Node ( const Node& aNode );
 
 		private:
 			//! The parent hardware interface of which this node is a child (or rather decendent)
