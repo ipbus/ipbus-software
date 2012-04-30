@@ -66,11 +66,20 @@ env.Append(
 ) 
 
 env.Append( 
-	LIBS = [  'pantheios.1.core.gcc41' , 'pantheios.1.be.fprintf.gcc41' , 'pantheios.1.bec.fprintf.gcc41' , 'pantheios.1.fe.simple.gcc41' , 'pantheios.1.util.gcc41' , 'b64.1.pan.gcc41' , 'pantheios.1.core.gcc41' ] #core is needed a second time for gcc
+	LIBS = [  'pantheios.1.core.gcc41' , 
+				'pantheios.1.fe.simple.gcc41' , 
+				'pantheios.1.util.gcc41' , 
+				'b64.1.pan.gcc41' , 
+				'pantheios.1.core.gcc41' ] #core is needed a second time for gcc
 )  
 
+env.Append( 
+	LIBS = [  'boost_system' , 'boost_filesystem' , 'boost_regex' ]
+)  
 
-
+env.Append( 
+	LIBS = [  'PugiXML' ]
+)  
 
 #configure where scons puts its temporary file
 #env['CONFIGUREDIR'] = env['ENV']['microhal_path']+"/.sconf_temp"

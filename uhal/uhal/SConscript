@@ -21,8 +21,13 @@ lib = localenv.SharedLibrary(
 	source = [ Glob(localenv.BuildPath+'/src/common/*.cpp') ]
 )
 
+logging_lib = localenv.SharedLibrary( 
+	target = localenv.LibPath+'/uhal.pantheios.be.colour', 
+	source = [ localenv.BuildPath+'/src/common/pantheios.be.colour.cc' ]
+)
+
 # Install the libraries
-localenv.Install( localenv.InstallPath , lib )
+localenv.Install( localenv.InstallPath , [ lib , logging_lib ] )
 localenv.Alias( 'install', localenv.InstallPath )
 
 

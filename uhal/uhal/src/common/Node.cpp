@@ -326,14 +326,14 @@ Node::Node ( const pugi::xml_node& aXmlNode ) try :
 		throw uhal::exception ( aExc );
 	}
 
-	
-	Node::Node ( const Node& aNode ) try :
-			mHw ( aNode.mHw ),
+
+Node::Node ( const Node& aNode ) try :
+		mHw ( aNode.mHw ),
 			mUid ( aNode.mUid ),
 			mAddr ( aNode.mAddr ),
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
-			mChildren ( new std::vector < Node > ( *(aNode.mChildren) ) ),
+			mChildren ( new std::vector < Node > ( * ( aNode.mChildren ) ) ),
 			mChildrenMap ( new std::hash_map< std::string , Node* > )
 	{
 		for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
@@ -353,8 +353,8 @@ Node::Node ( const pugi::xml_node& aXmlNode ) try :
 		pantheios::log_EXCEPTION ( aExc );
 		throw uhal::exception ( aExc );
 	}
-	
-	
+
+
 
 	void Node::write ( const uint32_t& aValue )
 	{
@@ -525,6 +525,6 @@ Node::Node ( const pugi::xml_node& aXmlNode ) try :
 			pantheios::log_EXCEPTION ( aExc );
 			throw uhal::exception ( aExc );
 		}
-	}	
-	
+	}
+
 }

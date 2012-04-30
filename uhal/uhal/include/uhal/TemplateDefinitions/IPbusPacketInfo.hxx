@@ -305,6 +305,21 @@ namespace uhal
 			switch ( IPbusProtocolVersion )
 			{
 				case IPbus_1_2:
+				
+					switch ( mType )
+					{
+						case RMW_BITS:
+							return ( ( 1&0xF ) <<28 ) | ( ( aTransactionId&0x7ff ) <<17 ) | ( ( 2&0x1ff ) <<8 ) | mType;
+						case B_O_T:
+						case NI_WRITE:
+						case WRITE:
+						case NI_READ:
+						case READ:
+						case RMW_SUM:
+						case R_A_I:
+							return ( ( 1&0xF ) <<28 ) | ( ( aTransactionId&0x7ff ) <<17 ) | ( ( aWordCount&0x1ff ) <<8 ) | mType;
+					}
+					
 				case IPbus_1_3:
 
 					switch ( mType )

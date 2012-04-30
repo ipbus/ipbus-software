@@ -12,14 +12,31 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 	{
 		//We need to pad out the packets to compensate for the bug in the firmware
 		//If we didn't then the mByteOrderTransaction could be a single 32bit uint (as it was previously)
-		mByteOrderTransaction[0] = 0x10FE00F8;
-		mByteOrderTransaction[1] = 0x10FE00F8;
-		mByteOrderTransaction[2] = 0x10FE00F8;
-		mByteOrderTransaction[3] = 0x10FE00F8;
-		mByteOrderTransaction[4] = 0x10FE00F8;
-		mByteOrderTransaction[5] = 0x10FE00F8;
-		mByteOrderTransaction[6] = 0x10FE00F8;
-		mByteOrderTransaction[7] = 0x10FE00F8;
+		switch ( IPbusProtocolVersion )
+		{
+			case IPbus_1_2:
+			case IPbus_1_3:
+				mByteOrderTransaction[0] = 0x10FE00F8;
+				mByteOrderTransaction[1] = 0x10FE00F8;
+				mByteOrderTransaction[2] = 0x10FE00F8;
+				mByteOrderTransaction[3] = 0x10FE00F8;
+				mByteOrderTransaction[4] = 0x10FE00F8;
+				mByteOrderTransaction[5] = 0x10FE00F8;
+				mByteOrderTransaction[6] = 0x10FE00F8;
+				mByteOrderTransaction[7] = 0x10FE00F8;
+				break;
+			case IPbus_1_4:
+			case IPbus_2_0:
+				mByteOrderTransaction[0] = 0x200000FF;
+				mByteOrderTransaction[1] = 0x200000FF;
+				mByteOrderTransaction[2] = 0x200000FF;
+				mByteOrderTransaction[3] = 0x200000FF;
+				mByteOrderTransaction[4] = 0x200000FF;
+				mByteOrderTransaction[5] = 0x200000FF;
+				mByteOrderTransaction[6] = 0x200000FF;
+				mByteOrderTransaction[7] = 0x200000FF;
+				break;
+		}
 	}
 	catch ( const std::exception& aExc )
 	{

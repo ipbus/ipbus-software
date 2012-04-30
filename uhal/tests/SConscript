@@ -11,7 +11,11 @@ localenv.VariantDir( localenv.SrcBuildPath , 'src/common' , duplicate=0 )
 
 ## Add default libs
 localenv.Append( 
-	LIBS = [ 'uhal' , 'BoostSpiritGrammars' , 'boost_system' , 'boost_filesystem' , 'boost_regex' , 'PugiXML' , 'pantheios.1.core.gcc41' , 'pantheios.1.be.fprintf.gcc41' , 'pantheios.1.bec.fprintf.gcc41' , 'pantheios.1.fe.all.gcc41' , 'pantheios.1.util.gcc41' , 'pantheios.1.core.gcc41'  ] 
+	LIBS = [ 'uhal' , 'BoostSpiritGrammars' , 
+	'pantheios.1.be.fprintf.gcc41' , 'pantheios.1.bec.fprintf.gcc41'	#to use the stock logging back end, include this line
+	#'uhal.pantheios.be.colour' 										#to use the custom, coloured back end, include this line instead
+	] 
+
 )  
 
 ## Compile the IPbusClient Unit Test as an executable

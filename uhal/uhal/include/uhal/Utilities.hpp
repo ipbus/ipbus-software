@@ -609,7 +609,8 @@ namespace uhal
 			try
 			{
 				pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
-				if( ! lAttr.empty() )
+
+				if ( ! lAttr.empty() )
 				{
 					aTarget = lAttr.value();
 					return true;
@@ -644,7 +645,8 @@ namespace uhal
 			try
 			{
 				pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
-				if( ! lAttr.empty() )
+
+				if ( ! lAttr.empty() )
 				{
 					aTarget = lAttr.value();
 					return true;
@@ -679,31 +681,41 @@ namespace uhal
 			try
 			{
 				pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
-				if( ! lAttr.empty() )
+
+				if ( ! lAttr.empty() )
 				{
-				
-					std::string lAttrStr( lAttr.value() );
-					std::stringstream ss; 
-					
+					std::string lAttrStr ( lAttr.value() );
+					std::stringstream ss;
+
 					//if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
-					if( lAttrStr.size() > 2 ) {
-						if ( (lAttrStr[1] == 'x') || (lAttrStr[1] == 'X') ){
-							ss << std::hex << lAttrStr.substr(2);						
-						}else{
+					if ( lAttrStr.size() > 2 )
+					{
+						if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
+						{
+							ss << std::hex << lAttrStr.substr ( 2 );
+						}
+						else
+						{
 							ss << lAttrStr;
 						}
-					}else if ( lAttrStr.size() > 1 ){
-						if( (lAttrStr[0] == 'x') || (lAttrStr[0] == 'X') ){
-							ss << std::hex << lAttrStr.substr(1);
-						}else{
+					}
+					else if ( lAttrStr.size() > 1 )
+					{
+						if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
+						{
+							ss << std::hex << lAttrStr.substr ( 1 );
+						}
+						else
+						{
 							ss << lAttrStr;
 						}
-					}else{
+					}
+					else
+					{
 						ss << lAttrStr;
 					}
-					
-					ss >> aTarget; 
-					
+
+					ss >> aTarget;
 					// aTarget = lAttr.as_int();
 					return true;
 				}
@@ -737,30 +749,41 @@ namespace uhal
 			try
 			{
 				pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
-				if( ! lAttr.empty() )
+
+				if ( ! lAttr.empty() )
 				{
-					std::string lAttrStr( lAttr.value() );
-					std::stringstream ss; 
-					
+					std::string lAttrStr ( lAttr.value() );
+					std::stringstream ss;
+
 					//if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
-					if( lAttrStr.size() > 2 ) {
-						if ( (lAttrStr[1] == 'x') || (lAttrStr[1] == 'X') ){
-							ss << std::hex << lAttrStr.substr(2);						
-						}else{
+					if ( lAttrStr.size() > 2 )
+					{
+						if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
+						{
+							ss << std::hex << lAttrStr.substr ( 2 );
+						}
+						else
+						{
 							ss << lAttrStr;
 						}
-					}else if ( lAttrStr.size() > 1 ){
-						if( (lAttrStr[0] == 'x') || (lAttrStr[0] == 'X') ){
-							ss << std::hex << lAttrStr.substr(1);
-						}else{
+					}
+					else if ( lAttrStr.size() > 1 )
+					{
+						if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
+						{
+							ss << std::hex << lAttrStr.substr ( 1 );
+						}
+						else
+						{
 							ss << lAttrStr;
 						}
-					}else{
+					}
+					else
+					{
 						ss << lAttrStr;
 					}
-					
-					ss >> aTarget; 
-					
+
+					ss >> aTarget;
 					// aTarget = lAttr.as_uint();
 					return true;
 				}
@@ -794,7 +817,8 @@ namespace uhal
 			try
 			{
 				pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
-				if( ! lAttr.empty() )
+
+				if ( ! lAttr.empty() )
 				{
 					aTarget = lAttr.as_double();
 					return true;
@@ -829,7 +853,8 @@ namespace uhal
 			try
 			{
 				pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
-				if( ! lAttr.empty() )
+
+				if ( ! lAttr.empty() )
 				{
 					aTarget = lAttr.as_float();
 					return true;
@@ -864,7 +889,8 @@ namespace uhal
 			try
 			{
 				pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
-				if( ! lAttr.empty() )
+
+				if ( ! lAttr.empty() )
 				{
 					aTarget = lAttr.as_bool();
 					return true;

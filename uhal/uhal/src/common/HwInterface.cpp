@@ -5,7 +5,7 @@
 namespace uhal
 {
 
-	HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const Node& aNode ) try :
+HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const Node& aNode ) try :
 		mClientInterface ( aClientInterface ),
 						 mNode ( aNode )
 	{
@@ -17,10 +17,10 @@ namespace uhal
 		throw uhal::exception ( aExc );
 	}
 
-	
-	HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
+
+HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		mClientInterface ( aHwInterface.mClientInterface ),
-							mNode ( aHwInterface.mNode )
+						 mNode ( aHwInterface.mNode )
 	{
 		claimNode ( mNode );
 	}
@@ -28,9 +28,9 @@ namespace uhal
 	{
 		pantheios::log_EXCEPTION ( aExc );
 		throw uhal::exception ( aExc );
-	}	
-	
-	
+	}
+
+
 	void HwInterface::claimNode ( Node& aNode )
 	{
 		try
@@ -73,8 +73,8 @@ namespace uhal
 			pantheios::log_EXCEPTION ( aExc );
 			throw uhal::exception ( aExc );
 		}
-	}	
-	
+	}
+
 	void HwInterface::dispatch ()
 	{
 		try

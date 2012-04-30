@@ -43,10 +43,10 @@ namespace BoostSpiritGrammars
 		start = protocol > hostname > port > - ( path ) > - ( extension ) > - ( data_pairs_vector );
 		protocol = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( "://" );
 		hostname = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( ":" );
-		port 	 = + ( qi::char_ - qi::lit ( "/" ) ) > qi::lit ( "/" );
-		path = + ( qi::char_ - qi::lit ( "." ) - qi::lit ( "?" ) );
-		extension = qi::lit ( "." ) > + ( qi::char_ - qi::lit ( "?" ) ) ;
-		data_pairs_vector = qi::lit ( "?" ) > *data_pairs;
+		port 	 = + ( qi::char_ - ascii::punct ) ;
+		path 				= qi::lit ( "/" ) > + ( qi::char_ - qi::lit ( "." ) - qi::lit ( "?" ) );
+		extension 			= qi::lit ( "." ) > + ( qi::char_ - qi::lit ( "?" ) ) ;
+		data_pairs_vector 	= qi::lit ( "?" ) > *data_pairs;
 		data_pairs = data_pairs_1 > data_pairs_2;
 		data_pairs_1 = + ( qi::char_ - qi::lit ( "=" ) ) > qi::lit ( "=" );
 		data_pairs_2 = * ( qi::char_ - qi::lit ( "&" ) ) >> - ( qi::lit ( "&" ) );
