@@ -14,42 +14,60 @@
 
 %% --------------------------------------------------------------------
 %% External exports
--export([start/3, send/2]).
+-export([start_link/2, send/4]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--record(state, {socket = null}).
+-record(state, {socket = null,                   % Network socket to target device
+                device_client_index_tid = null   % For storing the Device Client Index ETS table ID.
+               }
+       ).
 
 
-%% ====================================================================
-%% External functions
-%% ====================================================================
-
-% Starts up a device client process and returns its process ID or an error reason.
-%% @spec start( DeviceId::integer(), IPaddress::string(), Port::integer() ) -> {ok, Pid} | {error, Error} 
-start(DeviceID, IPaddress, Port) when is_integer(DeviceID), is_list(IPaddress), is_integer(Port) ->
-    gen_server:start(?MODULE, [DeviceID, IPaddress, Port], []).
+%%% ====================================================================
+%%% API functions (public interface)
+%%% ====================================================================
 
 
-% An asynchronous request to sends some instructions to a device. The response is returned to the calling
-% seperately - i.e. not through the return value of this function.
-send(DeviceID, Instructions) when is_integer(DeviceID),
-                                  is_binary(Instructions) ->
-    case device_client_index:get_pid(DeviceID) of
-        undefined ->
-            %TODO: Deal with this error properly
-            io:format("Ignoring send request to non-existant DeviceID = ~p~n", [DeviceID]),
-            unknown_device_id;
-        Pid when is_pid(Pid) ->
-            gen_server:cast(Pid, {send, Instructions, self()})
-    end.
+%% ---------------------------------------------------------------------
+%% @doc Start up a Device Client for a given target IP address (given
+%%      as a 32-bit integer) and port number.
+%%
+%% @spec start_link(IPaddr::integer(), Port::integer) -> {ok, Pid} | {error, Error}
+%% @end
+%% ---------------------------------------------------------------------
+start_link(IPaddr, Port) when is_integer(IPaddr), is_integer(Port) ->
+    gen_server:start_link(?MODULE, [IPaddr, Port], []).
+
+
+%% ---------------------------------------------------------------------
+%% @doc Send some instructions to target hardware at the specified
+%%      IPaddr and Port. The Device Client Index ETS table ID (DCIndex)
+%%      must also be provided for efficient lookup of the appropriate
+%%      Device Client process. The IP address is given as a raw 32-bit
+%%      integer (no "192.168.0.1" strings, etc). Note that this send
+%%      function is asynchoronous; the response is returned to the
+%%      sender seperately - i.e. not through the return value of this
+%%      function.
+%%
+%% @spec send(DCIndex::tid(),
+%%            IPaddr::integer(),
+%%            Port::integer(),
+%%            Instructions::binary()) -> ok
+%% @end
+%% ---------------------------------------------------------------------
+send(DCIndex, IPaddr, Port, Instructions) when is_binary(Instructions) ->
+    Pid = device_client_registry:get_pid(DCIndex, IPaddr, Port),
+    gen_server:cast(Pid, {send, Instructions, self()}),
+    ok.
     
     
 
-%% ====================================================================
-%% Server functions
-%% ====================================================================
+%%% ====================================================================
+%%% gen_server callbacks
+%%% ====================================================================
+
 
 %% --------------------------------------------------------------------
 %% Function: init/1
@@ -59,22 +77,27 @@ send(DeviceID, Instructions) when is_integer(DeviceID),
 %%          ignore               |
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
-init([DeviceID, IPaddress, Port]) ->
-    % These three are all "process constants", and hence OK to use process dict.
-    put(deviceID, DeviceID),
-    put(deviceIP, IPaddress),
-    put(devicePort, Port),
+init([IPaddr, Port]) ->
+    % Put process constants in process dict.
+    put(targetIP, IPaddr),
+    put(targetPort, Port),
+    % Tuple summarising the target address - useful for error/trace messages, etc.
+    put(targetSummary, {device_client_target, {ipaddr,ch_utils:ipv4_addr_to_tuple(IPaddr)}, {port, Port}}),
     
     % Try opening ephemeral port and we want data delivered as a binary.
     case gen_udp:open(0, [binary]) of   
         {ok, Socket} -> {ok, #state{socket = Socket}};
         {error, Reason} when is_atom(Reason) ->
-            ErrorMessage = "Couldn't open UDP socket for device ID '" ++ integer_to_list(DeviceID) ++
-                           "'. Posix error code is: " ++ atom_to_list(Reason) ++ ".",
+            ErrorMessage = {"Device client couldn't open UDP port to target",
+                            get(targetSummary),
+                            {errorCode, Reason}
+                           },
             {stop, ErrorMessage};
         _ ->
-            ErrorMessage = "Couldn't open UDP socket for device ID '" ++ integer_to_list(DeviceID) ++
-                           "'. Cause unknown - received unexpected error response.",
+            ErrorMessage = {"Device client couldn't open UDP port to target",
+                            get(targetSummary),
+                            {errorCode, unknown}
+                           },
             {stop, ErrorMessage}
     end.
     
@@ -102,25 +125,19 @@ handle_call(_Request, _From, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_cast({send, Instructions, ClientPid}, State = #state{socket = Socket}) ->
-    ?DEBUG_TRACE("Instructions received from Transaction Manager with PID = ~p.  Forwarding to DeviceID = ~p...", [ClientPid, get(deviceID)]),
+    ?DEBUG_TRACE("Instructions received from Transaction Manager with PID = ~p.  Forwarding to ~p...", [ClientPid, get(targetSummary)]),
     ch_stats:udp_out(),
-    ok = gen_udp:send(Socket, get(deviceIP), get(devicePort), Instructions),
+    ok = gen_udp:send(Socket, get(targetIP), get(targetPort), Instructions),
     Reply = receive
                 {udp, Socket, _, _, HardwareReplyBin} -> 
-                    ?DEBUG_TRACE("Received response from DeviceID = ~p. Passing it to originating Transaction Manager...", [get(deviceID)]),
+                    ?DEBUG_TRACE("Received response from ~p. Passing it to originating Transaction Manager...", [get(targetSummary)]),
                     ch_stats:udp_in(),
-                    % Now prepend the deviceID to the front of the HardwareReplyBin
-                    CompleteResponse = list_to_binary([<<(get(deviceID)):32>>, HardwareReplyBin]),
-                    {device_client_response, get(deviceID), ok, CompleteResponse}
+                    {device_client_response, get(targetIP), get(targetPort), {ok, HardwareReplyBin} }
             after ?DEVICE_CLIENT_UDP_TIMEOUT ->
-                ?DEBUG_TRACE("TIMEOUT REACHED! No response from DeviceID = ~p. Generating and sending a timeout "
-                             "response to originating Transaction Manager...", [get(deviceID)]),
+                ?DEBUG_TRACE("TIMEOUT REACHED! No response from ~p. Generating and sending a timeout "
+                             "response to originating Transaction Manager...", [get(targetSummary)]),
                 ch_stats:udp_response_timeout(),
-                TimeoutResponseBin = <<
-                                       (get(deviceID)):32,
-                                       16#00000000:32
-                                     >>,
-                {device_client_response, get(deviceID), udp_response_timeout, TimeoutResponseBin}
+                {device_client_response, get(targetIP), get(targetPort), {error, udp_response_timeout} }
             end,
     ClientPid ! Reply,
     {noreply, State};
@@ -155,7 +172,9 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
-%% --------------------------------------------------------------------
-%%% Internal functions
-%% --------------------------------------------------------------------
+
+
+%%% --------------------------------------------------------------------
+%%% Internal functions (private)
+%%% --------------------------------------------------------------------
 
