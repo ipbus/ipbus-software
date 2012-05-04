@@ -21,6 +21,6 @@
                  ch_stats,
                  ch_sup]},
    {applications, [kernel, stdlib]},
-   {mod, {controlhub_app, []}},
+   {mod, {controlhub_app, []}}
  ]
-}
+}.
