@@ -15,16 +15,13 @@ INCLUDE_DIR=include
 INCLUDES=$(wildcard $(INCLUDE_DIR)/*.hrl)
 OBJECTS=$(SOURCES:src/%.erl=ebin/%.beam)
 
-all: ebin_dir $(OBJECTS) test
-
-ebin_dir:
-	test -d $(OBJDIR) || mkdir $(OBJDIR)
+all: $(OBJECTS) test
 
 ebin/%.beam : src/%.erl $(INCLUDES)
 	erlc $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
 
 clean: 
-	rm -rf ebin
+	rm -f ebin/*.beam
 
 test:
 	erl -noshell -pa ebin -eval 'eunit:test("ebin",[verbose])' -s init stop
