@@ -18,7 +18,7 @@
 %%% ===========================================================================
 %%% Test Fixtures
 %%% 
-%%% The test fixtures, including the lists of tests to be run, and the
+%%% The test fixtures that contain lists of tests to be run, and the
 %%% setup and teardown functions used by the fixtures.
 %%% ===========================================================================
 

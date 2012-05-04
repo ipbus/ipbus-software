@@ -36,19 +36,19 @@
          get_udp_response_timeouts/0,
          report_to_console/0]).
 
-%% gen_server callbacks
+%% Behavioural exports - the gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 %% Server state record definition - all of type integer().
--record(state, {active_clients = 0,
-                max_active_clients = 0,
-                request_count = 0,
-                malformed_request_count = 0,
-                response_count = 0,
-                udp_in = 0,
-                udp_malformed = 0,
-                udp_out = 0,
-                udp_response_timeouts = 0}).
+-record(state, {active_clients = 0 :: integer(),
+                max_active_clients = 0 :: integer(),
+                request_count = 0 :: integer(),
+                malformed_request_count = 0 :: integer(),
+                response_count = 0 :: integer(),
+                udp_in = 0 :: integer(),
+                udp_malformed = 0 :: integer(),
+                udp_out = 0 :: integer(),
+                udp_response_timeouts = 0 :: integer()}).
 
 
 
@@ -58,7 +58,7 @@
 
     
 %% ---------------------------------------------------------------------
-%% @doc Starts a singleton Control Hub stats server.
+%% @doc Starts the (singleton) stats server.
 %%
 %% @spec start_link() -> {ok, Pid} | {error, {already_started, Pid}}
 %% where
@@ -69,7 +69,7 @@ start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Stops the Control Hub stats server.
+%% @doc Stops the stats server.
 %%
 %% @spec stop() -> ok
 %% @end
