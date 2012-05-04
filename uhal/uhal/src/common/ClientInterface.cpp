@@ -129,11 +129,11 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			// We must, therefore, use Read-Modify-Write, rather than a plain old write
 			IPbusPacketInfo lIPbusPacketInfo;
 			// lIPbusPacketInfo.setHeader ( WRITE , 1 , aAddr );
-			// lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) && aMask );
+			// lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) & aMask );
 			mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 ) );
 			lIPbusPacketInfo.setHeader ( RMW_BITS , 2 , aAddr );
 			lIPbusPacketInfo.setPayload ( ~aMask );
-			lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) && aMask );
+			lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) & aMask );
 			lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
 			pack ( lIPbusPacketInfo );
 		}

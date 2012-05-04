@@ -51,6 +51,9 @@ namespace uhal
 			void ReceiveHandler ( const boost::system::error_code& aErrorCode, std::size_t aReplyLength, std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef );
 
 			inline const tAccumulatedPackets& getAccumulatedPackets();
+			
+			template< int LogLevel >
+			void debug( const pantheios::level< LogLevel >& aLogLevel );
 
 		private:
 			//! The raw stream packets which will be sent by the transport protocol

@@ -82,21 +82,22 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 
 			for ( tAccumulatedPackets::const_iterator lAccumulatedPacketIt = mPackingProtocol.getAccumulatedPackets().begin() ; lAccumulatedPacketIt != mPackingProtocol.getAccumulatedPackets().end() ; ++lAccumulatedPacketIt )
 			{
-				//#ifdef DEBUGGING
-				for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
+				if(pantheios::isSeverityLogged(pantheios::debug) )
 				{
-					pantheios::log_DEBUG ( ">>> ----------------" );
-					std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
-					const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
-
-					for ( unsigned int y=0; y!=s1>>2; ++y )
+					for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
 					{
-						pantheios::log_DEBUG ( "SENDING  " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
-					}
-				}
+						pantheios::log_DEBUG ( ">>> ----------------" );
+						std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+						const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
 
-				pantheios::log_DEBUG ( ">>> ----------------" );
-				//#endif // DEBUGGING
+						for ( unsigned int y=0; y!=s1>>2; ++y )
+						{
+							pantheios::log_DEBUG ( "SENDING  " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+						}
+					}
+
+					pantheios::log_DEBUG ( ">>> ----------------" );
+				}
 
 				if ( lAccumulatedPacketIt->mSendBuffers.size() == 0 )
 				{
@@ -158,21 +159,23 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 				}
 				while ( ( lReplyLength>>2 ) != lAccumulatedPacketIt->mCumulativeReturnSize );
 
-				//#ifdef DEBUGGING
-				for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
+				if(pantheios::isSeverityLogged(pantheios::debug) )
 				{
-					pantheios::log_DEBUG ( ">>> ----------------" );
-					std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
-					const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
-
-					for ( unsigned int y=0; y!=s1>>2; ++y )
+					for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
 					{
-						pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
-					}
-				}
+						pantheios::log_DEBUG ( ">>> ----------------" );
+						std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+						const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
 
-				pantheios::log_DEBUG ( ">>> ----------------" );
-				//#endif // DEBUGGING
+						for ( unsigned int y=0; y!=s1>>2; ++y )
+						{
+							pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+						}
+					}
+
+					pantheios::log_DEBUG ( ">>> ----------------" );
+				}
+				
 				// std::cout << (mThis->mReplyLength>>2) << " vs. " << lAccumulatedPacketIt->mCumulativeReturnSize << std::endl;
 				//check that it is the right length...
 				// if( (mThis->mReplyLength>>2) != lAccumulatedPacketIt->mCumulativeReturnSize ){

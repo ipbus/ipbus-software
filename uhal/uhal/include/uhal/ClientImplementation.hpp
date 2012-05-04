@@ -37,7 +37,7 @@ namespace uhal
 				The maximum allowed IPbus packet length.
 				@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
 			*/
-			static const int mMaxPacketLength = 128;
+			static const int mMaxPacketLength = 85; //for some reason BOOST ASIO only sends a maximum of 340 bytes ( at least it does on my CENTOS VM )
 
 			//! Typedef the packing protocol which will be used by this IPbus Client
 			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;

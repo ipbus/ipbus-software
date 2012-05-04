@@ -54,7 +54,7 @@ namespace uhal
 				@param aFilenameExpr a Filename Expression
 				@return the newly created node tree
 			*/
-			Node getAddressTable ( const std::string& aFilenameExpr );
+			Node getAddressTable ( const std::string& aFilenameExpr , const uint32_t& aAddr = 0x00000000 , const uint32_t& aAddrMask = 0xFFFFFFFF );
 
 			/**
 				Method called once the file specified in the call to getAddressTable( aFilenameExpr ) has been opened
@@ -63,7 +63,7 @@ namespace uhal
 				@param aFile A byte vector containing the content of the opened file. Done like this since the routine handles local and http files identically
 				@param aAddressTable The address table constructed from the file
 			*/
-			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< Node >& aAddressTable );
+			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< Node >& aAddressTable );
 
 		private:
 			//! The single instance of the class

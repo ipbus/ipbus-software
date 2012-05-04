@@ -397,6 +397,38 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 										   "!" );
 					pantheios::log_ERROR ( "Received : " , DebugIPbusHeader< IPbusProtocolVersion > ( *mTransactionHeader ) );
 					pantheios::log_ERROR ( "Expected : " , DebugIPbusHeader< IPbusProtocolVersion > ( lChunkPtr->mExpectedReplyHeader ) );
+					
+					pantheios::log_ERROR ( "Transaction history :" );						
+					for ( tAccumulatedPackets::const_iterator lAccumulatedPacketIt = mAccumulatedPackets.begin() ; lAccumulatedPacketIt != mAccumulatedPackets.end() ; ++lAccumulatedPacketIt )
+					{
+						for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
+						{
+							pantheios::log_ERROR ( "-------------------" );
+							std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+							const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
+
+							for ( unsigned int y=0; y!=s1>>2; ++y )
+							{
+								pantheios::log_ERROR ( "SENT " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+							}
+						}							
+						
+						for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
+						{
+							pantheios::log_ERROR ( "-------------------" );
+							std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+							const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
+
+							for ( unsigned int y=0; y!=s1>>2; ++y )
+							{
+								pantheios::log_ERROR ( "RECEIVED " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+							}
+						}
+
+						pantheios::log_ERROR ( "-------------------" );
+
+					}
+					
 					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 					aError = true;
 					return;

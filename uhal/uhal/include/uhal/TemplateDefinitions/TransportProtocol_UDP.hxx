@@ -65,6 +65,7 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 	template < class PACKINGPROTOCOL >
 	void UdpTransportProtocol< PACKINGPROTOCOL >::Dispatch()
 	{
+	
 		try
 		{
 			//I use lazy evaluation here - i.e. don't try making a connection until we actually use it
@@ -76,26 +77,46 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 				mResolver = new boost::asio::ip::udp::resolver ( mIOservice );
 				mQuery = new boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , mHostname , mServiceOrPort );
 				mIterator = mResolver->resolve ( *mQuery );
-				pantheios::log_NOTICE ( "UDP connection setup succeeded" );
+				pantheios::log_NOTICE ( "UDP connection setup succeeded" );			
 			}
 
 			for ( tAccumulatedPackets::const_iterator lAccumulatedPacketIt = mPackingProtocol.getAccumulatedPackets().begin() ; lAccumulatedPacketIt != mPackingProtocol.getAccumulatedPackets().end() ; ++lAccumulatedPacketIt )
 			{
-				//#ifdef DEBUGGING
-				for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
+			
+				// if( pantheios::isSeverityLogged(pantheios::informational) )
+				// {			
+					// uint32_t lSendSize(0);
+					// for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
+					// {
+						// lSendSize+=boost::asio::buffer_size ( *lBufIt );
+					// }
+					
+					// uint32_t lReplySize(0);
+					// for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
+					// {
+						// lReplySize+=boost::asio::buffer_size ( *lBufIt );					
+					// }
+					
+					// pantheios::log_INFORMATIONAL ( "mCumulativeSendSize:" , pantheios::integer ( lAccumulatedPacketIt->mCumulativeSendSize<<2 ) , " bytes vs. Calculated Send Size: " , pantheios::integer ( lSendSize ) , " bytes" );
+					// pantheios::log_INFORMATIONAL ( "mCumulativeReturnSize:" , pantheios::integer ( lAccumulatedPacketIt->mCumulativeReturnSize<<2 ) , " bytes vs. Calculated Return Size: " , pantheios::integer ( lReplySize ) , " bytes"  );
+				// }
+				
+				if( pantheios::isSeverityLogged(pantheios::debug) )
 				{
-					pantheios::log_DEBUG ( ">>> ----------------" );
-					std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
-					const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
-
-					for ( unsigned int y=0; y!=s1>>2; ++y )
+					for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
 					{
-						pantheios::log_DEBUG ( "SENDING  " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
-					}
-				}
+						pantheios::log_DEBUG ( ">>> ----------------" );
+						std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+						const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
 
-				pantheios::log_DEBUG ( ">>> ----------------" );
-				//#endif // DEBUGGING
+						for ( unsigned int y=0; y!=s1>>2; ++y )
+						{
+							pantheios::log_DEBUG ( "SENDING  " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+						}
+					}
+
+					pantheios::log_DEBUG ( ">>> ----------------" );
+				}
 
 				if ( lAccumulatedPacketIt->mSendBuffers.size() == 0 )
 				{
@@ -103,7 +124,9 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 				}
 
 				//send
-				mSocket->send_to ( lAccumulatedPacketIt->mSendBuffers , *mIterator );
+				std::size_t lSentSize = mSocket->send_to ( lAccumulatedPacketIt->mSendBuffers , *mIterator );
+				pantheios::log_INFORMATIONAL ( pantheios::integer ( lAccumulatedPacketIt->mCumulativeSendSize<<2 ) , " bytes in accumulated packet. ASIO sees " , pantheios::integer (  boost::asio::buffer_size( lAccumulatedPacketIt->mSendBuffers) ) , " bytes in accumulated packet. Sent: " , pantheios::integer ( lSentSize ) , " bytes" ); 				
+				
 				//set deadline for reply
 				mDeadline.expires_from_now ( mTimeOut );
 				//wait for reply
@@ -151,21 +174,22 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 				}
 				while ( lAwaitingCallBack );
 
-				//#ifdef DEBUGGING
-				for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
+				if(pantheios::isSeverityLogged(pantheios::debug) )
 				{
-					pantheios::log_DEBUG ( ">>> ----------------" );
-					std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
-					const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
-
-					for ( unsigned int y=0; y!=s1>>2; ++y )
+					for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
 					{
-						pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
-					}
-				}
+						pantheios::log_DEBUG ( ">>> ----------------" );
+						std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+						const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
 
-				pantheios::log_DEBUG ( ">>> ----------------" );
-				//#endif // DEBUGGING
+						for ( unsigned int y=0; y!=s1>>2; ++y )
+						{
+							pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+						}
+					}
+
+					pantheios::log_DEBUG ( ">>> ----------------" );
+				}
 				// std::cout << (mThis->mReplyLength>>2) << " vs. " << lAccumulatedPacketIt->mCumulativeReturnSize << std::endl;
 				//check that it is the right length...
 				// if( (mThis->mReplyLength>>2) != lAccumulatedPacketIt->mCumulativeReturnSize ){
@@ -178,6 +202,10 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 				if ( ( lReplyLength>>2 ) != lAccumulatedPacketIt->mCumulativeReturnSize )
 				{
 					pantheios::log_ERROR (	"Return size (", pantheios::integer ( lReplyLength>>2 ) ,") does not match expected (", pantheios::integer ( lAccumulatedPacketIt->mCumulativeReturnSize ) ,")" );
+					pantheios::log_ERROR ( "Transaction history :" );					
+
+					mPackingProtocol.debug( pantheios::error );	
+					 					
 					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 					throw ReturnSizeMismatch();
 				}

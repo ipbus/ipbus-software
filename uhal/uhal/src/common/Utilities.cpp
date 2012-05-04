@@ -45,7 +45,6 @@ namespace uhal
 
 				std::size_t lDist0 ( lIt0 - lIt1 );
 				std::size_t lDist1 ( lIt2 - lIt0 );
-				pantheios::log_ERROR ( "Error occured at line number " , pantheios::integer ( lLineCounter ) , ", character " , pantheios::integer ( lDist0+1 ) );
 				std::string lLine;
 				lLine.reserve ( lIt2 - lIt1 );
 
@@ -61,8 +60,10 @@ namespace uhal
 					}
 				}
 
-				pantheios::log_ERROR ( "LINE           : " , lLine , "\n"
-									   "ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
+				pantheios::log_ERROR ( "Error occured at line number " , pantheios::integer ( lLineCounter ) , 
+										", character " , pantheios::integer ( lDist0+1 ) , "\n"
+										"LINE           : " , lLine , "\n"
+										"ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
 			}
 			catch ( const std::exception& aExc )
 			{

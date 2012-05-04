@@ -52,7 +52,12 @@ namespace uhal
 	class NodeMustHaveUID: public uhal::exception {  };
 	//! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
 	class NoBranchFoundWithGivenUID: public uhal::exception {  };
-
+	//! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
+	class ChildHasAddressOverlap: public uhal::exception {  };
+	//! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
+	class ChildHasAddressMaskOverlap: public uhal::exception {  };
+	
+	
 	//! A heirarchical node for navigating heirarchical firmwares
 	class Node
 	{
@@ -219,7 +224,7 @@ namespace uhal
 				Construct a node from a PugiXML node
 				@param aXmlNode a PugiXML node from which to construct a node
 			*/
-			Node ( const pugi::xml_node& aXmlNode );
+			Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
 
 			/**
 				Copy constructor
@@ -236,6 +241,10 @@ namespace uhal
 			std::string mUid;
 			//! The register address with which this node is associated
 			uint32_t mAddr;
+			
+			//! The register address with which this node is associated
+			uint32_t mAddrMask;			
+			
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
 			//! The read/write access permissions of this node

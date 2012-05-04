@@ -8,6 +8,7 @@
 #define _uhal_AsioAccumulatedPacket_hpp_
 
 #include <deque>
+#include <vector>
 #include <boost/asio.hpp>
 
 //! A struct for creating, filling and holding a buffer to be sent

@@ -29,7 +29,7 @@ namespace uhal
 		}
 	}
 
-	Node AddressTableBuilder::getAddressTable ( const std::string& aFilenameExpr )
+	Node AddressTableBuilder::getAddressTable ( const std::string& aFilenameExpr , const uint32_t& aAddr , const uint32_t& aAddrMask )
 	{
 		try
 		{
@@ -45,7 +45,7 @@ namespace uhal
 
 			std::vector< Node > lNodes;
 
-			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind ( &AddressTableBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , boost::ref ( lNodes ) ) ) )
+			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind ( &AddressTableBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , aAddr , aAddrMask , boost::ref ( lNodes ) ) ) )
 			{
 				pantheios::log_ERROR ( "Failed to open address table file \"" , lAddressFiles[0].second , "\"" );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
@@ -69,7 +69,7 @@ namespace uhal
 	}
 
 
-	void AddressTableBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< Node >& aNodes )
+	void AddressTableBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< Node >& aNodes )
 	{
 		try
 		{
@@ -104,7 +104,7 @@ namespace uhal
 					return;
 				}
 
-				Node lNode ( lXmlNode );
+				Node lNode ( lXmlNode , aAddr , aAddrMask );
 				aNodes.push_back ( lNode );
 				return;
 			}

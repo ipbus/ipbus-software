@@ -22,10 +22,10 @@
 #include "uhal/log.hpp"
 
 // Forward declare the class so we can declare the friend outside the namespace
-namespace uhal
-{
-	class IPbusPacketInfo;
-}
+// namespace uhal
+// {
+	// class IPbusPacketInfo;
+// }
 
 //	Declare the friend streaming class for aIPbusPacketInfo outside the uhal namespace.
 /**
@@ -34,7 +34,7 @@ namespace uhal
 	@param aIPbusPacketInfo a IPbusPacketInfo to output
 	@return a stream for further appending
 */
-std::ostream& operator<< ( std::ostream& aStream, const uhal::IPbusPacketInfo& aIPbusPacketInfo );
+// std::ostream& operator<< ( std::ostream& aStream, const uhal::IPbusPacketInfo& aIPbusPacketInfo );
 
 
 // Using the uhal namespace
@@ -90,7 +90,7 @@ namespace uhal
 				@param aIPbusPacketInfo The IPbusPacketInfo to write to the stream
 				@return a stream for further appending
 			*/
-			friend std::ostream& ( ::operator<< ) ( std::ostream& aStream, const IPbusPacketInfo& aIPbusPacketInfo );
+			// friend std::ostream& ( ::operator<< ) ( std::ostream& aStream, const IPbusPacketInfo& aIPbusPacketInfo );
 
 		public:
 			//! A struct to store a chunk of an IPbus transaction

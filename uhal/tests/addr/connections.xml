@@ -9,7 +9,7 @@
   <connection id="hcal.crate1.slot1" uri="ipbusudp://localhost:50001/blah/1/2/3.txt?a=1&b=2&c=3"              address_table="file://$HOME/crate1.xml" />
   <connection id="hcal.crate1.slot1" uri="ipbustcp://localhost:50001/blah/1/2/3.txt?a=1&b=2&c=3"              address_table="file://$HOME/crate1.xml" />
 	-->
-  <connection id="hcal.crate1.slot1" uri="chtcp-1.3://localhost:10203/1"              address_table="file://$HOME/crate1.xml" />
+  <connection id="hcal.crate1.slot1" uri="chtcp-1.3://localhost:10203/1"              address_table="file://~/uhal/tests/addr/uhal_address_table.xml" />
 
   <connection id="hcal.crate1.slot2" uri="chtcp://controlhub1.hcal.cms:80/2"      address_table="file://$HOME/crate2.txt" />
   <connection id="gt.crate1.psb1"    uri="gpttcp://psb1.gt.cms:1234"              address_table="http://gt.cms/psb.xml" />

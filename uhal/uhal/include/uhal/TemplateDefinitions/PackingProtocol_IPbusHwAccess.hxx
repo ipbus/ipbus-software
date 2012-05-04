@@ -131,7 +131,7 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 				//check that, for each chunk, the reply header from each board matches the expected header
 				for ( std::deque< IPbusPacketInfo::tChunks >::const_iterator lChunkIt = lPacketInfoIt->getChunks().begin() ; lChunkIt != lPacketInfoIt->getChunks().end() ; ++lChunkIt )
 				{
-					//for( std::vector< boost::uint32_t >::const_iterator lReplyHeaderIt = lChunkIt->mReplyHeaders.begin() ; lReplyHeaderIt != lChunkIt->mReplyHeaders.end() ; ++lReplyHeaderIt ){
+					//for( std::vector< uint32_t >::const_iterator lReplyHeaderIt = lChunkIt->mReplyHeaders.begin() ; lReplyHeaderIt != lChunkIt->mReplyHeaders.end() ; ++lReplyHeaderIt ){
 					if ( lChunkIt->mReplyHeaders[0] != lChunkIt->mExpectedReplyHeader )
 					{
 						pantheios::log_ERROR ( "Reply header " ,
@@ -141,6 +141,40 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 											   "!" );
 						pantheios::log_ERROR ( "Received : " , DebugIPbusHeader< IPbusProtocolVersion > ( lChunkIt->mReplyHeaders[0] ) );
 						pantheios::log_ERROR ( "Expected : " , DebugIPbusHeader< IPbusProtocolVersion > ( lChunkIt->mExpectedReplyHeader ) );
+						
+						pantheios::log_ERROR ( "Transaction history :" );						
+						for ( tAccumulatedPackets::const_iterator lAccumulatedPacketIt = mAccumulatedPackets.begin() ; lAccumulatedPacketIt != mAccumulatedPackets.end() ; ++lAccumulatedPacketIt )
+						{
+							for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
+							{
+								pantheios::log_ERROR ( "-------------------" );
+								std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+								const uint32_t* p1 = boost::asio::buffer_cast<const uint32_t*> ( *lBufIt );
+
+								for ( unsigned int y=0; y!=s1>>2; ++y )
+								{
+									pantheios::log_ERROR ( "SENT " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+								}
+							}							
+							
+							for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
+							{
+								pantheios::log_ERROR ( "-------------------" );
+								std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
+								const uint32_t* p1 = boost::asio::buffer_cast<const uint32_t*> ( *lBufIt );
+
+								for ( unsigned int y=0; y!=s1>>2; ++y )
+								{
+									pantheios::log_ERROR ( "RECEIVED " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+								}
+							}
+
+							pantheios::log_ERROR ( "-------------------" );
+
+						}
+						
+						
+						
 						pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 						throw ReplyHeaderExpectationFailure();
 					}
@@ -203,6 +237,366 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 			pantheios::log_EXCEPTION ( aExc );
 			throw uhal::exception ( aExc );
 		}
+	}
+	
+	
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	template< int LogLevel >
+	void IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::debug(  const pantheios::level< LogLevel >& aLogLevel )
+	{
+		if( mAccumulatedPackets.size() == 0 )
+		{
+			pantheios::log ( aLogLevel , "No entries in Accumulated Packet list" );
+			return;
+		}
+
+		if( mPacketInfo.size() == 0 )
+		{
+			pantheios::log ( aLogLevel , "No entries in Packet Info list" );
+			return;
+		}
+		
+		std::stringstream lStr;
+		lStr << std::hex << std::setfill('0');
+		lStr << "+---------+------------+------------+------------+---------------+---------+\n" ;								
+		lStr << "|         |   Packet   | Queue that |  Raw Data  |   Packetized  |         |\n" ;							
+		lStr << "|         | To Be Sent |  was sent  |  Received  | data received |         |\n" ;							
+
+					
+		bool lIPbusChunkGood( false );
+		tIPbusPacketInfoStorage::iterator lIPbusPacketIt;
+		std::deque< IPbusPacketInfo::tChunks >::iterator lChunkIt;
+		
+		lIPbusPacketIt = mPacketInfo.begin();
+		if( lIPbusPacketIt != mPacketInfo.end() )
+		{
+			lChunkIt = lIPbusPacketIt->getChunks().begin();
+			if( lChunkIt != lIPbusPacketIt->getChunks().end() )
+			{
+				lIPbusChunkGood = true;
+			}
+		}
+
+				
+		bool lAccumulatedSendGood( false );
+		bool lAccumulatedReplyGood( false );
+
+		tAccumulatedPackets::const_iterator lAccumulatedPacketIt ;
+		std::deque< boost::asio::const_buffer >::const_iterator lSendBufIt;
+		std::size_t lSendBufSize ( 0 );
+		const uint32_t* lSendBufStart ( NULL );		
+		std::deque< boost::asio::mutable_buffer >::const_iterator lReplyBufIt;
+		std::size_t lReplyBufSize ( 0 );
+		const uint32_t* lReplyBufStart ( NULL );
+
+				
+		lAccumulatedPacketIt = mAccumulatedPackets.begin();
+		if( lAccumulatedPacketIt != mAccumulatedPackets.end() ){
+			lSendBufIt = lAccumulatedPacketIt->mSendBuffers.begin();
+			if( lSendBufIt != lAccumulatedPacketIt->mSendBuffers.end() )
+			{
+				lAccumulatedSendGood = true;
+			}
+			
+			lReplyBufIt = lAccumulatedPacketIt->mReplyBuffers.begin();
+			if( lReplyBufIt != lAccumulatedPacketIt->mReplyBuffers.end() )
+			{
+				lAccumulatedReplyGood = true;
+			}
+		}
+		
+				
+				
+		enum { header , address , payload } lState( header );
+		
+		std::size_t lCounter( 0 );
+		
+		bool lMatch( false );
+		
+		while( lIPbusChunkGood || lAccumulatedSendGood || lAccumulatedReplyGood ){
+		
+			if( lAccumulatedSendGood ){
+				lSendBufSize = boost::asio::buffer_size ( *lSendBufIt ) >> 2;
+				lSendBufStart = boost::asio::buffer_cast<const uint32_t*> ( *lSendBufIt );
+			}
+						
+			if( lAccumulatedReplyGood ){
+				lReplyBufSize = boost::asio::buffer_size ( *lReplyBufIt ) >> 2;
+				lReplyBufStart = boost::asio::buffer_cast<const uint32_t*> ( *lReplyBufIt );
+			}
+					
+			switch( lState )
+			{
+				case header:
+					lStr << "+---------+------------+------------+------------+---------------+---------+\n" ;								
+					lStr << "| Header  | ";
+					lMatch = false;
+					if( lIPbusChunkGood && lAccumulatedSendGood )
+					{
+						if ( *lSendBufStart == lChunkIt->mTransactionHeader ){
+							lMatch = true;
+						}
+					}
+
+										
+					if ( lMatch ){
+						lStr << "0x" << std::setw(8) << lChunkIt->mTransactionHeader;
+					}else{
+						lStr << std::string( 10 , ' ' );
+					}
+					
+					lStr << " | "; 
+										
+					if( lAccumulatedSendGood )
+					{
+						lStr << "0x" << std::setw(8) << *lSendBufStart;
+					}else{
+						lStr << std::string( 10 , ' ' );
+					}
+
+					lStr << " | "; 
+										
+					if( lAccumulatedReplyGood )
+					{
+						lStr << "0x" << std::setw(8) << *lReplyBufStart;
+					}else{
+						lStr << std::string( 10 , ' ' );
+					}
+					
+					lStr << " |  "; 
+					
+					if ( lMatch ){
+						lStr << "0x" << std::setw(8) << lChunkIt->mReplyHeaders[0];
+					}else{
+						lStr << std::string( 10 , ' ' );
+					}
+					
+					lStr << "   |  Header |\n";
+					
+					if( lMatch ){
+						if( lIPbusPacketIt->hasBaseAddress() )
+						{
+							lState = address;
+						}
+						else
+						{
+							lState = payload;
+						}
+					}
+		
+		
+					if( lAccumulatedPacketIt != mAccumulatedPackets.end() ){
+						if( ++lSendBufIt == lAccumulatedPacketIt->mSendBuffers.end() )
+						{
+							lAccumulatedSendGood = false;
+						}
+						
+						if( ++lReplyBufIt == lAccumulatedPacketIt->mReplyBuffers.end() )
+						{
+							lAccumulatedReplyGood = false;
+						}
+								
+						if( !lAccumulatedSendGood && !lAccumulatedReplyGood ){
+							if( ++lAccumulatedPacketIt != mAccumulatedPackets.end() ){
+								lSendBufIt = lAccumulatedPacketIt->mSendBuffers.begin();
+								if( lSendBufIt != lAccumulatedPacketIt->mSendBuffers.end() )
+								{
+									lAccumulatedSendGood = true;
+								}
+								
+								lReplyBufIt = lAccumulatedPacketIt->mReplyBuffers.begin();
+								if( lReplyBufIt != lAccumulatedPacketIt->mReplyBuffers.end() )
+								{
+									lAccumulatedReplyGood = true;
+								}
+							}
+						}
+					}
+		
+		
+					break;
+					
+					
+				case address:
+					lStr << "| Address | ";
+
+					if( lIPbusChunkGood )
+					{
+						lStr << "0x" << std::setw(8) << lChunkIt->mBaseAddress;
+					}else{
+						lStr << std::string( 10 , ' ' );
+					}	
+
+					lStr << " | "; 
+										
+					if( lAccumulatedSendGood )
+					{
+						lStr << "0x" << std::setw(8) << *lSendBufStart;
+					}else{
+						lStr << std::string( 10 , ' ' );
+					}
+
+					lStr << " | " << std::string( 10 , ' ' )  << " |  " << std::string( 10 , ' ' ) << "   |         |\n";
+					
+					if( lChunkIt->mSendSize>2 || lChunkIt->mReturnSize>1 )
+					{
+						lState = payload;
+					}
+					else
+					{
+						lState = header;
+						lIPbusChunkGood = false;
+						if( lIPbusPacketIt != mPacketInfo.end() )
+						{
+							lChunkIt = lIPbusPacketIt->getChunks().begin();
+							if( lChunkIt != lIPbusPacketIt->getChunks().end() )
+							{
+								lIPbusChunkGood = true;
+							}
+						}
+					}
+					
+					if( lAccumulatedPacketIt != mAccumulatedPackets.end() ){
+						if( ++lSendBufIt == lAccumulatedPacketIt->mSendBuffers.end() )
+						{
+							lAccumulatedSendGood = false;
+						}
+													
+						if( !lAccumulatedSendGood ){
+							if( ++lAccumulatedPacketIt != mAccumulatedPackets.end() ){
+								lSendBufIt = lAccumulatedPacketIt->mSendBuffers.begin();
+								if( lSendBufIt != lAccumulatedPacketIt->mSendBuffers.end() )
+								{
+									lAccumulatedSendGood = true;
+								}
+							}
+						}
+					}
+					
+					
+					break;
+				case payload:
+					if( (lCounter < lChunkIt->mSendSize-2) || (lCounter < lChunkIt->mReturnSize-1) || ( lCounter < lSendBufSize ) || ( lCounter < lReplyBufSize ) ){
+						lStr << "| Payload | ";
+					
+						if( lIPbusChunkGood )
+						{
+							if( lCounter < lChunkIt->mSendSize-2 )
+							{
+								lStr << "0x" << std::setw(8) << *( lChunkIt->mSendPtr + lCounter ) ;
+							}else{
+								lStr << std::string( 10 , ' ' );
+							}	
+						}else{
+							lStr << std::string( 10 , ' ' );
+						}	
+
+						lStr << " | "; 
+											
+						if( lAccumulatedSendGood )
+						{
+							if( lCounter < lSendBufSize )
+							{
+								lStr << "0x" << std::setw(8) << *( lSendBufStart + lCounter );
+							}else{
+								lStr << std::string( 10 , ' ' );
+							}	
+						}else{
+							lStr << std::string( 10 , ' ' );
+						}
+
+						lStr << " | "; 
+						
+						if( lAccumulatedReplyGood )
+						{
+							if( lCounter < lReplyBufSize )
+							{
+								lStr << "0x" << std::setw(8) << *( lReplyBufStart + lCounter );
+							}else{
+								lStr << std::string( 10 , ' ' );
+							}	
+						}else{
+							lStr << std::string( 10 , ' ' );
+						}
+
+						lStr << " |  "; 
+						
+						if( lIPbusChunkGood )
+						{
+							if( lCounter < lChunkIt->mReturnSize-1 )
+							{
+								lStr << "0x" << std::setw(8) << *( lChunkIt->mValMemPtr[0] + lCounter )  << "   | Payload |\n";
+							}else{
+								lStr << std::string( 10 , ' ' ) << "   | " << std::string( 7 , ' ' ) << " |\n";
+							}	
+						}else{
+							lStr << std::string( 10 , ' ' ) << "   | " << std::string( 7 , ' ' ) << " |\n";
+						}	
+					
+						lCounter++;					
+					}else{
+						lCounter = 0;
+						lState = header;
+												
+						if( lIPbusPacketIt != mPacketInfo.end() )
+						{
+							if( ++lChunkIt == lIPbusPacketIt->getChunks().end() )
+							{
+								lIPbusChunkGood = false;
+							}
+								
+							if( !lIPbusChunkGood ){
+								if( ++lIPbusPacketIt != mPacketInfo.end() )
+								{
+									lChunkIt = lIPbusPacketIt->getChunks().begin();
+									if( lChunkIt != lIPbusPacketIt->getChunks().end() )
+									{
+										lIPbusChunkGood = true;
+									}
+								}
+							}
+						}
+						
+						if( lAccumulatedPacketIt != mAccumulatedPackets.end() ){
+							if( ++lSendBufIt == lAccumulatedPacketIt->mSendBuffers.end() )
+							{
+								lAccumulatedSendGood = false;
+							}
+							
+							if( ++lReplyBufIt == lAccumulatedPacketIt->mReplyBuffers.end() )
+							{
+								lAccumulatedReplyGood = false;
+							}
+									
+							if( !lAccumulatedSendGood && !lAccumulatedReplyGood ){
+								if( ++lAccumulatedPacketIt != mAccumulatedPackets.end() ){
+									lSendBufIt = lAccumulatedPacketIt->mSendBuffers.begin();
+									if( lSendBufIt != lAccumulatedPacketIt->mSendBuffers.end() )
+									{
+										lAccumulatedSendGood = true;
+									}
+									
+									lReplyBufIt = lAccumulatedPacketIt->mReplyBuffers.begin();
+									if( lReplyBufIt != lAccumulatedPacketIt->mReplyBuffers.end() )
+									{
+										lAccumulatedReplyGood = true;
+									}
+								}
+							}
+						}	
+						
+					}
+						
+					break;
+			};
+					
+		}
+
+		
+		lStr << "+---------+------------+------------+------------+---------------+---------+\n" ;								
+		pantheios::log ( aLogLevel , "\n" , lStr.str() );
+		
+		
 	}
 
 }

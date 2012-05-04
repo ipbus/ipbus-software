@@ -26,11 +26,17 @@
     </node>
   </node>
   
+ 
   <!--_JTAG_interface_-->
   
-  <node id="JTAG_BASE_ADDR" address="0x0600" />
+  <node id="JTAG_BASE_ADDR" address="0x0600">
+	<node id="a" mask="0x1" />
+	<node id="b" mask="0x2" />
+	<node id="c" mask="0x4" />
+	<node id="d" mask="0x8" />
+  </node>
   
-  <node id="SYSTEM1" module="addr/SystemCore.xml" address="0x0500"/>
+  <node id="SYSTEM1" module="file://~/uhal/tests/addr/uhal_module_address_table.xml" address="0x0500"/>
   
   <!-- The above node is equivalent to the following SYSTEM2 node fullid="SOURCE_CARD.SYSTEM2.SYSTEM." -->
   <node id="SYSTEM2" address="0x1000">
