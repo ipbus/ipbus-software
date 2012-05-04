@@ -11,6 +11,7 @@
 
 -behaviour(application).
 
+-include("ch_global.hrl").
 
 %% Behavioural exports
 -export([start/2,stop/1]).
@@ -27,6 +28,7 @@
 %%          {error, Reason}
 %% --------------------------------------------------------------------
 start(_Type, _StartArgs) ->
+    ?DEBUG_TRACE("Starting the Control Hub application."),
     % Start the root supervisor and return its process ID.
     case ch_sup:start_link() of
       {ok, Pid} ->

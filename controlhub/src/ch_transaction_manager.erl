@@ -18,7 +18,7 @@
 %%
 %% Exported Functions
 %%
--export([start/1, tcp_acceptor/1]).
+-export([start_link/1, tcp_acceptor/1]).
 
 %%
 %% API Functions
@@ -35,9 +35,9 @@
 %% @spec start(TcpListenSocket::socket) -> ok
 %% @end
 %% ---------------------------------------------------------------------
-start(TcpListenSocket) ->
-    ?DEBUG_TRACE("Spawning new Transaction Manager."),
-    spawn(?MODULE, tcp_acceptor, [TcpListenSocket]),
+start_link(TcpListenSocket) ->
+    ?DEBUG_TRACE("Spawning new transaction manager."),
+    spawn_link(?MODULE, tcp_acceptor, [TcpListenSocket]),
     ok.
     
 
@@ -49,6 +49,7 @@ start(TcpListenSocket) ->
 
 %% Blocks until a client connection is accepted on the given socket.
 tcp_acceptor(TcpListenSocket) ->
+    ?DEBUG_TRACE("Transaction manager born. Waiting for TCP connection..."),
     case gen_tcp:accept(TcpListenSocket) of
         {ok, TcpAcceptedSocket} ->
             ?DEBUG_TRACE("TCP socket accepted!"),
@@ -56,19 +57,15 @@ tcp_acceptor(TcpListenSocket) ->
             ch_stats:client_connected(),
             tcp_receive_handler(TcpAcceptedSocket);
         {error, _Reason} ->
+            ch_tcp_listener:connection_accept_completed(),
             % Something funny happened whilst trying to accept the socket.
             ?DEBUG_TRACE("Error (~p) occurred during TCP accept.", [_Reason]);
         _Else ->  % Belt and braces...
-            ?DEBUG_TRACE("Something very weird occurred during TCP accept (~p).", [_Else])
+            ch_tcp_listener:connection_accept_completed(),
+            ?DEBUG_TRACE("Unexpected event (~p) occurred during TCP accept.", [_Else])
     end,
-    % If we're here, the TCP accept returned but with some form of error.
-    % This doesn't really matter as this process only exists to service a
-    % successfully accepted connection.  So, let the TCP listener know
-    % that the TCP accept completed, and then just die naturally.
-    ch_tcp_listener:connection_accept_completed(),
-    ?DEBUG_TRACE("Have no valid connection... Existence now pointless, so exiting normally."),
+    ?DEBUG_TRACE("I am now redundant; exiting normally."),
     ok.
-
  
 tcp_receive_handler(TcpAcceptedSocket) ->
     receive
@@ -77,11 +74,11 @@ tcp_receive_handler(TcpAcceptedSocket) ->
             tcp_receive_handler(TcpAcceptedSocket);
         {tcp_closed, TcpAcceptedSocket} ->
             ch_stats:client_disconnected(),
-            ?DEBUG_TRACE("TCP socket closed. Process exiting normally.");
+            ?DEBUG_TRACE("TCP socket closed.");
         {tcp_error, TcpAcceptedSocket, _Reason} ->
             % Assume this ends up with the socket closed from a stats standpoint
             ch_stats:client_disconnected(),
-            ?DEBUG_TRACE("TCP socket error (~p). Existence now pointless, so exiting normally.", [_Reason]);
+            ?DEBUG_TRACE("TCP socket error (~p).", [_Reason]);
         _Else ->
             ?DEBUG_TRACE("WARNING! Received and ignoring unexpected message: ~p", [_Else]),
             tcp_receive_handler(TcpAcceptedSocket)

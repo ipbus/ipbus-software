@@ -13,6 +13,8 @@
 
 -behaviour(gen_server).
 
+-include("ch_global.hrl").
+
 %% API  exports
 -export([start_link/0, stop/0, get_index/0, get_pid/3, total_device_clients/1 ]).
 
@@ -108,6 +110,7 @@ total_device_clients(DCIndex) ->
 init([]) ->
     % Note that our ETS table for holding the index of device clients
     % gets created as part of the standard server state record.
+    ?DEBUG_TRACE("Initialising the device client registry."),
     {ok, #state{}}.
 
 %% --------------------------------------------------------------------
@@ -145,6 +148,9 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_cast(stop, State) ->
+    {stop, normal, State};
+
 handle_cast(_Msg, State) ->
     {noreply, State}.
 

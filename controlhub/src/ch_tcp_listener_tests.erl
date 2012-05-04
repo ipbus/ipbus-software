@@ -41,7 +41,11 @@ setup() ->
 %% Teardown function for test fixture
 teardown(_Ignore) ->
     ch_stats:stop(),
-    ch_tcp_listener:stop().
+    ch_tcp_listener:stop(),
+    % This sucks, but it's just to prevent the standard IO going down before
+    % any io:format messages that report shutdowns might have completed. This
+    % can cause misleading error logger reports during unit-testing.
+    timer:sleep(50).  
 
 
 

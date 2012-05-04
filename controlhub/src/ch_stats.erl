@@ -272,6 +272,7 @@ report_to_console() -> gen_server:cast(?MODULE, report_to_console).
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
+    ?DEBUG_TRACE("Initialising the stats server."),
     {ok, #state{}}.
 
 %% --------------------------------------------------------------------
@@ -365,7 +366,7 @@ handle_cast(udp_response_timeout, State = #state{udp_response_timeouts = Value})
     {noreply, NewState};
 
 handle_cast(report_to_console, State) ->
-    io:format("Control Hub Stats Report~n"
+    io:format("~nControl Hub Stats Report~n"
               "------------------------~n~n"
               "CLIENT  Active connections: ~p (peak=~p)~n"
               "         Requests received: ~p (of which ~p were malformed)~n"
@@ -383,6 +384,9 @@ handle_cast(report_to_console, State) ->
                State#state.udp_out,
                State#state.udp_response_timeouts]),
     {noreply, State};
+
+handle_cast(stop, State) ->
+    {stop, normal, State};
 
 handle_cast(_Request, State) ->
     {noreply, State}.

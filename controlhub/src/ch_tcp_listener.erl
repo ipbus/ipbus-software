@@ -85,6 +85,8 @@ connection_accept_completed() ->
 %% @end
 %% --------------------------------------------------------------------
 init([]) ->
+    ?DEBUG_TRACE("Initialising the TCP listener."),
+    process_flag(trap_exit, true),
     case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, ?TCP_OPTIONS) of
         {ok, TcpListenSocket} ->
             {ok, spawn_acceptor(#state{socket = TcpListenSocket})};
@@ -97,6 +99,7 @@ init([]) ->
             exit(What)
     end.    
 
+
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
 %% Description: Handling call messages
@@ -107,9 +110,12 @@ init([]) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+
+%% Default call handler - on unknown call request it does nothing.
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
+
 
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
@@ -118,12 +124,19 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+
+%% Spawn a new acceptor as soon as a transaction manager reports that a conection accept completed.
 handle_cast(connection_accept_completed, State) ->
     {noreply, spawn_acceptor(State)};
 
-    
+%% Shutdown
+handle_cast(stop, State) ->
+    {stop, normal, State};
+
+%% Default cast handler - on unknown cast message it does nothing
 handle_cast(_Msg, State) ->
     {noreply, State}.
+
 
 %% --------------------------------------------------------------------
 %% Function: handle_info/2
@@ -132,6 +145,13 @@ handle_cast(_Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+
+% Observe any exit signals that come our way but do nothing with them other than a trace message
+handle_info({'EXIT', _Pid, _Reason}, State) ->
+    ?DEBUG_TRACE("Observed process ~p shutting down with reason: ~p", [_Pid, _Reason]),
+    {noreply, State};
+
+%% Default info handler - on unknown info message it does nothing
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -140,7 +160,8 @@ handle_info(_Info, State) ->
 %% Description: Shutdown the server
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
+    gen_tcp:close(State#state.socket),
     ok.
 
 %% --------------------------------------------------------------------
@@ -159,5 +180,5 @@ code_change(_OldVsn, State, _Extra) ->
 %% spawns a ch_transaction_manager process to accept and deal with each new client
 %% @spec spawn_acceptor(State) -> State
 spawn_acceptor(State) ->
-    ch_transaction_manager:start(State#state.socket),
+    ch_transaction_manager:start_link(State#state.socket),
     State.
