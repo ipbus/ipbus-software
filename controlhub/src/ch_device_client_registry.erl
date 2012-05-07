@@ -22,7 +22,8 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 %% Server state record definition
--record(state, {device_client_index = ets:new(device_client_index, [{read_concurrency, true}])}).
+-record(state, {dc_index = ets:new(device_client_index, [protected, {read_concurrency, true}]),
+                dc_reverse_index = ets:new(device_client_reverse_index, [private])}).
 
 
 %%% ====================================================================
@@ -111,6 +112,10 @@ init([]) ->
     % Note that our ETS table for holding the index of device clients
     % gets created as part of the standard server state record.
     ?DEBUG_TRACE("Initialising the device client registry."),
+    % Trap exits - if any device clients spawned by the registry end
+    % up dying, we'll need to catch the message and remove the device
+    % client from the index.
+    process_flag(trap_exit, true),
     {ok, #state{}}.
 
 %% --------------------------------------------------------------------
@@ -128,14 +133,14 @@ handle_call({register, {IPaddr, Port}}, _From, State) ->
     % safe sequential territory of our single device client registry
     % server process, we must first check that the specified device
     % hasn't already been created+registered, and proceed from there.
-    Reply = case ets:lookup(State#state.device_client_index, {IPaddr, Port}) of
+    Reply = case ets:lookup(State#state.dc_index, {IPaddr, Port}) of
                 [ { {IPaddr, Port}, Pid } ] -> {ok, Pid};  % Already got created
-                [ ] -> create_and_register_device_client(IPaddr, Port, State#state.device_client_index)
+                [] -> create_and_register_device_client(IPaddr, Port, State#state.dc_index, State#state.dc_reverse_index)
             end,
     {reply, Reply, State};
 
 handle_call(get_index, _From, State) ->
-    {reply, State#state.device_client_index, State};
+    {reply, State#state.dc_index, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -161,6 +166,20 @@ handle_cast(_Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+
+%%
+handle_info({'EXIT', Pid, _Reason}, State = #state{dc_index = Index, dc_reverse_index = RIndex}) ->
+    ?DEBUG_TRACE("Observed process ~p shutting down with reason: ~p", [Pid, _Reason]),
+    % If the dead process is registered, delete the entries associated with it.
+    case ets:lookup(RIndex, Pid) of
+        [{Pid, {IPaddr, Port}}] ->
+            ets:delete(Index, {IPaddr, Port}),
+            ets:delete(RIndex, Pid);
+        [] -> ok
+    end,     
+    {noreply, State};
+
+%% Default handle info
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -186,26 +205,16 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions (private)
 %%% --------------------------------------------------------------------
 
-create_and_register_device_client(IPaddr, Port, Index) ->
+create_and_register_device_client(IPaddr, Port, Index, ReverseIndex) ->
     case ch_device_client:start_link(IPaddr, Port) of
         {ok, Pid} -> 
             ets:insert(Index, {{IPaddr, Port}, Pid}),
+            % For reverse lookups.
+            % If we catch a process dying, we can check the dead process Pid
+            % to be certain its a device client started by the registry.
+            ets:insert(ReverseIndex, {Pid, {IPaddr, Port}}),  
             {ok, Pid};
         Error -> {error, Error}
     end.
 
-%% create_device_clients([{DeviceID, IPaddress, Port} | Tail]) ->
-%%     case device_client:start(DeviceID, IPaddress, Port) of
-%%         {ok, Pid} -> 
-%%             % Using process dictionary as the DeviceID to Pid mappings are effectively
-%%             % process constants and will never change.
-%%             % TODO: Report if a DeviceID has already been taking (i.e. conflicting registration)
-%%             put(DeviceID, Pid),
-%%             io:format("Successfully created client process (PID = ~p) for DeviceID = ~p~n", [Pid, DeviceID]);
-%%         {error, What} -> 
-%%             io:format("Warning: could not start device client with DeviceID=~p, "
-%%                       "IPaddress=~p, Port=~p! Reason: ~p~n", [DeviceID, IPaddress, Port, What])
-%%     end,
-%%     create_device_clients(Tail);
-%% 
-%% create_device_clients([]) -> ok.
+
