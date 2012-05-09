@@ -35,13 +35,19 @@ else:
 
 
 env.BuildPath = '.build/'+env.MachineArchitecture+'/' 
-env.LibPath = 'lib/' 
+
+if ( struct.calcsize("P") ) == 8 :
+	env.LibPath = 'lib64/' 
+else:
+	env.LibPath = 'lib/' 
+
+
 env.SrcBuildPath = 'bin/exe-'+env.MachineArchitecture+'/' 
 
 
 ## Add default libs
 env.Append( 
-	LIBPATH = [ '/opt/local/lib' , env.InstallPath ] 
+	LIBPATH = [ '/opt/local/'+env.LibPath , env.InstallPath ] 
 ) 
 
 ## Turn on GCC optimization
@@ -61,7 +67,7 @@ env.Append(
 # The logging library
 env.Append( 
 	CPPPATH = [  os.path.abspath('/opt/local/include/stlsoft/include') , 
-				os.path.abspath('/usr/local/pantheios/include')
+				os.path.abspath('/opt/local/include/pantheios/include')
 			]
 ) 
 

@@ -37,7 +37,7 @@ int pantheios_be_logEntry (
 	timeval theTime;
 	gettimeofday ( &theTime, NULL );
 	char lStr[200];
-	size_t lSize = strftime ( lStr , 200 , "%Y/%m/%d %H:%M:%S" , localtime ( &theTime.tv_sec ) );
+	int lSize = strftime ( lStr , 200 , "%Y/%m/%d %H:%M:%S" , localtime ( &theTime.tv_sec ) );
 
 	switch ( severity )
 	{
