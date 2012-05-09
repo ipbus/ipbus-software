@@ -20,6 +20,10 @@
 % The maximum number of TCP user-client connections we will offer.
 -define(MAX_CONCURRENT_CLIENT_CONNECTIONS, 64).
 
-% Device Client UDP timeout when communicating with a target hardware device.
+% Device Client UDP timeout (milliseconds) when communicating with a target hardware device.
 -define(DEVICE_CLIENT_UDP_TIMEOUT, 200).
 
+% Possible error codes for responses to the user client (microHAL)
+-define(ERRCODE_SUCCESS, 0).
+-define(ERRCODE_TARGET_TIMEOUT, 1).
+-define(ERRCODE_CH_DEVICE_CLIENT_TIMEOUT, 2).

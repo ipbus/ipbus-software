@@ -1,9 +1,16 @@
-%%% -------------------------------------------------------------------
-%%% Author  : rob
-%%% Description :
+%%% ===========================================================================
+%%% @author Robert Frazier
 %%%
-%%% Created : Dec 20, 2010
-%%% -------------------------------------------------------------------
+%%% @since May 2012
+%%%
+%%% @doc A device client forms a single point of contact with a particular
+%%%      hardware target, and deals with all the UDP communication to that
+%%%      particular target.  The interface simply allows you to queue
+%%%      transactions for a particular target, with the relevant device client
+%%%      being found (or spawned) behind the scenes.  Replies from the target
+%%%      device are sent back as a message to the originating process.
+%%% @end
+%%% ===========================================================================
 -module(ch_device_client).
 
 -behaviour(gen_server).
@@ -21,9 +28,6 @@
 
 -record(state, {socket = null}). % Network socket to target device
 
-% Possible error codes for responses back to transaction managers
--define(SUCCESS_CODE, 0).
--define(TIMEOUT_CODE, 1).
 
 %%% ====================================================================
 %%% API functions (public interface)
@@ -48,11 +52,12 @@ start_link(IPaddrU32, PortU16) when is_integer(IPaddrU32), is_integer(PortU16) -
 %%      integer (no "192.168.0.1" strings, etc). Once the device client
 %%      has dispatched the requests, the received responses will be
 %%      forwarded to the caller of this function using the form:
+%%
 %%        { device_client_response,
 %%          TargetIPaddrU32::integer(),
 %%          TargetPortU16::integer(),
 %%          ErrorCodeU16::integer(),
-%%          ResponseBin::binary() }
+%%          TargetResponse::binary() }
 %%
 %% @spec enqueue_requests(IPaddrU32::integer(),
 %%                        PortU16::integer(),
@@ -60,7 +65,7 @@ start_link(IPaddrU32, PortU16) when is_integer(IPaddrU32), is_integer(PortU16) -
 %% @end
 %% ---------------------------------------------------------------------
 enqueue_requests(IPaddrU32, PortU16, IPbusRequests) when is_binary(IPbusRequests) ->
-    Pid = device_client_registry:get_pid(IPaddr, Port),
+    Pid = device_client_registry:get_pid(IPaddrU32, PortU16),
     gen_server:cast(Pid, {send, IPbusRequests, self()}),
     ok.
     
@@ -84,7 +89,7 @@ init([IPaddrU32, PortU16]) ->
     put(targetIP, IPaddrU32),
     put(targetPort, PortU16),
     % Tuple summarising the target address - useful for error/trace messages, etc.
-    put(targetSummary, {device_client_target, {ipaddr,ch_utils:ipv4_addr_to_tuple(IPaddr)}, {port, Port}}),
+    put(targetSummary, {device_client_target, {ipaddr,ch_utils:ipv4_addr_to_tuple(IPaddrU32)}, {port, PortU16}}),
     
     % Try opening ephemeral port and we want data delivered as a binary.
     case gen_udp:open(0, [binary]) of   
@@ -134,12 +139,12 @@ handle_cast({send, IPbusRequests, ClientPid}, State = #state{socket = Socket}) -
                 {udp, Socket, _, _, HardwareReplyBin} -> 
                     ?DEBUG_TRACE("Received response from ~p. Passing it to originating Transaction Manager...", [get(targetSummary)]),
                     ch_stats:udp_in(),
-                    { device_client_response, get(targetIP), get(targetPort), ?SUCCESS_CODE, HardwareReplyBin} }
+                    { device_client_response, get(targetIP), get(targetPort), ?ERRCODE_SUCCESS, HardwareReplyBin}
             after ?DEVICE_CLIENT_UDP_TIMEOUT ->
                 ?DEBUG_TRACE("TIMEOUT REACHED! No response from ~p. Generating and sending a timeout "
                              "response to originating Transaction Manager...", [get(targetSummary)]),
                 ch_stats:udp_response_timeout(),
-                { device_client_response, get(targetIP), get(targetPort), ?TIMEOUT_CODE, <<>> }
+                { device_client_response, get(targetIP), get(targetPort), ?ERRCODE_TARGET_TIMEOUT, <<>> }
             end,
     ClientPid ! Reply,
     {noreply, State};

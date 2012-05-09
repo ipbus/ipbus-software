@@ -58,7 +58,7 @@ tcp_acceptor(TcpListenSocket) ->
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?DEBUG_TRACE("Socket error whilst getting peername.")
-            end,
+            end;
         {error, _Reason} ->
             ch_tcp_listener:connection_accept_completed(),
             % Something funny happened whilst trying to accept the socket.
@@ -80,7 +80,7 @@ tcp_acceptor(TcpListenSocket) ->
 tcp_receive_handler_loop(ClientSocket) ->
     receive
         {tcp, ClientSocket, RequestBin} ->
-            ?DEBUG_TRACE("Received a request from client.")
+            ?DEBUG_TRACE("Received a request from client."),
             ch_stats:client_request_in(),
             process_request(ClientSocket, RequestBin),
             tcp_receive_handler_loop(ClientSocket);
@@ -93,7 +93,7 @@ tcp_receive_handler_loop(ClientSocket) ->
             ?DEBUG_TRACE("TCP socket error (~p).", [_Reason]);
         _Else ->
             ?DEBUG_TRACE("WARNING! Received and ignoring unexpected message: ~p", [_Else]),
-            tcp_receive_handler(ClientSocket)
+            tcp_receive_handler_loop(ClientSocket)
     end.
 
 
@@ -102,8 +102,8 @@ process_request(ClientSocket, RequestBin) ->
     try unpack_target_requests(RequestBin) of
        TargetRequestList ->
            TargetResponseOrder = dispatch_to_device_clients(TargetRequestList),
-           CompleteResponse = gather_device_client_responses(TargetResponseOrder),
-           reply_to_client(CompleteResponse)
+           FullResponseBin = gather_device_client_responses(TargetResponseOrder),
+           reply_to_client(ClientSocket, FullResponseBin)
     catch
         throw:{malformed, WhyMalformed} ->
           ?DEBUG_TRACE("WARNING! Malformed (~p) client request received; will ignore.", [WhyMalformed]),
@@ -144,8 +144,8 @@ target_request_accumulator(TargetRequestList,  <<TargetIPaddr:32,
             ?DEBUG_TRACE("Unpacked ~p instruction words for target IP addr=~p, port=~p:", [NumInstructions, TargetIPaddrTuple, TargetPort]),
             target_request_accumulator([{TargetIPaddr, TargetPort, Instructions} | TargetRequestList], Remainder2);
         _ ->
-            throw({malformed, {'bad match on target request body', length(TargetRequestList)}}).
-    end.
+            throw({malformed, {'bad match on target request body', length(TargetRequestList)}})
+    end;
 
 target_request_accumulator(TargetRequestList, <<>>) ->
     lists:reverse(TargetRequestList);
@@ -159,155 +159,39 @@ target_request_accumulator(TargetRequestList, _Else) ->
 %%       TargetRequestList = [TargetRequest, ..]
 %%       TargetRequest = {IPaddrU32::integer(), PortU16::integer(), Instructions::binary()}
 %%       TargetResponseOrder = [ {IPaddrU32::integer(), PortU16::integer()}, .. ]
-dispatch_to_device_clients(TargetRequest) ->
-    lists:foreach(dispatch_to_device_client/1, TargetRequestList),
-    map(fun({IPaddrU32, PortU16, Instructions}) -> {IPaddrU32, PortU16} end, TargetRequestList).  
+dispatch_to_device_clients(TargetRequestList) ->
+    lists:foreach(fun dispatch_to_device_client/1, TargetRequestList),
+    lists:map(fun({IPaddrU32, PortU16, _Instructions}) -> {IPaddrU32, PortU16} end, TargetRequestList).  
 
 dispatch_to_device_client({IPaddrU32, PortU16, Instructions}) ->
     ch_device_client:enqueue_requests(IPaddrU32, PortU16, Instructions).
 
 
-%% *** I AM HERE - just need to get the responses according to the TargetResponseOrder list ***
+gather_device_client_responses(TargetResponseOrder) ->
+    device_client_response_accumulator(TargetResponseOrder, []).
 
 
-%%  ***** OLD CODE ****
+device_client_response_accumulator([{IPaddrU32, PortU16}| Tail], ResponsesList) ->
+    ResponseBin = receive
+                      {device_client_response, IPaddrU32, PortU16, ErrorCode, TargetResponseBin} ->
+                          ?DEBUG_TRACE("Received device client response from target IPaddr=~p,"
+                                       "Port=~p", [ch_utils:ipv4_addr_to_tuple(IPaddrU32), PortU16]),
+                          <<IPaddrU32:32, ErrorCode:16, PortU16:16, TargetResponseBin/binary>>
+                  after (?DEVICE_CLIENT_UDP_TIMEOUT * 3) -> % Give it 3 times as long as whatever device client timeout we have
+                      ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~p,"
+                                   "Port=~p", [ch_utils:ipv4_addr_to_tuple(IPaddrU32), PortU16]),            
+                          <<IPaddrU32:32, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16, PortU16:16>>
+                  end,
+    device_client_response_accumulator(Tail, [ResponseBin | ResponsesList]);
 
-    TargetSections = unpack_target_sections({malformed(size(RequestBin) rem 4), ClientSocket, RequestBin)
-    dispatch_target_sections_to_device_clients(TargetSections)
-    gather_device_client_responses()
-    send_response_to_client()
-    
-    RequestSizeInBytes = size(RequestBin)
-    case RequestSizeInBytes rem 4 of
-        0 -> process_request_by_section(ClientSocket, RequestBin, []);
-        _ -> ch_stats:client_request_malformed()
-    process_request_section_loop(ClientSocket, RequestBin).
-
-
-%% Attempt unpack and processes of each request subsection 
-process_request_section_loop(ClientSocket, RequestBin)
-
-
-%% Quickly examine the packet; if ok then we proceed with unpack.
-check_and_process_packet(ClientSocket, RequestBin) ->
-  case basic_packet_check(RequestBin) of
-      ok ->
-          unpack_packet(ClientSocket, RequestBin);
-      bad_packet ->
-          ?DEBUG_TRACE("WARNING! Received and ignoring malformed packet."),
-          ?PACKET_TRACE(RequestBin, "WARNING!~n  Received and ignoring this malformed packet - did not pass basic packet checks:"),
-          ch_stats:client_request_malformed(),
-          bad_packet_logged
-  end.
+device_client_response_accumulator([], ResponsesList) ->
+    ?DEBUG_TRACE("Received all expected device client responses"),
+    lists:reverse(ResponsesList),
+    list_to_binary(ResponsesList).
 
 
-
-%% Performs some very basic checks on the packet, such as minimum size check
-%% and does it contain an integer number of 32-bit words.
-%% @spec basic_packet_check(RequestBin) -> ok | bad_packet
-basic_packet_check(RequestBin) ->
-    SizeInBytes = size(RequestBin),  % Size of packet in bytes 
-    % Check if the packet is an integer number of 32-bit words or not
-    case SizeInBytes rem 4 of
-        0 -> case SizeInBytes div 4 of
-                 Size32 when Size32 >= 3 -> ok;
-                 _ -> bad_packet  % Size not three or more 32-bit words in size => rubbish.
-             end;
-        _ -> bad_packet  % Packet does not consist of an integer number of 32-bit words
-    end.
-
-%% Unpack the header: Target IP address (32-bit),
-%%                    Num IPbus instruction words (16-bit),
-%%                    Target Port(16-bit) 
-unpack_packet(ClientSocket, <<TargetIPaddr:32,
-                                   NumInstructions:16,
-                                   TargetPort:16,
-                                   Remainder/binary>>) ->
-    NumBitsForInstructions = 32 * NumInstructions,
-    case Remainder of
-        <<Instructions:NumBitsForInstructions/bits, Remainder2/binary>> ->
-            TargetIPaddrTuple = ch_utils:ipv4_addr_to_tuple(TargetIPaddr),
-            ?PACKET_TRACE(Instructions, "~n  Unpacked the following instructions for target IP addr=~p, port=~p:", [TargetIPaddrTuple, TargetPort]),
-            ?DEBUG_TRACE("Unpacked ~p instruction words for target IP addr=~p, port=~p:", [NumInstructions, TargetIPaddrTuple, TargetPort]),
-            process_packet(DeviceIDs, Instructions),
-            ?DEBUG_TRACE("Finished distributing instructions to devices; now awaiting responses..."),
-            process_responses(ClientSocket, NumDevices),
-            % TODO: If Remainder2 is not of zero size, then we need to treat it as a "new" packet...
-            if 
-                size(Remainder2) /= 0 -> 
-                    check_and_process_packet(ClientSocket, Remainder2);
-                true -> ok
-            end;
-        _ ->
-            ?DEBUG_TRACE("WARNING! Received and ignoring malformed packet."),
-            ?PACKET_TRACE(RequestBin, "WARNING!~n  Received and ignoring this malformed packet - did not pass Redwood packet checks:"),
-            ch_stats:client_request_malformed(),
-            bad_packet_logged
-    end.
-
-
-process_packet(DeviceIDs, Instructions) ->
-    DeviceIDList = get_device_IDs_as_list(DeviceIDs),
-    send_instructions_to_device_clients(DeviceIDList, Instructions).
-
-
-get_device_IDs_as_list(DeviceIDs) ->
-    get_device_IDs_as_list([], DeviceIDs).
-
-get_device_IDs_as_list(ResultList, <<DeviceID:32, Remainder/binary>>) ->
-    get_device_IDs_as_list([DeviceID | ResultList], Remainder);
-
-get_device_IDs_as_list(ResultList, <<>>) ->
-    lists:reverse(ResultList), %% Not really necessary... remove in the future for sake of speed.
-    ResultList.
-
-
-send_instructions_to_device_clients([DeviceID | RemainingDeviceIDs], Instructions) ->
-    ?DEBUG_TRACE("Sending instructions to the device client for DeviceID = ~p", [DeviceID]),
-    device_client:send(DeviceID, Instructions),
-    send_instructions_to_device_clients(RemainingDeviceIDs, Instructions);
-
-send_instructions_to_device_clients([], _Instructions) -> ok.
-
-
-process_responses(ClientSocket, NumDevices) ->
-    ResponsesList = get_hardware_responses(NumDevices, []),
-    % TODO: check we have the responses from the devices we expect, and log any declared timeout responses. 
-    send_responses_to_tcp_client(ClientSocket, ResponsesList).
-
-
-get_hardware_responses(RemainingDevices, ResponsesList) when RemainingDevices > 0 ->
-    receive
-        {device_client_response, DeviceID, Status, Response} ->
-            ?DEBUG_TRACE("Received response from the device client for DeviceID = ~p", [DeviceID]),            
-            get_hardware_responses(RemainingDevices - 1, [{DeviceID, Status, Response}| ResponsesList]);
-        _What ->
-            io:format("Warning! Transaction Manager received unexpected response: ~p~n", [_What]),
-            get_hardware_responses(RemainingDevices, ResponsesList)
-    after (?DEVICE_CLIENT_UDP_TIMEOUT + 200) ->
-        io:format("WARNING! Transaction Manager received only ~p of ~p expected responses!~n",
-                  [length(ResponsesList), length(ResponsesList) + RemainingDevices]),
-        % TODO: Log this error properly
-        ResponsesList
-    end;
-
-get_hardware_responses(0, ResponsesList) -> 
-    ResponsesList.
-        
-
-send_responses_to_tcp_client(ClientSocket, [{_DeviceID, ok, Response} | RemainingResponses]) ->
-    ?DEBUG_TRACE("Sending response from DeviceID = ~p to Redwood.", [_DeviceID]),
-    ?PACKET_TRACE(Response, "~n  Sending the following response packet to Redwood from DeviceID = ~p:", [_DeviceID]),
-    gen_tcp:send(ClientSocket, Response),
-    ch_stats:client_response_sent(),
-    send_responses_to_tcp_client(ClientSocket, RemainingResponses);
-
-send_responses_to_tcp_client(ClientSocket, [{_DeviceID, udp_response_timeout, Response} | RemainingResponses]) ->
-    ?DEBUG_TRACE("Sending UDP timeout response from DeviceID = ~p to Redwood.", [_DeviceID]),
-    ?PACKET_TRACE(Response, "~n  Sending the following UDP timeout response packet to Redwood from DeviceID = ~p:", [_DeviceID]),
-    gen_tcp:send(ClientSocket, Response),
-    ch_stats:client_response_sent(),
-    send_responses_to_tcp_client(ClientSocket, RemainingResponses);
-
-send_responses_to_tcp_client(_ClientSocket, []) -> ok.
-
+reply_to_client(ClientSocket, FullResponseBin) ->
+    ?DEBUG_TRACE("Sending response to TCP client"),
+    ?PACKET_TRACE(FullResponseBin, "~n  Sending the following response to the TCP client:"),
+    gen_tcp:send(ClientSocket, FullResponseBin),
+    packet_stats:client_response_sent().
