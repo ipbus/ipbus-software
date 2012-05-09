@@ -16,13 +16,13 @@
 -include("ch_global.hrl").
 
 %% API  exports
--export([start_link/0, stop/0, get_index/0, get_pid/3, total_device_clients/1 ]).
+-export([start_link/0, stop/0, get_pid/2, total_device_clients/0 ]).
 
 %% Behavioural exports - gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 %% Server state record definition
--record(state, {dc_index = ets:new(device_client_index, [protected, {read_concurrency, true}]),
+-record(state, {dc_index = ets:new(device_client_index, [named_table, protected, {read_concurrency, true}]),
                 dc_reverse_index = ets:new(device_client_reverse_index, [private])}).
 
 
@@ -51,33 +51,18 @@ start_link() ->
 stop() -> gen_server:cast(?MODULE, stop).
 
 
-
-%% ---------------------------------------------------------------------
-%% @doc Returns the Device Client Index ETS table ID the device clients
-%%      are registered into. This table is read only to any processes
-%%      except the registry itself.
-%%
-%% @spec get_index() -> DCIndex::tid()
-%% @end
-%% ---------------------------------------------------------------------
-get_index() ->
-    gen_server:call(?MODULE, get_index).
-
-
 %% ---------------------------------------------------------------------
 %% @doc Returns the Process ID of the Device Client that handles the
 %%      IPbus transactions for a given hardware target - as defined by
-%%      the target's IP address and port number - by looking it up in the
-%%      given Device Client Index ETS table (see get_index() if you don't
-%%      have the table ID already).  If no such Device Client yet exists
-%%      for the given hardware target, a Device Client will be created,
-%%      registered, and its PID returned.
+%%      the target's IP address and port number.  If no such Device
+%%      Client yet exists for the given hardware target, a Device Client
+%%      will be created, registered, and its PID returned.
 %%
-%% @spec get_pid(DCIndex::tid(), IPaddr::integer(), Port::integer()) -> {ok, pid()} | {error, any()}
+%% @spec get_pid(IPaddr::integer(), Port::integer()) -> {ok, pid()} | {error, any()}
 %% @end
 %% ---------------------------------------------------------------------
-get_pid(DCIndex, IPaddr, Port) ->
-    case ets:lookup(DCIndex, {IPaddr, Port}) of
+get_pid(IPaddr, Port) ->
+    case ets:lookup(device_client_index, {IPaddr, Port}) of
         [ { {IPaddr, Port}, Pid } ] -> {ok, Pid};
         [ ] -> gen_server:call(?MODULE, {register, {IPaddr, Port}});
         Error -> {error, Error}
@@ -85,13 +70,12 @@ get_pid(DCIndex, IPaddr, Port) ->
 
 
 %% ---------------------------------------------------------------------
-%% @doc Returns the number of registered Device Clients currently in the
-%%      Device Client Index.
+%% @doc Returns the number of Device Clients currently registered.
 %%
-%% @spec total_device_clients(DCIndex::tid()) -> integer()
+%% @spec total_device_clients() -> integer()
 %% ---------------------------------------------------------------------
-total_device_clients(DCIndex) ->
-    [NumDeviceClients] = [ X || {size, X} <- ets:info(DCIndex) ],
+total_device_clients() ->
+    [NumDeviceClients] = [ X || {size, X} <- ets:info(device_client_index) ],
     NumDeviceClients.
 
 

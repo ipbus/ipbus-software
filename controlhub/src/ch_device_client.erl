@@ -14,13 +14,16 @@
 
 %% --------------------------------------------------------------------
 %% External exports
--export([start_link/2, send/4]).
+-export([start_link/2, enqueue_requests/3]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -record(state, {socket = null}). % Network socket to target device
 
+% Possible error codes for responses back to transaction managers
+-define(SUCCESS_CODE, 0).
+-define(TIMEOUT_CODE, 1).
 
 %%% ====================================================================
 %%% API functions (public interface)
@@ -29,34 +32,36 @@
 
 %% ---------------------------------------------------------------------
 %% @doc Start up a Device Client for a given target IP address (given
-%%      as a 32-bit integer) and port number.
+%%      as a 32-bit uint) and port number (16-bit uint).
 %%
-%% @spec start_link(IPaddr::integer(), Port::integer) -> {ok, Pid} | {error, Error}
+%% @spec start_link(IPaddrU32::integer(), PortU16::integer()) -> {ok, Pid} | {error, Error}
 %% @end
 %% ---------------------------------------------------------------------
-start_link(IPaddr, Port) when is_integer(IPaddr), is_integer(Port) ->
-    gen_server:start_link(?MODULE, [IPaddr, Port], []).
+start_link(IPaddrU32, PortU16) when is_integer(IPaddrU32), is_integer(PortU16) ->
+    gen_server:start_link(?MODULE, [IPaddrU32, PortU16], []).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Send some instructions to target hardware at the specified
-%%      IPaddr and Port. The Device Client Index ETS table ID (DCIndex)
-%%      must also be provided for efficient lookup of the appropriate
-%%      Device Client process. The IP address is given as a raw 32-bit
-%%      integer (no "192.168.0.1" strings, etc). Note that this send
-%%      function is asynchoronous; the response is returned to the
-%%      sender seperately - i.e. not through the return value of this
-%%      function.
+%% @doc Add some IPbus requests to the queue of the device client  
+%%      dealing with the target hardware at the given IPaddr and Port.
+%%      Note that the IP address is given as a raw unsigned 32-bit
+%%      integer (no "192.168.0.1" strings, etc). Once the device client
+%%      has dispatched the requests, the received responses will be
+%%      forwarded to the caller of this function using the form:
+%%        { device_client_response,
+%%          TargetIPaddrU32::integer(),
+%%          TargetPortU16::integer(),
+%%          ErrorCodeU16::integer(),
+%%          ResponseBin::binary() }
 %%
-%% @spec send(DCIndex::tid(),
-%%            IPaddr::integer(),
-%%            Port::integer(),
-%%            Instructions::binary()) -> ok
+%% @spec enqueue_requests(IPaddrU32::integer(),
+%%                        PortU16::integer(),
+%%                        IPbusRequests::binary()) -> ok
 %% @end
 %% ---------------------------------------------------------------------
-send(DCIndex, IPaddr, Port, Instructions) when is_binary(Instructions) ->
-    Pid = device_client_registry:get_pid(DCIndex, IPaddr, Port),
-    gen_server:cast(Pid, {send, Instructions, self()}),
+enqueue_requests(IPaddrU32, PortU16, IPbusRequests) when is_binary(IPbusRequests) ->
+    Pid = device_client_registry:get_pid(IPaddr, Port),
+    gen_server:cast(Pid, {send, IPbusRequests, self()}),
     ok.
     
     
@@ -74,10 +79,10 @@ send(DCIndex, IPaddr, Port, Instructions) when is_binary(Instructions) ->
 %%          ignore               |
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
-init([IPaddr, Port]) ->
+init([IPaddrU32, PortU16]) ->
     % Put process constants in process dict.
-    put(targetIP, IPaddr),
-    put(targetPort, Port),
+    put(targetIP, IPaddrU32),
+    put(targetPort, PortU16),
     % Tuple summarising the target address - useful for error/trace messages, etc.
     put(targetSummary, {device_client_target, {ipaddr,ch_utils:ipv4_addr_to_tuple(IPaddr)}, {port, Port}}),
     
@@ -121,20 +126,20 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_cast({send, Instructions, ClientPid}, State = #state{socket = Socket}) ->
-    ?DEBUG_TRACE("Instructions received from Transaction Manager with PID = ~p.  Forwarding to ~p...", [ClientPid, get(targetSummary)]),
+handle_cast({send, IPbusRequests, ClientPid}, State = #state{socket = Socket}) ->
+    ?DEBUG_TRACE("IPbus requests received from Transaction Manager with PID = ~p.  Forwarding to ~p...", [ClientPid, get(targetSummary)]),
     ch_stats:udp_out(),
-    ok = gen_udp:send(Socket, get(targetIP), get(targetPort), Instructions),
+    ok = gen_udp:send(Socket, get(targetIP), get(targetPort), IPbusRequests),
     Reply = receive
                 {udp, Socket, _, _, HardwareReplyBin} -> 
                     ?DEBUG_TRACE("Received response from ~p. Passing it to originating Transaction Manager...", [get(targetSummary)]),
                     ch_stats:udp_in(),
-                    {device_client_response, get(targetIP), get(targetPort), {ok, HardwareReplyBin} }
+                    { device_client_response, get(targetIP), get(targetPort), ?SUCCESS_CODE, HardwareReplyBin} }
             after ?DEVICE_CLIENT_UDP_TIMEOUT ->
                 ?DEBUG_TRACE("TIMEOUT REACHED! No response from ~p. Generating and sending a timeout "
                              "response to originating Transaction Manager...", [get(targetSummary)]),
                 ch_stats:udp_response_timeout(),
-                {device_client_response, get(targetIP), get(targetPort), {error, udp_response_timeout} }
+                { device_client_response, get(targetIP), get(targetPort), ?TIMEOUT_CODE, <<>> }
             end,
     ClientPid ! Reply,
     {noreply, State};
