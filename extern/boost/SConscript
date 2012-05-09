@@ -30,8 +30,8 @@ BoostSources = [
 # print 'BoostSources', BoostSources
 
 BoostRpms = [
-	'%(name)s-%(major)i.%(minor)i.%(bugfix)i-%(release)i' % attributes , 
-	'%(name)s-debuginfo-%(major)i.%(minor)i.%(bugfix)i-%(release)i' % attributes
+	'%(name)s-%(major)i.%(minor)i.%(bugfix)i-%(release)i' % attributes #, 
+#	'%(name)s-debuginfo-%(major)i.%(minor)i.%(bugfix)i-%(release)i' % attributes
 ]
 # print 'BoostRpms', BoostRpms
 
@@ -40,12 +40,12 @@ Arch = subprocess.Popen([ 'rpm' , '-E' , '%{_arch}' ], stdout=subprocess.PIPE, s
 
 BoostRpmFiles = [
 	'rpmbuild/RPMS/'+Arch+'/'+BoostRpms[0]+'.'+Arch+'.rpm',
-	'rpmbuild/RPMS/'+Arch+'/'+BoostRpms[1]+'.'+Arch+'.rpm',
+#	'rpmbuild/RPMS/'+Arch+'/'+BoostRpms[1]+'.'+Arch+'.rpm',
 	'rpmbuild/SRPMS/'+BoostRpms[0]+'.src.rpm'
 ]
 # print 'BoostRpmFiles', BoostRpmFiles
 
-BoostInstallFiles = BoostRpmFiles[0:2]
+BoostInstallFiles = BoostRpmFiles[0:1]
 # print 'BoostInstallFiles', BoostInstallFiles
 
 LocalTargets = [ Dir('doc') , Dir('include') , Dir('lib') ]
