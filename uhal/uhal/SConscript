@@ -22,7 +22,7 @@ lib = localenv.SharedLibrary(
 )
 
 logging_lib = localenv.SharedLibrary( 
-	target = localenv.LibPath+'/uhal.pantheios.be.colour', 
+	target = localenv.LibPath+'/uhal.pantheios.be.colour.so', 
 	source = [ localenv.BuildPath+'/src/common/pantheios.be.colour.cc' ]
 )
 
