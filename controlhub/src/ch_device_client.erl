@@ -65,7 +65,7 @@ start_link(IPaddrU32, PortU16) when is_integer(IPaddrU32), is_integer(PortU16) -
 %% @end
 %% ---------------------------------------------------------------------
 enqueue_requests(IPaddrU32, PortU16, IPbusRequests) when is_binary(IPbusRequests) ->
-    Pid = device_client_registry:get_pid(IPaddrU32, PortU16),
+    {ok, Pid} = ch_device_client_registry:get_pid(IPaddrU32, PortU16),
     gen_server:cast(Pid, {send, IPbusRequests, self()}),
     ok.
     
@@ -86,10 +86,9 @@ enqueue_requests(IPaddrU32, PortU16, IPbusRequests) when is_binary(IPbusRequests
 %% --------------------------------------------------------------------
 init([IPaddrU32, PortU16]) ->
     % Put process constants in process dict.
-    put(targetIP, IPaddrU32),
+    put(targetIPaddrU32, IPaddrU32),
+    put(targetIPaddrTuple, ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32)),
     put(targetPort, PortU16),
-    % Tuple summarising the target address - useful for error/trace messages, etc.
-    put(targetSummary, {device_client_target, {ipaddr,ch_utils:ipv4_addr_to_tuple(IPaddrU32)}, {port, PortU16}}),
     
     % Try opening ephemeral port and we want data delivered as a binary.
     case gen_udp:open(0, [binary]) of   
@@ -132,19 +131,19 @@ handle_call(_Request, _From, State) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_cast({send, IPbusRequests, ClientPid}, State = #state{socket = Socket}) ->
-    ?DEBUG_TRACE("IPbus requests received from Transaction Manager with PID = ~p.  Forwarding to ~p...", [ClientPid, get(targetSummary)]),
+    ?DEBUG_TRACE("IPbus requests received from Transaction Manager with PID = ~p.  Forwarding to IP addr=~w, port=~w...", [ClientPid, get(targetIPaddrTuple), get(targetPort)]),
     ch_stats:udp_out(),
-    ok = gen_udp:send(Socket, get(targetIP), get(targetPort), IPbusRequests),
+    gen_udp:send(Socket, get(targetIPaddrTuple), get(targetPort), IPbusRequests),
     Reply = receive
                 {udp, Socket, _, _, HardwareReplyBin} -> 
-                    ?DEBUG_TRACE("Received response from ~p. Passing it to originating Transaction Manager...", [get(targetSummary)]),
+                    ?DEBUG_TRACE("Received response from IP addr=~w, port=~w. Passing it to originating Transaction Manager...", [get(targetIPaddrTuple), get(targetPort)]),
                     ch_stats:udp_in(),
-                    { device_client_response, get(targetIP), get(targetPort), ?ERRCODE_SUCCESS, HardwareReplyBin}
+                    { device_client_response, get(targetIPaddrU32), get(targetPort), ?ERRCODE_SUCCESS, HardwareReplyBin}
             after ?DEVICE_CLIENT_UDP_TIMEOUT ->
-                ?DEBUG_TRACE("TIMEOUT REACHED! No response from ~p. Generating and sending a timeout "
-                             "response to originating Transaction Manager...", [get(targetSummary)]),
+                ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending a timeout "
+                             "response to originating Transaction Manager...", [get(targetIPaddrTuple), get(targetPort)]),
                 ch_stats:udp_response_timeout(),
-                { device_client_response, get(targetIP), get(targetPort), ?ERRCODE_TARGET_TIMEOUT, <<>> }
+                { device_client_response, get(targetIPaddrU32), get(targetPort), ?ERRCODE_TARGET_TIMEOUT, <<>> }
             end,
     ClientPid ! Reply,
     {noreply, State};

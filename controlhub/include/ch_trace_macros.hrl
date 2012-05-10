@@ -13,7 +13,7 @@
 
 
 %% Uncomment line below to globally switch on the simple debug trace messages.
--define(debug_trace, true).
+%-define(debug_trace, true).
 
 %% Uncomment line below to globally switch on packet trace messages.
 %-define(packet_trace, true).

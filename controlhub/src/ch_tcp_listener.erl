@@ -93,10 +93,10 @@ init([]) ->
         {error, eaddrinuse} ->
             io:format("~n*****~nError starting the Control Hub's TCP listener:~n"
                       "\tport ~p is already in use!~n*****~n~n", [?CONTROL_HUB_TCP_LISTEN_PORT]),
-            exit(eaddrinuse);
+            {stop, "The Control Hub listen port is already in use"};
         {error, What} ->
             io:format("~n*****~nError starting the Control Hub's TCP listener:~n\t~p~n*****~n~n", [What]),
-            exit(What)
+            {stop, {"Error starting the Control Hub TCP listener", What}}
     end.    
 
 
@@ -148,7 +148,7 @@ handle_cast(_Msg, State) ->
 
 % Observe any exit signals that come our way but do nothing with them other than a trace message
 handle_info({'EXIT', _Pid, _Reason}, State) ->
-    ?DEBUG_TRACE("Observed process ~p shutting down with reason: ~p", [_Pid, _Reason]),
+    ?DEBUG_TRACE("Observed transaction manager process ~p shutting down with reason: ~p", [_Pid, _Reason]),
     {noreply, State};
 
 %% Default info handler - on unknown info message it does nothing

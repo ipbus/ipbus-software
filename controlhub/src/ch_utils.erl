@@ -7,7 +7,7 @@
 
 
 %% Exported Functions
--export([print_binary_as_hex/1, ipv4_addr_to_tuple/1]).
+-export([print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1]).
 
 
 %%% ------------------------------------------------------------------------------------
@@ -24,19 +24,22 @@
 print_binary_as_hex(Binary) when is_binary(Binary) ->
     case size(Binary) rem 4 of
         0 -> do_print_binary_as_hex(Binary);
-        _ -> {error, needs_integer_number_32bit_words}
+        _ -> io:format("    * Binary printout skipped! *~n"
+                       "    *   Does not contain an    *~n"
+                       "    *    integer number of     *~n"
+                       "    *      32-bit words!       *~n")
     end.
 
 %% -------------------------------------------------------------------------------------
 %% @doc Converts an IPv4 address in raw u32 form into a tuple of the four address bytes.
 %%      E.g.: the 32-bit hex number 0x89abcdef goes to { 137, 171, 205, 239 }.
 %% 
-%% @spec ipv4_addr_to_tuple(IPaddrRawU32::integer()) -> ip4_address()
+%% @spec ipv4_u32_addr_to_tuple(IPaddrRawU32::integer()) -> ip4_address()
 %% where
 %%       ip4_address() = {0..255, 0..255, 0..255, 0..255}
 %% @end
 %% -------------------------------------------------------------------------------------
-ipv4_addr_to_tuple(IPaddrRawU32) when is_integer(IPaddrRawU32),
+ipv4_u32_addr_to_tuple(IPaddrRawU32) when is_integer(IPaddrRawU32),
                                       IPaddrRawU32 >= 0,
                                       IPaddrRawU32 < 4294967296 ->
     <<Byte3:8/integer, Byte2:8/integer, Byte1:8/integer, Byte0:8/integer>> = <<IPaddrRawU32:32/integer>>,

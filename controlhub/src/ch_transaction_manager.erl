@@ -53,7 +53,7 @@ tcp_acceptor(TcpListenSocket) ->
             ch_stats:client_connected(),
             case inet:peername(ClientSocket) of
                 {ok, {ClientAddr, ClientPort}} ->
-                    ?DEBUG_TRACE("TCP socket accepted from client at IP addr=~p, port=~p", [ClientAddr, ClientPort]),
+                    ?DEBUG_TRACE("TCP socket accepted from client at IP addr=~w, port=~p", [ClientAddr, ClientPort]),
                     tcp_receive_handler_loop(ClientSocket);
                 _Else ->
                     ch_stats:client_disconnected(),
@@ -106,8 +106,8 @@ process_request(ClientSocket, RequestBin) ->
            reply_to_client(ClientSocket, FullResponseBin)
     catch
         throw:{malformed, WhyMalformed} ->
-          ?DEBUG_TRACE("WARNING! Malformed (~p) client request received; will ignore.", [WhyMalformed]),
-          ?PACKET_TRACE(RequestBin, "WARNING!~n  Received and ignoring this malformed (~p) packet:", [WhyMalformed]),
+          ?DEBUG_TRACE("WARNING! Malformed (~w) client request received; will ignore.", [WhyMalformed]),
+          ?PACKET_TRACE(RequestBin, "WARNING!~n  Received and ignoring this malformed (~w) packet:", [WhyMalformed]),
           ch_stats:client_request_malformed()
     end.
 
@@ -138,10 +138,10 @@ target_request_accumulator(TargetRequestList,  <<TargetIPaddr:32,
     NumBitsForInstructions = 32 * NumInstructions,
     case Remainder of
         <<Instructions:NumBitsForInstructions/bits, Remainder2/binary>> ->
-            TargetIPaddrTuple = ch_utils:ipv4_addr_to_tuple(TargetIPaddr),
+            TargetIPaddrTuple = ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr),
             ?PACKET_TRACE(Instructions, "~n  Unpacked the following instructions "
-                                        "for target IP addr=~p, port=~p:", [TargetIPaddrTuple, TargetPort]),
-            ?DEBUG_TRACE("Unpacked ~p instruction words for target IP addr=~p, port=~p:", [NumInstructions, TargetIPaddrTuple, TargetPort]),
+                                        "for target IP addr=~w, port=~p:", [TargetIPaddrTuple, TargetPort]),
+            ?DEBUG_TRACE("Unpacked ~p instruction words for target IP addr=~w, port=~p:", [NumInstructions, TargetIPaddrTuple, TargetPort]),
             target_request_accumulator([{TargetIPaddr, TargetPort, Instructions} | TargetRequestList], Remainder2);
         _ ->
             throw({malformed, {'bad match on target request body', length(TargetRequestList)}})
@@ -174,18 +174,18 @@ gather_device_client_responses(TargetResponseOrder) ->
 device_client_response_accumulator([{IPaddrU32, PortU16}| Tail], ResponsesList) ->
     ResponseBin = receive
                       {device_client_response, IPaddrU32, PortU16, ErrorCode, TargetResponseBin} ->
-                          ?DEBUG_TRACE("Received device client response from target IPaddr=~p,"
-                                       "Port=~p", [ch_utils:ipv4_addr_to_tuple(IPaddrU32), PortU16]),
+                          ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
+                                       "Port=~p", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),
                           <<IPaddrU32:32, ErrorCode:16, PortU16:16, TargetResponseBin/binary>>
                   after (?DEVICE_CLIENT_UDP_TIMEOUT * 3) -> % Give it 3 times as long as whatever device client timeout we have
-                      ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~p,"
-                                   "Port=~p", [ch_utils:ipv4_addr_to_tuple(IPaddrU32), PortU16]),            
+                      ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~w,"
+                                   "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),            
                           <<IPaddrU32:32, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16, PortU16:16>>
                   end,
     device_client_response_accumulator(Tail, [ResponseBin | ResponsesList]);
 
 device_client_response_accumulator([], ResponsesList) ->
-    ?DEBUG_TRACE("Received all expected device client responses"),
+    ?DEBUG_TRACE("Finished gathering client responses."),
     lists:reverse(ResponsesList),
     list_to_binary(ResponsesList).
 
@@ -194,4 +194,4 @@ reply_to_client(ClientSocket, FullResponseBin) ->
     ?DEBUG_TRACE("Sending response to TCP client"),
     ?PACKET_TRACE(FullResponseBin, "~n  Sending the following response to the TCP client:"),
     gen_tcp:send(ClientSocket, FullResponseBin),
-    packet_stats:client_response_sent().
+    ch_stats:client_response_sent().

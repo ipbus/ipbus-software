@@ -20,13 +20,13 @@
 %%% ===========================================================================
 
 
-ipv4_addr_to_tuple__correct_output_test() -> 
-    ?assertEqual({192,168,0,255}, ch_utils:ipv4_addr_to_tuple(16#c0a800ff)),
-    ?assertEqual({0,0,0,0}, ch_utils:ipv4_addr_to_tuple(0)),
-    ?assertEqual({255,255,255,255}, ch_utils:ipv4_addr_to_tuple(16#ffffffff)).
+ipv4_u32_addr_to_tuple__correct_output_test() -> 
+    ?assertEqual({192,168,0,255}, ch_utils:ipv4_u32_addr_to_tuple(16#c0a800ff)),
+    ?assertEqual({0,0,0,0}, ch_utils:ipv4_u32_addr_to_tuple(0)),
+    ?assertEqual({255,255,255,255}, ch_utils:ipv4_u32_addr_to_tuple(16#ffffffff)).
 
-ipv4_addr_to_tuple__input_negative_throws_test() -> 
-    ?assertError(function_clause, ch_utils:ipv4_addr_to_tuple(-1)).
+ipv4_u32_addr_to_tuple__input_negative_throws_test() -> 
+    ?assertError(function_clause, ch_utils:ipv4_u32_addr_to_tuple(-1)).
 
-ipv4_addr_to_tuple__input_too_large_throws_test() ->
-    ?assertError(function_clause, ch_utils:ipv4_addr_to_tuple(16#100000000)). % 1 bigger than max 32-bit unsigned integer.
+ipv4_u32_addr_to_tuple__input_too_large_throws_test() ->
+    ?assertError(function_clause, ch_utils:ipv4_u32_addr_to_tuple(16#100000000)). % 1 bigger than max 32-bit unsigned integer.

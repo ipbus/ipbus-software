@@ -371,17 +371,17 @@ handle_cast(report_to_console, State) ->
               "CLIENT  Active connections: ~p (peak=~p)~n"
               "         Requests received: ~p (of which ~p were malformed)~n"
               "            Responses sent: ~p~n~n"
-              "UDP             Packets In: ~p (of which ~p were malformed)~n"
-              "               Packets Out: ~p~n"
+              "UDP            Packets Out: ~p~n"
+              "                Packets In: ~p (of which ~p were malformed)~n"
               "                  Timeouts: ~p~n",
               [State#state.active_clients,
                State#state.max_active_clients,
                State#state.request_count,
                State#state.malformed_request_count,
                State#state.response_count,
+               State#state.udp_out,
                State#state.udp_in,
                State#state.udp_malformed,
-               State#state.udp_out,
                State#state.udp_response_timeouts]),
     {noreply, State};
 
