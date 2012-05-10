@@ -52,8 +52,8 @@ tcp_acceptor(TcpListenSocket) ->
             ch_tcp_listener:connection_accept_completed(),
             ch_stats:client_connected(),
             case inet:peername(ClientSocket) of
-                {ok, {ClientAddr, ClientPort}} ->
-                    ?DEBUG_TRACE("TCP socket accepted from client at IP addr=~w, port=~p", [ClientAddr, ClientPort]),
+                {ok, {_ClientAddr, _ClientPort}} ->
+                    ?DEBUG_TRACE("TCP socket accepted from client at IP addr=~w, port=~p", [_ClientAddr, _ClientPort]),
                     tcp_receive_handler_loop(ClientSocket);
                 _Else ->
                     ch_stats:client_disconnected(),
@@ -105,9 +105,9 @@ process_request(ClientSocket, RequestBin) ->
            FullResponseBin = gather_device_client_responses(TargetResponseOrder),
            reply_to_client(ClientSocket, FullResponseBin)
     catch
-        throw:{malformed, WhyMalformed} ->
-          ?DEBUG_TRACE("WARNING! Malformed (~w) client request received; will ignore.", [WhyMalformed]),
-          ?PACKET_TRACE(RequestBin, "WARNING!~n  Received and ignoring this malformed (~w) packet:", [WhyMalformed]),
+        throw:{malformed, _WhyMalformed} ->
+          ?DEBUG_TRACE("WARNING! Malformed (~w) client request received; will ignore.", [_WhyMalformed]),
+          ?PACKET_TRACE(RequestBin, "WARNING!~n  Received and ignoring this malformed (~w) packet:", [_WhyMalformed]),
           ch_stats:client_request_malformed()
     end.
 
@@ -138,10 +138,10 @@ target_request_accumulator(TargetRequestList,  <<TargetIPaddr:32,
     NumBitsForInstructions = 32 * NumInstructions,
     case Remainder of
         <<Instructions:NumBitsForInstructions/bits, Remainder2/binary>> ->
-            TargetIPaddrTuple = ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr),
+            _TargetIPaddrTuple = ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr),
             ?PACKET_TRACE(Instructions, "~n  Unpacked the following instructions "
-                                        "for target IP addr=~w, port=~p:", [TargetIPaddrTuple, TargetPort]),
-            ?DEBUG_TRACE("Unpacked ~p instruction words for target IP addr=~w, port=~p:", [NumInstructions, TargetIPaddrTuple, TargetPort]),
+                                        "for target IP addr=~w, port=~p:", [_TargetIPaddrTuple, TargetPort]),
+            ?DEBUG_TRACE("Unpacked ~p instruction words for target IP addr=~w, port=~p:", [NumInstructions, _TargetIPaddrTuple, TargetPort]),
             target_request_accumulator([{TargetIPaddr, TargetPort, Instructions} | TargetRequestList], Remainder2);
         _ ->
             throw({malformed, {'bad match on target request body', length(TargetRequestList)}})
