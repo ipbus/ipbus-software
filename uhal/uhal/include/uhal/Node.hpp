@@ -56,8 +56,8 @@ namespace uhal
 	class ChildHasAddressOverlap: public uhal::exception {  };
 	//! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
 	class ChildHasAddressMaskOverlap: public uhal::exception {  };
-	
-	
+
+
 	//! A heirarchical node for navigating heirarchical firmwares
 	class Node
 	{
@@ -241,10 +241,10 @@ namespace uhal
 			std::string mUid;
 			//! The register address with which this node is associated
 			uint32_t mAddr;
-			
+
 			//! The register address with which this node is associated
-			uint32_t mAddrMask;			
-			
+			uint32_t mAddrMask;
+
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
 			//! The read/write access permissions of this node

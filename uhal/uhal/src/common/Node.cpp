@@ -154,31 +154,36 @@ namespace uhal
 			if ( lIterator==mChildrenMap->end() )
 			{
 				pantheios::log_ERROR ( "No branch found with ID-path \"" , aId , "\"" );
-				
-				std::size_t lPos( std::string::npos );
-				bool lPartialMatch(false);
-				while ( true ){
-					lPos = aId.rfind( '.' , lPos );
-					if( lPos == std::string::npos )
+				std::size_t lPos ( std::string::npos );
+				bool lPartialMatch ( false );
+
+				while ( true )
+				{
+					lPos = aId.rfind ( '.' , lPos );
+
+					if ( lPos == std::string::npos )
 					{
 						break;
 					}
-					std::hash_map< std::string , Node* >::iterator lIterator = mChildrenMap->find ( aId.substr( 0 , lPos ) );
+
+					std::hash_map< std::string , Node* >::iterator lIterator = mChildrenMap->find ( aId.substr ( 0 , lPos ) );
+
 					if ( lIterator!=mChildrenMap->end() )
 					{
-						pantheios::log_ERROR ( "Partial match \"" , aId.substr( 0 , lPos ) , "\" found for ID-path \"" , aId , "\"" );
-						pantheios::log_ERROR ( "Tree structure of partial match is:" , lazy_stream_inserter ( *(lIterator->second) ) );
+						pantheios::log_ERROR ( "Partial match \"" , aId.substr ( 0 , lPos ) , "\" found for ID-path \"" , aId , "\"" );
+						pantheios::log_ERROR ( "Tree structure of partial match is:" , lazy_stream_inserter ( * ( lIterator->second ) ) );
 						lPartialMatch = true;
 						break;
 					}
-					lPos--;					
+
+					lPos--;
 				}
-				
-				if( !lPartialMatch )
+
+				if ( !lPartialMatch )
 				{
 					pantheios::log_ERROR ( "Not even a partial match found for ID-path \"" , aId , "\". Tree structure is:" , lazy_stream_inserter ( *this ) );
 				}
-					
+
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 				throw NoBranchFoundWithGivenUID();
 			}
@@ -221,18 +226,15 @@ namespace uhal
 		{
 			std::vector<std::string> lNodes;
 			lNodes.reserve ( mChildrenMap->size() ); //prevent reallocations
+			pantheios::log_INFORMATIONAL ( "Regular Expression : " , aRegex.str() );
 
-			pantheios::log_INFORMATIONAL(  "Regular Expression : " , aRegex.str() );
-
-				
 			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
 			{
 				boost::cmatch lMatch;
 
-
 				if ( boost::regex_match ( lIt->first.c_str() , lMatch , aRegex ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
 				{
-					pantheios::log_INFORMATIONAL(  lIt->first , " matches" );
+					pantheios::log_INFORMATIONAL ( lIt->first , " matches" );
 					lNodes.push_back ( lIt->first );
 				}
 			}
@@ -293,52 +295,54 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			throw NodeMustHaveUID();
 		}
 
-		
-		uint32_t lAddr( 0x00000000 );
-		if( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
+		uint32_t lAddr ( 0x00000000 );
+
+		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
 		{
-			if( lAddr & ~aParentMask ){
-				pantheios::log_ERROR ( "Node address " , pantheios::integer ( lAddr , pantheios::fmt::fullHex | 10 ) , 
-										" overlaps with the mask specified by the parent node, " , pantheios::integer ( aParentMask , pantheios::fmt::fullHex | 10 ) );			
+			if ( lAddr & ~aParentMask )
+			{
+				pantheios::log_ERROR ( "Node address " , pantheios::integer ( lAddr , pantheios::fmt::fullHex | 10 ) ,
+									   " overlaps with the mask specified by the parent node, " , pantheios::integer ( aParentMask , pantheios::fmt::fullHex | 10 ) );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 				throw ChildHasAddressOverlap();
 			}
-			
-			mAddr = aParentAddr | ( lAddr & aParentMask );			
+
+			mAddr = aParentAddr | ( lAddr & aParentMask );
 		}
 		else
 		{
 			mAddr = aParentAddr;
 		}
 
-
-		if( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address-mask" , mAddrMask ) )
+		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address-mask" , mAddrMask ) )
 		{
-			if( mAddrMask & ~aParentMask ){
-				pantheios::log_ERROR ( "Node address mask " , pantheios::integer ( mAddrMask , pantheios::fmt::fullHex | 10 ) , 
-										" overlaps with the parent mask " , pantheios::integer ( aParentMask , pantheios::fmt::fullHex | 10 ) ,
-										". This makes the child's address subspace larger than the parent and is not allowed" );			
+			if ( mAddrMask & ~aParentMask )
+			{
+				pantheios::log_ERROR ( "Node address mask " , pantheios::integer ( mAddrMask , pantheios::fmt::fullHex | 10 ) ,
+									   " overlaps with the parent mask " , pantheios::integer ( aParentMask , pantheios::fmt::fullHex | 10 ) ,
+									   ". This makes the child's address subspace larger than the parent and is not allowed" );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 				throw ChildHasAddressMaskOverlap();
 			}
-			
-		
 		}
 		else
 		{
 			//we have already checked that the address doesn't overlap with the parent mask, therefore, this calculation cannot produce a mask which overlaps the parent mask either.
 			mAddrMask = 0x00000001 ;
-			for ( uint32_t i=0 ; i!=32 ; ++i ){
-				if( mAddrMask & mAddr )
+
+			for ( uint32_t i=0 ; i!=32 ; ++i )
+			{
+				if ( mAddrMask & mAddr )
 				{
 					break;
 				}
-				mAddrMask = (mAddrMask << 1) | 0x00000001;
+
+				mAddrMask = ( mAddrMask << 1 ) | 0x00000001;
 			}
+
 			mAddrMask &= ~mAddr;
 		}
-		
-		
+
 		/*if ( lAddrSpecified )
 		{
 			if( ( aParentAddr == 0x00000000 ) || ( aParentAddr == lAddr ) )
@@ -347,27 +351,25 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			}
 			else
 			{
-				
+
 
 				pantheios::log_INFORMATIONAL ( "aParentAddr  = " , pantheios::integer ( aParentAddr , pantheios::fmt::fullHex | 10 ) );
 				pantheios::log_INFORMATIONAL ( "lMask  = " , pantheios::integer ( lMask , pantheios::fmt::fullHex | 10 ) );
-				
-				
-				
-				
+
+
+
+
 			}
-			
+
 		}
 		else
 		{
 			mAddr = aParentAddr;
 		}*/
-			
-		
 		std::string lModule;
 
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
-		{	
+		{
 			try
 			{
 				Node lNode = AddressTableBuilder::getInstance().getAddressTable ( lModule , mAddr , mAddrMask );
@@ -381,10 +383,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		}
 		else
 		{
-			
 			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
 			std::string lPermission;
-			
+
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
 			{
 				try
@@ -403,7 +404,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 					throw uhal::exception ( aExc );
 				}
 			}
-		
+
 			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
 			{
 				mChildren->push_back ( Node ( lXmlNode , mAddr , mAddrMask ) );

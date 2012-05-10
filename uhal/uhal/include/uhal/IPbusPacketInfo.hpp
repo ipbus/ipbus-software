@@ -24,7 +24,7 @@
 // Forward declare the class so we can declare the friend outside the namespace
 // namespace uhal
 // {
-	// class IPbusPacketInfo;
+// class IPbusPacketInfo;
 // }
 
 //	Declare the friend streaming class for aIPbusPacketInfo outside the uhal namespace.

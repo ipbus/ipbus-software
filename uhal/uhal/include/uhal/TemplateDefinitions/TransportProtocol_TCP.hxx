@@ -82,7 +82,7 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 
 			for ( tAccumulatedPackets::const_iterator lAccumulatedPacketIt = mPackingProtocol.getAccumulatedPackets().begin() ; lAccumulatedPacketIt != mPackingProtocol.getAccumulatedPackets().end() ; ++lAccumulatedPacketIt )
 			{
-				if(pantheios::isSeverityLogged(pantheios::debug) )
+				if ( pantheios::isSeverityLogged ( pantheios::debug ) )
 				{
 					for ( std::deque< boost::asio::const_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mSendBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mSendBuffers.end() ; ++lBufIt )
 					{
@@ -159,7 +159,7 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 				}
 				while ( ( lReplyLength>>2 ) != lAccumulatedPacketIt->mCumulativeReturnSize );
 
-				if(pantheios::isSeverityLogged(pantheios::debug) )
+				if ( pantheios::isSeverityLogged ( pantheios::debug ) )
 				{
 					for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
 					{
@@ -175,7 +175,7 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 
 					pantheios::log_DEBUG ( ">>> ----------------" );
 				}
-				
+
 				// std::cout << (mThis->mReplyLength>>2) << " vs. " << lAccumulatedPacketIt->mCumulativeReturnSize << std::endl;
 				//check that it is the right length...
 				// if( (mThis->mReplyLength>>2) != lAccumulatedPacketIt->mCumulativeReturnSize ){

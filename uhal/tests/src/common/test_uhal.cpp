@@ -372,25 +372,22 @@ void write_test()
 	}
 }
 
-void read_write_mask() {
-	uhal::ConnectionManager manager( "file://tests/addr/connections.xml" );
-	uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
-
+void read_write_mask()
+{
+	uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
+	uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 	hw.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
 	hw.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
 	hw.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
-	hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );	
+	hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
 	hw.dispatch();
-
-
-// uhal::ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
-// //BOOST_CHECK(mem >=0 && mem <=0xF);
-
-// uint32_t val = 0x3;
-// hw.getNode("REGISTER_MASK_0xF0").write(val);
-// mem = hw.getNode("REGISTER_MASK_0xF0").read();
-// hw.dispatch();
-// //BOOST_CHECK(mem == val);
+	// uhal::ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
+	// //BOOST_CHECK(mem >=0 && mem <=0xF);
+	// uint32_t val = 0x3;
+	// hw.getNode("REGISTER_MASK_0xF0").write(val);
+	// mem = hw.getNode("REGISTER_MASK_0xF0").read();
+	// hw.dispatch();
+	// //BOOST_CHECK(mem == val);
 }
 
 // void read_write_permissions() {
@@ -669,7 +666,6 @@ int main ( int argc,char* argv[] )
 	try
 	{
 		pantheios_fe_simple_setSeverityCeiling ( pantheios::debug );
-	
 		// hwInterface_creation();
 		// rawClientAccess();
 		// navigation_and_traversal_test();

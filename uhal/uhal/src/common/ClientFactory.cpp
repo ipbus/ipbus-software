@@ -25,6 +25,7 @@ namespace uhal
 				mInstance->add< uhal::IPBusTCPClient<IPbus_2_0> > ( "ipbustcp-2.0" );
 				// ---------------------------------------------------------------------
 				mInstance->add< uhal::ControlHubClient<IPbus_1_3> > ( "chtcp" );
+				mInstance->add< uhal::ControlHubClient<IPbus_1_2> > ( "chtcp-1.2" );
 				mInstance->add< uhal::ControlHubClient<IPbus_1_3> > ( "chtcp-1.3" );
 				mInstance->add< uhal::ControlHubClient<IPbus_1_4> > ( "chtcp-1.4" );
 				mInstance->add< uhal::ControlHubClient<IPbus_2_0> > ( "chtcp-2.0" );

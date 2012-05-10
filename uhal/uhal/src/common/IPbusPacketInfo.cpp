@@ -11,45 +11,45 @@
 
 // std::ostream& operator<< ( std::ostream& aStream, const uhal::IPbusPacketInfo& aIPbusPacketInfo )
 // {
-	// try
-	// {
-		// /*	if( aIPbusPacketInfo.mTransactionHeader.size()==0 ){
-				// aStream << "'IPbusPacketInfo with no type'" << std::endl;
-				// return aStream;
-			// }
+// try
+// {
+// /*	if( aIPbusPacketInfo.mTransactionHeader.size()==0 ){
+// aStream << "'IPbusPacketInfo with no type'" << std::endl;
+// return aStream;
+// }
 
-			// aStream << std::hex << std::uppercase << std::setfill('0') << "Header : 0x" << std::setw(8) << aIPbusPacketInfo.mTransactionHeader.at(0) << std::endl;
-			// if( aIPbusPacketInfo.mTransactionHeader.size()==2 )
-				// aStream << std::hex << std::uppercase << std::setfill('0') << "Base Address : 0x" << std::setw(8) << aIPbusPacketInfo.mTransactionHeader.at(1) << std::endl;
+// aStream << std::hex << std::uppercase << std::setfill('0') << "Header : 0x" << std::setw(8) << aIPbusPacketInfo.mTransactionHeader.at(0) << std::endl;
+// if( aIPbusPacketInfo.mTransactionHeader.size()==2 )
+// aStream << std::hex << std::uppercase << std::setfill('0') << "Base Address : 0x" << std::setw(8) << aIPbusPacketInfo.mTransactionHeader.at(1) << std::endl;
 
-			// if( aIPbusPacketInfo.mPayload.size() ){
-				// aStream << "Payload :\n" ;
+// if( aIPbusPacketInfo.mPayload.size() ){
+// aStream << "Payload :\n" ;
 
-				// std::vector<uint32_t>::const_iterator lIt;
-				// int i;
+// std::vector<uint32_t>::const_iterator lIt;
+// int i;
 
-				// for( lIt = aIPbusPacketInfo.mPayload.begin() , i = 0 ; lIt != aIPbusPacketInfo.mPayload.end(); ++lIt , ++i )
-					// aStream << "\t" << std::dec << i << "\t" << std::hex << std::setw(8) << *lIt << "\n";
-			// }
+// for( lIt = aIPbusPacketInfo.mPayload.begin() , i = 0 ; lIt != aIPbusPacketInfo.mPayload.end(); ++lIt , ++i )
+// aStream << "\t" << std::dec << i << "\t" << std::hex << std::setw(8) << *lIt << "\n";
+// }
 
-			// aStream << std::hex << std::uppercase << std::setfill('0')
-					// << "aTransactionId = 0x" << std::setw(8) << aIPbusPacketInfo.transactionId()
-					// << ", mType = 0x" << std::setw(8) << (aIPbusPacketInfo.type()>>3)
-					// << std::dec
-					// << ", mWordCount = " << aIPbusPacketInfo.wordCount()
-					// << ", #DeviceIDs = " << aIPbusPacketInfo.mDeviceIDs.size()
-					// << ", Payload size = " << aIPbusPacketInfo.mPayload.size()
-					// << ".";
-		// */
-		// aStream << aIPbusPacketInfo.mType << " " <<  aIPbusPacketInfo.mWordCount << " " <<  aIPbusPacketInfo.mBaseAddress << " " <<  aIPbusPacketInfo.mHasBaseAddress
-				// << " Returning : " <<  aIPbusPacketInfo.ReturnSize() << " (" << aIPbusPacketInfo.ReturnHeaderSize() << " , " <<  aIPbusPacketInfo.ReturnPayloadSize() << ")";
-		// return aStream;
-	// }
-	// catch ( const std::exception& aExc )
-	// {
-		// pantheios::log_EXCEPTION ( aExc );
-		// throw uhal::exception ( aExc );
-	// }
+// aStream << std::hex << std::uppercase << std::setfill('0')
+// << "aTransactionId = 0x" << std::setw(8) << aIPbusPacketInfo.transactionId()
+// << ", mType = 0x" << std::setw(8) << (aIPbusPacketInfo.type()>>3)
+// << std::dec
+// << ", mWordCount = " << aIPbusPacketInfo.wordCount()
+// << ", #DeviceIDs = " << aIPbusPacketInfo.mDeviceIDs.size()
+// << ", Payload size = " << aIPbusPacketInfo.mPayload.size()
+// << ".";
+// */
+// aStream << aIPbusPacketInfo.mType << " " <<  aIPbusPacketInfo.mWordCount << " " <<  aIPbusPacketInfo.mBaseAddress << " " <<  aIPbusPacketInfo.mHasBaseAddress
+// << " Returning : " <<  aIPbusPacketInfo.ReturnSize() << " (" << aIPbusPacketInfo.ReturnHeaderSize() << " , " <<  aIPbusPacketInfo.ReturnPayloadSize() << ")";
+// return aStream;
+// }
+// catch ( const std::exception& aExc )
+// {
+// pantheios::log_EXCEPTION ( aExc );
+// throw uhal::exception ( aExc );
+// }
 // }
 
 // Using the uhal namespace

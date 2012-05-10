@@ -60,10 +60,10 @@ namespace uhal
 					}
 				}
 
-				pantheios::log_ERROR ( "Error occured at line number " , pantheios::integer ( lLineCounter ) , 
-										", character " , pantheios::integer ( lDist0+1 ) , "\n"
-										"LINE           : " , lLine , "\n"
-										"ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
+				pantheios::log_ERROR ( "Error occured at line number " , pantheios::integer ( lLineCounter ) ,
+									   ", character " , pantheios::integer ( lDist0+1 ) , "\n"
+									   "LINE           : " , lLine , "\n"
+									   "ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
 			}
 			catch ( const std::exception& aExc )
 			{
