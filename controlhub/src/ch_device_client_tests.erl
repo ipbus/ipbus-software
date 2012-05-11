@@ -38,7 +38,7 @@ ch_device_client_test_() ->
 %% @spec setup() -> ok
 setup() ->
     ch_device_client_registry:start_link(), % needs to be available to spawn the device clients
-    DummyHwPid = spawn(fun() -> bounceback_simple_dummy_hw(?DUMMY_HW_PORT) end),
+    DummyHwPid = spawn(fun() -> udp_echo_server(?DUMMY_HW_PORT) end),
     DummyHwPid.
 
 %% Teardown function for test fixture
@@ -79,7 +79,10 @@ test_unresponse_target() ->
 %% Test multiple processes chucking loads of data at a single device client
 %% More of a stress test than unit test...
 test_multiple_client_processes() ->
-    spawn_request_generators(20, 100, 100, ?LOCALHOST, ?DUMMY_HW_PORT).
+    process_flag(trap_exit, true),
+    TotalGenerators = 20,
+    spawn_request_generators(TotalGenerators, 100, 100, ?LOCALHOST, ?DUMMY_HW_PORT),
+    await_generator_exits(TotalGenerators).
 
 
 %%% ==========================================================================
@@ -105,11 +108,19 @@ udp_echo_server_loop(Socket) ->
 %% number of 32-bit words allowed in the randomly generated packets, and the target hardware's
 %% IP address and port.
 spawn_request_generators(RemainingToSpawn, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
-    spawn(fun() -> request_generator(TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) end),
-    spawn_request_generators(RemainingToSpawn - 1, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort).
+    spawn_link(fun() -> request_generator(TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) end),
+    spawn_request_generators(RemainingToSpawn - 1, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort);
 
 spawn_request_generators(RemainingToSpawn, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
+    blah.
 
 request_generator(RemainingIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
     blah.
-                                                                                 
+
+await_generator_exits(Remaining) ->
+    receive
+        {exit, _Pid, _Why} ->
+            await_generator_exits(Remaining-1)
+    end;
+
+await_generator_exits(0) -> ok.
