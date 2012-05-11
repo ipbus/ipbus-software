@@ -76,22 +76,40 @@ test_unresponse_target() ->
     end.    
 
 
+%% Test multiple processes chucking loads of data at a single device client
+%% More of a stress test than unit test...
+test_multiple_client_processes() ->
+    spawn_request_generators(20, 100, 100, ?LOCALHOST, ?DUMMY_HW_PORT).
+
 
 %%% ==========================================================================
 %%% Test Helper Functions
 %%% ==========================================================================
 
-%% Very simple dummy hardware that simply sends back whatever it receives
-%% over UDP.  Simply spawn a process that starts with this function and
-%% specify the port for it to listen on.
-bounceback_simple_dummy_hw(Port) ->
+%% Very simple dummy hardware - just returns whatever it gets sent.
+udp_echo_server(Port) ->
     {ok, Socket} = gen_udp:open(Port, [binary]),
-    bounceback_recv_send_loop(Socket).
+    udp_echo_server_loop(Socket).
 
-bounceback_recv_send_loop(Socket) ->
+%% The receive loop for the echo server.
+udp_echo_server_loop(Socket) ->
     receive
         {udp, Socket, IP, Port, Packet} ->
             gen_udp:send(Socket, IP, Port, Packet),
-            bounceback_recv_send_loop(Socket);
+            udp_echo_server_loop(Socket);
         die -> ok % For a receiving a clean/normal exit message.
     end.
+
+%% Spawns request generators to test the device client process. Specify the total number you
+%% want spawning, the total number of request loops each generator should perform, the maximum
+%% number of 32-bit words allowed in the randomly generated packets, and the target hardware's
+%% IP address and port.
+spawn_request_generators(RemainingToSpawn, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
+    spawn(fun() -> request_generator(TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) end),
+    spawn_request_generators(RemainingToSpawn - 1, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort).
+
+spawn_request_generators(RemainingToSpawn, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
+
+request_generator(RemainingIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
+    blah.
+                                                                                 
