@@ -26,7 +26,7 @@
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--record(state, {socket = null}). % Network socket to target device
+-record(state, {socket}).           % Holds network socket to target device.
 
 
 %%% ====================================================================
@@ -59,6 +59,13 @@ start_link(IPaddrU32, PortU16) when is_integer(IPaddrU32), is_integer(PortU16) -
 %%          ErrorCodeU16::integer(),
 %%          TargetResponse::binary() }
 %%
+%%      Currently ErrorCodeU16 will either be:
+%%          0  :  Success, no error.
+%%          1  :  Target response timeout reached.
+%%
+%%      If the the error code is not 0, then the TargetResponse will be
+%%      an empty binary. 
+%%
 %% @spec enqueue_requests(IPaddrU32::integer(),
 %%                        PortU16::integer(),
 %%                        IPbusRequests::binary()) -> ok
@@ -86,13 +93,14 @@ enqueue_requests(IPaddrU32, PortU16, IPbusRequests) when is_binary(IPbusRequests
 %% --------------------------------------------------------------------
 init([IPaddrU32, PortU16]) ->
     % Put process constants in process dict.
-    put(targetIPaddrU32, IPaddrU32),
-    put(targetIPaddrTuple, ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32)),
-    put(targetPort, PortU16),
+    put(target_ip_u32, IPaddrU32),
+    put(target_ip_tuple, ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32)),
+    put(target_port, PortU16),
     
     % Try opening ephemeral port and we want data delivered as a binary.
     case gen_udp:open(0, [binary]) of   
-        {ok, Socket} -> {ok, #state{socket = Socket}};
+        {ok, Socket} ->
+            {ok, #state{socket = Socket}};
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             get(targetSummary),
@@ -123,6 +131,7 @@ handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
 
+
 %% --------------------------------------------------------------------
 %% Function: handle_cast/2
 %% Description: Handling cast messages
@@ -130,25 +139,31 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+
+% handle_cast callback for enqueue_requests API call.
 handle_cast({send, IPbusRequests, ClientPid}, State = #state{socket = Socket}) ->
-    ?DEBUG_TRACE("IPbus requests received from Transaction Manager with PID = ~p.  Forwarding to IP addr=~w, port=~w...", [ClientPid, get(targetIPaddrTuple), get(targetPort)]),
+    ?DEBUG_TRACE("IPbus requests received from Transaction Manager with PID = ~w.  Forwarding to "
+                 "IP addr=~w, port=~w...", [ClientPid, get(target_ip_tuple), get(target_port)]),
+    gen_udp:send(Socket, get(target_ip_tuple), get(target_port), IPbusRequests),
     ch_stats:udp_out(),
-    gen_udp:send(Socket, get(targetIPaddrTuple), get(targetPort), IPbusRequests),
+    TargetIPtuple = get(target_ip_tuple),
+    TargetPort = get(target_port),
     Reply = receive
-                {udp, Socket, _, _, HardwareReplyBin} -> 
-                    ?DEBUG_TRACE("Received response from IP addr=~w, port=~w. Passing it to originating Transaction Manager...", [get(targetIPaddrTuple), get(targetPort)]),
+                {udp, Socket, TargetIPtuple, TargetPort, HardwareReplyBin} -> 
+                    ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w. "
+                                 "Passing it to originating Transaction Manager...", [TargetIPtuple, TargetPort]),
                     ch_stats:udp_in(),
-                    { device_client_response, get(targetIPaddrU32), get(targetPort), ?ERRCODE_SUCCESS, HardwareReplyBin}
+                    { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReplyBin}
             after ?DEVICE_CLIENT_UDP_TIMEOUT ->
-                ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending a timeout "
-                             "response to originating Transaction Manager...", [get(targetIPaddrTuple), get(targetPort)]),
+                ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
+                             "a timeout response to originating Transaction Manager...", [TargetIPtuple, TargetPort]),
                 ch_stats:udp_response_timeout(),
-                { device_client_response, get(targetIPaddrU32), get(targetPort), ?ERRCODE_TARGET_TIMEOUT, <<>> }
+                { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_TIMEOUT, <<>> }
             end,
     ClientPid ! Reply,
     {noreply, State};
 
-
+%% Default handle cast
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
