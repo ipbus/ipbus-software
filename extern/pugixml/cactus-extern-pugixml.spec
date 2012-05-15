@@ -1,5 +1,5 @@
 #
-# spefile for boost
+# spefile for PugiXML
 #
 Name: %{name} 
 Version: %{version} 
