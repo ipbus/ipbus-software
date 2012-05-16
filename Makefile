@@ -1,7 +1,11 @@
 MAKE=make
-PACKAGES = extern/boost \
-	extern/stlsoft \
-	extern/pantheios
+PACKAGES = 	extern/boost \
+		extern/stlsoft \
+		extern/pantheios \
+		extern/pugixml \
+		uhal/BoostSpiritGrammars \
+		uhal/uhal \
+		uhal/tests
 
 TARGETS=clean rpm build
 
