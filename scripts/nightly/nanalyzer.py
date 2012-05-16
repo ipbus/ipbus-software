@@ -1,4 +1,15 @@
-from configuration import *
+#!/usr/bin/python
+"""
+Usage: nanalyzer.py [options] configuration.py
+Executes the nightly analyzer with the given configuration file.
+
+arguments:
+   configuration.py  Python configuration file 
+   
+options:
+   -h, --help        help
+"""
+
 import re
 import time
 import os
@@ -6,6 +17,7 @@ import smtplib
 from email.MIMEText import MIMEText
 
 LIMIT, ERROR, TEST_PASSED = range(3)
+CONF = None
 
 def style(type):
     if type == LIMIT:
@@ -29,17 +41,17 @@ def analyze_log():
 
     r_limit = re.compile(r'----\+\+\+\+(.*?)\+\+\+\+----')
 
-    fn = LOG_FILE
+    fn = CONF.LOG_FILE
     current_section = "BEGIN"
     for (i, l) in enumerate(open(fn)):
         if r_limit.search(l):
             s = r_limit.search(l)
             current_section = s.groups()[0]
             result.append((i, LIMIT, l, current_section))
-        elif findany(l, TEST_PASSED_LIST):
-            result.append((i, TEST_PASSED, l, current_section))
-        elif findany(l, ERROR_LIST):
-            if findany(l, IGNORE_ERROR_LIST):
+        elif findany(l, CONF.TEST_PASSED_LIST):
+            result.append((i, CONF.TEST_PASSED, l, current_section))
+        elif findany(l, CONF.ERROR_LIST):
+            if findany(l, CONF.IGNORE_ERROR_LIST):
                 pass
             else:
                 result.append((i, ERROR, l, current_section))
@@ -74,9 +86,9 @@ def report_summary(result):
 
     html += "</table><br/>\n"
 
-    html += "see <a href='%s'>RPMs...</a><br/>" % os.path.join(WEB_URL,"RPMS")
-    html += "see <a href='%s'>log file...</a><br/>" % os.path.join(WEB_URL,"nightly.log.html")
-    html += "see <a href='%s'>other logs...</a><br/>" % os.path.join(WEB_URL,"logs")
+    html += "see <a href='%s'>RPMs...</a><br/>" % os.path.join(CONF.WEB_URL,"RPMS")
+    html += "see <a href='%s'>log file...</a><br/>" % os.path.join(CONF.WEB_URL,"nightly.log.html")
+    html += "see <a href='%s'>other logs...</a><br/>" % os.path.join(CONF.WEB_URL,"logs")
 
     return html
 
@@ -91,7 +103,7 @@ def report_links(result):
             if t == LIMIT:
                 html += "<a name='incidence_" + s + "'><h5>" + s + "</h5></a>"
             else:
-                html += "<a style='text-decoration: none' href='%s'>" % os.path.join(WEB_URL, "nightly.log.html#log_" + str(c))
+                html += "<a style='text-decoration: none' href='%s'>" % os.path.join(CONF.WEB_URL, "nightly.log.html#log_" + str(c))
                 html += "<pre style='" + style(t) + "'> " + d + "</pre>"
                 html += "</a>"
 
@@ -101,7 +113,7 @@ def render_log(result):
     
     html = html_header("L1 Nightlies: Log details %s" % time.asctime())
     
-    html += "<a href='%s'>back...</a><br/><br/>" % os.path.join(WEB_URL,"index.html")
+    html += "<a href='%s'>back...</a><br/><br/>" % os.path.join(CONF.WEB_URL,"index.html")
 
     fn = LOG_FILE
     keys = [i[0] for i in result]
@@ -116,7 +128,7 @@ def render_log(result):
         
     html += html_footer()
         
-    fn = os.path.join(WEB_DIR, "nightly.log.html")
+    fn = os.path.join(CONF.WEB_DIR, "nightly.log.html")
     tmp = open(fn, "w")
     tmp.write(html)
     tmp.close()
@@ -142,13 +154,15 @@ def html_header(title):
     html += "<a href='https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds'><img src='static/question_mark.png' height='60' width='60' style='border-style: none' align='right'/></a>"
     html += "<h1>" + title + "</h1>\n"
 
+    html += "<p>" + nutils.system("uname -a",exception=False) + "</p>"
+
     return html
 
 def html_footer():
     html = """<center>
     <span>
     <a href=\"http://savannah.cern.ch/projects/l1ts/\">Support</a> |
-    <a href=\"https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds">Documentation</a>
+    <a href=\"https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds\">Documentation</a>
     </span>
     </center>
     """
@@ -159,28 +173,28 @@ def html_footer():
     return html
 
 def render_main(result):
-    html = html_header("CMS L1 Online SW Nightlies %s" % time.asctime())
+    html = html_header("%s %s" % (CONF.TITLE,time.asctime()))
     html += report_summary(result)
     html += report_links(result)
     html += html_footer()
 
-    fn = os.path.join(WEB_DIR,"index.html")
+    fn = os.path.join(CONF.WEB_DIR,"index.html")
     open(fn,"w").write(html)
 
 def send_mail():
-    fn = os.path.join(WEB_DIR,"index.html")
+    fn = os.path.join(CONF.WEB_DIR,"index.html")
     content = open(fn).read()
 
     msg = MIMEText(content,'html')
 
     if re.search("\d+\s+ERRORS",content):
-        msg['Subject'] = "Nightly build: ERRORs"
+        msg['Subject'] = CONF.TILE + ": ERRORs"
     else:
-        msg['Subject'] = "Nightly build"
+        msg['Subject'] = CONF.TILE
 
-    fromaddr = "cms-l1osw@cern.ch"
+    fromaddr = CONF.FROM_EMAIL
     msg['From'] = fromaddr
-    toaddr = "cms-l1osw@cern.ch"
+    toaddr = CONF.TO_EMAIL
     msg['To'] = toaddr
 
     s = smtplib.SMTP('localhost')
@@ -198,4 +212,31 @@ def report():
     send_mail()
 
 if __name__ == '__main__':
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
+    except getopt.GetoptError, err:
+        print __doc__
+        sys.exit(2)
+
+    silent = False
+    keep = False
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            print __doc__
+            sys.exit(0)
+                
+
+    if len(args) == 1:
+        global CONF
+        try:
+            p,fn = os.path.split(args[0])
+            n,ext = os.path.splitext(fn)
+            CONF = __import__(n)
+        except ImportError,e:
+            sys.stderr.write("ERROR: Failed to import '%s': %s\n\n" % (args[0],str(e)))
+    else:
+        sys.stderr.write("ERROR: Wrong number of arguments\n\n")
+        print __doc__
+        sys.exit(2)
+        
     report()
