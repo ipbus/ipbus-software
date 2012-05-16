@@ -4,9 +4,11 @@ from os.path import join
 import socket
 
 ####VARIABLES
-BUILD_HOME     = '/build/cactus'
-RELEASE_DIR    = "/afs/cern.ch/user/c/cactus/www/nightly/RPMS"
-XDAQ_REPO_FILE = join(BUILD_HOME,"trunk/nightly/xdaq.repo")
+BUILD_HOME          = '/build/cactus'
+RELEASE_DIR         = "/afs/cern.ch/user/c/cactus/www/nightly/RPMS"
+XDAQ_REPO_FILE      = "/afs/cern.ch/user/c/cactus/nightly/cactus_xdaq.repo"
+YUMGROUP_FILE       = "/afs/cern.ch/project/l1ts/nightly/cactus_yumgroups.xml"
+CMSL1OSW_REPO_FILE  = "/afs/cern.ch/project/l1ts/nightly/cactus.repo"
 
 ####VARIABLES: analysis of logs
 TITLE             = "CACTUS Nightlies"
