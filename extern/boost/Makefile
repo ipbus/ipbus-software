@@ -44,7 +44,6 @@ _all:
 
 rpm: _rpmall
 _rpmall: 
-	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD						\
 			--define  "_topdir ${PackagePath}/RPMBUILD"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\
