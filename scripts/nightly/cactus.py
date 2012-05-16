@@ -7,8 +7,8 @@ import socket
 BUILD_HOME          = '/build/cactus'
 RELEASE_DIR         = "/afs/cern.ch/user/c/cactus/www/nightly/RPMS"
 XDAQ_REPO_FILE      = "/afs/cern.ch/user/c/cactus/nightly/cactus_xdaq.repo"
-YUMGROUP_FILE       = "/afs/cern.ch/project/l1ts/nightly/cactus_yumgroups.xml"
-CACTUS_REPO_FILE  = "/afs/cern.ch/project/l1ts/nightly/cactus.repo"
+YUMGROUP_FILE       = "/afs/cern.ch/user/c/cactus/nightly/cactus_yumgroups.xml"
+CACTUS_REPO_FILE    = "/afs/cern.ch/user/c/cactus/nightly/cactus.repo"
 
 ####VARIABLES: analysis of logs
 TITLE             = "CACTUS Nightlies"
