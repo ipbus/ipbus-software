@@ -20,6 +20,7 @@ LOG_DIR           = "/afs/cern.ch/user/c/cactus/www/nightly/logs"
 #The log file name and path should be the same than in the one in the acrontab
 LOG_FILE          = "/afs/cern.ch/user/c/cactus/www/nightly/logs/nightly.log"
 
+#nanalyzer.py variables
 ERROR_LIST        = ['TEST FAILED, ',
                      'error: ',
                      'RPM build errors',
@@ -70,6 +71,6 @@ INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
 
 TEST_CMDS = []
 
-REPORT_CMDS = ["python $HOME/nightly/nanalyzer.py cactus"]
+REPORT_CMDS = ["python $HOME/nightly/nanalyzer.py cactus.py"]
 
              
