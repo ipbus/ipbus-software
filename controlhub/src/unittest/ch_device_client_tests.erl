@@ -10,6 +10,7 @@
 -module(ch_device_client_tests).
 
 -include("ch_global.hrl").
+-include("ch_timeouts.hrl").
 
 %% API exports
 -export([]).
@@ -39,7 +40,7 @@ ch_device_client_test_() ->
 %% @spec setup() -> ok
 setup() ->
     ch_device_client_registry:start_link(), % needs to be available to spawn the device clients
-    DummyHwPid = spawn(fun() -> udp_echo_server(?DUMMY_HW_PORT) end),
+    DummyHwPid = spawn(fun() -> ch_unittest_common:udp_echo_server(?DUMMY_HW_PORT) end),
     DummyHwPid.
 
 %% Teardown function for test fixture
@@ -91,22 +92,6 @@ test_multiple_client_processes() ->
 %%% ==========================================================================
 %%% Test Helper Functions
 %%% ==========================================================================
-
-%% Very simple dummy hardware - just returns whatever it gets sent.
-udp_echo_server(Port) ->
-    {ok, Socket} = gen_udp:open(Port, [binary]),
-    udp_echo_server_loop(Socket).
-
-
-%% The receive loop for the echo server.
-udp_echo_server_loop(Socket) ->
-    receive
-        {udp, Socket, IP, Port, Packet} ->
-            gen_udp:send(Socket, IP, Port, Packet),
-            udp_echo_server_loop(Socket);
-        die -> ok % For a receiving a clean/normal exit message.
-    end.
-
 
 %% Spawns request generators to test the device client process. Specify the total number you
 %% want spawning, the total number of request loops each generator should perform, the maximum

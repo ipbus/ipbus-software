@@ -10,6 +10,7 @@
 -module(ch_tcp_listener_tests).
 
 -include("ch_global.hrl").
+-include("ch_tcp_server_params.hrl").
 
 %% API exports
 -export([]).
