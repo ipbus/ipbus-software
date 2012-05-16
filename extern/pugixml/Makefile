@@ -33,7 +33,7 @@ buildall: _all
 _all:
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	unzip ${ZIP_FILE} -d ${ZIP_DIR}
-	cd ${ZIP_DIR}; g++ -fPIC -O3 -shared -o libpugixml.so src/pugixml.cpp
+	cd ${ZIP_DIR}; g++ -fPIC -O3 -shared -o libcactus_extern_pugixml.so src/pugixml.cpp
 	mkdir -p RPMBUILD/SOURCES/{lib,include/pugixml}
 	cp ${ZIP_DIR}/libpugixml.so RPMBUILD/SOURCES/lib
 	cp ${ZIP_DIR}/src/*.hpp RPMBUILD/SOURCES/include/pugixml
