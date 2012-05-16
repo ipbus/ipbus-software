@@ -1,5 +1,7 @@
 MAKE=make
-PACKAGES = extern/boost 
+PACKAGES = extern/boost \
+	extern/stlsoft \
+	extern/pantheios
 
 TARGETS=clean rpm build
 
