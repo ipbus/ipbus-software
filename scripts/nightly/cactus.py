@@ -8,7 +8,7 @@ BUILD_HOME          = '/build/cactus'
 RELEASE_DIR         = "/afs/cern.ch/user/c/cactus/www/nightly/RPMS"
 XDAQ_REPO_FILE      = "/afs/cern.ch/user/c/cactus/nightly/cactus_xdaq.repo"
 YUMGROUP_FILE       = "/afs/cern.ch/project/l1ts/nightly/cactus_yumgroups.xml"
-CMSL1OSW_REPO_FILE  = "/afs/cern.ch/project/l1ts/nightly/cactus.repo"
+CACTUS_REPO_FILE  = "/afs/cern.ch/project/l1ts/nightly/cactus.repo"
 
 ####VARIABLES: analysis of logs
 TITLE             = "CACTUS Nightlies"
@@ -60,11 +60,11 @@ BUILD_CMDS = ["cd %s" % join(BUILD_HOME,"trunk")]
 
 RELEASE_CMDS = ["rm -rf %s" % RELEASE_DIR,
                 "mkdir -p %s" % RELEASE_DIR,
-                "cp %s %s" % (join(BUILD_HOME,"trunk/nightly/yumgroups.xml"),RELEASE_DIR),
+                "cp %s %s" % (YUMGROUP_FILE,join(RELEASE_DIR,"yumgroups.xml")),
                 "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_DIR),
                 "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_DIR]
 
-INSTALL_CMDS = ["sudo cp %s %s" % (join(BUILD_HOME, 'trunk/nightly/cactus_dev.repo'),"/etc/yum.repos.d/."),
+INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "sudo yum clean all",
                 "sudo yum -y groupinstall cactus"]
 
