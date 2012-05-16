@@ -1,13 +1,13 @@
 #
-# Makefile for boost
+# Makefile for uhal 
 #
 BUILD_HOME = $(shell pwd)/../..
 
 include ${BUILD_HOME}/config/Makefile.macros
 
-Package = uhal/BoostSpiritGrammars
+Package = uhal/uhal
 PackagePath = ${BUILD_HOME}/${Package}
-PackageName = cactus-uhal-gramars
+PackageName = cactus-uhal-uhal
 
 Packager = Andrew Rose, Marc Magrans de Abril
 
@@ -16,17 +16,35 @@ PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
-LIBRARY = lib/libcactus_uhal_grammars.so
+LIBRARY = lib/libcactus_uhal_uhal.so
 
 SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
-LIBRARY_PATH = 	
+LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
+		\
+		${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.core.gcc41.a \
+		${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.fe.simple.gcc41.a \
+		${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.util.gcc41.a \
+		${EXTERN_PANTHEIOS_LIB_PREFIX}/libb64.1.pan.gcc41.a \
+		\
+		-L${EXTERN_PUGIXML_LIB_PREFIX} \
+		-L${UHAL_GRAMMARS_LIB_PREFIX}
 
-LIBRARIES =  
+LIBRARIES = 	-lcactus_extern_pugixml \
+		\
+		-lboost_system \
+		-lboost_filesystem \
+		-lboost_regex \
+		\
+		-lcactus_uhal_grammars
 
 INCLUDE_PATH = 	-Iinclude  \
-		-I${EXTERN_BOOST_INCLUDE_PREFIX} 
+		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
+		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
+		-I${EXTERN_PANTHEIOS_INCLUDE_PREFIX} \
+		-I${EXTERN_STLSOFT_INCLUDE_PREFIX} \
+		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
 CPP_FLAGS = -O3 -Wall -fPIC
 LINK_FLAGS = -shared -fPIC -Wall -O3
@@ -47,11 +65,11 @@ _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include/BoostSpiritGrammars}
+	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal}
 	mkdir -p lib
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -p include/BoostSpiritGrammars/*.hpp RPMBUILD/SOURCES/include/BoostSpiritGrammars/.
+	cp -p include/uhal/*.hpp RPMBUILD/SOURCES/include/uhal/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj
@@ -69,5 +87,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-spirit-grammars.spec
+			cactus-uhal-uhal.spec
 
