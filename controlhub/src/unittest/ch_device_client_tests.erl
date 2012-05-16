@@ -30,7 +30,8 @@ ch_device_client_test_() ->
       fun setup/0,
       fun teardown/1,
       [ fun test_normal_operation/0,
-        fun test_unresponse_target/0
+        fun test_unresponse_target/0,
+        fun test_multiple_client_processes/0
       ]
     }.
 
@@ -76,13 +77,15 @@ test_unresponse_target() ->
     end.    
 
 
-%% Test multiple processes chucking loads of data at a single device client
+%% Test multiple processes chucking loads of data at a single device client (and thus single dummy hw)
 %% More of a stress test than unit test...
 test_multiple_client_processes() ->
     process_flag(trap_exit, true),
-    TotalGenerators = 20,
-    spawn_request_generators(TotalGenerators, 100, 100, ?LOCALHOST, ?DUMMY_HW_PORT),
-    await_generator_exits(TotalGenerators).
+    TotalTestClients = 20,
+    IterationsPerTestClient = 20,
+    MaxRequestSizePerTestClient = 350,
+    spawn_test_clients(TotalTestClients, IterationsPerTestClient, MaxRequestSizePerTestClient, ?LOCALHOST, ?DUMMY_HW_PORT),
+    ?assertEqual(test_ok, await_test_client_exits(TotalTestClients)).
 
 
 %%% ==========================================================================
@@ -94,6 +97,7 @@ udp_echo_server(Port) ->
     {ok, Socket} = gen_udp:open(Port, [binary]),
     udp_echo_server_loop(Socket).
 
+
 %% The receive loop for the echo server.
 udp_echo_server_loop(Socket) ->
     receive
@@ -103,24 +107,50 @@ udp_echo_server_loop(Socket) ->
         die -> ok % For a receiving a clean/normal exit message.
     end.
 
+
 %% Spawns request generators to test the device client process. Specify the total number you
 %% want spawning, the total number of request loops each generator should perform, the maximum
 %% number of 32-bit words allowed in the randomly generated packets, and the target hardware's
 %% IP address and port.
-spawn_request_generators(RemainingToSpawn, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
-    spawn_link(fun() -> request_generator(TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) end),
-    spawn_request_generators(RemainingToSpawn - 1, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort);
+spawn_test_clients(RemainingToSpawn, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) when RemainingToSpawn > 0 ->
+    spawn_link(fun() -> test_client(TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) end),
+    spawn_test_clients(RemainingToSpawn - 1, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort);
 
-spawn_request_generators(RemainingToSpawn, TotalIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
-    blah.
+spawn_test_clients(0, _TotalIterations, _MaxRequestLength, _TargetIPaddrU32, _TargetPort) -> ok.
 
-request_generator(RemainingIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) ->
-    blah.
-
-await_generator_exits(Remaining) ->
+%% Does a bunch of request/receive loops
+test_client(RemainingIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) when RemainingIterations > 0 ->
+    FakeIPbusRequests = request_data_generator(MaxRequestLength),
+    ch_device_client:enqueue_requests(TargetIPaddrU32, TargetPort, FakeIPbusRequests),
     receive
-        {exit, _Pid, _Why} ->
-            await_generator_exits(Remaining-1)
+        { device_client_response, TargetIPaddrU32, TargetPort, 0, FakeIPbusRequests } ->
+            test_client(RemainingIterations-1, MaxRequestLength, TargetIPaddrU32, TargetPort);
+        _Other -> exit(unexpected_response_received)
+    after ?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT ->
+        exit(timeout_reached)
     end;
 
-await_generator_exits(0) -> ok.
+test_client(0, _MaxRequestLength, _TargetIPaddrU32, _TargetPort) -> ok.
+
+
+request_data_generator(MaxRequestLength) ->
+    RequestLengthInBytes = random:uniform(MaxRequestLength) * 4,
+    % slightly hacky way to produce random request data.
+    list_to_binary([random:uniform(256)-1 || _X <- lists:seq(1, RequestLengthInBytes)]).
+
+% Waits for the given number of test clients to exit, finally returning
+await_test_client_exits(Remaining) ->
+  await_test_client_exits(Remaining, test_ok).
+
+await_test_client_exits(Remaining, TestStatus) when Remaining > 0 ->
+    receive
+        {'EXIT', _Pid, normal} ->
+            if
+                TestStatus == test_ok -> await_test_client_exits(Remaining-1, test_ok);
+                true -> await_test_client_exits(Remaining-1, test_fail)
+            end;
+        {'EXIT', _Pid, _NonNormal} -> await_test_client_exits(Remaining-1, test_fail)
+    end;
+
+await_test_client_exits(0, TestStatus) -> TestStatus.
+

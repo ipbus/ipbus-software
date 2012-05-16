@@ -10,7 +10,7 @@
 
 ERLC_FLAGS=
 
-SOURCES=$(wildcard src/*.erl)
+SOURCES=$(wildcard src/*.erl src/unittest/*.erl)
 INCLUDE_DIR=include
 INCLUDES=$(wildcard $(INCLUDE_DIR)/*.hrl)
 OBJECTS=$(SOURCES:src/%.erl=ebin/%.beam)

@@ -14,6 +14,7 @@
 -behaviour(gen_server).
 
 -include("ch_global.hrl").
+-include("ch_tcp_server_params.hrl").
 
 -define(TCP_OPTIONS, [binary, {packet, 4}, {reuseaddr, true}, {active, true}, {backlog, ?MAX_CONCURRENT_CLIENT_CONNECTIONS}]).
 

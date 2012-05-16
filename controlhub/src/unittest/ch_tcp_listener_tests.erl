@@ -62,13 +62,13 @@ test_tcp_connect() ->
     {ok, TestSocket2} = gen_tcp:connect("localhost", ?CONTROL_HUB_TCP_LISTEN_PORT, [binary, {packet, 4}], Timeout_ms),
     {ok, TestSocket3} = gen_tcp:connect("localhost", ?CONTROL_HUB_TCP_LISTEN_PORT, [binary, {packet, 4}], Timeout_ms),
     {ok, TestSocket4} = gen_tcp:connect("localhost", ?CONTROL_HUB_TCP_LISTEN_PORT, [binary, {packet, 4}], Timeout_ms),
-    timer:sleep(1), % sleep briefly to make sure the stats server becomes up to date.
+    timer:sleep(10), % sleep briefly to make sure the stats server becomes up to date.
     ?assertEqual(4, ch_stats:get_active_clients()),
     gen_tcp:close(TestSocket4),
     gen_tcp:close(TestSocket3),
     gen_tcp:close(TestSocket2),
     gen_tcp:close(TestSocket1),
-    timer:sleep(1), % sleep briefly to make sure the stats server becomes up to date.
+    timer:sleep(10), % sleep briefly to make sure the stats server becomes up to date.
     ?assertEqual(4, ch_stats:get_max_active_clients()),
     ?assertEqual(0, ch_stats:get_active_clients()).
 

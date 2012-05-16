@@ -18,6 +18,8 @@
 %% Include files
 %% --------------------------------------------------------------------
 -include("ch_global.hrl").
+-include("ch_timeouts.hrl").
+-include("ch_error_codes.hrl").
 
 %% --------------------------------------------------------------------
 %% External exports
@@ -154,7 +156,7 @@ handle_cast({send, IPbusRequests, ClientPid}, State = #state{socket = Socket}) -
                                  "Passing it to originating Transaction Manager...", [TargetIPtuple, TargetPort]),
                     ch_stats:udp_in(),
                     { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReplyBin}
-            after ?DEVICE_CLIENT_UDP_TIMEOUT ->
+            after ?UDP_RESPONSE_TIMEOUT ->
                 ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
                              "a timeout response to originating Transaction Manager...", [TargetIPtuple, TargetPort]),
                 ch_stats:udp_response_timeout(),

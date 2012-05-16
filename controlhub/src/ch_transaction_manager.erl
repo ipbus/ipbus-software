@@ -14,6 +14,8 @@
 %% Include files
 %%
 -include("ch_global.hrl").
+-include("ch_timeouts.hrl").
+-include("ch_error_codes.hrl").
 
 %%
 %% Exported Functions
@@ -177,7 +179,7 @@ device_client_response_accumulator([{IPaddrU32, PortU16}| Tail], ResponsesList) 
                           ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
                                        "Port=~p", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),
                           <<IPaddrU32:32, ErrorCode:16, PortU16:16, TargetResponseBin/binary>>
-                  after (?DEVICE_CLIENT_UDP_TIMEOUT * 3) -> % Give it 3 times as long as whatever device client timeout we have
+                  after (?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT) -> % Give it 3 times as long as whatever device client timeout we have
                       ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~w,"
                                    "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),            
                           <<IPaddrU32:32, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16, PortU16:16>>
