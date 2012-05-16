@@ -9,7 +9,6 @@ arguments:
 options:
    -h, --help        help
 """
-
 import re
 import time
 import os
@@ -17,7 +16,6 @@ import smtplib
 from email.MIMEText import MIMEText
 
 LIMIT, ERROR, TEST_PASSED = range(3)
-CONF = None
 
 def style(type):
     if type == LIMIT:
