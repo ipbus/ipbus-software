@@ -47,7 +47,7 @@ ENVIRONMENT_CMDS = ["env"]
 
 DEPENDENCIES_CMDS = ["sudo yum -y install scons bzip2-devel erlang",
                      "sudo cp %s %s" % (XDAQ_REPO_FILE,"/etc/yum.repos.d/xdaq.repo"),
-                     "sudo yum -y install boost boost-devel e2fsprogs-devel curl curl-devel"]
+                     "sudo yum -y install e2fsprogs-devel curl curl-devel"]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
