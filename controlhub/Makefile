@@ -19,6 +19,8 @@ TEST_SOURCES=$(wildcard src/unittest/*.erl)
 OBJECTS=$(SOURCES:src/%.erl=ebin/%.beam)
 TEST_OBJECTS=$(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
 
+.PHONY: all build_controlhub build_and_run_tests check_test_build_dir clean test
+
 all: build_controlhub build_and_run_tests
 
 build_controlhub: $(OBJECTS)
