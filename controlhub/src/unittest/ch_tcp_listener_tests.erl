@@ -46,7 +46,7 @@ teardown(_Ignore) ->
     % This sucks, but it's just to prevent the standard IO going down before
     % any io:format messages that report shutdowns might have completed. This
     % can cause misleading error logger reports during unit-testing.
-    timer:sleep(1).  
+    timer:sleep(10).  
 
 
 
