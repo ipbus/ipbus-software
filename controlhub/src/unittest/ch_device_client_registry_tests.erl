@@ -83,7 +83,7 @@ test_device_client_death_updates_registry() ->
     {ok, Pid1} = ch_device_client_registry:get_pid(TestIPaddrU32, TestPort),
     ?assertEqual(InitialNumClients + 1, ch_device_client_registry:total_device_clients()),
     exit(Pid1, kill),
-    timer:sleep(1), % sleep briefly to let the magic happen.
+    timer:sleep(10), % sleep briefly to let the magic happen.
     ?assertEqual(InitialNumClients, ch_device_client_registry:total_device_clients()),
     {ok, Pid2} = ch_device_client_registry:get_pid(TestIPaddrU32, TestPort), % ask for device with same addr & port
     ?assert(Pid1 /= Pid2).
