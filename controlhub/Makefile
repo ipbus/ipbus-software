@@ -19,9 +19,9 @@ TEST_SOURCES=$(wildcard src/unittest/*.erl)
 OBJECTS=$(SOURCES:src/%.erl=ebin/%.beam)
 TEST_OBJECTS=$(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
 
-all: controlhub build_and_run_tests
+all: build_controlhub build_and_run_tests
 
-controlhub: $(OBJECTS)
+build_controlhub: $(OBJECTS)
 
 build_and_run_tests: check_test_build_dir $(TEST_OBJECTS) test
 
@@ -41,4 +41,4 @@ check_test_build_dir:
 test:
 	erl -noshell -pa ebin ebin/unittest -eval 'eunit:test("ebin",[verbose])' -s init stop
 
-release: clean controlhub
+release: clean build_controlhub
