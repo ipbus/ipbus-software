@@ -62,6 +62,13 @@ namespace uhal
 			*/
 			std::string url();
 
+			
+			/*
+				Return a description of the behaviour this client
+				@return a description of the behaviour this client
+			*/
+			//static std::string description();
+			
 			/**
 				Write a single, unmasked word to a register
 				@param aAddr the address of the register to write

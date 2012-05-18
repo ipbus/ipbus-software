@@ -186,11 +186,11 @@ IPbusPacketInfo::IPbusPacketInfo() try :
 	// }
 
 
-	void IPbusPacketInfo::setDeviceID ( const uint32_t& aDeviceID )
+	void IPbusPacketInfo::setDeviceID ( const uint64_t& aDeviceID )
 	{
 		try
 		{
-			mDeviceIDs.push_back ( htonl ( aDeviceID ) );
+			mDeviceIDs.push_back ( aDeviceID );
 		}
 		catch ( const std::exception& aExc )
 		{

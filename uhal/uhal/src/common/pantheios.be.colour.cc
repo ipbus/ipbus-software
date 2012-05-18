@@ -42,7 +42,7 @@ int pantheios_be_logEntry (
 	switch ( severity )
 	{
 		case ( PANTHEIOS_SEV_DEBUG ) :
-			fprintf ( stdout, "%s[%s %.*s.%lu %s] %.*s%s\n", "\033[0;34m" , ( char const* ) beToken , lSize , lStr , theTime.tv_usec , "DEBUG", ( int ) cchEntry, entry , "\033[0m" );
+			fprintf ( stdout, "%s[%s %.*s.%lu %s] %.*s%s\n", "\033[1;34m" , ( char const* ) beToken , lSize , lStr , theTime.tv_usec , "DEBUG", ( int ) cchEntry, entry , "\033[0m" );
 			//standard blue
 			break;
 		case ( PANTHEIOS_SEV_INFORMATIONAL ) :

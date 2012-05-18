@@ -52,7 +52,7 @@ namespace uhal
 				@param aProtocol the protocol identifier
 			*/
 			template <class T>
-			void add ( const std::string& aProtocol );
+			void add ( const std::string& aProtocol , const std::string& aDescription = "" );
 
 			/**
 				Construct an IPbus client based on the protocol identifier specified
@@ -113,11 +113,13 @@ namespace uhal
 			static ClientFactory* mInstance;
 			//! Hash map associating a creator for a particular protocol with a file name
 			std::hash_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators; //map string name of each protocol to a creator for that protocol
+			//! Store the description of the factory product
+			std::map< std::string , std::string > mProductDescriptions;
 
 	};
 
 }
 
-#include "TemplateDefinitions/ClientFactory.hxx"
+#include "uhal/TemplateDefinitions/ClientFactory.hxx"
 
 #endif

@@ -53,7 +53,7 @@ namespace uhal
 				@param aIPbusPacketInfo an IPbusPacketInfo to be added to the queue of pending IPbus transactions
 				@param aId an identifier that may be required by clients that handle more than one target device
 			*/
-			virtual void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId = 0 ) = 0;
+			virtual void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint64_t& aId = 0 ) = 0;
 
 			/**
 				A virtual function which will be called immediately prior to a call to the Transport Protocol's Dispatch() function. Can be used for finalizing the queue for dispatch.

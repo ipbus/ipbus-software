@@ -13,8 +13,14 @@
 
 namespace uhal
 {
-
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	enum eControlHubHostPackingProtocolVersion
+	{
+		CHH_1,
+		CHH_2,
+		CHH_3		
+	};
+	
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubHostPackingProtocol : public PackingProtocol
 	{
 		public:
@@ -33,7 +39,7 @@ namespace uhal
 				@param aIPbusPacketInfo an IPbusPacketInfo to be added to the queue of pending IPbus transactions
 				@param aId the identifier of the target device (IPbus client instance), since the control-hub host handles more than one device
 			*/
-			void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId = 0 );
+			void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint64_t& aId = 0 );
 
 			/**
 				A function called immediately prior to a call to the Transport Protocol's Dispatch() function. Used for finalizing the queue for dispatch.
@@ -54,6 +60,7 @@ namespace uhal
 
 			inline const tAccumulatedPackets& getAccumulatedPackets();
 
+					
 		private:
 			//! The raw stream packets which will be sent by the transport protocol
 			tAccumulatedPackets mAccumulatedPackets;
@@ -70,11 +77,17 @@ namespace uhal
 			*/
 			uint32_t mByteOrderTransaction[8];
 
+			//! The size in bytes of the device identifier that will be sent
+			uint8_t mDeviceIDsize;
+
 			//! A register into which to write the transaction reply header
-			uint32_t mDeviceIDheader;
+			uint64_t mDeviceIDheader;
 
 			//! A register to receive the reply bytecount header
 			uint32_t mReplyByteCount;
+
+			//! A register into which to write the error code for protocols which include them
+			uint32_t mErrorCode;
 
 			//! A register into which to write the transaction reply header
 			uint32_t mTransactionId;
@@ -84,22 +97,21 @@ namespace uhal
 				make a note where the last entry was so that subsequent
 				entries are not stored before it!
 			*/
-			std::map< uint32_t , uint32_t > mLastInstruction;
+			std::map< uint64_t , uint32_t > mLastInstruction;
 
 
 			/**
 				A deque to hold the counter fields
-				Stored as a local copy so that if user sets the value by temporary variable, the data will be valid when sent
 			*/
 			std::deque<uint32_t> mCounters;
 
 			//! A map of device IDs to reply packets.
 			typedef std::deque< std::pair< uint32_t , IPbusPacketInfo::tChunks* > > tChunkList;
-			typedef std::map< uint32_t , tChunkList > tReplyMap;
+			typedef std::map< uint64_t , tChunkList > tReplyMap;
 			tReplyMap mReplyMap;
 			tReplyMap::iterator mReplyMapIt;
 
-
+			
 			uint32_t* mReplyMemory;
 			uint32_t* mTransactionHeader;
 			uint32_t mDeviceIndex;
@@ -116,7 +128,7 @@ namespace uhal
 
 }
 
-#include "TemplateDefinitions/PackingProtocol_ControlHubHost.hxx"
+#include "uhal/TemplateDefinitions/PackingProtocol_ControlHubHost.hxx"
 
 
 #endif

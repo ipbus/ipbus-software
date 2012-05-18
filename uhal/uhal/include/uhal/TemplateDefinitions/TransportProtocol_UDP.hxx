@@ -93,8 +93,8 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 				// {
 				// lReplySize+=boost::asio::buffer_size ( *lBufIt );
 				// }
-				// pantheios::log_INFORMATIONAL ( "mCumulativeSendSize:" , pantheios::integer ( lAccumulatedPacketIt->mCumulativeSendSize<<2 ) , " bytes vs. Calculated Send Size: " , pantheios::integer ( lSendSize ) , " bytes" );
-				// pantheios::log_INFORMATIONAL ( "mCumulativeReturnSize:" , pantheios::integer ( lAccumulatedPacketIt->mCumulativeReturnSize<<2 ) , " bytes vs. Calculated Return Size: " , pantheios::integer ( lReplySize ) , " bytes"  );
+				// pantheios::log_INFORMATIONAL ( "mCumulativeSendSize:" , pantheios::integer ( lAccumulatedPacketIt->mCumulativeSendSize ) , " bytes vs. Calculated Send Size: " , pantheios::integer ( lSendSize ) , " bytes" );
+				// pantheios::log_INFORMATIONAL ( "mCumulativeReturnSize:" , pantheios::integer ( lAccumulatedPacketIt->mCumulativeReturnSize ) , " bytes vs. Calculated Return Size: " , pantheios::integer ( lReplySize ) , " bytes"  );
 				// }
 				if ( pantheios::isSeverityLogged ( pantheios::debug ) )
 				{
@@ -120,7 +120,7 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 
 				//send
 				std::size_t lSentSize = mSocket->send_to ( lAccumulatedPacketIt->mSendBuffers , *mIterator );
-				pantheios::log_INFORMATIONAL ( pantheios::integer ( lAccumulatedPacketIt->mCumulativeSendSize<<2 ) , " bytes in accumulated packet. ASIO sees " , pantheios::integer ( boost::asio::buffer_size ( lAccumulatedPacketIt->mSendBuffers ) ) , " bytes in accumulated packet. Sent: " , pantheios::integer ( lSentSize ) , " bytes" );
+				pantheios::log_INFORMATIONAL ( pantheios::integer ( lAccumulatedPacketIt->mCumulativeSendSize ) , " bytes in accumulated packet. ASIO sees " , pantheios::integer ( boost::asio::buffer_size ( lAccumulatedPacketIt->mSendBuffers ) ) , " bytes in accumulated packet. Sent: " , pantheios::integer ( lSentSize ) , " bytes" );
 				//set deadline for reply
 				mDeadline.expires_from_now ( mTimeOut );
 				//wait for reply
@@ -185,18 +185,18 @@ UdpTransportProtocol< PACKINGPROTOCOL >::UdpTransportProtocol ( const std::strin
 					pantheios::log_DEBUG ( ">>> ----------------" );
 				}
 
-				// std::cout << (mThis->mReplyLength>>2) << " vs. " << lAccumulatedPacketIt->mCumulativeReturnSize << std::endl;
+				// std::cout << mThis->mReplyLength << " vs. " << lAccumulatedPacketIt->mCumulativeReturnSize << std::endl;
 				//check that it is the right length...
-				// if( (mThis->mReplyLength>>2) != lAccumulatedPacketIt->mCumulativeReturnSize ){
+				// if( mThis->mReplyLength != lAccumulatedPacketIt->mCumulativeReturnSize ){
 				// //Throw exception - Since the hardware does not know how to break up packets, this must be an error
 				// GenericException lExc(	"Return size does not match expected..." );
 				// RAISE( lExc );
 				// }
 
 				//check that it is the right length...
-				if ( ( lReplyLength>>2 ) != lAccumulatedPacketIt->mCumulativeReturnSize )
+				if ( lReplyLength != lAccumulatedPacketIt->mCumulativeReturnSize )
 				{
-					pantheios::log_ERROR (	"Return size (", pantheios::integer ( lReplyLength>>2 ) ,") does not match expected (", pantheios::integer ( lAccumulatedPacketIt->mCumulativeReturnSize ) ,")" );
+					pantheios::log_ERROR (	"Return size (", pantheios::integer ( lReplyLength ) ,") does not match expected (", pantheios::integer ( lAccumulatedPacketIt->mCumulativeReturnSize ) ,")" );
 					pantheios::log_ERROR ( "Transaction history :" );
 					mPackingProtocol.debug ( pantheios::error );
 					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );

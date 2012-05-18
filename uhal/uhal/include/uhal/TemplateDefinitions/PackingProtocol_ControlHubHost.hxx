@@ -3,40 +3,45 @@
 namespace uhal
 {
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
 
-ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProtocol ( const uint32_t& aMaxPacketLength ) try :
+ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::ControlHubHostPackingProtocol ( const uint32_t& aMaxPacketLength ) try :
 		PackingProtocol(),
 						mMaxPacketLength ( aMaxPacketLength ),
+						mDeviceIDheader( 0 ),
+						mErrorCode( 0 ),
 						mTransactionId ( 0 )
 	{
+		int i;
 		//We need to pad out the packets to compensate for the bug in the firmware
 		//If we didn't then the mByteOrderTransaction could be a single 32bit uint (as it was previously)
 		switch ( IPbusProtocolVersion )
 		{
 			case IPbus_1_2:
 			case IPbus_1_3:
-				mByteOrderTransaction[0] = 0x10FE00F8;
-				mByteOrderTransaction[1] = 0x10FE00F8;
-				mByteOrderTransaction[2] = 0x10FE00F8;
-				mByteOrderTransaction[3] = 0x10FE00F8;
-				mByteOrderTransaction[4] = 0x10FE00F8;
-				mByteOrderTransaction[5] = 0x10FE00F8;
-				mByteOrderTransaction[6] = 0x10FE00F8;
-				mByteOrderTransaction[7] = 0x10FE00F8;
+				for( i = 0 ; i != 8 ; ++i ){
+					mByteOrderTransaction[i] = 0x10FE00F8;
+				}
 				break;
 			case IPbus_1_4:
 			case IPbus_2_0:
-				mByteOrderTransaction[0] = 0x200000FF;
-				mByteOrderTransaction[1] = 0x200000FF;
-				mByteOrderTransaction[2] = 0x200000FF;
-				mByteOrderTransaction[3] = 0x200000FF;
-				mByteOrderTransaction[4] = 0x200000FF;
-				mByteOrderTransaction[5] = 0x200000FF;
-				mByteOrderTransaction[6] = 0x200000FF;
-				mByteOrderTransaction[7] = 0x200000FF;
+				for( i = 0 ; i != 8 ; ++i ){
+					mByteOrderTransaction[i] = 0x200000FF;
+				}
 				break;
 		}
+		
+		switch ( ControlHubHostPackingProtocolVersion )
+		{
+			case CHH_1:
+				mDeviceIDsize = 4;
+				break;
+			case CHH_2:
+			case CHH_3:
+				mDeviceIDsize = 6;
+				break;		
+		}
+		
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -44,11 +49,11 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 		throw uhal::exception ( aExc );
 	}
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	ControlHubHostPackingProtocol< IPbusProtocolVersion >::~ControlHubHostPackingProtocol() {}
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::~ControlHubHostPackingProtocol() {}
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId )
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint64_t& aId )
 	{
 		try
 		{
@@ -87,8 +92,8 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 
 
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::PreDispatch()
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::PreDispatch()
 	{
 		try
 		{
@@ -104,130 +109,294 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 				// }
 			}
 
-			//some local variables to help
-			uint32_t lSendCounter ( 0 );
-			uint32_t lReplyCounter ( 0 );
-			//for the control hub, everything goes in one Accumulated Packet
-			mAccumulatedPackets.push_back ( tAccumulatedPacket() );
-			tAccumulatedPacket& lAccumulatedPacket = mAccumulatedPackets.front();
-			//iterators for data to be put into packet
-			tIPbusPacketInfoStorage::iterator lPacketInfoIt = mPacketInfo.begin() , lPacketInfoLastIt = mPacketInfo.begin();
-			std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lPacketInfoIt->getChunks().begin();
-			bool lAddHeader ( true );
-			bool lPacketInfoItUpdated ( false );
-			lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( & ( lAccumulatedPacket.mCumulativeSendSize ) , 4 ) );
 
-			//send buffers
-			do
-			{
-				if ( lAddHeader )
+
+			
+			if( ControlHubHostPackingProtocolVersion == CHH_3 ){
+			
+			
+				std::map< uint64_t , std::pair< tAccumulatedPacket* , uint32_t > > lAccumulatedPacketMap;
+				tAccumulatedPacket* lAccumulatedPacket( NULL );
+				
+				std::vector< uint32_t* > lSendCounterPtrs;
+				std::vector<uint32_t> lReturnCounters;
+				
+				uint32_t*  lSendCounterPtr;
+				uint32_t*  lReturnCounterPtr;				
+				
+				
+				for ( tIPbusPacketInfoStorage::iterator lPacketInfoIt = mPacketInfo.begin() ; lPacketInfoIt != mPacketInfo.end() ; ++lPacketInfoIt )
 				{
-					//We need a persistent counter word...
-					mCounters.push_back ( 0 );
-					lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( &mCounters.back() , 4 ) );
-					lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( lPacketInfoIt->getDeviceIDs() ) );
-					lAccumulatedPacket.mCumulativeSendSize += lPacketInfoIt->getDeviceIDs().size() + 1;
-					//Add leading BOT and initialize counters (always 1 for BOTs)
-					lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , 4 ) ) ; //note this needs to be &mByteOrderTransaction if using a single 32bit uint, rather than an array
-					lSendCounter = 1;
-					lReplyCounter = 1;
-					lAddHeader = false;
-				}
-
-				std::size_t lSendPayloadSize = lChunksIt->mSendSize - lPacketInfoIt->SendHeaderSize();
-				lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( &lChunksIt->mTransactionHeader , 4 ) ) ;
-
-				if ( lPacketInfoIt->hasBaseAddress() )
-				{
-					lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( &lChunksIt->mBaseAddress , 4 ) ) ;
-				}
-
-				if ( lSendPayloadSize )
-				{
-					lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( lChunksIt->mSendPtr , lSendPayloadSize<<2 ) ) ;
-				}
-
-				lSendCounter+=lChunksIt->mSendSize;
-				lReplyCounter+=lChunksIt->mReturnSize;
-
-				if ( ( ++lChunksIt ) == lPacketInfoIt->getChunks().end() )
-				{
-					//move to first chunk of next lPacketInfo
-					//note that lChunksIt will be invalid if lPacketInfoIt == mPacketInfo.end() and will segfault if you try to use it :o)
-					lChunksIt = ( ++lPacketInfoIt )->getChunks().begin();
-					lPacketInfoItUpdated = true;
-				}
-
-				if ( lPacketInfoIt == mPacketInfo.end() )
-				{
-					// we will really exit if this condition occurs, we just use "lAddHeader" to make sure that we finalize this part of the packet
-					lAddHeader = true;
-				}
-				else
-				{
-					// if the next send packet will push the outgoing udp packet over size, add a new header/udp packet instead
-					lAddHeader |= ( lSendCounter + lChunksIt->mSendSize > mMaxPacketLength );
-					// if the next reply packet will push the reply udp packet over size, add a new header/udp packet instead
-					lAddHeader |= ( lReplyCounter +  lChunksIt->mReturnSize > mMaxPacketLength );
-
-					// if the device lists are different then add a new header
-					if ( lPacketInfoItUpdated ) //if the lists are independent then test to see if the device lists differ
+					uint64_t lDeviceIndex = 0;
+					for ( std::vector<uint64_t>::const_iterator lIt = lPacketInfoIt->getDeviceIDs().begin() ; lIt != lPacketInfoIt->getDeviceIDs().end() ; ++lIt , ++lDeviceIndex )
 					{
-						lAddHeader |= ( lPacketInfoIt->getDeviceIDs() != lPacketInfoLastIt->getDeviceIDs() );
+						tChunkList* lReplyMapPtr = &mReplyMap[ *lIt ];
+						std::map< uint64_t , std::pair< tAccumulatedPacket* , uint32_t > >::iterator lAccumulatedPacketIt = lAccumulatedPacketMap.find( *lIt );
+						
+						for ( std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lPacketInfoIt->getChunks().begin() ; lChunksIt != lPacketInfoIt->getChunks().end() ; ++lChunksIt )
+						{					
+							lReplyMapPtr->push_back ( std::make_pair ( lDeviceIndex , & ( *lChunksIt ) ) );
+
+							bool lNewAccumulatedPacket( false );
+						
+							if( lAccumulatedPacketIt == lAccumulatedPacketMap.end() ){
+								lNewAccumulatedPacket = true;
+							}else{
+								lAccumulatedPacket = lAccumulatedPacketIt->second.first;
+								lSendCounterPtr = lSendCounterPtrs.at( lAccumulatedPacketIt->second.second );
+								lReturnCounterPtr = &( lReturnCounters.at( lAccumulatedPacketIt->second.second ) );
+								lNewAccumulatedPacket |= *lSendCounterPtr + lChunksIt->mSendSize > mMaxPacketLength;
+								lNewAccumulatedPacket |= *lReturnCounterPtr + lChunksIt->mReturnSize > mMaxPacketLength;
+								
+								if( lNewAccumulatedPacket ){
+									if ( *lSendCounterPtr < 8 )
+									{
+										uint32_t lSize ( 8-*lSendCounterPtr );
+										//Add BOTs as padding
+										lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , lSize<<2 ) );
+										*lSendCounterPtr+=lSize;
+										*lReturnCounterPtr+=lSize;
+									}
+									lAccumulatedPacket->mCumulativeSendSize += (*lSendCounterPtr << 2);
+									lAccumulatedPacket->mCumulativeReturnSize += (*lReturnCounterPtr << 2);
+									*lSendCounterPtr = htons( *lSendCounterPtr );
+								}								
+							}
+							
+							if( lNewAccumulatedPacket ){
+								mAccumulatedPackets.push_back ( tAccumulatedPacket() );
+								lAccumulatedPacket = &mAccumulatedPackets.back();
+								lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( & ( lAccumulatedPacket->mCumulativeSendSize ) , 4 ) );		
+								
+								lAccumulatedPacketMap[ *lIt ] = std::make_pair( lAccumulatedPacket , mCounters.size() );
+								lAccumulatedPacketIt = lAccumulatedPacketMap.find( *lIt );
+
+								mCounters.push_back(0);
+								lSendCounterPtr = &mCounters.back();
+								lSendCounterPtrs.push_back( lSendCounterPtr );
+								
+								lReturnCounters.push_back( 0 );
+								lReturnCounterPtr = &lReturnCounters.back();
+								
+								lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( &(*lIt) , mDeviceIDsize ) );
+								lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( lSendCounterPtr , 2 ) );	
+								lAccumulatedPacket->mCumulativeSendSize += 8;
+								//lAccumulatedPacket->mCumulativeReturnSize += 8;								
+
+								lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , 4 ) ) ; //note this needs to be &mByteOrderTransaction if using a single 32bit uint, rather than an array
+								*lSendCounterPtr += 1;	
+								*lReturnCounterPtr  += 1;	
+							}
+						
+							lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( &lChunksIt->mTransactionHeader , 4 ) ) ;
+
+							if ( lPacketInfoIt->hasBaseAddress() )
+							{
+								lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( &lChunksIt->mBaseAddress , 4 ) ) ;
+							}
+
+							std::size_t lSendPayloadSize = lChunksIt->mSendSize - lPacketInfoIt->SendHeaderSize();
+							if ( lSendPayloadSize )
+							{
+								lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( lChunksIt->mSendPtr , lSendPayloadSize<<2 ) ) ;
+							}
+
+							*lSendCounterPtr += lChunksIt->mSendSize;	
+							*lReturnCounterPtr += lChunksIt->mReturnSize;							
+
+						}
 					}
 				}
-
-				// finalize packets before we add the next header block or before we exit the loop
-				if ( lAddHeader )
-				{
-					if ( lSendCounter < 8 )
+				
+					
+				for( std::map< uint64_t , std::pair< tAccumulatedPacket* , uint32_t > >::iterator lAccumulatedPacketIt = lAccumulatedPacketMap.begin() ; 
+																								lAccumulatedPacketIt != lAccumulatedPacketMap.end() ; 
+																								++lAccumulatedPacketIt ){
+					lAccumulatedPacket = lAccumulatedPacketIt->second.first;
+					lSendCounterPtr = lSendCounterPtrs.at( lAccumulatedPacketIt->second.second );
+					lReturnCounterPtr = &( lReturnCounters.at( lAccumulatedPacketIt->second.second ) );
+					if ( *lSendCounterPtr < 8 )
 					{
-						uint32_t lSize ( 8-lSendCounter );
+						uint32_t lSize ( 8-*lSendCounterPtr );
 						//Add BOTs as padding
-						lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , lSize<<2 ) );
-						lSendCounter+=lSize;
-						lReplyCounter+=lSize;
+						lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , lSize<<2 ) );
+						*lSendCounterPtr+=lSize;
+						*lReturnCounterPtr+=lSize;
 					}
+					lAccumulatedPacket->mCumulativeSendSize += (*lSendCounterPtr << 2);
+					lAccumulatedPacket->mCumulativeReturnSize += (*lReturnCounterPtr << 2);
+					
+					*lSendCounterPtr = htons( *lSendCounterPtr );
+				}	
+			
+			
+				for ( tAccumulatedPackets::iterator lIt = mAccumulatedPackets.begin() ; lIt != mAccumulatedPackets.end() ; ++lIt ){
+					lIt->mCumulativeSendSize = htonl ( lIt->mCumulativeSendSize );
+					//simply put the registers for the 1st preamble into the default reply buffer
+					lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
+					lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+					lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;
+				}			
+			
+				// tAccumulatedPackets::iterator lIt = mAccumulatedPackets.begin();
+				// tAccumulatedPackets::iterator lIt2 = mAccumulatedPackets.begin();
+				// lIt2++;
+			
+				// for ( tAccumulatedPackets::iterator lIt = mAccumulatedPackets.begin() ; lIt != mAccumulatedPackets.end() ; ++lIt ){
+					// lIt->mCumulativeSendSize += lIt2->mCumulativeSendSize;
+					// lIt->mCumulativeReturnSize += lIt2->mCumulativeReturnSize;
+					// lIt->mSendBuffers.insert( lIt->mSendBuffers.end() , lIt2->mSendBuffers.begin() , lIt2->mSendBuffers.end() );
+					// lIt->mReplyBuffers.insert( lIt->mReplyBuffers.end() , lIt2->mReplyBuffers.begin() , lIt2->mReplyBuffers.end() );
+				// }
+				
+				// lIt->mCumulativeSendSize = htonl ( lIt->mCumulativeSendSize );
+				// //simply put the registers for the 1st preamble into the default reply buffer
+				// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
+				// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+				// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;
+					
+			}else{
+			
+				//some local variables to help
+				uint32_t lSendCounter ( 0 );
+				uint32_t lReplyCounter ( 0 );
+				//for the control hub, everything goes in one Accumulated Packet
+				mAccumulatedPackets.push_back ( tAccumulatedPacket() );
+				tAccumulatedPacket& lAccumulatedPacket = mAccumulatedPackets.front();
+				//iterators for data to be put into packet
+				tIPbusPacketInfoStorage::iterator lPacketInfoIt = mPacketInfo.begin() , lPacketInfoLastIt = mPacketInfo.begin();
+				std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lPacketInfoIt->getChunks().begin();
+				bool lAddHeader ( true );
+				bool lPacketInfoItUpdated ( false );
+				lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( & ( lAccumulatedPacket.mCumulativeSendSize ) , 4 ) );					
 
-					//fill the 16bit counters we send to the control-hub host.
-					//note this must always be big-endian, so use htonl!
-					mCounters.back() = htonl ( ( ( lSendCounter<<16 ) &0xffff0000 ) | ( lPacketInfoLastIt->getDeviceIDs().size() &0x0000ffff ) );
-					lAccumulatedPacket.mCumulativeSendSize += lSendCounter;
-					lAccumulatedPacket.mCumulativeReturnSize += ( lReplyCounter*lPacketInfoLastIt->getDeviceIDs().size() );
-				}
-
-				if ( lPacketInfoItUpdated )
+				//send buffers
+				do
 				{
-					lPacketInfoLastIt=lPacketInfoIt;
-					lPacketInfoItUpdated = false;
-				}
-			}
-			while ( lPacketInfoIt != mPacketInfo.end() );
-
-			//store list of packetinfo relevant for each device
-			for ( lPacketInfoIt = mPacketInfo.begin() ; lPacketInfoIt != mPacketInfo.end() ; ++lPacketInfoIt )
-			{
-				uint32_t lDeviceIndex = 0;
-
-				for ( std::vector<uint32_t>::const_iterator lIt = lPacketInfoIt->getDeviceIDs().begin() ; lIt != lPacketInfoIt->getDeviceIDs().end() ; ++lIt , ++lDeviceIndex )
-				{
-					tChunkList* lReplyMapPtr = &mReplyMap[ *lIt ];
-
-					for ( std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lPacketInfoIt->getChunks().begin() ; lChunksIt != lPacketInfoIt->getChunks().end() ; ++lChunksIt )
+					if ( lAddHeader )
 					{
-						lReplyMapPtr->push_back ( std::make_pair ( lDeviceIndex , & ( *lChunksIt ) ) );
+						//We need a persistent counter word...
+						mCounters.push_back ( 0 );
+						lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( &mCounters.back() , 4 ) );
+						lAccumulatedPacket.mCumulativeSendSize += 4;
+					
+						for( std::vector<uint64_t>::const_iterator lIt = lPacketInfoIt->getDeviceIDs().begin() ; lIt != lPacketInfoIt->getDeviceIDs().end() ; ++lIt ){
+							lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( &(*lIt) , mDeviceIDsize ) );
+						}
+						lAccumulatedPacket.mCumulativeSendSize += (lPacketInfoIt->getDeviceIDs().size()*mDeviceIDsize);
+						
+						//Add leading BOT and initialize counters (always 1 for BOTs)
+						lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , 4 ) ) ; //note this needs to be &mByteOrderTransaction if using a single 32bit uint, rather than an array
+						lSendCounter = 1;
+						lReplyCounter = 1;
+						lAddHeader = false;
+					}
+
+					std::size_t lSendPayloadSize = lChunksIt->mSendSize - lPacketInfoIt->SendHeaderSize();
+					lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( &lChunksIt->mTransactionHeader , 4 ) ) ;
+
+					if ( lPacketInfoIt->hasBaseAddress() )
+					{
+						lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( &lChunksIt->mBaseAddress , 4 ) ) ;
+					}
+
+					if ( lSendPayloadSize )
+					{
+						lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( lChunksIt->mSendPtr , lSendPayloadSize<<2 ) ) ;
+					}
+
+					lSendCounter+=lChunksIt->mSendSize;
+					lReplyCounter+=lChunksIt->mReturnSize;
+
+					if ( ( ++lChunksIt ) == lPacketInfoIt->getChunks().end() )
+					{
+						//move to first chunk of next lPacketInfo
+						//note that lChunksIt will be invalid if lPacketInfoIt == mPacketInfo.end() and will segfault if you try to use it :o)
+						lChunksIt = ( ++lPacketInfoIt )->getChunks().begin();
+						lPacketInfoItUpdated = true;
+					}
+
+					if ( lPacketInfoIt == mPacketInfo.end() )
+					{
+						// we will really exit if this condition occurs, we just use "lAddHeader" to make sure that we finalize this part of the packet
+						lAddHeader = true;
+					}
+					else
+					{
+						// if the next send packet will push the outgoing udp packet over size, add a new header/udp packet instead
+						lAddHeader |= ( lSendCounter + lChunksIt->mSendSize > mMaxPacketLength );
+						// if the next reply packet will push the reply udp packet over size, add a new header/udp packet instead
+						lAddHeader |= ( lReplyCounter +  lChunksIt->mReturnSize > mMaxPacketLength );
+
+						// if the device lists are different then add a new header
+						if ( lPacketInfoItUpdated ) //if the lists are independent then test to see if the device lists differ
+						{
+							lAddHeader |= ( lPacketInfoIt->getDeviceIDs() != lPacketInfoLastIt->getDeviceIDs() );
+						}
+					}
+
+					// finalize packets before we add the next header block or before we exit the loop
+					if ( lAddHeader )
+					{
+						if ( lSendCounter < 8 )
+						{
+							uint32_t lSize ( 8-lSendCounter );
+							//Add BOTs as padding
+							lAccumulatedPacket.mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , lSize<<2 ) );
+							lSendCounter+=lSize;
+							lReplyCounter+=lSize;
+						}
+
+						//fill the 16bit counters we send to the control-hub host.
+						//note this must always be big-endian, so use htonl!
+						mCounters.back() = htonl ( ( ( lSendCounter<<16 ) &0xffff0000 ) | ( lPacketInfoLastIt->getDeviceIDs().size() &0x0000ffff ) );
+						lAccumulatedPacket.mCumulativeSendSize += (lSendCounter*4);
+						lAccumulatedPacket.mCumulativeReturnSize += ( lReplyCounter*lPacketInfoLastIt->getDeviceIDs().size()*4 );
+					}
+
+					if ( lPacketInfoItUpdated )
+					{
+						lPacketInfoLastIt=lPacketInfoIt;
+						lPacketInfoItUpdated = false;
 					}
 				}
+				while ( lPacketInfoIt != mPacketInfo.end() );
+
+				//store list of packetinfo relevant for each device
+				for ( lPacketInfoIt = mPacketInfo.begin() ; lPacketInfoIt != mPacketInfo.end() ; ++lPacketInfoIt )
+				{
+					uint64_t lDeviceIndex = 0;
+
+					for ( std::vector<uint64_t>::const_iterator lIt = lPacketInfoIt->getDeviceIDs().begin() ; lIt != lPacketInfoIt->getDeviceIDs().end() ; ++lIt , ++lDeviceIndex )
+					{
+						tChunkList* lReplyMapPtr = &mReplyMap[ *lIt ];
+
+						for ( std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lPacketInfoIt->getChunks().begin() ; lChunksIt != lPacketInfoIt->getChunks().end() ; ++lChunksIt )
+						{
+							lReplyMapPtr->push_back ( std::make_pair ( lDeviceIndex , & ( *lChunksIt ) ) );
+						}
+					}
+				}
+
+				//convert the send size into bytes instead of words and make it Big-Endian, since we are sending this value to the CHH
+				lAccumulatedPacket.mCumulativeSendSize = htonl ( lAccumulatedPacket.mCumulativeSendSize );
+				//simply put the registers for the 1st preamble into the default reply buffer
+				lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
+				
+				if( ControlHubHostPackingProtocolVersion == CHH_1 ){
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+				}else{
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;						
+				}
+				
 			}
 
-			//convert the send size into bytes instead of words and make it Big-Endian, since we are sending this value to the CHH
-			lAccumulatedPacket.mCumulativeSendSize = htonl ( lAccumulatedPacket.mCumulativeSendSize<<2 );
-			//simply put the registers for the 1st preamble into the default reply buffer
-			lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
-			lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , 4 ) ) ;
+			
 			mExpectedReplyType = ExpectPreamble;
 			// std::cout << std::dec << "lAccumulatedPacket.mCumulativeSendSize (words) = " << (ntohl(lAccumulatedPacket.mCumulativeSendSize)>>2) << std::endl;
 			// std::cout << std::dec << "lAccumulatedPacket.mCumulativeReturnSize (words) = " << lAccumulatedPacket.mCumulativeReturnSize << std::endl;
+				
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -236,8 +405,8 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 		}
 	}
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::PostDispatch()
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::PostDispatch()
 	{
 		try
 		{
@@ -261,11 +430,12 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 	}
 
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::ReceiveHandler ( const boost::system::error_code& aErrorCode , std::size_t aReplyLength , std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef )
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::ReceiveHandler ( const boost::system::error_code& aErrorCode , std::size_t aReplyLength , std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef )
 	{
 		try
 		{
+		
 			tAccumulatedPacket& lAccumulatedPacket = mAccumulatedPackets.front();
 
 			//For direct hardware access the callback is trivial
@@ -276,6 +446,12 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 				return;
 			}
 
+			if( mErrorCode ){
+				pantheios::log_ERROR ( "Control Hub reported error code " , pantheios::integer( mErrorCode&0xF ) , " in transaction ID " , pantheios::integer( (mErrorCode>>4)&0xFFF , pantheios::fmt::fullHex | 6 ) );
+				aErrorRef = true;
+				return;
+			}
+			
 			// #ifdef DEBUGGING
 			for ( std::deque< boost::asio::mutable_buffer >::iterator lBufIt = lAccumulatedPacket.mReplyBuffers.begin() ; lBufIt != lAccumulatedPacket.mReplyBuffers.end() ; ++lBufIt )
 			{
@@ -283,9 +459,27 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 				std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
 				const uint32_t* p1 = boost::asio::buffer_cast<const uint32_t*> ( *lBufIt );
 
+				std::string lExpected;
+				switch ( mExpectedReplyType )
+				{
+					case ExpectPreamble :
+						lExpected = " (Expecting Preamble)";
+						break;
+					case ExpectHeader :
+						lExpected = " (Expecting Header)";
+						break;
+					case ExpectPayload :
+						lExpected = " (Expecting Payload)";
+						break;
+				}				
+				
 				for ( unsigned int y=0; y!=s1>>2; ++y )
 				{
-					pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( * ( p1+y ) , pantheios::fmt::fullHex | 10 ) );
+					pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( * ( p1++ ) , pantheios::fmt::fullHex | 10 ) , lExpected );
+				}
+				
+				if( s1%4 ){
+					pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( *( p1 ) , pantheios::fmt::fullHex | 6 ) , lExpected );
 				}
 			}
 
@@ -321,19 +515,29 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 
 
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::GotPreamble ( std::size_t aReplyLength , bool& aError )
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::GotPreamble ( std::size_t aReplyLength , bool& aError )
 	{
 		try
 		{
 			// pantheios::log_LOCATION();
 			tAccumulatedPacket& lAccumulatedPacket = mAccumulatedPackets.front();
-			mReplyByteCount = ntohl ( mReplyByteCount ) - 4 ;
+			if( ControlHubHostPackingProtocolVersion == CHH_1 ){
+				mReplyByteCount = ntohl ( mReplyByteCount ) - 4 ;
+			}else{
+				mReplyByteCount = ntohl ( mReplyByteCount ) - 8 ;
+			}
 			mReplyMapIt = mReplyMap.find ( mDeviceIDheader );
 
 			if ( mReplyMapIt == mReplyMap.end() )
 			{
-				pantheios::log_ERROR ( "DeviceID " ,  pantheios::integer ( ntohl ( mDeviceIDheader ) , pantheios::fmt::fullHex | 10 ) , " returned was not found in reply map" );
+				std::stringstream lStr;
+				lStr << std::hex << std::setfill('0');
+				for( mReplyMapIt = mReplyMap.begin() ; mReplyMapIt !=mReplyMap.end() ; ++mReplyMapIt ){
+					lStr << "\n0x" << std::setw(16) << mReplyMapIt->first;
+				}
+			
+				pantheios::log_ERROR ( "DeviceID " ,  pantheios::integer ( mDeviceIDheader , pantheios::fmt::fullHex | 18 ) , " was returned but was not found in reply map. Known IDs are:" , lStr.str() );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 				aError = true;
 				return;
@@ -356,8 +560,8 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 
 
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::GotHeader ( std::size_t aReplyLength , bool& aError )
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::GotHeader ( std::size_t aReplyLength , bool& aError )
 	{
 		try
 		{
@@ -451,11 +655,17 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 					}
 
 					//are we done with this set of chained instructions?
+					pantheios::log_DEBUG ( "mReplyByteCount = " , pantheios::integer ( mReplyByteCount ) );			
 					if ( mReplyByteCount == 0 )
 					{
 						//new preamble follows
 						lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
-						lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , 4 ) ) ;
+						if( ControlHubHostPackingProtocolVersion == CHH_1 ){
+							lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+						}else{
+							lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+							lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;						
+						}
 						// std::cout << "Next is Preamble" << std::endl;
 						mExpectedReplyType = ExpectPreamble;
 					}
@@ -487,8 +697,12 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 				{
 					//new preamble follows
 					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
-					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , 4 ) ) ;
-					// std::cout << "Next is Preamble" << std::endl;
+					if( ControlHubHostPackingProtocolVersion == CHH_1 ){
+						lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+					}else{
+						lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+						lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;						
+					}					// std::cout << "Next is Preamble" << std::endl;
 					mExpectedReplyType = ExpectPreamble;
 				}
 				else
@@ -508,8 +722,8 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 	}
 
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void ControlHubHostPackingProtocol< IPbusProtocolVersion >::GotPayload ( std::size_t aReplyLength , bool& aError )
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::GotPayload ( std::size_t aReplyLength , bool& aError )
 	{
 		try
 		{
@@ -528,11 +742,18 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 				return;
 			}
 
+			
+			pantheios::log_DEBUG ( "mReplyByteCount = " , pantheios::integer ( mReplyByteCount ) );			
 			if ( mReplyByteCount == 0 )
 			{
 				//new preamble follows
 				lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
-				lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , 4 ) ) ;
+				if( ControlHubHostPackingProtocolVersion == CHH_1 ){
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+				}else{
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;						
+				}
 				// std::cout << "Next is Preamble" << std::endl;
 				mExpectedReplyType = ExpectPreamble;
 			}
@@ -569,8 +790,8 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 	}
 
 
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	inline const tAccumulatedPackets& ControlHubHostPackingProtocol< IPbusProtocolVersion >::getAccumulatedPackets()
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	inline const tAccumulatedPackets& ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion , IPbusProtocolVersion >::getAccumulatedPackets()
 	{
 		try
 		{
@@ -582,5 +803,7 @@ ControlHubHostPackingProtocol< IPbusProtocolVersion >::ControlHubHostPackingProt
 			throw uhal::exception ( aExc );
 		}
 	}
+	
 
+	
 }

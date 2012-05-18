@@ -181,7 +181,7 @@ namespace uhal
 				A method to add a device ID to the list of devices which will receive the payload
 				@param aDeviceID		The unique ID of the device
 			*/
-			void setDeviceID ( const uint32_t& aDeviceID );
+			void setDeviceID ( const uint64_t& aDeviceID );
 
 
 			/**
@@ -284,7 +284,7 @@ namespace uhal
 				Return a reference to the list of device IDs that this instruction should be be sent to
 				@return a reference to the list of device IDs that this instruction should be sent to
 			*/
-			inline const std::vector<uint32_t>& getDeviceIDs();
+			inline const std::vector<uint64_t>& getDeviceIDs();
 
 
 			/** A method to merge a list of device IDs to the list of devices which will receive the payload
@@ -304,7 +304,7 @@ namespace uhal
 			bool mHasBaseAddress;
 
 			//! A vector of device IDs to which the payload is to be sent
-			std::vector<uint32_t> mDeviceIDs;
+			std::vector<uint64_t> mDeviceIDs;
 
 			/**
 				A local copy of the payload to be sent.
@@ -327,6 +327,6 @@ namespace uhal
 
 }
 
-#include "TemplateDefinitions/IPbusPacketInfo.hxx"
+#include "uhal/TemplateDefinitions/IPbusPacketInfo.hxx"
 
 #endif

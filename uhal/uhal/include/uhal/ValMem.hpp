@@ -287,7 +287,7 @@ namespace uhal
 
 }
 
-#include "TemplateDefinitions/ValMem.hxx"
+#include "uhal/TemplateDefinitions/ValMem.hxx"
 
 #endif
 

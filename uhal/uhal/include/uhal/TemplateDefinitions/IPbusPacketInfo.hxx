@@ -124,7 +124,7 @@ namespace uhal
 		}
 	}
 
-	const std::vector<uint32_t>& IPbusPacketInfo::getDeviceIDs()
+	const std::vector<uint64_t>& IPbusPacketInfo::getDeviceIDs()
 	{
 		try
 		{

@@ -18,9 +18,9 @@ struct tAccumulatedPacket
 	std::deque< boost::asio::const_buffer > mSendBuffers;
 	//! A buffer sequence for receiving the replies
 	std::deque< boost::asio::mutable_buffer > mReplyBuffers;
-	//! The number of words to be sent in the packet
+	//! The number of bytes to be sent in the packet
 	std::size_t mCumulativeSendSize;
-	//! The expected number of words to be returned by the packet
+	//! The expected bytes of words to be returned by the packet
 	std::size_t mCumulativeReturnSize;
 	//! default constructor
 	tAccumulatedPacket() :

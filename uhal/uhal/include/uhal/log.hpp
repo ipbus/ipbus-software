@@ -229,6 +229,6 @@ namespace uhal
 template< typename T > std::ostream& operator<< ( std::ostream& aStream , const uhal::_lazy_stream_inserter_<T>& aLazyInserter );
 
 
-#include "TemplateDefinitions/log.hxx"
+#include "uhal/TemplateDefinitions/log.hxx"
 
 #endif

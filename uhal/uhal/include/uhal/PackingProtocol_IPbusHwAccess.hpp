@@ -36,7 +36,7 @@ namespace uhal
 				@param aIPbusPacketInfo an IPbusPacketInfo to be added to the queue of pending IPbus transactions
 				@param aId not used in this class
 			*/
-			void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId = 0 );
+			void pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint64_t& aId = 0 );
 
 			/**
 				A function called immediately prior to a call to the Transport Protocol's Dispatch() function. Used for finalizing the queue for dispatch.
@@ -84,6 +84,6 @@ namespace uhal
 
 }
 
-#include "TemplateDefinitions/PackingProtocol_IPbusHwAccess.hxx"
+#include "uhal/TemplateDefinitions/PackingProtocol_IPbusHwAccess.hxx"
 
 #endif

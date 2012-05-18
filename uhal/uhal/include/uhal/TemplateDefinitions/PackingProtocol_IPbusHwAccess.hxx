@@ -30,7 +30,7 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 	IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::~IPbusHwAccessPackingProtocol() {}
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	void IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint32_t& aId )
+	void IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::pack ( IPbusPacketInfo& aIPbusPacketInfo , const uint64_t& aId )
 	{
 		try
 		{
@@ -48,8 +48,8 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 			for ( std::deque< IPbusPacketInfo::tChunks >::iterator lChunksIt = lIPbusPacketInfo.getChunks().begin() ; lChunksIt != lIPbusPacketInfo.getChunks().end() ; ++lChunksIt )
 			{
 				//if the chunk will push the UDP packet over size, then add a new packet into the queue
-				bool lSendSizeBad ( mAccumulatedPackets.back().mCumulativeSendSize + lChunksIt->mSendSize > mMaxPacketLength );
-				bool lReturnSizeBad ( mAccumulatedPackets.back().mCumulativeReturnSize +  lChunksIt->mReturnSize > mMaxPacketLength );
+				bool lSendSizeBad ( (mAccumulatedPackets.back().mCumulativeSendSize>>2) + lChunksIt->mSendSize > mMaxPacketLength );
+				bool lReturnSizeBad ( (mAccumulatedPackets.back().mCumulativeReturnSize>>2) +  lChunksIt->mReturnSize > mMaxPacketLength );
 
 				if ( lSendSizeBad || lReturnSizeBad )
 				{
@@ -61,8 +61,8 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 				{
 					mAccumulatedPackets.back().mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , 4 ) ) ; //note this needs to be &mByteOrderTransaction if using a single 32bit uint, rather than an array
 					mAccumulatedPackets.back().mReplyBuffers.push_back ( boost::asio::mutable_buffer ( mBOTReplyHeader , 4 ) ) ; //note this needs to be &mBOTReplyHeader if using a single 32bit uint, rather than an array
-					mAccumulatedPackets.back().mCumulativeSendSize=1;
-					mAccumulatedPackets.back().mCumulativeReturnSize=1;
+					mAccumulatedPackets.back().mCumulativeSendSize=4;
+					mAccumulatedPackets.back().mCumulativeReturnSize=4;
 				}
 
 				std::size_t lSendPayloadSize = lChunksIt->mSendSize - lIPbusPacketInfo.SendHeaderSize();
@@ -78,7 +78,7 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 					mAccumulatedPackets.back().mSendBuffers.push_back ( boost::asio::buffer ( lChunksIt->mSendPtr , lSendPayloadSize<<2 ) ) ;
 				}
 
-				mAccumulatedPackets.back().mCumulativeSendSize+=lChunksIt->mSendSize;
+				mAccumulatedPackets.back().mCumulativeSendSize+=(lChunksIt->mSendSize<<2);
 				std::size_t lReturnPayloadSize = lChunksIt->mReturnSize - lIPbusPacketInfo.ReturnHeaderSize();
 				mAccumulatedPackets.back().mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &lChunksIt->mReplyHeaders.at ( 0 ) , 4 ) ) ; //IPbus HW access clients only talk to a single board, so always at 0
 
@@ -87,7 +87,7 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 					mAccumulatedPackets.back().mReplyBuffers.push_back ( boost::asio::mutable_buffer ( lChunksIt->mValMemPtr.at ( 0 ) , lReturnPayloadSize<<2 ) ) ; //IPbus HW access clients only talk to a single board, so always at 0
 				}
 
-				mAccumulatedPackets.back().mCumulativeReturnSize+=lChunksIt->mReturnSize;
+				mAccumulatedPackets.back().mCumulativeReturnSize+=(lChunksIt->mReturnSize<<2);
 			}
 		}
 		catch ( const std::exception& aExc )
@@ -104,13 +104,13 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 		{
 			for ( tAccumulatedPackets::iterator lAccumulatedPacketIt = mAccumulatedPackets.begin() ; lAccumulatedPacketIt != mAccumulatedPackets.end() ; ++lAccumulatedPacketIt )
 			{
-				if ( lAccumulatedPacketIt->mCumulativeSendSize < 8 )
+				if ( (lAccumulatedPacketIt->mCumulativeSendSize>>2) < 8 )
 				{
-					uint32_t lSize ( 8-lAccumulatedPacketIt->mCumulativeSendSize );
+					uint32_t lSize ( 8-(lAccumulatedPacketIt->mCumulativeSendSize>>2) );
 					lAccumulatedPacketIt->mSendBuffers.push_back ( boost::asio::buffer ( mByteOrderTransaction , lSize<<2 ) );
-					lAccumulatedPacketIt->mCumulativeSendSize+=lSize;
+					lAccumulatedPacketIt->mCumulativeSendSize+=(lSize<<2);
 					lAccumulatedPacketIt->mReplyBuffers.push_back ( boost::asio::buffer ( mBOTReplyHeader , lSize<<2 ) );
-					lAccumulatedPacketIt->mCumulativeReturnSize+=lSize;
+					lAccumulatedPacketIt->mCumulativeReturnSize+=(lSize<<2);
 				}
 			}
 		}
@@ -376,7 +376,7 @@ IPbusHwAccessPackingProtocol< IPbusProtocolVersion >::IPbusHwAccessPackingProtoc
 						lStr << std::string ( 10 , ' ' );
 					}
 
-					lStr << "   |  Header |\n";
+					lStr << "   |  Header | Sent " << DebugIPbusHeader <IPbusProtocolVersion> ( *lSendBufStart ) << "\n";
 
 					if ( lMatch )
 					{

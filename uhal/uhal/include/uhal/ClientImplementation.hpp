@@ -53,6 +53,12 @@ namespace uhal
 			*/
 			IPBusUDPClient ( const std::string& aId , const URI& aUri );
 
+			/**
+				Return a description of the behaviour this client
+				@return a description of the behaviour this client
+			*/
+			static std::string description();
+			
 		private:
 			/**
 				Method to return the packing protocol. The base ClientInterface requires that this exists
@@ -102,6 +108,12 @@ namespace uhal
 			*/
 			IPBusTCPClient ( const std::string& aId , const URI& aUri );
 
+			/**
+				Return a description of the behaviour this client
+				@return a description of the behaviour this client
+			*/
+			static std::string description();
+			
 		private:
 			/**
 				Method to return the packing protocol. The base ClientInterface requires that this exists
@@ -125,10 +137,28 @@ namespace uhal
 
 	// ----------------------------------------------------------------------------------------------------------------
 
+	//! Exception class to handle the case where the received header does not match the expected header. Uses the base uhal::exception implementation of what()
+	class XMLfileMissingRequiredParameters: public uhal::exception {};
+
+	//Forware declare so that we can declare the friends
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	class ControlHubClient;
+	
+	//Declare two different functions rather than messing around with partial template specialization...
+	template < eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ExtractTargetID1( ControlHubClient< ControlHubHostPackingProtocolVersion , IPbusProtocolVersion >& aCHC );
+	template < eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
+	void ExtractTargetID2( ControlHubClient< ControlHubHostPackingProtocolVersion , IPbusProtocolVersion >& aCHC );
+		
+	
 	//! A class to indirectly access (via a Control Hub Host) devices via IPbus over UDP
-	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubClient : public ClientInterface
 	{
+
+			friend void ExtractTargetID1<>( ControlHubClient< ControlHubHostPackingProtocolVersion , IPbusProtocolVersion >& aCHC );
+			friend void ExtractTargetID2<>( ControlHubClient< ControlHubHostPackingProtocolVersion , IPbusProtocolVersion >& aCHC );
+	
 			//! The timeout period for TCP transactions in seconds
 			static const int mTimeoutPeriod = 10;
 			/**
@@ -138,7 +168,7 @@ namespace uhal
 			static const int mMaxPacketLength = 100;
 
 			//! Typedef the packing protocol which will be used by this IPbus Client
-			typedef ControlHubHostPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			typedef ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion , IPbusProtocolVersion > tPackingProtocol;
 			//! Typedef the transport protocol which will be used by this IPbus Client
 			typedef TcpTransportProtocol< tPackingProtocol > tTransportProtocol;
 			//! Typedef a map of string identifiers to pairs a PackingProtocol/TransportProtocol pair
@@ -158,7 +188,14 @@ namespace uhal
 			*/
 			void pack ( IPbusPacketInfo& aIPbusPacketInfo );
 
+			/**
+				Return a description of the behaviour this client
+				@return a description of the behaviour this client
+			*/
+			static std::string description();
+			
 		private:
+	
 			/**
 				Method to return the packing protocol. The base ClientInterface requires that this exists
 				@return a reference to an instance of the packing protocol
@@ -172,7 +209,7 @@ namespace uhal
 			TransportProtocol& getTransportProtocol();
 
 			//! The target ID with which this instance of the client is associated
-			uint32_t mTargetId;
+			uint64_t mTargetId;
 
 			//! A pointer to an instance of the packing protocol used by this IPbus client
 			tPackingProtocol* mPackingProtocolPtr;
@@ -183,6 +220,11 @@ namespace uhal
 			static tMap mMapNameAndPortToCHH;
 	};
 
+	
+
+	
+
+	
 	/*
 	// ----------------------------------------------------------------------------------------------------------------
 
@@ -209,7 +251,7 @@ namespace uhal
 
 }
 
-#include "TemplateDefinitions/ClientImplementation.hxx"
+#include "uhal/TemplateDefinitions/ClientImplementation.hxx"
 
 
 

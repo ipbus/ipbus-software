@@ -3,7 +3,7 @@ namespace uhal
 {
 
 	template <class T>
-	void ClientFactory::add ( const std::string& aProtocol )
+	void ClientFactory::add ( const std::string& aProtocol , const std::string& aDescription )
 	{
 		try
 		{
@@ -18,6 +18,11 @@ namespace uhal
 			}
 
 			mCreators[aProtocol] =  boost::shared_ptr<CreatorInterface> ( new Creator<T>() );
+			if( aDescription.size() == 0 ){
+				mProductDescriptions.insert( std::make_pair( aProtocol , T::description() ) );
+			}else{
+				mProductDescriptions.insert( std::make_pair( aProtocol , aDescription ) );
+			}
 		}
 		catch ( const std::exception& aExc )
 		{
