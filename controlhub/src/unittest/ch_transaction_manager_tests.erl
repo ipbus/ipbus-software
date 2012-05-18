@@ -37,7 +37,8 @@ ch_transaction_manager_test_() ->
       fun setup/0,
       fun teardown/1,
       { with,
-        [ fun test_normal_operation_single_req_single_target/1
+        [ fun test_normal_operation_single_req_single_target/1,
+          fun test_normal_operation_multi_req_single_target/1
         ]
       }
     }.
@@ -77,19 +78,58 @@ test_normal_operation_single_req_single_target(TestBaggage) ->
                      (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest) div 4):16,
                      DummyIPbusRequest/binary >>,
     % The response we expect back
-
     ExpectedResponse = << ?LOCALHOST:32,
                           (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
                           DummyIPbusRequest/binary >>,
-    % Create the transaction manager process we're going to test:
+    % Run the test
+    ReceivedResponse = create_send_receive(TestBaggage#test_baggage.listen_socket, TestRequest),
+    ?assertEqual(ExpectedResponse, ReceivedResponse).
     
-    ch_transaction_manager:start_link(TestBaggage#test_baggage.listen_socket),
+
+%% Tests the sending ofs a single request to a single target device
+test_normal_operation_multi_req_single_target(TestBaggage) ->
+    % Make some random "IPbus" request content
+    DummyIPbusRequest1 = << 16#11111111:32 >>,
+    DummyIPbusRequest2 = << 16#55555555:32, 16#44444444:32 >>,
+    DummyIPbusRequest3 = << 16#ffffffff:32, 16#eeeeeeee:32, 16#dddddddd:32 >>,    
+    % Take the above, but prepend with target address, etc, as would be sent by uHAL.
+    TestRequest = << ?LOCALHOST:32,
+                     (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest1) div 4):16,
+                     DummyIPbusRequest1/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest2) div 4):16,
+                     DummyIPbusRequest2/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest3) div 4):16,
+                     DummyIPbusRequest3/binary >>,
+    % The response we expect back
+    ExpectedResponse = << ?LOCALHOST:32,
+                          (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest1/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest2/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest3/binary >>,
+    % Run the test
+    ReceivedResponse = create_send_receive(TestBaggage#test_baggage.listen_socket, TestRequest),
+    ?assertEqual(ExpectedResponse, ReceivedResponse).
+
+
+%%% ==========================================================================
+%%% Test Helper Functions
+%%% ==========================================================================
+
+% Creates the transaction manager under test, sends the test request to it, receives
+% and returns the response.
+create_send_receive(TcpListenSocket, TestRequest) ->
+    ch_transaction_manager:start_link(TcpListenSocket),
     % Connect to the transaction manager
     {ok, ClientSocket} = gen_tcp:connect("localhost", ?CONTROL_HUB_TCP_LISTEN_PORT, [binary, {packet, 4}]),
     ok = gen_tcp:send(ClientSocket, TestRequest),
-    ReceivedBin = receive
-                      {tcp, ClientSocket, Bin} -> Bin
-                  end,
-    ?assertEqual(ExpectedResponse, ReceivedBin).
-    
-    
+    ReceivedResponse = receive
+                           {tcp, ClientSocket, Bin} -> Bin
+                       end,
+    gen_tcp:close(ClientSocket),
+    ReceivedResponse.
