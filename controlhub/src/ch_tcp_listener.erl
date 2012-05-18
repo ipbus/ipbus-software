@@ -16,8 +16,6 @@
 -include("ch_global.hrl").
 -include("ch_tcp_server_params.hrl").
 
--define(TCP_OPTIONS, [binary, {packet, 4}, {reuseaddr, true}, {active, true}, {backlog, ?MAX_CONCURRENT_CLIENT_CONNECTIONS}]).
-
 
 %% API exports
 -export([start_link/0, stop/0, connection_accept_completed/0]).
@@ -88,7 +86,7 @@ connection_accept_completed() ->
 init([]) ->
     ?DEBUG_TRACE("Initialising the TCP listener."),
     process_flag(trap_exit, true),
-    case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, ?TCP_OPTIONS) of
+    case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, ?TCP_SOCKET_OPTIONS) of
         {ok, TcpListenSocket} ->
             {ok, spawn_acceptor(#state{socket = TcpListenSocket})};
         {error, eaddrinuse} ->

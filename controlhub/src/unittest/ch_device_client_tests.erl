@@ -37,16 +37,16 @@ ch_device_client_test_() ->
     }.
 
 %% Setup function for test fixture
-%% @spec setup() -> ok
+%% @spec setup() -> DummyHwPid::pid()
 setup() ->
     ch_device_client_registry:start_link(), % needs to be available to spawn the device clients
-    DummyHwPid = spawn(fun() -> ch_unittest_common:udp_echo_server(?DUMMY_HW_PORT) end),
+    DummyHwPid = ch_unittest_common:spawn_udp_echo_server(?DUMMY_HW_PORT),
     DummyHwPid.
 
 %% Teardown function for test fixture
 teardown(DummyHwPid) ->
     ch_device_client_registry:stop(),
-    DummyHwPid ! die.
+    DummyHwPid ! shutdown.
 
 
 %%% ===========================================================================
@@ -105,7 +105,7 @@ spawn_test_clients(0, _TotalIterations, _MaxRequestLength, _TargetIPaddrU32, _Ta
 
 %% Does a bunch of request/receive loops
 test_client(RemainingIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) when RemainingIterations > 0 ->
-    FakeIPbusRequests = request_data_generator(MaxRequestLength),
+    FakeIPbusRequests = ch_unittest_common:dummy_request_data_generator(MaxRequestLength),
     ch_device_client:enqueue_requests(TargetIPaddrU32, TargetPort, FakeIPbusRequests),
     receive
         { device_client_response, TargetIPaddrU32, TargetPort, 0, FakeIPbusRequests } ->
@@ -117,11 +117,6 @@ test_client(RemainingIterations, MaxRequestLength, TargetIPaddrU32, TargetPort) 
 
 test_client(0, _MaxRequestLength, _TargetIPaddrU32, _TargetPort) -> ok.
 
-
-request_data_generator(MaxRequestLength) ->
-    RequestLengthInBytes = random:uniform(MaxRequestLength) * 4,
-    % slightly hacky way to produce random request data.
-    list_to_binary([random:uniform(256)-1 || _X <- lists:seq(1, RequestLengthInBytes)]).
 
 % Waits for the given number of test clients to exit, finally returning
 await_test_client_exits(Remaining) ->

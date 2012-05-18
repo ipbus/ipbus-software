@@ -34,7 +34,7 @@
 %%      is called.  The transaction manager process reaches end of life
 %%      when the TCP connection is terminated by the microHAL client.
 %%
-%% @spec start(TcpListenSocket::socket) -> ok
+%% @spec start_link(TcpListenSocket::socket) -> ok
 %% @end
 %% ---------------------------------------------------------------------
 start_link(TcpListenSocket) ->
@@ -134,8 +134,8 @@ target_request_accumulator(RequestBin) ->
 
 %% Implements target_request_accumulator/1
 target_request_accumulator(TargetRequestList,  <<TargetIPaddr:32,
-                                                 NumInstructions:16,
                                                  TargetPort:16,
+                                                 NumInstructions:16,
                                                  Remainder/binary>>) ->
     NumBitsForInstructions = 32 * NumInstructions,
     case Remainder of
@@ -179,7 +179,7 @@ device_client_response_accumulator([{IPaddrU32, PortU16}| Tail], ResponsesList) 
                           ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
                                        "Port=~p", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),
                           <<IPaddrU32:32, ErrorCode:16, PortU16:16, TargetResponseBin/binary>>
-                  after (?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT) -> % Give it 3 times as long as whatever device client timeout we have
+                  after (?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT) -> 
                       ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~w,"
                                    "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),            
                           <<IPaddrU32:32, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16, PortU16:16>>
