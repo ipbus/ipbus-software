@@ -27,17 +27,15 @@ ch_stats_test_() ->
     { setup,
       fun setup/0,
       fun teardown/1,
-      { inparallel,  % run the tests below concurrently, JUST BECAUSE I CAN! (and it's prob a bit quicker)
-        [ fun test_client_connections/0,
-          fun test_client_request_in/0,
-          fun test_client_request_malformed/0,
-          fun test_client_response_sent/0,
-          fun test_udp_in/0,
-          fun test_udp_malformed/0,
-          fun test_udp_out/0,
-          fun test_udp_response_timeout/0
-        ]
-      }
+      [ fun test_client_connections/0,
+        fun test_client_request_in/0,
+        fun test_client_request_malformed/0,
+        fun test_client_response_sent/0,
+        fun test_udp_in/0,
+        fun test_udp_malformed/0,
+        fun test_udp_out/0,
+        fun test_udp_response_timeout/0
+      ]
     }.
 
 %% Setup function for test fixture - starts up the ch_stats server

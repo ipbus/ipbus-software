@@ -55,8 +55,7 @@ teardown(_Ignore) ->
 %%% ===========================================================================
 
 test_tcp_connect() ->    
-    % Need to improve this... don't really test anything much, as you can connect and
-    % send without an accepted socket at the other end...
+    % Need to improve this... currently relies on the stats server to prove it's doing the right thing.
     % Create a whole bunch of dummy client connections with a small timeout
     Timeout_ms = 50, % 50 millisecond timeout
     {ok, TestSocket1} = gen_tcp:connect("localhost", ?CONTROL_HUB_TCP_LISTEN_PORT, [binary, {packet, 4}], Timeout_ms),

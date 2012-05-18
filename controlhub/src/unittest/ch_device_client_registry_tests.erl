@@ -27,12 +27,10 @@ ch_device_client_registry_test_() ->
     { setup,
       fun setup/0,
       fun teardown/1,
-      { inorder,  % run the tests below in order
-        [ fun test_total_device_clients/0,
+      [ fun test_total_device_clients/0,
           fun test_get_pid/0,
           fun test_device_client_death_updates_registry/0
-        ]
-      }
+      ]
     }.
 
 %% Setup function for test fixture
