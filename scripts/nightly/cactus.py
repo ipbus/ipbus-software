@@ -57,7 +57,7 @@ CHECKOUT_CMDS = ["rm -rf %s" % BUILD_HOME,
                  ";".join(CHECKOUT)]
 
 
-BUILD_CMDS = ["cd %s" % join(BUILD_HOME,"trunk")]
+BUILD_CMDS = ["cd %s;make -k" % join(BUILD_HOME,"trunk")]
 
 RELEASE_CMDS = ["rm -rf %s" % RELEASE_DIR,
                 "mkdir -p %s" % RELEASE_DIR,
