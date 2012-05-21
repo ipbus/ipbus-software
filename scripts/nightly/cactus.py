@@ -16,9 +16,9 @@ FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
 WEB_URL           = "http://cern.ch/cactus/nightly/"
 WEB_DIR           = "/afs/cern.ch/user/c/cactus/www/nightly"
-LOG_DIR           = "/afs/cern.ch/user/c/cactus/www/nightly/logs"
+LOG_DIR           = join(WEB_DIR,"logs")
 #The log file name and path should be the same than in the one in the acrontab
-LOG_FILE          = "/afs/cern.ch/user/c/cactus/www/nightly/logs/nightly.log"
+LOG_FILE          = join(LOG_DIR,"nightly.log")
 
 #nanalyzer.py variables
 ERROR_LIST        = ['TEST FAILED, ',
