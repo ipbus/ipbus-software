@@ -67,8 +67,14 @@ def uninstall():
     logger.info("----++++UNINSTALLING++++----")
 
     for cmd in CONF.UNINSTALL_CMDS:
-        system(cmd, log=True, exception=False)
+        system(cmd, log=False, exception=False)
 
+def report():
+    logger.info("----++++REPORTING++++----")
+
+    for cmd in CONF.REPORT_CMDS:
+        system(cmd,exception=False)
+        
 def processLogs():
     logger.info("----++++PROCESSING LOGS++++----")
     ### Copy all log files to LOG_DIR.
@@ -130,8 +136,7 @@ if __name__== "__main__":
     # Reporting.
     try:
         if not silent:
-            logger.info("----++++REPORTING++++----")
-            nanalyzer.report()
+            report()
             processLogs()
         else:
             logger.info("Final reporting and email notifications were disabled")
