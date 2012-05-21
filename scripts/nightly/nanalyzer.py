@@ -9,10 +9,13 @@ arguments:
 options:
    -h, --help        help
 """
+import getopt
+import sys
 import re
 import time
 import os
 import smtplib
+import nutils
 from email.MIMEText import MIMEText
 
 LIMIT, ERROR, TEST_PASSED = range(3)
@@ -47,7 +50,7 @@ def analyze_log():
             current_section = s.groups()[0]
             result.append((i, LIMIT, l, current_section))
         elif findany(l, CONF.TEST_PASSED_LIST):
-            result.append((i, CONF.TEST_PASSED, l, current_section))
+            result.append((i, TEST_PASSED, l, current_section))
         elif findany(l, CONF.ERROR_LIST):
             if findany(l, CONF.IGNORE_ERROR_LIST):
                 pass
@@ -113,7 +116,7 @@ def render_log(result):
     
     html += "<a href='%s'>back...</a><br/><br/>" % os.path.join(CONF.WEB_URL,"index.html")
 
-    fn = LOG_FILE
+    fn = CONF.LOG_FILE
     keys = [i[0] for i in result]
     types = [i[1] for i in result]
     for (i, l) in enumerate(open(fn)):
@@ -152,7 +155,7 @@ def html_header(title):
     html += "<a href='https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds'><img src='static/question_mark.png' height='60' width='60' style='border-style: none' align='right'/></a>"
     html += "<h1>" + title + "</h1>\n"
 
-    html += "<p>" + nutils.system("uname -a",exception=False) + "</p>"
+    html += "<p>" + nutils.system("uname -a",exception=False)[0] + "</p>"
 
     return html
 
@@ -186,9 +189,9 @@ def send_mail():
     msg = MIMEText(content,'html')
 
     if re.search("\d+\s+ERRORS",content):
-        msg['Subject'] = CONF.TILE + ": ERRORs"
+        msg['Subject'] = CONF.TITLE + ": ERRORs"
     else:
-        msg['Subject'] = CONF.TILE
+        msg['Subject'] = CONF.TITLE
 
     fromaddr = CONF.FROM_EMAIL
     msg['From'] = fromaddr

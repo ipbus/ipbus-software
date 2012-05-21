@@ -111,7 +111,6 @@ if __name__== "__main__":
     # Execute build/test/etc.
     try:
         try:
-            uninstall()
             environment()
             checkout()
             dependencies()
