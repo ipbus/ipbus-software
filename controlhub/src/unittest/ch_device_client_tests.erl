@@ -46,7 +46,8 @@ setup() ->
 %% Teardown function for test fixture
 teardown(DummyHwPid) ->
     ch_device_client_registry:stop(),
-    DummyHwPid ! shutdown.
+    DummyHwPid ! shutdown,
+    timer:sleep(10).  % Sleep to let everything finish shutting down properly before next test-suite starts.
 
 
 %%% ===========================================================================
