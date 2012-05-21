@@ -22,12 +22,6 @@ SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
 LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
-		\
-		${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.core.gcc41.a \
-		${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.fe.simple.gcc41.a \
-		${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.util.gcc41.a \
-		${EXTERN_PANTHEIOS_LIB_PREFIX}/libb64.1.pan.gcc41.a \
-		\
 		-L${EXTERN_PUGIXML_LIB_PREFIX} \
 		-L${UHAL_GRAMMARS_LIB_PREFIX}
 
@@ -65,11 +59,12 @@ _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal}
+	mkdir -p RPMBUILD/SOURCES/{lib,include}
 	mkdir -p lib
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -p include/uhal/*.hpp RPMBUILD/SOURCES/include/uhal/.
+	cp -pr include RPMBUILD/SOURCES/.
+	find RPMBUILD/SOURCES/include/. -type d -a -name ".svn" | xargs rm -rf
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj
