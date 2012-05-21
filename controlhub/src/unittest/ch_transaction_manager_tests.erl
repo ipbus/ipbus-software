@@ -38,7 +38,9 @@ ch_transaction_manager_test_() ->
       fun teardown/1,
       { with,
         [ fun test_normal_operation_single_req_single_target/1,
-          fun test_normal_operation_multi_req_single_target/1
+          fun test_normal_operation_multi_req_single_target/1,
+          fun test_normal_operation_same_req_multi_targets/1,
+          fun test_normal_operation_multi_req_multi_targets/1
         ]
       }
     }.
@@ -66,9 +68,9 @@ teardown(TestBaggage) ->
 %%% Individual Test Functions.
 %%% ===========================================================================
 
-%% Tests the sending ofs a single request to a single target device
+%% Tests the sending of a single request to a single target device
 test_normal_operation_single_req_single_target(TestBaggage) ->
-    % Dummy IPbus request data only going to echo server
+    % Dummy IPbus request data - only going to echo server, so no need for real IPbus content.
     DummyIPbusRequest = << 16#deadbeef:32,
                            16#cafebabe:32,
                            16#a5a5a5a5:32,
@@ -86,13 +88,13 @@ test_normal_operation_single_req_single_target(TestBaggage) ->
     ?assertEqual(ExpectedResponse, ReceivedResponse).
     
 
-%% Tests the sending ofs a single request to a single target device
+%% Tests the sending of multiple requests to a single target device
 test_normal_operation_multi_req_single_target(TestBaggage) ->
-    % Make some random "IPbus" request content
-    DummyIPbusRequest1 = << 16#11111111:32 >>,
-    DummyIPbusRequest2 = << 16#55555555:32, 16#44444444:32 >>,
-    DummyIPbusRequest3 = << 16#ffffffff:32, 16#eeeeeeee:32, 16#dddddddd:32 >>,    
-    % Take the above, but prepend with target address, etc, as would be sent by uHAL.
+    % The dummy content of our three requests - only going to echo server, so no need for real IPbus content.
+    DummyIPbusRequest1 = << 16#01010101:32 >>,
+    DummyIPbusRequest2 = << 16#02020202:32, 16#03030303:32 >>,
+    DummyIPbusRequest3 = << 16#04040404:32, 16#05050505:32, 16#06060606:32 >>,    
+    % Build the test request
     TestRequest = << ?LOCALHOST:32,
                      (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest1) div 4):16,
                      DummyIPbusRequest1/binary,
@@ -115,6 +117,112 @@ test_normal_operation_multi_req_single_target(TestBaggage) ->
     % Run the test
     ReceivedResponse = create_send_receive(TestBaggage#test_baggage.listen_socket, TestRequest),
     ?assertEqual(ExpectedResponse, ReceivedResponse).
+
+
+%% Tests the sending of the same request to multiple target devices
+test_normal_operation_same_req_multi_targets(TestBaggage) ->
+    % Dummy IPbus request data - only going to echo server, so no need for real IPbus content.
+    DummyIPbusRequest = << 16#deadbeef:32,
+                           16#cafebabe:32,
+                           16#a5a5a5a5:32,
+                           16#69696969:32 >>,
+    % Build the test request
+    TestRequest = << ?LOCALHOST:32,
+                     (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest) div 4):16,
+                     DummyIPbusRequest/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest) div 4):16,
+                     DummyIPbusRequest/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest) div 4):16,
+                     DummyIPbusRequest/binary >>,
+    % The response we expect back
+    ExpectedResponse = << ?LOCALHOST:32,
+                          (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest/binary >>,
+    % Run the test
+    ReceivedResponse = create_send_receive(TestBaggage#test_baggage.listen_socket, TestRequest),
+    ?assertEqual(ExpectedResponse, ReceivedResponse).
+
+
+%% Tests the sending multiple different requests to multiple target devices
+test_normal_operation_multi_req_multi_targets(TestBaggage) ->
+    % The dummy content of our three requests - only going to echo server, so no need for real IPbus content.
+    DummyIPbusRequest1_1 = << 16#01010001:32 >>,
+    DummyIPbusRequest1_2 = << 16#01020001:32, 16#01020002:32 >>,
+    DummyIPbusRequest1_3 = << 16#01030001:32, 16#01030002:32, 16#01030003:32 >>,
+    DummyIPbusRequest2_1 = << 16#02010001:32 >>,
+    DummyIPbusRequest2_2 = << 16#02020001:32, 16#02020002:32 >>,
+    DummyIPbusRequest2_3 = << 16#02030001:32, 16#02030002:32, 16#02030003:32 >>,
+    DummyIPbusRequest3_1 = << 16#03010001:32 >>,
+    DummyIPbusRequest3_2 = << 16#03020001:32, 16#03020002:32 >>,
+    DummyIPbusRequest3_3 = << 16#03030001:32, 16#03030002:32, 16#03030003:32 >>,
+    % Build the test request
+    TestRequest = << ?LOCALHOST:32,
+                     (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest1_1) div 4):16,
+                     DummyIPbusRequest1_1/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest2_1) div 4):16,
+                     DummyIPbusRequest2_1/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest3_1) div 4):16,
+                     DummyIPbusRequest3_1/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest1_2) div 4):16,
+                     DummyIPbusRequest1_2/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest2_2) div 4):16,
+                     DummyIPbusRequest2_2/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest3_2) div 4):16,
+                     DummyIPbusRequest3_2/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest1_3) div 4):16,
+                     DummyIPbusRequest1_3/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest2_3) div 4):16,
+                     DummyIPbusRequest2_3/binary,
+                     ?LOCALHOST:32,
+                     (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, (size(DummyIPbusRequest3_3) div 4):16,
+                     DummyIPbusRequest3_3/binary >>,
+    % The response we expect back
+    ExpectedResponse = << ?LOCALHOST:32,
+                          (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest1_1/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest2_1/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest3_1/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest1_2/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest2_2/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest3_2/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest1_3/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(2, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest2_3/binary,
+                          ?LOCALHOST:32,
+                          (lists:nth(3, ?DUMMY_HW_PORTS_LIST)):16, ?ERRCODE_SUCCESS:16,
+                          DummyIPbusRequest3_3/binary >>,
+    % Run the test
+    ReceivedResponse = create_send_receive(TestBaggage#test_baggage.listen_socket, TestRequest),
+    ?assertEqual(ExpectedResponse, ReceivedResponse).
+
 
 
 %%% ==========================================================================
