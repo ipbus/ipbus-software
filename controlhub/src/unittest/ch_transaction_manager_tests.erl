@@ -132,4 +132,8 @@ create_send_receive(TcpListenSocket, TestRequest) ->
                            {tcp, ClientSocket, Bin} -> Bin
                        end,
     gen_tcp:close(ClientSocket),
+    % Wait for the transaction manager to shut down normally. Can cause problems in debug
+    % trace mode otherwise (process gets killed whilst debug stdout is occurring). Need
+    % to find a better way around this problem...
+    timer:sleep(10),
     ReceivedResponse.

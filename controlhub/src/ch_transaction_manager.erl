@@ -188,8 +188,8 @@ device_client_response_accumulator([{IPaddrU32, PortU16}| Tail], ResponsesList) 
 
 device_client_response_accumulator([], ResponsesList) ->
     ?DEBUG_TRACE("Finished gathering client responses."),
-    lists:reverse(ResponsesList),
-    list_to_binary(ResponsesList).
+    ReversedResponsesList = lists:reverse(ResponsesList),
+    list_to_binary(ReversedResponsesList).
 
 
 reply_to_client(ClientSocket, FullResponseBin) ->

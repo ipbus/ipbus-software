@@ -146,6 +146,9 @@ handle_call(_Request, _From, State) ->
 handle_cast({send, IPbusRequests, ClientPid}, State = #state{socket = Socket}) ->
     ?DEBUG_TRACE("IPbus requests received from Transaction Manager with PID = ~w.  Forwarding to "
                  "IP addr=~w, port=~w...", [ClientPid, get(target_ip_tuple), get(target_port)]),
+    ?PACKET_TRACE(IPbusRequests, "The following IPbus requests have been received from Transaction " 
+                  "Manager with PID = ~w.  Forwarding to IP addr=~w, port=~w...",
+                  [ClientPid, get(target_ip_tuple), get(target_port)]),
     gen_udp:send(Socket, get(target_ip_tuple), get(target_port), IPbusRequests),
     ch_stats:udp_out(),
     TargetIPtuple = get(target_ip_tuple),
