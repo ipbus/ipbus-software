@@ -23,3 +23,8 @@ localenv.Program(
 	target = localenv.SrcBuildPath+'/test_uhal', 
 	source = [ localenv.SrcBuildPath+'/test_uhal.cpp' ]
 )
+
+localenv.Program( 
+	target = localenv.SrcBuildPath+'/test_timing', 
+	source = [ localenv.SrcBuildPath+'/test_timing.cpp' ]
+)

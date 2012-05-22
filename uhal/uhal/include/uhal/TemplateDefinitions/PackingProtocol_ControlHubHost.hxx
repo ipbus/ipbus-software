@@ -166,7 +166,7 @@ ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProt
 							if( lNewAccumulatedPacket ){
 								mAccumulatedPackets.push_back ( tAccumulatedPacket() );
 								lAccumulatedPacket = &mAccumulatedPackets.back();
-								lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( & ( lAccumulatedPacket->mCumulativeSendSize ) , 4 ) );		
+								// lAccumulatedPacket->mSendBuffers.push_back ( boost::asio::buffer ( & ( lAccumulatedPacket->mCumulativeSendSize ) , 4 ) );		
 								
 								lAccumulatedPacketMap[ *lIt ] = std::make_pair( lAccumulatedPacket , mCounters.size() );
 								lAccumulatedPacketIt = lAccumulatedPacketMap.find( *lIt );
@@ -230,30 +230,35 @@ ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProt
 				}	
 			
 			
-				for ( tAccumulatedPackets::iterator lIt = mAccumulatedPackets.begin() ; lIt != mAccumulatedPackets.end() ; ++lIt ){
-					lIt->mCumulativeSendSize = htonl ( lIt->mCumulativeSendSize );
-					//simply put the registers for the 1st preamble into the default reply buffer
-					lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
-					lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
-					lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;
-				}			
-			
-				// tAccumulatedPackets::iterator lIt = mAccumulatedPackets.begin();
-				// tAccumulatedPackets::iterator lIt2 = mAccumulatedPackets.begin();
-				// lIt2++;
-			
 				// for ( tAccumulatedPackets::iterator lIt = mAccumulatedPackets.begin() ; lIt != mAccumulatedPackets.end() ; ++lIt ){
-					// lIt->mCumulativeSendSize += lIt2->mCumulativeSendSize;
-					// lIt->mCumulativeReturnSize += lIt2->mCumulativeReturnSize;
-					// lIt->mSendBuffers.insert( lIt->mSendBuffers.end() , lIt2->mSendBuffers.begin() , lIt2->mSendBuffers.end() );
-					// lIt->mReplyBuffers.insert( lIt->mReplyBuffers.end() , lIt2->mReplyBuffers.begin() , lIt2->mReplyBuffers.end() );
-				// }
+					// lIt->mCumulativeSendSize = htonl ( lIt->mCumulativeSendSize );
+					// //simply put the registers for the 1st preamble into the default reply buffer
+					// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
+					// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+					// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;
+				// }			
+			
+				tAccumulatedPackets::iterator lIt = mAccumulatedPackets.begin();
+				tAccumulatedPackets::iterator lIt2 = mAccumulatedPackets.begin();
+				lIt2++;
+			
+				for ( ; lIt2 != mAccumulatedPackets.end() ; ++lIt2 ){
+					lIt->mCumulativeSendSize += lIt2->mCumulativeSendSize;
+					lIt->mCumulativeReturnSize += lIt2->mCumulativeReturnSize;
+					lIt->mSendBuffers.insert( lIt->mSendBuffers.end() , lIt2->mSendBuffers.begin() , lIt2->mSendBuffers.end() );
+					lIt->mReplyBuffers.insert( lIt->mReplyBuffers.end() , lIt2->mReplyBuffers.begin() , lIt2->mReplyBuffers.end() );
+				}
 				
-				// lIt->mCumulativeSendSize = htonl ( lIt->mCumulativeSendSize );
-				// //simply put the registers for the 1st preamble into the default reply buffer
-				// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
-				// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
-				// lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;
+				mAccumulatedPackets.resize(1);
+				
+				lIt->mCumulativeSendSize = htonl ( lIt->mCumulativeSendSize );
+				lIt->mSendBuffers.push_front ( boost::asio::buffer ( & ( lIt->mCumulativeSendSize ) , 4 ) );		
+
+				//simply put the registers for the 1st preamble into the default reply buffer
+				lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
+				lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
+				lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
+				lIt->mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;
 					
 			}else{
 			
@@ -381,11 +386,13 @@ ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProt
 				//convert the send size into bytes instead of words and make it Big-Endian, since we are sending this value to the CHH
 				lAccumulatedPacket.mCumulativeSendSize = htonl ( lAccumulatedPacket.mCumulativeSendSize );
 				//simply put the registers for the 1st preamble into the default reply buffer
-				lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
 				
 				if( ControlHubHostPackingProtocolVersion == CHH_1 ){
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
 					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
 				}else{
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
+					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mReplyByteCount , 4 ) ) ;
 					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mDeviceIDheader , mDeviceIDsize ) ) ;
 					lAccumulatedPacket.mReplyBuffers.push_back ( boost::asio::mutable_buffer ( &mErrorCode , 2 ) ) ;						
 				}
