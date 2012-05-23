@@ -16,7 +16,6 @@ from clone_setup import clone_setup
 from nutils import logger, log_setup, system
 import os
 import time
-import nanalyzer
 import sys
 import getopt
 

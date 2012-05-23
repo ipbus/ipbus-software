@@ -63,4 +63,4 @@ if __name__== "__main__":
         print __doc__
         sys.exit(1)
 
-    clone_setup(sys.argc[1],sys.argv[2])
+    clone_setup(sys.argv[1],sys.argv[2])
