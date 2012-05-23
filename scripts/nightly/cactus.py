@@ -38,16 +38,14 @@ TEST_PASSED_LIST  = ['TEST OK, ']
 #environ['CVSROOT'] = ':pserver:anonymous:98passwd@isscvs.cern.ch:/local/reps/tridas'
 
 ####COMMANDS
-UNINSTALL_CMDS = ["sudo yum -y remove scons bzip2-devel erlang",
-                  "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite",
-                  "rm -rf %s" % BUILD_HOME,
+UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
                   "mkdir -p %s" % BUILD_HOME]
 
 ENVIRONMENT_CMDS = ["env"]
 
-DEPENDENCIES_CMDS = ["sudo yum -y install scons bzip2-devel erlang",
+DEPENDENCIES_CMDS = ["sudo yum -y remove scons bzip2-devel erlang python-devel",
                      "sudo cp %s %s" % (XDAQ_REPO_FILE,"/etc/yum.repos.d/xdaq.repo"),
-                     "sudo yum -y install e2fsprogs-devel curl curl-devel"]
+                     "sudo yum -y remove e2fsprogs-devel curl curl-devel"]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
