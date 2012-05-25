@@ -200,7 +200,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
 			lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
 			pack ( lIPbusPacketInfo );
-			return mUnsignedReplyWords.back();
+		return mUnsignedReplyWords.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -213,6 +213,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
+		PERFORMANCE( "Queue a read instruction" ,
 			mUnsignedReplyVectors.push_back ( ValVector< uint32_t > ( aSize ) );
 			IPbusPacketInfo lIPbusPacketInfo;
 
@@ -227,6 +228,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 			lIPbusPacketInfo.setValMem ( mUnsignedReplyVectors.back() );
 			pack ( lIPbusPacketInfo );
+		)
 			return mUnsignedReplyVectors.back();
 		}
 		catch ( const std::exception& aExc )
@@ -375,6 +377,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	void ClientInterface::pack ( IPbusPacketInfo& aIPbusPacketInfo )
 	{
+	PERFORMANCE( "Call the packing protocols pack function" ,
 		try
 		{
 			getPackingProtocol().pack ( aIPbusPacketInfo );
@@ -384,6 +387,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			pantheios::log_EXCEPTION ( aExc );
 			throw uhal::exception ( aExc );
 		}
+	)
 	}
 
 
@@ -391,9 +395,15 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
+	PERFORMANCE( "Call the packing protocols pre-dispatch function" ,
 			getPackingProtocol().PreDispatch();
+	)
+	PERFORMANCE( "Call the transport protocols dispatch function" ,
 			getTransportProtocol().Dispatch();
+	)
+	PERFORMANCE( "Call the packing protocols post-dispatch function" ,	
 			getPackingProtocol().PostDispatch();
+	)
 			mUnsignedReplyWords.clear();
 			mSignedReplyWords.clear();
 			mUnsignedReplyVectors.clear();

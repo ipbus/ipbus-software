@@ -1,3 +1,4 @@
+#include <uhal/performance.hpp>
 
 namespace uhal
 {
@@ -77,6 +78,9 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 				mQuery = new boost::asio::ip::tcp::resolver::query ( mHostname , mServiceOrPort );
 				mIterator = mResolver->resolve ( *mQuery );
 				mSocket -> connect ( *mIterator );
+
+				mSocket -> set_option( boost::asio::ip::tcp::no_delay(true) ); 
+				
 				pantheios::log_NOTICE ( "TCP connection succeeded" );
 			}
 
@@ -109,8 +113,10 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 					continue;    //Sending empty packet will cause trouble, so don't!
 				}
 
+		PERFORMANCE( "ASIO write" ,
 				//send
 				boost::asio::write ( *mSocket , lAccumulatedPacketIt->mSendBuffers );
+		)
 				//set deadline for reply
 				mDeadline.expires_from_now ( mTimeOut );
 				//wait for reply
@@ -124,8 +130,20 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 
 				do
 				{
-
 					bool lAwaitingCallBack ( true );
+
+		PERFORMANCE( "ASIO synchronous read" ,
+					boost::system::error_code ec;
+					std::size_t lReplyLength2 = boost::asio::read ( *mSocket , lAccumulatedPacketIt->mReplyBuffers , ec);
+				)
+					
+		PERFORMANCE(
+			"Call to Receive handler" ,
+			mPackingProtocol.ReceiveHandler( ec , lReplyLength2 , lReplyLength , lAwaitingCallBack , lErrorFlag );
+		)
+				
+/*				
+		PERFORMANCE(
 					// Start the asynchronous operation itself. The ReceiveHandler function
 					// used as a callback will update the mErrorCode and length variables.
 					boost::asio::async_read (
@@ -141,12 +159,15 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 							boost::ref ( lErrorFlag )
 						)
 					);
-
+		)
+		
+		
 					// Block until the asynchronous operation has completed.
 					do
 					{
+		PERFORMANCE(
 						mIOservice.run_one();
-
+		)
 						if ( mTimeoutFlag )
 						{
 							pantheios::log_ERROR ( "Caught Timeout flag in asynchronous callback. Converting to an exception." );
@@ -167,38 +188,10 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 											);
 					}
 					while ( lAwaitingCallBack );
+					*/
+					
 				}
 				while ( lReplyLength != lAccumulatedPacketIt->mCumulativeReturnSize );
-
-				// if ( pantheios::isSeverityLogged ( pantheios::debug ) )
-				// {
-					// for ( std::deque< boost::asio::mutable_buffer >::const_iterator lBufIt = lAccumulatedPacketIt->mReplyBuffers.begin() ; lBufIt != lAccumulatedPacketIt->mReplyBuffers.end() ; ++lBufIt )
-					// {
-						// pantheios::log_DEBUG ( ">>> ----------------" );
-						// std::size_t s1 = boost::asio::buffer_size ( *lBufIt );
-						// const boost::uint32_t* p1 = boost::asio::buffer_cast<const boost::uint32_t*> ( *lBufIt );
-
-						// for ( unsigned int y=0; y!=s1>>2; ++y )
-						// {
-							// pantheios::log_DEBUG ( "RECEIVED " , pantheios::integer ( * ( p1++ ) , pantheios::fmt::fullHex | 10 ) );
-						// }
-						
-						// if( s1%4 ){
-							// pantheios::log_DEBUG ( "RECEIVED  " , pantheios::integer ( *( p1 ) , pantheios::fmt::fullHex | 6 ) );
-						// }
-						
-					// }
-
-					// pantheios::log_DEBUG ( ">>> ----------------" );
-				// }
-
-				// std::cout << mThis->mReplyLength << " vs. " << lAccumulatedPacketIt->mCumulativeReturnSize << std::endl;
-				//check that it is the right length...
-				// if( mThis->mReplyLength != lAccumulatedPacketIt->mCumulativeReturnSize ){
-				// //Throw exception - Since the hardware does not know how to break up packets, this must be an error
-				// GenericException lExc(	"Return size does not match expected..." );
-				// RAISE( lExc );
-				// }
 			}
 		}
 		catch ( const std::exception& aExc )
@@ -206,6 +199,8 @@ TcpTransportProtocol< PACKINGPROTOCOL >::TcpTransportProtocol ( const std::strin
 			pantheios::log_EXCEPTION ( aExc );
 			throw uhal::exception ( aExc );
 		}
+		
+		
 	}
 
 

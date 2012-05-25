@@ -57,15 +57,28 @@ int main ( int argc,char* argv[] )
 		uint32_t SIZE=10500;
 		uint32_t ITERATIONS=10;
 
+		std::vector< uint32_t > lData;
+		for ( int i = 0 ; i != SIZE ; ++i ){
+			lData.push_back( rand() );
+		}
+		
+		
+		hw.getClient()->writeBlock ( 0xBA5EADD4 , lData );
+		hw.dispatch();
+	
+		uhal::ValVector< uint32_t > block2;
+	
 		timeval start, end , TimeTaken;
 		gettimeofday ( &start, NULL );
 		for ( int i = 0 ; i !=ITERATIONS ; ++i ){
-			uhal::ValVector< uint32_t > block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE );
+			//uhal::ValVector< uint32_t > block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE );
+			block2 = hw.getClient()->readBlock ( 0xBA5EADD4 , SIZE );
+			
 			hw.dispatch();
 		}
 		gettimeofday ( &end, NULL );
 		
-
+	
 		timeval_subtract( &TimeTaken , &end , &start );
 		
 		std::cout << "Time elapsed " << TimeTaken.tv_sec << "s " << TimeTaken.tv_usec << "us" << std::endl;
@@ -73,6 +86,20 @@ int main ( int argc,char* argv[] )
 		std::cout << "Rate " << ((double)SIZE * (double)ITERATIONS * 32.0)/( (1000000 * (double)TimeTaken.tv_sec) + (double)TimeTaken.tv_usec ) << "Mbit/s" << std::endl;
 		
 		
+		std::vector< uint32_t >::const_iterator lSourceIt = lData.begin();
+		uhal::ValVector< uint32_t >::const_iterator lReadIt = block2.begin();
+		int count = 0;
+
+		for ( ; lReadIt != block2.end() && lSourceIt != lData.end() ; ++lReadIt , ++lSourceIt , ++count )
+		{
+			if ( *lReadIt != *lSourceIt )
+			{
+				pantheios::log_ERROR ( "MISMATCH AT " , pantheios::integer ( count ) , " : Source " , pantheios::integer ( *lSourceIt , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( *lReadIt  ,  pantheios::fmt::fullHex | 10 ) );
+				pantheios::log_LOCATION();
+				throw 0;
+			}
+		}
+	
 		
 		
 	}

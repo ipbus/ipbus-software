@@ -52,7 +52,7 @@ env.Append(
 
 ## Turn on GCC optimization
 env.Append( 
-	CCFLAGS = [ '-O3' , '-Wall' ] 
+	CCFLAGS = [ '-O3' , '-Wall' ] #, '-D MEASUREPERFORMANCE' ] 
 )
 
 env.Append( 

@@ -1,4 +1,4 @@
-
+#include <uhal/performance.hpp>
 
 namespace uhal
 {
@@ -440,6 +440,7 @@ ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProt
 	template< eControlHubHostPackingProtocolVersion ControlHubHostPackingProtocolVersion , eIPbusProtocolVersion IPbusProtocolVersion >
 	void ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProtocolVersion >::ReceiveHandler ( const boost::system::error_code& aErrorCode , std::size_t aReplyLength , std::size_t& aReplyLengthRef , bool& aAwaitingCallBackRef , bool& aErrorRef )
 	{
+PERFORMANCE( "Recieve Handler Call-back" ,
 		try
 		{
 		
@@ -518,6 +519,7 @@ ControlHubHostPackingProtocol< ControlHubHostPackingProtocolVersion ,  IPbusProt
 			//throw uhal::exception( aExc ); //CANNOT PROPAGATE EXCEPTION ACROSS THREADS, SET THE ERROR FLAG INSTEAD
 			aErrorRef = true;
 		}
+)
 	}
 
 

@@ -22,6 +22,11 @@
 #include <deque>
 #include <iostream>
 
+#include <map>
+
+#include <uhal/performance.hpp>
+
+
 namespace uhal
 {
 	// //! Exception class to handle the case where an Atomic Transaction was requested but could not be performed. Uses the base uhal::exception implementation of what()
@@ -206,7 +211,6 @@ namespace uhal
 			std::string mId;
 			//! a struct containing the full URI of the target for this client
 			URI mUri;
-
 
 	};
 
