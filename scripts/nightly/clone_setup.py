@@ -42,7 +42,7 @@ def replace_environ(path):
 
                 open(fn,'w').write(text)
 
-def clone_setup(setup,from_path):
+def clone_setup(from_path,setup):
     os.environ["XDAQ_ZONE"] = setup
     to_path = os.path.join(from_path,'../%s' % setup)
 
