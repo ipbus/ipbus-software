@@ -36,12 +36,11 @@ LIBRARIES = 	\
 		-lcactus_uhal_grammars \
 		-lcactus_uhal_uhal \
 		\
-		-lpantheios.1.core.gcc41.mt \
-		-lpantheios.1.fe.simple.gcc41.mt \
-		-lpantheios.1.be.fprintf.gcc41.mt \
-		-lpantheios.1.bec.fprintf.gcc41.mt \
-		-lpantheios.1.util.gcc41.mt \
-		-lpantheios.1.core.gcc41.mt
+		-lpantheios.1.core.gcc41 \
+		-lpantheios.1.fe.simple.gcc41 \
+		-lpantheios.1.util.gcc41 \
+		-lb64.1.pan.gcc41 \
+		-lpantheios.1.core.gcc41
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
@@ -50,15 +49,6 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_STLSOFT_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		-I${UHAL_UHAL_INCLUDE_PREFIX}
-
-STATIC_LIBRARIES = 	${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.core.gcc41.a \
-			${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.fe.simple.gcc41.a \
-			${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.util.gcc41.a \
-			${EXTERN_PANTHEIOS_LIB_PREFIX}/libb64.1.pan.gcc41.a \
-			${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.bec.file.gcc41.a \
-			${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.be.file.gcc41.a \
-			${EXTERN_PANTHEIOS_LIB_PREFIX}/libpantheios.1.core.gcc41.a 
-
 
 CPP_FLAGS = -O3 -Wall -fPIC
 LINK_FLAGS = -fPIC -Wall -O3

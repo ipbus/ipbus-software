@@ -5,7 +5,8 @@ PACKAGES = 	extern/boost \
 		extern/pugixml \
 		uhal/BoostSpiritGrammars \
 		uhal/uhal \
-		uhal/tests
+		uhal/tests \
+		controlhub
 
 TARGETS=clean rpm build
 
