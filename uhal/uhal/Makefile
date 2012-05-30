@@ -23,7 +23,7 @@ OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
 LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
 		-L${EXTERN_PUGIXML_LIB_PREFIX} \
-		-L${UHAL_GRAMMARS_LIB_PREFIX}
+		-L${UHAL_GRAMMARS_LIB_PREFIX} 
 
 LIBRARIES = 	-lcactus_extern_pugixml \
 		\
@@ -31,7 +31,7 @@ LIBRARIES = 	-lcactus_extern_pugixml \
 		-lboost_filesystem \
 		-lboost_regex \
 		\
-		-lcactus_uhal_grammars
+		-lcactus_uhal_grammars 	
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
