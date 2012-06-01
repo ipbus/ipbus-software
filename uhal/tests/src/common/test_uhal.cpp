@@ -381,14 +381,12 @@ void read_write_mask()
 	hw.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
 	hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
 	hw.dispatch();
-	
 	uhal::HwInterface hw2 = manager.getDevice ( "hcal.crate1.slot2" );
 	hw2.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
 	hw2.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
 	hw2.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
 	hw2.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
-	hw2.dispatch();	
-		
+	hw2.dispatch();
 	// uhal::ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
 	// //BOOST_CHECK(mem >=0 && mem <=0xF);
 	// uint32_t val = 0x3;
@@ -555,9 +553,8 @@ void allInstructionPermutations()
 	{
 		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		std::vector< uhal::HwInterface > hw;
-		hw.push_back( manager.getDevice ( "hcal.crate1.slot1" ) );
-		hw.push_back( manager.getDevice ( "hcal.crate1.slot2" ) );
-		
+		hw.push_back ( manager.getDevice ( "hcal.crate1.slot1" ) );
+		hw.push_back ( manager.getDevice ( "hcal.crate1.slot2" ) );
 		uint32_t BlockSize ( 2 );
 		uint32_t val = static_cast<uint32_t> ( rand() );
 		std::vector<uint32_t> vals;
@@ -585,8 +582,8 @@ void allInstructionPermutations()
 				do
 				{
 					pantheios::log_INFORMATIONAL ( "all writes, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
-					addOperationToQueue ( hw.at(rand()%hw.size()) , lOperationSequence , val , vals );
-					hw.at(0).dispatch();
+					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
+					hw.at ( 0 ).dispatch();
 				}
 				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
 			}
@@ -603,8 +600,8 @@ void allInstructionPermutations()
 				do
 				{
 					pantheios::log_INFORMATIONAL ( "all reads, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
-					addOperationToQueue ( hw.at(rand()%hw.size()) , lOperationSequence , val , vals );
-					hw.at(0).dispatch();
+					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
+					hw.at ( 0 ).dispatch();
 				}
 				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
 			}
@@ -621,8 +618,8 @@ void allInstructionPermutations()
 				do
 				{
 					pantheios::log_INFORMATIONAL ( "read-modify-write, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
-					addOperationToQueue ( hw.at(rand()%hw.size()) , lOperationSequence , val , vals );
-					hw.at(0).dispatch();
+					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
+					hw.at ( 0 ).dispatch();
 				}
 				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
 			}
@@ -639,8 +636,8 @@ void allInstructionPermutations()
 				do
 				{
 					pantheios::log_INFORMATIONAL ( "all types, same addr, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
-					addOperationToQueue ( hw.at(rand()%hw.size()) , lOperationSequence , val , vals );
-					hw.at(0).dispatch();
+					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
+					hw.at ( 0 ).dispatch();
 				}
 				while ( std::next_permutation ( lOperationSequence.begin() , lOperationSequence.end() ) );
 			}

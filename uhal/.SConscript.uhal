@@ -26,8 +26,6 @@ if env['PLATFORM'] == 'win32':
 		CCFLAGS = [ '-D__USE_W32_SOCKETS' , '-D_WIN32_WINNT=0x0501' ] 
 	)
 
-env.InstallPath = os.path.normpath( GetOption('prefix')+"/lib" )
-
 if env['PLATFORM'] != 'win32':
 	env.MachineArchitecture = "Linux"+str( 8 * struct.calcsize("P") )
 else:	
@@ -41,6 +39,8 @@ if ( struct.calcsize("P") ) == 8 :
 else:
 	env.LibPath = 'lib/' 
 
+	
+env.InstallPath = os.path.normpath( GetOption('prefix')+"/"+env.LibPath )	
 
 env.SrcBuildPath = 'bin/exe-'+env.MachineArchitecture+'/' 
 
@@ -52,8 +52,17 @@ env.Append(
 
 ## Turn on GCC optimization
 env.Append( 
-	CCFLAGS = [ '-O3' , '-Wall' ] #, '-D MEASUREPERFORMANCE' ] 
+	CCFLAGS = [ '-O3' , '-Wall' ] 
 )
+
+#env.Append( 
+#	CCFLAGS = [ '-D MEASUREPERFORMANCE' ] 
+#)
+
+env.Append( 
+	CCFLAGS = [ '-D USE_TCP_MULTITHREADED']
+)
+
 
 env.Append( 
 	CPPPATH = [	
@@ -80,7 +89,7 @@ env.Append(
 )  
 
 env.Append( 
-	LIBS = [  'boost_system' , 'boost_filesystem' , 'boost_regex' ]
+	LIBS = [  'boost_system' , 'boost_filesystem' , 'boost_regex' , 'boost_thread' ]
 )  
 
 env.Append( 
