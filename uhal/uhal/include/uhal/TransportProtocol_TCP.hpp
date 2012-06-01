@@ -9,7 +9,6 @@
 
 #include "uhal/exception.hpp"
 #include "uhal/ProtocolInterfaces.hpp"
-#include "uhal/AsioAccumulatedPacket.hpp"
 #include "uhal/log.hpp"
 
 #include <iostream>
@@ -17,67 +16,92 @@
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/thread/thread.hpp>
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+	
 #include <string>
 
 namespace uhal
 {
 
-	//! Exception class to handle the case where the TCP connection timed out. Uses the base uhal::exception implementation of what()
-	class TcpTimeout: public uhal::exception {  };
-	//! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
+	// //! Exception class to handle the case where the TCP connection timed out. Uses the base uhal::exception implementation of what()
+	// class TcpTimeout: public uhal::exception {  };
+	// //! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
 	class ErrorInTcpCallback: public uhal::exception {  };
 
-	template < class PACKINGPROTOCOL >
+	class ErrorAtTcpSocketCreation: public uhal::exception {  };
+	
+
+	
 	class TcpTransportProtocol : public TransportProtocol
 	{
+	
+		class DispatchWorker{
+			public:
+				DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod = 10 );
+				virtual ~DispatchWorker();
+		
+				void operator() ();
+				
+				void Dispatch( Buffers* aBuffers );
+			
+			private:
+				TcpTransportProtocol& mTcpTransportProtocol;
+				
+				// void CheckDeadline();
+
+				//! The boost::asio::io_service used to create the connections
+				boost::shared_ptr< boost::asio::io_service > mIOservice;		
+
+				boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
+
+				//! Timeout period for TCP transactions;
+				boost::posix_time::seconds mTimeOut;
+			
+				// //! timer for the timeout conditions
+				// boost::asio::deadline_timer mDeadline;
+				// bool mTimeoutFlag;						
+		};
+		
+		friend class DispatchWorker;
+	
 		public:
 			/**
 				Constructor
 			*/
-			TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , PACKINGPROTOCOL& aPackingProtocol , uint32_t aTimeoutPeriod = 10 );
+			TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod = 10 );
 			/**
 				Destructor
 			*/
 			virtual ~TcpTransportProtocol();
 
 			/**
-				Flush the queue of pending IPbus transactions
+			Add buffers to the dispatch queue
 			*/
-			void Dispatch();
+			virtual void Dispatch ( Buffers* aBuffers );
+
+			virtual void Flush( );
 
 		private:
+					
+			boost::shared_ptr< DispatchWorker > mDispatchWorker;
+			boost::shared_ptr< boost::thread > mDispatchThread;
+	
+			std::deque< Buffers* > mPendingBuffers;
+			
+			uhal::exception* mAsynchronousException;
 
-			void CheckDeadline();
+			uint32_t mSent;
+			uint32_t mReceived;
+			
 
-
-			std::string mHostname;
-			std::string mServiceOrPort;
-
-			PACKINGPROTOCOL& mPackingProtocol;
-
-			//! The boost::asio::io_service used to create the connections
-			boost::asio::io_service mIOservice;
-
-			boost::asio::ip::tcp::socket* mSocket;
-			boost::asio::ip::tcp::resolver* mResolver;
-			boost::asio::ip::tcp::resolver::query* mQuery;
-			boost::asio::ip::tcp::resolver::iterator mIterator;
-
-			//! Timeout period for TCP transactions;
-			boost::posix_time::seconds mTimeOut;
-
-			//! timer for the timeout conditions
-			boost::asio::deadline_timer mDeadline;
-
-			bool mTimeoutFlag;
 
 	};
 
 
 }
 
-#include "uhal/TemplateDefinitions/TransportProtocol_TCP.hxx"
+// #include "uhal/TemplateDefinitions/TransportProtocol_TCP.hxx"
 
 #endif

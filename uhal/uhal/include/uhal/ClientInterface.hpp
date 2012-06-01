@@ -67,13 +67,13 @@ namespace uhal
 			*/
 			std::string url();
 
-			
+
 			/*
 				Return a description of the behaviour this client
 				@return a description of the behaviour this client
 			*/
 			//static std::string description();
-			
+
 			/**
 				Write a single, unmasked word to a register
 				@param aAddr the address of the register to write
@@ -167,13 +167,6 @@ namespace uhal
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
 			virtual ValWord< int32_t > rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend );
-
-
-			/**
-				Virtual method to add an IPbusPacketInfo to the queue of IPbusPacketInfo's
-				@param aIPbusPacketInfo an IPbusPacketInfo to add to the queue of IPbusPacketInfo's
-			*/
-			virtual void pack ( IPbusPacketInfo& aIPbusPacketInfo ) ;
 
 			/**
 				Method to dispatch all IPbus packets which are in the queue of IPbusPacketInfo's

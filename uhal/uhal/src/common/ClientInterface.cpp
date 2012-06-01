@@ -64,13 +64,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			lReturn << mUri.mProtocol << "://" << mUri.mHostname << ":" << mUri.mPort;
 
 			// there is sometimes a path
-			if ( mUri.mPath != "" )
+			if ( mUri.mPath != __PRETTY_FUNCTION__ )
 			{
 				lReturn << "/" << mUri.mPath;
 			}
 
 			// there is sometimes a filename extension
-			if ( mUri.mExtension != "" )
+			if ( mUri.mExtension != __PRETTY_FUNCTION__ )
 			{
 				lReturn << "." << mUri.mExtension;
 			}
@@ -109,10 +109,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( WRITE , 1 , aAddr );
-			lIPbusPacketInfo.setPayload ( aSource );
-			pack ( lIPbusPacketInfo );
+			getPackingProtocol().write ( aAddr , aSource );
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -125,17 +122,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			// If we are writing to a masked sub-field then we expect to preserve all the other sub-fields.
-			// We must, therefore, use Read-Modify-Write, rather than a plain old write
-			IPbusPacketInfo lIPbusPacketInfo;
-			// lIPbusPacketInfo.setHeader ( WRITE , 1 , aAddr );
-			// lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) & aMask );
-			mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 ) );
-			lIPbusPacketInfo.setHeader ( RMW_BITS , 2 , aAddr );
-			lIPbusPacketInfo.setPayload ( ~aMask );
-			lIPbusPacketInfo.setPayload ( ( aSource << utilities::TrailingRightBits ( aMask ) ) & aMask );
-			lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
-			pack ( lIPbusPacketInfo );
+			getPackingProtocol().rmw_bits ( aAddr , ~aMask , ( aSource << utilities::TrailingRightBits ( aMask ) ) & aMask );
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -148,19 +135,18 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			IPbusPacketInfo lIPbusPacketInfo;
-
-			if ( aMode == defs::INCREMENTAL )
-			{
-				lIPbusPacketInfo.setHeader ( WRITE , aSource.size() , aAddr );
-			}
-			else
-			{
-				lIPbusPacketInfo.setHeader ( NI_WRITE , aSource.size() , aAddr );
-			}
-
-			lIPbusPacketInfo.setPayload ( aSource );
-			pack ( lIPbusPacketInfo );
+			getPackingProtocol().writeBlock ( aAddr, aSource, aMode );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// if ( aMode == defs::INCREMENTAL )
+			// {
+			// lIPbusPacketInfo.setHeader ( WRITE , aSource.size() , aAddr );
+			// }
+			// else
+			// {
+			// lIPbusPacketInfo.setHeader ( NI_WRITE , aSource.size() , aAddr );
+			// }
+			// lIPbusPacketInfo.setPayload ( aSource );
+			// pack ( lIPbusPacketInfo );
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -177,12 +163,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
-			lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
-			pack ( lIPbusPacketInfo );
-			return mUnsignedReplyWords.back();
+			return getPackingProtocol().read ( aAddr );
+			// mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
+			// lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mUnsignedReplyWords.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -195,12 +182,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 , aMask ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
-			lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
-			pack ( lIPbusPacketInfo );
-		return mUnsignedReplyWords.back();
+			return getPackingProtocol().read ( aAddr, aMask );
+			// mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 , aMask ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
+			// lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mUnsignedReplyWords.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -213,23 +201,20 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-		PERFORMANCE( "Queue a read instruction" ,
-			mUnsignedReplyVectors.push_back ( ValVector< uint32_t > ( aSize ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-
-			if ( aMode == defs::INCREMENTAL )
-			{
-				lIPbusPacketInfo.setHeader ( READ , aSize , aAddr );
-			}
-			else
-			{
-				lIPbusPacketInfo.setHeader ( NI_READ , aSize , aAddr );
-			}
-
-			lIPbusPacketInfo.setValMem ( mUnsignedReplyVectors.back() );
-			pack ( lIPbusPacketInfo );
-		)
-			return mUnsignedReplyVectors.back();
+			return getPackingProtocol().readBlock ( aAddr, aSize, aMode );
+						  // mUnsignedReplyVectors.push_back ( ValVector< uint32_t > ( aSize ) );
+						  // IPbusPacketInfo lIPbusPacketInfo;
+						  // if ( aMode == defs::INCREMENTAL )
+						  // {
+						  // lIPbusPacketInfo.setHeader ( READ , aSize , aAddr );
+						  // }
+						  // else
+						  // {
+						  // lIPbusPacketInfo.setHeader ( NI_READ , aSize , aAddr );
+						  // }
+						  // lIPbusPacketInfo.setValMem ( mUnsignedReplyVectors.back() );
+						  // pack ( lIPbusPacketInfo );
+			// return mUnsignedReplyVectors.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -246,12 +231,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mSignedReplyWords.push_back ( ValWord< int32_t > ( 0x00000000 ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
-			lIPbusPacketInfo.setValMem ( mSignedReplyWords.back() );
-			pack ( lIPbusPacketInfo );
-			return mSignedReplyWords.back();
+			return getPackingProtocol().readSigned ( aAddr );
+			// mSignedReplyWords.push_back ( ValWord< int32_t > ( 0x00000000 ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
+			// lIPbusPacketInfo.setValMem ( mSignedReplyWords.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mSignedReplyWords.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -264,12 +250,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mSignedReplyWords.push_back ( ValWord< int32_t > ( 0x00000000 , aMask ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
-			lIPbusPacketInfo.setValMem ( mSignedReplyWords.back() );
-			pack ( lIPbusPacketInfo );
-			return mSignedReplyWords.back();
+			return getPackingProtocol().readSigned ( aAddr , aMask );
+			// mSignedReplyWords.push_back ( ValWord< int32_t > ( 0x00000000 , aMask ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// lIPbusPacketInfo.setHeader ( READ , 1 , aAddr );
+			// lIPbusPacketInfo.setValMem ( mSignedReplyWords.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mSignedReplyWords.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -282,21 +269,20 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mSignedReplyVectors.push_back ( ValVector< int32_t > ( aSize ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-
-			if ( aMode == defs::INCREMENTAL )
-			{
-				lIPbusPacketInfo.setHeader ( READ , aSize , aAddr );
-			}
-			else
-			{
-				lIPbusPacketInfo.setHeader ( NI_READ , aSize , aAddr );
-			}
-
-			lIPbusPacketInfo.setValMem ( mSignedReplyVectors.back() );
-			pack ( lIPbusPacketInfo );
-			return mSignedReplyVectors.back();
+			return getPackingProtocol().readBlockSigned ( aAddr, aSize, aMode );
+			// mSignedReplyVectors.push_back ( ValVector< int32_t > ( aSize ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// if ( aMode == defs::INCREMENTAL )
+			// {
+			// lIPbusPacketInfo.setHeader ( READ , aSize , aAddr );
+			// }
+			// else
+			// {
+			// lIPbusPacketInfo.setHeader ( NI_READ , aSize , aAddr );
+			// }
+			// lIPbusPacketInfo.setValMem ( mSignedReplyVectors.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mSignedReplyVectors.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -313,12 +299,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mUnsignedReplyVectors.push_back ( ValVector< uint32_t > ( 2 ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( R_A_I , 0 );
-			lIPbusPacketInfo.setValMem ( mUnsignedReplyVectors.back() );
-			pack ( lIPbusPacketInfo );
-			return mUnsignedReplyVectors.back();
+			return getPackingProtocol().readReservedAddressInfo ();
+			// mUnsignedReplyVectors.push_back ( ValVector< uint32_t > ( 2 ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// lIPbusPacketInfo.setHeader ( R_A_I , 0 );
+			// lIPbusPacketInfo.setValMem ( mUnsignedReplyVectors.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mUnsignedReplyVectors.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -334,14 +321,15 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( RMW_BITS , 2 , aAddr );
-			lIPbusPacketInfo.setPayload ( aANDterm );
-			lIPbusPacketInfo.setPayload ( aORterm );
-			lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
-			pack ( lIPbusPacketInfo );
-			return mUnsignedReplyWords.back();
+			return getPackingProtocol().rmw_bits ( aAddr , aANDterm , aORterm );
+			// mUnsignedReplyWords.push_back ( ValWord< uint32_t > ( 0x00000000 ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// lIPbusPacketInfo.setHeader ( RMW_BITS , 2 , aAddr );
+			// lIPbusPacketInfo.setPayload ( aANDterm );
+			// lIPbusPacketInfo.setPayload ( aORterm );
+			// lIPbusPacketInfo.setValMem ( mUnsignedReplyWords.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mUnsignedReplyWords.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -357,13 +345,14 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			mSignedReplyWords.push_back ( ValWord< int32_t > ( 0x00000000 ) );
-			IPbusPacketInfo lIPbusPacketInfo;
-			lIPbusPacketInfo.setHeader ( RMW_SUM , 1 , aAddr );
-			lIPbusPacketInfo.setPayload ( aAddend );
-			lIPbusPacketInfo.setValMem ( mSignedReplyWords.back() );
-			pack ( lIPbusPacketInfo );
-			return mSignedReplyWords.back();
+			return getPackingProtocol().rmw_sum ( aAddr , aAddend );
+			// mSignedReplyWords.push_back ( ValWord< int32_t > ( 0x00000000 ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// lIPbusPacketInfo.setHeader ( RMW_SUM , 1 , aAddr );
+			// lIPbusPacketInfo.setPayload ( aAddend );
+			// lIPbusPacketInfo.setValMem ( mSignedReplyWords.back() );
+			// pack ( lIPbusPacketInfo );
+			// return mSignedReplyWords.back();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -375,39 +364,24 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	void ClientInterface::pack ( IPbusPacketInfo& aIPbusPacketInfo )
-	{
-	PERFORMANCE( "Call the packing protocols pack function" ,
-		try
-		{
-			getPackingProtocol().pack ( aIPbusPacketInfo );
-		}
-		catch ( const std::exception& aExc )
-		{
-			pantheios::log_EXCEPTION ( aExc );
-			throw uhal::exception ( aExc );
-		}
-	)
-	}
-
-
 	void ClientInterface::dispatch ()
 	{
 		try
 		{
-	PERFORMANCE( "Call the packing protocols pre-dispatch function" ,
-			getPackingProtocol().PreDispatch();
-	)
-	PERFORMANCE( "Call the transport protocols dispatch function" ,
-			getTransportProtocol().Dispatch();
-	)
-	PERFORMANCE( "Call the packing protocols post-dispatch function" ,	
-			getPackingProtocol().PostDispatch();
-	)
-			mUnsignedReplyWords.clear();
-			mSignedReplyWords.clear();
-			mUnsignedReplyVectors.clear();
-			mSignedReplyVectors.clear();
+			getPackingProtocol().Dispatch();
+			// PERFORMANCE( "Call the packing protocols pre-dispatch function" ,
+			// getPackingProtocol().PreDispatch();
+			// )
+			// PERFORMANCE( "Call the transport protocols dispatch function" ,
+			// getTransportProtocol().Dispatch();
+			// )
+			// PERFORMANCE( "Call the packing protocols post-dispatch function" ,
+			// getPackingProtocol().PostDispatch();
+			// )
+			// mUnsignedReplyWords.clear();
+			// mSignedReplyWords.clear();
+			// mUnsignedReplyVectors.clear();
+			// mSignedReplyVectors.clear();
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -415,6 +389,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			throw uhal::exception ( aExc );
 		}
 	}
+	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 

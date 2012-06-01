@@ -13,6 +13,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <vector>
+#include <deque>
 #include <iostream>
 
 #include "uhal/log.hpp"
@@ -26,14 +27,38 @@ namespace uhal
 	//! Exception class to handle the case of attempted modification of validated memory. Uses the base uhal::exception implementation of what()
 	class ValMemImutabilityViolation: public uhal::exception { };
 
-	// Forward declare IPbusPacketInfo so it can be our friend
-	class IPbusPacketInfo;
+	// Forward declare PackingProtocol so it can be our friend
+	class PackingProtocol;
 
 
+	// Forward declaration so we can define friends
+	class ValHeader;
 	// Forward declaration so we can define friends
 	template< typename T > class ValWord;
 	// Forward declaration so we can define friends
 	template< typename T > class ValVector;
+
+
+	struct _ValHeader_
+	{
+		public:
+			//! A flag for marking whether the data is actually valid
+			bool valid;
+			//! The IPbus header associated with the transaction that returned this data
+			uint32_t IPbusHeader;
+
+		private:
+			//! Make ValHeader a friend since it is the only class that should be able to create an instance this struct
+			friend class ValHeader;
+			/**
+				Constructor
+				Private, since this struct should only be used by the ValHeader
+				@param aValid an initial validity
+			*/
+			_ValHeader_ ( const bool& aValid );
+	};
+
+
 
 	//! A Template helper struct wrapping a register for storing a single word of data, a valid flag and a mask for modifying returned values
 	template< typename T >
@@ -46,6 +71,9 @@ namespace uhal
 			bool valid;
 			//! A mask for modifying returned values
 			uint32_t mask;
+			//! The IPbus header associated with the transaction that returned this data
+			uint32_t IPbusHeader;
+
 		private:
 			//! Make ValWord a friend since it is the only class that should be able to create an instance this struct
 			friend class ValWord<T>;
@@ -69,6 +97,9 @@ namespace uhal
 			std::vector<T> value;
 			//! A flag for marking whether the data is actually valid
 			bool valid;
+			//! The IPbus header associated with the transaction that returned this data
+			std::deque<uint32_t> IPbusHeaders;
+
 		private:
 			//! Make ValVector a friend since it is the only class that should be able to create an instance this struct
 			friend class ValVector<T>;
@@ -81,13 +112,43 @@ namespace uhal
 			_ValVector_ ( const std::vector<T>& aValue , const bool& aValid );
 	};
 
+
+
+	//! A class which wraps a single word of data and marks whether or not it is valid
+	class ValHeader
+	{
+			//! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
+			friend class PackingProtocol;
+
+		public:
+			/**
+				Default constructor
+			*/
+			ValHeader();
+			/**
+				Return whether the Validated memory is marked as valid
+				@return whether the Validated memory is marked as valid
+			*/
+			bool valid();
+			/**
+				Change the validatity state of the Validated memory
+				@param aValid the new validity state of the Validated memory
+			*/
+			void valid ( bool aValid );
+
+		private:
+			//! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory
+			boost::shared_ptr< _ValHeader_ > mMembers;
+	};
+
+
 	//! A class which wraps a single word of data and marks whether or not it is valid
 	template< typename T >
 	class ValWord
 	{
 
-			//! Make IPbusPacketInfo a friend so that it can access the members to get the info associated with the raw data space
-			friend class IPbusPacketInfo;
+			//! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
+			friend class PackingProtocol;
 
 		public:
 			/**
@@ -159,8 +220,8 @@ namespace uhal
 	template< typename T >
 	class ValVector
 	{
-			//! Make IPbusPacketInfo a friend so that it can access the members to get the info associated with the raw data space
-			friend class IPbusPacketInfo;
+			//! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
+			friend class PackingProtocol;
 
 		public:
 			//! typedef iterator to be that of the underlying storage type

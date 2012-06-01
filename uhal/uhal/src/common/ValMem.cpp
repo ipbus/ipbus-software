@@ -7,12 +7,25 @@
 namespace uhal
 {
 
+_ValHeader_::_ValHeader_ ( const bool& aValid ) try :
+		valid ( aValid ) ,
+			  IPbusHeader ( 0 )
+		{}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+
+
+
 	template< typename T >
 
 _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask ) try :
 		value ( aValue ) ,
 			  valid ( aValid ) ,
-			  mask ( aMask )
+			  mask ( aMask ) ,
+			  IPbusHeader ( 0 )
 		{}
 	catch ( const std::exception& aExc )
 	{
@@ -32,6 +45,48 @@ _ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid 
 		pantheios::log_EXCEPTION ( aExc );
 		throw uhal::exception ( aExc );
 	}
+
+
+
+
+
+ValHeader::ValHeader() try :
+		mMembers ( new _ValHeader_ ( false ) )
+	{
+	}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
+
+	bool ValHeader::valid()
+	{
+		try
+		{
+			return mMembers->valid;
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+	void ValHeader::valid ( bool aValid )
+	{
+		try
+		{
+			mMembers->valid = aValid;
+		}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+
 
 
 
