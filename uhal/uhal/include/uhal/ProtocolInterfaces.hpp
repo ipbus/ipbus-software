@@ -7,7 +7,7 @@
 #ifndef _uhal_ProtocolInterfaces_hpp_
 #define _uhal_ProtocolInterfaces_hpp_
 
-#include <boost/any.hpp>
+//#include <boost/any.hpp>
 #include <deque>
 #include "uhal/IPbusPacketInfo.hpp"
 #include "uhal/performance.hpp"
@@ -58,6 +58,8 @@ namespace uhal
 
 			std::deque< std::pair< uint8_t* , uint32_t > >& getReplyBuffer();
 
+			void validate();
+
 
 		private:
 			uint32_t mSendCounter;
@@ -66,12 +68,12 @@ namespace uhal
 			uint8_t* mSendBuffer;
 			std::deque< std::pair< uint8_t* , uint32_t > > mReplyBuffer;
 
-			std::deque< boost::any > mValMems;
-			/*std::deque< ValHeader > mValHeaders;
+			//std::deque< boost::any > mValMems;
+			std::deque< ValHeader > mValHeaders;
 			std::deque< ValWord< uint32_t > > mUnsignedValWords;
 			std::deque< ValWord< int32_t > > mSignedValWords;
 			std::deque< ValVector< uint32_t > > mUnsignedValVectors;
-			std::deque< ValVector< int32_t > > mSignedValVectors;	*/
+			std::deque< ValVector< int32_t > > mSignedValVectors;
 	};
 
 
@@ -205,6 +207,8 @@ namespace uhal
 			virtual ValWord< int32_t > rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend );
 
 			virtual void Dispatch( );
+
+			virtual bool Validate( Buffers* aBuffers );
 
 		protected:
 

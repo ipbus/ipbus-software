@@ -28,3 +28,8 @@ localenv.Program(
 	target = localenv.SrcBuildPath+'/test_timing', 
 	source = [ localenv.SrcBuildPath+'/test_timing.cpp' ]
 )
+
+localenv.Program( 
+	target = localenv.SrcBuildPath+'/DummyHardwareUdp', 
+	source = [ localenv.SrcBuildPath+'/DummyHardwareUdp.cpp' ]
+)

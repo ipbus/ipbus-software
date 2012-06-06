@@ -62,35 +62,40 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 	void Buffers::add ( const ValHeader& aValMem )
 	{
 		PERFORMANCE ( "" ,
-					  mValMems.push_back ( aValMem );
+// 					  mValMems.push_back ( aValMem );
+					  mValHeaders.push_back ( aValMem );
 					)
 	}
 
 	void Buffers::add ( const ValWord< uint32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-					  mValMems.push_back ( aValMem );
+// 					  mValMems.push_back ( aValMem );
+					  mUnsignedValWords.push_back ( aValMem );
 				)
 	}
 
 	void Buffers::add ( const ValWord< int32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-					  mValMems.push_back ( aValMem );
+// 					  mValMems.push_back ( aValMem );
+					  mSignedValWords.push_back ( aValMem );
 					)
 	}
 
 	void Buffers::add ( const ValVector< uint32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-					  mValMems.push_back ( aValMem );
+// 					  mValMems.push_back ( aValMem );
+					  mUnsignedValVectors.push_back ( aValMem );
 					)
 	}
 
 	void Buffers::add ( const ValVector< int32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-					  mValMems.push_back ( aValMem );
+// 					  mValMems.push_back ( aValMem );
+					  mSignedValVectors.push_back ( aValMem );
 					)
 	}
 
@@ -104,6 +109,29 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 		return mReplyBuffer;
 	}
 
+
+	void Buffers::validate()
+	{
+		for( std::deque< ValHeader >::iterator lIt = mValHeaders.begin() ; lIt != mValHeaders.end() ; ++lIt ){
+			lIt->valid( true );
+		} 
+
+		for( std::deque< ValWord< uint32_t > >::iterator lIt = mUnsignedValWords.begin() ; lIt != mUnsignedValWords.end() ; ++lIt ){
+			lIt->valid( true );
+		} 
+
+		for( std::deque< ValWord< int32_t > >::iterator lIt = mSignedValWords.begin() ; lIt != mSignedValWords.end() ; ++lIt ){
+			lIt->valid( true );
+		} 
+
+		for( std::deque< ValVector< uint32_t > >::iterator lIt = mUnsignedValVectors.begin() ; lIt != mUnsignedValVectors.end() ; ++lIt ){
+			lIt->valid( true );
+		} 
+
+		for( std::deque< ValVector< int32_t > >::iterator lIt = mSignedValVectors.begin() ; lIt != mSignedValVectors.end() ; ++lIt ){
+			lIt->valid( true );
+		}
+	}
 
 
 
@@ -174,6 +202,37 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						}
 					)
 	}
+
+
+
+
+	bool PackingProtocol::Validate( Buffers* aBuffers )
+	{
+		pantheios::log_NOTICE( "CALL TO BASE" );
+// 		uint32_t* lSendBuffer( ( uint32_t* )( aBuffers->getSendBuffer() ) );
+// 		std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyIt( aBuffers->getReplyBuffer().begin() );
+// 		std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyEnd( aBuffers->getReplyBuffer().end() );
+// 
+// 		uint32_t lNextSendCount( 1 );
+// 		uint32_t lNextReplyCount( 1 );
+// 
+// // 		for ( uint32_t i=0 ; i != aBuffers->sendCounter()>>2 ; ++i ){
+// // 			pantheios::log_NOTICE( pantheios::integer ( *lSendBuffer , pantheios::fmt::fullHex | 10 ) );
+// // 			lSendBuffer++;
+// // 		}
+// 
+// 		for( ; lReplyIt != lReplyEnd ; ++lReplyIt ){
+// 			uint32_t* lReplyBuffer( ( uint32_t* )( lReplyIt->first ) );
+// 			for( uint32_t i = 0 ; i!=lReplyIt->second>>2 ; ++i ){
+// 				pantheios::log_NOTICE( pantheios::integer ( *lReplyBuffer , pantheios::fmt::fullHex | 10 ) );
+// 				lReplyBuffer++;
+// 			}
+// 		}
+
+		return true;
+	}
+
+
 
 
 	void PackingProtocol::ByteOrderTransaction()
@@ -497,7 +556,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  mCurrentBuffers->receive ( lReplyMem.IPbusHeaders[0] );
 						  mCurrentBuffers->receive ( ( uint8_t* ) ( & ( lReplyMem.value[0] ) ) , 2<<2 );
 						)
-			//return lReply;
+			return lReply;
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -537,7 +596,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  mCurrentBuffers->receive ( lReplyMem.IPbusHeader );
 						  mCurrentBuffers->receive ( lReplyMem.value );
 						)
-			//return lReply;
+			return lReply;
 		}
 		catch ( const std::exception& aExc )
 		{

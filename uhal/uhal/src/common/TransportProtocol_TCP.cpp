@@ -1,8 +1,6 @@
 #include "uhal/performance.hpp"
 #include "uhal/TransportProtocol_TCP.hpp"
 
-#define USE_TCP_MULTITHREADED
-
 #ifdef USE_TCP_MULTITHREADED
 	#define MUTEX_LOCK() mutex.lock()
 	#define MUTEX_UNLOCK() mutex.unlock()
@@ -73,25 +71,31 @@ namespace uhal
 				boost::this_thread::interruption_point();
 				
 				MUTEX_LOCK();
-				bool lBuffersPending( mTcpTransportProtocol.mPendingBuffers.size() != 0 );
+				bool lBuffersPending( mTcpTransportProtocol.mPendingSendBuffers.size() != 0 );
 				MUTEX_UNLOCK();
 
 				if( lBuffersPending ){
 					MUTEX_LOCK();
-					Buffers* lBuffers = mTcpTransportProtocol.mPendingBuffers.front();
+					Buffers* lBuffers = mTcpTransportProtocol.mPendingSendBuffers.front();
 					MUTEX_UNLOCK();
 				
 					Dispatch( lBuffers );
 					
 					MUTEX_LOCK();
-					mTcpTransportProtocol.mPendingBuffers.pop_front();
+					mTcpTransportProtocol.mPendingValidationBuffers.push_back( lBuffers );
+					mTcpTransportProtocol.mPendingSendBuffers.pop_front();
 					MUTEX_UNLOCK();	
 				}
 			}
 		} 
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			mTcpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
+		}
 		catch (boost::thread_interrupted&) 
 		{ 
-		} 
+		}
 		#endif
 	}
 
@@ -212,11 +216,13 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		try
 		{
 			MUTEX_LOCK();
-			mPendingBuffers.push_back( aBuffers );
+			mPendingSendBuffers.push_back( aBuffers );
 			MUTEX_UNLOCK();
 			
 			#ifndef USE_TCP_MULTITHREADED
 			mDispatchWorker->Dispatch( aBuffers );	
+			mPendingValidationBuffers.push_back( lBuffers );
+			mPendingSendBuffers.pop_front();
 			#endif
 
 		}
@@ -232,12 +238,10 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 	void TcpTransportProtocol::Flush( )	
 	{
 		
-		#ifdef USE_TCP_MULTITHREADED
 		bool lContinue( true );
 		while ( lContinue ){
 		
 			MUTEX_LOCK();
-			lContinue = ( mPendingBuffers.size()!=0 );
 			
 			// kill time while pending buffers are emptied and check for exceptions on the thread...
 			if( mAsynchronousException ){
@@ -246,9 +250,15 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 				throw lExc;		
 			}
 
+			if( mPendingValidationBuffers.size() ){
+				bool lResult = mPackingProtocol->Validate( mPendingValidationBuffers.front() );
+				
+				mPendingValidationBuffers.pop_front();
+			}
+
+			lContinue = ( mPendingSendBuffers.size() || mPendingValidationBuffers.size() );
 			MUTEX_UNLOCK();
 		}
-		#endif
 		
 	}
 	

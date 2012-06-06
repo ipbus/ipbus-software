@@ -88,7 +88,8 @@ namespace uhal
 			boost::shared_ptr< DispatchWorker > mDispatchWorker;
 			boost::shared_ptr< boost::thread > mDispatchThread;
 	
-			std::deque< Buffers* > mPendingBuffers;
+			std::deque< Buffers* > mPendingSendBuffers;
+			std::deque< Buffers* > mPendingValidationBuffers;
 			
 			uhal::exception* mAsynchronousException;
 

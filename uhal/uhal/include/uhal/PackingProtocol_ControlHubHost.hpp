@@ -34,6 +34,8 @@ namespace uhal
 
 			virtual void Predispatch( );
 
+			virtual bool Validate( Buffers* aBuffers );
+
 		private:
 			uint32_t mDeviceIPaddress;
 			uint16_t mDevicePort;
