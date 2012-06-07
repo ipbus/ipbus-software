@@ -1,19 +1,9 @@
 #include "uhal/performance.hpp"
 #include "uhal/TransportProtocol_TCP.hpp"
 
-#ifdef USE_TCP_MULTITHREADED
-	#define MUTEX_LOCK() mutex.lock()
-	#define MUTEX_UNLOCK() mutex.unlock()
-#else
-	#define MUTEX_LOCK()
-	#define MUTEX_UNLOCK()
-#endif
-
 namespace uhal
 {
 	
-	boost::mutex mutex; 
-
 
 	TcpTransportProtocol::DispatchWorker::DispatchWorker( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
 							  mTcpTransportProtocol( aTcpTransportProtocol ),
@@ -64,38 +54,45 @@ namespace uhal
 
 	void TcpTransportProtocol::DispatchWorker::operator() (){
 		#ifdef USE_TCP_MULTITHREADED
-		try 
-		{
-			while( true ){
-				
-				boost::this_thread::interruption_point();
-				
-				MUTEX_LOCK();
-				bool lBuffersPending( mTcpTransportProtocol.mPendingSendBuffers.size() != 0 );
-				MUTEX_UNLOCK();
-
-				if( lBuffersPending ){
-					MUTEX_LOCK();
-					Buffers* lBuffers = mTcpTransportProtocol.mPendingSendBuffers.front();
-					MUTEX_UNLOCK();
-				
-					Dispatch( lBuffers );
+			try 
+			{
+				while( true ){
 					
-					MUTEX_LOCK();
-					mTcpTransportProtocol.mPendingValidationBuffers.push_back( lBuffers );
-					mTcpTransportProtocol.mPendingSendBuffers.pop_front();
-					MUTEX_UNLOCK();	
+					boost::this_thread::interruption_point();
+					
+					mTcpTransportProtocol.mMutex.lock();
+					bool lBuffersPending( mTcpTransportProtocol.mPendingSendBuffers.size() != 0 );
+					mTcpTransportProtocol.mMutex.unlock();
+	
+					if( lBuffersPending ){
+						mTcpTransportProtocol.mMutex.lock();
+						Buffers* lBuffers = mTcpTransportProtocol.mPendingSendBuffers.front();
+						mTcpTransportProtocol.mMutex.unlock();
+					
+						Dispatch( lBuffers );
+						if( !mTcpTransportProtocol.mPackingProtocol->Validate( lBuffers ) )
+						{
+							pantheios::log_ERROR ( "Validation function reported an error!" );
+							pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+							mTcpTransportProtocol.mAsynchronousException = new uhal::exception ();
+						}
+						
+	
+						mTcpTransportProtocol.mMutex.lock();
+						mTcpTransportProtocol.mPendingSendBuffers.pop_front();
+						mTcpTransportProtocol.mMutex.unlock();	
+					}
 				}
+			} 
+			catch ( const std::exception& aExc )
+			{
+				pantheios::log_EXCEPTION ( aExc );
+				mTcpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
 			}
-		} 
-		catch ( const std::exception& aExc )
-		{
-			pantheios::log_EXCEPTION ( aExc );
-			mTcpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
-		}
-		catch (boost::thread_interrupted&) 
-		{ 
-		}
+			catch (boost::thread_interrupted&) 
+			{ 
+				//This thread was interrupted by main thread, which is ok - we just exit
+			}
 		#endif
 	}
 
@@ -126,15 +123,15 @@ namespace uhal
 		// mDeadline.expires_from_now ( mTimeOut );
 	
 		//pantheios::log_NOTICE ( "ASIO read" );
-		boost::system::error_code ec;
+		boost::system::error_code lErrorCode;
 
 		PERFORMANCE ( "ASIO synchronous read" ,
-					  boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), ec);
+					  boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), lErrorCode);
 					)						
 
-		if (ec)
+		if (lErrorCode)
 		{
-			pantheios::log_ERROR ( "ASIO reported an error: " , ec.message() );
+			pantheios::log_ERROR ( "ASIO reported an error: " , lErrorCode.message() );
 		}
 		else
 		{
@@ -156,13 +153,11 @@ namespace uhal
 
 TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
 		TransportProtocol(),
-		mDispatchWorker( boost::shared_ptr< DispatchWorker >( new DispatchWorker( *this , aHostname , aServiceOrPort , aTimeoutPeriod ) ) ),
+		mDispatchWorker( boost::shared_ptr< DispatchWorker >( new DispatchWorker( *this , aHostname , aServiceOrPort , aTimeoutPeriod ) ) )
 		#ifdef USE_TCP_MULTITHREADED
-		mDispatchThread( boost::shared_ptr< boost::thread >( new boost::thread( *mDispatchWorker ) ) ),
+			, mDispatchThread( boost::shared_ptr< boost::thread >( new boost::thread( *mDispatchWorker ) ) ),
+			mAsynchronousException( NULL )
 		#endif
-		mAsynchronousException( NULL ),
-		mSent( 0 ),
-		mReceived( 0 )				  
 	{}
 	catch ( const std::exception& aExc )
 	{
@@ -175,16 +170,16 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 	{
 		try
 		{
-		MUTEX_LOCK();
+		#ifdef USE_TCP_MULTITHREADED
+			mMutex.lock();
 			if( mAsynchronousException ){
 				uhal::exception lExc( *mAsynchronousException );
 				pantheios::log_EXCEPTION ( lExc );
 				delete mAsynchronousException;
 				mAsynchronousException = NULL;
 			}
-		MUTEX_UNLOCK();
+			mMutex.unlock();
 		
-		#ifdef USE_TCP_MULTITHREADED
 			if( mDispatchThread.unique() ){
 				mDispatchThread->interrupt(); 
 				mDispatchThread->join();
@@ -205,24 +200,29 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 	void TcpTransportProtocol::Dispatch ( Buffers* aBuffers )
 	{
 
-		MUTEX_LOCK();
-		if( mAsynchronousException ){
-			uhal::exception lExc( *mAsynchronousException );
-			pantheios::log_EXCEPTION ( lExc );
-			throw lExc;		
-		}
-		MUTEX_UNLOCK();
 	
 		try
 		{
-			MUTEX_LOCK();
-			mPendingSendBuffers.push_back( aBuffers );
-			MUTEX_UNLOCK();
-			
-			#ifndef USE_TCP_MULTITHREADED
-			mDispatchWorker->Dispatch( aBuffers );	
-			mPendingValidationBuffers.push_back( lBuffers );
-			mPendingSendBuffers.pop_front();
+			#ifdef USE_TCP_MULTITHREADED
+				mMutex.lock();
+
+				if( mAsynchronousException ){
+					uhal::exception lExc( *mAsynchronousException );
+					pantheios::log_EXCEPTION ( lExc );
+					throw lExc;		
+				}
+
+				mPendingSendBuffers.push_back( aBuffers );
+
+				mMutex.unlock();
+			#else
+				mDispatchWorker->Dispatch( aBuffers );
+				if( !mPackingProtocol->Validate( lBuffers ) )
+				{
+					pantheios::log_ERROR ( "Validation function reported an error!" );
+					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					throw uhal::exception ();
+				}
 			#endif
 
 		}
@@ -238,27 +238,23 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 	void TcpTransportProtocol::Flush( )	
 	{
 		
-		bool lContinue( true );
-		while ( lContinue ){
-		
-			MUTEX_LOCK();
+		#ifdef USE_TCP_MULTITHREADED
+			bool lContinue( true );
+			do{
 			
-			// kill time while pending buffers are emptied and check for exceptions on the thread...
-			if( mAsynchronousException ){
-				uhal::exception lExc( *mAsynchronousException );
-				pantheios::log_EXCEPTION ( lExc );
-				throw lExc;		
-			}
-
-			if( mPendingValidationBuffers.size() ){
-				bool lResult = mPackingProtocol->Validate( mPendingValidationBuffers.front() );
+				mMutex.lock();
 				
-				mPendingValidationBuffers.pop_front();
-			}
-
-			lContinue = ( mPendingSendBuffers.size() || mPendingValidationBuffers.size() );
-			MUTEX_UNLOCK();
-		}
+				// kill time while pending buffers are emptied and check for exceptions on the thread...
+				if( mAsynchronousException ){
+					uhal::exception lExc( *mAsynchronousException );
+					pantheios::log_EXCEPTION ( lExc );
+					throw lExc;		
+				}
+	
+				lContinue = ( mPendingSendBuffers.size() /*|| mPendingValidationBuffers.size()*/ );
+				mMutex.unlock();
+			}while ( lContinue );
+		#endif
 		
 	}
 	

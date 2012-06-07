@@ -16,9 +16,11 @@
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include <boost/thread/thread.hpp>
-
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#ifdef USE_TCP_MULTITHREADED
+	#include <boost/thread/thread.hpp>
+#endif
 	
 #include <string>
 
@@ -86,16 +88,14 @@ namespace uhal
 		private:
 					
 			boost::shared_ptr< DispatchWorker > mDispatchWorker;
-			boost::shared_ptr< boost::thread > mDispatchThread;
-	
-			std::deque< Buffers* > mPendingSendBuffers;
-			std::deque< Buffers* > mPendingValidationBuffers;
-			
-			uhal::exception* mAsynchronousException;
 
-			uint32_t mSent;
-			uint32_t mReceived;
-			
+#ifdef USE_TCP_MULTITHREADED
+			boost::shared_ptr< boost::thread > mDispatchThread;
+			std::deque< Buffers* > mPendingSendBuffers;
+			uhal::exception* mAsynchronousException;
+			boost::mutex mMutex; 
+#endif
+
 
 
 	};

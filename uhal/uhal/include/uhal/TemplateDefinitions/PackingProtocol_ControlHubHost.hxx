@@ -21,9 +21,21 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 	ControlHubHostPackingProtocol<  IPbusProtocolVersion >::~ControlHubHostPackingProtocol() {}
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	uint32_t ControlHubHostPackingProtocol<  IPbusProtocolVersion >::IPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
+	uint32_t ControlHubHostPackingProtocol<  IPbusProtocolVersion >::calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
 	{
 		return IPbusHeaderHelper<IPbusProtocolVersion>::calculate ( aType , aWordCount , mTransactionCounter++ );
+	}
+
+
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	bool ControlHubHostPackingProtocol<  IPbusProtocolVersion >::extractIPbusHeader(
+																	const uint32_t& aHeader , 
+																	eIPbusTransactionType& aType , 
+																	uint32_t& aWordCount , 
+																	uint32_t& aTransactionId , 
+																	uint8_t& aResponseGood )
+	{
+		return IPbusHeaderHelper<IPbusProtocolVersion>::extract( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
 	}
 
 
@@ -44,8 +56,10 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 					  // Device Port number (2 bytes)
 					  // Error code (2 bytes)
 
+					  mMutex.lock();
 					  mPreambles.push_back ( tPreamble() );
 					  tPreamble& lPreamble ( mPreambles.back() );
+					  mMutex.unlock();
 					  lPreamble.mSendByteCountPtr = ( uint32_t* ) ( mCurrentBuffers->send ( ( uint32_t ) ( 0 ) ) );
 					  mCurrentBuffers->send ( mDeviceIPaddress );
 					  mCurrentBuffers->send ( mDevicePort );
@@ -64,7 +78,9 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 	void ControlHubHostPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
 	{
 				PERFORMANCE ( "Complete Preamble" ,
+					  mMutex.lock();
 					  tPreamble& lPreamble ( mPreambles.back() );
+					  mMutex.unlock();
 					  uint32_t lByteCount ( mCurrentBuffers->sendCounter() );
 					  *lPreamble.mSendByteCountPtr = htonl ( lByteCount-4 );
 					  *lPreamble.mSendWordCountPtr = htons ( ( lByteCount-12 ) >>2 );
@@ -72,6 +88,12 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 	}
 
 
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+// IT MUST ONLY USE LOCAL VARIABLES
+//            --- OR ---
+// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	bool ControlHubHostPackingProtocol< IPbusProtocolVersion >::Validate( Buffers* aBuffers )
 	{
@@ -84,7 +106,9 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyIt( aBuffers->getReplyBuffer().begin() );
  		std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyEnd( aBuffers->getReplyBuffer().end() );
 
+ 	 	mMutex.lock();
 		tPreamble& lPreamble ( mPreambles.front() );
+		mMutex.unlock();
 
 /*		pantheios::log_NOTICE( "Byte Count 1 : " , pantheios::integer ( *(( uint32_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 10 ) , 
 								" : Memory : " , pantheios::integer ( lPreamble.mReplyTotalByteCounter , pantheios::fmt::fullHex | 10 ) ,
@@ -123,106 +147,22 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		}
 		lReplyIt++;
 
-
+		mMutex.lock();
 		mPreambles.pop_front();
+		mMutex.unlock();
 
-		eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
-		uint32_t lSendWordCount , lReplyWordCount;
-		uint32_t lSendTransactionId , lReplyTransactionId; 
-		uint8_t lSendResponseGood , lReplyResponseGood;
+		bool lRet =  PackingProtocol::Validate( lSendBuffer , 
+											lSendBufferEnd ,
+											lReplyIt ,
+											lReplyEnd );
 
- 		do{	
-	
-//  			pantheios::log_NOTICE( "Send Header  : " , pantheios::integer (  *(( uint32_t* )( lSendBuffer )) , pantheios::fmt::fullHex | 10 ) );
-//  			pantheios::log_NOTICE( "Reply Header : " , pantheios::integer (  *(( uint32_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 10 ) );
+		if ( lRet )
+		{
+			aBuffers->validate();
+		} 
 
-			if( ! IPbusHeaderHelper< IPbusProtocolVersion >::extract( *(( uint32_t* )( lSendBuffer )) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) ){
-				pantheios::log_ERROR( "Unable to parse send header " , pantheios::integer ( *(( uint32_t* )( lSendBuffer )) , pantheios::fmt::fullHex | 10 ) );
-				return false;
-			} 
-	
-			if( ! IPbusHeaderHelper< IPbusProtocolVersion >::extract( *(( uint32_t* )( lReplyIt->first )) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) ){
-				pantheios::log_ERROR( "Unable to parse reply header " , pantheios::integer ( *(( uint32_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 10 ) );
-				return false;
-			} 
+		return lRet;
 
-			if( lReplyResponseGood ){
-				pantheios::log_ERROR( "Returned Response " , pantheios::integer ( lReplyResponseGood , pantheios::fmt::fullHex | 4 ) , " indicated error" );
-				return false;
-			}
-	
-			if( lSendIPbusTransactionType != lReplyIPbusTransactionType ){
-				pantheios::log_ERROR( "Returned Transaction Type " , pantheios::integer ( (uint8_t)(lReplyIPbusTransactionType) , pantheios::fmt::fullHex | 4 ) , 
-										" does not match that sent " , pantheios::integer ( (uint8_t)(lSendIPbusTransactionType) , pantheios::fmt::fullHex | 4 ) );
-				return false;
-			}
-			
-			if( lSendTransactionId != lReplyTransactionId ){
-				pantheios::log_ERROR( "Returned Transaction Id " , pantheios::integer ( lReplyTransactionId , pantheios::fmt::fullHex | 10 ) , 
-										" does not match that sent " , pantheios::integer ( lSendTransactionId , pantheios::fmt::fullHex | 10 ) );
-				return false;
-			}
-
-			switch ( lSendIPbusTransactionType )
-			{
-				case B_O_T:
-				case R_A_I:
-					lSendBuffer += (1<<2);
-					break;
-				case NI_READ:
-				case READ:
-					lSendBuffer += (2<<2);
-					break;
-				case NI_WRITE:
-				case WRITE:
-					lSendBuffer += ((2+lSendWordCount)<<2);
-					break;
-				case RMW_SUM:
-					lSendBuffer += (3<<2);
-					break;
-				case RMW_BITS:
-					lSendBuffer += (4<<2);
-					break;
-			}
-
-			switch ( lReplyIPbusTransactionType )
-			{
-				case B_O_T:
-				case NI_WRITE:
-				case WRITE:
-					lReplyIt++;
-					break;
-				case R_A_I:
-				case NI_READ:
-				case READ:
-				case RMW_SUM:
-				case RMW_BITS:
-					lReplyIt+=2;
-					break;
-			}
-
- 		}while( (lSendBufferEnd - lSendBuffer != 0) && (lReplyEnd - lReplyIt != 0) );
-
-
-		aBuffers->validate(); 
-
-// 		uint32_t lPayloadCount( 1 );
-// 		uint32_t lNextReplyCount( 1 );
-
-
-// 		for ( uint32_t i=0 ; i != aBuffers->sendCounter()>>2 ; ++i ){
-// 			pantheios::log_NOTICE( pantheios::integer ( *lSendBuffer , pantheios::fmt::fullHex | 10 ) );
-// 			lSendBuffer++;
-// 		}
-	// 		for( ; lReplyIt != lReplyEnd ; ++lReplyIt ){
-	// 			uint32_t* lReplyBuffer( ( uint32_t* )( lReplyIt->first ) );
-	// 			for( uint32_t i = 0 ; i!=lReplyIt->second>>2 ; ++i ){
-	// 				pantheios::log_NOTICE( pantheios::integer ( *lReplyBuffer , pantheios::fmt::fullHex | 10 ) );
-	// 				lReplyBuffer++;
-	// 			}
-	// 		}
-
-		return true;
 	}
 
 }

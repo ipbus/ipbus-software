@@ -208,13 +208,33 @@ namespace uhal
 
 			virtual void Dispatch( );
 
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+// IT MUST ONLY USE LOCAL VARIABLES
+//            --- OR ---
+// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+			virtual bool Validate( uint8_t* aSendBufferStart , 
+									uint8_t* aSendBufferEnd , 
+									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt , 
+									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+// IT MUST ONLY USE LOCAL VARIABLES
+//            --- OR ---
+// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 			virtual bool Validate( Buffers* aBuffers );
 
 		protected:
 
 			virtual void checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 
-			virtual uint32_t IPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount ) = 0;
+			virtual uint32_t calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount ) = 0;
+
+			virtual bool extractIPbusHeader( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood ) = 0;
+
 
 			virtual void Preamble( );
 

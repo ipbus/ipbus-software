@@ -204,33 +204,120 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	}
 
 
-
-
-	bool PackingProtocol::Validate( Buffers* aBuffers )
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+// IT MUST ONLY USE LOCAL VARIABLES
+//            --- OR ---
+// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	bool PackingProtocol::Validate( uint8_t* aSendBufferStart , 
+									uint8_t* aSendBufferEnd , 
+									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt , 
+									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
 	{
-		pantheios::log_NOTICE( "CALL TO BASE" );
-// 		uint32_t* lSendBuffer( ( uint32_t* )( aBuffers->getSendBuffer() ) );
-// 		std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyIt( aBuffers->getReplyBuffer().begin() );
-// 		std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyEnd( aBuffers->getReplyBuffer().end() );
-// 
-// 		uint32_t lNextSendCount( 1 );
-// 		uint32_t lNextReplyCount( 1 );
-// 
-// // 		for ( uint32_t i=0 ; i != aBuffers->sendCounter()>>2 ; ++i ){
-// // 			pantheios::log_NOTICE( pantheios::integer ( *lSendBuffer , pantheios::fmt::fullHex | 10 ) );
-// // 			lSendBuffer++;
-// // 		}
-// 
-// 		for( ; lReplyIt != lReplyEnd ; ++lReplyIt ){
-// 			uint32_t* lReplyBuffer( ( uint32_t* )( lReplyIt->first ) );
-// 			for( uint32_t i = 0 ; i!=lReplyIt->second>>2 ; ++i ){
-// 				pantheios::log_NOTICE( pantheios::integer ( *lReplyBuffer , pantheios::fmt::fullHex | 10 ) );
-// 				lReplyBuffer++;
-// 			}
-// 		}
+
+		eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
+		uint32_t lSendWordCount , lReplyWordCount;
+		uint32_t lSendTransactionId , lReplyTransactionId; 
+		uint8_t lSendResponseGood , lReplyResponseGood;
+
+ 		do{	
+	
+			if( ! this->extractIPbusHeader( *(( uint32_t* )( aSendBufferStart )) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) ){
+				pantheios::log_ERROR( "Unable to parse send header " , pantheios::integer ( *(( uint32_t* )( aSendBufferStart )) , pantheios::fmt::fullHex | 10 ) );
+				return false;
+			} 
+	
+			if( ! this->extractIPbusHeader( *(( uint32_t* )( aReplyStartIt->first )) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) ){
+				pantheios::log_ERROR( "Unable to parse reply header " , pantheios::integer ( *(( uint32_t* )( aReplyStartIt->first )) , pantheios::fmt::fullHex | 10 ) );
+				return false;
+			} 
+
+			if( lReplyResponseGood ){
+				pantheios::log_ERROR( "Returned Response " , pantheios::integer ( lReplyResponseGood , pantheios::fmt::fullHex | 4 ) , " indicated error" );
+				return false;
+			}
+	
+			if( lSendIPbusTransactionType != lReplyIPbusTransactionType ){
+				pantheios::log_ERROR( "Returned Transaction Type " , pantheios::integer ( (uint8_t)(lReplyIPbusTransactionType) , pantheios::fmt::fullHex | 4 ) , 
+										" does not match that sent " , pantheios::integer ( (uint8_t)(lSendIPbusTransactionType) , pantheios::fmt::fullHex | 4 ) );
+				return false;
+			}
+			
+			if( lSendTransactionId != lReplyTransactionId ){
+				pantheios::log_ERROR( "Returned Transaction Id " , pantheios::integer ( lReplyTransactionId , pantheios::fmt::fullHex | 10 ) , 
+										" does not match that sent " , pantheios::integer ( lSendTransactionId , pantheios::fmt::fullHex | 10 ) );
+				return false;
+			}
+
+			switch ( lSendIPbusTransactionType )
+			{
+				case B_O_T:
+				case R_A_I:
+					aSendBufferStart += (1<<2);
+					break;
+				case NI_READ:
+				case READ:
+					aSendBufferStart += (2<<2);
+					break;
+				case NI_WRITE:
+				case WRITE:
+					aSendBufferStart += ((2+lSendWordCount)<<2);
+					break;
+				case RMW_SUM:
+					aSendBufferStart += (3<<2);
+					break;
+				case RMW_BITS:
+					aSendBufferStart += (4<<2);
+					break;
+			}
+
+			switch ( lReplyIPbusTransactionType )
+			{
+				case B_O_T:
+				case NI_WRITE:
+				case WRITE:
+					aReplyStartIt++;
+					break;
+				case R_A_I:
+				case NI_READ:
+				case READ:
+				case RMW_SUM:
+				case RMW_BITS:
+					aReplyStartIt+=2;
+					break;
+			}
+
+ 		}while( (aSendBufferEnd - aSendBufferStart != 0) && (aReplyEndIt - aReplyStartIt != 0) );
 
 		return true;
 	}
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+// IT MUST ONLY USE LOCAL VARIABLES
+//            --- OR ---
+// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	bool PackingProtocol::Validate( Buffers* aBuffers )
+	{
+		bool lRet = this->Validate( aBuffers->getSendBuffer() , 
+								aBuffers->getSendBuffer()+aBuffers->sendCounter() ,
+								aBuffers->getReplyBuffer().begin() ,
+								aBuffers->getReplyBuffer().end() );
+
+		if ( lRet )
+		{
+			aBuffers->validate();
+		} 
+
+		return lRet;
+	}
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -249,7 +336,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  uint32_t lSendBytesAvailable;
 						  uint32_t  lReplyBytesAvailable;
 						  this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-						  mCurrentBuffers->send ( this->IPbusHeader ( B_O_T , 0 ) );
+						  mCurrentBuffers->send ( this->calculateIPbusHeader ( B_O_T , 0 ) );
 						  ValHeader lReply;
 						  mCurrentBuffers->add ( lReply );
 						  mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
@@ -279,7 +366,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  uint32_t lSendBytesAvailable;
 						  uint32_t  lReplyBytesAvailable;
 						  this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-						  mCurrentBuffers->send ( this->IPbusHeader ( WRITE , 1 ) );
+						  mCurrentBuffers->send ( this->calculateIPbusHeader ( WRITE , 1 ) );
 						  mCurrentBuffers->send ( aAddr );
 						  mCurrentBuffers->send ( aSource );
 						  ValHeader lReply;
@@ -325,7 +412,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 				//pantheios::log_NOTICE( "lSendBytesAvailableForPayload (bytes) = " , pantheios::integer(lSendBytesAvailableForPayload) );
 				//pantheios::log_NOTICE( "lSendBytesAvailableForPayload (words) = " , pantheios::integer(lSendBytesAvailableForPayload>>2) );
 				//pantheios::log_NOTICE( "lPayloadByteCount = " , pantheios::integer(lPayloadByteCount) );
-				mCurrentBuffers->send ( this->IPbusHeader ( lType , lSendBytesAvailableForPayload>>2 ) );
+				mCurrentBuffers->send ( this->calculateIPbusHeader ( lType , lSendBytesAvailableForPayload>>2 ) );
 				mCurrentBuffers->send ( lAddr );
 				mCurrentBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
 				lSourcePtr += lSendBytesAvailableForPayload;
@@ -370,7 +457,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  uint32_t lSendBytesAvailable;
 						  uint32_t  lReplyBytesAvailable;
 						  this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-						  mCurrentBuffers->send ( this->IPbusHeader ( READ , 1 ) );
+						  mCurrentBuffers->send ( this->calculateIPbusHeader ( READ , 1 ) );
 						  mCurrentBuffers->send ( aAddr );
 						  ValWord< uint32_t > lReply ( 0 , aMask );
 						  mCurrentBuffers->add ( lReply );
@@ -415,7 +502,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{
 			this->checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
 				uint32_t lReplyBytesAvailableForPayload ( ( lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
-				mCurrentBuffers->send ( this->IPbusHeader ( lType , lReplyBytesAvailableForPayload>>2 ) );
+				mCurrentBuffers->send ( this->calculateIPbusHeader ( lType , lReplyBytesAvailableForPayload>>2 ) );
 				mCurrentBuffers->send ( lAddr );
 				lReplyMem.IPbusHeaders.push_back ( 0 );
 				mCurrentBuffers->receive ( lReplyMem.IPbusHeaders.back() );
@@ -459,7 +546,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  uint32_t lSendBytesAvailable;
 						  uint32_t  lReplyBytesAvailable;
 						  this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-						  mCurrentBuffers->send ( this->IPbusHeader ( READ , 1 ) );
+						  mCurrentBuffers->send ( this->calculateIPbusHeader ( READ , 1 ) );
 						  mCurrentBuffers->send ( aAddr );
 						  ValWord< int32_t > lReply ( 0 , aMask );
 						  mCurrentBuffers->add ( lReply );
@@ -504,7 +591,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{
 			this->checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
 				uint32_t lReplyBytesAvailableForPayload ( ( lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
-				mCurrentBuffers->send ( this->IPbusHeader ( lType , lReplyBytesAvailableForPayload>>2 ) );
+				mCurrentBuffers->send ( this->calculateIPbusHeader ( lType , lReplyBytesAvailableForPayload>>2 ) );
 				mCurrentBuffers->send ( lAddr );
 				lReplyMem.IPbusHeaders.push_back ( 0 );
 				mCurrentBuffers->receive ( lReplyMem.IPbusHeaders.back() );
@@ -548,7 +635,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  uint32_t lSendBytesAvailable;
 						  uint32_t  lReplyBytesAvailable;
 						  this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-						  mCurrentBuffers->send ( this->IPbusHeader ( R_A_I , 0 ) );
+						  mCurrentBuffers->send ( this->calculateIPbusHeader ( R_A_I , 0 ) );
 						  ValVector< uint32_t > lReply ( 2 );
 						  mCurrentBuffers->add ( lReply );
 						  _ValVector_< uint32_t >& lReplyMem = * ( lReply.mMembers );
@@ -586,7 +673,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  uint32_t lSendBytesAvailable;
 						  uint32_t  lReplyBytesAvailable;
 						  this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-						  mCurrentBuffers->send ( this->IPbusHeader ( RMW_BITS , 1 ) );
+						  mCurrentBuffers->send ( this->calculateIPbusHeader ( RMW_BITS , 1 ) );
 						  mCurrentBuffers->send ( aAddr );
 						  mCurrentBuffers->send ( aANDterm );
 						  mCurrentBuffers->send ( aORterm );
@@ -625,7 +712,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  uint32_t lSendBytesAvailable;
 						  uint32_t  lReplyBytesAvailable;
 						  this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-						  mCurrentBuffers->send ( this->IPbusHeader ( RMW_SUM , 1 ) );
+						  mCurrentBuffers->send ( this->calculateIPbusHeader ( RMW_SUM , 1 ) );
 						  mCurrentBuffers->send ( aAddr );
 						  mCurrentBuffers->send ( static_cast< uint32_t > ( aAddend ) );
 						  ValWord< int32_t > lReply ( 0 );
