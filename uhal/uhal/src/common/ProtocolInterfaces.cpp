@@ -159,7 +159,8 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 	PackingProtocol::~PackingProtocol()
 	{
-		PERFORMANCE ( "" ,
+
+	PERFORMANCE ( "" ,
 	if ( mCurrentBuffers )
 	{
 		delete mCurrentBuffers;

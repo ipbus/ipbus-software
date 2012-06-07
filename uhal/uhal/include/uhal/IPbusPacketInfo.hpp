@@ -41,6 +41,9 @@
 namespace uhal
 {
 
+	class IPbusValidationError: public uhal::exception {  };
+
+
 	/**
 		Enumerated type to define the IPbus transaction type.
 		Note that they are stored here as (raw_type << 3) so that the LSL operation does not need to be performed every time a new transaction is created
