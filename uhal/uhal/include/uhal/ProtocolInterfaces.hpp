@@ -88,7 +88,7 @@ namespace uhal
 			/**
 				Default constructor
 			*/
-			TransportProtocol( const uint32_t& aTimeoutPeriod );
+			TransportProtocol ( const uint32_t& aTimeoutPeriod );
 
 			/**
 				Destructor
@@ -102,10 +102,10 @@ namespace uhal
 
 			virtual void Flush() = 0;
 
-			virtual void setTimeoutPeriod( const uint32_t& aTimeoutPeriod );
+			virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
 
 			virtual const uint32_t& getTimeoutPeriod();
-			
+
 		protected:
 			PackingProtocol* mPackingProtocol;
 
@@ -214,24 +214,24 @@ namespace uhal
 
 			virtual void Dispatch( );
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
-// IT MUST ONLY USE LOCAL VARIABLES
-//            --- OR ---
-// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-			virtual bool Validate( uint8_t* aSendBufferStart , 
-									uint8_t* aSendBufferEnd , 
-									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt , 
+			// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+			// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+			// IT MUST ONLY USE LOCAL VARIABLES
+			//            --- OR ---
+			// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+			// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+			virtual bool Validate ( uint8_t* aSendBufferStart ,
+									uint8_t* aSendBufferEnd ,
+									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
 									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
-// IT MUST ONLY USE LOCAL VARIABLES
-//            --- OR ---
-// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-			virtual bool Validate( Buffers* aBuffers );
+			// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+			// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+			// IT MUST ONLY USE LOCAL VARIABLES
+			//            --- OR ---
+			// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+			// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+			virtual bool Validate ( Buffers* aBuffers );
 
 		protected:
 
@@ -239,7 +239,7 @@ namespace uhal
 
 			virtual uint32_t calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount ) = 0;
 
-			virtual bool extractIPbusHeader( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood ) = 0;
+			virtual bool extractIPbusHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood ) = 0;
 
 
 			virtual void Preamble( );

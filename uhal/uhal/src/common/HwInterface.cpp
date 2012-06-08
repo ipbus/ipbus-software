@@ -89,9 +89,9 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 	}
 
 
-	void HwInterface::setTimeoutPeriod( const uint32_t& aTimeoutPeriod )
+	void HwInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
 	{
-		mClientInterface->setTimeoutPeriod( aTimeoutPeriod );
+		mClientInterface->setTimeoutPeriod ( aTimeoutPeriod );
 	}
 
 

@@ -172,7 +172,7 @@ namespace uhal
 			*/
 			void dispatch ();
 
-			virtual void setTimeoutPeriod( const uint32_t& aTimeoutPeriod );
+			virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
 
 			virtual const uint32_t& getTimeoutPeriod();
 

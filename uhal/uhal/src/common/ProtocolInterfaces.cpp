@@ -46,7 +46,7 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 					  uint8_t* lStartPtr ( mSendBuffer+mSendCounter );
 					  memcpy ( lStartPtr , aPtr , aSize );
 					  mSendCounter += aSize;
-				)
+					)
 		return lStartPtr;
 	}
 
@@ -62,7 +62,7 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 	void Buffers::add ( const ValHeader& aValMem )
 	{
 		PERFORMANCE ( "" ,
-// 					  mValMems.push_back ( aValMem );
+					  // 					  mValMems.push_back ( aValMem );
 					  mValHeaders.push_back ( aValMem );
 					)
 	}
@@ -70,15 +70,15 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 	void Buffers::add ( const ValWord< uint32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-// 					  mValMems.push_back ( aValMem );
+					  // 					  mValMems.push_back ( aValMem );
 					  mUnsignedValWords.push_back ( aValMem );
-				)
+					)
 	}
 
 	void Buffers::add ( const ValWord< int32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-// 					  mValMems.push_back ( aValMem );
+					  // 					  mValMems.push_back ( aValMem );
 					  mSignedValWords.push_back ( aValMem );
 					)
 	}
@@ -86,7 +86,7 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 	void Buffers::add ( const ValVector< uint32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-// 					  mValMems.push_back ( aValMem );
+					  // 					  mValMems.push_back ( aValMem );
 					  mUnsignedValVectors.push_back ( aValMem );
 					)
 	}
@@ -94,7 +94,7 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 	void Buffers::add ( const ValVector< int32_t >& aValMem )
 	{
 		PERFORMANCE ( "" ,
-// 					  mValMems.push_back ( aValMem );
+					  // 					  mValMems.push_back ( aValMem );
 					  mSignedValVectors.push_back ( aValMem );
 					)
 	}
@@ -112,24 +112,29 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 
 	void Buffers::validate()
 	{
-		for( std::deque< ValHeader >::iterator lIt = mValHeaders.begin() ; lIt != mValHeaders.end() ; ++lIt ){
-			lIt->valid( true );
-		} 
+		for ( std::deque< ValHeader >::iterator lIt = mValHeaders.begin() ; lIt != mValHeaders.end() ; ++lIt )
+		{
+			lIt->valid ( true );
+		}
 
-		for( std::deque< ValWord< uint32_t > >::iterator lIt = mUnsignedValWords.begin() ; lIt != mUnsignedValWords.end() ; ++lIt ){
-			lIt->valid( true );
-		} 
+		for ( std::deque< ValWord< uint32_t > >::iterator lIt = mUnsignedValWords.begin() ; lIt != mUnsignedValWords.end() ; ++lIt )
+		{
+			lIt->valid ( true );
+		}
 
-		for( std::deque< ValWord< int32_t > >::iterator lIt = mSignedValWords.begin() ; lIt != mSignedValWords.end() ; ++lIt ){
-			lIt->valid( true );
-		} 
+		for ( std::deque< ValWord< int32_t > >::iterator lIt = mSignedValWords.begin() ; lIt != mSignedValWords.end() ; ++lIt )
+		{
+			lIt->valid ( true );
+		}
 
-		for( std::deque< ValVector< uint32_t > >::iterator lIt = mUnsignedValVectors.begin() ; lIt != mUnsignedValVectors.end() ; ++lIt ){
-			lIt->valid( true );
-		} 
+		for ( std::deque< ValVector< uint32_t > >::iterator lIt = mUnsignedValVectors.begin() ; lIt != mUnsignedValVectors.end() ; ++lIt )
+		{
+			lIt->valid ( true );
+		}
 
-		for( std::deque< ValVector< int32_t > >::iterator lIt = mSignedValVectors.begin() ; lIt != mSignedValVectors.end() ; ++lIt ){
-			lIt->valid( true );
+		for ( std::deque< ValVector< int32_t > >::iterator lIt = mSignedValVectors.begin() ; lIt != mSignedValVectors.end() ; ++lIt )
+		{
+			lIt->valid ( true );
 		}
 	}
 
@@ -147,19 +152,19 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 
 
 
-	TransportProtocol::TransportProtocol( const uint32_t& aTimeoutPeriod ) try :
+TransportProtocol::TransportProtocol ( const uint32_t& aTimeoutPeriod ) try :
 		mTimeoutPeriod ( aTimeoutPeriod )
 		{}
-		catch ( const std::exception& aExc )
-		{
-			pantheios::log_EXCEPTION ( aExc );
-			throw uhal::exception ( aExc );
-		}
+	catch ( const std::exception& aExc )
+	{
+		pantheios::log_EXCEPTION ( aExc );
+		throw uhal::exception ( aExc );
+	}
 
 	TransportProtocol::~TransportProtocol() {}
 
 
-	void TransportProtocol::setTimeoutPeriod( const uint32_t& aTimeoutPeriod )
+	void TransportProtocol::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
 	{
 		mTimeoutPeriod = aTimeoutPeriod;
 	}
@@ -186,9 +191,9 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 	PackingProtocol::~PackingProtocol()
 	{
+		PERFORMANCE ( "" ,
 
-	PERFORMANCE ( "" ,
-	if ( mCurrentBuffers )
+					  if ( mCurrentBuffers )
 	{
 		delete mCurrentBuffers;
 		mCurrentBuffers = NULL;
@@ -215,66 +220,72 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 	void PackingProtocol::Predispatch( )
 	{
-		pantheios::log_LOCATION();	
+		pantheios::log_LOCATION();
 	}
 
 
 	void PackingProtocol::Dispatch( )
 	{
 		PERFORMANCE ( "" ,
-						if( mCurrentBuffers ){
-							this->Predispatch();
-							mTransportProtocol->Dispatch ( mCurrentBuffers );
-							mCurrentBuffers = NULL;
-							mTransportProtocol->Flush();
-						}
+
+					  if ( mCurrentBuffers )
+	{
+		this->Predispatch();
+			mTransportProtocol->Dispatch ( mCurrentBuffers );
+			mCurrentBuffers = NULL;
+			mTransportProtocol->Flush();
+		}
 					)
 	}
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
-// IT MUST ONLY USE LOCAL VARIABLES
-//            --- OR ---
-// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-	bool PackingProtocol::Validate( uint8_t* aSendBufferStart , 
-									uint8_t* aSendBufferEnd , 
-									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt , 
-									std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+	// IT MUST ONLY USE LOCAL VARIABLES
+	//            --- OR ---
+	// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	bool PackingProtocol::Validate ( uint8_t* aSendBufferStart ,
+									 uint8_t* aSendBufferEnd ,
+									 std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
+									 std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
 	{
-
 		eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
 		uint32_t lSendWordCount , lReplyWordCount;
-		uint32_t lSendTransactionId , lReplyTransactionId; 
+		uint32_t lSendTransactionId , lReplyTransactionId;
 		uint8_t lSendResponseGood , lReplyResponseGood;
 
- 		do{	
-	
-			if( ! this->extractIPbusHeader( *(( uint32_t* )( aSendBufferStart )) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) ){
-				pantheios::log_ERROR( "Unable to parse send header " , pantheios::integer ( *(( uint32_t* )( aSendBufferStart )) , pantheios::fmt::fullHex | 10 ) );
+		do
+		{
+			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
+			{
+				pantheios::log_ERROR ( "Unable to parse send header " , pantheios::integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , pantheios::fmt::fullHex | 10 ) );
 				return false;
-			} 
-	
-			if( ! this->extractIPbusHeader( *(( uint32_t* )( aReplyStartIt->first )) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) ){
-				pantheios::log_ERROR( "Unable to parse reply header " , pantheios::integer ( *(( uint32_t* )( aReplyStartIt->first )) , pantheios::fmt::fullHex | 10 ) );
-				return false;
-			} 
+			}
 
-			if( lReplyResponseGood ){
-				pantheios::log_ERROR( "Returned Response " , pantheios::integer ( lReplyResponseGood , pantheios::fmt::fullHex | 4 ) , " indicated error" );
+			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
+			{
+				pantheios::log_ERROR ( "Unable to parse reply header " , pantheios::integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , pantheios::fmt::fullHex | 10 ) );
 				return false;
 			}
-	
-			if( lSendIPbusTransactionType != lReplyIPbusTransactionType ){
-				pantheios::log_ERROR( "Returned Transaction Type " , pantheios::integer ( (uint8_t)(lReplyIPbusTransactionType) , pantheios::fmt::fullHex | 4 ) , 
-										" does not match that sent " , pantheios::integer ( (uint8_t)(lSendIPbusTransactionType) , pantheios::fmt::fullHex | 4 ) );
+
+			if ( lReplyResponseGood )
+			{
+				pantheios::log_ERROR ( "Returned Response " , pantheios::integer ( lReplyResponseGood , pantheios::fmt::fullHex | 4 ) , " indicated error" );
 				return false;
 			}
-			
-			if( lSendTransactionId != lReplyTransactionId ){
-				pantheios::log_ERROR( "Returned Transaction Id " , pantheios::integer ( lReplyTransactionId , pantheios::fmt::fullHex | 10 ) , 
-										" does not match that sent " , pantheios::integer ( lSendTransactionId , pantheios::fmt::fullHex | 10 ) );
+
+			if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
+			{
+				pantheios::log_ERROR ( "Returned Transaction Type " , pantheios::integer ( ( uint8_t ) ( lReplyIPbusTransactionType ) , pantheios::fmt::fullHex | 4 ) ,
+									   " does not match that sent " , pantheios::integer ( ( uint8_t ) ( lSendIPbusTransactionType ) , pantheios::fmt::fullHex | 4 ) );
+				return false;
+			}
+
+			if ( lSendTransactionId != lReplyTransactionId )
+			{
+				pantheios::log_ERROR ( "Returned Transaction Id " , pantheios::integer ( lReplyTransactionId , pantheios::fmt::fullHex | 10 ) ,
+									   " does not match that sent " , pantheios::integer ( lSendTransactionId , pantheios::fmt::fullHex | 10 ) );
 				return false;
 			}
 
@@ -282,21 +293,21 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			{
 				case B_O_T:
 				case R_A_I:
-					aSendBufferStart += (1<<2);
+					aSendBufferStart += ( 1<<2 );
 					break;
 				case NI_READ:
 				case READ:
-					aSendBufferStart += (2<<2);
+					aSendBufferStart += ( 2<<2 );
 					break;
 				case NI_WRITE:
 				case WRITE:
-					aSendBufferStart += ((2+lSendWordCount)<<2);
+					aSendBufferStart += ( ( 2+lSendWordCount ) <<2 );
 					break;
 				case RMW_SUM:
-					aSendBufferStart += (3<<2);
+					aSendBufferStart += ( 3<<2 );
 					break;
 				case RMW_BITS:
-					aSendBufferStart += (4<<2);
+					aSendBufferStart += ( 4<<2 );
 					break;
 			}
 
@@ -315,37 +326,37 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 					aReplyStartIt+=2;
 					break;
 			}
-
- 		}while( (aSendBufferEnd - aSendBufferStart != 0) && (aReplyEndIt - aReplyStartIt != 0) );
+		}
+		while ( ( aSendBufferEnd - aSendBufferStart != 0 ) && ( aReplyEndIt - aReplyStartIt != 0 ) );
 
 		return true;
 	}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
-// IT MUST ONLY USE LOCAL VARIABLES
-//            --- OR ---
-// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-	bool PackingProtocol::Validate( Buffers* aBuffers )
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+	// IT MUST ONLY USE LOCAL VARIABLES
+	//            --- OR ---
+	// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	bool PackingProtocol::Validate ( Buffers* aBuffers )
 	{
-		bool lRet = this->Validate( aBuffers->getSendBuffer() , 
-								aBuffers->getSendBuffer()+aBuffers->sendCounter() ,
-								aBuffers->getReplyBuffer().begin() ,
-								aBuffers->getReplyBuffer().end() );
+		bool lRet = this->Validate ( aBuffers->getSendBuffer() ,
+									 aBuffers->getSendBuffer() +aBuffers->sendCounter() ,
+									 aBuffers->getReplyBuffer().begin() ,
+									 aBuffers->getReplyBuffer().end() );
 
 		if ( lRet )
 		{
 			aBuffers->validate();
-		} 
+		}
 
 		return lRet;
 	}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -368,7 +379,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  ValHeader lReply;
 						  mCurrentBuffers->add ( lReply );
 						  mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
-					)
+						)
 			//return lReply;
 		}
 		catch ( const std::exception& aExc )

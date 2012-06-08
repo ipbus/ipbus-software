@@ -30,19 +30,19 @@ namespace uhal
 
 			virtual uint32_t calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount );
 
-			virtual bool extractIPbusHeader( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood );
+			virtual bool extractIPbusHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood );
 
 			virtual void Preamble( );
 
 			virtual void Predispatch( );
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
-// IT MUST ONLY USE LOCAL VARIABLES
-//            --- OR ---
-// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-			virtual bool Validate( Buffers* aBuffers );
+			// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+			// NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
+			// IT MUST ONLY USE LOCAL VARIABLES
+			//            --- OR ---
+			// IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
+			// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+			virtual bool Validate ( Buffers* aBuffers );
 
 		private:
 			uint32_t mDeviceIPaddress;
@@ -61,7 +61,7 @@ namespace uhal
 				uint16_t mReplyErrorCode;
 			};
 
-			boost::mutex mMutex; 
+			boost::mutex mMutex;
 			std::deque< tPreamble > mPreambles;
 
 	};

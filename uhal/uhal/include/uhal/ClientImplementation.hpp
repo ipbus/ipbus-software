@@ -11,7 +11,7 @@
 #include "uhal/Utilities.hpp"
 
 #include "uhal/ClientInterface.hpp"
-#include "uhal/AsioAccumulatedPacket.hpp"
+
 
 #include "uhal/TransportProtocol_UDP.hpp"
 #include "uhal/TransportProtocol_TCP.hpp"

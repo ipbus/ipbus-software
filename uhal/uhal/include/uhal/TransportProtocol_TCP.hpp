@@ -19,9 +19,9 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #ifdef USE_TCP_MULTITHREADED
-	#include <boost/thread/thread.hpp>
+#include <boost/thread/thread.hpp>
 #endif
-	
+
 #include <string>
 
 namespace uhal
@@ -33,38 +33,39 @@ namespace uhal
 	class ErrorInTcpCallback: public uhal::exception {  };
 
 	class ErrorAtTcpSocketCreation: public uhal::exception {  };
-		
+
 	class TcpTransportProtocol : public TransportProtocol
 	{
-	
+
 		public:
-			class DispatchWorker{
+			class DispatchWorker
+			{
 				public:
 					DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod );
 
 					virtual ~DispatchWorker();
-			
+
 					void operator() ();
-					
-					void Dispatch( Buffers* aBuffers );
-	
-				
+
+					void Dispatch ( Buffers* aBuffers );
+
+
 				private:
 
 					TcpTransportProtocol& mTcpTransportProtocol;
-					
+
 					//! The boost::asio::io_service used to create the connections
-					boost::shared_ptr< boost::asio::io_service > mIOservice;		
-	
+					boost::shared_ptr< boost::asio::io_service > mIOservice;
+
 					boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
 
 					//! Error code for the async callbacks to fill
 					boost::system::error_code mErrorCode;
-						
+
 			};
-			
+
 			friend class DispatchWorker;
-	
+
 
 			/**
 				Constructor
@@ -83,14 +84,14 @@ namespace uhal
 			virtual void Flush( );
 
 		private:
-					
+
 			boost::shared_ptr< DispatchWorker > mDispatchWorker;
 
 #ifdef USE_TCP_MULTITHREADED
 			boost::shared_ptr< boost::thread > mDispatchThread;
 			std::deque< Buffers* > mPendingSendBuffers;
 			uhal::exception* mAsynchronousException;
-			boost::mutex mMutex; 
+			boost::mutex mMutex;
 #endif
 
 	};

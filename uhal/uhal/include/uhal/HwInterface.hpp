@@ -41,7 +41,7 @@ namespace uhal
 			*/
 			void dispatch ();
 
-			void setTimeoutPeriod( const uint32_t& aTimeoutPeriod );
+			void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
 
 			const uint32_t& getTimeoutPeriod();
 

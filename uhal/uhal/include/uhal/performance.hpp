@@ -45,7 +45,8 @@ class PerformanceMeasurement
 			int mLine;
 			timeval mStartTime;
 			timeval mEndTime;
-			/*uint32_t*/ std::deque< std::string > mDepth;
+			/*uint32_t*/
+			std::deque< std::string > mDepth;
 
 			tPerformanceMeasurement ( const std::string& aDesc , const std::string& aFunction , const std::string& aFile , const uint32_t& aLine , const timeval& aStartTime , const timeval& aEndTime , const /*uint32_t*/ std::deque< std::string >& aDepth ) :
 				mDesc ( aDesc ),
@@ -105,13 +106,13 @@ class PerformanceMeasurement
 				{
 					std::stringstream lStr;
 					//lStr << "\"" << ( **lIt2 ).mDesc << "\" at " << ( **lIt2 ).mFile << ":" << ( **lIt2 ).mLine; // << " " << (**lIt2).mFunction;
-					
-					for( std::deque< std::string >::iterator lIt3 = ( **lIt2 ).mDepth.begin() ; lIt3 != ( **lIt2 ).mDepth.end() ; ++lIt3 ){
+
+					for ( std::deque< std::string >::iterator lIt3 = ( **lIt2 ).mDepth.begin() ; lIt3 != ( **lIt2 ).mDepth.end() ; ++lIt3 )
+					{
 						lStr << "\n > " << *lIt3;
 					}
+
 					lStr << "\n\"" << ( **lIt2 ).mDesc << "\" at " << ( **lIt2 ).mFile << ":" << ( **lIt2 ).mLine << "\n" ; // << " " << (**lIt2).mFunction;
-					
-					
 					double lStart ( ( ( double ) ( **lIt2 ).mStartTime.tv_sec*1000000.0 ) + ( ( double ) ( **lIt2 ).mStartTime.tv_usec ) );
 					double lEnd ( ( ( double ) ( **lIt2 ).mEndTime.tv_sec*1000000.0 ) + ( ( double ) ( **lIt2 ).mEndTime.tv_usec ) );
 					tStats& lSort2 = mSort2[ lStr.str() ];
@@ -135,7 +136,7 @@ class PerformanceMeasurement
 		}
 
 		/*uint32_t*/ std::deque< std::string > mDepth;
-		
+
 	private:
 		std::deque< tPerformanceMeasurement > mPerformanceMeasurement;
 };

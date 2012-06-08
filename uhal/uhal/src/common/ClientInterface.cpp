@@ -202,18 +202,18 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		try
 		{
 			return getPackingProtocol().readBlock ( aAddr, aSize, aMode );
-						  // mUnsignedReplyVectors.push_back ( ValVector< uint32_t > ( aSize ) );
-						  // IPbusPacketInfo lIPbusPacketInfo;
-						  // if ( aMode == defs::INCREMENTAL )
-						  // {
-						  // lIPbusPacketInfo.setHeader ( READ , aSize , aAddr );
-						  // }
-						  // else
-						  // {
-						  // lIPbusPacketInfo.setHeader ( NI_READ , aSize , aAddr );
-						  // }
-						  // lIPbusPacketInfo.setValMem ( mUnsignedReplyVectors.back() );
-						  // pack ( lIPbusPacketInfo );
+			// mUnsignedReplyVectors.push_back ( ValVector< uint32_t > ( aSize ) );
+			// IPbusPacketInfo lIPbusPacketInfo;
+			// if ( aMode == defs::INCREMENTAL )
+			// {
+			// lIPbusPacketInfo.setHeader ( READ , aSize , aAddr );
+			// }
+			// else
+			// {
+			// lIPbusPacketInfo.setHeader ( NI_READ , aSize , aAddr );
+			// }
+			// lIPbusPacketInfo.setValMem ( mUnsignedReplyVectors.back() );
+			// pack ( lIPbusPacketInfo );
 			// return mUnsignedReplyVectors.back();
 		}
 		catch ( const std::exception& aExc )
@@ -393,9 +393,9 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 
 
-	void ClientInterface::setTimeoutPeriod( const uint32_t& aTimeoutPeriod )
+	void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
 	{
-		getTransportProtocol().setTimeoutPeriod( aTimeoutPeriod );
+		getTransportProtocol().setTimeoutPeriod ( aTimeoutPeriod );
 	}
 
 	const uint32_t& ClientInterface::getTimeoutPeriod()
