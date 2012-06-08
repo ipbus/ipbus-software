@@ -2,25 +2,28 @@
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 
-using boost::asio::ip::udp;
+using boost::asio::ip::tcp;
 using namespace uhal;
 
 
-class UDPdummyHardware
+class TCPdummyHardware
 {
 	public:
 
-	UDPdummyHardware ( const uint16_t& aPort ) try :
+	TCPdummyHardware ( const uint16_t& aPort ) try :
 			mIOservice(),
-					   mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) )
-			{}
+					   mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) ),
+					   mSocket ( mIOservice )
+		{
+			mAcceptor.accept ( mSocket );
+		}
 		catch ( const std::exception& aExc )
 		{
 			pantheios::log_EXCEPTION ( aExc );
 			throw uhal::exception ( aExc );
 		}
 
-		~UDPdummyHardware() {}
+		~TCPdummyHardware() {}
 
 		void run()
 		{
@@ -28,10 +31,17 @@ class UDPdummyHardware
 			{
 				for ( ;; )
 				{
-					uint32_t lUDPreceiveCounter = mSocket.receive_from ( boost::asio::buffer ( mUDPreceiveBuffer, 500<<2 ) , mSenderEndpoint );
-					uint32_t* lReceivePtr ( mUDPreceiveBuffer );
-					uint32_t* lReceiveEnd ( lReceivePtr+ ( lUDPreceiveCounter>>2 ) );
-					uint32_t* lReplyPtr ( mUDPreplyBuffer );
+					boost::system::error_code lError;
+					uint32_t lTCPreceiveCounter = mSocket.read_some ( boost::asio::buffer ( mTCPreceiveBuffer, 500<<2 ) , lError );
+
+					if ( lError == boost::asio::error::eof )
+					{
+						break; // Connection closed cleanly by peer.
+					}
+
+					uint32_t* lReceivePtr ( mTCPreceiveBuffer );
+					uint32_t* lReceiveEnd ( lReceivePtr+ ( lTCPreceiveCounter>>2 ) );
+					uint32_t* lReplyPtr ( mTCPreplyBuffer );
 
 					do
 					{
@@ -133,7 +143,7 @@ class UDPdummyHardware
 					}
 					while ( lReceivePtr!=lReceiveEnd );
 
-					mSocket.send_to ( boost::asio::buffer ( mUDPreplyBuffer , ( lReplyPtr-mUDPreplyBuffer ) <<2 ) , mSenderEndpoint );
+					boost::asio::write ( mSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
 				}
 			}
 			catch ( const std::exception& aExc )
@@ -145,13 +155,14 @@ class UDPdummyHardware
 
 	private:
 		boost::asio::io_service mIOservice;
-		udp::socket mSocket;
-		udp::endpoint mSenderEndpoint;
+		tcp::acceptor mAcceptor;
+		tcp::socket mSocket;
+		tcp::endpoint mSenderEndpoint;
 
 		uint32_t mMemory[65536];
 
-		uint32_t mUDPreceiveBuffer[500];
-		uint32_t mUDPreplyBuffer[500];
+		uint32_t mTCPreceiveBuffer[500];
+		uint32_t mTCPreplyBuffer[500];
 
 		eIPbusTransactionType mType;
 		uint32_t mWordCounter;
@@ -174,8 +185,13 @@ int main ( int argc, char* argv[] )
 			return 1;
 		}
 
-		UDPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) );
-		lDummyHardware.run();
+		for ( ;; )
+		{
+			TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) );
+			lDummyHardware.run();
+			//if the connection is closed, open a new one 
+		}
+		
 	}
 	catch ( const std::exception& aExc )
 	{

@@ -1,87 +1,103 @@
-// /**
-// @file
-// @author Andrew W. Rose
-// @date 2012
-// */
+/**
+	@file
+	@author Andrew W. Rose
+	@date 2012
+*/
 
-// #ifndef _uhal_TransportProtocol_UDP_hpp_
-// #define _uhal_TransportProtocol_UDP_hpp_
+#ifndef _uhal_TransportProtocol_UDP_hpp_
+#define _uhal_TransportProtocol_UDP_hpp_
 
-// #include "uhal/exception.hpp"
-// #include "uhal/ProtocolInterfaces.hpp"
-// 
-// #include "uhal/log.hpp"
+#include "uhal/exception.hpp"
+#include "uhal/ProtocolInterfaces.hpp"
+#include "uhal/log.hpp"
 
-// #include <iostream>
-// #include <iomanip>
+#include <iostream>
+#include <iomanip>
 
-// #include <boost/bind.hpp>
-// #include <boost/asio.hpp>
-// #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/bind.hpp>
+#include <boost/asio.hpp>
 
-// #include <string>
+#ifdef USE_UDP_MULTITHREADED
+#include <boost/thread/thread.hpp>
+#endif
 
-// namespace uhal
-// {
+#include <string>
 
-// //! Exception class to handle the case where the UDP connection timed out. Uses the base uhal::exception implementation of what()
-// class UdpTimeout: public uhal::exception {  };
-// //! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
-// class ErrorInUdpCallback: public uhal::exception {  };
-// //! Exception class to handle the case where the returned packet size does not match that expected. Uses the base uhal::exception implementation of what()
-// class ReturnSizeMismatch: public uhal::exception {  };
+namespace uhal
+{
 
+	//! Exception class to handle the case where the UDP connection timed out. Uses the base uhal::exception implementation of what()
+	class UdpTimeout: public uhal::exception {  };
+	//! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
+	class ErrorInUdpCallback: public uhal::exception {  };
 
-// template < class PACKINGPROTOCOL >
-// class UdpTransportProtocol : public TransportProtocol
-// {
-// public:
+	class ErrorAtUdpSocketCreation: public uhal::exception {  };
 
-// /**
-// Constructor
-// */
-// UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , PACKINGPROTOCOL& aPackingProtocol , uint32_t aTimeoutPeriod = 10 );
-// /**
-// Destructor
-// */
-// virtual ~UdpTransportProtocol();
+	class UdpTransportProtocol : public TransportProtocol
+	{
 
-// /**
-// Flush the queue of pending IPbus transactions
-// */
-// void Dispatch();
+		public:
+			class DispatchWorker
+			{
+				public:
+					DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod );
 
-// private:
+					virtual ~DispatchWorker();
 
-// void CheckDeadline();
+					void operator() ();
+
+					void Dispatch ( Buffers* aBuffers );
 
 
-// std::string mHostname;
-// std::string mServiceOrPort;
+				private:
 
-// PACKINGPROTOCOL& mPackingProtocol;
+					UdpTransportProtocol& mUdpTransportProtocol;
 
-// //! The boost::asio::io_service used to create the connections
-// boost::asio::io_service mIOservice;
+					//! The boost::asio::io_service used to create the connections
+					boost::shared_ptr< boost::asio::io_service > mIOservice;
 
-// boost::asio::ip::udp::socket* mSocket;
-// boost::asio::ip::udp::resolver* mResolver;
-// boost::asio::ip::udp::resolver::query* mQuery;
-// boost::asio::ip::udp::resolver::iterator mIterator;
+					boost::shared_ptr< boost::asio::ip::udp::socket > mSocket;
 
-// //! Timeout period for UDP transactions;
-// boost::posix_time::seconds mTimeOut;
+					boost::shared_ptr< boost::asio::ip::udp::endpoint > mEndpoint;
 
-// //! timer for the timeout conditions
-// boost::asio::deadline_timer mDeadline;
+					//! Error code for the async callbacks to fill
+					boost::system::error_code mErrorCode;
 
-// bool mTimeoutFlag;
+			};
 
-// };
+			friend class DispatchWorker;
 
 
-// }
+			/**
+				Constructor
+			*/
+			UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod = 10 );
+			/**
+				Destructor
+			*/
+			virtual ~UdpTransportProtocol();
 
-// #include "uhal/TemplateDefinitions/TransportProtocol_UDP.hxx"
+			/**
+			Add buffers to the dispatch queue
+			*/
+			virtual void Dispatch ( Buffers* aBuffers );
 
-// #endif
+			virtual void Flush( );
+
+		private:
+
+			boost::shared_ptr< DispatchWorker > mDispatchWorker;
+
+#ifdef USE_UDP_MULTITHREADED
+			boost::shared_ptr< boost::thread > mDispatchThread;
+			std::deque< Buffers* > mPendingSendBuffers;
+			uhal::exception* mAsynchronousException;
+			boost::mutex mMutex;
+#endif
+
+	};
+
+
+}
+
+#endif

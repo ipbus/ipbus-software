@@ -219,9 +219,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	}
 
 	void PackingProtocol::Predispatch( )
-	{
-		pantheios::log_LOCATION();
-	}
+	{}
 
 
 	void PackingProtocol::Dispatch( )

@@ -33,3 +33,8 @@ localenv.Program(
 	target = localenv.SrcBuildPath+'/DummyHardwareUdp', 
 	source = [ localenv.SrcBuildPath+'/DummyHardwareUdp.cpp' ]
 )
+
+localenv.Program( 
+	target = localenv.SrcBuildPath+'/DummyHardwareTcp', 
+	source = [ localenv.SrcBuildPath+'/DummyHardwareTcp.cpp' ]
+)

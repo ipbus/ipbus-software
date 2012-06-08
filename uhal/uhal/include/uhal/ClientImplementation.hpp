@@ -25,113 +25,116 @@ namespace uhal
 {
 
 
-	// // ----------------------------------------------------------------------------------------------------------------
+	// ----------------------------------------------------------------------------------------------------------------
 
-	// //! A class to directly access locally-connected devices via IPbus over UDP
-	// template< eIPbusProtocolVersion IPbusProtocolVersion >
-	// class IPBusUDPClient : public ClientInterface
-	// {
-	// //! The timeout period for UDP transactions in seconds
-	// static const int mTimeoutPeriod = 10;
-	// /**
-	// The maximum allowed IPbus packet length.
-	// @todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
-	// */
-	// static const int mMaxPacketLength = 85; //for some reason BOOST ASIO only sends a maximum of 340 bytes ( at least it does on my CENTOS VM )
+	//! A class to directly access locally-connected devices via IPbus over UDP
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	class IPBusUDPClient : public ClientInterface
+	{
 
-	// //! Typedef the packing protocol which will be used by this IPbus Client
-	// typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
-	// //! Typedef the transport protocol which will be used by this IPbus Client
-	// typedef UdpTransportProtocol tTransportProtocol;
+			//! The timeout period for UDP transactions in seconds
+			static const int mDefaultTimeoutPeriod = 10;
+			/**
+			The maximum allowed IPbus packet length.
+			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
+			*/
+			static const int mMaxPacketLength = 350;
 
-	// public:
+			//! Typedef the packing protocol which will be used by this IPbus Client
+			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			//! Typedef the transport protocol which will be used by this IPbus Client
+			typedef UdpTransportProtocol tTransportProtocol;
 
-	// /**
-	// Constructor
-	// @param aId the uinique identifier that the client will be given.
-	// @param aUri a struct containing the full URI of the target.
-	// */
-	// IPBusUDPClient ( const std::string& aId , const URI& aUri );
+		public:
 
-	// /**
-	// Return a description of the behaviour this client
-	// @return a description of the behaviour this client
-	// */
-	// static std::string description();
+			/**
+			Constructor
+			@param aId the uinique identifier that the client will be given.
+			@param aUri a struct containing the full URI of the target.
+			*/
+			IPBusUDPClient ( const std::string& aId , const URI& aUri );
 
-	// private:
-	// /**
-	// Method to return the packing protocol. The base ClientInterface requires that this exists
-	// @return a reference to an instance of the packing protocol
-	// */
-	// PackingProtocol& getPackingProtocol();
+			/**
+			Return a description of the behaviour this client
+			@return a description of the behaviour this client
+			*/
+			static std::string description();
 
-	// /**
-	// Method to return the transport protocol. The base ClientInterface requires that this exists
-	// @return a reference to an instance of the transport protocol
-	// */
-	// TransportProtocol& getTransportProtocol();
+		private:
+			/**
+			Method to return the packing protocol. The base ClientInterface requires that this exists
+			@return a reference to an instance of the packing protocol
+			*/
+			PackingProtocol& getPackingProtocol();
 
-	// //! An instance of the packing protocol for this IPbus client
-	// tPackingProtocol mPackingProtocol;
-	// //! An instance of the transport protocol for this IPbus client
-	// tTransportProtocol mTransportProtocol;
+			/**
+			Method to return the transport protocol. The base ClientInterface requires that this exists
+			@return a reference to an instance of the transport protocol
+			*/
+			TransportProtocol& getTransportProtocol();
 
-	// };
+			//! An instance of the packing protocol for this IPbus client
+			tPackingProtocol mPackingProtocol;
+			//! An instance of the transport protocol for this IPbus client
+			tTransportProtocol mTransportProtocol;
 
-	// // ----------------------------------------------------------------------------------------------------------------
+	};
+
+	// ----------------------------------------------------------------------------------------------------------------
 
 
-	// //! A class to directly access locally-connected devices via IPbus over TCP
-	// template< eIPbusProtocolVersion IPbusProtocolVersion >
-	// class IPBusTCPClient : public ClientInterface
-	// {
-	// //! The timeout period for TCP transactions in seconds
-	// static const int mTimeoutPeriod = 10;
-	// /**
-	// The maximum allowed IPbus packet length.
-	// @todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
-	// */
-	// static const int mMaxPacketLength = 100;
+	//! A class to directly access locally-connected devices via IPbus over UDP
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	class IPBusTCPClient : public ClientInterface
+	{
 
-	// //! Typedef the packing protocol which will be used by this IPbus Client
-	// typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
-	// //! Typedef the transport protocol which will be used by this IPbus Client
-	// typedef TcpTransportProtocol tTransportProtocol;
+			//! The timeout period for UDP transactions in seconds
+			static const int mDefaultTimeoutPeriod = 10;
+			/**
+			The maximum allowed IPbus packet length.
+			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
+			*/
+			static const int mMaxPacketLength = 350;
 
-	// public:
+			//! Typedef the packing protocol which will be used by this IPbus Client
+			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+			//! Typedef the transport protocol which will be used by this IPbus Client
+			typedef TcpTransportProtocol tTransportProtocol;
 
-	// /**
-	// Constructor
-	// @param aId the uinique identifier that the client will be given.
-	// @param aUri a struct containing the full URI of the target.
-	// */
-	// IPBusTCPClient ( const std::string& aId , const URI& aUri );
+		public:
 
-	// /**
-	// Return a description of the behaviour this client
-	// @return a description of the behaviour this client
-	// */
-	// static std::string description();
+			/**
+			Constructor
+			@param aId the uinique identifier that the client will be given.
+			@param aUri a struct containing the full URI of the target.
+			*/
+			IPBusTCPClient ( const std::string& aId , const URI& aUri );
 
-	// private:
-	// /**
-	// Method to return the packing protocol. The base ClientInterface requires that this exists
-	// @return a reference to an instance of the packing protocol
-	// */
-	// PackingProtocol& getPackingProtocol();
+			/**
+			Return a description of the behaviour this client
+			@return a description of the behaviour this client
+			*/
+			static std::string description();
 
-	// /**
-	// Method to return the transport protocol. The base ClientInterface requires that this exists
-	// @return a reference to an instance of the transport protocol
-	// */
-	// TransportProtocol& getTransportProtocol();
+		private:
+			/**
+			Method to return the packing protocol. The base ClientInterface requires that this exists
+			@return a reference to an instance of the packing protocol
+			*/
+			PackingProtocol& getPackingProtocol();
 
-	// //! An instance of the packing protocol for this IPbus client
-	// tPackingProtocol mPackingProtocol;
-	// //! An instance of the transport protocol for this IPbus client
-	// tTransportProtocol mTransportProtocol;
-	// };
+			/**
+			Method to return the transport protocol. The base ClientInterface requires that this exists
+			@return a reference to an instance of the transport protocol
+			*/
+			TransportProtocol& getTransportProtocol();
+
+			//! An instance of the packing protocol for this IPbus client
+			tPackingProtocol mPackingProtocol;
+			//! An instance of the transport protocol for this IPbus client
+			tTransportProtocol mTransportProtocol;
+
+	};
 
 
 	// ----------------------------------------------------------------------------------------------------------------
@@ -146,13 +149,14 @@ namespace uhal
 	class ControlHubClient : public ClientInterface
 	{
 
-			//! The timeout period for TCP transactions in seconds
-			static const int mTimeoutPeriod = 10;
+			//! The timeout period for UDP transactions in seconds
+			static const int mDefaultTimeoutPeriod = 10;
 			/**
-				The maximum allowed IPbus packet length.
-				@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
+			The maximum allowed IPbus packet length.
+			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
 			*/
 			static const int mMaxPacketLength = 350;
+
 
 			//! Typedef the packing protocol which will be used by this IPbus Client
 			typedef ControlHubHostPackingProtocol< IPbusProtocolVersion > tPackingProtocol;

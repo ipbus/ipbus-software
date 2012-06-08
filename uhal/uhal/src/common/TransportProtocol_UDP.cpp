@@ -1,20 +1,20 @@
 #include "uhal/performance.hpp"
-#include "uhal/TransportProtocol_TCP.hpp"
+#include "uhal/TransportProtocol_UDP.hpp"
 
 // #include <boost/lambda/bind.hpp>
 // #include <boost/lambda/lambda.hpp>
 
 
-#ifdef USE_TCP_MULTITHREADED
+#ifdef USE_UDP_MULTITHREADED
 #include <sys/time.h>
 #else
 #include <signal.h>
 
-void TCPtimeout ( int signal )
+void UDPtimeout ( int signal )
 {
-	pantheios::log_ERROR ( "TCP Timeout" );
+	pantheios::log_ERROR ( "UDP Timeout" );
 	pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-	throw uhal::TcpTimeout();
+	throw uhal::UdpTimeout();
 }
 
 #endif
@@ -23,22 +23,20 @@ namespace uhal
 {
 
 
-TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
-		mTcpTransportProtocol ( aTcpTransportProtocol ),
+UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
+		mUdpTransportProtocol ( aUdpTransportProtocol ),
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
-							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) )
-	{
-		pantheios::log_NOTICE ( "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
-		boost::asio::connect ( *mSocket ,
-							   boost::asio::ip::tcp::resolver::iterator (
-								   boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
-									   boost::asio::ip::tcp::resolver::query ( aHostname , aServiceOrPort )
-								   )
-							   )
-							 );
-		mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-		pantheios::log_NOTICE ( "TCP connection succeeded" );
-	}
+							  mSocket ( boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) ) ),
+							  mEndpoint ( boost::shared_ptr< boost::asio::ip::udp::endpoint > ( new boost::asio::ip::udp::endpoint (
+											  * boost::asio::ip::udp::resolver::iterator (
+													  boost::asio::ip::udp::resolver ( *mIOservice ).resolve (
+															  boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aHostname , aServiceOrPort )
+													  )
+											  )
+										  )
+																							  )
+										)
+		{}
 	catch ( const std::exception& aExc )
 	{
 		pantheios::log_EXCEPTION ( aExc );
@@ -46,7 +44,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 	}
 
 
-	TcpTransportProtocol::DispatchWorker::~DispatchWorker()
+	UdpTransportProtocol::DispatchWorker::~DispatchWorker()
 	{
 		try
 		{
@@ -62,9 +60,9 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 	}
 
 
-	void TcpTransportProtocol::DispatchWorker::operator() ()
+	void UdpTransportProtocol::DispatchWorker::operator() ()
 	{
-#ifdef USE_TCP_MULTITHREADED
+#ifdef USE_UDP_MULTITHREADED
 
 		try
 		{
@@ -75,20 +73,20 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			{
 				boost::this_thread::interruption_point();
 				{
-					boost::lock_guard<boost::mutex> lLock ( mTcpTransportProtocol.mMutex );
-					lBuffersPending = ( mTcpTransportProtocol.mPendingSendBuffers.size() != 0 );
+					boost::lock_guard<boost::mutex> lLock ( mUdpTransportProtocol.mMutex );
+					lBuffersPending = ( mUdpTransportProtocol.mPendingSendBuffers.size() != 0 );
 				}
 
 				if ( lBuffersPending )
 				{
 					{
-						boost::lock_guard<boost::mutex> lLock ( mTcpTransportProtocol.mMutex );
-						lBuffers = mTcpTransportProtocol.mPendingSendBuffers.front();
+						boost::lock_guard<boost::mutex> lLock ( mUdpTransportProtocol.mMutex );
+						lBuffers = mUdpTransportProtocol.mPendingSendBuffers.front();
 					}
 					Dispatch ( lBuffers );
 					{
-						boost::lock_guard<boost::mutex> lLock ( mTcpTransportProtocol.mMutex );
-						mTcpTransportProtocol.mPendingSendBuffers.pop_front();
+						boost::lock_guard<boost::mutex> lLock ( mUdpTransportProtocol.mMutex );
+						mUdpTransportProtocol.mPendingSendBuffers.pop_front();
 					}
 				}
 			}
@@ -96,7 +94,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		catch ( const std::exception& aExc )
 		{
 			pantheios::log_EXCEPTION ( aExc );
-			mTcpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
+			mUdpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
 		}
 		catch ( boost::thread_interrupted& )
 		{
@@ -111,7 +109,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 
 
 
-	void TcpTransportProtocol::DispatchWorker::Dispatch ( Buffers* aBuffers )
+	void UdpTransportProtocol::DispatchWorker::Dispatch ( Buffers* aBuffers )
 	{
 		try
 		{
@@ -122,19 +120,16 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			PERFORMANCE ( "ASIO write" ,
 						  /*
-						  				NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+						  				NOTE! For TCP, using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
 						  */
-						  /*				mErrorCode = boost::asio::error::would_block;*/
-						  boost::asio::write ( *mSocket , lAsioSendBuffer , mErrorCode );
-						  /*				boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-						  				do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
+						  mSocket->send_to ( lAsioSendBuffer , *mEndpoint ); //, mErrorCode );
 						)
 
 			if ( mErrorCode )
 			{
 				pantheios::log_ERROR ( "ASIO reported an error: " , mErrorCode.message() );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-				throw ErrorInTcpCallback();
+				throw ErrorInUdpCallback();
 			}
 
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -149,24 +144,22 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 				lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
 			}
 
+			boost::asio::ip::udp::endpoint lEndpoint;
 			PERFORMANCE ( "ASIO read" ,
 						  /*
-						  				NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+						  				NOTE! For TCP, using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
 						  */
-						  /*				mErrorCode = boost::asio::error::would_block;*/
-						  boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), mErrorCode );
-						  /*				boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-						  				do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
+						  mSocket->receive_from ( lAsioReplyBuffer , lEndpoint , 0 , mErrorCode );
 						)
 
 			if ( mErrorCode )
 			{
 				pantheios::log_ERROR ( "ASIO reported an error: " , mErrorCode.message() );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-				throw ErrorInTcpCallback();
+				throw ErrorInUdpCallback();
 			}
 
-			if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
+			if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
 				pantheios::log_ERROR ( "Validation function reported an error!" );
 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
@@ -183,24 +176,24 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 
 
 
-TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
+UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
 		TransportProtocol ( aTimeoutPeriod ),
 						  mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort , aTimeoutPeriod ) ) )
-#ifdef USE_TCP_MULTITHREADED
+#ifdef USE_UDP_MULTITHREADED
 						  , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
 						  mAsynchronousException ( NULL )
 #endif
 	{
-#ifndef USE_TCP_MULTITHREADED
+#ifndef USE_UDP_MULTITHREADED
 		struct sigaction sa;
 		memset ( &sa, 0, sizeof ( sa ) );
-		sa.sa_handler = TCPtimeout;
+		sa.sa_handler = UDPtimeout;
 
 		if ( sigaction ( SIGALRM, &sa, 0 ) < 0 )
 		{
 			pantheios::log_ERROR ( "Can't establish signal handler" );
 			pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-			throw TcpTimeout();
+			throw UdpTimeout();
 		}
 
 #endif
@@ -212,11 +205,11 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 	}
 
 
-	TcpTransportProtocol::~TcpTransportProtocol()
+	UdpTransportProtocol::~UdpTransportProtocol()
 	{
 		try
 		{
-#ifdef USE_TCP_MULTITHREADED
+#ifdef USE_UDP_MULTITHREADED
 
 			if ( mDispatchThread.unique() )
 			{
@@ -246,11 +239,11 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 
 
 
-	void TcpTransportProtocol::Dispatch ( Buffers* aBuffers )
+	void UdpTransportProtocol::Dispatch ( Buffers* aBuffers )
 	{
 		try
 		{
-#ifdef USE_TCP_MULTITHREADED
+#ifdef USE_UDP_MULTITHREADED
 			{
 				boost::lock_guard<boost::mutex> lLock ( mMutex );
 
@@ -279,11 +272,11 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 
 
 
-	void TcpTransportProtocol::Flush( )
+	void UdpTransportProtocol::Flush( )
 	{
 		try
 		{
-#ifdef USE_TCP_MULTITHREADED
+#ifdef USE_UDP_MULTITHREADED
 			// 				timeval lStart, lEnd;
 			// 				gettimeofday ( &lStart, NULL );
 			time_t lStart, lEnd; //we don't need us resolution
@@ -312,9 +305,9 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 
 				if ( lTimeTaken > mTimeoutPeriod )
 				{
-					pantheios::log_ERROR ( "TCP Timeout" );
+					pantheios::log_ERROR ( "UDP Timeout" );
 					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-					throw TcpTimeout();
+					throw UdpTimeout();
 				}
 			}
 			while ( lContinue );

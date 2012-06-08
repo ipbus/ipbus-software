@@ -14,14 +14,14 @@ namespace uhal
 				mInstance = new ClientFactory();
 				// ---------------------------------------------------------------------
 				/*				mInstance->add< uhal::IPBusUDPClient<IPbus_1_3> > ( "ipbusudp" , "Direct access to hardware via UDP, using the default IPbus version which is currently IPbus 1.3" );
-								mInstance->add< uhal::IPBusUDPClient<IPbus_1_2> > ( "ipbusudp-1.2" );
-								mInstance->add< uhal::IPBusUDPClient<IPbus_1_3> > ( "ipbusudp-1.3" );
-								// mInstance->add< uhal::IPBusUDPClient<IPbus_1_4> > ( "ipbusudp-1.4" );
+								mInstance->add< uhal::IPBusUDPClient<IPbus_1_2> > ( "ipbusudp-1.2" );*/
+				mInstance->add< uhal::IPBusUDPClient<IPbus_1_3> > ( "ipbusudp-1.3" );
+				/*				// mInstance->add< uhal::IPBusUDPClient<IPbus_1_4> > ( "ipbusudp-1.4" );
 								// mInstance->add< uhal::IPBusUDPClient<IPbus_2_0> > ( "ipbusudp-2.0" );
 								// ---------------------------------------------------------------------
-								mInstance->add< uhal::IPBusTCPClient<IPbus_1_3> > ( "ipbustcp" , "Direct access to hardware via TCP, using the default IPbus version which is currently IPbus 1.3" );
-								mInstance->add< uhal::IPBusTCPClient<IPbus_1_3> > ( "ipbustcp-1.3" );
-								// mInstance->add< uhal::IPBusTCPClient<IPbus_1_4> > ( "ipbustcp-1.4" );
+								mInstance->add< uhal::IPBusTCPClient<IPbus_1_3> > ( "ipbustcp" , "Direct access to hardware via TCP, using the default IPbus version which is currently IPbus 1.3" );*/
+				mInstance->add< uhal::IPBusTCPClient<IPbus_1_3> > ( "ipbustcp-1.3" );
+				/*				// mInstance->add< uhal::IPBusTCPClient<IPbus_1_4> > ( "ipbustcp-1.4" );
 								// mInstance->add< uhal::IPBusTCPClient<IPbus_2_0> > ( "ipbustcp-2.0" );
 								// ---------------------------------------------------------------------
 								mInstance->add< uhal::ControlHubClient<CHH_1 , IPbus_1_3> > ( "chtcp" , "Hardware access via the Control Hub, using Control Hub Protocol 1 (Multi target packets with 32-bit identifier) and the default IPbus version which is currently IPbus 1.3" );
