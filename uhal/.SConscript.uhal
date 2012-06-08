@@ -60,7 +60,7 @@ env.Append(
 #)
 
 env.Append( 
-	CCFLAGS = [ '-D USE_TCP_MULTITHREADED']
+	CCFLAGS = [	'-D USE_TCP_MULTITHREADED' , '-D USE_UDP_MULTITHREADED' ]
 )
 
 
