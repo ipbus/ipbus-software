@@ -1,10 +1,6 @@
 #include "uhal/performance.hpp"
 #include "uhal/TransportProtocol_UDP.hpp"
 
-// #include <boost/lambda/bind.hpp>
-// #include <boost/lambda/lambda.hpp>
-
-
 #ifdef USE_UDP_MULTITHREADED
 #include <sys/time.h>
 #else

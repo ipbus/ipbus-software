@@ -782,17 +782,11 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 			uint32_t lSendBufferFreeSpace ( mMaxSendSize - mCurrentBuffers->sendCounter() );
 			uint32_t lReplyBufferFreeSpace ( mMaxReplySize - mCurrentBuffers->replyCounter() );
-			//pantheios::log_NOTICE( "aRequestedSendSize = " , pantheios::integer(aRequestedSendSize) );
-			//pantheios::log_NOTICE( "aRequestedReplySize = " , pantheios::integer(aRequestedReplySize) );
-			//pantheios::log_NOTICE( "lSendBufferFreeSpace = " , pantheios::integer(lSendBufferFreeSpace) );
-			//pantheios::log_NOTICE( "lReplyBufferFreeSpace = " , pantheios::integer(lReplyBufferFreeSpace) );
 
 			if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
 			{
 				aAvailableSendSize = aRequestedSendSize;
 				aAvailableReplySize = aRequestedReplySize;
-				//pantheios::log_NOTICE( "replying with aAvailableSendSize = " , pantheios::integer(aAvailableSendSize) );
-				//pantheios::log_NOTICE( "replying with aAvailableReplySize = " , pantheios::integer(aAvailableReplySize) );
 				return;
 			}
 
@@ -800,14 +794,11 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			{
 				aAvailableSendSize = lSendBufferFreeSpace;
 				aAvailableReplySize = lReplyBufferFreeSpace;
-				//pantheios::log_NOTICE( "replying with aAvailableSendSize = " , pantheios::integer(aAvailableSendSize) );
-				//pantheios::log_NOTICE( "replying with aAvailableReplySize = " , pantheios::integer(aAvailableReplySize) );
 				return;
 			}
 
 			this->Predispatch();
 			mTransportProtocol->Dispatch ( mCurrentBuffers );
-			//pantheios::log_NOTICE( "Creating new buffer" );
 			mCurrentBuffers = new Buffers ( mMaxSendSize );
 			this->Preamble();
 			lSendBufferFreeSpace = mMaxSendSize - mCurrentBuffers->sendCounter();
@@ -817,15 +808,11 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			{
 				aAvailableSendSize = aRequestedSendSize;
 				aAvailableReplySize = aRequestedReplySize;
-				//pantheios::log_NOTICE( "replying with aAvailableSendSize = " , pantheios::integer(aAvailableSendSize) );
-				//pantheios::log_NOTICE( "replying with aAvailableReplySize = " , pantheios::integer(aAvailableReplySize) );
 				return;
 			}
 
 			aAvailableSendSize = lSendBufferFreeSpace;
 			aAvailableReplySize = lReplyBufferFreeSpace;
-			//pantheios::log_NOTICE( "replying with aAvailableSendSize = " , pantheios::integer(aAvailableSendSize) );
-			//pantheios::log_NOTICE( "replying with aAvailableReplySize = " , pantheios::integer(aAvailableReplySize) );
 		}
 		catch ( const std::exception& aExc )
 		{
