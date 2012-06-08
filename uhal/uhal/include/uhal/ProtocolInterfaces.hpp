@@ -88,12 +88,12 @@ namespace uhal
 			/**
 				Default constructor
 			*/
-			TransportProtocol() {}
+			TransportProtocol( const uint32_t& aTimeoutPeriod );
 
 			/**
 				Destructor
 			*/
-			virtual ~TransportProtocol() {}
+			virtual ~TransportProtocol();
 
 			/**
 				Pure virtual function in which the concrete implementations should flush the queue of pending IPbus transactions
@@ -101,10 +101,16 @@ namespace uhal
 			virtual void Dispatch ( Buffers* aBuffers ) = 0;
 
 			virtual void Flush() = 0;
+
+			virtual void setTimeoutPeriod( const uint32_t& aTimeoutPeriod );
+
+			virtual const uint32_t& getTimeoutPeriod();
 			
 		protected:
 			PackingProtocol* mPackingProtocol;
 
+			//! Timeout period for TCP transactions;
+			uint32_t mTimeoutPeriod;
 
 
 	};

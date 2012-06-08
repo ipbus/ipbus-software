@@ -50,20 +50,13 @@ namespace uhal
 	
 				
 				private:
-// 					void CheckDeadline();
-	
+
 					TcpTransportProtocol& mTcpTransportProtocol;
 					
 					//! The boost::asio::io_service used to create the connections
 					boost::shared_ptr< boost::asio::io_service > mIOservice;		
 	
 					boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
-	
-					//! Timeout period for TCP transactions;
-// 					boost::posix_time::seconds mTimeOut;
-	
-					//! Timer for the timeout conditions
-// 					boost::shared_ptr< boost::asio::deadline_timer > mDeadline;
 
 					//! Error code for the async callbacks to fill
 					boost::system::error_code mErrorCode;
@@ -100,13 +93,9 @@ namespace uhal
 			boost::mutex mMutex; 
 #endif
 
-			//! Timeout period for TCP transactions;
-			double mTimeOut;
 	};
 
 
 }
-
-// #include "uhal/TemplateDefinitions/TransportProtocol_TCP.hxx"
 
 #endif

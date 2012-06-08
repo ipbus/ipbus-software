@@ -4,7 +4,19 @@
 // #include <boost/lambda/bind.hpp>
 // #include <boost/lambda/lambda.hpp>
 
-#include <sys/time.h>
+
+#ifdef USE_TCP_MULTITHREADED
+	#include <sys/time.h>
+#else
+	#include <signal.h> 
+
+	void TCPtimeout( int signal ) { 
+		pantheios::log_ERROR ( "TCP Timeout" );
+		pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+		throw uhal::TcpTimeout();
+	} 
+
+#endif
 
 namespace uhal
 {
@@ -14,8 +26,6 @@ namespace uhal
 							  mTcpTransportProtocol( aTcpTransportProtocol ),
 							  mIOservice( boost::shared_ptr< boost::asio::io_service >( new boost::asio::io_service() ) ),
 							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket >( new boost::asio::ip::tcp::socket( *mIOservice ) ) ) //,
-// 							  mTimeOut ( aTimeoutPeriod ) ,
-// 							  mDeadline ( boost::shared_ptr< boost::asio::deadline_timer > ( new boost::asio::deadline_timer( *mIOservice ) ) )
 		{
 			pantheios::log_NOTICE ( "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
 						
@@ -27,9 +37,6 @@ namespace uhal
 							   )
 							 );
 			mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-
-// 			mDeadline->expires_at ( boost::posix_time::pos_infin );
-// 			CheckDeadline(); // Start the persistent actor that checks for deadline expiry.
 
 			pantheios::log_NOTICE ( "TCP connection succeeded" );
 
@@ -107,14 +114,15 @@ namespace uhal
 
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-		
-// 			mDeadline->expires_from_now ( mTimeOut );
-	
+			
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			// Send data
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			PERFORMANCE ( "ASIO write" ,
-				mErrorCode = boost::asio::error::would_block;
+/*
+				NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+*/
+/*				mErrorCode = boost::asio::error::would_block;*/
 				boost::asio::write ( *mSocket , lAsioSendBuffer , mErrorCode );
 /*				boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
 				do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
@@ -140,8 +148,11 @@ namespace uhal
 			}
 			
 							
-			PERFORMANCE ( "ASIO synchronous read" ,
-				mErrorCode = boost::asio::error::would_block;
+			PERFORMANCE ( "ASIO read" ,
+/*
+				NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+*/
+/*				mErrorCode = boost::asio::error::would_block;*/
 				boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), mErrorCode );
 /*				boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
 				do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
@@ -172,53 +183,30 @@ namespace uhal
 	
 	}
 
-// 	void TcpTransportProtocol::DispatchWorker::CheckDeadline()
-// 	{
-// 		try
-// 		{
-// 
-// 			// Check whether the deadline has passed. We compare the deadline against the current time since a new asynchronous operation may have moved the deadline before this actor had a chance to run.
-// 			if ( mDeadline->expires_at() <= boost::asio::deadline_timer::traits_type::now() )
-// 			{
-// 				// The deadline has passed
-// 				mDeadline->expires_at ( boost::posix_time::pos_infin );
-// 
-// 				boost::asio::ip::tcp::endpoint lRemoteEndpoint = mSocket->remote_endpoint();
-// 
-// 
-// 				pantheios::log_ERROR ( "TCP Timeout on connection to '" , lRemoteEndpoint.address().to_string() , "' port " , pantheios::integer( lRemoteEndpoint.port() ) );
-// 				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-// 				mTcpTransportProtocol.mAsynchronousException = new TcpTimeout();
-// 				return;
-// 			}
-// 
-// 			// Put the actor back to sleep.
-// 			mDeadline->async_wait ( boost::bind ( &TcpTransportProtocol::DispatchWorker::CheckDeadline , this ) );
-// 
-// 			
-// 			
-// 		}
-// 		catch ( const std::exception& aExc )
-// 		{
-// 			pantheios::log_EXCEPTION ( aExc );
-// 			mTcpTransportProtocol.mAsynchronousException = new uhal::exception( aExc );
-// 		}
-// 	}
-
-
-
 
 
 
 TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
-		TransportProtocol(),
+		TransportProtocol( aTimeoutPeriod ),
 		mDispatchWorker( boost::shared_ptr< DispatchWorker >( new DispatchWorker( *this , aHostname , aServiceOrPort , aTimeoutPeriod ) ) )
 		#ifdef USE_TCP_MULTITHREADED
 			, mDispatchThread( boost::shared_ptr< boost::thread >( new boost::thread( *mDispatchWorker ) ) ),
 			mAsynchronousException( NULL )
 		#endif
-		, mTimeOut( aTimeoutPeriod*1e6 )
-	{}
+	{
+
+		#ifndef USE_TCP_MULTITHREADED
+			struct sigaction sa; 
+			memset(&sa, 0, sizeof(sa)); 
+			sa.sa_handler = TCPtimeout; 
+			if (sigaction(SIGALRM, &sa, 0) < 0){ 
+				pantheios::log_ERROR ( "Can't establish signal handler" ); 
+				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				throw TcpTimeout();
+			}
+		#endif
+	
+	}
 	catch ( const std::exception& aExc )
 	{
 		pantheios::log_EXCEPTION ( aExc );
@@ -274,13 +262,9 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 
 				}
 			#else
+				alarm( mTimeoutPeriod );
 				mDispatchWorker->Dispatch( aBuffers );
-				if( !mPackingProtocol->Validate( lBuffers ) )
-				{
-					pantheios::log_ERROR ( "Validation function reported an error!" );
-					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
-					throw uhal::exception ();
-				}
+				alarm( 0 );
 			#endif
 
 		}
@@ -298,10 +282,12 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		try
 		{
 
-			timeval lStart, lEnd;
-			gettimeofday ( &lStart, NULL );
-
 			#ifdef USE_TCP_MULTITHREADED
+// 				timeval lStart, lEnd;
+// 				gettimeofday ( &lStart, NULL );
+				time_t lStart, lEnd; //we don't need us resolution
+				time ( &lStart );
+
 				bool lContinue( true );
 				do{
 				
@@ -317,10 +303,12 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 					lContinue = ( mPendingSendBuffers.size() );
 					}
 
-					gettimeofday ( &lEnd, NULL );
+// 					gettimeofday ( &lEnd, NULL );
+					time ( &lEnd );
 
-					double lTimeTaken ( ((double)(lEnd.tv_sec-lStart.tv_sec)*1e6) + (double)(lEnd.tv_usec-lStart.tv_usec) );
-					if( lTimeTaken > mTimeOut){
+/*					double lTimeTaken ( ((double)(lEnd.tv_sec-lStart.tv_sec)*1e6) + (double)(lEnd.tv_usec-lStart.tv_usec) );*/
+					double lTimeTaken( difftime ( lEnd , lStart) );
+					if( lTimeTaken > mTimeoutPeriod){
 						pantheios::log_ERROR ( "TCP Timeout" );
 						pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
 						throw TcpTimeout();

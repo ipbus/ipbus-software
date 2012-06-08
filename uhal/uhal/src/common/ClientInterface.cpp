@@ -393,4 +393,14 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 
 
+	void ClientInterface::setTimeoutPeriod( const uint32_t& aTimeoutPeriod )
+	{
+		getTransportProtocol().setTimeoutPeriod( aTimeoutPeriod );
+	}
+
+	const uint32_t& ClientInterface::getTimeoutPeriod()
+	{
+		return getTransportProtocol().getTimeoutPeriod();
+	}
+
 }

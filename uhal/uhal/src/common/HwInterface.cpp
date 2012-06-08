@@ -88,6 +88,20 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 	}
 
+
+	void HwInterface::setTimeoutPeriod( const uint32_t& aTimeoutPeriod )
+	{
+		mClientInterface->setTimeoutPeriod( aTimeoutPeriod );
+	}
+
+
+	const uint32_t& HwInterface::getTimeoutPeriod()
+	{
+		return mClientInterface->getTimeoutPeriod();
+	}
+
+
+
 	Node& HwInterface::getNode ( const std::string& aId )
 	{
 		try

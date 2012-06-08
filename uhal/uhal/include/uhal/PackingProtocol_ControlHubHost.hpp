@@ -8,8 +8,8 @@
 #define _uhal_PackingProtocol_ControlHubHost_hpp_
 
 #include "uhal/ProtocolInterfaces.hpp"
-// #include "boost/system/error_code.hpp"
-// #include "uhal/AsioAccumulatedPacket.hpp"
+
+#include <boost/thread/thread.hpp>
 
 namespace uhal
 {

@@ -145,6 +145,33 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 	}
 
 
+
+
+	TransportProtocol::TransportProtocol( const uint32_t& aTimeoutPeriod ) try :
+		mTimeoutPeriod ( aTimeoutPeriod )
+		{}
+		catch ( const std::exception& aExc )
+		{
+			pantheios::log_EXCEPTION ( aExc );
+			throw uhal::exception ( aExc );
+		}
+
+	TransportProtocol::~TransportProtocol() {}
+
+
+	void TransportProtocol::setTimeoutPeriod( const uint32_t& aTimeoutPeriod )
+	{
+		mTimeoutPeriod = aTimeoutPeriod;
+	}
+
+	const uint32_t& TransportProtocol::getTimeoutPeriod()
+	{
+		return mTimeoutPeriod;
+	}
+
+
+
+
 PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) try :
 		mTransportProtocol ( NULL ),
 						   mCurrentBuffers ( NULL ),

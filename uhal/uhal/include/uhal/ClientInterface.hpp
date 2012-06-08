@@ -67,7 +67,6 @@ namespace uhal
 			*/
 			std::string url();
 
-
 			/*
 				Return a description of the behaviour this client
 				@return a description of the behaviour this client
@@ -173,6 +172,10 @@ namespace uhal
 			*/
 			void dispatch ();
 
+			virtual void setTimeoutPeriod( const uint32_t& aTimeoutPeriod );
+
+			virtual const uint32_t& getTimeoutPeriod();
+
 		private:
 
 			/**
@@ -186,18 +189,6 @@ namespace uhal
 				@return a reference to the transport protocol used by the concrete implementation
 			*/
 			virtual TransportProtocol& getTransportProtocol() = 0;
-
-		private:
-
-			//! A deque of validated memory - needed since the reply memory must be valid when the dispatch is called even if the user discards their copy of the validated memory
-			std::deque< ValWord< uint32_t > > mUnsignedReplyWords;
-			//! A deque of validated memory - needed since the reply memory must be valid when the dispatch is called even if the user discards their copy of the validated memory
-			std::deque< ValWord< int32_t > > mSignedReplyWords;
-			//! A deque of validated memory - needed since the reply memory must be valid when the dispatch is called even if the user discards their copy of the validated memory
-			std::deque< ValVector< uint32_t > > mUnsignedReplyVectors;
-			//! A deque of validated memory - needed since the reply memory must be valid when the dispatch is called even if the user discards their copy of the validated memory
-			std::deque< ValVector< int32_t > > mSignedReplyVectors;
-
 
 		protected:
 			//! the identifier of the target for this client
