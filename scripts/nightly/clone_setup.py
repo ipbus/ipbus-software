@@ -1,5 +1,10 @@
 """Clones a XDAQ setup template and replaces the environment variables
-Usage: clone_setup.py xdaq_zone /path/to/setup
+Usage: clone_setup.py /path/to/setup  [xdaq_zone]
+
+Arguments:
+   /path/to/setup  Path to the setup files used as a template
+   xdaq_zone       (optional) Name of the XDAQ zone to be used for the generated setup.
+                              If the parameter is not present the environment variable $XDAQ_ZONE is used instead.
 """
 
 import os
@@ -57,10 +62,20 @@ def clone_setup(from_path,setup):
 
     replace_environ(to_path)
 
+
 if __name__== "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) == 2:
+        if os.environ.has_key("XDAQ_ZONE"):
+            clone_setup(sys.argv[1],os.environ["XDAQ_ZONE"])
+        else:
+            sys.stderr.write('ERROR: $XDAQ_ZONE is not defined\n\n')
+            print __doc__
+            sys.exit(1)
+      
+    elif len(sys.argv) == 3:
+        clone_setup(sys.argv[1],sys.argv[2])
+    else:
         sys.stderr.write('ERROR: wrong number of arguments\n\n')
         print __doc__
         sys.exit(1)
 
-    clone_setup(sys.argv[1],sys.argv[2])
