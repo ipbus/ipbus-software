@@ -47,9 +47,9 @@ def replace_environ(path):
 
                 open(fn,'w').write(text)
 
-def clone_setup(from_path,setup):
-    os.environ["XDAQ_ZONE"] = setup
-    to_path = os.path.join(from_path,'../%s' % setup)
+def clone_setup(from_path,zone):
+    os.environ["XDAQ_ZONE"] = zone
+    to_path = os.path.join(from_path,'../%s' % zone)
 
     system("rm -rf %s" % to_path,log=False)
     shutil.copytree(from_path,to_path)
