@@ -1,12 +1,14 @@
 MAKE=make
-PACKAGES = 	extern/boost \
-		extern/stlsoft \
-		extern/pantheios \
-		extern/pugixml \
-		uhal/BoostSpiritGrammars \
-		uhal/uhal \
-		uhal/tests \
-		controlhub
+PACKAGES = \
+	extern/boost \
+	extern/erlang \
+	extern/stlsoft \
+	extern/pantheios \
+	extern/pugixml \
+	uhal/BoostSpiritGrammars \
+	uhal/uhal \
+	uhal/tests \
+	controlhub
 
 TARGETS=clean rpm build
 
