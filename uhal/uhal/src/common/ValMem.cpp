@@ -1,7 +1,7 @@
 
 #include <uhal/ValMem.hpp>
 
-#include "uhal/log.hpp"
+#include "log/log.hpp"
 #include "uhal/Utilities.hpp"
 
 namespace uhal
@@ -13,7 +13,7 @@ _ValHeader_::_ValHeader_ ( const bool& aValid ) try :
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -29,7 +29,7 @@ _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t 
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -42,7 +42,7 @@ _ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid 
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -56,7 +56,7 @@ ValHeader::ValHeader() try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -68,7 +68,7 @@ ValHeader::ValHeader() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -81,7 +81,7 @@ ValHeader::ValHeader() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -99,7 +99,7 @@ ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -111,7 +111,7 @@ ValWord< T >::ValWord ( const ValWord<T>& aVal ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -123,7 +123,7 @@ ValWord< T >::ValWord() try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -136,7 +136,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -150,7 +150,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -165,7 +165,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -185,7 +185,7 @@ ValWord< T >::ValWord() try :
 	// }
 	// else
 	// {
-	// pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+	// log ( Error() , "Throwing at " , ThisLocation() );
 	// throw NonValidatedMemory();
 	// }
 	// }
@@ -199,7 +199,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -215,14 +215,14 @@ ValWord< T >::ValWord() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -238,14 +238,14 @@ ValWord< T >::ValWord() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Attempted  to modify validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Attempted  to modify validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ValMemImutabilityViolation();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -259,7 +259,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -273,7 +273,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -291,7 +291,7 @@ ValVector< T >::ValVector ( const std::vector<T>& aValues ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -303,7 +303,7 @@ ValVector< T >::ValVector ( const ValVector& aValues ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -315,7 +315,7 @@ ValVector< T >::ValVector ( uint32_t aSize ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -327,7 +327,7 @@ ValVector< T >::ValVector() try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -340,7 +340,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -354,7 +354,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -372,14 +372,14 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Attempted  to modify validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Attempted  to modify validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ValMemImutabilityViolation();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -395,14 +395,14 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -418,14 +418,14 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -443,15 +443,15 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 			*/
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -466,7 +466,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -482,14 +482,14 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -505,14 +505,14 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -528,14 +528,14 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -551,14 +551,14 @@ ValVector< T >::ValVector() try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Access attempted on non-validated memory" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Access attempted on non-validated memory" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NonValidatedMemory();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -576,14 +576,14 @@ ValVector< T >::ValVector() try :
 				}
 				else
 				{
-					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
+					log ( Error() , "Throwing at " , ThisLocation() );
 					throw ValMemImutabilityViolation();
 				}
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -599,14 +599,14 @@ ValVector< T >::ValVector() try :
 				}
 				else
 				{
-					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
+					log ( Error() , "Throwing at " , ThisLocation() );
 					throw ValMemImutabilityViolation();
 				}
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -622,14 +622,14 @@ ValVector< T >::ValVector() try :
 				}
 				else
 				{
-					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_reverse_iterator." );
-					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_reverse_iterator." );
+					log ( Error() , "Throwing at " , ThisLocation() );
 					throw ValMemImutabilityViolation();
 				}
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -645,14 +645,14 @@ ValVector< T >::ValVector() try :
 				}
 				else
 				{
-					pantheios::log_ERROR ( "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
+					log ( Error() , "Throwing at " , ThisLocation() );
 					throw ValMemImutabilityViolation();
 				}
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}

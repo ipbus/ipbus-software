@@ -11,30 +11,32 @@ Import('env')
 AddOption( '--generator' , action='store' , dest='generator' , default='' , help='build generator' ) 
 
 localenv = env.Clone()
-localenv.VariantDir( '.build/src/common' , 'src/common' , duplicate=0 )
-localenv.VariantDir( 'bin' , 'src/common' , duplicate=0 )
-
-
-localenv.Append( 
-	CPPPATH = [	'include' , '/opt/local/include' ]
-) 
-
-localenv.Append( 
-	CCFLAGS = [	'-D MAX_NUM_ARGS=32' ]
-) 
+localenv.VariantDir( localenv.BuildPath+'/src/common' , 'src/common' , duplicate=0 )
+localenv.VariantDir( localenv.SrcBuildPath , 'src/common' , duplicate=0 )
 
 if localenv.GetOption('generator'):
+	localenv.Append( 
+		CCFLAGS = [	'-D MAX_NUM_ARGS=32' ]
+	) 
+	
 	localenv.Program( 
 		target = 'bin/generator', 
-		source = [ '.build/src/common/generator.cxx' , '.build/src/common/log_configuration.cpp' ]
+		source = [ localenv.SrcBuildPath+'/src/common/generator.cxx' , localenv.SrcBuildPath+'/src/common/log_configuration.cpp' ]
 	)
+	
 else:
+
 	log = localenv.SharedLibrary( 
-		target = 'lib/log', 
-		source = [ Glob('.build/src/common/*.cpp') ]
+		target = localenv.LibPath+'/log', 
+		source = [ Glob(localenv.BuildPath+'/src/common/*.cpp') ]
 	)
+	
+	# Install the libraries
+	localenv.Install( localenv.InstallPath , [ log ] )
+	localenv.Alias( 'install', localenv.InstallPath )
+	
 	localenv.Program( 
 		target = 'bin/test', 
-		source = [ '.build/src/common/test.cxx' ],
+		source = [ localenv.SrcBuildPath+'/test.cxx' ],
 		LIBS = [ log ]
 	)

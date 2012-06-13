@@ -13,7 +13,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -26,7 +26,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -44,7 +44,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -57,7 +57,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -70,7 +70,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -83,7 +83,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -110,7 +110,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -123,7 +123,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -136,7 +136,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -149,7 +149,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -162,7 +162,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -175,7 +175,7 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

@@ -9,7 +9,8 @@ namespace uhal{
 	void log_inserter( const _Real< T , MAX_WIDTH >& aReal )
 	{
 		char lBuffer[ MAX_WIDTH ];
-		gcvt ( aReal.value() , MAX_WIDTH, lBuffer );
+		double lDouble( aReal.value() ); //it appears that some platforms require this to prevent a segfault
+		gcvt ( lDouble , MAX_WIDTH , lBuffer );
 		fputs ( lBuffer , log_configuration::getDestination() );
 	}
 

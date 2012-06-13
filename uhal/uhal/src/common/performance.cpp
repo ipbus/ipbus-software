@@ -2,4 +2,4 @@
 
 #include "uhal/performance.hpp"
 
-PerformanceMeasurement gPerformanceMeasurement;
+uhal::PerformanceMeasurement gPerformanceMeasurement;

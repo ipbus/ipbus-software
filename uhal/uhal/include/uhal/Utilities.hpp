@@ -25,7 +25,7 @@
 
 #include "pugixml/pugixml.hpp"
 
-#include "uhal/log.hpp"
+#include "log/log.hpp"
 #include "uhal/exception.hpp"
 
 #ifdef __GNUC__
@@ -49,13 +49,15 @@ namespace __gnu_cxx
 		//! implement the hash by calling the hash for the equivalent c-string
 		size_t operator() ( const std::string& x ) const
 		{
+			using namespace uhal;
+		
 			try
 			{
 				return hash< const char* >() ( x.c_str() );
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -85,8 +87,8 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
-				pantheios::log_ERROR ( "Expression \"" , aSemicolonDelimitedUriList , "\" must be a semicolon delimeted list and all files must be in the form \"protocol://address\"" );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Expression \"" , aSemicolonDelimitedUriList , "\" must be a semicolon delimeted list and all files must be in the form \"protocol://address\"" );
 				return false;
 			}
 
@@ -94,16 +96,16 @@ namespace uhal
 			{
 				try
 				{
-					pantheios::log_NOTICE ( "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
+					log ( Notice() , "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
 
 					for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
 					{
-						pantheios::log_NOTICE ( " > [" , lIt->first , "] \"" , lIt->second , "\"" );
+						log ( Notice() , " > [" , lIt->first , "] \"" , lIt->second , "\"" );
 					}
 				}
 				catch ( const std::exception& aExc )
 				{
-					pantheios::log_EXCEPTION ( aExc );
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					// Just debugging so although exception	is worrying, it is not critical
 				}
 			}
@@ -171,49 +173,55 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				return false;
 			}
 
-			if ( DebugInfo )
-			{
-				try
+			// Don't bother with Logging if the logger won't include it!
+			Notice lLoggingLevel;
+			if( log_configuration::LoggingIncludes( lLoggingLevel ) ){
+			
+				// After that we listen to the user's preference
+				if ( DebugInfo )
 				{
-					if ( aFiles || aDirectories )
+					try
 					{
-						pantheios::log_NOTICE ( "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
-					}
+						if ( aFiles || aDirectories )
+						{
+							log ( lLoggingLevel , "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
+						}
 
-					if ( aFiles )
+						if ( aFiles )
+						{
+								for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt )
+								{
+									log ( lLoggingLevel , " > [file] " , lIt->c_str() );
+								}
+
+								if ( ! aFiles->size() )
+								{
+									log ( lLoggingLevel , " > No matching files." );
+								}
+						}
+
+						if ( aDirectories )
+						{
+							for ( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt )
+							{
+								log ( lLoggingLevel , " > [directory] " , lIt->c_str() );
+							}
+
+							if ( ! aDirectories->size() )
+							{
+								log ( lLoggingLevel , " > No matching directories." );
+							}
+						}
+					}
+					catch ( const std::exception& aExc )
 					{
-						for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt )
-						{
-							pantheios::log_NOTICE ( " > [file] " , lazy_stream_inserter ( *lIt ) );
-						}
-
-						if ( ! aFiles->size() )
-						{
-							pantheios::log_NOTICE ( " > No matching files." );
-						}
+						log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+						// Just debugging so although exception	is worrying, it is not critical
 					}
-
-					if ( aDirectories )
-					{
-						for ( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt )
-						{
-							pantheios::log_NOTICE ( " > [directory] " , lazy_stream_inserter ( *lIt ) );
-						}
-
-						if ( ! aDirectories->size() )
-						{
-							pantheios::log_NOTICE ( " > No matching directories." );
-						}
-					}
-				}
-				catch ( const std::exception& aExc )
-				{
-					pantheios::log_EXCEPTION ( aExc );
-					// Just debugging so although exception	is worrying, it is not critical
 				}
 			}
 
@@ -236,7 +244,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -267,11 +275,11 @@ namespace uhal
 				{
 					try
 					{
-						pantheios::log_NOTICE ( "Retrieving URL http://" , aURL );
+						log ( Notice() , "Retrieving URL http://" , aURL );
 					}
 					catch ( const std::exception& aExc )
 					{
-						pantheios::log_EXCEPTION ( aExc );
+						log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 						// Just debugging so although exception	is worrying, it is not critical
 					}
 				}
@@ -285,7 +293,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					pantheios::log_EXCEPTION ( aExc );
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -310,13 +318,13 @@ namespace uhal
 
 					if ( lErrorCode )
 					{
-						pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+						log ( Error() , "Throwing at " , ThisLocation() );
 						throw boost::system::system_error ( lErrorCode );
 					}
 				}
 				catch ( const std::exception& aExc )
 				{
-					pantheios::log_EXCEPTION ( aExc );
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -335,13 +343,13 @@ namespace uhal
 
 					if ( lErrorCode )
 					{
-						pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+						log ( Error() , "Throwing at " , ThisLocation() );
 						throw boost::system::system_error ( lErrorCode );
 					}
 				}
 				catch ( const std::exception& aExc )
 				{
-					pantheios::log_EXCEPTION ( aExc );
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -367,7 +375,7 @@ namespace uhal
 							}
 							else
 							{
-								pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+								log ( Error() , "Throwing at " , ThisLocation() );
 								throw boost::system::system_error ( lErrorCode );
 							}
 						}
@@ -377,7 +385,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					pantheios::log_EXCEPTION ( aExc );
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -390,11 +398,11 @@ namespace uhal
 				{
 					try
 					{
-						pantheios::log_NOTICE ( "HTTP response parsed as:\n" , lazy_stream_inserter ( aResponse ) );
+						log ( Notice() , "HTTP response parsed as:\n" , aResponse );
 					}
 					catch ( const std::exception& aExc )
 					{
-						pantheios::log_ERROR ( "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
+						log ( Error() , "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
 						// Just debugging so although exception	is worrying, it is not critical
 					}
 				}
@@ -408,7 +416,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -447,7 +455,7 @@ namespace uhal
 
 					if ( !lStr.is_open() )
 					{
-						pantheios::log_ERROR ( "Failed to open " , lazy_stream_inserter ( *lIt2 ) , ". Continuing with next document for now but be aware!" );
+						log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
 					}
 					else
 					{
@@ -461,7 +469,7 @@ namespace uhal
 						}
 						catch ( const std::exception& aExc )
 						{
-							pantheios::log_EXCEPTION ( aExc );
+							log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 							throw uhal::exception ( aExc );
 						}
 					}
@@ -473,7 +481,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -493,7 +501,7 @@ namespace uhal
 
 				if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
 				{
-					pantheios::log_ERROR ( "Failed to download file " , aURL , ". Continuing for now but be aware!" );
+					log ( Error() , "Failed to download file " , aURL , ". Continuing for now but be aware!" );
 					return false;
 				}
 
@@ -504,7 +512,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					pantheios::log_EXCEPTION ( aExc );
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
 
@@ -512,7 +520,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -539,13 +547,13 @@ namespace uhal
 				}
 				else
 				{
-					pantheios::log_ERROR ( "Protocol \"" , aProtocol , "\" is unknown and I am, thus, ignoring file \"" , aFilenameExpr , "\". Continuing for now but be aware!" );
+					log ( Error() , "Protocol \"" , aProtocol , "\" is unknown and I am, thus, ignoring file \"" , aFilenameExpr , "\". Continuing for now but be aware!" );
 					return false;
 				}
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -619,7 +627,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
 					}
 
 					return false;
@@ -627,7 +635,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -655,7 +663,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
 					}
 
 					return false;
@@ -663,7 +671,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -723,7 +731,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
 					}
 
 					return false;
@@ -731,7 +739,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -791,7 +799,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
 					}
 
 					return false;
@@ -799,7 +807,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -827,7 +835,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
 					}
 
 					return false;
@@ -835,7 +843,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -863,7 +871,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
 					}
 
 					return false;
@@ -871,7 +879,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -899,7 +907,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						pantheios::log_ERROR ( "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
 					}
 
 					return false;
@@ -907,7 +915,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}

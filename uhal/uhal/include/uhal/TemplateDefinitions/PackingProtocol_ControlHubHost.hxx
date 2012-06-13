@@ -13,7 +13,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -102,42 +102,42 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		mMutex.lock();
 		tPreamble& lPreamble ( mPreambles.front() );
 		mMutex.unlock();
-		/*		pantheios::log_NOTICE( "Byte Count 1 : " , pantheios::integer ( *(( uint32_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 10 ) ,
-										" : Memory : " , pantheios::integer ( lPreamble.mReplyTotalByteCounter , pantheios::fmt::fullHex | 10 ) ,
-										" : Reply counter : " , pantheios::integer ( aBuffers->replyCounter(), pantheios::fmt::fullHex | 10 )
+		/*		log ( Notice() , "Byte Count 1 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) ) ,
+										" : Memory : " , Integer ( lPreamble.mReplyTotalByteCounter ) ,
+										" : Reply counter : " , Integer ( aBuffers->replyCounter() )
 				);*/
 		lReplyIt++;
-		/*		pantheios::log_NOTICE( "Byte Count 2 : " , pantheios::integer ( *(( uint32_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 10 )  ,
-										" : Memory : " , pantheios::integer ( lPreamble.mReplyChunkByteCounter , pantheios::fmt::fullHex | 10 ) );*/
+		/*		log ( Notice() , "Byte Count 2 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
+										" : Memory : " , Integer ( lPreamble.mReplyChunkByteCounter ) );*/
 		lReplyIt++;
 
-		/*		pantheios::log_NOTICE( "IP : " , pantheios::integer ( *(( uint32_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 10 )  ,
-										" : Memory : " , pantheios::integer ( lPreamble.mReplyDeviceIPaddress , pantheios::fmt::fullHex | 10 ) );*/
+		/*		log ( Notice() , "IP : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
+										" : Memory : " , Integer ( lPreamble.mReplyDeviceIPaddress ) );*/
 		if ( lPreamble.mReplyDeviceIPaddress != mDeviceIPaddress )
 		{
-			pantheios::log_ERROR ( "Returned IP address " , pantheios::integer ( lPreamble.mReplyDeviceIPaddress , pantheios::fmt::fullHex | 10 ) ,
-								   " does not match that sent " , pantheios::integer ( mDeviceIPaddress , pantheios::fmt::fullHex | 10 ) );
+			log ( Error() , "Returned IP address " , Integer< hex , fixed > ( lPreamble.mReplyDeviceIPaddress ) ,
+								   " does not match that sent " , Integer< hex , fixed >  ( mDeviceIPaddress ) );
 			return false;
 		}
 
 		lReplyIt++;
 
-		/*		pantheios::log_NOTICE( "PORT : " , pantheios::integer ( *(( uint16_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 6 )  ,
-										" : Memory : " , pantheios::integer ( lPreamble.mReplyDevicePort , pantheios::fmt::fullHex | 6 ) );*/
+		/*		log ( Notice() , "PORT : " , Integer< hex , fixed >  ( *(( uint16_t* )( lReplyIt->first )) )  ,
+										" : Memory : " , Integer< hex , fixed >  ( lPreamble.mReplyDevicePort ) );*/
 		if ( lPreamble.mReplyDevicePort != mDevicePort )
 		{
-			pantheios::log_ERROR ( "Returned Port number " , pantheios::integer ( lPreamble.mReplyDevicePort , pantheios::fmt::fullHex | 10 ) ,
-								   " does not match that sent " , pantheios::integer ( mDevicePort , pantheios::fmt::fullHex | 10 ) );
+			log ( Error() , "Returned Port number " , Integer ( lPreamble.mReplyDevicePort ) ,
+								   " does not match that sent " , Integer ( mDevicePort ) );
 			return false;
 		}
 
 		lReplyIt++;
 
-		/*		pantheios::log_NOTICE( "Error code : " , pantheios::integer ( *(( uint16_t* )( lReplyIt->first )) , pantheios::fmt::fullHex | 6 )  ,
-										" : Memory : " , pantheios::integer ( lPreamble.mReplyErrorCode , pantheios::fmt::fullHex | 6 ) );*/
+		/*		log ( Notice() , "Error code : " , Integer ( *(( uint16_t* )( lReplyIt->first )) )  ,
+										" : Memory : " , Integer ( lPreamble.mReplyErrorCode ) );*/
 		if ( lPreamble.mReplyErrorCode != 0 )
 		{
-			pantheios::log_ERROR ( "Control Hub reported error code " , pantheios::integer ( lPreamble.mReplyErrorCode , pantheios::fmt::fullHex | 10 ) );
+			log ( Error() , "Control Hub reported error code " , Integer< hex , fixed >  ( lPreamble.mReplyErrorCode ) );
 			return false;
 		}
 

@@ -93,6 +93,8 @@ int main ( int argc,char* argv[] )
 
 		log( Notice() , "double pi : " , Real( double(3.1415926535) ) );
 		log( Notice() , "float pi : " , Real( float(3.1415926535) ) , " (should be truncated)" );
+		log( Notice() , "double pi : " , Real<4>( double(3.1415926535) ) );
+		log( Notice() , "float pi : " , Real<4>( float(3.1415926535) ) , " (should be truncated)" );
 		log( Notice() , "double pi x 10^15 : " , Real( double(3.1415926535e15) ) );
 		log( Notice() , "float pi x 10^15 : " , Real( float(3.1415926535e15) ) , " (should be truncated)" );
 		log( Notice() , "double pi x 10^-2 : " , Real( double(3.1415926535e-2) ) );

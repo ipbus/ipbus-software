@@ -1,6 +1,6 @@
 #include "uhal/Utilities.hpp"
 
-#include "uhal/log.hpp"
+#include "log/log.hpp"
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace uhal
@@ -11,7 +11,7 @@ namespace uhal
 		{
 			try
 			{
-				pantheios::log_ERROR ( "Failed to parse file " , lazy_stream_inserter ( aPath ) , ". PugiXML returned the following description \"" , aLoadResult.description() , "\"." );
+				log ( Error() , "Failed to parse file " , aPath.c_str() , ". PugiXML returned the following description \"" , aLoadResult.description() , "\"." );
 				std::size_t lLineCounter ( 1 );
 				std::vector<uint8_t>::const_iterator lIt0 ( aFile.begin() );
 				std::vector<uint8_t>::const_iterator lIt1 ( aFile.begin() + aLoadResult.offset );
@@ -60,14 +60,14 @@ namespace uhal
 					}
 				}
 
-				pantheios::log_ERROR ( "Error occured at line number " , pantheios::integer ( lLineCounter ) ,
-									   ", character " , pantheios::integer ( lDist0+1 ) , "\n"
+				log ( Error() , "Error occured at line number " , Integer ( lLineCounter ) ,
+									   ", character " , Integer ( lDist0+1 ) , "\n"
 									   "LINE           : " , lLine , "\n"
 									   "ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -124,7 +124,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}

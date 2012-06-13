@@ -1,5 +1,6 @@
 
 #include <log/log_inserters.time.hpp>
+#include <log/log_inserters.integer.hpp>
 
 #include <log/log_configuration.hpp> 
 
@@ -8,7 +9,7 @@ namespace uhal{
 
 	template<>
 	void TimeSpecializationHelper< year >::print( FILE* aFile , const tm* aTm , const uint32_t& aUsec ){
-		fprintf ( aFile , "%i" , (aTm->tm_year+1900) );
+		log_inserter( Integer( aTm->tm_year+1900 ) );
 	}
 
 	template<>
@@ -24,7 +25,6 @@ namespace uhal{
 												"80818283848586878889"
 												"90919293949596979899" );
 		fwrite ( lCharacterMapping + ((aTm->tm_year%100)<<1) , 1 , 2 , aFile );
-		//fprintf ( aFile , "%i" , (aTm->tm_year+1900) );
 	}
 
 	template<>
@@ -93,7 +93,7 @@ namespace uhal{
 
 	template<>
 	void TimeSpecializationHelper< usec >::print( FILE* aFile , const tm* aTm , const uint32_t& aUsec ){
-		fprintf ( aFile , "%i" , aUsec );
+		log_inserter( Integer( aUsec ) );
 	}
 
 	void log_inserter( const  Time<usec,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null>& aTime )

@@ -9,10 +9,11 @@
 
 #include <map>
 #include <deque>
+#include <sstream>
 #include <sys/time.h>
 #include <math.h>
 
-#include <uhal/log.hpp>
+#include <log/log.hpp>
 
 #define _PASTE_(x,y) x ## _ ## y
 #define PASTE(x,y)  _PASTE_(x,y)
@@ -32,116 +33,118 @@ gPerformanceMeasurement.mDepth.pop_back();
 #define PERFORMANCE( DESCRIPTION , CODE ) CODE
 #endif
 
+namespace uhal{
 
-class PerformanceMeasurement
-{
-	public:
+	class PerformanceMeasurement
+	{
+		public:
 
-		struct tPerformanceMeasurement
-		{
-			std::string mDesc;
-			std::string mFunction;
-			std::string mFile;
-			int mLine;
-			timeval mStartTime;
-			timeval mEndTime;
-			/*uint32_t*/
-			std::deque< std::string > mDepth;
-
-			tPerformanceMeasurement ( const std::string& aDesc , const std::string& aFunction , const std::string& aFile , const uint32_t& aLine , const timeval& aStartTime , const timeval& aEndTime , const /*uint32_t*/ std::deque< std::string >& aDepth ) :
-				mDesc ( aDesc ),
-				mFunction ( aFunction ),
-				mFile ( aFile ),
-				mLine ( aLine ),
-				mStartTime ( aStartTime ),
-				mEndTime ( aEndTime ),
-				mDepth ( aDepth )
-			{}
-		};
-
-		struct tStats
-		{
-			double mSum;
-			double mSqSum;
-			uint32_t mCount;
-
-			double mean()
+			struct tPerformanceMeasurement
 			{
-				return mSum/mCount;
-			}
+				std::string mDesc;
+				std::string mFunction;
+				std::string mFile;
+				int mLine;
+				timeval mStartTime;
+				timeval mEndTime;
+				/*uint32_t*/
+				std::deque< std::string > mDepth;
 
-			double var()
+				tPerformanceMeasurement ( const std::string& aDesc , const std::string& aFunction , const std::string& aFile , const uint32_t& aLine , const timeval& aStartTime , const timeval& aEndTime , const /*uint32_t*/ std::deque< std::string >& aDepth ) :
+					mDesc ( aDesc ),
+					mFunction ( aFunction ),
+					mFile ( aFile ),
+					mLine ( aLine ),
+					mStartTime ( aStartTime ),
+					mEndTime ( aEndTime ),
+					mDepth ( aDepth )
+				{}
+			};
+
+			struct tStats
 			{
-				double lMean ( mean() );
-				return ( mSqSum/mCount )- ( lMean*lMean );
-			}
+				double mSum;
+				double mSqSum;
+				uint32_t mCount;
 
-			double sd()
-			{
-				return sqrt ( var() );
-			}
-
-		};
-
-
-		PerformanceMeasurement() :
-			mDepth ( 0 )
-		{}
-
-		~PerformanceMeasurement()
-		{
-			std::map< uint32_t , std::deque< tPerformanceMeasurement* > > mSort;
-
-			for ( std::deque< tPerformanceMeasurement >::iterator lIt = mPerformanceMeasurement.begin() ; lIt != mPerformanceMeasurement.end() ; ++lIt )
-			{
-				mSort[ lIt->mDepth.size() ].push_back ( & ( *lIt ) );
-			}
-
-			for ( std::map< uint32_t , std::deque< tPerformanceMeasurement* > >::iterator lIt = mSort.begin() ; lIt != mSort.end() ; ++lIt )
-			{
-				pantheios::log_NOTICE ( "\n\nFunction Depth " , pantheios::integer ( lIt->first ) );
-				std::map< std::string , tStats > mSort2;
-
-				for ( std::deque< tPerformanceMeasurement* >::iterator lIt2 = lIt->second.begin() ; lIt2 != lIt->second.end() ; ++lIt2 )
+				double mean()
 				{
-					std::stringstream lStr;
-					//lStr << "\"" << ( **lIt2 ).mDesc << "\" at " << ( **lIt2 ).mFile << ":" << ( **lIt2 ).mLine; // << " " << (**lIt2).mFunction;
+					return mSum/mCount;
+				}
 
-					for ( std::deque< std::string >::iterator lIt3 = ( **lIt2 ).mDepth.begin() ; lIt3 != ( **lIt2 ).mDepth.end() ; ++lIt3 )
+				double var()
+				{
+					double lMean ( mean() );
+					return ( mSqSum/mCount )- ( lMean*lMean );
+				}
+
+				double sd()
+				{
+					return sqrt ( var() );
+				}
+
+			};
+
+
+			PerformanceMeasurement() :
+				mDepth ( 0 )
+			{}
+
+			~PerformanceMeasurement()
+			{
+				std::map< uint32_t , std::deque< tPerformanceMeasurement* > > mSort;
+
+				for ( std::deque< tPerformanceMeasurement >::iterator lIt = mPerformanceMeasurement.begin() ; lIt != mPerformanceMeasurement.end() ; ++lIt )
+				{
+					mSort[ lIt->mDepth.size() ].push_back ( & ( *lIt ) );
+				}
+
+				for ( std::map< uint32_t , std::deque< tPerformanceMeasurement* > >::iterator lIt = mSort.begin() ; lIt != mSort.end() ; ++lIt )
+				{
+					log ( Notice() , "\n\nFunction Depth " , Integer ( lIt->first ) );
+					std::map< std::string , tStats > mSort2;
+
+					for ( std::deque< tPerformanceMeasurement* >::iterator lIt2 = lIt->second.begin() ; lIt2 != lIt->second.end() ; ++lIt2 )
 					{
-						lStr << "\n > " << *lIt3;
+						std::stringstream lStr;
+						//lStr << "\"" << ( **lIt2 ).mDesc << "\" at " << ( **lIt2 ).mFile << ":" << ( **lIt2 ).mLine; // << " " << (**lIt2).mFunction;
+
+						for ( std::deque< std::string >::iterator lIt3 = ( **lIt2 ).mDepth.begin() ; lIt3 != ( **lIt2 ).mDepth.end() ; ++lIt3 )
+						{
+							lStr << "\n > " << *lIt3;
+						}
+
+						lStr << "\n\"" << ( **lIt2 ).mDesc << "\" at " << ( **lIt2 ).mFile << ":" << ( **lIt2 ).mLine << "\n" ; // << " " << (**lIt2).mFunction;
+						double lStart ( ( ( double ) ( **lIt2 ).mStartTime.tv_sec*1000000.0 ) + ( ( double ) ( **lIt2 ).mStartTime.tv_usec ) );
+						double lEnd ( ( ( double ) ( **lIt2 ).mEndTime.tv_sec*1000000.0 ) + ( ( double ) ( **lIt2 ).mEndTime.tv_usec ) );
+						tStats& lSort2 = mSort2[ lStr.str() ];
+						double lDiff ( lEnd - lStart );
+						lSort2.mSum += lDiff;
+						lSort2.mSqSum += ( lDiff * lDiff );
+						lSort2.mCount++;
 					}
 
-					lStr << "\n\"" << ( **lIt2 ).mDesc << "\" at " << ( **lIt2 ).mFile << ":" << ( **lIt2 ).mLine << "\n" ; // << " " << (**lIt2).mFunction;
-					double lStart ( ( ( double ) ( **lIt2 ).mStartTime.tv_sec*1000000.0 ) + ( ( double ) ( **lIt2 ).mStartTime.tv_usec ) );
-					double lEnd ( ( ( double ) ( **lIt2 ).mEndTime.tv_sec*1000000.0 ) + ( ( double ) ( **lIt2 ).mEndTime.tv_usec ) );
-					tStats& lSort2 = mSort2[ lStr.str() ];
-					double lDiff ( lEnd - lStart );
-					lSort2.mSum += lDiff;
-					lSort2.mSqSum += ( lDiff * lDiff );
-					lSort2.mCount++;
-				}
-
-				for ( std::map< std::string , tStats >::iterator lIt2 = mSort2.begin() ; lIt2 != mSort2.end() ; ++lIt2 )
-				{
-					pantheios::log_NOTICE ( ( *lIt2 ).first , /*" : " , */ pantheios::integer ( ( *lIt2 ).second.mCount ) , " calls averaging " , pantheios::real ( ( *lIt2 ).second.mean() ) , "+/-" , pantheios::real ( ( *lIt2 ).second.sd() ) , "us = " ,  pantheios::real ( ( *lIt2 ).second.mSum ) , "us in total\n" );
+					for ( std::map< std::string , tStats >::iterator lIt2 = mSort2.begin() ; lIt2 != mSort2.end() ; ++lIt2 )
+					{
+						log ( Notice() , ( *lIt2 ).first , /*" : " , */ Integer ( ( *lIt2 ).second.mCount ) , " calls averaging " , Real ( ( *lIt2 ).second.mean() ) , "+/-" , Real ( ( *lIt2 ).second.sd() ) , "us = " ,  Real ( ( *lIt2 ).second.mSum ) , "us in total\n" );
+					}
 				}
 			}
-		}
 
 
-		inline void AddEntry ( const std::string& aDesc , const std::string& aFunction , const std::string& aFile , const uint32_t& aLine , const timeval& aStartTime , const timeval& aEndTime )
-		{
-			mPerformanceMeasurement.push_back ( tPerformanceMeasurement ( aDesc , aFunction , aFile , aLine , aStartTime , aEndTime , mDepth ) );
-		}
+			inline void AddEntry ( const std::string& aDesc , const std::string& aFunction , const std::string& aFile , const uint32_t& aLine , const timeval& aStartTime , const timeval& aEndTime )
+			{
+				mPerformanceMeasurement.push_back ( tPerformanceMeasurement ( aDesc , aFunction , aFile , aLine , aStartTime , aEndTime , mDepth ) );
+			}
 
-		/*uint32_t*/ std::deque< std::string > mDepth;
+			/*uint32_t*/ std::deque< std::string > mDepth;
 
-	private:
-		std::deque< tPerformanceMeasurement > mPerformanceMeasurement;
-};
+		private:
+			std::deque< tPerformanceMeasurement > mPerformanceMeasurement;
+	};
 
+}
 
-extern PerformanceMeasurement gPerformanceMeasurement;
+extern uhal::PerformanceMeasurement gPerformanceMeasurement;
 
 #endif

@@ -15,7 +15,7 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -36,7 +36,7 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -51,7 +51,7 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -74,7 +74,7 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -95,7 +95,7 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -110,7 +110,7 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -145,7 +145,7 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -168,7 +168,7 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -183,7 +183,7 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

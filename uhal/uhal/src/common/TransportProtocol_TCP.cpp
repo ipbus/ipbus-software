@@ -12,8 +12,8 @@
 
 void TCPtimeout ( int signal )
 {
-	pantheios::log_ERROR ( "TCP Timeout" );
-	pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+	log ( Error() , "TCP Timeout" );
+	log ( Error() , "Throwing at " , ThisLocation() );
 	throw uhal::TcpTimeout();
 }
 
@@ -28,7 +28,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
 							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) )
 	{
-		pantheios::log_NOTICE ( "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
+		log ( Notice() , "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
 		boost::asio::connect ( *mSocket ,
 							   boost::asio::ip::tcp::resolver::iterator (
 								   boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
@@ -37,11 +37,11 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 							   )
 							 );
 		mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-		pantheios::log_NOTICE ( "TCP connection succeeded" );
+		log ( Notice() , "TCP connection succeeded" );
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -57,7 +57,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		}
 	}
 
@@ -95,7 +95,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			mTcpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
 		}
 		catch ( boost::thread_interrupted& )
@@ -132,8 +132,8 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 
 			if ( mErrorCode )
 			{
-				pantheios::log_ERROR ( "ASIO reported an error: " , mErrorCode.message() );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ErrorInTcpCallback();
 			}
 
@@ -161,21 +161,21 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 
 			if ( mErrorCode )
 			{
-				pantheios::log_ERROR ( "ASIO reported an error: " , mErrorCode.message() );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ErrorInTcpCallback();
 			}
 
 			if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
-				pantheios::log_ERROR ( "Validation function reported an error!" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Validation function reported an error!" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw IPbusValidationError ();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -198,8 +198,8 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 
 		if ( sigaction ( SIGALRM, &sa, 0 ) < 0 )
 		{
-			pantheios::log_ERROR ( "Can't establish signal handler" );
-			pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+			log ( Error() , "Can't establish signal handler" );
+			log ( Error() , "Throwing at " , ThisLocation() );
 			throw TcpTimeout();
 		}
 
@@ -207,7 +207,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -239,7 +239,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		}
 	}
 
@@ -257,7 +257,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 				if ( mAsynchronousException )
 				{
 					uhal::exception lExc ( *mAsynchronousException );
-					pantheios::log_EXCEPTION ( lExc );
+					log ( Error() , "Exception \"" , lExc.what() , "\" caught at " , ThisLocation() );
 					throw lExc;
 				}
 
@@ -272,7 +272,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -299,7 +299,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 					if ( mAsynchronousException )
 					{
 						uhal::exception lExc ( *mAsynchronousException );
-						pantheios::log_EXCEPTION ( lExc );
+						log ( Error() , "Exception \"" , lExc.what() , "\" caught at " , ThisLocation() );
 						throw lExc;
 					}
 
@@ -312,8 +312,8 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 
 				if ( lTimeTaken > mTimeoutPeriod )
 				{
-					pantheios::log_ERROR ( "TCP Timeout" );
-					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					log ( Error() , "TCP Timeout" );
+					log ( Error() , "Throwing at " , ThisLocation() );
 					throw TcpTimeout();
 				}
 			}
@@ -323,7 +323,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

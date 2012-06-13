@@ -14,13 +14,13 @@ namespace uhal
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ValMemImutabilityViolation();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

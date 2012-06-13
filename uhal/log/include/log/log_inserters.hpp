@@ -10,7 +10,7 @@
 #include <log/log_inserters.real.hpp>
 #include <log/log_inserters.boolean.hpp>
 #include <log/log_inserters.hex.hpp>
-
+#include <log/log_inserters.location.hpp>
 
 
 #endif

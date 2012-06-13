@@ -11,15 +11,17 @@
 #include <cstdlib>
 #include <boost/math/special_functions/factorials.hpp>
 
-#include "pantheios/frontends/fe.simple.h"
+#include "log/log.hpp"
 
+using namespace uhal;
+
+	
 void hwInterface_creation()
 {
 	try
 	{
-		pantheios::log_LOCATION();
-		uhal::ConnectionManager manager ( "     file://tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  " ); // http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
-		uhal::HwInterface hw=manager.getDevice ( "hcal.crate1.slot1" );
+		ConnectionManager manager ( "     file://tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  " ); // http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
+		HwInterface hw=manager.getDevice ( "hcal.crate1.slot1" );
 		//BOOST_CHECK(manager.ping());
 		// manager.getDevice("hcal.crate1.slot2");
 		// hw.dispatch();
@@ -31,8 +33,8 @@ void hwInterface_creation()
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }
 
@@ -41,28 +43,25 @@ void rawClientAccess()
 {
 	try
 	{
-		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
-		uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//write register
 		uint32_t val = static_cast<uint32_t> ( rand() );
 		hw.getClient()->write ( 0xBA5EADD4 , val );
-		uhal::ValWord< uint32_t > mem = hw.getClient()->read ( 0xBA5EADD4 );
+		ValWord< uint32_t > mem = hw.getClient()->read ( 0xBA5EADD4 );
 		hw.dispatch();
-		pantheios::log_LOCATION();
-
+		
 		if ( mem==val )
 		{
-			pantheios::log_INFORMATIONAL ( "SINGLE WORD WRITE/READ : ALL GOOD" ) ;
+			log ( Info() , "SINGLE WORD WRITE/READ : ALL GOOD" ) ;
 		}
 		else
 		{
-			pantheios::log_ERROR ( "MISMATCH : Source " , pantheios::integer ( val , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( mem.value()  ,  pantheios::fmt::fullHex | 10 ) );
-			pantheios::log_LOCATION();
-			throw 0;
+			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( val ) , " vs. Found " , Integer< hex , fixed> ( mem.value()  ) );
+						throw 0;
 		}
 
-		// pantheios::log_LOCATION();
-		// // //write memory
+		// 		// // //write memory
 		uint32_t SIZE=129;
 		std::vector<uint32_t> vals;
 
@@ -73,18 +72,16 @@ void rawClientAccess()
 
 		// vals.push_back(static_cast<uint32_t>(i));
 		hw.getClient()->writeBlock ( 0xBA5EADD4 , vals );
-		uhal::ValVector< uint32_t > block = hw.getClient()->readBlock ( 0xBA5EADD4 , SIZE );
+		ValVector< uint32_t > block = hw.getClient()->readBlock ( 0xBA5EADD4 , SIZE );
 		hw.dispatch();
-		pantheios::log_LOCATION();
-
+		
 		if ( block.size() != SIZE )
 		{
-			pantheios::log_ERROR ( "SEND AND REPLY SIZES MISMATCH" );
-			pantheios::log_LOCATION();
-			throw 0;
+			log ( Error() , "SEND AND REPLY SIZES MISMATCH" );
+						throw 0;
 		}
 
-		uhal::ValVector< uint32_t >::const_iterator lReadIt = block.begin();
+		ValVector< uint32_t >::const_iterator lReadIt = block.begin();
 		std::vector< uint32_t >::const_iterator lSourceIt = vals.begin();
 		int count = 0;
 
@@ -92,13 +89,12 @@ void rawClientAccess()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				pantheios::log_ERROR ( "MISMATCH AT " , pantheios::integer ( count ) , " : Source " , pantheios::integer ( *lSourceIt , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( *lReadIt  ,  pantheios::fmt::fullHex | 10 ) );
-				pantheios::log_LOCATION();
-				throw 0;
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt  ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt  ) );
+								throw 0;
 			}
 		}
 
-		pantheios::log_INFORMATIONAL ( "INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
+		log ( Info() , "INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
 		// //BOOST_CHECK(block.size() == SIZE);
 		// //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
 		// //BOOST_CHECK(*block.begin() == *vals.begin());
@@ -111,22 +107,19 @@ void rawClientAccess()
 			vals.push_back ( static_cast<uint32_t> ( rand() ) );
 		}
 
-		pantheios::log_LOCATION();
-		// vals.push_back(static_cast<uint32_t>(i));
-		hw.getClient()->writeBlock ( 0xBA5EADD4 , vals , uhal::defs::NON_INCREMENTAL );
-		/*uhal::ValVector< uint32_t >*/
-		block = hw.getClient()->readBlock ( 0xBA5EADD4 , SIZE , uhal::defs::NON_INCREMENTAL );
+				// vals.push_back(static_cast<uint32_t>(i));
+		hw.getClient()->writeBlock ( 0xBA5EADD4 , vals , defs::NON_INCREMENTAL );
+		/*ValVector< uint32_t >*/
+		block = hw.getClient()->readBlock ( 0xBA5EADD4 , SIZE , defs::NON_INCREMENTAL );
 		hw.dispatch();
-		pantheios::log_LOCATION();
-
+		
 		if ( block.size() != SIZE )
 		{
-			pantheios::log_ERROR ( "SEND AND REPLY SIZES MISMATCH" );
-			pantheios::log_LOCATION();
-			throw 0;
+			log ( Error() , "SEND AND REPLY SIZES MISMATCH" );
+						throw 0;
 		}
 
-		/*uhal::ValVector< uint32_t >::const_iterator*/ lReadIt = block.begin();
+		/*ValVector< uint32_t >::const_iterator*/ lReadIt = block.begin();
 		/*std::vector< uint32_t >::const_iterator*/
 		lSourceIt = vals.end();
 		lSourceIt--;
@@ -137,48 +130,45 @@ void rawClientAccess()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				pantheios::log_ERROR ( "MISMATCH AT " , pantheios::integer ( count ) , " : Source " , pantheios::integer ( *lSourceIt , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( *lReadIt  ,  pantheios::fmt::fullHex | 10 ) );
-				pantheios::log_LOCATION();
-				throw 0;
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt  ) );
+								throw 0;
 			}
 		}
 
-		pantheios::log_INFORMATIONAL ( "NON-INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
+		log ( Info() , "NON-INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
 		uint32_t expected ( ( *lSourceIt&0x00C0FFEE ) |0xF00DF00D );
-		/*uhal::ValWord< uint32_t >*/
+		/*ValWord< uint32_t >*/
 		mem = hw.getClient()->rmw_bits ( 0xBA5EADD4 , 0x00C0FFEE , 0xF00DF00D );
 		hw.dispatch();
 
 		if ( mem == expected )
 		{
-			pantheios::log_INFORMATIONAL ( "RMW-BITS : ALL GOOD" ) ;
+			log ( Info() , "RMW-BITS : ALL GOOD" ) ;
 		}
 		else
 		{
-			pantheios::log_ERROR ( "MISMATCH : Source " , pantheios::integer ( expected , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( mem.value()  ,  pantheios::fmt::fullHex | 10 ) );
-			pantheios::log_LOCATION();
-			throw 0;
+			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected ) , " vs. Found " , Integer< hex , fixed> ( mem.value()  ) );
+						throw 0;
 		}
 
 		int32_t expected2 ( expected + 0x0BADBABE );
-		uhal::ValWord< int32_t > mem2 = hw.getClient()->rmw_sum ( 0xBA5EADD4 , 0x0BADBABE );
+		ValWord< int32_t > mem2 = hw.getClient()->rmw_sum ( 0xBA5EADD4 , 0x0BADBABE );
 		hw.dispatch();
 
 		if ( mem2 == expected2 )
 		{
-			pantheios::log_INFORMATIONAL ( "RMW-SUM : ALL GOOD" ) ;
+			log ( Info() , "RMW-SUM : ALL GOOD" ) ;
 		}
 		else
 		{
-			pantheios::log_ERROR ( "MISMATCH : Source " , pantheios::integer ( expected2 , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( mem2.value()  ,  pantheios::fmt::fullHex | 10 ) );
-			pantheios::log_LOCATION();
-			throw 0;
+			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected2 ) , " vs. Found " , Integer< hex , fixed> ( mem2.value()  ) );
+						throw 0;
 		}
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }
 
@@ -187,30 +177,29 @@ void navigation_and_traversal_test()
 {
 	try
 	{
-		pantheios::log_LOCATION();
-		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
-		uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+				ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		std::vector<std::string> lNodes = hw.getNodes();
 
 		for ( std::vector<std::string>::iterator lIt = lNodes.begin() ; lIt != lNodes.end() ; ++lIt )
 		{
-			pantheios::log_INFORMATIONAL ( "Get nodes: " , *lIt );
+			log ( Info() , "Get nodes: " , *lIt );
 		}
 
 		lNodes = hw.getNodes ( ".*ENABLE.*" );
 
 		for ( std::vector<std::string>::iterator lIt = lNodes.begin() ; lIt != lNodes.end() ; ++lIt )
 		{
-			pantheios::log_INFORMATIONAL ( "Get nodes Regex: " , *lIt );
+			log ( Info() , "Get nodes Regex: " , *lIt );
 		}
 
-		uhal::Node node1 ( hw.getNode ( "RECEIVER.CONFIG" ) );
-		uhal::Node node2 ( hw.getNode ( "RECEIVER" ).getNode ( "CONFIG" ) );
-		uhal::defs::NodePermission a = node1.getPermission();
+		Node node1 ( hw.getNode ( "RECEIVER.CONFIG" ) );
+		Node node2 ( hw.getNode ( "RECEIVER" ).getNode ( "CONFIG" ) );
+		defs::NodePermission a = node1.getPermission();
 		uint32_t mask = node1.getMask();
 		std::string id = node1.getId();
 		//BOOST_CHECK(id=="RECEIVER.CONFIG");
-		uhal::Node branch ( hw.getNode ( "RECEIVER" ) );
+		Node branch ( hw.getNode ( "RECEIVER" ) );
 		//BOOST_CHECK_THROW(branch.getPermission(),std::exception);
 		//BOOST_CHECK_THROW(branch.getMask(),std::exception);
 		//BOOST_CHECK_THROW(branch.read(),std::exception);
@@ -219,8 +208,8 @@ void navigation_and_traversal_test()
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }
 
@@ -229,19 +218,18 @@ void read_test()
 {
 	try
 	{
-		pantheios::log_LOCATION();
-		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
-		uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+				ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//read register
-		uhal::ValWord< uint32_t > mem1 = hw.getNode ( "SYSTEM1" ).getNode ( "SYSTEM" ).getNode ( "TTC" ).getNode ( "ADDRESS" ).read();
-		uhal::ValWord< uint32_t > mem2 = hw.getNode ( "SYSTEM1.SYSTEM.TTC.ADDRESS" ).read();
+		ValWord< uint32_t > mem1 = hw.getNode ( "SYSTEM1" ).getNode ( "SYSTEM" ).getNode ( "TTC" ).getNode ( "ADDRESS" ).read();
+		ValWord< uint32_t > mem2 = hw.getNode ( "SYSTEM1.SYSTEM.TTC.ADDRESS" ).read();
 		hw.dispatch();
 		//BOOST_CHECK(mem1.valid() && mem2.valid());
 		//BOOST_CHECK(mem1.value() == mem2.value());
 		//read memory
 		uint32_t SIZE=1024;
-		uhal::ValVector< uint32_t > block1 = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE );
-		uhal::ValVector< uint32_t > block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE );
+		ValVector< uint32_t > block1 = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE );
+		ValVector< uint32_t > block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE );
 		hw.dispatch();
 		//BOOST_CHECK(block1.size() == SIZE);
 		//BOOST_CHECK(block2.size() == SIZE);
@@ -250,8 +238,8 @@ void read_test()
 		//BOOST_CHECK(block1.rbegin()->valid() && block2.rbegin()->valid());
 		//BOOST_CHECK(*block1.rbegin() == *block2.rbegin());
 		//read FIFO
-		block1 = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE,uhal::defs::NON_INCREMENTAL );
-		block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE,uhal::defs::NON_INCREMENTAL );
+		block1 = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE,defs::NON_INCREMENTAL );
+		block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE,defs::NON_INCREMENTAL );
 		hw.dispatch();
 		//BOOST_CHECK(block1.size() == SIZE);
 		//BOOST_CHECK(block2.size() == SIZE);
@@ -262,8 +250,8 @@ void read_test()
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }
 
@@ -271,24 +259,22 @@ void write_test()
 {
 	try
 	{
-		pantheios::log_LOCATION();
-		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
-		uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+				ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//write register
 		uint32_t val = static_cast<uint32_t> ( rand() );
 		hw.getNode ( "SYSTEM1" ).getNode ( "SYSTEM" ).getNode ( "TTC" ).getNode ( "ADDRESS" ).write ( val );
-		uhal::ValWord< uint32_t > mem = hw.getNode ( "SYSTEM1" ).getNode ( "SYSTEM" ).getNode ( "TTC" ).getNode ( "ADDRESS" ).read();
+		ValWord< uint32_t > mem = hw.getNode ( "SYSTEM1" ).getNode ( "SYSTEM" ).getNode ( "TTC" ).getNode ( "ADDRESS" ).read();
 		hw.dispatch();
 
 		if ( mem==val )
 		{
-			pantheios::log_INFORMATIONAL ( "ALL GOOD" ) ;
+			log ( Info() , "ALL GOOD" ) ;
 		}
 		else
 		{
-			pantheios::log_ERROR ( "MISMATCH : Source " , pantheios::integer ( val , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( mem.value()  ,  pantheios::fmt::fullHex | 10 ) );
-			pantheios::log_LOCATION();
-			throw 0;
+			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( val ) , " vs. Found " , Integer< hex , fixed> ( mem.value() ) );
+						throw 0;
 		}
 
 		// //BOOST_CHECK(mem.valid());
@@ -304,17 +290,16 @@ void write_test()
 
 		// vals.push_back(static_cast<uint32_t>(i));
 		hw.getNode ( "TRANSMITTER.BRAM_DATA" ).writeBlock ( vals );
-		uhal::ValVector< uint32_t > block = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE );
+		ValVector< uint32_t > block = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE );
 		hw.dispatch();
 
 		if ( block.size() != SIZE )
 		{
-			pantheios::log_ERROR ( "SEND AND REPLY SIZES MISMATCH" );
-			pantheios::log_LOCATION();
-			throw 0;
+			log ( Error() , "SEND AND REPLY SIZES MISMATCH" );
+						throw 0;
 		}
 
-		uhal::ValVector< uint32_t >::const_iterator lReadIt = block.begin();
+		ValVector< uint32_t >::const_iterator lReadIt = block.begin();
 		std::vector< uint32_t >::const_iterator lSourceIt = vals.begin();
 		int count = 0;
 
@@ -322,13 +307,12 @@ void write_test()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				pantheios::log_ERROR ( "MISMATCH AT " , pantheios::integer ( count ) , " : Source " , pantheios::integer ( *lSourceIt , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( *lReadIt  ,  pantheios::fmt::fullHex | 10 ) );
-				pantheios::log_LOCATION();
-				throw 0;
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+								throw 0;
 			}
 		}
 
-		pantheios::log_INFORMATIONAL ( "ALL GOOD" ) ;
+		log ( Info() , "ALL GOOD" ) ;
 		// //BOOST_CHECK(block.size() == SIZE);
 		// //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
 		// //BOOST_CHECK(*block.begin() == *vals.begin());
@@ -342,10 +326,10 @@ void write_test()
 		}
 
 		// vals.push_back(static_cast<uint32_t>(i));
-		hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).writeBlock ( vals,uhal::defs::NON_INCREMENTAL );
-		block = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE,uhal::defs::NON_INCREMENTAL );
+		hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).writeBlock ( vals,defs::NON_INCREMENTAL );
+		block = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE,defs::NON_INCREMENTAL );
 		hw.dispatch();
-		/*uhal::ValVector< uint32_t >::const_iterator*/
+		/*ValVector< uint32_t >::const_iterator*/
 		lReadIt = block.begin();
 		/*std::vector< uint32_t >::const_iterator*/
 		lSourceIt = vals.end();
@@ -357,37 +341,36 @@ void write_test()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				pantheios::log_ERROR ( "MISMATCH AT " , pantheios::integer ( count ) , " : Source " , pantheios::integer ( *lSourceIt , pantheios::fmt::fullHex | 10 ) , " vs. Found " , pantheios::integer ( *lReadIt  ,  pantheios::fmt::fullHex | 10 ) );
-				pantheios::log_LOCATION();
-				throw 0;
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt   ) );
+								throw 0;
 			}
 		}
 
-		pantheios::log_INFORMATIONAL ( "ALL GOOD" ) ;
+		log ( Info() , "ALL GOOD" ) ;
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }
 
 void read_write_mask()
 {
-	uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
-	uhal::HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+	ConnectionManager manager ( "file://tests/addr/connections.xml" );
+	HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 	hw.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
 	hw.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
 	hw.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
 	hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
 	hw.dispatch();
-	uhal::HwInterface hw2 = manager.getDevice ( "hcal.crate1.slot2" );
+	HwInterface hw2 = manager.getDevice ( "hcal.crate1.slot2" );
 	hw2.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
 	hw2.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
 	hw2.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
 	hw2.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
 	hw2.dispatch();
-	// uhal::ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
+	// ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
 	// //BOOST_CHECK(mem >=0 && mem <=0xF);
 	// uint32_t val = 0x3;
 	// hw.getNode("REGISTER_MASK_0xF0").write(val);
@@ -397,13 +380,13 @@ void read_write_mask()
 }
 
 // void read_write_permissions() {
-// uhal::ConnectionManager manager("addr/connections.xml");
-// uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
+// ConnectionManager manager("addr/connections.xml");
+// HwInterface hw = manager.getDevice("hcal.crate1.slot1");
 
 // //read write register
 // uint32_t val = static_cast<uint32_t>(rand());
 // hw.getNode("READ_WRITE_REGISTER").write(val);
-// uhal::ValWord< uint32_t > mem = hw.getNode("READ_WRITE_REGISTER").read();
+// ValWord< uint32_t > mem = hw.getNode("READ_WRITE_REGISTER").read();
 
 // hw.dispatch();
 // //BOOST_CHECK(mem == val);
@@ -428,7 +411,7 @@ void read_write_mask()
 // vals.push_back(static_cast<uint32_t>(rand()));
 
 // hw.getNode("READ_WRITE_MEMORY").writeBlock(vals);
-// uhal::ValVector< uint32_t > block = hw.getNode("READ_WRITE_MEMORY").readBlock(SIZE);
+// ValVector< uint32_t > block = hw.getNode("READ_WRITE_MEMORY").readBlock(SIZE);
 // hw.dispatch();
 
 // //BOOST_CHECK(block.size() == vals.size());
@@ -453,28 +436,28 @@ void read_write_mask()
 // }
 
 // void synchronization_primitive() {
-// uhal::ConnectionManager manager("addr/connections.xml");
-// uhal::HwInterface hw = manager.getDevice("hcal.crate1.slot1");
+// ConnectionManager manager("addr/connections.xml");
+// HwInterface hw = manager.getDevice("hcal.crate1.slot1");
 
 // uint32_t SIZE = 10;
 // for(uint32_t i=0;i!=SIZE;i++)
-// uhal::ValWord< uint32_t > tmp = hw.getNode("REG1").read();
+// ValWord< uint32_t > tmp = hw.getNode("REG1").read();
 
-// hw.dispatch(uhal::defs::ATOMIC);
+// hw.dispatch(defs::ATOMIC);
 
 // SIZE = 1024*1024;
 // for(uint32_t i=0;i!=SIZE;i++)
-// uhal::ValWord< uint32_t > tmp = hw.getNode("REG1").read();
+// ValWord< uint32_t > tmp = hw.getNode("REG1").read();
 
-// //BOOST_CHECK_THROW(hw.dispatch(uhal::defs::ATOMIC),std::exception);
+// //BOOST_CHECK_THROW(hw.dispatch(defs::ATOMIC),std::exception);
 // try {
-// hw.dispatch(uhal::defs::ATOMIC);
+// hw.dispatch(defs::ATOMIC);
 // } catch(std::exception&) {}
 
 // }
 
 
-void addOperationToQueue ( uhal::HwInterface& hw , const std::vector<int>& aOperationList , const uint32_t& val, const std::vector<uint32_t>& vals )
+void addOperationToQueue ( HwInterface& hw , const std::vector<int>& aOperationList , const uint32_t& val, const std::vector<uint32_t>& vals )
 {
 	try
 	{
@@ -495,10 +478,10 @@ void addOperationToQueue ( uhal::HwInterface& hw , const std::vector<int>& aOper
 					hw.getClient()->readBlock ( 0xBA5EADD4 , vals.size() );
 					break;
 				case 4:
-					hw.getClient()->writeBlock ( 0xBA5EADD4 , vals , uhal::defs::NON_INCREMENTAL );
+					hw.getClient()->writeBlock ( 0xBA5EADD4 , vals , defs::NON_INCREMENTAL );
 					break;
 				case 5:
-					hw.getClient()->readBlock ( 0xBA5EADD4 , vals.size() , uhal::defs::NON_INCREMENTAL );
+					hw.getClient()->readBlock ( 0xBA5EADD4 , vals.size() , defs::NON_INCREMENTAL );
 					break;
 				case 6:
 					hw.getClient()->rmw_bits ( 0xBA5EADD4 , 0x00C0FFEE , 0xF00DF00D );
@@ -519,10 +502,10 @@ void addOperationToQueue ( uhal::HwInterface& hw , const std::vector<int>& aOper
 					hw.getClient()->readBlock ( 0xADD4BA5E , vals.size() );
 					break;
 				case 12:
-					hw.getClient()->writeBlock ( 0xADD4BA5E , vals , uhal::defs::NON_INCREMENTAL );
+					hw.getClient()->writeBlock ( 0xADD4BA5E , vals , defs::NON_INCREMENTAL );
 					break;
 				case 13:
-					hw.getClient()->readBlock ( 0xADD4BA5E , vals.size() , uhal::defs::NON_INCREMENTAL );
+					hw.getClient()->readBlock ( 0xADD4BA5E , vals.size() , defs::NON_INCREMENTAL );
 					break;
 				case 14:
 					hw.getClient()->rmw_bits ( 0xADD4BA5E , 0xDEADFACE , 0xFEEDFACE );
@@ -537,8 +520,8 @@ void addOperationToQueue ( uhal::HwInterface& hw , const std::vector<int>& aOper
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }
 
@@ -547,12 +530,12 @@ void addOperationToQueue ( uhal::HwInterface& hw , const std::vector<int>& aOper
 
 void allInstructionPermutations()
 {
-	pantheios_fe_simple_setSeverityCeiling ( pantheios::informational );
+	log_configuration::setLogLevelTo( Info() );
 
 	try
 	{
-		uhal::ConnectionManager manager ( "file://tests/addr/connections.xml" );
-		std::vector< uhal::HwInterface > hw;
+		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		std::vector< HwInterface > hw;
 		hw.push_back ( manager.getDevice ( "hcal.crate1.slot1" ) );
 		hw.push_back ( manager.getDevice ( "hcal.crate1.slot2" ) );
 		uint32_t BlockSize ( 2 );
@@ -581,7 +564,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					pantheios::log_INFORMATIONAL ( "all writes, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					log ( Info() , "all writes, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}
@@ -599,7 +582,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					pantheios::log_INFORMATIONAL ( "all reads, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					log ( Info() , "all reads, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}
@@ -617,7 +600,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					pantheios::log_INFORMATIONAL ( "read-modify-write, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					log ( Info() , "read-modify-write, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}
@@ -635,7 +618,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					pantheios::log_INFORMATIONAL ( "all types, same addr, permutation: " , pantheios::integer ( ++count ) , "/" , pantheios::real ( total ) );
+					log ( Info() , "all types, same addr, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}
@@ -656,15 +639,15 @@ void allInstructionPermutations()
 				lStr << messages[ *lIt ] << ", ";
 			}
 
-			pantheios::log_EXCEPTION ( aExc );
-			pantheios::log_ERROR ( "TEST SEQUENCE WAS : " , lStr.str() );
-			throw uhal::exception ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "TEST SEQUENCE WAS : " , lStr.str() );
+			throw exception ( aExc );
 		}
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }
 
@@ -673,7 +656,8 @@ int main ( int argc,char* argv[] )
 {
 	try
 	{
-		pantheios_fe_simple_setSeverityCeiling ( pantheios::debug );
+		log_configuration::setLogLevelTo( Debug() );
+		
 		hwInterface_creation();
 		rawClientAccess();
 		navigation_and_traversal_test();
@@ -686,7 +670,7 @@ int main ( int argc,char* argv[] )
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
-		throw uhal::exception ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
 	}
 }

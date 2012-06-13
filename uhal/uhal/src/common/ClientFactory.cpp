@@ -50,7 +50,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -72,7 +72,7 @@ namespace uhal
 			URI lUri;
 			BoostSpiritGrammars::URIGrammar lGrammar;
 			boost::spirit::qi::phrase_parse ( aUri.begin() , aUri.end() , lGrammar , boost::spirit::ascii::space , lUri );
-			pantheios::log_NOTICE ( "URI \"" , aUri , "\" parsed as:\n" , lazy_stream_inserter ( lUri ) );
+			log ( Notice() , "URI \"" , aUri , "\" parsed as:\n" , lUri );
 			std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
 
 			if ( lIt == mCreators.end() )
@@ -84,8 +84,8 @@ namespace uhal
 					lStr << "\n > " << lIt->first << "\t: " << lIt->second;
 				}
 
-				pantheios::log_ERROR ( "Protocol \"" , lUri.mProtocol , "\" does not exists in map of creators. Options are:" , lStr.str() );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Protocol \"" , lUri.mProtocol , "\" does not exists in map of creators. Options are:" , lStr.str() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ProtocolDoesNotExist();
 			}
 
@@ -93,7 +93,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

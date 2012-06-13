@@ -5,13 +5,14 @@
 #include "uhal/AddressTableBuilder.hpp"
 #include "uhal/Utilities.hpp"
 
-#include "uhal/log.hpp"
+#include "log/log.hpp"
 
 #include <iomanip>
 
 
 std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode )
 {
+	using namespace uhal;
 	try
 	{
 		aNode.stream ( aStream );
@@ -19,8 +20,25 @@ std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode )
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
+	}
+}
+
+
+namespace uhal
+{
+	template < >
+	void log_inserter< uhal::Node >( const uhal::Node& aNode ){
+		std::stringstream lStream;
+		aNode.stream ( lStream );
+		
+		std::istreambuf_iterator<char> lEnd;
+		std::istreambuf_iterator<char> lIt ( lStream.rdbuf() );
+		while ( lIt!=lEnd ){
+			fputc( *lIt++ , log_configuration::getDestination() );
+		}
+  
 	}
 }
 
@@ -58,7 +76,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -72,7 +90,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -85,7 +103,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -98,7 +116,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -111,7 +129,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -139,7 +157,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -153,7 +171,7 @@ namespace uhal
 
 			if ( lIterator==mChildrenMap->end() )
 			{
-				pantheios::log_ERROR ( "No branch found with ID-path \"" , aId , "\"" );
+				log ( Error() , "No branch found with ID-path \"" , aId , "\"" );
 				std::size_t lPos ( std::string::npos );
 				bool lPartialMatch ( false );
 
@@ -170,8 +188,8 @@ namespace uhal
 
 					if ( lIterator!=mChildrenMap->end() )
 					{
-						pantheios::log_ERROR ( "Partial match \"" , aId.substr ( 0 , lPos ) , "\" found for ID-path \"" , aId , "\"" );
-						pantheios::log_ERROR ( "Tree structure of partial match is:" , lazy_stream_inserter ( * ( lIterator->second ) ) );
+						log ( Error() , "Partial match \"" , aId.substr ( 0 , lPos ) , "\" found for ID-path \"" , aId , "\"" );
+						log ( Error() , "Tree structure of partial match is:" , * ( lIterator->second ) );
 						lPartialMatch = true;
 						break;
 					}
@@ -181,10 +199,10 @@ namespace uhal
 
 				if ( !lPartialMatch )
 				{
-					pantheios::log_ERROR ( "Not even a partial match found for ID-path \"" , aId , "\". Tree structure is:" , lazy_stream_inserter ( *this ) );
+					log ( Error() , "Not even a partial match found for ID-path \"" , aId , "\". Tree structure is:" , *this );
 				}
 
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw NoBranchFoundWithGivenUID();
 			}
 
@@ -192,7 +210,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -214,7 +232,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -226,7 +244,7 @@ namespace uhal
 		{
 			std::vector<std::string> lNodes;
 			lNodes.reserve ( mChildrenMap->size() ); //prevent reallocations
-			pantheios::log_INFORMATIONAL ( "Regular Expression : " , aRegex.str() );
+			log ( Info() , "Regular Expression : " , aRegex.str() );
 
 			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
 			{
@@ -234,7 +252,7 @@ namespace uhal
 
 				if ( boost::regex_match ( lIt->first.c_str() , lMatch , aRegex ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
 				{
-					pantheios::log_INFORMATIONAL ( lIt->first , " matches" );
+					log ( Info() , lIt->first , " matches" );
 					lNodes.push_back ( lIt->first );
 				}
 			}
@@ -245,7 +263,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -258,7 +276,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -271,7 +289,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -291,7 +309,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
 		{
 			//error description is given in the function itself so no more elaboration required
-			pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+			log ( Error() , "Throwing at " , ThisLocation() );
 			throw NodeMustHaveUID();
 		}
 
@@ -301,9 +319,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			if ( lAddr & ~aParentMask )
 			{
-				pantheios::log_ERROR ( "Node address " , pantheios::integer ( lAddr , pantheios::fmt::fullHex | 10 ) ,
-									   " overlaps with the mask specified by the parent node, " , pantheios::integer ( aParentMask , pantheios::fmt::fullHex | 10 ) );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Node address " , Integer< hex , fixed >  ( lAddr ) ,
+									   " overlaps with the mask specified by the parent node, " , Integer< hex , fixed >  ( aParentMask ) );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ChildHasAddressOverlap();
 			}
 
@@ -318,10 +336,10 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			if ( mAddrMask & ~aParentMask )
 			{
-				pantheios::log_ERROR ( "Node address mask " , pantheios::integer ( mAddrMask , pantheios::fmt::fullHex | 10 ) ,
-									   " overlaps with the parent mask " , pantheios::integer ( aParentMask , pantheios::fmt::fullHex | 10 ) ,
+				log ( Error() , "Node address mask " , Integer< hex , fixed >  ( mAddrMask ) ,
+									   " overlaps with the parent mask " , Integer< hex , fixed >  ( aParentMask ) ,
 									   ". This makes the child's address subspace larger than the parent and is not allowed" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ChildHasAddressMaskOverlap();
 			}
 		}
@@ -353,8 +371,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			{
 
 
-				pantheios::log_INFORMATIONAL ( "aParentAddr  = " , pantheios::integer ( aParentAddr , pantheios::fmt::fullHex | 10 ) );
-				pantheios::log_INFORMATIONAL ( "lMask  = " , pantheios::integer ( lMask , pantheios::fmt::fullHex | 10 ) );
+				log ( Info() , "aParentAddr  = " , Integer< hex , fixed >  ( aParentAddr ) );
+				log ( Info() , "lMask  = " , Integer< hex , fixed >  ( lMask ) );
 
 
 
@@ -377,7 +395,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -400,7 +418,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 				}
 				catch ( const std::exception& aExc )
 				{
-					pantheios::log_EXCEPTION ( aExc );
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
 			}
@@ -426,7 +444,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -455,7 +473,7 @@ Node::Node ( const Node& aNode ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -478,14 +496,14 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Node permissions denied write access" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Node permissions denied write access" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw WriteAccessDenied();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -501,14 +519,14 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Node permissions denied write access" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Node permissions denied write access" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw WriteAccessDenied();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -531,14 +549,14 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Node permissions denied read access" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Node permissions denied read access" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ReadAccessDenied();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -554,14 +572,14 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Node permissions denied read access" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Node permissions denied read access" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ReadAccessDenied();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -583,14 +601,14 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Node permissions denied read access" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Node permissions denied read access" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ReadAccessDenied();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -606,14 +624,14 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Node permissions denied read access" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Node permissions denied read access" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ReadAccessDenied();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -627,7 +645,7 @@ Node::Node ( const Node& aNode ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

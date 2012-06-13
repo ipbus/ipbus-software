@@ -12,7 +12,7 @@
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
 
-#include "uhal/log.hpp"
+#include "log/log.hpp"
 
 #include "uhal/ProtocolInterfaces.hpp"
 

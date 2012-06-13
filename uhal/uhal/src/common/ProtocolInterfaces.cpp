@@ -11,7 +11,7 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -157,7 +157,7 @@ TransportProtocol::TransportProtocol ( const uint32_t& aTimeoutPeriod ) try :
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -185,7 +185,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -212,7 +212,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 					)
@@ -257,33 +257,33 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{
 			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
 			{
-				pantheios::log_ERROR ( "Unable to parse send header " , pantheios::integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , pantheios::fmt::fullHex | 10 ) );
+				log ( Error() , "Unable to parse send header " , Integer< hex , fixed >  ( * ( ( uint32_t* ) ( aSendBufferStart ) ) ) );
 				return false;
 			}
 
 			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
 			{
-				pantheios::log_ERROR ( "Unable to parse reply header " , pantheios::integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , pantheios::fmt::fullHex | 10 ) );
+				log ( Error() , "Unable to parse reply header " , Integer< hex , fixed >  ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) ) );
 				return false;
 			}
 
 			if ( lReplyResponseGood )
 			{
-				pantheios::log_ERROR ( "Returned Response " , pantheios::integer ( lReplyResponseGood , pantheios::fmt::fullHex | 4 ) , " indicated error" );
+				log ( Error() , "Returned Response " , Integer< hex , fixed >  ( lReplyResponseGood ) , " indicated error" );
 				return false;
 			}
 
 			if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
 			{
-				pantheios::log_ERROR ( "Returned Transaction Type " , pantheios::integer ( ( uint8_t ) ( lReplyIPbusTransactionType ) , pantheios::fmt::fullHex | 4 ) ,
-									   " does not match that sent " , pantheios::integer ( ( uint8_t ) ( lSendIPbusTransactionType ) , pantheios::fmt::fullHex | 4 ) );
+				log ( Error() , "Returned Transaction Type " , Integer< hex , fixed >  ( ( uint8_t ) ( lReplyIPbusTransactionType ) ) ,
+									   " does not match that sent " , Integer< hex , fixed >  ( ( uint8_t ) ( lSendIPbusTransactionType ) ) );
 				return false;
 			}
 
 			if ( lSendTransactionId != lReplyTransactionId )
 			{
-				pantheios::log_ERROR ( "Returned Transaction Id " , pantheios::integer ( lReplyTransactionId , pantheios::fmt::fullHex | 10 ) ,
-									   " does not match that sent " , pantheios::integer ( lSendTransactionId , pantheios::fmt::fullHex | 10 ) );
+				log ( Error() , "Returned Transaction Id " , Integer< hex , fixed >  ( lReplyTransactionId ) ,
+									   " does not match that sent " , Integer< hex , fixed >  ( lSendTransactionId ) );
 				return false;
 			}
 
@@ -382,7 +382,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -414,7 +414,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -445,10 +445,10 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{
 			this->checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
 				uint32_t lSendBytesAvailableForPayload ( ( lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
-				//pantheios::log_NOTICE( "lSendBytesAvailable = " , pantheios::integer(lSendBytesAvailable) );
-				//pantheios::log_NOTICE( "lSendBytesAvailableForPayload (bytes) = " , pantheios::integer(lSendBytesAvailableForPayload) );
-				//pantheios::log_NOTICE( "lSendBytesAvailableForPayload (words) = " , pantheios::integer(lSendBytesAvailableForPayload>>2) );
-				//pantheios::log_NOTICE( "lPayloadByteCount = " , pantheios::integer(lPayloadByteCount) );
+				//log ( Notice() , "lSendBytesAvailable = " , Integer(lSendBytesAvailable) );
+				//log ( Notice() , "lSendBytesAvailableForPayload (bytes) = " , Integer(lSendBytesAvailableForPayload) );
+				//log ( Notice() , "lSendBytesAvailableForPayload (words) = " , Integer(lSendBytesAvailableForPayload>>2) );
+				//log ( Notice() , "lPayloadByteCount = " , Integer(lPayloadByteCount) );
 				mCurrentBuffers->send ( this->calculateIPbusHeader ( lType , lSendBytesAvailableForPayload>>2 ) );
 				mCurrentBuffers->send ( lAddr );
 				mCurrentBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
@@ -468,7 +468,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -506,7 +506,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -558,7 +558,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -595,7 +595,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -647,7 +647,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -684,7 +684,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -724,7 +724,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -762,7 +762,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -816,7 +816,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

@@ -2,7 +2,7 @@
 
 #include "uhal/AddressTableBuilder.hpp"
 #include "uhal/Utilities.hpp"
-#include "uhal/log.hpp"
+#include "log/log.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -24,7 +24,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -38,8 +38,8 @@ namespace uhal
 
 			if ( lAddressFiles.size() != 1 )
 			{
-				pantheios::log_ERROR ( "Exactly one address table file must be specified. The expression \"" , aFilenameExpr , "\" contains " , pantheios::integer ( lAddressFiles.size() ) , " valid file expressions." );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Exactly one address table file must be specified. The expression \"" , aFilenameExpr , "\" contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw IncorrectAddressTableFileCount();
 			}
 
@@ -47,15 +47,15 @@ namespace uhal
 
 			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind ( &AddressTableBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , aAddr , aAddrMask , boost::ref ( lNodes ) ) ) )
 			{
-				pantheios::log_ERROR ( "Failed to open address table file \"" , lAddressFiles[0].second , "\"" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Failed to open address table file \"" , lAddressFiles[0].second , "\"" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw FailedToOpenAddressTableFile();
 			}
 
 			if ( lNodes.size() != 1 )
 			{
-				pantheios::log_ERROR ( "Exactly one address table file must be specified. The expression \"" , lAddressFiles[0].second , "\" refers to " , pantheios::integer ( lNodes.size() ) , " valid files." );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Exactly one address table file must be specified. The expression \"" , lAddressFiles[0].second , "\" refers to " , Integer ( lNodes.size() ) , " valid files." );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw IncorrectAddressTableFileCount();
 			}
 
@@ -63,7 +63,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -86,7 +86,7 @@ namespace uhal
 
 			if ( lExtension == ".xml" )
 			{
-				pantheios::log_INFORMATIONAL ( "XML file" );
+				log ( Info() , "XML file" );
 				pugi::xml_document lXmlDocument;
 				pugi::xml_parse_result lLoadResult = lXmlDocument.load_buffer_inplace ( & ( aFile[0] ) , aFile.size() );
 
@@ -100,7 +100,7 @@ namespace uhal
 
 				if ( !lXmlNode )
 				{
-					pantheios::log_ERROR ( "No XML node called \"node\" in file " , lazy_stream_inserter ( aPath ) );
+					log ( Error() , "No XML node called \"node\" in file " , aPath.c_str() );
 					return;
 				}
 
@@ -110,9 +110,9 @@ namespace uhal
 			}
 			else if ( lExtension == ".txt" )
 			{
-				pantheios::log_INFORMATIONAL ( "TXT file" );
-				pantheios::log_ERROR ( "Parser problems mean that this method has been disabled. Please fix me! Please?!?" );
-				pantheios::log_ERROR ( "At " , ThisLocation() );
+				log ( Info() , "TXT file" );
+				log ( Error() , "Parser problems mean that this method has been disabled. Please fix me! Please?!?" );
+				log ( Error() , "At " , ThisLocation() );
 				return;
 				/*
 				uhal::OldHalEntryGrammar lGrammar;
@@ -125,25 +125,25 @@ namespace uhal
 				boost::spirit::qi::phrase_parse( lBegin , lEnd , lGrammar , lParser , lResponse );
 
 				for( std::vector< utilities::OldHalEntryType >::iterator lIt = lResponse.begin() ; lIt != lResponse.end() ; ++lIt ){
-					//pantheios::log_INFORMATIONAL ( "---------------------------------------------------\n" , *lIt );
+					//log ( Info() , "---------------------------------------------------\n" , *lIt );
 				}
 
-				//pantheios::log_INFORMATIONAL ( "Remaining:" );
+				//log ( Info() , "Remaining:" );
 				for( ; lBegin != lEnd ; ++lBegin ){
-					//pantheios::log_INFORMATIONAL ( *lBegin;
+					//log ( Info() , *lBegin;
 				}
 				std::cout );
 				*/
 			}
 			else
 			{
-				pantheios::log_ERROR ( "Extension \"" , lExtension , "\" not known." );
+				log ( Error() , "Extension \"" , lExtension , "\" not known." );
 				return;
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

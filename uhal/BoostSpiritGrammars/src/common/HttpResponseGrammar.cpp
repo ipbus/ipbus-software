@@ -1,5 +1,7 @@
 #include "BoostSpiritGrammars/HttpResponseGrammar.hpp"
 
+#include "log/log.hpp"
+
 std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse )
 {
 	aStream << " > method = " << aHttpResponse.method << "\n";
@@ -16,6 +18,27 @@ std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType&
 
 	aStream << std::endl;
 	return aStream;
+}
+
+
+namespace uhal
+{
+	template < >
+	void log_inserter< HttpResponseType >(  const HttpResponseType& aHttpResponse )
+	{
+		log_inserter( " > method = " );
+		log_inserter( aHttpResponse.method );
+		log_inserter( "\n > version = " );
+		log_inserter( Real(aHttpResponse.version) );
+		log_inserter( "\n > status = " );
+		log_inserter( Integer(aHttpResponse.status) );
+		log_inserter( "\n > status_string = "  );
+		log_inserter( aHttpResponse.status_string );
+		log_inserter(  "\n > NameValuePairs =\n" );
+		log_inserter( aHttpResponse.headers );
+		log_inserter( "\n > Content =\n" );
+		fwrite( &(aHttpResponse.content[0]) , 1 , aHttpResponse.content.size() , log_configuration::getDestination() ); 
+	}
 }
 
 

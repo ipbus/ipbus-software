@@ -11,9 +11,9 @@ namespace uhal
 
 			if ( lIt != mCreators.end() )
 			{
-				//pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				//log ( Error() , "Throwing at " , ThisLocation() );
 				//throw ProtocolAlreadyExist();
-				pantheios::log_WARNING ( "Protocol \"" , aProtocol , "\" already exists in map of creators. Continuing for now, but be warned." );
+				log ( Warning() , "Protocol \"" , aProtocol , "\" already exists in map of creators. Continuing for now, but be warned." );
 				return;
 			}
 
@@ -30,7 +30,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -45,7 +45,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

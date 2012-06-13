@@ -13,7 +13,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -27,7 +27,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -37,20 +37,20 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		try
 		{
 			std::string lInstruction ( "ping -q -c 1 " + mUri.mHostname + " &> /dev/null" );
-			pantheios::log_NOTICE ( "Pinging \"" , mId , "\" with instruction : " , lInstruction );
+			log ( Notice() , "Pinging \"" , mId , "\" with instruction : " , lInstruction );
 			//Cant use ICMP here because it requires raw socket (and hence superuser) access, so use system PING instead
 			int lPingStatus = system ( lInstruction.c_str() );
 
 			if ( WEXITSTATUS ( lPingStatus ) )
 			{
-				pantheios::log_ERROR ( "Ping returned exit status ", pantheios::integer ( WEXITSTATUS ( lPingStatus ) ) );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Ping returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw PingFailed();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -98,7 +98,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -113,7 +113,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -126,7 +126,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -139,7 +139,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -156,7 +156,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -169,7 +169,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -182,7 +182,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -199,7 +199,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -212,7 +212,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -225,7 +225,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -242,7 +242,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -258,7 +258,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -274,7 +274,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -290,7 +290,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

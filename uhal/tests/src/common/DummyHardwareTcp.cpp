@@ -19,7 +19,7 @@ class TCPdummyHardware
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 
@@ -53,7 +53,7 @@ class TCPdummyHardware
 									mResponseGood )
 						   )
 						{
-							pantheios::log_ERROR ( "Unable to parse send header " , pantheios::integer ( *lReceivePtr , pantheios::fmt::fullHex | 10 ) );
+							log ( Error() , "Unable to parse send header " ,  Integer<hex,fixed> ( *lReceivePtr ) );
 							return;
 						}
 
@@ -148,7 +148,7 @@ class TCPdummyHardware
 			}
 			catch ( const std::exception& aExc )
 			{
-				pantheios::log_EXCEPTION ( aExc );
+				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -195,7 +195,7 @@ int main ( int argc, char* argv[] )
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 

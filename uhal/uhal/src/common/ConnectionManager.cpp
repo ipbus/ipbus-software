@@ -6,7 +6,7 @@
 #include "uhal/ClientFactory.hpp"
 #include "uhal/Utilities.hpp"
 
-#include "uhal/log.hpp"
+#include "log/log.hpp"
 
 
 namespace uhal
@@ -36,7 +36,7 @@ namespace uhal
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -63,7 +63,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -85,7 +85,7 @@ namespace uhal
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -102,8 +102,8 @@ namespace uhal
 		{
 			if ( mConnectionDescriptors.size() == 0 )
 			{
-				pantheios::log_ERROR ( "Connection map contains no entries" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Connection map contains no entries" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ConnectionUIDDoesNotExist();
 			}
 
@@ -111,19 +111,19 @@ namespace uhal
 
 			if ( lIt == mConnectionDescriptors.end() )
 			{
-				pantheios::log_ERROR ( aId , " does not exist in connection map" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , aId , " does not exist in connection map" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ConnectionUIDDoesNotExist();
 			}
 
 			Node lNode = AddressTableBuilder::getInstance().getAddressTable ( lIt->second.address_table );
-			pantheios::log_NOTICE ( "ConnectionManager created node tree: " , lazy_stream_inserter ( lNode ) );
+			log ( Notice() , "ConnectionManager created node tree: " , lNode );
 			boost::shared_ptr<ClientInterface> lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
 			return HwInterface ( lClientInterface , lNode );
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -146,7 +146,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -173,7 +173,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -186,7 +186,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -199,7 +199,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -215,7 +215,7 @@ namespace uhal
 
 			if ( ! lInsert.second )
 			{
-				pantheios::log_NOTICE ( "File \"" , ( aProtocol+ ( aPath.string() ) ) , "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
+				log ( Notice() , "File \"" , ( aProtocol+ ( aPath.string() ) ) , "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
 				return;
 			}
 
@@ -244,7 +244,7 @@ namespace uhal
 					{
 						if ( lInsert.first->second == lDescriptor )
 						{
-							pantheios::log_NOTICE ( "Duplicate connection entry found:"
+							log ( Notice() , "Duplicate connection entry found:"
 													"\n > id = " , lDescriptor.id ,
 													"\n > uri = " , lDescriptor.uri ,
 													"\n > address_table = " , lDescriptor.address_table ,
@@ -252,21 +252,21 @@ namespace uhal
 						}
 						else
 						{
-							pantheios::log_ERROR ( "Duplicate connection ID found but parameters do not match! Bailing!" );
-							pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+							log ( Error() , "Duplicate connection ID found but parameters do not match! Bailing!" );
+							log ( Error() , "Throwing at " , ThisLocation() );
 							throw DuplicatedUID();
 						}
 					}
 				}
 				else
 				{
-					pantheios::log_ERROR ( "Construction of Connection Descriptor failed. Continuing with next Connection Descriptor for now but be aware!" );
+					log ( Error() , "Construction of Connection Descriptor failed. Continuing with next Connection Descriptor for now but be aware!" );
 				}
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

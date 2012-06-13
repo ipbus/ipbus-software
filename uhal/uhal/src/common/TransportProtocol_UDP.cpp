@@ -8,8 +8,8 @@
 
 void UDPtimeout ( int signal )
 {
-	pantheios::log_ERROR ( "UDP Timeout" );
-	pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+	log ( Error() , "UDP Timeout" );
+	log ( Error() , "Throwing at " , ThisLocation() );
 	throw uhal::UdpTimeout();
 }
 
@@ -35,7 +35,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 		{}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -51,7 +51,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		}
 	}
 
@@ -89,7 +89,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			mUdpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
 		}
 		catch ( boost::thread_interrupted& )
@@ -123,8 +123,8 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
 			if ( mErrorCode )
 			{
-				pantheios::log_ERROR ( "ASIO reported an error: " , mErrorCode.message() );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ErrorInUdpCallback();
 			}
 
@@ -150,21 +150,21 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
 			if ( mErrorCode )
 			{
-				pantheios::log_ERROR ( "ASIO reported an error: " , mErrorCode.message() );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ErrorInUdpCallback();
 			}
 
 			if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
-				pantheios::log_ERROR ( "Validation function reported an error!" );
-				pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+				log ( Error() , "Validation function reported an error!" );
+				log ( Error() , "Throwing at " , ThisLocation() );
 				throw IPbusValidationError ();
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -187,8 +187,8 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 
 		if ( sigaction ( SIGALRM, &sa, 0 ) < 0 )
 		{
-			pantheios::log_ERROR ( "Can't establish signal handler" );
-			pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+			log ( Error() , "Can't establish signal handler" );
+			log ( Error() , "Throwing at " , ThisLocation() );
 			throw UdpTimeout();
 		}
 
@@ -196,7 +196,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 	}
 	catch ( const std::exception& aExc )
 	{
-		pantheios::log_EXCEPTION ( aExc );
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -228,7 +228,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		}
 	}
 
@@ -246,7 +246,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 				if ( mAsynchronousException )
 				{
 					uhal::exception lExc ( *mAsynchronousException );
-					pantheios::log_EXCEPTION ( lExc );
+					log ( Error() , "Exception \"" , lExc.what() , "\" caught at " , ThisLocation() );
 					throw lExc;
 				}
 
@@ -261,7 +261,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -288,7 +288,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 					if ( mAsynchronousException )
 					{
 						uhal::exception lExc ( *mAsynchronousException );
-						pantheios::log_EXCEPTION ( lExc );
+						log ( Error() , "Exception \"" , lExc.what() , "\" caught at " , ThisLocation() );
 						throw lExc;
 					}
 
@@ -301,8 +301,8 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 
 				if ( lTimeTaken > mTimeoutPeriod )
 				{
-					pantheios::log_ERROR ( "UDP Timeout" );
-					pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+					log ( Error() , "UDP Timeout" );
+					log ( Error() , "Throwing at " , ThisLocation() );
 					throw UdpTimeout();
 				}
 			}
@@ -312,7 +312,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			pantheios::log_EXCEPTION ( aExc );
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

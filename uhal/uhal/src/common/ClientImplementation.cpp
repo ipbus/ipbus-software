@@ -34,8 +34,8 @@ namespace uhal
 
 		if ( ( lIPstr == aUri.mArguments.end() ) || ( lPortStr == aUri.mArguments.end() ) )
 		{
-			pantheios::log_ERROR ( "This function expects arguments of the form IP=192.168.200.200&port=50001. One or both of these was missing" );
-			pantheios::log_ERROR ( "Throwing at " , ThisLocation() );
+			log ( Error() , "This function expects arguments of the form IP=192.168.200.200&port=50001. One or both of these was missing" );
+			log ( Error() , "Throwing at " , ThisLocation() );
 			throw XMLfileMissingRequiredParameters();
 		}
 
@@ -48,11 +48,11 @@ namespace uhal
 										);
 		uint16_t lPort = boost::lexical_cast< uint16_t > ( lPortStr->second );
 		uint32_t lIPaddress = ( lIP.at ( 0 ) <<24 ) | ( lIP.at ( 1 ) <<16 ) | ( lIP.at ( 2 ) <<8 ) | ( lIP.at ( 3 ) );
-		pantheios::log_NOTICE ( "Converted IP address string \"" , lIPstr->second ,
-								"\" to " , pantheios::integer ( lIP.at ( 0 ) ) , "." , pantheios::integer ( lIP.at ( 1 ) ) , "." , pantheios::integer ( lIP.at ( 2 ) ) , "." , pantheios::integer ( lIP.at ( 3 ) ) ,
-								" and converted this to " , pantheios::integer ( lIPaddress  , pantheios::fmt::fullHex | 10 ) ,
+		log ( Notice() , "Converted IP address string \"" , lIPstr->second ,
+								"\" to " , Integer ( lIP.at ( 0 ) ) , "." , Integer ( lIP.at ( 1 ) ) , "." , Integer ( lIP.at ( 2 ) ) , "." , Integer ( lIP.at ( 3 ) ) ,
+								" and converted this to " , Integer< hex , fixed >  ( lIPaddress  ) ,
 								". Converted port string \"" , lPortStr->second ,
-								"\" to " , pantheios::integer ( lPort  , pantheios::fmt::fullHex | 6 )	);
+								"\" to " , Integer< hex , fixed >  ( lPort  )	);
 		return std::make_pair ( lIPaddress , lPort );
 	}
 
