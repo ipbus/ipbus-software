@@ -13,13 +13,14 @@ Packager = Robert Frazier
 
 # ErlangOTP version numbers.  Erlang is versioned like so: R14B, R14B01, R14B02, .., R15B, etc etc.
 PACKAGE_VER_MAJOR = 15
-PACKAGE_VER_MINOR = 01   # If no minor version number, leave blank rather than "00"
+# If no minor version number, leave blank rather than "00"
+PACKAGE_VER_MINOR = 01
 
 # This is the version number for the RPM packaging.
 # According to RPM spec-file docs, first time a given software version (as above) is packaged up,
 # the release number should start at 1.  Each time the same software version is repackaged, you
 # increment this number.
-PACKAGE_RELEASE = 1  
+PACKAGE_RELEASE = 1
 
 TARBALL_DIR = otp_src_R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}
 TARBALL_FILE = ${TARBALL_DIR}.tar.gz

@@ -28,17 +28,17 @@ systems.
 curdir=`pwd` 
 rm -rf $RPM_BUILD_ROOT 
 
-# copy includes to RPM_BUILD_ROOT and set aliases
-mkdir -p $RPM_BUILD_ROOT%{_prefix}/include
-cp -rp %{sources_dir}/include/* $RPM_BUILD_ROOT%{_prefix}/include/.
+# copy binaries to RPM_BUILD_ROOT and set aliases
+mkdir -p $RPM_BUILD_ROOT%{_prefix}/bin
+cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 
 # copy libs to RPM_BUILD_ROOT and set aliases
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 
 #Change access rights
+chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
-chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/include
 
 #return to working directory
 cd $curdir 
@@ -52,5 +52,5 @@ cd $curdir
 
 %files 
 %defattr(-, root, root) 
-%{_prefix}/include/*
+%{_prefix}/bin/*
 %{_prefix}/lib/*
