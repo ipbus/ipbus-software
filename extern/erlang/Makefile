@@ -31,29 +31,29 @@ default: build
 
 clean: _cleanall
 _cleanall:
-  rm -rf RPMBUILD
-  rm -rf ${TARBALL_DIR}
+	rm -rf RPMBUILD
+	rm -rf ${TARBALL_DIR}
 
 all: _all
 build: _all
 buildall: _all
 _all:
-  mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-  tar -zxvf ${TARBALL_FILE}
-  cd ${TARBALL_DIR}; ./configure --prefix=${PackagePath}/RPMBUILD/SOURCES --exec-prefix=${PackagePath}/RPMBUILD/SOURCES --without-javac
-  cd ${TARBALL_DIR}; make
-  cd ${TARBALL_DIR}; make install
+	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	tar -zxvf ${TARBALL_FILE}
+	cd ${TARBALL_DIR}; ./configure --prefix=${PackagePath}/RPMBUILD/SOURCES --exec-prefix=${PackagePath}/RPMBUILD/SOURCES --without-javac
+	cd ${TARBALL_DIR}; make
+	cd ${TARBALL_DIR}; make install
 
 rpm: _rpmall
 _rpmall: 
-  rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD \
-      --define  "_topdir ${PackagePath}/RPMBUILD" \
-      --define "_prefix ${INSTALL_PREFIX}" \
-      --define "tarball_file ${TARBALL_FILE}" \
-      --define "sources_dir ${PackagePath}/RPMBUILD/SOURCES" \
-      --define "name ${PackageName}" \
-      --define "version R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}" \
-      --define "release ${PACKAGE_RELEASE}" \
-      --define "packager ${Packager}" \
-      ${PackageName}.spec
+	rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD \
+    --define  "_topdir ${PackagePath}/RPMBUILD" \
+    --define "_prefix ${INSTALL_PREFIX}" \
+    --define "tarball_file ${TARBALL_FILE}" \
+    --define "sources_dir ${PackagePath}/RPMBUILD/SOURCES" \
+    --define "name ${PackageName}" \
+    --define "version R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}" \
+    --define "release ${PACKAGE_RELEASE}" \
+    --define "packager ${Packager}" \
+    ${PackageName}.spec
 
