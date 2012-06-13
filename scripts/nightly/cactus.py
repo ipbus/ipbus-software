@@ -43,7 +43,7 @@ UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
 
 ENVIRONMENT_CMDS = ["env"]
 
-DEPENDENCIES_CMDS = ["sudo yum -y install bzip2-devel erlang python-devel"]
+DEPENDENCIES_CMDS = ["sudo yum -y install bzip2-devel ncurses-devel erlang python-devel"]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
