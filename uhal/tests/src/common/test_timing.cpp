@@ -25,7 +25,7 @@ int main ( int argc,char* argv[] )
 		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		uint32_t SIZE=10500;
-		uint32_t ITERATIONS=10;
+		uint32_t ITERATIONS=10000;
 		std::vector< uint32_t > lData;
 
 		for ( int i = 0 ; i != SIZE ; ++i )
