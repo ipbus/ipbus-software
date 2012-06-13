@@ -9,7 +9,7 @@ env = SConscript( "./.SConscript.uhal" )
 Export('env')
 
 ## Build the relevant directories
-SConscript( [ 'log/SConscript' , 'BoostSpiritGrammars/SConscript' , 'uhal/SConscript' , 'tests/SConscript'] )
+SConscript( [ 'log/SConscript' , 'grammars/SConscript' , 'uhal/SConscript' , 'tests/SConscript'] )
 
 
 

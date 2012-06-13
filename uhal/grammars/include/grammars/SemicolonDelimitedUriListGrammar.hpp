@@ -8,7 +8,7 @@
 #include <vector>
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 
 	//! The BOOST::SPIRIT grammar for parsing the Semicolon delimited URI list

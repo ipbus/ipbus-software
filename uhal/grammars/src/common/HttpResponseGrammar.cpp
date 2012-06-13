@@ -1,4 +1,4 @@
-#include "BoostSpiritGrammars/HttpResponseGrammar.hpp"
+#include "grammars/HttpResponseGrammar.hpp"
 
 #include "log/log.hpp"
 
@@ -42,7 +42,7 @@ namespace uhal
 }
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 
 	HttpResponseGrammar::HttpResponseGrammar() :

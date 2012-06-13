@@ -8,7 +8,7 @@
 #include <vector>
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 
 	//! The BOOST::SPIRIT grammar for parsing a URL
@@ -57,7 +57,7 @@ BOOST_FUSION_ADAPT_STRUCT (
 );
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 	struct URIGrammar : boost::spirit::qi::grammar<std::string::const_iterator, uhal::URI(), boost::spirit::ascii::space_type>
 	{

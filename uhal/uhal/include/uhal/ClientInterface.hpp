@@ -16,7 +16,7 @@
 
 #include "uhal/ProtocolInterfaces.hpp"
 
-#include "BoostSpiritGrammars/URLGrammar.hpp"
+#include "grammars/URLGrammar.hpp"
 
 #include <vector>
 #include <deque>

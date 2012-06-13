@@ -1,7 +1,7 @@
-#include "BoostSpiritGrammars/OldHalAddressFileGrammar.hpp"
+#include "grammars/OldHalAddressFileGrammar.hpp"
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 
 	OldHalSkipParser::OldHalSkipParser() :

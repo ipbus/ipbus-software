@@ -65,7 +65,7 @@ env.Append(
 
 env.Append( 
 	CPPPATH = [	
-				os.path.abspath('./BoostSpiritGrammars/include') , 
+				os.path.abspath('./grammars/include') , 
 				os.path.abspath('./log/include') , 
 				os.path.abspath('./uhal/include') , 
 				os.path.abspath('/opt/local/include')

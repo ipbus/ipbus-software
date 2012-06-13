@@ -1,8 +1,8 @@
-#include "BoostSpiritGrammars/URLGrammar.hpp"
+#include "grammars/URLGrammar.hpp"
 
 #include "log/log.hpp"
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 
 	URIGrammarShort::URIGrammarShort() :
@@ -66,7 +66,7 @@ namespace uhal
 
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 	URIGrammar::URIGrammar() :
 		URIGrammar::base_type ( start )

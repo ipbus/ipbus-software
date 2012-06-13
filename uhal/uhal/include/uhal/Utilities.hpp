@@ -19,9 +19,9 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/bind/bind.hpp>
 
-#include "BoostSpiritGrammars/SemicolonDelimitedUriListGrammar.hpp"
-#include "BoostSpiritGrammars/HttpResponseGrammar.hpp"
-#include "BoostSpiritGrammars/URLGrammar.hpp"
+#include "grammars/SemicolonDelimitedUriListGrammar.hpp"
+#include "grammars/HttpResponseGrammar.hpp"
+#include "grammars/URLGrammar.hpp"
 
 #include "pugixml/pugixml.hpp"
 
@@ -82,7 +82,7 @@ namespace uhal
 		{
 			try
 			{
-				BoostSpiritGrammars::SemicolonDelimitedUriListGrammar lGrammar;
+				grammars::SemicolonDelimitedUriListGrammar lGrammar;
 				boost::spirit::qi::phrase_parse ( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
 			}
 			catch ( const std::exception& aExc )
@@ -289,7 +289,7 @@ namespace uhal
 
 				try
 				{
-					BoostSpiritGrammars::URIGrammarShort lGrammar;
+					grammars::URIGrammarShort lGrammar;
 					boost::spirit::qi::phrase_parse ( aURL.begin() , aURL.end() , lGrammar , boost::spirit::ascii::space , lURLPair );
 				}
 				catch ( const std::exception& aExc )
@@ -392,7 +392,7 @@ namespace uhal
 
 				mBuffer.resize ( lSize );
 				//Parse the recieved data into an HttpResponseType object
-				BoostSpiritGrammars::HttpResponseGrammar lGrammar2;
+				grammars::HttpResponseGrammar lGrammar2;
 				boost::spirit::qi::phrase_parse ( mBuffer.begin() , mBuffer.end() , lGrammar2 , boost::spirit::ascii::space , aResponse );
 
 				if ( DebugInfo )

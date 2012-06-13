@@ -5,7 +5,7 @@ BUILD_HOME = $(shell pwd)/../..
 
 include ${BUILD_HOME}/config/Makefile.macros
 
-Package = uhal/BoostSpiritGrammars
+Package = uhal/grammars
 PackagePath = ${BUILD_HOME}/${Package}
 PackageName = cactus-uhal-gramars
 
@@ -47,11 +47,11 @@ _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include/BoostSpiritGrammars}
+	mkdir -p RPMBUILD/SOURCES/{lib,include/grammars}
 	mkdir -p lib
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -p include/BoostSpiritGrammars/*.hpp RPMBUILD/SOURCES/include/BoostSpiritGrammars/.
+	cp -p include/grammars/*.hpp RPMBUILD/SOURCES/include/grammars/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj

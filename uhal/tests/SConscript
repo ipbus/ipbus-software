@@ -11,7 +11,7 @@ localenv.VariantDir( localenv.SrcBuildPath , 'src/common' , duplicate=0 )
 
 ## Add default libs
 localenv.Append( 
-	LIBS = [ 'uhal' , 'BoostSpiritGrammars' , 'log' ] 
+	LIBS = [ 'uhal' , 'grammars' , 'log' ] 
 
 )  
 

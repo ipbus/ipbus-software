@@ -46,7 +46,7 @@ BOOST_FUSION_ADAPT_STRUCT (
 );
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 	struct HttpResponseGrammar : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator , uhal::HttpResponseType() ,	boost::spirit::ascii::space_type >
 	{

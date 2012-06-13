@@ -1,7 +1,7 @@
-#include "BoostSpiritGrammars/SemicolonDelimitedUriListGrammar.hpp"
+#include "grammars/SemicolonDelimitedUriListGrammar.hpp"
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 	SemicolonDelimitedUriListGrammar::SemicolonDelimitedUriListGrammar() :
 		SemicolonDelimitedUriListGrammar::base_type ( data_pairs_vector )

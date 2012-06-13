@@ -16,7 +16,7 @@ localenv.Append(
 
 ## Build IPbusClient as a shared library
 lib = localenv.SharedLibrary( 
-	target = localenv.LibPath+'/BoostSpiritGrammars', 
+	target = localenv.LibPath+'/grammars', 
 	source = [ Glob(localenv.BuildPath+'/src/common/*.cpp') ]
 )
 

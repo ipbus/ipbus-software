@@ -12,7 +12,7 @@ localenv.VariantDir( localenv.BuildPath+'/src/common' , 'src/common' , duplicate
 
 ## Add default libs
 localenv.Append( 
-	LIBS = [  'BoostSpiritGrammars' ]
+	LIBS = [  'grammars' ]
 )
 
 ## Build IPbusClient as a shared library

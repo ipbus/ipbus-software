@@ -64,7 +64,7 @@ BOOST_FUSION_ADAPT_STRUCT (
 
 
 
-namespace BoostSpiritGrammars
+namespace grammars
 {
 
 	struct OldHalSkipParser : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator >
