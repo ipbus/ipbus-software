@@ -15,7 +15,7 @@
 
 using namespace uhal;
 
-	
+
 void hwInterface_creation()
 {
 	try
@@ -50,15 +50,15 @@ void rawClientAccess()
 		hw.getClient()->write ( 0xBA5EADD4 , val );
 		ValWord< uint32_t > mem = hw.getClient()->read ( 0xBA5EADD4 );
 		hw.dispatch();
-		
+
 		if ( mem==val )
 		{
 			log ( Info() , "SINGLE WORD WRITE/READ : ALL GOOD" ) ;
 		}
 		else
 		{
-			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( val ) , " vs. Found " , Integer< hex , fixed> ( mem.value()  ) );
-						throw 0;
+			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( val ) , " vs. Found " , Integer< hex , fixed> ( mem.value() ) );
+			throw 0;
 		}
 
 		// 		// // //write memory
@@ -74,11 +74,11 @@ void rawClientAccess()
 		hw.getClient()->writeBlock ( 0xBA5EADD4 , vals );
 		ValVector< uint32_t > block = hw.getClient()->readBlock ( 0xBA5EADD4 , SIZE );
 		hw.dispatch();
-		
+
 		if ( block.size() != SIZE )
 		{
 			log ( Error() , "SEND AND REPLY SIZES MISMATCH" );
-						throw 0;
+			throw 0;
 		}
 
 		ValVector< uint32_t >::const_iterator lReadIt = block.begin();
@@ -89,8 +89,8 @@ void rawClientAccess()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt  ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt  ) );
-								throw 0;
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+				throw 0;
 			}
 		}
 
@@ -107,16 +107,16 @@ void rawClientAccess()
 			vals.push_back ( static_cast<uint32_t> ( rand() ) );
 		}
 
-				// vals.push_back(static_cast<uint32_t>(i));
+		// vals.push_back(static_cast<uint32_t>(i));
 		hw.getClient()->writeBlock ( 0xBA5EADD4 , vals , defs::NON_INCREMENTAL );
 		/*ValVector< uint32_t >*/
 		block = hw.getClient()->readBlock ( 0xBA5EADD4 , SIZE , defs::NON_INCREMENTAL );
 		hw.dispatch();
-		
+
 		if ( block.size() != SIZE )
 		{
 			log ( Error() , "SEND AND REPLY SIZES MISMATCH" );
-						throw 0;
+			throw 0;
 		}
 
 		/*ValVector< uint32_t >::const_iterator*/ lReadIt = block.begin();
@@ -130,8 +130,8 @@ void rawClientAccess()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt  ) );
-								throw 0;
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+				throw 0;
 			}
 		}
 
@@ -147,8 +147,8 @@ void rawClientAccess()
 		}
 		else
 		{
-			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected ) , " vs. Found " , Integer< hex , fixed> ( mem.value()  ) );
-						throw 0;
+			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected ) , " vs. Found " , Integer< hex , fixed> ( mem.value() ) );
+			throw 0;
 		}
 
 		int32_t expected2 ( expected + 0x0BADBABE );
@@ -161,8 +161,8 @@ void rawClientAccess()
 		}
 		else
 		{
-			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected2 ) , " vs. Found " , Integer< hex , fixed> ( mem2.value()  ) );
-						throw 0;
+			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected2 ) , " vs. Found " , Integer< hex , fixed> ( mem2.value() ) );
+			throw 0;
 		}
 	}
 	catch ( const std::exception& aExc )
@@ -177,7 +177,7 @@ void navigation_and_traversal_test()
 {
 	try
 	{
-				ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		std::vector<std::string> lNodes = hw.getNodes();
 
@@ -218,7 +218,7 @@ void read_test()
 {
 	try
 	{
-				ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//read register
 		ValWord< uint32_t > mem1 = hw.getNode ( "SYSTEM1" ).getNode ( "SYSTEM" ).getNode ( "TTC" ).getNode ( "ADDRESS" ).read();
@@ -259,7 +259,7 @@ void write_test()
 {
 	try
 	{
-				ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//write register
 		uint32_t val = static_cast<uint32_t> ( rand() );
@@ -274,7 +274,7 @@ void write_test()
 		else
 		{
 			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( val ) , " vs. Found " , Integer< hex , fixed> ( mem.value() ) );
-						throw 0;
+			throw 0;
 		}
 
 		// //BOOST_CHECK(mem.valid());
@@ -296,7 +296,7 @@ void write_test()
 		if ( block.size() != SIZE )
 		{
 			log ( Error() , "SEND AND REPLY SIZES MISMATCH" );
-						throw 0;
+			throw 0;
 		}
 
 		ValVector< uint32_t >::const_iterator lReadIt = block.begin();
@@ -308,7 +308,7 @@ void write_test()
 			if ( *lReadIt != *lSourceIt )
 			{
 				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
-								throw 0;
+				throw 0;
 			}
 		}
 
@@ -341,8 +341,8 @@ void write_test()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt   ) );
-								throw 0;
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+				throw 0;
 			}
 		}
 
@@ -530,7 +530,7 @@ void addOperationToQueue ( HwInterface& hw , const std::vector<int>& aOperationL
 
 void allInstructionPermutations()
 {
-	log_configuration::setLogLevelTo( Info() );
+	log_configuration::setLogLevelTo ( Info() );
 
 	try
 	{
@@ -656,8 +656,7 @@ int main ( int argc,char* argv[] )
 {
 	try
 	{
-		log_configuration::setLogLevelTo( Debug() );
-		
+		log_configuration::setLogLevelTo ( Debug() );
 		hwInterface_creation();
 		rawClientAccess();
 		navigation_and_traversal_test();

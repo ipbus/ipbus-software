@@ -33,7 +33,8 @@ gPerformanceMeasurement.mDepth.pop_back();
 #define PERFORMANCE( DESCRIPTION , CODE ) CODE
 #endif
 
-namespace uhal{
+namespace uhal
+{
 
 	class PerformanceMeasurement
 	{

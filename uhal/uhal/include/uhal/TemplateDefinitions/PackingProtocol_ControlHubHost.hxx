@@ -116,7 +116,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		if ( lPreamble.mReplyDeviceIPaddress != mDeviceIPaddress )
 		{
 			log ( Error() , "Returned IP address " , Integer< hex , fixed > ( lPreamble.mReplyDeviceIPaddress ) ,
-								   " does not match that sent " , Integer< hex , fixed >  ( mDeviceIPaddress ) );
+				  " does not match that sent " , Integer< hex , fixed > ( mDeviceIPaddress ) );
 			return false;
 		}
 
@@ -127,7 +127,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		if ( lPreamble.mReplyDevicePort != mDevicePort )
 		{
 			log ( Error() , "Returned Port number " , Integer ( lPreamble.mReplyDevicePort ) ,
-								   " does not match that sent " , Integer ( mDevicePort ) );
+				  " does not match that sent " , Integer ( mDevicePort ) );
 			return false;
 		}
 
@@ -137,7 +137,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 										" : Memory : " , Integer ( lPreamble.mReplyErrorCode ) );*/
 		if ( lPreamble.mReplyErrorCode != 0 )
 		{
-			log ( Error() , "Control Hub reported error code " , Integer< hex , fixed >  ( lPreamble.mReplyErrorCode ) );
+			log ( Error() , "Control Hub reported error code " , Integer< hex , fixed > ( lPreamble.mReplyErrorCode ) );
 			return false;
 		}
 

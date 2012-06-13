@@ -50,7 +50,7 @@ namespace __gnu_cxx
 		size_t operator() ( const std::string& x ) const
 		{
 			using namespace uhal;
-		
+
 			try
 			{
 				return hash< const char* >() ( x.c_str() );
@@ -179,8 +179,9 @@ namespace uhal
 
 			// Don't bother with Logging if the logger won't include it!
 			Notice lLoggingLevel;
-			if( log_configuration::LoggingIncludes( lLoggingLevel ) ){
-			
+
+			if ( log_configuration::LoggingIncludes ( lLoggingLevel ) )
+			{
 				// After that we listen to the user's preference
 				if ( DebugInfo )
 				{
@@ -193,15 +194,15 @@ namespace uhal
 
 						if ( aFiles )
 						{
-								for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt )
-								{
-									log ( lLoggingLevel , " > [file] " , lIt->c_str() );
-								}
+							for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt )
+							{
+								log ( lLoggingLevel , " > [file] " , lIt->c_str() );
+							}
 
-								if ( ! aFiles->size() )
-								{
-									log ( lLoggingLevel , " > No matching files." );
-								}
+							if ( ! aFiles->size() )
+							{
+								log ( lLoggingLevel , " > No matching files." );
+							}
 						}
 
 						if ( aDirectories )

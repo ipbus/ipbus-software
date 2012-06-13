@@ -19,11 +19,9 @@ using namespace uhal;
 
 int main ( int argc,char* argv[] )
 {
-	
 	try
 	{
-		log_configuration::setLogLevelTo( Debug() );
-		
+		log_configuration::setLogLevelTo ( Debug() );
 		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		uint32_t SIZE=10500;
@@ -70,8 +68,8 @@ int main ( int argc,char* argv[] )
 			if ( *lReadIt != *lSourceIt )
 			{
 				log ( Error() , "MISMATCH AT " , Integer ( count ) ,
-									   " : Source " , Integer < hex , fixed > ( *lSourceIt ) ,
-									   " vs. Found " , Integer < hex , fixed > ( *lReadIt  ) );
+					  " : Source " , Integer < hex , fixed > ( *lSourceIt ) ,
+					  " vs. Found " , Integer < hex , fixed > ( *lReadIt ) );
 				// throw 0;
 			}
 		}

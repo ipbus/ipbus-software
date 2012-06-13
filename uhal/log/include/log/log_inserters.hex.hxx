@@ -5,43 +5,40 @@
 #include <cxxabi.h>
 #endif
 
-namespace uhal{
+namespace uhal
+{
 
 	template< typename T >
-	void log_inserter( const _Hex< T >& aHex )
+	void log_inserter ( const _Hex< T >& aHex )
 	{
-
-		fputs( "[ " , log_configuration::getDestination() );
-
+		fputs ( "[ " , log_configuration::getDestination() );
 #ifdef __GNUG__
-				// this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
-				int lStatus ( 0 );
-				fputs( abi::__cxa_demangle ( typeid ( T ).name() , 0 , 0 , &lStatus ) , log_configuration::getDestination() );
+		// this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
+		int lStatus ( 0 );
+		fputs ( abi::__cxa_demangle ( typeid ( T ).name() , 0 , 0 , &lStatus ) , log_configuration::getDestination() );
 #else
-				fputs( typeid ( *this ).name() , log_configuration::getDestination() );
+		fputs ( typeid ( *this ).name() , log_configuration::getDestination() );
 #endif
+		fputs ( " ] 0x" , log_configuration::getDestination() );
+		uint32_t lSize ( sizeof ( T ) );
+		static const char* lCharacterMapping ( "0123456789ABCDEF" );
+		uint8_t* lStart ( ( uint8_t* ) ( & aHex.value() ) );
+		uint8_t* lPtr ( lStart + lSize );
 
-		fputs( " ] 0x" , log_configuration::getDestination() );
-
-
-		uint32_t lSize( sizeof( T ) );
-		static const char* lCharacterMapping( "0123456789ABCDEF" );
-
-		uint8_t* lStart( ( uint8_t* )( & aHex.value() ) );
-		uint8_t* lPtr( lStart + lSize );
-
-		do{
+		do
+		{
 			--lPtr;
-			fputc( *( lCharacterMapping + ( ((*lPtr)&0xF0)>>4 ) ) , log_configuration::getDestination() );
-			fputc( *( lCharacterMapping + ( ((*lPtr)&0x0F) ) ) , log_configuration::getDestination() );			
-		}while ( lPtr!=lStart );
-		
+			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0xF0 ) >>4 ) ) , log_configuration::getDestination() );
+			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0x0F ) ) ) , log_configuration::getDestination() );
+		}
+		while ( lPtr!=lStart );
 	}
 
 
 	template< typename T >
-	_Hex< T > Hex( const T& aT ){
-		return _Hex< T >( aT );
+	_Hex< T > Hex ( const T& aT )
+	{
+		return _Hex< T > ( aT );
 	}
 
 }

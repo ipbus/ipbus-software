@@ -245,10 +245,10 @@ namespace uhal
 						if ( lInsert.first->second == lDescriptor )
 						{
 							log ( Notice() , "Duplicate connection entry found:"
-													"\n > id = " , lDescriptor.id ,
-													"\n > uri = " , lDescriptor.uri ,
-													"\n > address_table = " , lDescriptor.address_table ,
-													"\n Continuing for now but be aware!" );
+								  "\n > id = " , lDescriptor.id ,
+								  "\n > uri = " , lDescriptor.uri ,
+								  "\n > address_table = " , lDescriptor.address_table ,
+								  "\n Continuing for now but be aware!" );
 						}
 						else
 						{

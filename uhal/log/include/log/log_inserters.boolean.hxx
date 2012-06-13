@@ -1,12 +1,14 @@
 
 #include <log/log_configuration.hpp>
 
-namespace uhal{
+namespace uhal
+{
 
 
 	template< boolean_format FORMAT >
-	_Boolean< FORMAT > Boolean( const bool& aBool ){
-		return _Boolean< FORMAT >( aBool );
+	_Boolean< FORMAT > Boolean ( const bool& aBool )
+	{
+		return _Boolean< FORMAT > ( aBool );
 	}
 
 

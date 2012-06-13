@@ -61,9 +61,9 @@ namespace uhal
 				}
 
 				log ( Error() , "Error occured at line number " , Integer ( lLineCounter ) ,
-									   ", character " , Integer ( lDist0+1 ) , "\n"
-									   "LINE           : " , lLine , "\n"
-									   "ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
+					  ", character " , Integer ( lDist0+1 ) , "\n"
+					  "LINE           : " , lLine , "\n"
+					  "ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
 			}
 			catch ( const std::exception& aExc )
 			{

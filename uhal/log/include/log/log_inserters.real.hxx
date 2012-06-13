@@ -3,29 +3,30 @@
 
 #include <stdlib.h>
 
-namespace uhal{
+namespace uhal
+{
 
 	template< typename T , uint32_t MAX_WIDTH >
-	void log_inserter( const _Real< T , MAX_WIDTH >& aReal )
+	void log_inserter ( const _Real< T , MAX_WIDTH >& aReal )
 	{
 		char lBuffer[ MAX_WIDTH ];
-		double lDouble( aReal.value() ); //it appears that some platforms require this to prevent a segfault
+		double lDouble ( aReal.value() ); //it appears that some platforms require this to prevent a segfault
 		gcvt ( lDouble , MAX_WIDTH , lBuffer );
 		fputs ( lBuffer , log_configuration::getDestination() );
 	}
 
 
 	template< uint32_t MAX_WIDTH >
-	_Real< double , MAX_WIDTH > Real( const double & aReal )
+	_Real< double , MAX_WIDTH > Real ( const double& aReal )
 	{
-		return _Real< double , MAX_WIDTH >( aReal );
+		return _Real< double , MAX_WIDTH > ( aReal );
 	}
 
 
 	template< uint32_t MAX_WIDTH >
-	_Real< float , MAX_WIDTH > Real( const float & aReal )
+	_Real< float , MAX_WIDTH > Real ( const float& aReal )
 	{
-		return _Real< float , MAX_WIDTH >( aReal );
+		return _Real< float , MAX_WIDTH > ( aReal );
 	}
 
 

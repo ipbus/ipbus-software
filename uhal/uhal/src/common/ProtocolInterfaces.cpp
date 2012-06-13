@@ -257,33 +257,33 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{
 			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
 			{
-				log ( Error() , "Unable to parse send header " , Integer< hex , fixed >  ( * ( ( uint32_t* ) ( aSendBufferStart ) ) ) );
+				log ( Error() , "Unable to parse send header " , Integer< hex , fixed > ( * ( ( uint32_t* ) ( aSendBufferStart ) ) ) );
 				return false;
 			}
 
 			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
 			{
-				log ( Error() , "Unable to parse reply header " , Integer< hex , fixed >  ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) ) );
+				log ( Error() , "Unable to parse reply header " , Integer< hex , fixed > ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) ) );
 				return false;
 			}
 
 			if ( lReplyResponseGood )
 			{
-				log ( Error() , "Returned Response " , Integer< hex , fixed >  ( lReplyResponseGood ) , " indicated error" );
+				log ( Error() , "Returned Response " , Integer< hex , fixed > ( lReplyResponseGood ) , " indicated error" );
 				return false;
 			}
 
 			if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
 			{
-				log ( Error() , "Returned Transaction Type " , Integer< hex , fixed >  ( ( uint8_t ) ( lReplyIPbusTransactionType ) ) ,
-									   " does not match that sent " , Integer< hex , fixed >  ( ( uint8_t ) ( lSendIPbusTransactionType ) ) );
+				log ( Error() , "Returned Transaction Type " , Integer< hex , fixed > ( ( uint8_t ) ( lReplyIPbusTransactionType ) ) ,
+					  " does not match that sent " , Integer< hex , fixed > ( ( uint8_t ) ( lSendIPbusTransactionType ) ) );
 				return false;
 			}
 
 			if ( lSendTransactionId != lReplyTransactionId )
 			{
-				log ( Error() , "Returned Transaction Id " , Integer< hex , fixed >  ( lReplyTransactionId ) ,
-									   " does not match that sent " , Integer< hex , fixed >  ( lSendTransactionId ) );
+				log ( Error() , "Returned Transaction Id " , Integer< hex , fixed > ( lReplyTransactionId ) ,
+					  " does not match that sent " , Integer< hex , fixed > ( lSendTransactionId ) );
 				return false;
 			}
 

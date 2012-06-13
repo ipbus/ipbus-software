@@ -189,9 +189,8 @@ int main ( int argc, char* argv[] )
 		{
 			TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) );
 			lDummyHardware.run();
-			//if the connection is closed, open a new one 
+			//if the connection is closed, open a new one
 		}
-		
 	}
 	catch ( const std::exception& aExc )
 	{

@@ -49,10 +49,10 @@ namespace uhal
 		uint16_t lPort = boost::lexical_cast< uint16_t > ( lPortStr->second );
 		uint32_t lIPaddress = ( lIP.at ( 0 ) <<24 ) | ( lIP.at ( 1 ) <<16 ) | ( lIP.at ( 2 ) <<8 ) | ( lIP.at ( 3 ) );
 		log ( Notice() , "Converted IP address string \"" , lIPstr->second ,
-								"\" to " , Integer ( lIP.at ( 0 ) ) , "." , Integer ( lIP.at ( 1 ) ) , "." , Integer ( lIP.at ( 2 ) ) , "." , Integer ( lIP.at ( 3 ) ) ,
-								" and converted this to " , Integer< hex , fixed >  ( lIPaddress  ) ,
-								". Converted port string \"" , lPortStr->second ,
-								"\" to " , Integer< hex , fixed >  ( lPort  )	);
+			  "\" to " , Integer ( lIP.at ( 0 ) ) , "." , Integer ( lIP.at ( 1 ) ) , "." , Integer ( lIP.at ( 2 ) ) , "." , Integer ( lIP.at ( 3 ) ) ,
+			  " and converted this to " , Integer< hex , fixed > ( lIPaddress ) ,
+			  ". Converted port string \"" , lPortStr->second ,
+			  "\" to " , Integer< hex , fixed > ( lPort )	);
 		return std::make_pair ( lIPaddress , lPort );
 	}
 

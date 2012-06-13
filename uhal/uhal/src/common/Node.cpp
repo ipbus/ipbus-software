@@ -13,6 +13,7 @@
 std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode )
 {
 	using namespace uhal;
+
 	try
 	{
 		aNode.stream ( aStream );
@@ -29,16 +30,17 @@ std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode )
 namespace uhal
 {
 	template < >
-	void log_inserter< uhal::Node >( const uhal::Node& aNode ){
+	void log_inserter< uhal::Node > ( const uhal::Node& aNode )
+	{
 		std::stringstream lStream;
 		aNode.stream ( lStream );
-		
 		std::istreambuf_iterator<char> lEnd;
 		std::istreambuf_iterator<char> lIt ( lStream.rdbuf() );
-		while ( lIt!=lEnd ){
-			fputc( *lIt++ , log_configuration::getDestination() );
+
+		while ( lIt!=lEnd )
+		{
+			fputc ( *lIt++ , log_configuration::getDestination() );
 		}
-  
 	}
 }
 
@@ -319,8 +321,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			if ( lAddr & ~aParentMask )
 			{
-				log ( Error() , "Node address " , Integer< hex , fixed >  ( lAddr ) ,
-									   " overlaps with the mask specified by the parent node, " , Integer< hex , fixed >  ( aParentMask ) );
+				log ( Error() , "Node address " , Integer< hex , fixed > ( lAddr ) ,
+					  " overlaps with the mask specified by the parent node, " , Integer< hex , fixed > ( aParentMask ) );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ChildHasAddressOverlap();
 			}
@@ -336,9 +338,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			if ( mAddrMask & ~aParentMask )
 			{
-				log ( Error() , "Node address mask " , Integer< hex , fixed >  ( mAddrMask ) ,
-									   " overlaps with the parent mask " , Integer< hex , fixed >  ( aParentMask ) ,
-									   ". This makes the child's address subspace larger than the parent and is not allowed" );
+				log ( Error() , "Node address mask " , Integer< hex , fixed > ( mAddrMask ) ,
+					  " overlaps with the parent mask " , Integer< hex , fixed > ( aParentMask ) ,
+					  ". This makes the child's address subspace larger than the parent and is not allowed" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ChildHasAddressMaskOverlap();
 			}
