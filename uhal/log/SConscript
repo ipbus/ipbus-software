@@ -1,0 +1,40 @@
+## Sconstruct file for the IPbusClient package
+#	@author Andrew W. Rose
+#	@date 2012
+
+## Import the environment from the SConstruct File
+import os
+import glob
+
+Import('env')
+
+AddOption( '--generator' , action='store' , dest='generator' , default='' , help='build generator' ) 
+
+localenv = env.Clone()
+localenv.VariantDir( '.build/src/common' , 'src/common' , duplicate=0 )
+localenv.VariantDir( 'bin' , 'src/common' , duplicate=0 )
+
+
+localenv.Append( 
+	CPPPATH = [	'include' , '/opt/local/include' ]
+) 
+
+localenv.Append( 
+	CCFLAGS = [	'-D MAX_NUM_ARGS=32' ]
+) 
+
+if localenv.GetOption('generator'):
+	localenv.Program( 
+		target = 'bin/generator', 
+		source = [ '.build/src/common/generator.cxx' , '.build/src/common/log_configuration.cpp' ]
+	)
+else:
+	log = localenv.SharedLibrary( 
+		target = 'lib/log', 
+		source = [ Glob('.build/src/common/*.cpp') ]
+	)
+	localenv.Program( 
+		target = 'bin/test', 
+		source = [ '.build/src/common/test.cxx' ],
+		LIBS = [ log ]
+	)

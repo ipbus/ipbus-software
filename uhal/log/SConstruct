@@ -1,0 +1,14 @@
+## Sconstruct file for the IPbusClient package
+#	@author Andrew W. Rose
+#	@author Simon Fayer
+#	@date 2012
+
+import os
+
+## Get the standard boost environment
+env = Environment( ENV = os.environ )
+Export('env')
+
+SConscript("/cactus/trunk/uhal/.SConscript.colour" )
+
+SConscript('SConscript')
