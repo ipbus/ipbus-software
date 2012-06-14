@@ -28,7 +28,7 @@ namespace uhal
 
 	template< typename T , typename FORMAT > struct IntegerFactory;
 
-	template< integer_base BASE = DefaultIntegerBase , integer_format FORMAT = DefaultIntegerFormat > struct IntFmt {};
+	template< integer_base BASE = DefaultIntegerBase , integer_format FORMAT = DefaultIntegerFormat , uint32_t WIDTH = 0 > struct IntFmt {};
 
 
 	template< typename T , typename FORMAT >

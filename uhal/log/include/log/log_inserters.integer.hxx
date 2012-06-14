@@ -102,11 +102,20 @@ namespace uhal
 	{}
 
 
-	template< typename T >
-	void log_inserter ( const _Integer< T , IntFmt<bin , fixed> >& aInt )
+	template< typename T , uint32_t WIDTH >
+	void log_inserter ( const _Integer< T , IntFmt<bin , fixed , WIDTH> >& aInt )
 	{
-		uint32_t lSize ( sizeof ( T ) <<3 );
+		uint32_t lSize ( sizeof ( T ) << 3 ); //number of characters
 		fputs ( "0b" , log_configuration::getDestination() );
+		
+		int32_t i(WIDTH-lSize);
+		if( i > 0 ){
+			for( ; i!=0 ; --i )
+			{
+				fputc( '0' , log_configuration::getDestination() );
+			}		
+		}		
+		
 		T lValue ( aInt.value() );
 		T lMask ( 0x1 );
 		lMask <<= ( lSize-1 );
@@ -119,15 +128,58 @@ namespace uhal
 	}
 
 
-
-	template< typename T >
-	void log_inserter ( const _Integer< T , IntFmt<hex , fixed> >& aInt )
+	template< typename T , uint32_t WIDTH >
+	void log_inserter ( const _Integer< T , IntFmt<dec , fixed , WIDTH> >& aInt )
 	{
-		uint32_t lSize ( sizeof ( T ) );
+		static const char* lCharacterMapping ( "9876543210123456789" );
+		static const char* lCharacterMappingCenter ( lCharacterMapping + 9 );
+		char lBuffer[24]; //greater than the size of a 64bit decimal number
+		char* lPtr = lBuffer;
+		T value ( aInt.value() );
+		T tmp_value;
+		SignHelper ( value );
+
+		do
+		{
+			tmp_value = value;
+			value /= 10;
+			*lPtr++ = * ( lCharacterMappingCenter + tmp_value - ( value * 10 ) );
+		}
+		while ( value );
+
+		int32_t i( WIDTH-(lPtr-lBuffer) );
+		if( i > 0 ){
+			for(  ; i!=0 ; --i )
+			{
+				fputc( '0' , log_configuration::getDestination() );
+			}	
+		}
+		
+		do
+		{
+			fputc ( * ( --lPtr ) , log_configuration::getDestination() );
+		}
+		while ( lPtr!=lBuffer );
+	}
+	
+
+	template< typename T , uint32_t WIDTH >
+	void log_inserter ( const _Integer< T , IntFmt<hex , fixed , WIDTH> >& aInt )
+	{
+		uint32_t lSize ( sizeof ( T ) << 1 ); //number of characters
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
+		
 		fputs ( "0x" , log_configuration::getDestination() );
+		int32_t i(WIDTH-lSize);
+		if( i > 0 ){
+			for( ; i!=0 ; --i )
+			{
+				fputc( '0' , log_configuration::getDestination() );
+			}		
+		}	
+		
 		uint8_t* lStart ( ( uint8_t* ) ( & aInt.value() ) );
-		uint8_t* lPtr ( lStart + lSize );
+		uint8_t* lPtr ( lStart + sizeof ( T ) );
 
 		do
 		{
@@ -142,7 +194,7 @@ namespace uhal
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , IntFmt<bin , variable> >& aInt )
+	void log_inserter ( const _Integer< T , IntFmt<bin , variable , 0> >& aInt )
 	{
 		if ( aInt.value() == 0 )
 		{
@@ -175,7 +227,7 @@ namespace uhal
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , IntFmt<dec , variable> >& aInt )
+	void log_inserter ( const _Integer< T , IntFmt<dec , variable , 0> >& aInt )
 	{
 		static const char* lCharacterMapping ( "9876543210123456789" );
 		static const char* lCharacterMappingCenter ( lCharacterMapping + 9 );
@@ -203,7 +255,7 @@ namespace uhal
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , IntFmt<hex , variable> >& aInt )
+	void log_inserter ( const _Integer< T , IntFmt<hex , variable , 0> >& aInt )
 	{
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
 

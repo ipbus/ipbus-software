@@ -9,13 +9,14 @@ namespace uhal
 {
 
 	template<>
-	void TimeSpecializationHelper< year >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< year >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
+		// the tm struct stores years as int number of years since 1900
 		log_inserter ( Integer ( aTm->tm_year+1900 ) );
 	}
 
 	template<>
-	void TimeSpecializationHelper< yr >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< yr >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
 		static const char* lCharacterMapping (	"00010203040506070809"
 												"10111213141516171819"
@@ -31,22 +32,25 @@ namespace uhal
 	}
 
 	template<>
-	void TimeSpecializationHelper< strmth >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< strmth >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
+		// the tm struct stores months as int with values 0 - 11 (not 1 - 12)
 		static const char* lCharacterMapping ( "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec" );
 		fwrite ( lCharacterMapping + ( aTm->tm_mon<<2 ) , 1 , 3 , aFile );
 	}
 
 	template<>
-	void TimeSpecializationHelper< mth >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< mth >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
+		// the tm struct stores months as int with values 0 - 11 (not 1 - 12)
 		static const char* lCharacterMapping ( "010203040506070809101112" );
 		fwrite ( lCharacterMapping + ( aTm->tm_mon<<1 ) , 1 , 2 , aFile );
 	}
 
 	template<>
-	void TimeSpecializationHelper< day >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< day >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
+		// the tm struct stores days as int with values 1 - 31 (so I add a dummy entry to start of LUT)
 		static const char* lCharacterMapping (	"xx010203040506070809"
 												"10111213141516171819"
 												"20212223242526272829"
@@ -55,8 +59,9 @@ namespace uhal
 	}
 
 	template<>
-	void TimeSpecializationHelper< hr >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< hr >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
+		// the tm struct stores hours as int with values 0-23
 		static const char* lCharacterMapping (	"00010203040506070809"
 												"10111213141516171819"
 												"20212223" );
@@ -64,8 +69,9 @@ namespace uhal
 	}
 
 	template<>
-	void TimeSpecializationHelper< min >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< min >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
+		// the tm struct stores minutes as int with values 0-59
 		static const char* lCharacterMapping (	"00010203040506070809"
 												"10111213141516171819"
 												"20212223242526272829"
@@ -76,8 +82,9 @@ namespace uhal
 	}
 
 	template<>
-	void TimeSpecializationHelper< sec >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< sec >::print ( FILE* aFile , const tm* aTm , const uint32_t& )
 	{
+		// the tm struct stores minutes as int with values 0-61 to take into account the double leap second
 		static const char* lCharacterMapping (	"00010203040506070809"
 												"10111213141516171819"
 												"20212223242526272829"
@@ -89,15 +96,15 @@ namespace uhal
 	}
 
 	template<>
-	void TimeSpecializationHelper< usec >::print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec )
+	void TimeSpecializationHelper< usec >::print ( FILE* aFile , const tm* , const uint32_t& aUsec )
 	{
-		log_inserter ( Integer ( aUsec ) );
+		// the uSeconds are just a 32bit number so print it as an integer
+		log_inserter ( Integer ( aUsec , IntFmt<dec , fixed , 6>() ) );		
 	}
 
 	void log_inserter ( const _Time< timeval , TimeFmt<usec,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime )
 	{
-		tm* lLocalTime ( NULL );
-		TimeSpecializationHelper< usec >::print ( log_configuration::getDestination() , lLocalTime , ( aTime.value() ).tv_usec );
+		log_inserter ( Integer ( uint32_t( aTime.value().tv_usec ) , IntFmt<dec , fixed , 6>() ) );
 	}
 
 }
