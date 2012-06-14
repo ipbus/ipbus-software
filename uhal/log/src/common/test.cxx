@@ -107,6 +107,12 @@ int main ( int argc,char* argv[] )
 		log ( Notice() , "Hex dump (struct) : " , Hex ( lTest ) );
 		log ( Notice() , "Hex dump (one of the logging wrappers) : " , Hex ( Integer ( uint64_t ( 13 ) ) ) );
 		log ( Notice() , "Hex dump (POD) : " , Hex ( uint64_t ( 13 ) ) );
+		
+		log ( Notice() , "Pointer : " , Pointer ( &lTest ) );
+		log ( Notice() , "Pointer : " , Pointer ( argv ) );
+		log ( Notice() , "Pointer : " , Pointer ( *argv ) );
+		
+		
 		// Test setting logging levels
 		log_configuration::setLogLevelTo ( Error() );
 		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );

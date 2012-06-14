@@ -28,6 +28,24 @@ namespace uhal
 		private:
 			const T& mT;
 	};
+	
+	
+	template< typename T >
+	class RefWrapper< T* >
+	{
+		protected:
+			RefWrapper ( const T* aT ) : mT ( aT ) {}
+			virtual ~RefWrapper() {}
+
+		public:
+			const T* value() const
+			{
+				return mT;
+			}
+
+		private:
+			const T* mT;
+	};	
 
 }
 

@@ -9,20 +9,23 @@ namespace uhal
 {
 
 	template< typename T >
-	void log_inserter ( const _Hex< T >& aHex )
+	void log_inserter ( const _Pointer< T >& aPointer )
 	{
-		fputs ( "[ " , log_configuration::getDestination() );
+		fputc ( '(' , log_configuration::getDestination() );
 #ifdef __GNUG__
 		// this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
 		int lStatus ( 0 );
-		fputs ( abi::__cxa_demangle ( typeid ( T ).name() , 0 , 0 , &lStatus ) , log_configuration::getDestination() );
+		fputs ( abi::__cxa_demangle ( typeid ( T* ).name() , 0 , 0 , &lStatus ) , log_configuration::getDestination() );
 #else
 		fputs ( typeid ( *this ).name() , log_configuration::getDestination() );
 #endif
-		fputs ( " ] 0x" , log_configuration::getDestination() );
+		fputs ( ")(0x" , log_configuration::getDestination() );
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
-		uint8_t* lStart ( ( uint8_t* ) ( & aHex.value() ) );
-		uint8_t* lPtr ( lStart + sizeof ( T ) );
+		
+		uint64_t lPointer( (uint64_t)(aPointer.value()) );
+		
+		uint8_t* lStart ( ( uint8_t* )( &lPointer ) );
+		uint8_t* lPtr ( lStart + sizeof ( T* ) );
 
 		do
 		{
@@ -31,13 +34,16 @@ namespace uhal
 			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0x0F ) ) ) , log_configuration::getDestination() );
 		}
 		while ( lPtr!=lStart );
+		
+		fputc ( ')' , log_configuration::getDestination() );
+		
 	}
 
 
 	template< typename T >
-	_Hex< T > Hex ( const T& aT )
+	_Pointer< T > Pointer ( const T* aT )
 	{
-		return _Hex< T > ( aT );
+		return _Pointer< T > ( aT );
 	}
 
 }

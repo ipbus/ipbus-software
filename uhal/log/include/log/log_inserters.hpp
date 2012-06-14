@@ -11,6 +11,6 @@
 #include <log/log_inserters.boolean.hpp>
 #include <log/log_inserters.hex.hpp>
 #include <log/log_inserters.location.hpp>
-
+#include <log/log_inserters.pointer.hpp>
 
 #endif
