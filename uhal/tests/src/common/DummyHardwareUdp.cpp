@@ -43,7 +43,7 @@ class UDPdummyHardware
 									mResponseGood )
 						   )
 						{
-							log ( Error() , "Unable to parse send header " , Integer<hex,fixed> ( *lReceivePtr ) );
+							log ( Error() , "Unable to parse send header " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
 							return;
 						}
 
@@ -170,7 +170,7 @@ int main ( int argc, char* argv[] )
 	{
 		if ( argc != 2 )
 		{
-			std::cerr << "Usage: " << argv[0] << " <port>\n";
+			log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port>" );
 			return 1;
 		}
 

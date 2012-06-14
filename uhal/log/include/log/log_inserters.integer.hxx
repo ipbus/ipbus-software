@@ -5,108 +5,105 @@ namespace uhal
 {
 
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint8_t , BASE , FORMAT > Integer ( const uint8_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < uint8_t , FORMAT >
 	{
-		return _Integer< uint8_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< uint8_t , FORMAT > Construct ( const uint8_t& aInt )
+		{
+			return _Integer< uint8_t , FORMAT > ( aInt );
+		}
+	};
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int8_t , BASE , FORMAT > Integer ( const int8_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < int8_t , FORMAT >
 	{
-		return _Integer< int8_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< int8_t , FORMAT > Construct ( const int8_t& aInt )
+		{
+			return _Integer< int8_t , FORMAT > ( aInt );
+		}
+	};
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint16_t , BASE , FORMAT > Integer ( const uint16_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < uint16_t , FORMAT >
 	{
-		return _Integer< uint16_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< uint16_t , FORMAT > Construct ( const uint16_t& aInt )
+		{
+			return _Integer< uint16_t , FORMAT > ( aInt );
+		}
+	};
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int16_t , BASE , FORMAT > Integer ( const int16_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < int16_t , FORMAT >
 	{
-		return _Integer< int16_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< int16_t , FORMAT > Construct ( const int16_t& aInt )
+		{
+			return _Integer< int16_t , FORMAT > ( aInt );
+		}
+	};
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint32_t , BASE , FORMAT > Integer ( const uint32_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < uint32_t , FORMAT >
 	{
-		return _Integer< uint32_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< uint32_t , FORMAT > Construct ( const uint32_t& aInt )
+		{
+			return _Integer< uint32_t , FORMAT > ( aInt );
+		}
+	};
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int32_t , BASE , FORMAT > Integer ( const int32_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < int32_t , FORMAT >
 	{
-		return _Integer< int32_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< int32_t , FORMAT > Construct ( const int32_t& aInt )
+		{
+			return _Integer< int32_t , FORMAT > ( aInt );
+		}
+	};
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint64_t , BASE , FORMAT > Integer ( const uint64_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < uint64_t , FORMAT >
 	{
-		return _Integer< uint64_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< uint64_t , FORMAT > Construct ( const uint64_t& aInt )
+		{
+			return _Integer< uint64_t , FORMAT > ( aInt );
+		}
+	};
 
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int64_t , BASE , FORMAT > Integer ( const int64_t& aInt )
+	template< typename FORMAT >
+	struct IntegerFactory < int64_t , FORMAT >
 	{
-		return _Integer< int64_t , BASE , FORMAT > ( aInt );
-	}
+		static _Integer< int64_t , FORMAT > Construct ( const int64_t& aInt )
+		{
+			return _Integer< int64_t , FORMAT > ( aInt );
+		}
+	};
 
-
-
-	template< integer_base BASE >
-	_Integer< uint8_t , BASE, DefaultIntegerFormat > Integer ( const uint8_t& aInt )
-	{
-		return _Integer< uint8_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
-
-	template< integer_base BASE >
-	_Integer< int8_t , BASE, DefaultIntegerFormat > Integer ( const int8_t& aInt )
-	{
-		return _Integer< int8_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
-
-	template< integer_base BASE >
-	_Integer< uint16_t , BASE, DefaultIntegerFormat > Integer ( const uint16_t& aInt )
-	{
-		return _Integer< uint16_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
-
-	template< integer_base BASE >
-	_Integer< int16_t , BASE, DefaultIntegerFormat > Integer ( const int16_t& aInt )
-	{
-		return _Integer< int16_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
-
-	template< integer_base BASE >
-	_Integer< uint32_t , BASE, DefaultIntegerFormat > Integer ( const uint32_t& aInt )
-	{
-		return _Integer< uint32_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
-
-	template< integer_base BASE >
-	_Integer< int32_t , BASE, DefaultIntegerFormat > Integer ( const int32_t& aInt )
-	{
-		return _Integer< int32_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
-
-	template< integer_base BASE >
-	_Integer< uint64_t , BASE, DefaultIntegerFormat > Integer ( const uint64_t& aInt )
-	{
-		return _Integer< uint64_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
-
-	template< integer_base BASE >
-	_Integer< int64_t , BASE, DefaultIntegerFormat > Integer ( const int64_t& aInt )
-	{
-		return _Integer< int64_t , BASE, DefaultIntegerFormat > ( aInt );
-	}
 
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , bin , fixed >& aInt )
+	_Integer< T , IntFmt<> > Integer ( const T& aT )
+	{
+		return IntegerFactory< T , IntFmt<> >::Construct ( aT );
+	}
+
+	template< typename T , typename FORMAT >
+	_Integer< T , FORMAT > Integer ( const T& aT , const FORMAT& aFmt )
+	{
+		return IntegerFactory< T , FORMAT >::Construct ( aT );
+	}
+
+
+
+
+
+
+	template< typename T >
+	void SignHelper ( const T& aInt )
+	{}
+
+
+	template< typename T >
+	void log_inserter ( const _Integer< T , IntFmt<bin , fixed> >& aInt )
 	{
 		uint32_t lSize ( sizeof ( T ) <<3 );
 		fputs ( "0b" , log_configuration::getDestination() );
@@ -124,7 +121,7 @@ namespace uhal
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , hex , fixed >& aInt )
+	void log_inserter ( const _Integer< T , IntFmt<hex , fixed> >& aInt )
 	{
 		uint32_t lSize ( sizeof ( T ) );
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
@@ -145,7 +142,7 @@ namespace uhal
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , bin , variable >& aInt )
+	void log_inserter ( const _Integer< T , IntFmt<bin , variable> >& aInt )
 	{
 		if ( aInt.value() == 0 )
 		{
@@ -178,7 +175,7 @@ namespace uhal
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , dec , variable >& aInt )
+	void log_inserter ( const _Integer< T , IntFmt<dec , variable> >& aInt )
 	{
 		static const char* lCharacterMapping ( "9876543210123456789" );
 		static const char* lCharacterMappingCenter ( lCharacterMapping + 9 );
@@ -206,7 +203,7 @@ namespace uhal
 
 
 	template< typename T >
-	void log_inserter ( const _Integer< T , hex , variable >& aInt )
+	void log_inserter ( const _Integer< T , IntFmt<hex , variable> >& aInt )
 	{
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
 

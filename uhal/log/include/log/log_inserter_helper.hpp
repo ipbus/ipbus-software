@@ -13,7 +13,7 @@ namespace uhal
 
 
 	template< typename T >
-	struct RefWrapper
+	class RefWrapper
 	{
 		protected:
 			RefWrapper ( const T& aT ) : mT ( aT ) {}

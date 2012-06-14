@@ -17,96 +17,32 @@ namespace uhal
 		hex
 	};
 
-	static const integer_base DefaultIntegerBase ( dec );
-
 	enum integer_format
 	{
 		fixed,
 		variable
 	};
 
+	static const integer_base DefaultIntegerBase ( dec );
 	static const integer_format DefaultIntegerFormat ( variable );
 
+	template< typename T , typename FORMAT > struct IntegerFactory;
 
-	template< typename T , integer_base BASE , integer_format FORMAT >
+	template< integer_base BASE = DefaultIntegerBase , integer_format FORMAT = DefaultIntegerFormat > struct IntFmt {};
+
+
+	template< typename T , typename FORMAT >
 	class _Integer : public RefWrapper< T >
 	{
-		public:
+			friend class IntegerFactory< T , FORMAT >;
 			_Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
 	};
 
+	template< typename T > void SignHelper ( const T& aInt );
 
-	template< typename T >
-	void SignHelper ( const T& aInt );
+	template< typename T > _Integer< T , IntFmt<> > Integer ( const T& aT );
 
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint8_t , BASE , FORMAT > Integer ( const uint8_t& aInt );
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int8_t , BASE , FORMAT > Integer ( const int8_t& aInt );
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint16_t , BASE , FORMAT > Integer ( const uint16_t& aInt );
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int16_t , BASE , FORMAT > Integer ( const int16_t& aInt );
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint32_t , BASE , FORMAT > Integer ( const uint32_t& aInt );
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int32_t , BASE , FORMAT > Integer ( const int32_t& aInt );
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< uint64_t , BASE , FORMAT > Integer ( const uint64_t& aInt );
-
-	template< integer_base BASE , integer_format FORMAT >
-	_Integer< int64_t , BASE , FORMAT > Integer ( const int64_t& aInt );
-
-
-
-	template< integer_base BASE >
-	_Integer< uint8_t , BASE, DefaultIntegerFormat > Integer ( const uint8_t& aInt );
-
-	template< integer_base BASE >
-	_Integer< int8_t , BASE, DefaultIntegerFormat > Integer ( const int8_t& aInt );
-
-	template< integer_base BASE >
-	_Integer< uint16_t , BASE, DefaultIntegerFormat > Integer ( const uint16_t& aInt );
-
-	template< integer_base BASE >
-	_Integer< int16_t , BASE, DefaultIntegerFormat > Integer ( const int16_t& aInt );
-
-	template< integer_base BASE >
-	_Integer< uint32_t , BASE, DefaultIntegerFormat > Integer ( const uint32_t& aInt );
-
-	template< integer_base BASE >
-	_Integer< int32_t , BASE, DefaultIntegerFormat > Integer ( const int32_t& aInt );
-
-	template< integer_base BASE >
-	_Integer< uint64_t , BASE, DefaultIntegerFormat > Integer ( const uint64_t& aInt );
-
-	template< integer_base BASE >
-	_Integer< int64_t , BASE, DefaultIntegerFormat > Integer ( const int64_t& aInt );
-
-
-
-	_Integer< uint8_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const uint8_t& aInt );
-
-	_Integer< int8_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const int8_t& aInt );
-
-	_Integer< uint16_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const uint16_t& aInt );
-
-	_Integer< int16_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const int16_t& aInt );
-
-	_Integer< uint32_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const uint32_t& aInt );
-
-	_Integer< int32_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const int32_t& aInt );
-
-	_Integer< uint64_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const uint64_t& aInt );
-
-	_Integer< int64_t , DefaultIntegerBase , DefaultIntegerFormat > Integer ( const int64_t& aInt );
+	template< typename T , typename FORMAT > _Integer< T , FORMAT >Integer ( const T& aT , const FORMAT& aFmt );
 
 
 }

@@ -11,21 +11,19 @@ namespace uhal
 
 	static const uint32_t DefaultRealWidth ( 10 );
 
-	template< typename T , uint32_t MAX_WIDTH >
+	template< typename T , typename FORMAT > struct RealFactory;
+
+	template< uint32_t WIDTH = DefaultRealWidth > struct RealFmt {};
+
+	template< typename T , typename FORMAT >
 	class _Real : public RefWrapper< T >
 	{
-		public:
+			friend class RealFactory< T , FORMAT >;
 			_Real ( const T& aReal ) : RefWrapper< T > ( aReal ) {}
 	};
 
-	_Real< double , DefaultRealWidth > Real ( const double& aReal );
-	_Real< float , DefaultRealWidth > Real ( const float& aReal );
-
-	template< uint32_t MAX_WIDTH >
-	_Real< double , MAX_WIDTH > Real ( const double& aReal );
-
-	template< uint32_t MAX_WIDTH >
-	_Real< float , MAX_WIDTH > Real ( const float& aReal );
+	template< typename T > _Real< T , RealFmt<> > Real ( const T& aT );
+	template< typename T , typename FORMAT > _Real< T , FORMAT > Real ( const T& aT , const FORMAT& aFmt );
 
 }
 

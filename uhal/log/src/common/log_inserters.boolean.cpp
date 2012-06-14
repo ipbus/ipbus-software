@@ -7,7 +7,7 @@ namespace uhal
 {
 
 	template<>
-	void log_inserter< _Boolean< alpha > > ( const _Boolean< alpha >& aBoolean )
+	void log_inserter< _Boolean< bool , BoolFmt<alpha> > > ( const _Boolean< bool , BoolFmt<alpha> >& aBoolean )
 	{
 		if ( aBoolean.value() )
 		{
@@ -21,7 +21,7 @@ namespace uhal
 
 
 	template<>
-	void log_inserter< _Boolean< numeric > > ( const _Boolean< numeric >& aBoolean )
+	void log_inserter< _Boolean< bool , BoolFmt<numeric> > > ( const _Boolean< bool , BoolFmt<numeric> >& aBoolean )
 	{
 		if ( aBoolean.value() )
 		{
@@ -33,11 +33,6 @@ namespace uhal
 		}
 	}
 
-
-	_Boolean< DefaultBooleanFormat > Boolean ( const bool& aBool )
-	{
-		return _Boolean< DefaultBooleanFormat > ( aBool );
-	}
 
 
 }

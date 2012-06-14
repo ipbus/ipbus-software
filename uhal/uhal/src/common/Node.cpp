@@ -321,8 +321,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			if ( lAddr & ~aParentMask )
 			{
-				log ( Error() , "Node address " , Integer< hex , fixed > ( lAddr ) ,
-					  " overlaps with the mask specified by the parent node, " , Integer< hex , fixed > ( aParentMask ) );
+				log ( Error() , "Node address " , Integer ( lAddr, IntFmt< hex , fixed >() ) ,
+					  " overlaps with the mask specified by the parent node, " , Integer ( aParentMask, IntFmt< hex , fixed >() ) );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ChildHasAddressOverlap();
 			}
@@ -338,8 +338,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			if ( mAddrMask & ~aParentMask )
 			{
-				log ( Error() , "Node address mask " , Integer< hex , fixed > ( mAddrMask ) ,
-					  " overlaps with the parent mask " , Integer< hex , fixed > ( aParentMask ) ,
+				log ( Error() , "Node address mask " , Integer ( mAddrMask, IntFmt< hex , fixed >() ) ,
+					  " overlaps with the parent mask " , Integer ( aParentMask, IntFmt< hex , fixed >() ) ,
 					  ". This makes the child's address subspace larger than the parent and is not allowed" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ChildHasAddressMaskOverlap();
@@ -373,8 +373,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			{
 
 
-				log ( Info() , "aParentAddr  = " , Integer< hex , fixed >  ( aParentAddr ) );
-				log ( Info() , "lMask  = " , Integer< hex , fixed >  ( lMask ) );
+				log ( Info() , "aParentAddr  = " , Integer  ( aParentAddr, IntFmt< hex , fixed >() ) );
+				log ( Info() , "lMask  = " , Integer  ( lMask, IntFmt< hex , fixed >() ) );
 
 
 

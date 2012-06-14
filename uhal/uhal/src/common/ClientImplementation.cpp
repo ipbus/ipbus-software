@@ -50,9 +50,9 @@ namespace uhal
 		uint32_t lIPaddress = ( lIP.at ( 0 ) <<24 ) | ( lIP.at ( 1 ) <<16 ) | ( lIP.at ( 2 ) <<8 ) | ( lIP.at ( 3 ) );
 		log ( Notice() , "Converted IP address string \"" , lIPstr->second ,
 			  "\" to " , Integer ( lIP.at ( 0 ) ) , "." , Integer ( lIP.at ( 1 ) ) , "." , Integer ( lIP.at ( 2 ) ) , "." , Integer ( lIP.at ( 3 ) ) ,
-			  " and converted this to " , Integer< hex , fixed > ( lIPaddress ) ,
+			  " and converted this to " , Integer ( lIPaddress, IntFmt< hex , fixed >() ) ,
 			  ". Converted port string \"" , lPortStr->second ,
-			  "\" to " , Integer< hex , fixed > ( lPort )	);
+			  "\" to " , Integer ( lPort, IntFmt< hex , fixed >() )	);
 		return std::make_pair ( lIPaddress , lPort );
 	}
 

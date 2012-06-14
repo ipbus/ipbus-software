@@ -68,8 +68,8 @@ int main ( int argc,char* argv[] )
 			if ( *lReadIt != *lSourceIt )
 			{
 				log ( Error() , "MISMATCH AT " , Integer ( count ) ,
-					  " : Source " , Integer < hex , fixed > ( *lSourceIt ) ,
-					  " vs. Found " , Integer < hex , fixed > ( *lReadIt ) );
+					  " : Source " , Integer ( *lSourceIt , IntFmt< hex , fixed >() ) ,
+					  " vs. Found " , Integer ( *lReadIt , IntFmt< hex , fixed >() ) );
 				// throw 0;
 			}
 		}

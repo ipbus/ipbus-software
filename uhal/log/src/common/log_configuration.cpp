@@ -324,7 +324,7 @@ namespace uhal
 		fputs ( "\033[0;31m[" , mDestination ); //standard red
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " EMERGENCY] " , mDestination );
 	}
 
@@ -333,7 +333,7 @@ namespace uhal
 		fputs ( "\033[0;31m[" , mDestination ); //standard red
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " ALERT] " , mDestination );
 	}
 
@@ -342,7 +342,7 @@ namespace uhal
 		fputs ( "\033[0;31m[" , mDestination ); //standard red
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " CRITICAL] " , mDestination );
 	}
 
@@ -351,7 +351,7 @@ namespace uhal
 		fputs ( "\033[0;31m[" , mDestination ); //standard red
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " ERROR] " , mDestination );
 	}
 
@@ -360,7 +360,7 @@ namespace uhal
 		fputs ( "\033[0;33m[" , mDestination ); //standard yellow
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " WARNING] " , mDestination );
 	}
 
@@ -369,7 +369,7 @@ namespace uhal
 		fputs ( "\033[0;32m[" , mDestination ); //standard green
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " NOTICE] " , mDestination );
 	}
 
@@ -378,7 +378,7 @@ namespace uhal
 		fputs ( "\033[0;36m[" , mDestination ); //standard cyan
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " INFO] " , mDestination );
 	}
 
@@ -387,7 +387,7 @@ namespace uhal
 		fputs ( "\033[1;34m[" , mDestination ); //standard blue
 		timeval lTime;
 		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec > ( lTime ) );
+		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
 		fputs ( " DEBUG] " , mDestination );
 	}
 

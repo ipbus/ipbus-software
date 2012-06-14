@@ -6,29 +6,46 @@
 namespace uhal
 {
 
-	template< typename T , uint32_t MAX_WIDTH >
-	void log_inserter ( const _Real< T , MAX_WIDTH >& aReal )
+	template< typename T , uint32_t WIDTH >
+	void log_inserter ( const _Real< T , RealFmt<WIDTH> >& aReal )
 	{
-		char lBuffer[ MAX_WIDTH ];
+		char lBuffer[ WIDTH ];
 		double lDouble ( aReal.value() ); //it appears that some platforms require this to prevent a segfault
-		gcvt ( lDouble , MAX_WIDTH , lBuffer );
+		gcvt ( lDouble , WIDTH , lBuffer );
 		fputs ( lBuffer , log_configuration::getDestination() );
 	}
 
-
-	template< uint32_t MAX_WIDTH >
-	_Real< double , MAX_WIDTH > Real ( const double& aReal )
+	template< typename FORMAT >
+	struct RealFactory < double , FORMAT >
 	{
-		return _Real< double , MAX_WIDTH > ( aReal );
+		static _Real< double , FORMAT > Construct ( const double& aReal )
+		{
+			return _Real< double , FORMAT > ( aReal );
+		}
+	};
+
+	template< typename FORMAT >
+	struct RealFactory < float , FORMAT >
+	{
+		static _Real< float , FORMAT > Construct ( const float& aReal )
+		{
+			return _Real< float , FORMAT > ( aReal );
+		}
+	};
+
+
+	template< typename T >
+	_Real< T , RealFmt<> > Real ( const T& aT )
+	{
+		return RealFactory< T , RealFmt<> >::Construct ( aT );
 	}
 
 
-	template< uint32_t MAX_WIDTH >
-	_Real< float , MAX_WIDTH > Real ( const float& aReal )
+	template< typename T , typename FORMAT >
+	_Real< T , FORMAT > Real ( const T& aT , const FORMAT& aFmt )
 	{
-		return _Real< float , MAX_WIDTH > ( aReal );
+		return RealFactory< T , FORMAT >::Construct ( aT );
 	}
-
 
 }
 

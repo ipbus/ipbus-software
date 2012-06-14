@@ -17,18 +17,21 @@ namespace uhal
 
 	static const boolean_format DefaultBooleanFormat ( alpha );
 
+	template< typename T , typename FORMAT > struct BooleanFactory;
 
-	template< boolean_format FORMAT = numeric >
-	struct _Boolean : public RefWrapper< bool >
+	template< boolean_format FORMAT = DefaultBooleanFormat > struct BoolFmt {};
+
+	template< typename T , typename FORMAT >
+	class _Boolean : public RefWrapper< T >
 	{
-		_Boolean ( const bool& aBoolean ) : RefWrapper< bool > ( aBoolean ) {}
+			friend class BooleanFactory< T , FORMAT >;
+			_Boolean ( const T& aT ) : RefWrapper< T > ( aT ) {}
 	};
 
 
-	_Boolean< DefaultBooleanFormat > Boolean ( const bool& aBool );
+	template< typename T > _Boolean< T , BoolFmt<> > Boolean ( const T& aT );
 
-	template< boolean_format FORMAT >
-	_Boolean< FORMAT > Boolean ( const bool& aBool );
+	template< typename T , typename FORMAT > _Boolean< T , FORMAT > Boolean ( const T& aT , const FORMAT& aFmt );
 
 }
 

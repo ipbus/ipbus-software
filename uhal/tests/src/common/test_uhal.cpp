@@ -57,7 +57,7 @@ void rawClientAccess()
 		}
 		else
 		{
-			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( val ) , " vs. Found " , Integer< hex , fixed> ( mem.value() ) );
+			log ( Error() , "MISMATCH : Source " , Integer ( val , IntFmt< hex , fixed>() ) , " vs. Found " , Integer ( mem.value() , IntFmt< hex , fixed>() ) );
 			throw 0;
 		}
 
@@ -89,7 +89,7 @@ void rawClientAccess()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer ( *lSourceIt , IntFmt< hex , fixed>() ) , " vs. Found " , Integer ( *lReadIt , IntFmt< hex , fixed>() ) );
 				throw 0;
 			}
 		}
@@ -130,7 +130,7 @@ void rawClientAccess()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer ( *lSourceIt , IntFmt< hex , fixed> () ) , " vs. Found " , Integer ( *lReadIt , IntFmt< hex , fixed>() ) );
 				throw 0;
 			}
 		}
@@ -147,7 +147,7 @@ void rawClientAccess()
 		}
 		else
 		{
-			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected ) , " vs. Found " , Integer< hex , fixed> ( mem.value() ) );
+			log ( Error() , "MISMATCH : Source " , Integer ( expected , IntFmt< hex , fixed>() ) , " vs. Found " , Integer ( mem.value() , IntFmt< hex , fixed>() ) );
 			throw 0;
 		}
 
@@ -161,7 +161,7 @@ void rawClientAccess()
 		}
 		else
 		{
-			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( expected2 ) , " vs. Found " , Integer< hex , fixed> ( mem2.value() ) );
+			log ( Error() , "MISMATCH : Source " , Integer ( expected2 , IntFmt< hex , fixed>() ) , " vs. Found " , Integer ( mem2.value() , IntFmt< hex , fixed>() ) );
 			throw 0;
 		}
 	}
@@ -273,7 +273,7 @@ void write_test()
 		}
 		else
 		{
-			log ( Error() , "MISMATCH : Source " , Integer< hex , fixed> ( val ) , " vs. Found " , Integer< hex , fixed> ( mem.value() ) );
+			log ( Error() , "MISMATCH : Source " , Integer ( val , IntFmt< hex , fixed>() ) , " vs. Found " , Integer ( mem.value() , IntFmt< hex , fixed>() ) );
 			throw 0;
 		}
 
@@ -307,7 +307,7 @@ void write_test()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer ( *lSourceIt , IntFmt< hex , fixed>() ) , " vs. Found " , Integer ( *lReadIt , IntFmt< hex , fixed>() ) );
 				throw 0;
 			}
 		}
@@ -341,7 +341,7 @@ void write_test()
 		{
 			if ( *lReadIt != *lSourceIt )
 			{
-				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer< hex , fixed> ( *lSourceIt ) , " vs. Found " , Integer< hex , fixed> ( *lReadIt ) );
+				log ( Error() , "MISMATCH AT " , Integer ( count ) , " : Source " , Integer ( *lSourceIt , IntFmt< hex , fixed>() ) , " vs. Found " , Integer ( *lReadIt , IntFmt< hex , fixed>() ) );
 				throw 0;
 			}
 		}

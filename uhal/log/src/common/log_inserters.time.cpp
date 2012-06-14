@@ -94,7 +94,7 @@ namespace uhal
 		log_inserter ( Integer ( aUsec ) );
 	}
 
-	void log_inserter ( const  Time<usec,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null>& aTime )
+	void log_inserter ( const _Time< timeval , TimeFmt<usec,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime )
 	{
 		tm* lLocalTime ( NULL );
 		TimeSpecializationHelper< usec >::print ( log_configuration::getDestination() , lLocalTime , ( aTime.value() ).tv_usec );
