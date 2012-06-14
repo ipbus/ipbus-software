@@ -33,13 +33,7 @@ LIBRARIES = 	\
 		\
 		-lcactus_extern_pugixml \
 		-lcactus_uhal_grammars \
-		-lcactus_uhal_uhal \
-		\
-		-lpantheios.1.core.gcc41 \
-		-lpantheios.1.fe.simple.gcc41 \
-		-lpantheios.1.util.gcc41 \
-		-lb64.1.pan.gcc41 \
-		-lpantheios.1.core.gcc41
+		-lcactus_uhal_uhal
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
