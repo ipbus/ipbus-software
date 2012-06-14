@@ -2,8 +2,6 @@ MAKE=make
 PACKAGES = \
 	extern/boost \
 	extern/erlang \
-	extern/stlsoft \
-	extern/pantheios \
 	extern/pugixml \
 	uhal/BoostSpiritGrammars \
 	uhal/uhal \
