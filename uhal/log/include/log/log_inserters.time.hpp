@@ -29,12 +29,12 @@ namespace uhal
 
 	template< typename T , typename FORMAT > struct TimeFactory;
 
-	template< time_element T0 = day, char D0 = '/' ,
-	time_element T1 = mth, char D1 = '/' ,
-	time_element T2 = year, char D2 = ' ' ,
-	time_element T3 = hr, char D3 = ':' ,
-	time_element T4 = min, char D4 = ':' ,
-	time_element T5 = sec, char D5 = ' ' ,
+	template< time_element T0 , char D0 = ' ' ,
+	time_element T1 = null, char D1 = ' ' ,
+	time_element T2 = null, char D2 = ' ' ,
+	time_element T3 = null, char D3 = ' ' ,
+	time_element T4 = null, char D4 = ' ' ,
+	time_element T5 = null, char D5 = ' ' ,
 	time_element T6 = null > struct TimeFmt {};
 
 	template< typename T , typename FORMAT >
@@ -50,7 +50,7 @@ namespace uhal
 		static void print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec );
 	};
 
-	template< typename T > _Time< T , TimeFmt<> > Time ( const T& aT );
+	template< typename T > _Time< T , TimeFmt<day,'/',mth,'/',year,' ',hr,':',min,':',sec> > Time ( const T& aT );
 	template< typename T , typename FORMAT > _Time< T , FORMAT > Time ( const T& aT , const FORMAT& aFmt );
 
 }
