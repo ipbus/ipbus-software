@@ -167,6 +167,18 @@ namespace uhal
 			//@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
 			void writeBlock ( const std::vector< uint32_t >& aValues ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
+			void writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode ){
+				log( Error() , "THIS METHOD IS DEPRECATED! " 
+								"PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+								"AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
+								"I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+								"THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+				defs::BlockReadWriteMode lMode( mMode );
+				mMode = aMode;
+				writeBlock( aValues );
+				mMode = lMode;
+			}	
+			
 			/**
 				Read a single, unmasked, unsigned word
 				@return a Validated Memory which wraps the location to which the reply data is to be written
@@ -181,6 +193,19 @@ namespace uhal
 			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
 			ValVector< uint32_t > readBlock ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
+			ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode ){
+				log( Error() , "THIS METHOD IS DEPRECATED! " 
+								"PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+								"AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "
+								"I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+								"THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+				defs::BlockReadWriteMode lMode( mMode );
+				mMode = aMode;
+				ValVector< uint32_t > lRet( readBlock( aSize ) );
+				mMode = lMode;
+				return lRet;
+			}			
+			
 			/**
 				Read a single, unmasked word and interpret it as being signed
 				@return a Validated Memory which wraps the location to which the reply data is to be written
@@ -194,6 +219,20 @@ namespace uhal
 			*/
 			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
 			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+
+			
+			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode ){
+				log( Error() , "THIS METHOD IS DEPRECATED! " 
+								"PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+								"AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
+								"I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+								"THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+				defs::BlockReadWriteMode lMode( mMode );
+				mMode = aMode;
+				ValVector< int32_t > lRet( readBlockSigned( aSize ) );
+				mMode = lMode;
+				return lRet;
+			}
 
 			
 			/**

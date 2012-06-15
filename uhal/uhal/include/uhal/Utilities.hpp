@@ -178,7 +178,7 @@ namespace uhal
 			}
 
 			// Don't bother with Logging if the logger won't include it!
-			Notice lLoggingLevel;
+			Info lLoggingLevel;
 
 			if ( log_configuration::LoggingIncludes ( lLoggingLevel ) )
 			{

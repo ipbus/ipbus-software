@@ -331,7 +331,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			mUid ( "" ),
 			mAddr ( 0x00000000 ),
 			mAddrMask ( 0x00000000 ),
-			mMask ( 0xFFFFFFFF ),
+			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
 			mChildren ( new std::vector < Node > ),
@@ -561,6 +561,7 @@ Node::Node ( const Node& aNode ) try :
 			if( (mMode == defs::SINGLE) && (aValues.size() != 1) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
+				log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=\"incremental\"' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BulkTransferOnSingleRegister();
 			}
@@ -623,6 +624,7 @@ Node::Node ( const Node& aNode ) try :
 			if( (mMode == defs::SINGLE) && (aSize != 1) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
+				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=\"incremental\"' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BulkTransferOnSingleRegister();
 			}
@@ -684,6 +686,8 @@ Node::Node ( const Node& aNode ) try :
 			if( (mMode == defs::SINGLE) && (aSize != 1) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
+				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=\"incremental\"' flags there" );
+								
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BulkTransferOnSingleRegister();
 			}
