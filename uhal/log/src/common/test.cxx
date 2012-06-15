@@ -82,13 +82,9 @@ int main ( int argc,char* argv[] )
 		log ( Notice() , "-13 as a fixed-width hex int32 : " , Integer ( int32_t ( -13 ) , IntFmt<hex , fixed>() ) );
 		log ( Notice() , "13 as a fixed-width hex uint64 : " , Integer ( uint64_t ( 13 ) , IntFmt<hex , fixed>() ) );
 		log ( Notice() , "-13 as a fixed-width hex int64 : " , Integer ( int64_t ( -13 ) , IntFmt<hex , fixed>() ) );
-		
-		
 		log ( Notice() , "Specified fixed width bin uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<bin , fixed , 10>() ) );
 		log ( Notice() , "Specified fixed width dec uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<dec , fixed , 10>() ) );
 		log ( Notice() , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
-
-		
 		log ( Notice() , "double pi : " , Real ( double ( 3.1415926535 ) ) );
 		log ( Notice() , "float pi : " , Real ( float ( 3.1415926535 ) ) , " (should be truncated)" );
 		log ( Notice() , "double pi : " , Real ( double ( 3.1415926535 ) , RealFmt<4>() ) );
@@ -107,12 +103,9 @@ int main ( int argc,char* argv[] )
 		log ( Notice() , "Hex dump (struct) : " , Hex ( lTest ) );
 		log ( Notice() , "Hex dump (one of the logging wrappers) : " , Hex ( Integer ( uint64_t ( 13 ) ) ) );
 		log ( Notice() , "Hex dump (POD) : " , Hex ( uint64_t ( 13 ) ) );
-		
 		log ( Notice() , "Pointer : " , Pointer ( &lTest ) );
 		log ( Notice() , "Pointer : " , Pointer ( argv ) );
 		log ( Notice() , "Pointer : " , Pointer ( *argv ) );
-		
-		
 		// Test setting logging levels
 		log_configuration::setLogLevelTo ( Error() );
 		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );

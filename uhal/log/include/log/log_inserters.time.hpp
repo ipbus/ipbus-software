@@ -37,6 +37,8 @@ namespace uhal
 	time_element T5 = null, char D5 = ' ' ,
 	time_element T6 = null > struct TimeFmt {};
 
+	typedef TimeFmt<day,'/',mth,'/',year,' ',hr,':',min,':',sec> DefaultTimeFmt;
+
 	template< typename T , typename FORMAT >
 	class _Time : public RefWrapper< T >
 	{
@@ -50,7 +52,7 @@ namespace uhal
 		static void print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec );
 	};
 
-	template< typename T > _Time< T , TimeFmt<day,'/',mth,'/',year,' ',hr,':',min,':',sec> > Time ( const T& aT );
+	template< typename T > _Time< T , DefaultTimeFmt > Time ( const T& aT );
 	template< typename T , typename FORMAT > _Time< T , FORMAT > Time ( const T& aT , const FORMAT& aFmt );
 
 }

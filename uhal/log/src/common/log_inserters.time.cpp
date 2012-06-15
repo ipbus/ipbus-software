@@ -99,12 +99,12 @@ namespace uhal
 	void TimeSpecializationHelper< usec >::print ( FILE* aFile , const tm* , const uint32_t& aUsec )
 	{
 		// the uSeconds are just a 32bit number so print it as an integer
-		log_inserter ( Integer ( aUsec , IntFmt<dec , fixed , 6>() ) );		
+		log_inserter ( Integer ( aUsec , IntFmt<dec , fixed , 6>() ) );
 	}
 
 	void log_inserter ( const _Time< timeval , TimeFmt<usec,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime )
 	{
-		log_inserter ( Integer ( uint32_t( aTime.value().tv_usec ) , IntFmt<dec , fixed , 6>() ) );
+		log_inserter ( Integer ( uint32_t ( aTime.value().tv_usec ) , IntFmt<dec , fixed , 6>() ) );
 	}
 
 }

@@ -130,9 +130,9 @@ namespace uhal
 
 
 	template< typename T >
-	_Time< T , TimeFmt<day,'/',mth,'/',year,' ',hr,':',min,':',sec> > Time ( const T& aT )
+	_Time< T , DefaultTimeFmt > Time ( const T& aT )
 	{
-		return TimeFactory< T , TimeFmt<day,'/',mth,'/',year,' ',hr,':',min,':',sec> >::Construct ( aT );
+		return TimeFactory< T , DefaultTimeFmt >::Construct ( aT );
 	}
 
 

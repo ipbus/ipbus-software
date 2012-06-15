@@ -107,15 +107,16 @@ namespace uhal
 	{
 		uint32_t lSize ( sizeof ( T ) << 3 ); //number of characters
 		fputs ( "0b" , log_configuration::getDestination() );
-		
-		int32_t i(WIDTH-lSize);
-		if( i > 0 ){
-			for( ; i!=0 ; --i )
+		int32_t i ( WIDTH-lSize );
+
+		if ( i > 0 )
+		{
+			for ( ; i!=0 ; --i )
 			{
-				fputc( '0' , log_configuration::getDestination() );
-			}		
-		}		
-		
+				fputc ( '0' , log_configuration::getDestination() );
+			}
+		}
+
 		T lValue ( aInt.value() );
 		T lMask ( 0x1 );
 		lMask <<= ( lSize-1 );
@@ -147,37 +148,40 @@ namespace uhal
 		}
 		while ( value );
 
-		int32_t i( WIDTH-(lPtr-lBuffer) );
-		if( i > 0 ){
-			for(  ; i!=0 ; --i )
+		int32_t i ( WIDTH- ( lPtr-lBuffer ) );
+
+		if ( i > 0 )
+		{
+			for ( ; i!=0 ; --i )
 			{
-				fputc( '0' , log_configuration::getDestination() );
-			}	
+				fputc ( '0' , log_configuration::getDestination() );
+			}
 		}
-		
+
 		do
 		{
 			fputc ( * ( --lPtr ) , log_configuration::getDestination() );
 		}
 		while ( lPtr!=lBuffer );
 	}
-	
+
 
 	template< typename T , uint32_t WIDTH >
 	void log_inserter ( const _Integer< T , IntFmt<hex , fixed , WIDTH> >& aInt )
 	{
 		uint32_t lSize ( sizeof ( T ) << 1 ); //number of characters
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
-		
 		fputs ( "0x" , log_configuration::getDestination() );
-		int32_t i(WIDTH-lSize);
-		if( i > 0 ){
-			for( ; i!=0 ; --i )
+		int32_t i ( WIDTH-lSize );
+
+		if ( i > 0 )
+		{
+			for ( ; i!=0 ; --i )
 			{
-				fputc( '0' , log_configuration::getDestination() );
-			}		
-		}	
-		
+				fputc ( '0' , log_configuration::getDestination() );
+			}
+		}
+
 		uint8_t* lStart ( ( uint8_t* ) ( & aInt.value() ) );
 		uint8_t* lPtr ( lStart + sizeof ( T ) );
 

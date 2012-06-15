@@ -1,5 +1,6 @@
 
 #include <log/log_configuration.hpp>
+#include <log/log_inserters.integer.hpp>
 
 #ifdef __GNUG__
 #include <cxxabi.h>
@@ -21,10 +22,8 @@ namespace uhal
 #endif
 		fputs ( ")(0x" , log_configuration::getDestination() );
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
-		
-		uint64_t lPointer( (uint64_t)(aPointer.value()) );
-		
-		uint8_t* lStart ( ( uint8_t* )( &lPointer ) );
+		uint64_t lPointer ( ( uint64_t ) ( aPointer.value() ) );
+		uint8_t* lStart ( ( uint8_t* ) ( &lPointer ) );
 		uint8_t* lPtr ( lStart + sizeof ( T* ) );
 
 		do
@@ -34,9 +33,10 @@ namespace uhal
 			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0x0F ) ) ) , log_configuration::getDestination() );
 		}
 		while ( lPtr!=lStart );
-		
+
+		fputs ( ")(+" , log_configuration::getDestination() );
+		log_inserter ( Integer ( sizeof ( T ) ) );
 		fputc ( ')' , log_configuration::getDestination() );
-		
 	}
 
 

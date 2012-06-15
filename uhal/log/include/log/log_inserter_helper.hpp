@@ -28,8 +28,8 @@ namespace uhal
 		private:
 			const T& mT;
 	};
-	
-	
+
+
 	template< typename T >
 	class RefWrapper< T* >
 	{
@@ -45,7 +45,7 @@ namespace uhal
 
 		private:
 			const T* mT;
-	};	
+	};
 
 }
 
