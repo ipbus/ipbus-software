@@ -52,9 +52,9 @@ namespace uhal
 			/**
 				Construct a node tree from file whose name is specified
 				@param aFilenameExpr a Filename Expression
-				@return the newly created node tree
+				@return a shared_ptr to a const node tree, such that which must be copied by the final user
 			*/
-			Node getAddressTable ( const std::string& aFilenameExpr , const uint32_t& aAddr = 0x00000000 , const uint32_t& aAddrMask = 0xFFFFFFFF );
+			boost::shared_ptr< const Node > getAddressTable ( const std::string& aFilenameExpr , const uint32_t& aAddr = 0x00000000 , const uint32_t& aAddrMask = 0xFFFFFFFF );
 
 			/**
 				Method called once the file specified in the call to getAddressTable( aFilenameExpr ) has been opened
@@ -63,13 +63,13 @@ namespace uhal
 				@param aFile A byte vector containing the content of the opened file. Done like this since the routine handles local and http files identically
 				@param aAddressTable The address table constructed from the file
 			*/
-			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< Node >& aAddressTable );
+			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< boost::shared_ptr< const Node > >& aAddressTable );
 
 		private:
 			//! The single instance of the class
 			static AddressTableBuilder* mInstance;
 			//! Hash map associating a Node tree with a file name
-			std::hash_map< std::string , Node > mNodes;
+			std::hash_map< std::string , boost::shared_ptr< const Node > > mNodes;
 
 	};
 }

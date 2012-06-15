@@ -258,6 +258,7 @@ namespace uhal
 			boost::shared_ptr<ClientInterface> getClient();
 
 
+			
 			//private:
 			//Node ( HwInterface* aHwInterface, const std::string& aFullid );
 
@@ -273,6 +274,13 @@ namespace uhal
 				@param aNode a node to copy
 			*/
 			Node ( const Node& aNode );
+			
+			/**
+				Assignment operator
+				@param aNode a node to copy
+				@return self reference
+			*/
+			Node& operator= ( const Node& aNode );			
 
 		private:
 			//! The parent hardware interface of which this node is a child (or rather decendent)
@@ -294,10 +302,8 @@ namespace uhal
 			//! Whether the node represents a single register, a block of registers or a block-read/write port
 			defs::BlockReadWriteMode mMode;
 			
-			//! The children of the current node
-			boost::shared_ptr< std::vector< Node > > mChildren;
 			//! Helper to assist look-up of a particular child node, given a name
-			boost::shared_ptr< std::hash_map< std::string , Node* > > mChildrenMap;	//ok as long as the member mChildren cannot be modified after this is constructed, otherwise reallocation can cause a problem
+			std::hash_map< std::string , boost::shared_ptr< Node> > mChildren;
 
 			//! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
 			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>

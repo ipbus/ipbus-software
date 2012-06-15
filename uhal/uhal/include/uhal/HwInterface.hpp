@@ -22,13 +22,23 @@ namespace uhal
 			/**
 				Constructor
 			*/
-			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const Node& aNode );
+			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< const Node >& aNode );
 
 			/**
 				Copy constructor
+				@param aHwInterface a HwInterface to copy
 			*/
 			HwInterface ( const HwInterface& aHwInterface );
 
+			/**
+				Assignment operator
+				@param aHwInterface a HwInterface to copy
+				@return self reference
+			*/
+			HwInterface& operator= (const HwInterface &aHwInterface);
+			
+			
+			virtual ~HwInterface();
 
 			/**
 				Get the underlying IPbus client
@@ -100,7 +110,7 @@ namespace uhal
 			boost::shared_ptr<ClientInterface> mClientInterface;
 
 			//! A node tree
-			Node mNode;
+			boost::shared_ptr<Node> mNode;
 
 	};
 

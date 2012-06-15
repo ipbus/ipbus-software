@@ -177,12 +177,9 @@ namespace uhal
 					break;					
 			}
 			
-			if ( mChildren )
+			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
 			{
-				for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
-				{
-					lIt->stream ( aStream , aIndent+2 );
-				}
+				lIt->second->stream ( aStream , aIndent+2 );
 			}
 		}
 		catch ( const std::exception& aExc )
@@ -197,9 +194,9 @@ namespace uhal
 	{
 		try
 		{
-			std::hash_map< std::string , Node* >::iterator lIterator = mChildrenMap->find ( aId );
+			std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildren.find ( aId );
 
-			if ( lIterator==mChildrenMap->end() )
+			if ( lIt==mChildren.end() )
 			{
 				log ( Error() , "No branch found with ID-path \"" , aId , "\"" );
 				std::size_t lPos ( std::string::npos );
@@ -214,12 +211,12 @@ namespace uhal
 						break;
 					}
 
-					std::hash_map< std::string , Node* >::iterator lIterator = mChildrenMap->find ( aId.substr ( 0 , lPos ) );
+					std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildren.find ( aId.substr ( 0 , lPos ) );
 
-					if ( lIterator!=mChildrenMap->end() )
+					if ( lIt!=mChildren.end() )
 					{
 						log ( Error() , "Partial match \"" , aId.substr ( 0 , lPos ) , "\" found for ID-path \"" , aId , "\"" );
-						log ( Error() , "Tree structure of partial match is:" , * ( lIterator->second ) );
+						log ( Error() , "Tree structure of partial match is:" , * ( lIt->second ) );
 						lPartialMatch = true;
 						break;
 					}
@@ -236,7 +233,7 @@ namespace uhal
 				throw NoBranchFoundWithGivenUID();
 			}
 
-			return * ( lIterator->second );
+			return * ( lIt->second );
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -251,11 +248,11 @@ namespace uhal
 		try
 		{
 			std::vector<std::string> lNodes;
-			lNodes.reserve ( mChildren->size() ); //prevent reallocations
+			lNodes.reserve ( mChildren.size() ); //prevent reallocations
 
-			for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
+			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
 			{
-				lNodes.push_back ( lIt->mUid );
+				lNodes.push_back ( lIt->second->mUid );
 			}
 
 			return lNodes;
@@ -273,10 +270,10 @@ namespace uhal
 		try
 		{
 			std::vector<std::string> lNodes;
-			lNodes.reserve ( mChildrenMap->size() ); //prevent reallocations
+			lNodes.reserve ( mChildren.size() ); //prevent reallocations
 			log ( Info() , "Regular Expression : " , aRegex.str() );
 
-			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
 			{
 				boost::cmatch lMatch;
 
@@ -334,157 +331,156 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
-			mChildren ( new std::vector < Node > ),
-			mChildrenMap ( new std::hash_map< std::string , Node* > )
+			mChildren ( )
 	{
-		if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
-		{
-			//error description is given in the function itself so no more elaboration required
-			log ( Error() , "Throwing at " , ThisLocation() );
-			throw NodeMustHaveUID();
-		}
+		// if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
+		// {
+			// //error description is given in the function itself so no more elaboration required
+			// log ( Error() , "Throwing at " , ThisLocation() );
+			// throw NodeMustHaveUID();
+		// }
 
-		uint32_t lAddr ( 0x00000000 );
+		// uint32_t lAddr ( 0x00000000 );
 
-		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
-		{
-			if ( lAddr & ~aParentMask )
-			{
-				log ( Error() , "Node address " , Integer ( lAddr, IntFmt< hex , fixed >() ) ,
-					  " overlaps with the mask specified by the parent node, " , Integer ( aParentMask, IntFmt< hex , fixed >() ) );
-				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ChildHasAddressOverlap();
-			}
+		// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
+		// {
+			// if ( lAddr & ~aParentMask )
+			// {
+				// log ( Error() , "Node address " , Integer ( lAddr, IntFmt< hex , fixed >() ) ,
+					  // " overlaps with the mask specified by the parent node, " , Integer ( aParentMask, IntFmt< hex , fixed >() ) );
+				// log ( Error() , "Throwing at " , ThisLocation() );
+				// throw ChildHasAddressOverlap();
+			// }
 
-			mAddr = aParentAddr | ( lAddr & aParentMask );
-		}
-		else
-		{
-			mAddr = aParentAddr;
-		}
+			// mAddr = aParentAddr | ( lAddr & aParentMask );
+		// }
+		// else
+		// {
+			// mAddr = aParentAddr;
+		// }
 
-		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address-mask" , mAddrMask ) )
-		{
-			if ( mAddrMask & ~aParentMask )
-			{
-				log ( Error() , "Node address mask " , Integer ( mAddrMask, IntFmt< hex , fixed >() ) ,
-					  " overlaps with the parent mask " , Integer ( aParentMask, IntFmt< hex , fixed >() ) ,
-					  ". This makes the child's address subspace larger than the parent and is not allowed" );
-				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ChildHasAddressMaskOverlap();
-			}
-		}
-		else
-		{
-			//we have already checked that the address doesn't overlap with the parent mask, therefore, this calculation cannot produce a mask which overlaps the parent mask either.
-			mAddrMask = 0x00000001 ;
+		// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address-mask" , mAddrMask ) )
+		// {
+			// if ( mAddrMask & ~aParentMask )
+			// {
+				// log ( Error() , "Node address mask " , Integer ( mAddrMask, IntFmt< hex , fixed >() ) ,
+					  // " overlaps with the parent mask " , Integer ( aParentMask, IntFmt< hex , fixed >() ) ,
+					  // ". This makes the child's address subspace larger than the parent and is not allowed" );
+				// log ( Error() , "Throwing at " , ThisLocation() );
+				// throw ChildHasAddressMaskOverlap();
+			// }
+		// }
+		// else
+		// {
+			// //we have already checked that the address doesn't overlap with the parent mask, therefore, this calculation cannot produce a mask which overlaps the parent mask either.
+			// mAddrMask = 0x00000001 ;
 
-			for ( uint32_t i=0 ; i!=32 ; ++i )
-			{
-				if ( mAddrMask & mAddr )
-				{
-					break;
-				}
+			// for ( uint32_t i=0 ; i!=32 ; ++i )
+			// {
+				// if ( mAddrMask & mAddr )
+				// {
+					// break;
+				// }
 
-				mAddrMask = ( mAddrMask << 1 ) | 0x00000001;
-			}
+				// mAddrMask = ( mAddrMask << 1 ) | 0x00000001;
+			// }
 
-			mAddrMask &= ~mAddr;
-		}
+			// mAddrMask &= ~mAddr;
+		// }
 
-		/*if ( lAddrSpecified )
-		{
-			if( ( aParentAddr == 0x00000000 ) || ( aParentAddr == lAddr ) )
-			{
-				mAddr = lAddr;
-			}
-			else
-			{
-				log ( Info() , "aParentAddr  = " , Integer  ( aParentAddr, IntFmt< hex , fixed >() ) );
-				log ( Info() , "lMask  = " , Integer  ( lMask, IntFmt< hex , fixed >() ) );
-			}
-		}
-		else
-		{
-			mAddr = aParentAddr;
-		}*/
-		std::string lModule;
+		// /*if ( lAddrSpecified )
+		// {
+			// if( ( aParentAddr == 0x00000000 ) || ( aParentAddr == lAddr ) )
+			// {
+				// mAddr = lAddr;
+			// }
+			// else
+			// {
+				// log ( Info() , "aParentAddr  = " , Integer  ( aParentAddr, IntFmt< hex , fixed >() ) );
+				// log ( Info() , "lMask  = " , Integer  ( lMask, IntFmt< hex , fixed >() ) );
+			// }
+		// }
+		// else
+		// {
+			// mAddr = aParentAddr;
+		// }*/
+		// std::string lModule;
 
-		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
-		{
-			try
-			{
-				Node lNode = AddressTableBuilder::getInstance().getAddressTable ( lModule , mAddr , mAddrMask );
-				mChildren->push_back ( lNode );
-			}
-			catch ( const std::exception& aExc )
-			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
-			}
-		}
-		else
-		{
-			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
+		// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
+		// {
+			// try
+			// {
+				// Node lNode = AddressTableBuilder::getInstance().getAddressTable ( lModule , mAddr , mAddrMask );
+				// mChildren.push_back ( lNode );
+			// }
+			// catch ( const std::exception& aExc )
+			// {
+				// log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				// throw uhal::exception ( aExc );
+			// }
+		// }
+		// else
+		// {
+			// uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
 
-			std::string lPermission;
-			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
-			{
-				try
-				{
-					boost::spirit::qi::phrase_parse (
-						lPermission.begin(),
-						lPermission.end(),
-						Node::mPermissionsLut,
-						boost::spirit::ascii::space,
-						mPermission
-					);
-				}
-				catch ( const std::exception& aExc )
-				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-					throw uhal::exception ( aExc );
-				}
-			}
+			// std::string lPermission;
+			// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
+			// {
+				// try
+				// {
+					// boost::spirit::qi::phrase_parse (
+						// lPermission.begin(),
+						// lPermission.end(),
+						// Node::mPermissionsLut,
+						// boost::spirit::ascii::space,
+						// mPermission
+					// );
+				// }
+				// catch ( const std::exception& aExc )
+				// {
+					// log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					// throw uhal::exception ( aExc );
+				// }
+			// }
 			
-			std::string lMode;
-			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
-			{
-				try
-				{
-					boost::spirit::qi::phrase_parse (
-						lMode.begin(),
-						lMode.end(),
-						Node::mModeLut,
-						boost::spirit::ascii::space,
-						mMode
-					);
-				}
-				catch ( const std::exception& aExc )
-				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-					throw uhal::exception ( aExc );
-				}
-			}		
+			// std::string lMode;
+			// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
+			// {
+				// try
+				// {
+					// boost::spirit::qi::phrase_parse (
+						// lMode.begin(),
+						// lMode.end(),
+						// Node::mModeLut,
+						// boost::spirit::ascii::space,
+						// mMode
+					// );
+				// }
+				// catch ( const std::exception& aExc )
+				// {
+					// log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					// throw uhal::exception ( aExc );
+				// }
+			// }		
 			
-			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
-			{
-				mChildren->push_back ( Node ( lXmlNode , mAddr , mAddrMask ) );
-			}
-		}
+			// for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
+			// {
+				// mChildren.push_back ( Node ( lXmlNode , mAddr , mAddrMask ) );
+			// }
+		// }
 
-		//iterate over the immediate children
-		for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
-		{
-			//add the immediate child to the lookup map
-			mChildrenMap->insert ( std::make_pair ( lIt->mUid , & ( *lIt ) ) );
+		// //iterate over the immediate children
+		// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+		// {
+			// //add the immediate child to the lookup map
+			// mChildren.insert ( std::make_pair ( lIt->second->mUid , & ( *lIt ) ) );
 
-			//add all the entries in the child's look-up map to the paren't look-up map, prepended with the child's name followed by a '.'
-			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap->begin() ; lSubMapIt != lIt->mChildrenMap->end() ; ++lSubMapIt )
-			{
-				mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-			}
-		}
+			// //add all the entries in the child's look-up map to the paren't look-up map, prepended with the child's name followed by a '.'
+			// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lSubMapIt = lIt->mChildren.begin() ; lSubMapIt != lIt->mChildren.end() ; ++lSubMapIt )
+			// {
+				// mChildren.insert ( std::make_pair ( ( lIt->second->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			// }
+		// }
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -501,20 +497,19 @@ Node::Node ( const Node& aNode ) try :
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
 			mMode ( aNode.mMode ),
-			mChildren ( new std::vector < Node > ( * ( aNode.mChildren ) ) ),
-			mChildrenMap ( new std::hash_map< std::string , Node* > )
+			mChildren ()
 	{
-		for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
-		{
-			//add the immediate child to the lookup map
-			mChildrenMap->insert ( std::make_pair ( lIt->mUid , & ( *lIt ) ) );
+		// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+		// {
+			// //add the immediate child to the lookup map
+			// mChildren.insert ( std::make_pair ( lIt->second->mUid , & ( *lIt ) ) );
 
-			//add all the entries in the child's look-up map to the paren't look-up map, prepended with the child's name followed by a '.'
-			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap->begin() ; lSubMapIt != lIt->mChildrenMap->end() ; ++lSubMapIt )
-			{
-				mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-			}
-		}
+			// //add all the entries in the child's look-up map to the paren't look-up map, prepended with the child's name followed by a '.'
+			// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lSubMapIt = lIt->mChildren.begin() ; lSubMapIt != lIt->mChildren.end() ; ++lSubMapIt )
+			// {
+				// mChildren.insert ( std::make_pair ( ( lIt->second->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			// }
+		// }
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -523,6 +518,37 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
+Node& Node::operator= ( const Node& aNode )
+{
+	try{
+		mHw = aNode.mHw;
+		mUid = aNode.mUid;
+		mAddr = aNode.mAddr;
+		mAddrMask = aNode.mAddrMask;
+		mMask = aNode.mMask;
+		mPermission = aNode.mPermission;
+		mMode = aNode.mMode;
+// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+		// {
+			// //add the immediate child to the lookup map
+			// mChildren.insert ( std::make_pair ( lIt->second->mUid , & ( *lIt ) ) );
+
+			// //add all the entries in the child's look-up map to the paren't look-up map, prepended with the child's name followed by a '.'
+			// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lSubMapIt = lIt->mChildren.begin() ; lSubMapIt != lIt->mChildren.end() ; ++lSubMapIt )
+			// {
+				// mChildren.insert ( std::make_pair ( ( lIt->second->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			// }
+		// }
+		return *this;
+	}
+	catch ( const std::exception& aExc )
+	{
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw uhal::exception ( aExc );
+	}
+}		
+	
+	
 
 	void Node::write ( const uint32_t& aValue )
 	{

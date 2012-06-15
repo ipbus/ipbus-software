@@ -29,7 +29,7 @@ namespace uhal
 		}
 	}
 
-	Node AddressTableBuilder::getAddressTable ( const std::string& aFilenameExpr , const uint32_t& aAddr , const uint32_t& aAddrMask )
+	boost::shared_ptr< const Node > AddressTableBuilder::getAddressTable ( const std::string& aFilenameExpr , const uint32_t& aAddr , const uint32_t& aAddrMask )
 	{
 		try
 		{
@@ -43,7 +43,7 @@ namespace uhal
 				throw IncorrectAddressTableFileCount();
 			}
 
-			std::vector< Node > lNodes;
+			std::vector< boost::shared_ptr< const Node > > lNodes;
 
 			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind ( &AddressTableBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , aAddr , aAddrMask , boost::ref ( lNodes ) ) ) )
 			{
@@ -69,11 +69,12 @@ namespace uhal
 	}
 
 
-	void AddressTableBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< Node >& aNodes )
+	void AddressTableBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< boost::shared_ptr< const Node > >& aNodes )
 	{
 		try
 		{
-			std::hash_map< std::string , Node >::iterator lNodeIt = mNodes.find ( aProtocol+ ( aPath.string() ) );
+			std::string lName( aProtocol+ ( aPath.string() ) );
+			std::hash_map< std::string , boost::shared_ptr< const Node > >::iterator lNodeIt = mNodes.find ( lName );
 
 			if ( lNodeIt != mNodes.end() )
 			{
@@ -104,7 +105,8 @@ namespace uhal
 					return;
 				}
 
-				Node lNode ( lXmlNode , aAddr , aAddrMask );
+				boost::shared_ptr< const Node > lNode( new Node( lXmlNode , aAddr , aAddrMask ) );
+				mNodes.insert( std::make_pair( lName , lNode ) );
 				aNodes.push_back ( lNode );
 				return;
 			}
