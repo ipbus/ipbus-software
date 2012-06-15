@@ -40,25 +40,30 @@ build: _all
 buildall: _all
 _all:
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	tar -zxvf ${TARBALL_FILE}
-	cd ${TARBALL_DIR}; ./configure --prefix=${PackagePath}/RPMBUILD/SOURCES --exec-prefix=${PackagePath}/RPMBUILD/SOURCES --without-javac
+	tar -zxf ${TARBALL_FILE}
+	cd ${TARBALL_DIR}; ./configure \
+		--prefix=${PackagePath}/RPMBUILD/SOURCES \
+		--exec-prefix=${PackagePath}/RPMBUILD/SOURCES 
+		--without-javac
 	cd ${TARBALL_DIR}; make
 	cd ${TARBALL_DIR}; make install
 	# Now replace some paths within the Erlang release so that they use the path for
 	# the RPM installation directory rather than the path where the RPM was created.
-	cd ${PackagePath}/RPMBUILD/SOURCES/lib/erlang; sed -i "s|${PackagePath}/RPMBUILD/SOURCES|${INSTALL_PREFIX}|" erts*/bin/{erl,start} releases/RELEASES bin/{erl,start}
+	cd ${PackagePath}/RPMBUILD/SOURCES/lib/erlang; \
+		sed -i "s|${PackagePath}/RPMBUILD/SOURCES|${INSTALL_PREFIX}|" \
+		erts*/bin/{erl,start} releases/RELEASES bin/{erl,start}
 	
 
 rpm: _rpmall
 _rpmall: 
 	rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD \
-    --define  "_topdir ${PackagePath}/RPMBUILD" \
-    --define "_prefix ${INSTALL_PREFIX}" \
-    --define "tarball_file ${TARBALL_FILE}" \
-    --define "sources_dir ${PackagePath}/RPMBUILD/SOURCES" \
-    --define "name ${PackageName}" \
-    --define "version R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}" \
-    --define "release ${PACKAGE_RELEASE}" \
-    --define "packager ${Packager}" \
-    ${PackageName}.spec
+		--define  "_topdir ${PackagePath}/RPMBUILD" \
+		--define "_prefix ${INSTALL_PREFIX}" \
+		--define "tarball_file ${TARBALL_FILE}" \
+		--define "sources_dir ${PackagePath}/RPMBUILD/SOURCES" \
+		--define "name ${PackageName}" \
+		--define "version R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}" \
+		--define "release ${PACKAGE_RELEASE}" \
+		--define "packager ${Packager}" \
+		${PackageName}.spec
 
