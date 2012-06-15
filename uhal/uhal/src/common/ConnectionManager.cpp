@@ -117,7 +117,7 @@ namespace uhal
 			}
 
 			Node lNode = AddressTableBuilder::getInstance().getAddressTable ( lIt->second.address_table );
-			log ( Notice() , "ConnectionManager created node tree: " , lNode );
+			log ( Info() , "ConnectionManager created node tree: " , lNode );
 			boost::shared_ptr<ClientInterface> lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
 			return HwInterface ( lClientInterface , lNode );
 		}
@@ -215,7 +215,7 @@ namespace uhal
 
 			if ( ! lInsert.second )
 			{
-				log ( Notice() , "File \"" , ( aProtocol+ ( aPath.string() ) ) , "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
+				log ( Info() , "File \"" , ( aProtocol+ ( aPath.string() ) ) , "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
 				return;
 			}
 
@@ -244,7 +244,7 @@ namespace uhal
 					{
 						if ( lInsert.first->second == lDescriptor )
 						{
-							log ( Notice() , "Duplicate connection entry found:"
+							log ( Info() , "Duplicate connection entry found:"
 								  "\n > id = " , lDescriptor.id ,
 								  "\n > uri = " , lDescriptor.uri ,
 								  "\n > address_table = " , lDescriptor.address_table ,

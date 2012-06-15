@@ -161,7 +161,7 @@ namespace uhal
 				@param aMask the mask to apply to the value after reading
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			virtual ValWord< uint32_t > read ( const uint32_t& aAddr, const uint32_t& aMask = 0xFFFFFFFF );
+			virtual ValWord< uint32_t > read ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
 
 			/**
 				Read a block of unsigned data from a block of registers or a block-read port
@@ -178,7 +178,7 @@ namespace uhal
 				@param aMask the mask to apply to the value after reading
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			virtual ValWord< int32_t > readSigned ( const uint32_t& aAddr, const uint32_t& aMask = 0xFFFFFFFF );
+			virtual ValWord< int32_t > readSigned ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
 
 			/**
 				Read a block of data from a block of registers or a block-read port and interpret it as being signed data

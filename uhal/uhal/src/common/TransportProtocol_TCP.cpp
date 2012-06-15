@@ -12,8 +12,8 @@
 
 void TCPtimeout ( int signal )
 {
-	log ( Error() , "TCP Timeout" );
-	log ( Error() , "Throwing at " , ThisLocation() );
+	log ( uhal::Error() , "TCP Timeout" );
+	log ( uhal::Error() , "Throwing at " , ThisLocation() );
 	throw uhal::TcpTimeout();
 }
 
@@ -28,7 +28,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
 							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) )
 	{
-		log ( Notice() , "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
+		log ( Info() , "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
 		boost::asio::connect ( *mSocket ,
 							   boost::asio::ip::tcp::resolver::iterator (
 								   boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
@@ -37,7 +37,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 							   )
 							 );
 		mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-		log ( Notice() , "TCP connection succeeded" );
+		log ( Info() , "TCP connection succeeded" );
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -115,11 +115,15 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 	{
 		try
 		{
-			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
-			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			// Send data
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
+			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
+			
+			log( Debug() , "Sending " , Integer( aBuffers->sendCounter() ) , " bytes" );
+
 			PERFORMANCE ( "ASIO write" ,
 						  /*
 						  				NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
@@ -143,11 +147,14 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
 			std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
 			lAsioReplyBuffer.reserve ( lReplyBuffers.size() );
-
+		
 			for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
 			{
 				lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
+				
 			}
+
+			log( Debug() , "Expecting " , Integer( aBuffers->replyCounter() ) , " bytes in reply" );
 
 			PERFORMANCE ( "ASIO read" ,
 						  /*

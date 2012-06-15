@@ -102,7 +102,7 @@ namespace uhal
 
 				for ( std::map< uint32_t , std::deque< tPerformanceMeasurement* > >::iterator lIt = mSort.begin() ; lIt != mSort.end() ; ++lIt )
 				{
-					log ( Notice() , "\n\nFunction Depth " , Integer ( lIt->first ) );
+					log ( Info() , "\n\nFunction Depth " , Integer ( lIt->first ) );
 					std::map< std::string , tStats > mSort2;
 
 					for ( std::deque< tPerformanceMeasurement* >::iterator lIt2 = lIt->second.begin() ; lIt2 != lIt->second.end() ; ++lIt2 )
@@ -127,7 +127,7 @@ namespace uhal
 
 					for ( std::map< std::string , tStats >::iterator lIt2 = mSort2.begin() ; lIt2 != mSort2.end() ; ++lIt2 )
 					{
-						log ( Notice() , ( *lIt2 ).first , /*" : " , */ Integer ( ( *lIt2 ).second.mCount ) , " calls averaging " , Real ( ( *lIt2 ).second.mean() ) , "+/-" , Real ( ( *lIt2 ).second.sd() ) , "us = " ,  Real ( ( *lIt2 ).second.mSum ) , "us in total\n" );
+						log ( Info() , ( *lIt2 ).first , /*" : " , */ Integer ( ( *lIt2 ).second.mCount ) , " calls averaging " , Real ( ( *lIt2 ).second.mean() ) , "+/-" , Real ( ( *lIt2 ).second.sd() ) , "us = " ,  Real ( ( *lIt2 ).second.mSum ) , "us in total\n" );
 					}
 				}
 			}

@@ -445,10 +445,10 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{
 			this->checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
 				uint32_t lSendBytesAvailableForPayload ( ( lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
-				//log ( Notice() , "lSendBytesAvailable = " , Integer(lSendBytesAvailable) );
-				//log ( Notice() , "lSendBytesAvailableForPayload (bytes) = " , Integer(lSendBytesAvailableForPayload) );
-				//log ( Notice() , "lSendBytesAvailableForPayload (words) = " , Integer(lSendBytesAvailableForPayload>>2) );
-				//log ( Notice() , "lPayloadByteCount = " , Integer(lPayloadByteCount) );
+				//log ( Info() , "lSendBytesAvailable = " , Integer(lSendBytesAvailable) );
+				//log ( Info() , "lSendBytesAvailableForPayload (bytes) = " , Integer(lSendBytesAvailableForPayload) );
+				//log ( Info() , "lSendBytesAvailableForPayload (words) = " , Integer(lSendBytesAvailableForPayload>>2) );
+				//log ( Info() , "lPayloadByteCount = " , Integer(lPayloadByteCount) );
 				mCurrentBuffers->send ( this->calculateIPbusHeader ( lType , lSendBytesAvailableForPayload>>2 ) );
 				mCurrentBuffers->send ( lAddr );
 				mCurrentBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
@@ -719,7 +719,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						  _ValWord_< uint32_t >& lReplyMem = * ( lReply.mMembers );
 						  mCurrentBuffers->receive ( lReplyMem.IPbusHeader );
 						  mCurrentBuffers->receive ( lReplyMem.value );
-						)
+						  )
 			return lReply;
 		}
 		catch ( const std::exception& aExc )

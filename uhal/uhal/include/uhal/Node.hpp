@@ -56,6 +56,8 @@ namespace uhal
 	class ChildHasAddressOverlap: public uhal::exception {  };
 	//! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
 	class ChildHasAddressMaskOverlap: public uhal::exception {  };
+	//! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
+	class BulkTransferOnSingleRegister: public uhal::exception {  };
 
 
 	//! A heirarchical node for navigating heirarchical firmwares
@@ -161,9 +163,9 @@ namespace uhal
 			/**
 				Write a block of data to a block of registers or a block-write port
 				@param aValues the values to write to the registers or a block-write port
-				@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
 			*/
-			void writeBlock ( const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			//@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
+			void writeBlock ( const std::vector< uint32_t >& aValues ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
 			/**
 				Read a single, unmasked, unsigned word
@@ -174,10 +176,10 @@ namespace uhal
 			/**
 				Read a block of unsigned data from a block of registers or a block-read port
 				@param aSize the number of words to read
-				@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			ValVector< uint32_t > readBlock ( const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+			ValVector< uint32_t > readBlock ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
 			/**
 				Read a single, unmasked word and interpret it as being signed
@@ -188,27 +190,27 @@ namespace uhal
 			/**
 				Read a block of data from a block of registers or a block-read port and interpret it as being signed data
 				@param aSize the number of words to read
-				@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
-			/*
-						/ **
-							Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
-							@param aANDterm the AND-term to apply to existing value in the target register
-							@param aORterm the OR-term to apply to existing value in the target register
-							@return a Validated Memory which wraps the location to which the reply data is to be written
-						* /
-						ValWord< uint32_t > rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm );
-
-						/ **
-							Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
-							@param aAddend the addend to add to the existing value in the target register
-							@return a Validated Memory which wraps the location to which the reply data is to be written
-						* /
-						ValWord< int32_t > rmw_sum ( const int32_t& aAddend );
+			
+			/**
+				Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
+				@param aANDterm the AND-term to apply to existing value in the target register
+				@param aORterm the OR-term to apply to existing value in the target register
+				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
+			ValWord< uint32_t > rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm );
+
+			/**
+				Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
+				@param aAddend the addend to add to the existing value in the target register
+				@return a Validated Memory which wraps the location to which the reply data is to be written
+			*/
+			ValWord< int32_t > rmw_sum ( const int32_t& aAddend );
+			
 
 			/**
 				Get the underlying IPbus client
@@ -249,7 +251,10 @@ namespace uhal
 			uint32_t mMask;
 			//! The read/write access permissions of this node
 			defs::NodePermission mPermission;
-
+			
+			//! Whether the node represents a single register, a block of registers or a block-read/write port
+			defs::BlockReadWriteMode mMode;
+			
 			//! The children of the current node
 			boost::shared_ptr< std::vector< Node > > mChildren;
 			//! Helper to assist look-up of a particular child node, given a name
@@ -262,6 +267,15 @@ namespace uhal
 				permissions_lut();
 			} mPermissionsLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
 
+			
+			//! A look-up table that the boost qi parser uses for associating strings ("single","block","port","incremental","non-incremental","inc","non-inc") with enumerated mode types
+			static const struct mode_lut : boost::spirit::qi::symbols<char, defs::BlockReadWriteMode>
+			{
+				//! The actual function that the boost qi parser uses for associating strings with enumerated permissions types
+				mode_lut();
+			} mModeLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
+			
+			
 	};
 
 }

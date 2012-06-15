@@ -53,7 +53,7 @@ namespace uhal
 		add
 		( "r"			, defs::READ )
 		( "w"			, defs::WRITE )
-		( "read"			, defs::READ )
+		( "read"		, defs::READ )
 		( "write"		, defs::WRITE )
 		( "rw"			, defs::READWRITE )
 		( "wr"			, defs::READWRITE )
@@ -65,6 +65,22 @@ namespace uhal
 	const Node::permissions_lut Node::mPermissionsLut;
 
 
+	Node::mode_lut::mode_lut()
+	{
+		add
+		( "single"			, defs::SINGLE )
+		( "block"			, defs::INCREMENTAL )
+		( "port"			, defs::NON_INCREMENTAL )
+		( "incremental"		, defs::INCREMENTAL )
+		( "non-incremental"	, defs::NON_INCREMENTAL )
+		( "inc"				, defs::INCREMENTAL )
+		( "non-inc"			, defs::NON_INCREMENTAL )
+		;
+	}
+	
+	const Node::mode_lut Node::mModeLut;	
+	
+	
 	Node::~Node() {}
 
 	bool Node::operator == ( const Node& aNode )
@@ -147,8 +163,20 @@ namespace uhal
 			aStream << "Address 0x" << std::setw ( 8 ) << mAddr << ", ";
 			aStream << "Address Mask 0x" << std::setw ( 8 ) << mAddrMask << ", ";
 			aStream << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
-			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' );
+			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) << ", ";
 
+			switch( mMode ){
+				case defs::SINGLE:
+					aStream << "Mode SINGLE register access";
+					break;
+				case defs::INCREMENTAL:
+					aStream << "Mode INCREMENTAL block access";
+					break;
+				case defs::NON_INCREMENTAL:
+					aStream << "Mode NON-INCREMENTAL block access";
+					break;					
+			}
+			
 			if ( mChildren )
 			{
 				for ( std::vector < Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
@@ -305,6 +333,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			mAddrMask ( 0x00000000 ),
 			mMask ( 0xFFFFFFFF ),
 			mPermission ( defs::READWRITE ),
+			mMode ( defs::SINGLE ),
 			mChildren ( new std::vector < Node > ),
 			mChildrenMap ( new std::hash_map< std::string , Node* > )
 	{
@@ -371,16 +400,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			}
 			else
 			{
-
-
 				log ( Info() , "aParentAddr  = " , Integer  ( aParentAddr, IntFmt< hex , fixed >() ) );
 				log ( Info() , "lMask  = " , Integer  ( lMask, IntFmt< hex , fixed >() ) );
-
-
-
-
 			}
-
 		}
 		else
 		{
@@ -404,8 +426,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		else
 		{
 			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
-			std::string lPermission;
 
+			std::string lPermission;
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
 			{
 				try
@@ -424,7 +446,27 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 					throw uhal::exception ( aExc );
 				}
 			}
-
+			
+			std::string lMode;
+			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
+			{
+				try
+				{
+					boost::spirit::qi::phrase_parse (
+						lMode.begin(),
+						lMode.end(),
+						Node::mModeLut,
+						boost::spirit::ascii::space,
+						mMode
+					);
+				}
+				catch ( const std::exception& aExc )
+				{
+					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					throw uhal::exception ( aExc );
+				}
+			}		
+			
 			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
 			{
 				mChildren->push_back ( Node ( lXmlNode , mAddr , mAddrMask ) );
@@ -458,6 +500,7 @@ Node::Node ( const Node& aNode ) try :
 			mAddrMask ( aNode.mAddrMask ),
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
+			mMode ( aNode.mMode ),
 			mChildren ( new std::vector < Node > ( * ( aNode.mChildren ) ) ),
 			mChildrenMap ( new std::hash_map< std::string , Node* > )
 	{
@@ -511,19 +554,28 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
-	void Node::writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
+	void Node::writeBlock ( const std::vector< uint32_t >& aValues ) // , const defs::BlockReadWriteMode& aMode )
 	{
 		try
 		{
-			if ( mPermission & defs::WRITE )
+			if( (mMode == defs::SINGLE) && (aValues.size() != 1) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
-				mHw->getClient()->writeBlock ( mAddr , aValues , aMode );
+				log ( Error() , "Bulk Transfer requested on single register node" );
+				log ( Error() , "Throwing at " , ThisLocation() );
+				throw BulkTransferOnSingleRegister();
 			}
 			else
 			{
-				log ( Error() , "Node permissions denied write access" );
-				log ( Error() , "Throwing at " , ThisLocation() );
-				throw WriteAccessDenied();
+				if ( mPermission & defs::WRITE )
+				{
+					mHw->getClient()->writeBlock ( mAddr , aValues , mMode ); //aMode );
+				}
+				else
+				{
+					log ( Error() , "Node permissions denied write access" );
+					log ( Error() , "Throwing at " , ThisLocation() );
+					throw WriteAccessDenied();
+				}
 			}
 		}
 		catch ( const std::exception& aExc )
@@ -564,19 +616,28 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
-	ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+	ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize ) //, const defs::BlockReadWriteMode& aMode )
 	{
 		try
 		{
-			if ( mPermission & defs::READ )
+			if( (mMode == defs::SINGLE) && (aSize != 1) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
-				return mHw->getClient()->readBlock ( mAddr , aSize , aMode );
+				log ( Error() , "Bulk Transfer requested on single register node" );
+				log ( Error() , "Throwing at " , ThisLocation() );
+				throw BulkTransferOnSingleRegister();
 			}
 			else
 			{
-				log ( Error() , "Node permissions denied read access" );
-				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ReadAccessDenied();
+				if ( mPermission & defs::READ )
+				{
+					return mHw->getClient()->readBlock ( mAddr , aSize , mMode ); //aMode );
+				}
+				else
+				{
+					log ( Error() , "Node permissions denied read access" );
+					log ( Error() , "Throwing at " , ThisLocation() );
+					throw ReadAccessDenied();
+				}
 			}
 		}
 		catch ( const std::exception& aExc )
@@ -616,17 +677,51 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
-	ValVector< int32_t > Node::readBlockSigned ( const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+	ValVector< int32_t > Node::readBlockSigned ( const uint32_t& aSize ) //, const defs::BlockReadWriteMode& aMode )
 	{
 		try
 		{
-			if ( mPermission & defs::READ )
+			if( (mMode == defs::SINGLE) && (aSize != 1) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
-				return mHw->getClient()->readBlockSigned ( mAddr , aSize , aMode );
+				log ( Error() , "Bulk Transfer requested on single register node" );
+				log ( Error() , "Throwing at " , ThisLocation() );
+				throw BulkTransferOnSingleRegister();
 			}
 			else
 			{
-				log ( Error() , "Node permissions denied read access" );
+				if ( mPermission & defs::READ )
+				{
+					return mHw->getClient()->readBlockSigned ( mAddr , aSize , mMode ); //aMode );
+				}
+				else
+				{
+					log ( Error() , "Node permissions denied read access" );
+					log ( Error() , "Throwing at " , ThisLocation() );
+					throw ReadAccessDenied();
+				}
+			}
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+
+
+
+	ValWord< uint32_t > Node::rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm )
+	{
+		try
+		{
+			if ( mPermission == defs::READWRITE )
+			{
+				return mHw->getClient()->rmw_bits ( mAddr , aANDterm , aORterm );
+			}
+			else
+			{
+				log ( Error() , "Node permissions denied read/write access" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw ReadAccessDenied();
 			}
@@ -639,6 +734,32 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
+	
+	ValWord< int32_t > Node::rmw_sum ( const int32_t& aAddend )
+	{
+		try
+		{
+			if ( mPermission == defs::READWRITE )
+			{
+				return mHw->getClient()->rmw_sum ( mAddr , aAddend );
+			}
+			else
+			{
+				log ( Error() , "Node permissions denied read/write access" );
+				log ( Error() , "Throwing at " , ThisLocation() );
+				throw ReadAccessDenied();
+			}
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+			
+	
+	
 	boost::shared_ptr<ClientInterface> Node::getClient()
 	{
 		try

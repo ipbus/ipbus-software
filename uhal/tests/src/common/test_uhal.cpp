@@ -45,6 +45,8 @@ void rawClientAccess()
 	{
 		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+
+		log ( Notice() , "ATTEMPTING SINGLE WORD WRITE/READ" ) ;
 		//write register
 		uint32_t val = static_cast<uint32_t> ( rand() );
 		hw.getClient()->write ( 0xBA5EADD4 , val );
@@ -53,7 +55,7 @@ void rawClientAccess()
 
 		if ( mem==val )
 		{
-			log ( Info() , "SINGLE WORD WRITE/READ : ALL GOOD" ) ;
+			log ( Notice() , "SINGLE WORD WRITE/READ : ALL GOOD" ) ;
 		}
 		else
 		{
@@ -61,6 +63,8 @@ void rawClientAccess()
 			throw 0;
 		}
 
+		log ( Notice() , "ATTEMPTING INCREMENTING BLOCK WRITE/READ" ) ;
+		
 		// 		// // //write memory
 		uint32_t SIZE=129;
 		std::vector<uint32_t> vals;
@@ -94,7 +98,10 @@ void rawClientAccess()
 			}
 		}
 
-		log ( Info() , "INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
+		log ( Notice() , "INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
+
+		log ( Notice() , "ATTEMPTING NON-INCREMENTING BLOCK WRITE/READ" ) ;
+
 		// //BOOST_CHECK(block.size() == SIZE);
 		// //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
 		// //BOOST_CHECK(*block.begin() == *vals.begin());
@@ -135,7 +142,11 @@ void rawClientAccess()
 			}
 		}
 
-		log ( Info() , "NON-INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
+		log ( Notice() , "NON-INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
+		
+		log ( Notice() , "ATTEMPTING RMW-BITS" ) ;
+		
+		
 		uint32_t expected ( ( *lSourceIt&0x00C0FFEE ) |0xF00DF00D );
 		/*ValWord< uint32_t >*/
 		mem = hw.getClient()->rmw_bits ( 0xBA5EADD4 , 0x00C0FFEE , 0xF00DF00D );
@@ -143,7 +154,7 @@ void rawClientAccess()
 
 		if ( mem == expected )
 		{
-			log ( Info() , "RMW-BITS : ALL GOOD" ) ;
+			log ( Notice() , "RMW-BITS : ALL GOOD" ) ;
 		}
 		else
 		{
@@ -151,13 +162,15 @@ void rawClientAccess()
 			throw 0;
 		}
 
+		log ( Notice() , "ATTEMPTING RMW-SUM" ) ;
+		
 		int32_t expected2 ( expected + 0x0BADBABE );
 		ValWord< int32_t > mem2 = hw.getClient()->rmw_sum ( 0xBA5EADD4 , 0x0BADBABE );
 		hw.dispatch();
 
 		if ( mem2 == expected2 )
 		{
-			log ( Info() , "RMW-SUM : ALL GOOD" ) ;
+			log ( Notice() , "RMW-SUM : ALL GOOD" ) ;
 		}
 		else
 		{
@@ -183,14 +196,14 @@ void navigation_and_traversal_test()
 
 		for ( std::vector<std::string>::iterator lIt = lNodes.begin() ; lIt != lNodes.end() ; ++lIt )
 		{
-			log ( Info() , "Get nodes: " , *lIt );
+			log ( Notice() , "Get nodes: " , *lIt );
 		}
 
 		lNodes = hw.getNodes ( ".*ENABLE.*" );
 
 		for ( std::vector<std::string>::iterator lIt = lNodes.begin() ; lIt != lNodes.end() ; ++lIt )
 		{
-			log ( Info() , "Get nodes Regex: " , *lIt );
+			log ( Notice() , "Get nodes Regex: " , *lIt );
 		}
 
 		Node node1 ( hw.getNode ( "RECEIVER.CONFIG" ) );
@@ -221,6 +234,7 @@ void read_test()
 		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//read register
+		log ( Notice() , "ATTEMPTING SINGLE WORD READ" ) ;
 		ValWord< uint32_t > mem1 = hw.getNode ( "SYSTEM1" ).getNode ( "SYSTEM" ).getNode ( "TTC" ).getNode ( "ADDRESS" ).read();
 		ValWord< uint32_t > mem2 = hw.getNode ( "SYSTEM1.SYSTEM.TTC.ADDRESS" ).read();
 		hw.dispatch();
@@ -228,6 +242,7 @@ void read_test()
 		//BOOST_CHECK(mem1.value() == mem2.value());
 		//read memory
 		uint32_t SIZE=1024;
+		log ( Notice() , "ATTEMPTING INCREMENTING BLOCK WRITE/READ" ) ;
 		ValVector< uint32_t > block1 = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE );
 		ValVector< uint32_t > block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE );
 		hw.dispatch();
@@ -238,8 +253,9 @@ void read_test()
 		//BOOST_CHECK(block1.rbegin()->valid() && block2.rbegin()->valid());
 		//BOOST_CHECK(*block1.rbegin() == *block2.rbegin());
 		//read FIFO
-		block1 = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE,defs::NON_INCREMENTAL );
-		block2 = hw.getNode ( "TRANSMITTER.BRAM_DATA" ).readBlock ( SIZE,defs::NON_INCREMENTAL );
+		log ( Notice() , "ATTEMPTING NON-INCREMENTING BLOCK WRITE/READ" ) ;
+		block1 = hw.getNode ( "TRANSMITTER" ).getNode ( "RUNNING_PERIOD" ).readBlock ( SIZE ); //,defs::NON_INCREMENTAL );
+		block2 = hw.getNode ( "TRANSMITTER.RUNNING_PERIOD" ).readBlock ( SIZE ); //,defs::NON_INCREMENTAL );
 		hw.dispatch();
 		//BOOST_CHECK(block1.size() == SIZE);
 		//BOOST_CHECK(block2.size() == SIZE);
@@ -269,7 +285,7 @@ void write_test()
 
 		if ( mem==val )
 		{
-			log ( Info() , "ALL GOOD" ) ;
+			log ( Notice() , "ALL GOOD" ) ;
 		}
 		else
 		{
@@ -312,7 +328,7 @@ void write_test()
 			}
 		}
 
-		log ( Info() , "ALL GOOD" ) ;
+		log ( Notice() , "ALL GOOD" ) ;
 		// //BOOST_CHECK(block.size() == SIZE);
 		// //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
 		// //BOOST_CHECK(*block.begin() == *vals.begin());
@@ -326,8 +342,8 @@ void write_test()
 		}
 
 		// vals.push_back(static_cast<uint32_t>(i));
-		hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).writeBlock ( vals,defs::NON_INCREMENTAL );
-		block = hw.getNode ( "TRANSMITTER" ).getNode ( "BRAM_DATA" ).readBlock ( SIZE,defs::NON_INCREMENTAL );
+		hw.getNode ( "TRANSMITTER" ).getNode ( "RUNNING_PERIOD" ).writeBlock ( vals ); //,defs::NON_INCREMENTAL );
+		block = hw.getNode ( "TRANSMITTER" ).getNode ( "RUNNING_PERIOD" ).readBlock ( SIZE ); //,defs::NON_INCREMENTAL );
 		hw.dispatch();
 		/*ValVector< uint32_t >::const_iterator*/
 		lReadIt = block.begin();
@@ -346,7 +362,7 @@ void write_test()
 			}
 		}
 
-		log ( Info() , "ALL GOOD" ) ;
+		log ( Notice() , "ALL GOOD" ) ;
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -357,26 +373,34 @@ void write_test()
 
 void read_write_mask()
 {
-	ConnectionManager manager ( "file://tests/addr/connections.xml" );
-	HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
-	hw.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
-	hw.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
-	hw.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
-	hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
-	hw.dispatch();
-	HwInterface hw2 = manager.getDevice ( "hcal.crate1.slot2" );
-	hw2.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
-	hw2.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
-	hw2.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
-	hw2.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
-	hw2.dispatch();
-	// ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
-	// //BOOST_CHECK(mem >=0 && mem <=0xF);
-	// uint32_t val = 0x3;
-	// hw.getNode("REGISTER_MASK_0xF0").write(val);
-	// mem = hw.getNode("REGISTER_MASK_0xF0").read();
-	// hw.dispatch();
-	// //BOOST_CHECK(mem == val);
+	try
+	{
+		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+		hw.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
+		hw.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
+		hw.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
+		hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
+		hw.dispatch();
+		HwInterface hw2 = manager.getDevice ( "hcal.crate1.slot2" );
+		hw2.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
+		hw2.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
+		hw2.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
+		hw2.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
+		hw2.dispatch();
+		// ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
+		// //BOOST_CHECK(mem >=0 && mem <=0xF);
+		// uint32_t val = 0x3;
+		// hw.getNode("REGISTER_MASK_0xF0").write(val);
+		// mem = hw.getNode("REGISTER_MASK_0xF0").read();
+		// hw.dispatch();
+		// //BOOST_CHECK(mem == val);
+	}
+	catch ( const std::exception& aExc )
+	{
+		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		throw exception ( aExc );
+	}
 }
 
 // void read_write_permissions() {
@@ -530,7 +554,7 @@ void addOperationToQueue ( HwInterface& hw , const std::vector<int>& aOperationL
 
 void allInstructionPermutations()
 {
-	log_configuration::setLogLevelTo ( Info() );
+	log_configuration::setLogLevelTo ( Notice() );
 
 	try
 	{
@@ -564,7 +588,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					log ( Info() , "all writes, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
+					log ( Notice() , "all writes, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}
@@ -582,7 +606,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					log ( Info() , "all reads, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
+					log ( Notice() , "all reads, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}
@@ -600,7 +624,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					log ( Info() , "read-modify-write, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
+					log ( Notice() , "read-modify-write, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}
@@ -618,7 +642,7 @@ void allInstructionPermutations()
 
 				do
 				{
-					log ( Info() , "all types, same addr, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
+					log ( Notice() , "all types, same addr, permutation: " , Integer ( ++count ) , "/" , Real ( total ) );
 					addOperationToQueue ( hw.at ( rand() %hw.size() ) , lOperationSequence , val , vals );
 					hw.at ( 0 ).dispatch();
 				}

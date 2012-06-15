@@ -65,13 +65,13 @@
   
   <node id="TRANSMITTER" address="0x0100">
     <node id="CONFIG" address="0x0000" />
-    <node id="FSM_MODE" address="0x0001" />
-    <node id="TRIGGER_MODE" address="0x0002" />
-    <node id="BRAM_ADDRESS" address="0x0003" />
-    <node id="BRAM_DATA" address="0x0004" />
-    <node id="RUNNING_PERIOD" address="0x0005" />
-    <node id="LOOP_PERIOD" address="0x0007" />
-    <node id="DELAY_PERIOD" address="0x0008" />
+    <node id="FSM_MODE" address="0x0001" mode="single"/>
+    <node id="TRIGGER_MODE" address="0x0002" mode="block" />
+    <node id="BRAM_ADDRESS" address="0x0003" mode="port" />
+    <node id="BRAM_DATA" address="0x0004" mode="incremental" />
+    <node id="RUNNING_PERIOD" address="0x0005" mode="non-incremental" />
+    <node id="LOOP_PERIOD" address="0x0007" mode="inc" />
+    <node id="DELAY_PERIOD" address="0x0008" mode="non-inc" />
     <node id="MASK">
       <node id="A" address="0x0009" />
       <node id="B" address="0x000A" />

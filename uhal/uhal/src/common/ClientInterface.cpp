@@ -37,7 +37,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		try
 		{
 			std::string lInstruction ( "ping -q -c 1 " + mUri.mHostname + " &> /dev/null" );
-			log ( Notice() , "Pinging \"" , mId , "\" with instruction : " , lInstruction );
+			log ( Info() , "Pinging \"" , mId , "\" with instruction : " , lInstruction );
 			//Cant use ICMP here because it requires raw socket (and hence superuser) access, so use system PING instead
 			int lPingStatus = system ( lInstruction.c_str() );
 

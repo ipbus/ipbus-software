@@ -102,16 +102,16 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		mMutex.lock();
 		tPreamble& lPreamble ( mPreambles.front() );
 		mMutex.unlock();
-		/*		log ( Notice() , "Byte Count 1 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) ) ,
+		/*		log ( Info() , "Byte Count 1 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) ) ,
 										" : Memory : " , Integer ( lPreamble.mReplyTotalByteCounter ) ,
 										" : Reply counter : " , Integer ( aBuffers->replyCounter() )
 				);*/
 		lReplyIt++;
-		/*		log ( Notice() , "Byte Count 2 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
+		/*		log ( Info() , "Byte Count 2 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
 										" : Memory : " , Integer ( lPreamble.mReplyChunkByteCounter ) );*/
 		lReplyIt++;
 
-		/*		log ( Notice() , "IP : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
+		/*		log ( Info() , "IP : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
 										" : Memory : " , Integer ( lPreamble.mReplyDeviceIPaddress ) );*/
 		if ( lPreamble.mReplyDeviceIPaddress != mDeviceIPaddress )
 		{
@@ -122,7 +122,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 
 		lReplyIt++;
 
-		/*		log ( Notice() , "PORT : " , Integer  ( *(( uint16_t* )( lReplyIt->first )), IntFmt< hex , fixed >() )  ,
+		/*		log ( Info() , "PORT : " , Integer  ( *(( uint16_t* )( lReplyIt->first )), IntFmt< hex , fixed >() )  ,
 										" : Memory : " , Integer  ( lPreamble.mReplyDevicePort, IntFmt< hex , fixed >() ) );*/
 		if ( lPreamble.mReplyDevicePort != mDevicePort )
 		{
@@ -133,7 +133,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 
 		lReplyIt++;
 
-		/*		log ( Notice() , "Error code : " , Integer ( *(( uint16_t* )( lReplyIt->first )) )  ,
+		/*		log ( Info() , "Error code : " , Integer ( *(( uint16_t* )( lReplyIt->first )) )  ,
 										" : Memory : " , Integer ( lPreamble.mReplyErrorCode ) );*/
 		if ( lPreamble.mReplyErrorCode != 0 )
 		{

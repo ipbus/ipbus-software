@@ -96,11 +96,11 @@ namespace uhal
 			{
 				try
 				{
-					log ( Notice() , "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
+					log ( Info() , "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
 
 					for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
 					{
-						log ( Notice() , " > [" , lIt->first , "] \"" , lIt->second , "\"" );
+						log ( Info() , " > [" , lIt->first , "] \"" , lIt->second , "\"" );
 					}
 				}
 				catch ( const std::exception& aExc )
@@ -276,7 +276,7 @@ namespace uhal
 				{
 					try
 					{
-						log ( Notice() , "Retrieving URL http://" , aURL );
+						log ( Info() , "Retrieving URL http://" , aURL );
 					}
 					catch ( const std::exception& aExc )
 					{
@@ -399,7 +399,7 @@ namespace uhal
 				{
 					try
 					{
-						log ( Notice() , "HTTP response parsed as:\n" , aResponse );
+						log ( Info() , "HTTP response parsed as:\n" , aResponse );
 					}
 					catch ( const std::exception& aExc )
 					{
