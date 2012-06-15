@@ -9,7 +9,7 @@ Package = uhal/grammars
 PackagePath = ${BUILD_HOME}/${Package}
 PackageName = cactus-uhal-gramars
 
-Packager = Andrew Rose, Marc Magrans de Abril
+Packager = Andrew Rose
 
 PACKAGE_VER_MAJOR = 0
 PACKAGE_VER_MINOR = 0
@@ -69,5 +69,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-spirit-grammars.spec
+			cactus-uhal-grammars.spec
 

@@ -9,7 +9,7 @@ Package = uhal/uhal
 PackagePath = ${BUILD_HOME}/${Package}
 PackageName = cactus-uhal-uhal
 
-Packager = Andrew Rose, Marc Magrans de Abril
+Packager = Andrew Rose
 
 PACKAGE_VER_MAJOR = 0
 PACKAGE_VER_MINOR = 0
@@ -23,7 +23,8 @@ OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
 LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
 		-L${EXTERN_PUGIXML_LIB_PREFIX} \
-		-L${UHAL_GRAMMARS_LIB_PREFIX} 
+		-L${UHAL_GRAMMARS_LIB_PREFIX} \
+		-L${UHAL_LOG_LIB_PREFIX} 
 
 LIBRARIES = 	-lcactus_extern_pugixml \
 		\
@@ -35,13 +36,14 @@ LIBRARIES = 	-lcactus_extern_pugixml \
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
+		-I${UHAL_LOG_INCLUDE_PREFIX} \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
 CPP_FLAGS = -O3 -Wall -fPIC
 LINK_FLAGS = -shared -fPIC -Wall -O3
 
-.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
+.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
 
 default: build
 

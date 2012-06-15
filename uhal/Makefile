@@ -1,13 +1,9 @@
 MAKE=make
 PACKAGES = \
-	extern/boost \
-	extern/erlang \
-	extern/pugixml \
-	uhal/log \
-	uhal/grammars \
-	uhal/uhal \
-	uhal/tests \
-	controlhub
+	log \
+	grammars \
+	uhal \
+	tests 
 
 TARGETS=clean rpm build all
 

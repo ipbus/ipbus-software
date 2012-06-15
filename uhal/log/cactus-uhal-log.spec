@@ -1,20 +1,20 @@
 #
-# spefile for uHAL Boost Spirit Grammars
+# spefile for uHAL Logging Library
 #
 Name: %{name} 
 Version: %{version} 
 Release: %{release} 
 Packager: %{packager}
-Summary: uHAL Boost Spirit Grammars
+Summary: uHAL Logging Library
 License: BSD License
 Group: CACTUS
-Source: https://svnweb.cern.ch/trac/cactus/browser/trunk/uhal/spirit_grammars
+Source: https://svnweb.cern.ch/trac/cactus/browser/trunk/uhal/log
 URL: https://svnweb.cern.ch/trac/cactus 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot 
 Prefix: %{_prefix}
 
 %description
-uHAL Boost Spirit Grammars
+uHAL Logging Library
 
 %prep
 

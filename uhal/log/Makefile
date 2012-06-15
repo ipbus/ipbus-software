@@ -1,13 +1,13 @@
 #
-# Makefile for uhal tests
+# Makefile for boost
 #
 BUILD_HOME = $(shell pwd)/../..
 
 include ${BUILD_HOME}/config/Makefile.macros
 
-Package = uhal/tests
+Package = uhal/log
 PackagePath = ${BUILD_HOME}/${Package}
-PackageName = cactus-uhal-tests
+PackageName = cactus-uhal-log
 
 Packager = Andrew Rose
 
@@ -16,33 +16,20 @@ PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
-SOURCES = src/common/test_uhal.cpp
-EXECUTABLES = $(patsubst src/common/%.cpp,bin/%.exe,${SOURCES})
+LIBRARY = lib/libcactus_uhal_log.so
 
-LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
-		-L${EXTERN_PUGIXML_LIB_PREFIX} \
-		-L${UHAL_GRAMMARS_LIB_PREFIX} \
-		-L${UHAL_UHAL_LIB_PREFIX} 
+SOURCES = $(wildcard src/common/*.cpp)
+OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
-LIBRARIES = 	\
-		-lpthread \
-		\
-		-lboost_filesystem \
-		-lboost_regex \
-		-lboost_system \
-		\
-		-lcactus_extern_pugixml \
-		-lcactus_uhal_grammars \
-		-lcactus_uhal_uhal
+LIBRARY_PATH = 	
+
+LIBRARIES =  
 
 INCLUDE_PATH = 	-Iinclude  \
-		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
-		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
-		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
-		-I${UHAL_UHAL_INCLUDE_PREFIX}
+		-I${EXTERN_BOOST_INCLUDE_PREFIX} 
 
 CPP_FLAGS = -O3 -Wall -fPIC
-LINK_FLAGS = -fPIC -Wall -O3
+LINK_FLAGS = -shared -fPIC -Wall -O3
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
@@ -51,19 +38,25 @@ default: build
 clean: _cleanall
 _cleanall:
 	rm -rf RPMBUILD
-	rm -rf bin
+	rm -rf obj
 
 all: _all
 build: _all
 buildall: _all
-_all: ${EXECUTABLES}
+_all: ${LIBRARY}
 
-${EXECUTABLES}: bin/%.exe : src/common/%.cpp 
+${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/bin
-	mkdir -p bin
-	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${INCLUDE_PATH} $< -o $@
-	cp -p bin/*.exe RPMBUILD/SOURCES/bin/.
+	mkdir -p RPMBUILD/SOURCES/{lib,include/log}
+	mkdir -p lib
+	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
+	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
+	cp -p include/log/*.hpp RPMBUILD/SOURCES/include/log/.
+
+${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
+	mkdir -p obj
+	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
+
 
 
 rpm: _rpmall
@@ -76,5 +69,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-uhal.spec
+			cactus-uhal-log.spec
 
