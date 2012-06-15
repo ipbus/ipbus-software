@@ -18,7 +18,7 @@ PACKAGE_RELEASE = 2
 
 TARBALL_NAME = boost_${PACKAGE_VER_MAJOR}_${PACKAGE_VER_MINOR}_${PACKAGE_VER_PATCH}
 
-.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
+.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
 
 default: build
 

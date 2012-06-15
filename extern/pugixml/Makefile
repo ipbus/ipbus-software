@@ -20,7 +20,7 @@ LIBRARY = libcactus_extern_pugixml.so
 ZIP_FILE = pugixml-${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.zip
 ZIP_DIR = pugixml-${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}
 
-.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
+.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
 
 default: build
 

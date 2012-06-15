@@ -19,9 +19,13 @@ TEST_SOURCES=$(wildcard src/unittest/*.erl)
 OBJECTS=$(SOURCES:src/%.erl=ebin/%.beam)
 TEST_OBJECTS=$(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
 
-.PHONY: all build_controlhub build_and_run_tests check_test_build_dir clean test
+.PHONY: all _all build_controlhub build_and_run_tests check_test_build_dir clean  _cleanall test install _installall rpm _rpmall
 
-all: build_controlhub build_and_run_tests
+default: _all
+build: _all
+buildall: _all
+all: _all
+_all: build_controlhub build_and_run_tests
 
 build_controlhub: $(OBJECTS)
 
@@ -33,7 +37,8 @@ ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
 ebin/%.beam : src/%.erl $(INCLUDES)
 	erlc $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
 
-clean: 
+clean: _cleanall
+_cleanall:
 	rm -f ebin/*.beam
 	rm -rf ebin/unittest
 
