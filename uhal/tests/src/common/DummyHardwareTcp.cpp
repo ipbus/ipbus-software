@@ -126,6 +126,8 @@ class TCPdummyHardware
 								lReceivePtr++;
 								mMemory[ mAddress & 0xFFFF ] += ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
+								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
+								lReplyPtr++;
 								*lReplyPtr = mMemory[ mAddress & 0xFFFF ];
 								lReplyPtr++;
 								break;
@@ -136,6 +138,8 @@ class TCPdummyHardware
 								lReceivePtr++;
 								mMemory[ mAddress & 0xFFFF ] |= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
+								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
+								lReplyPtr++;
 								*lReplyPtr = mMemory[ mAddress & 0xFFFF ];
 								lReplyPtr++;
 								break;
