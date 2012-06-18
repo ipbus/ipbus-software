@@ -47,11 +47,6 @@ _all:
 		--without-javac
 	cd ${TARBALL_DIR}; make
 	cd ${TARBALL_DIR}; make install
-	# Now replace some paths within the Erlang release so that they use the path for
-	# the RPM installation directory rather than the path where the RPM was created.
-	cd ${PackagePath}/RPMBUILD/SOURCES/lib/erlang; \
-		sed -i "s|${PackagePath}/RPMBUILD/SOURCES|${INSTALL_PREFIX}|" \
-		erts*/bin/{erl,start} releases/RELEASES bin/{erl,start}
 	
 
 rpm: _rpmall

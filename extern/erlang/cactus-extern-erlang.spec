@@ -36,6 +36,11 @@ cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 
+# Now replace some paths within the Erlang release so that they use the path for
+# the RPM installation directory rather than the path where the RPM was created.
+cd $RPM_BUILD_ROOT%{_prefix}/lib/erlang
+sed -i "s|%{sources_dir}|%{_prefix}|" erts*/bin/{erl,start} releases/RELEASES bin/{erl,start}
+
 #Change access rights
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
