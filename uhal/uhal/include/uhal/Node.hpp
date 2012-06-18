@@ -42,6 +42,11 @@ std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode );
 
 namespace uhal
 {
+	boost::shared_ptr< uhal::Node > clone( const boost::shared_ptr< uhal::Node >& aNode );
+}
+
+namespace uhal
+{
 	class HwInterface;
 
 	//! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
@@ -65,17 +70,32 @@ namespace uhal
 	{
 			friend class HwInterface;
 
-			/**
-				A streaming operator to format the node for display
-				@param aStream a stream to output the time onto
-				@param aNode the node to be displayed
-				@return a stream for further appending
-			*/
-			friend std::ostream& ( ::operator<< ) ( std::ostream& aStream , const Node& aNode );
-
+			friend boost::shared_ptr< uhal::Node > clone( const boost::shared_ptr< uhal::Node >& aNode );
 
 		public:
 
+			/**
+				Construct a node from a PugiXML node
+				@param aXmlNode a PugiXML node from which to construct a node
+			*/
+			Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
+
+		protected:
+			/**
+				Copy constructor
+				Need to clone the children, not copy the pointer!
+				@param aNode a node to copy
+			*/
+			Node ( const Node& aNode );
+			
+			/**
+				Assignment operator
+				@param aNode a node to copy
+				@return self reference
+			*/
+			Node& operator= ( const Node& aNode );		
+
+		public:
 			/**
 				Destructor
 			*/
@@ -257,31 +277,6 @@ namespace uhal
 			*/
 			boost::shared_ptr<ClientInterface> getClient();
 
-
-			
-			//private:
-			//Node ( HwInterface* aHwInterface, const std::string& aFullid );
-
-			/**
-				Construct a node from a PugiXML node
-				@param aXmlNode a PugiXML node from which to construct a node
-			*/
-			Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
-
-			/**
-				Copy constructor
-				Need to clone the children, not copy the pointer!
-				@param aNode a node to copy
-			*/
-			Node ( const Node& aNode );
-			
-			/**
-				Assignment operator
-				@param aNode a node to copy
-				@return self reference
-			*/
-			Node& operator= ( const Node& aNode );			
-
 		private:
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
@@ -303,7 +298,7 @@ namespace uhal
 			defs::BlockReadWriteMode mMode;
 			
 			//! Helper to assist look-up of a particular child node, given a name
-			std::hash_map< std::string , boost::shared_ptr< Node> > mChildren;
+			std::hash_map< std::string , boost::shared_ptr< Node> > mChildrenMap;
 
 			//! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
 			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>

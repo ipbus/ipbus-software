@@ -58,7 +58,7 @@ HwInterface::~HwInterface()
 		{
 			aNode.mHw = this;
 
-			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = aNode.mChildren.begin() ; lIt != aNode.mChildren.end() ; ++lIt )
+			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = aNode.mChildrenMap.begin() ; lIt != aNode.mChildrenMap.end() ; ++lIt )
 			{
 				claimNode ( *(lIt->second) );
 			}

@@ -206,13 +206,13 @@ void navigation_and_traversal_test()
 			log ( Notice() , "Get nodes Regex: " , *lIt );
 		}
 
-		Node node1 ( hw.getNode ( "RECEIVER.CONFIG" ) );
-		Node node2 ( hw.getNode ( "RECEIVER" ).getNode ( "CONFIG" ) );
+		Node& node1 ( hw.getNode ( "RECEIVER.CONFIG" ) );
+		Node& node2 ( hw.getNode ( "RECEIVER" ).getNode ( "CONFIG" ) );
 		defs::NodePermission a = node1.getPermission();
 		uint32_t mask = node1.getMask();
 		std::string id = node1.getId();
 		//BOOST_CHECK(id=="RECEIVER.CONFIG");
-		Node branch ( hw.getNode ( "RECEIVER" ) );
+		Node& branch ( hw.getNode ( "RECEIVER" ) );
 		//BOOST_CHECK_THROW(branch.getPermission(),std::exception);
 		//BOOST_CHECK_THROW(branch.getMask(),std::exception);
 		//BOOST_CHECK_THROW(branch.read(),std::exception);
