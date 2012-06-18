@@ -14,9 +14,14 @@ include $(BUILD_HOME)/config/Makefile.macros
 ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
 ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
 ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
-else 
+else
+ifeq ($(shell test -d ${INSTALL_PREFIX}/bin && echo OK),OK)
 ERL=$(INSTALL_PREFIX)/bin/erl
 ERLC=$(INSTALL_PREFIX)/bin/erlc
+else
+ERL=erl
+ERLC=erlc
+endif
 endif
 
 ERLC_FLAGS=
@@ -46,8 +51,6 @@ ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
 
 ebin/%.beam : src/%.erl $(INCLUDES)
-	@echo ${ERLC}
-	@echo ${ERL}
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
 
 clean: _cleanall
