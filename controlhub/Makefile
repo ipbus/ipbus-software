@@ -7,6 +7,13 @@
 #
 ###################################################################################
 
+BUILD_HOME = $(shell pwd)/..
+
+include $(BUILD_HOME)/config/Makefile.macros
+
+ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
+
+ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
 
 ERLC_FLAGS=
 
@@ -32,10 +39,10 @@ build_controlhub: $(OBJECTS)
 build_and_run_tests: check_test_build_dir $(TEST_OBJECTS) test
 
 ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
-	erlc $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
+	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
 
 ebin/%.beam : src/%.erl $(INCLUDES)
-	erlc $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
+	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
 
 clean: _cleanall
 _cleanall:
@@ -46,6 +53,6 @@ check_test_build_dir:
 	test -d ebin/unittest || mkdir ebin/unittest
 
 test:
-	erl -noshell -pa ebin ebin/unittest -eval 'eunit:test("ebin",[verbose])' -s init stop
+	$(ERL) -noshell -pa ebin ebin/unittest -eval 'eunit:test("ebin",[verbose])' -s init stop
 
 release: clean build_controlhub
