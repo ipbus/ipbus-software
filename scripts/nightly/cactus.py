@@ -1,7 +1,5 @@
-import os
 from os import environ
 from os.path import join
-import socket
 
 ####VARIABLES
 BUILD_HOME          = '/build/cactus'
@@ -53,7 +51,8 @@ CHECKOUT_CMDS = ["rm -rf %s" % BUILD_HOME,
                  ";".join(CHECKOUT)]
 
 
-BUILD_CMDS = ["cd %s;make -k" % join(BUILD_HOME,"trunk")]
+BUILD_CMDS = ["cd %s;make -k" % join(BUILD_HOME,"trunk"),
+              "cd %s;make -k rpm" % join(BUILD_HOME,"trunk")]
 
 RELEASE_CMDS = ["rm -rf %s" % RELEASE_DIR,
                 "mkdir -p %s" % RELEASE_DIR,
