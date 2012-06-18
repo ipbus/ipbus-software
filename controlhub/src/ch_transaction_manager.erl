@@ -39,7 +39,7 @@
 %% ---------------------------------------------------------------------
 start_link(TcpListenSocket) ->
     ?DEBUG_TRACE("Spawning new transaction manager."),
-    spawn_link(?MODULE, tcp_acceptor, [TcpListenSocket]),
+    proc_lib:spawn_link(?MODULE, tcp_acceptor, [TcpListenSocket]),
     ok.
     
 
@@ -118,7 +118,7 @@ process_request(ClientSocket, RequestBin) ->
 %% sections (i.e. the sets of IPbus instructions for specific targets)
 unpack_target_requests(RequestBin) ->
     % Test if there are an integer number of 32-bit words before proceeding
-    case ((size(RequestBin) rem 4) /= 0) of 
+    case ((byte_size(RequestBin) rem 4) /= 0) of 
         false -> 
             target_request_accumulator(RequestBin);
         true ->
@@ -178,7 +178,7 @@ device_client_response_accumulator([{IPaddrU32, PortU16}| Tail], ResponsesList) 
                       {device_client_response, IPaddrU32, PortU16, ErrorCode, TargetResponseBin} ->
                           ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
                                        "Port=~p", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),
-                          <<(size(TargetResponseBin) + 8):32, IPaddrU32:32, PortU16:16, ErrorCode:16, TargetResponseBin/binary>>
+                          <<(byte_size(TargetResponseBin) + 8):32, IPaddrU32:32, PortU16:16, ErrorCode:16, TargetResponseBin/binary>>
                   after (?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT) -> 
                       ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~w,"
                                    "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),            
