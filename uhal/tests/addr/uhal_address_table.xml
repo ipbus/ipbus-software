@@ -5,7 +5,7 @@
 <!-- ----------------------------------------------------- -->
 
 <node id="SOURCE_CARD">
-  <node id="RECEIVER">
+  <node id="RECEIVER" class="receiver" >
     <node id="CONFIG" address="0x0000" permission="r"/>
     <node id="MAX_CAPTURE" address="0x0001" permission="read"/>
     <node id="CONFIG_RESET" address="0x0002" permission="rw"/>
@@ -14,14 +14,14 @@
       <node id="RECEIVED" address="0x0003"  permission="readwrite"/>
       <node id="CALCULATED" address="0x0004" permission="writeread"/>
       <node id="GOOD">
-	<node id="CNT_H" address="0x0005" permission="w" />
-	<node id="CNT_M" address="0x0006" permission="write" />
-	<node id="CNT_L" address="0x0007" />
+		<node id="CNT_H" address="0x0005" permission="w" />
+		<node id="CNT_M" address="0x0006" permission="write" />
+		<node id="CNT_L" address="0x0007" />
       </node>
       <node id="BAD">
-	<node id="CNT_H" address="0x0008" />
-	<node id="CNT_M" address="0x0009" />
-	<node id="CNT_L" address="0x000A" />
+		<node id="CNT_H" address="0x0008" />
+		<node id="CNT_M" address="0x0009" />
+		<node id="CNT_L" address="0x000A" />
       </node>
     </node>
   </node>

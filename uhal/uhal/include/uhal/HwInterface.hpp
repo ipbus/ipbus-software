@@ -35,9 +35,9 @@ namespace uhal
 				@param aHwInterface a HwInterface to copy
 				@return self reference
 			*/
-			HwInterface& operator= (const HwInterface &aHwInterface);
-			
-			
+			HwInterface& operator= ( const HwInterface& aHwInterface );
+
+
 			virtual ~HwInterface();
 
 			/**
@@ -66,6 +66,15 @@ namespace uhal
 				@return the Node given by the identifier
 			*/
 			Node& getNode ( const std::string& aId );
+
+			/**
+				Retrieve the Node given by a full-stop delimeted name path relative, to the current node and cast it to a particular node type
+				@param aId a full-stop delimeted name path to a node, relative to the current node
+				@return the Node given by the identifier
+			*/
+			template< typename T>
+			T& getNode ( const std::string& aId );
+
 
 			/**
 				Return all node IDs known to this HwInterface
@@ -114,6 +123,19 @@ namespace uhal
 
 	};
 
+	template< typename T>
+	T& HwInterface::getNode ( const std::string& aId )
+	{
+		try
+		{
+			return dynamic_cast< T > ( getNode ( aId ) );
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
 
 }
 

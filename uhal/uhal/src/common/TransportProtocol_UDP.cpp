@@ -1,4 +1,4 @@
-#include "uhal/performance.hpp"
+// #include "uhal/performance.hpp"
 #include "uhal/TransportProtocol_UDP.hpp"
 
 #ifdef USE_UDP_MULTITHREADED
@@ -112,18 +112,13 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			// Send data
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-
-			log( Debug() , "Sending " , Integer( aBuffers->sendCounter() ) , " bytes" );
-
-			PERFORMANCE ( "ASIO write" ,
-						  /*
-						  				NOTE! For TCP, using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
-						  */
-						  mSocket->send_to ( lAsioSendBuffer , *mEndpoint ); //, mErrorCode );
-						)
+			log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+			/*
+							NOTE! For TCP, using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+			*/
+			mSocket->send_to ( lAsioSendBuffer , *mEndpoint ); //, mErrorCode );
 
 			if ( mErrorCode )
 			{
@@ -144,15 +139,12 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 				lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
 			}
 
-			log( Debug() , "Expecting " , Integer( aBuffers->replyCounter() ) , " bytes in reply" );
-
+			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
 			boost::asio::ip::udp::endpoint lEndpoint;
-			PERFORMANCE ( "ASIO read" ,
-						  /*
-						  				NOTE! For TCP, using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
-						  */
-						  mSocket->receive_from ( lAsioReplyBuffer , lEndpoint , 0 , mErrorCode );
-						)
+			/*
+							NOTE! For TCP, using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+			*/
+			mSocket->receive_from ( lAsioReplyBuffer , lEndpoint , 0 , mErrorCode );
 
 			if ( mErrorCode )
 			{

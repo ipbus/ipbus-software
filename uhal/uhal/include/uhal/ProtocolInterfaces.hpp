@@ -10,7 +10,7 @@
 //#include <boost/any.hpp>
 #include <deque>
 #include "uhal/IPbusPacketInfo.hpp"
-#include "uhal/performance.hpp"
+// #include "uhal/performance.hpp"
 
 namespace uhal
 {

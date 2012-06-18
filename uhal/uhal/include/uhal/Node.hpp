@@ -42,7 +42,8 @@ std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode );
 
 namespace uhal
 {
-	boost::shared_ptr< uhal::Node > clone( const boost::shared_ptr< uhal::Node >& aNode );
+	boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< uhal::Node >& aNode );
+	boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< const uhal::Node >& aNode );
 }
 
 namespace uhal
@@ -70,7 +71,8 @@ namespace uhal
 	{
 			friend class HwInterface;
 
-			friend boost::shared_ptr< uhal::Node > clone( const boost::shared_ptr< uhal::Node >& aNode );
+			friend boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< uhal::Node >& aNode );
+			friend boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< const uhal::Node >& aNode );
 
 		public:
 
@@ -87,13 +89,13 @@ namespace uhal
 				@param aNode a node to copy
 			*/
 			Node ( const Node& aNode );
-			
+
 			/**
 				Assignment operator
 				@param aNode a node to copy
 				@return self reference
 			*/
-			Node& operator= ( const Node& aNode );		
+			Node& operator= ( const Node& aNode );
 
 		public:
 			/**
@@ -115,6 +117,16 @@ namespace uhal
 				@return the Node given by the identifier
 			*/
 			Node& getNode ( const std::string& aId );
+
+
+			/**
+				Retrieve the Node given by a full-stop delimeted name path relative, to the current node and cast it to a particular node type
+				@param aId a full-stop delimeted name path to a node, relative to the current node
+				@return the Node given by the identifier
+			*/
+			template< typename T>
+			T& getNode ( const std::string& aId );
+
 
 			/**
 				Return all node IDs known to this HwInterface
@@ -187,18 +199,19 @@ namespace uhal
 			//@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
 			void writeBlock ( const std::vector< uint32_t >& aValues ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
-			void writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode ){
-				log( Error() , "THIS METHOD IS DEPRECATED! " 
-								"PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-								"AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
-								"I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-								"THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-				defs::BlockReadWriteMode lMode( mMode );
+			void writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
+			{
+				log ( Error() , "THIS METHOD IS DEPRECATED! "
+					  "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+					  "AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
+					  "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+					  "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+				defs::BlockReadWriteMode lMode ( mMode );
 				mMode = aMode;
-				writeBlock( aValues );
+				writeBlock ( aValues );
 				mMode = lMode;
-			}	
-			
+			}
+
 			/**
 				Read a single, unmasked, unsigned word
 				@return a Validated Memory which wraps the location to which the reply data is to be written
@@ -213,19 +226,20 @@ namespace uhal
 			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
 			ValVector< uint32_t > readBlock ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
-			ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode ){
-				log( Error() , "THIS METHOD IS DEPRECATED! " 
-								"PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-								"AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "
-								"I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-								"THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-				defs::BlockReadWriteMode lMode( mMode );
+			ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
+			{
+				log ( Error() , "THIS METHOD IS DEPRECATED! "
+					  "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+					  "AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "
+					  "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+					  "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+				defs::BlockReadWriteMode lMode ( mMode );
 				mMode = aMode;
-				ValVector< uint32_t > lRet( readBlock( aSize ) );
+				ValVector< uint32_t > lRet ( readBlock ( aSize ) );
 				mMode = lMode;
 				return lRet;
-			}			
-			
+			}
+
 			/**
 				Read a single, unmasked word and interpret it as being signed
 				@return a Validated Memory which wraps the location to which the reply data is to be written
@@ -240,21 +254,22 @@ namespace uhal
 			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
 			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
-			
-			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode ){
-				log( Error() , "THIS METHOD IS DEPRECATED! " 
-								"PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-								"AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
-								"I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-								"THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-				defs::BlockReadWriteMode lMode( mMode );
+
+			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
+			{
+				log ( Error() , "THIS METHOD IS DEPRECATED! "
+					  "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+					  "AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
+					  "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+					  "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+				defs::BlockReadWriteMode lMode ( mMode );
 				mMode = aMode;
-				ValVector< int32_t > lRet( readBlockSigned( aSize ) );
+				ValVector< int32_t > lRet ( readBlockSigned ( aSize ) );
 				mMode = lMode;
 				return lRet;
 			}
 
-			
+
 			/**
 				Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
 				@param aANDterm the AND-term to apply to existing value in the target register
@@ -269,7 +284,7 @@ namespace uhal
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
 			ValWord< int32_t > rmw_sum ( const int32_t& aAddend );
-			
+
 
 			/**
 				Get the underlying IPbus client
@@ -293,10 +308,10 @@ namespace uhal
 			uint32_t mMask;
 			//! The read/write access permissions of this node
 			defs::NodePermission mPermission;
-			
+
 			//! Whether the node represents a single register, a block of registers or a block-read/write port
 			defs::BlockReadWriteMode mMode;
-			
+
 			//! Helper to assist look-up of a particular child node, given a name
 			std::hash_map< std::string , boost::shared_ptr< Node> > mChildrenMap;
 
@@ -307,16 +322,31 @@ namespace uhal
 				permissions_lut();
 			} mPermissionsLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
 
-			
+
 			//! A look-up table that the boost qi parser uses for associating strings ("single","block","port","incremental","non-incremental","inc","non-inc") with enumerated mode types
 			static const struct mode_lut : boost::spirit::qi::symbols<char, defs::BlockReadWriteMode>
 			{
 				//! The actual function that the boost qi parser uses for associating strings with enumerated permissions types
 				mode_lut();
 			} mModeLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
-			
-			
+
+
 	};
+
+
+	template< typename T>
+	T& Node::getNode ( const std::string& aId )
+	{
+		try
+		{
+			return dynamic_cast< T > ( getNode ( aId ) );
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
 
 }
 

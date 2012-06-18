@@ -7,7 +7,7 @@ namespace uhal
 
 HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< const Node >& aNode ) try :
 		mClientInterface ( aClientInterface ),
-						 mNode ( new Node( *aNode ) )
+						 mNode ( clone ( aNode ) )
 	{
 		claimNode ( *mNode );
 	}
@@ -20,7 +20,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 
 HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 		mClientInterface ( aHwInterface.mClientInterface ),
-						 mNode ( new Node( *(aHwInterface.mNode) ) )
+						 mNode ( clone ( aHwInterface.mNode ) )
 	{
 		claimNode ( *mNode );
 	}
@@ -31,13 +31,13 @@ HwInterface::HwInterface ( const HwInterface& aHwInterface ) try :
 	}
 
 
-HwInterface& HwInterface::operator= ( const HwInterface& aHwInterface ) 
+	HwInterface& HwInterface::operator= ( const HwInterface& aHwInterface )
 	{
-		try {
+		try
+		{
 			mClientInterface = aHwInterface.mClientInterface;
-			mNode = boost::shared_ptr< Node >( new Node( *(aHwInterface.mNode) ) );
+			mNode = clone ( aHwInterface.mNode );
 			claimNode ( *mNode );
-			
 			return *this;
 		}
 		catch ( const std::exception& aExc )
@@ -46,11 +46,11 @@ HwInterface& HwInterface::operator= ( const HwInterface& aHwInterface )
 			throw uhal::exception ( aExc );
 		}
 	}
-	
-	
-HwInterface::~HwInterface()
+
+
+	HwInterface::~HwInterface()
 	{}
-	
+
 
 	void HwInterface::claimNode ( Node& aNode )
 	{
@@ -60,7 +60,7 @@ HwInterface::~HwInterface()
 
 			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = aNode.mChildrenMap.begin() ; lIt != aNode.mChildrenMap.end() ; ++lIt )
 			{
-				claimNode ( *(lIt->second) );
+				claimNode ( * ( lIt->second ) );
 			}
 		}
 		catch ( const std::exception& aExc )
@@ -201,7 +201,7 @@ HwInterface::~HwInterface()
 		}
 	}
 
-	// Node& HwInterface::getAddressTable()
+	// Node& HwInterface::getNodeTree()
 	// {
 	// return mAddressTable;
 	// }

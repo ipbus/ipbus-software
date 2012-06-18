@@ -2,7 +2,7 @@
 
 #include "uhal/HwInterface.hpp"
 #include "uhal/ValMem.hpp"
-#include "uhal/AddressTableBuilder.hpp"
+#include "uhal/NodeTreeBuilder.hpp"
 #include "uhal/Utilities.hpp"
 
 #include "log/log.hpp"
@@ -49,8 +49,14 @@ namespace uhal
 
 namespace uhal
 {
-	boost::shared_ptr< uhal::Node > clone( const boost::shared_ptr< uhal::Node >& aNode ){
-		return boost::shared_ptr< uhal::Node > ( new Node( *aNode ) );
+	boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< uhal::Node >& aNode )
+	{
+		return boost::shared_ptr< uhal::Node > ( new Node ( *aNode ) );
+	}
+
+	boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< const uhal::Node >& aNode )
+	{
+		return boost::shared_ptr< uhal::Node > ( new Node ( *aNode ) );
 	}
 }
 
@@ -87,9 +93,9 @@ namespace uhal
 		( "non-inc"			, defs::NON_INCREMENTAL )
 		;
 	}
-	
-	const Node::mode_lut Node::mModeLut;	
-	
+
+	const Node::mode_lut Node::mModeLut;
+
 
 
 
@@ -168,8 +174,13 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			try
 			{
-// 				boost::shared_ptr< const Node > lNode = AddressTableBuilder::getInstance().getAddressTable ( lModule , mAddr , mAddrMask );
-// 				mChildrenMap.push_back ( lNode );
+				boost::shared_ptr< Node > lNode ( clone ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , mAddr , mAddrMask ) ) );
+				mChildrenMap.insert ( std::make_pair ( lNode->mUid , lNode ) );
+
+				for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lSubMapIt = lNode->mChildrenMap.begin() ; lSubMapIt != lNode->mChildrenMap.end() ; ++lSubMapIt )
+				{
+					mChildrenMap.insert ( std::make_pair ( ( lNode->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) ); //no clone needed here because we want the shared_ptr to point to the same object
+				}
 			}
 			catch ( const std::exception& aExc )
 			{
@@ -180,8 +191,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		else
 		{
 			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
-
 			std::string lPermission;
+
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
 			{
 				try
@@ -200,8 +211,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 					throw uhal::exception ( aExc );
 				}
 			}
-			
+
 			std::string lMode;
+
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
 			{
 				try
@@ -219,25 +231,24 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
-			}		
-			
-// 			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
-// 			{
-// 				mChildrenMap.push_back ( Node ( lXmlNode , mAddr , mAddrMask ) );
-// 			}
+			}
+
+			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
+			{
+				boost::shared_ptr< Node > lNode ( clone ( NodeTreeBuilder::getInstance().create ( lXmlNode , mAddr , mAddrMask ) ) );
+				mChildrenMap.insert ( std::make_pair ( lNode->mUid , lNode ) );
+
+				for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lSubMapIt = lNode->mChildrenMap.begin() ; lSubMapIt != lNode->mChildrenMap.end() ; ++lSubMapIt )
+				{
+					mChildrenMap.insert ( std::make_pair ( ( lNode->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) ); //no clone needed here because we want the shared_ptr to point to the same object
+				}
+			}
 		}
 
-		// //iterate over the immediate children
-		// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+		// log( Info() , "Node \"" , mUid , "\" has the following mChildrenMap entries:" );
+		// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lIt = mChildrenMap.begin() ; lIt != mChildrenMap.end() ; ++lIt )
 		// {
-			// //add the immediate child to the lookup map
-			// mChildrenMap.insert ( std::make_pair ( lIt->second->mUid , & ( *lIt ) ) );
-
-			// //add all the entries in the child's look-up map to the paren't look-up map, prepended with the child's name followed by a '.'
-			// for ( std::hash_map< std::string , boost::shared_ptr<Node> >::iterator lSubMapIt = lIt->mChildrenMap.begin() ; lSubMapIt != lIt->mChildrenMap.end() ; ++lSubMapIt )
-			// {
-				// mChildrenMap.insert ( std::make_pair ( ( lIt->second->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-			// }
+		// log( Info() , "\t> " , lIt->first );
 		// }
 	}
 	catch ( const std::exception& aExc )
@@ -259,7 +270,7 @@ Node::Node ( const Node& aNode ) try :
 	{
 		for ( std::hash_map< std::string , boost::shared_ptr<Node> >::const_iterator lIt = aNode.mChildrenMap.begin(); lIt != aNode.mChildrenMap.end(); ++lIt )
 		{
-			mChildrenMap.insert ( std::make_pair( lIt->first , clone(lIt->second) ) );
+			mChildrenMap.insert ( std::make_pair ( lIt->first , clone ( lIt->second ) ) );
 		}
 	}
 	catch ( const std::exception& aExc )
@@ -269,31 +280,33 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
-Node& Node::operator= ( const Node& aNode )
-{
-	try{
-		mHw = aNode.mHw;
-		mUid = aNode.mUid;
-		mAddr = aNode.mAddr;
-		mAddrMask = aNode.mAddrMask;
-		mMask = aNode.mMask;
-		mPermission = aNode.mPermission;
-		mMode = aNode.mMode;
-
-		for ( std::hash_map< std::string , boost::shared_ptr<Node> >::const_iterator lIt = aNode.mChildrenMap.begin(); lIt != aNode.mChildrenMap.end(); ++lIt )
+	Node& Node::operator= ( const Node& aNode )
+	{
+		try
 		{
-			mChildrenMap.insert ( std::make_pair( lIt->first , clone(lIt->second) ) );
-		}
-		return *this;
-	}
-	catch ( const std::exception& aExc )
-	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
-	}
-}		
+			mHw = aNode.mHw;
+			mUid = aNode.mUid;
+			mAddr = aNode.mAddr;
+			mAddrMask = aNode.mAddrMask;
+			mMask = aNode.mMask;
+			mPermission = aNode.mPermission;
+			mMode = aNode.mMode;
 
-	
+			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::const_iterator lIt = aNode.mChildrenMap.begin(); lIt != aNode.mChildrenMap.end(); ++lIt )
+			{
+				mChildrenMap.insert ( std::make_pair ( lIt->first , clone ( lIt->second ) ) );
+			}
+
+			return *this;
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+
 	Node::~Node() {}
 
 	bool Node::operator == ( const Node& aNode )
@@ -378,7 +391,8 @@ Node& Node::operator= ( const Node& aNode )
 			aStream << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
 			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) << ", ";
 
-			switch( mMode ){
+			switch ( mMode )
+			{
 				case defs::SINGLE:
 					aStream << "Mode SINGLE register access";
 					break;
@@ -387,9 +401,9 @@ Node& Node::operator= ( const Node& aNode )
 					break;
 				case defs::NON_INCREMENTAL:
 					aStream << "Mode NON-INCREMENTAL block access";
-					break;					
+					break;
 			}
-			
+
 			for ( std::hash_map< std::string , boost::shared_ptr<Node> >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
 			{
 				lIt->second->stream ( aStream , aIndent+2 );
@@ -568,7 +582,7 @@ Node& Node::operator= ( const Node& aNode )
 	{
 		try
 		{
-			if( (mMode == defs::SINGLE) && (aValues.size() != 1) ) //We allow the user to call a bulk access of size=1 to a single register
+			if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=\"incremental\"' flags there" );
@@ -631,7 +645,7 @@ Node& Node::operator= ( const Node& aNode )
 	{
 		try
 		{
-			if( (mMode == defs::SINGLE) && (aSize != 1) ) //We allow the user to call a bulk access of size=1 to a single register
+			if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=\"incremental\"' flags there" );
@@ -693,11 +707,10 @@ Node& Node::operator= ( const Node& aNode )
 	{
 		try
 		{
-			if( (mMode == defs::SINGLE) && (aSize != 1) ) //We allow the user to call a bulk access of size=1 to a single register
+			if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=\"incremental\"' flags there" );
-								
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BulkTransferOnSingleRegister();
 			}
@@ -748,7 +761,7 @@ Node& Node::operator= ( const Node& aNode )
 	}
 
 
-	
+
 	ValWord< int32_t > Node::rmw_sum ( const int32_t& aAddend )
 	{
 		try
@@ -771,9 +784,9 @@ Node& Node::operator= ( const Node& aNode )
 		}
 	}
 
-			
-	
-	
+
+
+
 	boost::shared_ptr<ClientInterface> Node::getClient()
 	{
 		try

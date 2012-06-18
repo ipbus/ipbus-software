@@ -1,4 +1,4 @@
-#include "uhal/performance.hpp"
+// #include "uhal/performance.hpp"
 #include "uhal/TransportProtocol_TCP.hpp"
 
 // #include <boost/lambda/bind.hpp>
@@ -118,21 +118,16 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			// Send data
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-			
-			log( Debug() , "Sending " , Integer( aBuffers->sendCounter() ) , " bytes" );
-
-			PERFORMANCE ( "ASIO write" ,
-						  /*
-						  				NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
-						  */
-						  /*				mErrorCode = boost::asio::error::would_block;*/
-						  boost::asio::write ( *mSocket , lAsioSendBuffer , mErrorCode );
-						  /*				boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-						  				do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
-						)
+			log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+			/*
+							NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+			*/
+			/*				mErrorCode = boost::asio::error::would_block;*/
+			boost::asio::write ( *mSocket , lAsioSendBuffer , mErrorCode );
+			/*				boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
+							do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
 
 			if ( mErrorCode )
 			{
@@ -147,24 +142,20 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
 			std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
 			lAsioReplyBuffer.reserve ( lReplyBuffers.size() );
-		
+
 			for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
 			{
 				lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
-				
 			}
 
-			log( Debug() , "Expecting " , Integer( aBuffers->replyCounter() ) , " bytes in reply" );
-
-			PERFORMANCE ( "ASIO read" ,
-						  /*
-						  				NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
-						  */
-						  /*				mErrorCode = boost::asio::error::would_block;*/
-						  boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), mErrorCode );
-						  /*				boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-						  				do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
-						)
+			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
+			/*
+							NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
+			*/
+			/*				mErrorCode = boost::asio::error::would_block;*/
+			boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), mErrorCode );
+			/*				boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
+							do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
 
 			if ( mErrorCode )
 			{

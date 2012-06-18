@@ -45,7 +45,6 @@ void rawClientAccess()
 	{
 		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
-
 		log ( Notice() , "ATTEMPTING SINGLE WORD WRITE/READ" ) ;
 		//write register
 		uint32_t val = static_cast<uint32_t> ( rand() );
@@ -64,7 +63,6 @@ void rawClientAccess()
 		}
 
 		log ( Notice() , "ATTEMPTING INCREMENTING BLOCK WRITE/READ" ) ;
-		
 		// 		// // //write memory
 		uint32_t SIZE=129;
 		std::vector<uint32_t> vals;
@@ -99,9 +97,7 @@ void rawClientAccess()
 		}
 
 		log ( Notice() , "INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
-
 		log ( Notice() , "ATTEMPTING NON-INCREMENTING BLOCK WRITE/READ" ) ;
-
 		// //BOOST_CHECK(block.size() == SIZE);
 		// //BOOST_CHECK(block.begin()->valid() && block.rbegin()->valid());
 		// //BOOST_CHECK(*block.begin() == *vals.begin());
@@ -143,10 +139,7 @@ void rawClientAccess()
 		}
 
 		log ( Notice() , "NON-INCREMENTING BLOCK WRITE/READ : ALL GOOD" ) ;
-		
 		log ( Notice() , "ATTEMPTING RMW-BITS" ) ;
-		
-		
 		uint32_t expected ( ( *lSourceIt&0x00C0FFEE ) |0xF00DF00D );
 		/*ValWord< uint32_t >*/
 		mem = hw.getClient()->rmw_bits ( 0xBA5EADD4 , 0x00C0FFEE , 0xF00DF00D );
@@ -163,7 +156,6 @@ void rawClientAccess()
 		}
 
 		log ( Notice() , "ATTEMPTING RMW-SUM" ) ;
-		
 		int32_t expected2 ( expected + 0x0BADBABE );
 		ValWord< int32_t > mem2 = hw.getClient()->rmw_sum ( 0xBA5EADD4 , 0x0BADBABE );
 		hw.dispatch();

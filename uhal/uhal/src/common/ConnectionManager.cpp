@@ -1,7 +1,7 @@
 #include "uhal/ConnectionManager.hpp"
 
 #include "uhal/Node.hpp"
-#include "uhal/AddressTableBuilder.hpp"
+#include "uhal/NodeTreeBuilder.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/ClientFactory.hpp"
 #include "uhal/Utilities.hpp"
@@ -116,8 +116,8 @@ namespace uhal
 				throw ConnectionUIDDoesNotExist();
 			}
 
-			//The address table builder returns a newly created shared_ptr to a Node
-			boost::shared_ptr< const Node > lNode = AddressTableBuilder::getInstance().getAddressTable ( lIt->second.address_table );
+			//The node tree builder returns a newly created shared_ptr to a Node
+			boost::shared_ptr< const Node > lNode = NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table );
 			log ( Info() , "ConnectionManager created node tree: " , *lNode );
 			boost::shared_ptr<ClientInterface> lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
 			return HwInterface ( lClientInterface , lNode );
