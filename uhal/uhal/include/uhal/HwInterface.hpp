@@ -8,6 +8,7 @@
 #define _uhal_HwInterface_hpp_
 
 #include "uhal/Node.hpp"
+#include "uhal/exception.hpp"
 #include "uhal/ClientInterface.hpp"
 
 #include <boost/regex.hpp>
@@ -25,19 +26,8 @@ namespace uhal
 			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< const Node >& aNode );
 
 			/**
-				Copy constructor
-				@param aHwInterface a HwInterface to copy
+				Destructor
 			*/
-			HwInterface ( const HwInterface& aHwInterface );
-
-			/**
-				Assignment operator
-				@param aHwInterface a HwInterface to copy
-				@return self reference
-			*/
-			HwInterface& operator= ( const HwInterface& aHwInterface );
-
-
 			virtual ~HwInterface();
 
 			/**
@@ -51,8 +41,16 @@ namespace uhal
 			*/
 			void dispatch ();
 
+			/**
+				A method to modify the timeout period for any pending or future transactions
+				@param aTimeoutPeriod the desired timeout period in seconds
+			*/
 			void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
 
+			/**
+				A method to retrieve the timeout period currently being used
+				@return the timeout period currently being used
+			*/
 			const uint32_t& getTimeoutPeriod();
 
 			/**
@@ -101,8 +99,6 @@ namespace uhal
 			*/
 			std::vector<std::string> getNodes ( const std::string& aRegex );
 
-			// Node& getNode();
-
 			/**
 				Get the target device's reserved address information
 				@return a Validated Memory which wraps the location to which the reserved address information will be written
@@ -112,6 +108,7 @@ namespace uhal
 		private:
 			/**
 				A function which sets the HwInterface pointer in the Node to point to this HwInterface
+				@param aNode a Node that is to be claimed
 			*/
 			void claimNode ( Node& aNode );
 

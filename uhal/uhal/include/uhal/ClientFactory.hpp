@@ -50,6 +50,7 @@ namespace uhal
 			/**
 				Method to create an associate between a protocol identifier and a Creator of a particular type
 				@param aProtocol the protocol identifier
+				@param aDescription an optional description of the protocol
 			*/
 			template <class T>
 			void add ( const std::string& aProtocol , const std::string& aDescription = "" );

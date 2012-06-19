@@ -19,6 +19,8 @@
 
 #include <map>
 
+#define REGISTER_NODE_TYPE( class ) NodeTreeBuilder::RegistrationHelper< class >( #class );
+
 namespace uhal
 {
 	//! Exception class to handle the case where too many or two few address files are specified. Uses the base uhal::exception implementation of what()
@@ -26,10 +28,20 @@ namespace uhal
 	//! Exception class to handle the case where the address file failed to open. Uses the base uhal::exception implementation of what()
 	class FailedToOpenAddressTableFile: public uhal::exception {  };
 
+
 	//! A class to build a node tree from an Address table file
 	class NodeTreeBuilder: private boost::noncopyable
 	{
+		public:
 			friend class Node;
+
+			template< typename T >
+			struct RegistrationHelper
+			{
+				RegistrationHelper ( const std::string& aNodeTypeIdentifier );
+			};
+
+			template< typename T > friend class RegistrationHelper;
 
 		private:
 			/**
@@ -52,17 +64,9 @@ namespace uhal
 			static NodeTreeBuilder& getInstance();
 
 			/**
-				Method to create an associate between a node type identifier and a Creator of that particular node type
-				@param aProtocol the protocol identifier
-			*/
-			template <class T>
-			void add ( const std::string& aProtocol );
-
-
-			/**
 				Construct a node tree from file whose name is specified
 				@param aFilenameExpr a Filename Expression
-				@return a shared_ptr to a const node tree, such that which must be copied by the final user
+				@return a node tree which must be copied before it can be used
 			*/
 			boost::shared_ptr< const Node > getNodeTree ( const std::string& aFilenameExpr , const uint32_t& aAddr = 0x00000000 , const uint32_t& aAddrMask = 0xFFFFFFFF );
 
@@ -76,6 +80,13 @@ namespace uhal
 			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< boost::shared_ptr< const Node > >& aAddressTable );
 
 		private:
+
+			/**
+				Method to create an associate between a node type identifier and a Creator of that particular node type
+				@param aNodeTypeIdentifier the node type identifier
+			*/
+			template <class T>
+			void add ( const std::string& aNodeTypeIdentifier );
 
 			//! An abstract base class for defining the interface to the creators
 			class CreatorInterface
@@ -114,7 +125,7 @@ namespace uhal
 					/**
 						Concrete function which creates a new IPbus client based on the protocol identifier specified
 						@param aXmlNode a PugiXML node from which to construct a node
-						@return a shared pointer to a node tree which must be copied before it can be used
+						@return a node tree which must be copied before it can be used
 					*/
 					boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
 			};

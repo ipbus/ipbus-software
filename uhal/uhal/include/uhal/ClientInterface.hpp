@@ -172,8 +172,16 @@ namespace uhal
 			*/
 			void dispatch ();
 
+			/**
+				A method to modify the timeout period for any pending or future transactions
+				@param aTimeoutPeriod the desired timeout period in seconds
+			*/
 			virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
 
+			/**
+				A method to retrieve the timeout period currently being used
+				@return the timeout period currently being used
+			*/
 			virtual const uint32_t& getTimeoutPeriod();
 
 		private:

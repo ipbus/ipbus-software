@@ -117,9 +117,9 @@ namespace uhal
 			}
 
 			//The node tree builder returns a newly created shared_ptr to a Node
-			boost::shared_ptr< const Node > lNode = NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table );
+			boost::shared_ptr< const Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table ) );
 			log ( Info() , "ConnectionManager created node tree: " , *lNode );
-			boost::shared_ptr<ClientInterface> lClientInterface = ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri );
+			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );
 			return HwInterface ( lClientInterface , lNode );
 		}
 		catch ( const std::exception& aExc )

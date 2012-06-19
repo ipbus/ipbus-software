@@ -25,6 +25,7 @@
 namespace uhal
 {
 
+	//! Exception class to handle the case where we were unable to validate the IPbus header. Uses the base uhal::exception implementation of what()
 	class IPbusValidationError: public uhal::exception {  };
 
 
@@ -55,14 +56,35 @@ namespace uhal
 		IPbus_2_0
 	};
 
-
+	/**
+		Helper function to convert an enumerated type into a formatted string
+		@param aIPbusProtocolVersion The IPbus protocol version we wish to be formatted
+		@return a formatted string representing the enumerated type
+	*/
 	std::string toString ( const eIPbusProtocolVersion& aIPbusProtocolVersion );
 
-
+	//! A helper struct to allow us to use template specialization rather than if/else statements for types which are known at compile time
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	struct IPbusHeaderHelper
 	{
+		/**
+			Calculate an IPbus transaction header from individual fields
+			@param aType an enumerated IPbus instruction type
+			@param aWordCount the word count for the IPbus instruction
+			@param aTransactionId the transaction ID field
+			@return an IPbus transaction header
+		*/
 		static uint32_t calculate ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+
+		/**
+			Extract individual fields from an IPbus header
+			@param aHeader an IPbus transaction header to decode
+			@param aType the enumerated IPbus instruction type of the decoded transaction header
+			@param aWordCount the word count of the decoded transaction header
+			@param aTransactionId the transaction ID of the decoded transaction header
+			@param aResponseGood the response field of the decoded transaction header
+			@return whether extraction succeeded or not
+		*/
 		static bool extract ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood );
 	};
 

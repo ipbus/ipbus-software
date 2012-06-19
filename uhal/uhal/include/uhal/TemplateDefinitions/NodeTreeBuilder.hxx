@@ -3,21 +3,21 @@ namespace uhal
 {
 
 	template <class T>
-	void NodeTreeBuilder::add ( const std::string& aProtocol )
+	void NodeTreeBuilder::add ( const std::string& aNodeTypeIdentifier )
 	{
 		try
 		{
-			std::hash_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aProtocol ) ;
+			std::hash_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNodeTypeIdentifier ) ;
 
 			if ( lIt != mCreators.end() )
 			{
 				//log ( Error() , "Throwing at " , ThisLocation() );
 				//throw ProtocolAlreadyExist();
-				log ( Warning() , "Protocol \"" , aProtocol , "\" already exists in map of creators. Continuing for now, but be warned." );
+				log ( Warning() , "Protocol \"" , aNodeTypeIdentifier , "\" already exists in map of creators. Continuing for now, but be warned." );
 				return;
 			}
 
-			mCreators[aProtocol] =  boost::shared_ptr<CreatorInterface> ( new Creator<T>() );
+			mCreators[aNodeTypeIdentifier] =  boost::shared_ptr<CreatorInterface> ( new Creator<T>() );
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -41,5 +41,11 @@ namespace uhal
 		}
 	}
 
+
+	template< typename T >
+	NodeTreeBuilder::RegistrationHelper<T>::RegistrationHelper ( const std::string& aNodeTypeIdentifier )
+	{
+		NodeTreeBuilder::getInstance().add< T > ( aNodeTypeIdentifier );
+	}
 
 }

@@ -142,6 +142,11 @@ namespace uhal
 	//! Exception class to handle the case where the received header does not match the expected header. Uses the base uhal::exception implementation of what()
 	class XMLfileMissingRequiredParameters: public uhal::exception {};
 
+	/**
+		Extract an IP-address and port number from a URI object
+		@param aUri a URI object to be parsed
+		@return a pair containing an IP-address (first) and port number (second)
+	*/
 	std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri );
 
 	//! A class to indirectly access (via a Control Hub Host) devices via IPbus over UDP
@@ -191,6 +196,7 @@ namespace uhal
 			*/
 			TransportProtocol& getTransportProtocol();
 
+			//! A pair containing an IP-address (first) and port number (second)
 			std::pair< uint32_t , uint16_t > mTargetId;
 
 			//! A pointer to an instance of the packing protocol used by this IPbus client

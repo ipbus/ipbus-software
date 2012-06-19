@@ -31,20 +31,6 @@ namespace uhal
 	class Node;
 }
 
-/**
-	A streaming operator to format the node for display
-	@param aStream a stream to output the time onto
-	@param aNode the node to be displayed
-	@return a stream for further appending
-*/
-std::ostream& operator<< ( std::ostream& aStream , const uhal::Node& aNode );
-
-
-namespace uhal
-{
-	boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< uhal::Node >& aNode );
-	boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< const uhal::Node >& aNode );
-}
 
 namespace uhal
 {
@@ -71,8 +57,12 @@ namespace uhal
 	{
 			friend class HwInterface;
 
-			friend boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< uhal::Node >& aNode );
-			friend boost::shared_ptr< uhal::Node > clone ( const boost::shared_ptr< const uhal::Node >& aNode );
+		private:
+			/**
+				Empty node
+			*/
+			Node ( );
+
 
 		public:
 
@@ -82,22 +72,6 @@ namespace uhal
 			*/
 			Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
 
-		protected:
-			/**
-				Copy constructor
-				Need to clone the children, not copy the pointer!
-				@param aNode a node to copy
-			*/
-			Node ( const Node& aNode );
-
-			/**
-				Assignment operator
-				@param aNode a node to copy
-				@return self reference
-			*/
-			Node& operator= ( const Node& aNode );
-
-		public:
 			/**
 				Destructor
 			*/
@@ -293,6 +267,10 @@ namespace uhal
 			boost::shared_ptr<ClientInterface> getClient();
 
 		private:
+
+			Node clone() const;
+
+
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
 			// std::string mFullId;
@@ -313,7 +291,7 @@ namespace uhal
 			defs::BlockReadWriteMode mMode;
 
 			//! Helper to assist look-up of a particular child node, given a name
-			std::hash_map< std::string , boost::shared_ptr< Node> > mChildrenMap;
+			boost::shared_ptr< std::hash_map< std::string , Node > > mChildrenMap;
 
 			//! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
 			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>
