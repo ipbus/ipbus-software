@@ -32,7 +32,7 @@ build: _all
 buildall: _all
 _all:
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	tar -xvjf ${TARBALL_NAME}.tar.bz2
+	tar -xjf ${TARBALL_NAME}.tar.bz2
 	cd ${TARBALL_NAME};./bootstrap.sh
 	cd ${TARBALL_NAME};./b2 --without-mpi					\
 				--prefix=${PackagePath}/RPMBUILD/SOURCES	\
