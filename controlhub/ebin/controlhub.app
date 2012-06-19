@@ -20,7 +20,7 @@
    {registered, [ch_device_client_registry,
                  ch_stats,
                  ch_sup]},
-   {applications, [kernel, stdlib]},
+   {applications, [kernel, sasl, stdlib]},
    {mod, {controlhub_app, []}}
  ]
 }.

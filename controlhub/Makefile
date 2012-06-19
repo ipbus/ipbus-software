@@ -11,16 +11,20 @@ BUILD_HOME = $(shell pwd)/..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
+UNAME := $(shell uname)
+
+# Allows me to still develop on Mac OS X
+ifeq ($(UNAME), Darwin)
+ERL=erl
+ERLC=erlc
+else
+#If we're on Linux, use the cactus-extern-erlang RPM sources or RPM installation
 ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
 ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
 ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
 else
-ifeq ($(shell test -d ${INSTALL_PREFIX}/bin && echo OK),OK)
 ERL=$(INSTALL_PREFIX)/bin/erl
 ERLC=$(INSTALL_PREFIX)/bin/erlc
-else
-ERL=erl
-ERLC=erlc
 endif
 endif
 
@@ -65,3 +69,24 @@ test:
 	$(ERL) -noshell -pa ebin ebin/unittest -eval 'eunit:test("ebin",[verbose])' -s init stop
 
 release: clean build_controlhub
+
+# Auto-generate the release boot and script files
+controlhub.boot: controlhub.rel Makefile
+	$(ERL) -pa ebin -noshell +B -eval \
+	'case systools:make_script("'$(basename $@)'",[local]) of \
+         ok -> halt(0); _ -> halt(1) end.'
+
+# Auto-generate the control.rel file.
+controlhub.rel: ebin/controlhub.app Makefile
+	echo $(basename $@)
+	$(ERL) -pa ebin -noshell +B -eval \
+	 "ok = application:load($(basename $@)), \
+	 {ok, ControlHubVsn} = application:get_key(controlhub, vsn), \
+	 {ok, Apps} = application:get_key($(basename $@), applications), \
+	 {ok, F} = file:open("$@", [write]), \
+	 io:format(F, \"~p.~n\", [{release, {\"$(basename $@)\", ControlHubVsn}, \
+	 {erts, erlang:system_info(version)}, \
+	 lists:map(fun (App) -> application:load(App), \
+	 {ok, Vsn} = application:get_key(App, vsn), \
+         {App, Vsn} end, Apps ++ [$(basename $@)])}]), \
+	 file:close(F), halt(0)."
