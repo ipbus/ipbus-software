@@ -23,11 +23,11 @@ OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
 LIBRARY_PATH = 	
 
-LIBRARIES =  
+LIBRARIES =  -L${UHAL_LOG_LIB_PREFIX} -lcactus_uhal_log
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
-		-I${UHAL_LOG_INCLUDE_PREFIX} \
+		-I${UHAL_LOG_INCLUDE_PREFIX}
 
 
 CPP_FLAGS = -O3 -Wall -fPIC
@@ -41,6 +41,7 @@ clean: _cleanall
 _cleanall:
 	rm -rf RPMBUILD
 	rm -rf obj
+	rm -rf lib
 
 all: _all
 build: _all

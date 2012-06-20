@@ -18,6 +18,7 @@ PACKAGE_RELEASE = 1
 
 SOURCES = src/common/test_uhal.cpp
 EXECUTABLES = $(patsubst src/common/%.cpp,bin/%.exe,${SOURCES})
+EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
 LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
 		-L${EXTERN_PUGIXML_LIB_PREFIX} \
@@ -28,6 +29,7 @@ LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
 LIBRARIES = 	\
 		-lpthread \
 		\
+		-lboost_thread \
 		-lboost_filesystem \
 		-lboost_regex \
 		-lboost_system \
@@ -44,8 +46,8 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		-I${UHAL_UHAL_INCLUDE_PREFIX}
 
-CPP_FLAGS = -O3 -Wall -fPIC
-LINK_FLAGS = -fPIC -Wall -O3
+CPP_FLAGS = -O3 -Wall -fPIC ${INCLUDE_PATH}
+LINK_FLAGS = -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
@@ -54,6 +56,7 @@ default: build
 clean: _cleanall
 _cleanall:
 	rm -rf RPMBUILD
+	rm -rf obj
 	rm -rf bin
 
 all: _all
@@ -61,13 +64,16 @@ build: _all
 buildall: _all
 _all: ${EXECUTABLES}
 
-${EXECUTABLES}: bin/%.exe : src/common/%.cpp 
+${EXECUTABLES}: ${EXECUTABLE_OBJECT_FILES} 
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p RPMBUILD/SOURCES/bin
 	mkdir -p bin
-	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${INCLUDE_PATH} $< -o $@
+	g++ ${LINK_FLAGS} $< -o $@
 	cp -p bin/*.exe RPMBUILD/SOURCES/bin/.
 
+${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cpp
+	mkdir -p obj
+	g++ -c ${CPP_FLAGS}  $< -o $@
 
 rpm: _rpmall
 _rpmall: 

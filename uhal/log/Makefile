@@ -17,9 +17,13 @@ PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_log.so
+LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
+LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 
-SOURCES = $(wildcard src/common/*.cpp)
-OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
+EXECUTABLE_SOURCES = 	src/common/test.cxx \
+			src/common/generator.cxx
+EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
+EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
 LIBRARY_PATH = 	
 
@@ -28,8 +32,11 @@ LIBRARIES =
 INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -O3 -Wall -fPIC
-LINK_FLAGS = -shared -fPIC -Wall -O3
+CPP_FLAGS = -g -Wall -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH}
+
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
+
+LINK_EXECUTABLE_FLAGS = -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
@@ -39,25 +46,34 @@ clean: _cleanall
 _cleanall:
 	rm -rf RPMBUILD
 	rm -rf obj
+	rm -rf bin
+	rm -rf lib
 
 all: _all
 build: _all
 buildall: _all
-_all: ${LIBRARY}
+_all: ${LIBRARY} ${EXECUTABLES}
 
-${LIBRARY}: ${OBJECT_FILES}
+#Executables will be compiled but they won't be packaged
+${EXECUTABLES}: bin/%.exe: obj/%.o ${LIBRARY_OBJECT_FILES} ${EXECUTABLE_OBJECT_FILES}
+	mkdir -p bin
+	g++ ${LINK_EXECUTABLE_FLAGS} ${LIBRARY_OBJECT_FILES} $< -o $@
+
+${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
+	g++ -c ${CPP_FLAGS}  $< -o $@
+
+#Library will be compiled and will be packaged
+${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal/log}
 	mkdir -p lib
-	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
+	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
 	cp -p include/uhal/log/*.{hpp,hxx} RPMBUILD/SOURCES/include/uhal/log/.
 
-${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
+${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj
-	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
-
-
+	g++ -c ${CPP_FLAGS} $< -o $@
 
 rpm: _rpmall
 _rpmall: 

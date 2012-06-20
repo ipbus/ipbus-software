@@ -26,13 +26,17 @@ LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
 		-L${UHAL_GRAMMARS_LIB_PREFIX} \
 		-L${UHAL_LOG_LIB_PREFIX} 
 
-LIBRARIES = 	-lcactus_extern_pugixml \
+LIBRARIES = 	-lpthread \
 		\
+		-lcactus_extern_pugixml \
+		\
+		-lboost_thread \
 		-lboost_system \
 		-lboost_filesystem \
 		-lboost_regex \
 		\
-		-lcactus_uhal_grammars 	
+		-lcactus_uhal_grammars \
+		-lcactus_uhal_log	
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
@@ -40,9 +44,8 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
-CPP_USER_FLAGS = -D USE_TCP_MULTITHREADED -D USE_UDP_MULTITHREADED
-CPP_FLAGS = -O3 -Wall -fPIC
-LINK_FLAGS = -shared -fPIC -Wall -O3
+CPP_FLAGS = -O3 -Wall -fPIC -D USE_TCP_MULTITHREADED -D USE_UDP_MULTITHREADED  ${INCLUDE_PATH}
+LINK_FLAGS = -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
 
@@ -52,6 +55,7 @@ clean: _cleanall
 _cleanall:
 	rm -rf RPMBUILD
 	rm -rf obj
+	rm -rf lib
 
 all: _all
 build: _all
@@ -62,14 +66,14 @@ ${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal,include/uhal/TemplateDefinitions}
 	mkdir -p lib
-	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
+	g++ ${LINK_FLAGS} ${OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
 	cp -p include/uhal/*.hpp RPMBUILD/SOURCES/include/uhal/.
 	cp -p include/uhal/TemplateDefinitions/*.hxx RPMBUILD/SOURCES/include/uhal/TemplateDefinitions/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj
-	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} ${CPP_USER_FLAGS} -o $@
+	g++ ${CPP_FLAGS} -c $< -o $@
 
 
 
