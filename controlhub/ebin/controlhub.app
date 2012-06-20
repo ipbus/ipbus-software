@@ -14,7 +14,7 @@
    {modules, [ch_device_client_registry,
               ch_device_client,
               ch_stats,
-              ch_tcp_listerner,
+              ch_tcp_listener,
               ch_transaction_manager,
               ch_utils]},
    {registered, [ch_device_client_registry,
