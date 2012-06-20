@@ -1,7 +1,7 @@
 
 #include <uhal/ValMem.hpp>
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 #include "uhal/Utilities.hpp"
 
 namespace uhal

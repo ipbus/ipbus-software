@@ -6,7 +6,7 @@
 #include "uhal/ClientFactory.hpp"
 #include "uhal/Utilities.hpp"
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 
 namespace uhal

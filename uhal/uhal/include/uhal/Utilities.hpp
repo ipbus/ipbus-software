@@ -19,13 +19,13 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/bind/bind.hpp>
 
-#include "grammars/SemicolonDelimitedUriListGrammar.hpp"
-#include "grammars/HttpResponseGrammar.hpp"
-#include "grammars/URLGrammar.hpp"
+#include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
+#include "uhal/grammars/HttpResponseGrammar.hpp"
+#include "uhal/grammars/URLGrammar.hpp"
 
 #include "pugixml/pugixml.hpp"
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 #include "uhal/exception.hpp"
 
 #ifdef __GNUC__

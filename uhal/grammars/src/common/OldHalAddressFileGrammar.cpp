@@ -1,4 +1,4 @@
-#include "grammars/OldHalAddressFileGrammar.hpp"
+#include "uhal/grammars/OldHalAddressFileGrammar.hpp"
 
 
 namespace grammars

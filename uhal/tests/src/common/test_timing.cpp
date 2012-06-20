@@ -13,7 +13,7 @@
 #include <boost/lexical_cast.hpp>
 #include <sys/time.h>
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 using namespace uhal;
 

@@ -9,7 +9,7 @@
 
 #include "uhal/exception.hpp"
 #include "uhal/ProtocolInterfaces.hpp"
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 #include <iostream>
 #include <iomanip>

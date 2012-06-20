@@ -2,7 +2,7 @@
 #ifndef _log_inserters_string_hpp_
 #define _log_inserters_string_hpp_
 
-#include <log/log_inserter_helper.hpp>
+#include <uhal/log/log_inserter_helper.hpp>
 
 #include <string>
 

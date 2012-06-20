@@ -1,4 +1,4 @@
-#include "grammars/SemicolonDelimitedUriListGrammar.hpp"
+#include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
 
 
 namespace grammars

@@ -19,7 +19,7 @@
 
 // Custom includes
 #include "uhal/ValMem.hpp"
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 // Using the uhal namespace
 namespace uhal

@@ -11,7 +11,7 @@
 #include "uhal/exception.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/Utilities.hpp"
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 #include "boost/utility.hpp"
 

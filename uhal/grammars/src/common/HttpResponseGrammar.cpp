@@ -1,6 +1,6 @@
-#include "grammars/HttpResponseGrammar.hpp"
+#include "uhal/grammars/HttpResponseGrammar.hpp"
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse )
 {

@@ -6,7 +6,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <log/log_configuration.hpp>
+#include <uhal/log/log_configuration.hpp>
 
 
 uint32_t gLogLevelCount ( 8 );
@@ -24,21 +24,21 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
 				<< "#ifndef _log_hpp_\n"
 				<< "#define _log_hpp_\n"
 				<< "\n"
-				<< "#include <log/log_configuration.hpp>\n"
+				<< "#include <uhal/log/log_configuration.hpp>\n"
 				<< "\n"
 				<< "namespace uhal{\n"
 				<< "\n"
 				<< gDivider
 				<< "\n";
 	aHxxFile	<< "\n"
-				<< "#include <log/log_inserters.hpp>\n"
+				<< "#include <uhal/log/log_inserters.hpp>\n"
 				<< "\n"
 				<< "namespace uhal{\n"
 				<< "\n"
 				<< gDivider
 				<< "\n";
 	aCppFile	<< "\n"
-				<< "#include <log/log.hpp>\n"
+				<< "#include <uhal/log/log.hpp>\n"
 				<< "\n"
 				<< "namespace uhal{\n"
 				<< "\n"
@@ -98,7 +98,7 @@ void fileContent ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
 void fileFooters ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
 	aHppFile	<< "}\n"
-				<< "#include <log/log.hxx>\n"
+				<< "#include <uhal/log/log.hxx>\n"
 				<< "#endif\n";
 	aHxxFile	<< "}\n"
 				<< "\n";

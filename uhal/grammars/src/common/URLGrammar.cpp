@@ -1,6 +1,6 @@
-#include "grammars/URLGrammar.hpp"
+#include "uhal/grammars/URLGrammar.hpp"
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 namespace grammars
 {

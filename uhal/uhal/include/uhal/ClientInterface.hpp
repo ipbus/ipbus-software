@@ -12,11 +12,11 @@
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 #include "uhal/ProtocolInterfaces.hpp"
 
-#include "grammars/URLGrammar.hpp"
+#include "uhal/grammars/URLGrammar.hpp"
 
 #include <vector>
 #include <deque>

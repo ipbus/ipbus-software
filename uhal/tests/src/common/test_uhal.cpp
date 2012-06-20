@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <boost/math/special_functions/factorials.hpp>
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 
 using namespace uhal;
 

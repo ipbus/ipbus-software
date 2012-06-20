@@ -1,7 +1,7 @@
 
-#include <log/log_inserters.boolean.hpp>
+#include <uhal/log/log_inserters.boolean.hpp>
 
-#include <log/log_configuration.hpp>
+#include <uhal/log/log_configuration.hpp>
 
 namespace uhal
 {

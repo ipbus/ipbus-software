@@ -13,7 +13,7 @@
 #include <sys/time.h>
 #include <math.h>
 
-#include <log/log.hpp>
+#include <uhal/log/log.hpp>
 
 #define _PASTE_(x,y) x ## _ ## y
 #define PASTE(x,y)  _PASTE_(x,y)

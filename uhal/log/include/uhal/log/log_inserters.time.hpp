@@ -2,7 +2,7 @@
 #ifndef _log_inserters_time_hpp_
 #define _log_inserters_time_hpp_
 
-#include <log/log_inserter_helper.hpp>
+#include <uhal/log/log_inserter_helper.hpp>
 
 #include <sys/time.h>
 #include <time.h>
@@ -57,6 +57,6 @@ namespace uhal
 
 }
 
-#include <log/log_inserters.time.hxx>
+#include <uhal/log/log_inserters.time.hxx>
 
 #endif

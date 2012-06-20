@@ -2,7 +2,7 @@
 #ifndef _log_inserters_hex_hpp_
 #define _log_inserters_hex_hpp_
 
-#include <log/log_inserter_helper.hpp>
+#include <uhal/log/log_inserter_helper.hpp>
 
 #include <stdint.h>
 
@@ -25,6 +25,6 @@ namespace uhal
 
 }
 
-#include <log/log_inserters.hex.hxx>
+#include <uhal/log/log_inserters.hex.hxx>
 
 #endif

@@ -2,7 +2,7 @@
 #ifndef _log_inserters_boolean_hpp_
 #define _log_inserters_boolean_hpp_
 
-#include <log/log_inserter_helper.hpp>
+#include <uhal/log/log_inserter_helper.hpp>
 
 #include <string>
 
@@ -35,6 +35,6 @@ namespace uhal
 
 }
 
-#include <log/log_inserters.boolean.hxx>
+#include <uhal/log/log_inserters.boolean.hxx>
 
 #endif

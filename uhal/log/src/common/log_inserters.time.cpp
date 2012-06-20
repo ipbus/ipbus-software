@@ -1,8 +1,8 @@
 
-#include <log/log_inserters.time.hpp>
-#include <log/log_inserters.integer.hpp>
+#include <uhal/log/log_inserters.time.hpp>
+#include <uhal/log/log_inserters.integer.hpp>
 
-#include <log/log_configuration.hpp>
+#include <uhal/log/log_configuration.hpp>
 
 
 namespace uhal

@@ -2,7 +2,7 @@
 #ifndef _log_inserters_integer_hpp_
 #define _log_inserters_integer_hpp_
 
-#include <log/log_inserter_helper.hpp>
+#include <uhal/log/log_inserter_helper.hpp>
 
 #include <stdint.h>
 
@@ -47,6 +47,6 @@ namespace uhal
 
 }
 
-#include <log/log_inserters.integer.hxx>
+#include <uhal/log/log_inserters.integer.hxx>
 
 #endif

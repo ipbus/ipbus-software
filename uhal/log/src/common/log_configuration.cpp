@@ -1,6 +1,6 @@
 
-#include <log/log_configuration.hpp>
-#include <log/log_inserters.hpp>
+#include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log_inserters.hpp>
 
 #include <sys/time.h>
 

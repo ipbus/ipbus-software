@@ -1,5 +1,5 @@
 
-#include <log/log_inserters.hpp>
+#include <uhal/log/log_inserters.hpp>
 
 namespace uhal
 {

@@ -4,7 +4,7 @@
 	@date 2012
 */
 
-#include "log/log.hpp"
+#include "uhal/log/log.hpp"
 #include <iostream>
 
 using namespace uhal;

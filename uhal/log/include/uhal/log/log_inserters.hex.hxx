@@ -1,5 +1,5 @@
 
-#include <log/log_configuration.hpp>
+#include <uhal/log/log_configuration.hpp>
 
 #ifdef __GNUG__
 #include <cxxabi.h>

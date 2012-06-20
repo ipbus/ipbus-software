@@ -2,7 +2,7 @@
 #ifndef _log_hpp_
 #define _log_hpp_
 
-#include <log/log_configuration.hpp>
+#include <uhal/log/log_configuration.hpp>
 
 namespace uhal
 {
@@ -812,5 +812,5 @@ namespace uhal
 	// ======================================================================================================================================================
 
 }
-#include <log/log.hxx>
+#include <uhal/log/log.hxx>
 #endif
