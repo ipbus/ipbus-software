@@ -118,7 +118,8 @@ int main ( int argc,char* argv[] )
 	}
 	catch ( const std::exception& aExc )
 	{
-		std::cout << "Caught Exception : " << aExc.what() << std::endl;
+		std::cerr << "ERROR: Caught Exception : " << aExc.what() << std::endl;
+		exit(1);
 	}
 }
 

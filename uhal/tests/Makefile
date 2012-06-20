@@ -66,14 +66,14 @@ build: _all
 buildall: _all
 _all: ${EXECUTABLES}
 
-${EXECUTABLES}: ${EXECUTABLE_OBJECT_FILES} 
+${EXECUTABLES}: bin/%.exe: obj/%.o 
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p RPMBUILD/SOURCES/bin
 	mkdir -p bin
 	g++ ${LINK_FLAGS} $< -o $@
 	cp -p bin/*.exe RPMBUILD/SOURCES/bin/.
 
-${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cpp
+obj/%.o: src/common/%.cpp
 	mkdir -p obj
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
