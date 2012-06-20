@@ -47,11 +47,11 @@ _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include/log}
+	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal/log}
 	mkdir -p lib
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -p include/log/*.hpp RPMBUILD/SOURCES/include/log/.
+	cp -p include/uhal/log/*.{hpp,hxx} RPMBUILD/SOURCES/include/uhal/log/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj

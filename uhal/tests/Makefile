@@ -21,6 +21,7 @@ EXECUTABLES = $(patsubst src/common/%.cpp,bin/%.exe,${SOURCES})
 
 LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
 		-L${EXTERN_PUGIXML_LIB_PREFIX} \
+		-L${UHAL_LOG_LIB_PREFIX} \
 		-L${UHAL_GRAMMARS_LIB_PREFIX} \
 		-L${UHAL_UHAL_LIB_PREFIX} 
 
@@ -32,10 +33,12 @@ LIBRARIES = 	\
 		-lboost_system \
 		\
 		-lcactus_extern_pugixml \
+		-lcactus_uhal_log \
 		-lcactus_uhal_grammars \
 		-lcactus_uhal_uhal
 
 INCLUDE_PATH = 	-Iinclude  \
+		-I${UHAL_LOG_INCLUDE_PREFIX} \
 		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \

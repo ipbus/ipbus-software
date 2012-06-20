@@ -26,7 +26,9 @@ LIBRARY_PATH =
 LIBRARIES =  
 
 INCLUDE_PATH = 	-Iinclude  \
-		-I${EXTERN_BOOST_INCLUDE_PREFIX} 
+		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
+		-I${UHAL_LOG_INCLUDE_PREFIX} \
+
 
 CPP_FLAGS = -O3 -Wall -fPIC
 LINK_FLAGS = -shared -fPIC -Wall -O3
@@ -47,11 +49,11 @@ _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include/grammars}
+	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal/grammars}
 	mkdir -p lib
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -p include/grammars/*.hpp RPMBUILD/SOURCES/include/grammars/.
+	cp -p include/uhal/grammars/*.hpp RPMBUILD/SOURCES/include/uhal/grammars/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj

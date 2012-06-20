@@ -40,6 +40,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
+CPP_USER_FLAGS = -D USE_TCP_MULTITHREADED -D USE_UDP_MULTITHREADED
 CPP_FLAGS = -O3 -Wall -fPIC
 LINK_FLAGS = -shared -fPIC -Wall -O3
 
@@ -59,16 +60,16 @@ _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include}
+	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal,include/uhal/TemplateDefinitions}
 	mkdir -p lib
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -pr include RPMBUILD/SOURCES/.
-	find RPMBUILD/SOURCES/include/. -type d -a -name ".svn" | xargs rm -rf
+	cp -p include/uhal/*.hpp RPMBUILD/SOURCES/include/uhal/.
+	cp -p include/uhal/TemplateDefinitions/*.hxx RPMBUILD/SOURCES/include/uhal/TemplateDefinitions/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj
-	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
+	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} ${CPP_USER_FLAGS} -o $@
 
 
 
