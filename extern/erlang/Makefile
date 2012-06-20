@@ -43,7 +43,7 @@ _all:
 	tar -zxf ${TARBALL_FILE}
 	cd ${TARBALL_DIR}; ./configure \
 		--prefix=${PackagePath}/RPMBUILD/SOURCES \
-		--exec-prefix=${PackagePath}/RPMBUILD/SOURCES 
+		--exec-prefix=${PackagePath}/RPMBUILD/SOURCES \
 		--without-javac
 	cd ${TARBALL_DIR}; make
 	cd ${TARBALL_DIR}; make install
