@@ -395,42 +395,42 @@ namespace uhal
 
 	void log_configuration::log_tail ( const Emergency& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	void log_configuration::log_tail ( const Alert& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	void log_configuration::log_tail ( const Critical& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	void log_configuration::log_tail ( const Error& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	void log_configuration::log_tail ( const Warning& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	void log_configuration::log_tail ( const Notice& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	void log_configuration::log_tail ( const Info& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	void log_configuration::log_tail ( const Debug& )
 	{
-		fputc ( '\n' , mDestination );
+		fputs ( "\033[0m\n" , mDestination );
 	}
 
 	bool log_configuration::mLoggingIncludesEmergency = true;
