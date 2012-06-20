@@ -112,7 +112,7 @@ int main ( int argc , char* argv[] )
 {
 	try
 	{
-		std::ofstream lHppFile ( "include/log/log.hpp" );
+		std::ofstream lHppFile ( "include/uhal/log/log.hpp" );
 
 		if ( !lHppFile.is_open() )
 		{
@@ -120,7 +120,7 @@ int main ( int argc , char* argv[] )
 			return 1;
 		}
 
-		std::ofstream lHxxFile ( "include/log/log.hxx" );
+		std::ofstream lHxxFile ( "include/uhal/log/log.hxx" );
 
 		if ( !lHxxFile.is_open() )
 		{
@@ -145,7 +145,8 @@ int main ( int argc , char* argv[] )
 	}
 	catch ( const std::exception& aExc )
 	{
-		std::cout << "Caught Exception : " << aExc.what() << std::endl;
+		std::cerr << "ERROR: Caught Exception : " << aExc.what() << std::endl;
+		exit(1);
 	}
 }
 

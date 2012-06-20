@@ -20,8 +20,8 @@ LIBRARY = lib/libcactus_uhal_log.so
 LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 
-EXECUTABLE_SOURCES = 	src/common/test.cxx \
-			src/common/generator.cxx
+EXECUTABLE_SOURCES = 	src/common/generator.cxx
+
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
@@ -63,7 +63,7 @@ ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
 #Library will be compiled and will be packaged
-${LIBRARY}: ${LIBRARY_OBJECT_FILES}
+${LIBRARY}: ${LIBRARY_OBJECT_FILES} ${EXECUTABLES}
 	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal/log}
 	mkdir -p lib

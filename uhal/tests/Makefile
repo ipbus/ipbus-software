@@ -16,7 +16,9 @@ PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
-SOURCES = src/common/test_uhal.cpp
+SOURCES = 	src/common/test_uhal.cpp \
+		src/common/test_log.cpp
+
 EXECUTABLES = $(patsubst src/common/%.cpp,bin/%.exe,${SOURCES})
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
