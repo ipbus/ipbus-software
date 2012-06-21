@@ -6,7 +6,7 @@ include $(shell pwd)/../../config/Makefile.macros
 
 Package = uhal/grammars
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
-PackageName = cactus-uhal-gramars
+PackageName = cactus-uhal-grammars
 
 Packager = Andrew Rose
 
