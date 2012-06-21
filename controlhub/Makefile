@@ -1,9 +1,20 @@
 ###################################################################################
 #
-# Simple Erlang build file with testing built-in.
-# Inspiration taken from an erlang-factory.com presentation by Richard Carlsson 
+#  ControlHub Makefile; there are four top-level options for you:
+#     - Do "make" to do a standard clean release build.
+#     - Do "make dev" if you are just developing the code.
+#     - Do "make rpm" to build the release RPM (do a normal "make" first!).
+#     - Do "make clean" to clean.
 #
-#   Robert Frazier, March 2012
+#  Credit to:
+#     - Richard Carlsson for his erlang-factory presentation that gave inspiration
+#       on how to implement automated testing.
+#     - Erik Rigtorp for inspiration on how to automatically generate some of the
+#       necessary release files.
+#
+#
+#   Robert Frazier
+#   March 2012
 #
 ###################################################################################
 
@@ -61,6 +72,10 @@ clean: _cleanall
 _cleanall:
 	rm -f ebin/*.beam
 	rm -rf ebin/unittest
+	rm -f controlhub.rel
+	rm -f controlhub.boot
+	rm -f controlhub.script
+	rm -f controlhub.tar.gz
 
 check_test_build_dir:
 	test -d ebin/unittest || mkdir ebin/unittest
@@ -68,13 +83,16 @@ check_test_build_dir:
 test:
 	$(ERL) -noshell -pa ebin ebin/unittest -eval 'eunit:test("ebin",[verbose])' -s init stop
 
-release: clean build_controlhub
+release: clean build_controlhub controlhub.boot
+	$(ERL) -pa ebin -noshell +B -eval \
+	 'case systools:make_tar("controlhub", []) of \
+	 ok -> halt(0); _ -> halt(1) end.'
 
 # Auto-generate the release boot and script files
 controlhub.boot: controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
-	'case systools:make_script("'$(basename $@)'",[local]) of \
-         ok -> halt(0); _ -> halt(1) end.'
+	 'case systools:make_script("'$(basename $@)'",[]) of \
+	 ok -> halt(0); _ -> halt(1) end.'
 
 # Auto-generate the control.rel file.
 controlhub.rel: ebin/controlhub.app Makefile
@@ -90,3 +108,6 @@ controlhub.rel: ebin/controlhub.app Makefile
 	 {ok, Vsn} = application:get_key(App, vsn), \
          {App, Vsn} end, Apps ++ [$(basename $@)])}]), \
 	 file:close(F), halt(0)."
+
+	 
+	 
