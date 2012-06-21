@@ -1,12 +1,11 @@
 #
 # Makefile for boost
 #
-BUILD_HOME = $(shell pwd)/../..
 
-include ${BUILD_HOME}/config/Makefile.macros
+include $(shell pwd)/../../config/Makefile.macros
 
 Package = uhal/log
-PackagePath = ${BUILD_HOME}/${Package}
+PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
 PackageName = cactus-uhal-log
 
 Packager = Andrew Rose
@@ -38,13 +37,15 @@ LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 
 LINK_EXECUTABLE_FLAGS = -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
 default: build
 
 clean: _cleanall
 _cleanall:
-	rm -rf RPMBUILD
+	rm -rf ${RPMBUILD_DIR}
 	rm -rf obj
 	rm -rf bin
 	rm -rf lib
@@ -64,12 +65,12 @@ ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 
 #Library will be compiled and will be packaged
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES} ${EXECUTABLES}
-	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal/log}
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/log}
 	mkdir -p lib
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
-	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -p include/uhal/log/*.{hpp,hxx} RPMBUILD/SOURCES/include/uhal/log/.
+	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
+	cp -p include/uhal/log/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/uhal/log/.
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj
@@ -77,10 +78,10 @@ ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 
 rpm: _rpmall
 _rpmall: 
-	rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD						\
-			--define  "_topdir ${PackagePath}/RPMBUILD"						\
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
+			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\
-			--define "sources_dir ${PackagePath}/RPMBUILD/SOURCES"					\
+			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
 			--define "name ${PackageName}"								\
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\

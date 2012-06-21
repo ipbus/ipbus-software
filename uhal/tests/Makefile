@@ -1,12 +1,11 @@
 #
 # Makefile for uhal tests
 #
-BUILD_HOME = $(shell pwd)/../..
 
-include ${BUILD_HOME}/config/Makefile.macros
+include $(shell pwd)/../../config/Makefile.macros
 
 Package = uhal/tests
-PackagePath = ${BUILD_HOME}/${Package}
+PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
 PackageName = cactus-uhal-tests
 
 Packager = Andrew Rose
@@ -16,8 +15,11 @@ PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
-SOURCES = 	src/common/test_uhal.cpp \
-		src/common/test_log.cpp
+SOURCES = src/common/test_uhal.cpp \
+			src/common/test_timing.cpp \
+			src/common/DummyHardwareUdp.cpp \
+			src/common/DummyHardwareTcp.cpp \
+			src/common/test_log.cpp
 
 EXECUTABLES = $(patsubst src/common/%.cpp,bin/%.exe,${SOURCES})
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
@@ -35,6 +37,7 @@ LIBRARIES = 	\
 		-lboost_filesystem \
 		-lboost_regex \
 		-lboost_system \
+		-lboost_thread \
 		\
 		-lcactus_extern_pugixml \
 		-lcactus_uhal_log \
@@ -51,13 +54,15 @@ INCLUDE_PATH = 	-Iinclude  \
 CPP_FLAGS = -O3 -Wall -fPIC ${INCLUDE_PATH}
 LINK_FLAGS = -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}
 
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
 default: build
 
 clean: _cleanall
 _cleanall:
-	rm -rf RPMBUILD
+	rm -rf ${RPMBUILD_DIR}
 	rm -rf obj
 	rm -rf bin
 
@@ -67,11 +72,11 @@ buildall: _all
 _all: ${EXECUTABLES}
 
 ${EXECUTABLES}: bin/%.exe: obj/%.o 
-	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/bin
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/bin
 	mkdir -p bin
 	g++ ${LINK_FLAGS} $< -o $@
-	cp -p bin/*.exe RPMBUILD/SOURCES/bin/.
+	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/.
 
 obj/%.o: src/common/%.cpp
 	mkdir -p obj
@@ -79,13 +84,13 @@ obj/%.o: src/common/%.cpp
 
 rpm: _rpmall
 _rpmall: 
-	rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD						\
-			--define  "_topdir ${PackagePath}/RPMBUILD"						\
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
+			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\
-			--define "sources_dir ${PackagePath}/RPMBUILD/SOURCES"					\
+			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
 			--define "name ${PackageName}"								\
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-uhal.spec
+			cactus-uhal-tests.spec
 

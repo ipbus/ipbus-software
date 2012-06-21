@@ -1,12 +1,11 @@
 #
 # Makefile for ErlangOTP
 #
-BUILD_HOME = $(shell pwd)/../..
 
-include ${BUILD_HOME}/config/Makefile.macros
+include $(shell pwd)/../../config/Makefile.macros
 
 Package = extern/erlang
-PackagePath = ${BUILD_HOME}/${Package}
+PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
 PackageName = cactus-extern-erlang
 
 Packager = Robert Frazier
@@ -25,6 +24,7 @@ PACKAGE_RELEASE = 1
 TARBALL_DIR = otp_src_R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}
 TARBALL_FILE = ${TARBALL_DIR}.tar.gz
 
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
@@ -32,18 +32,18 @@ default: build
 
 clean: _cleanall
 _cleanall:
-	rm -rf RPMBUILD
+	rm -rf ${RPMBUILD_DIR}
 	rm -rf ${TARBALL_DIR}
 
 all: _all
 build: _all
 buildall: _all
 _all:
-	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	tar -zxf ${TARBALL_FILE}
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	tar -xvzf ${TARBALL_FILE} | sed 's/^/extracted: /'
 	cd ${TARBALL_DIR}; ./configure \
-		--prefix=${PackagePath}/RPMBUILD/SOURCES \
-		--exec-prefix=${PackagePath}/RPMBUILD/SOURCES \
+		--prefix=${RPMBUILD_DIR}/SOURCES \
+		--exec-prefix=${RPMBUILD_DIR}/SOURCES 
 		--without-javac
 	cd ${TARBALL_DIR}; make
 	cd ${TARBALL_DIR}; make install
@@ -51,11 +51,11 @@ _all:
 
 rpm: _rpmall
 _rpmall: 
-	rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD \
-		--define  "_topdir ${PackagePath}/RPMBUILD" \
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
+		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${INSTALL_PREFIX}" \
 		--define "tarball_file ${TARBALL_FILE}" \
-		--define "sources_dir ${PackagePath}/RPMBUILD/SOURCES" \
+		--define "sources_dir ${RPMBUILD_DIR}/SOURCES" \
 		--define "name ${PackageName}" \
 		--define "version R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}" \
 		--define "release ${PACKAGE_RELEASE}" \

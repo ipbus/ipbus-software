@@ -1,12 +1,11 @@
 # 
 # Makefile for uhal 
 #
-BUILD_HOME = $(shell pwd)/../..
 
-include ${BUILD_HOME}/config/Makefile.macros
+include $(shell pwd)/../../config/Makefile.macros
 
 Package = uhal/uhal
-PackagePath = ${BUILD_HOME}/${Package}
+PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
 PackageName = cactus-uhal-uhal
 
 Packager = Andrew Rose
@@ -34,6 +33,7 @@ LIBRARIES = 	-lpthread \
 		-lboost_system \
 		-lboost_filesystem \
 		-lboost_regex \
+		-lboost_thread \
 		\
 		-lcactus_uhal_grammars \
 		-lcactus_uhal_log	
@@ -47,13 +47,15 @@ INCLUDE_PATH = 	-Iinclude  \
 CPP_FLAGS = -O3 -Wall -fPIC -D USE_TCP_MULTITHREADED -D USE_UDP_MULTITHREADED  ${INCLUDE_PATH}
 LINK_FLAGS = -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}
 
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
 
 default: build
 
 clean: _cleanall
 _cleanall:
-	rm -rf RPMBUILD
+	rm -rf ${RPMBUILD_DIR}
 	rm -rf obj
 	rm -rf lib
 
@@ -63,13 +65,13 @@ buildall: _all
 _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
-	mkdir -p RPMBUILD/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p RPMBUILD/SOURCES/{lib,include/uhal,include/uhal/TemplateDefinitions}
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal,include/uhal/TemplateDefinitions}
 	mkdir -p lib
 	g++ ${LINK_FLAGS} ${OBJECT_FILES} -o $@
-	cp -p lib/*.so RPMBUILD/SOURCES/lib/.
-	cp -p include/uhal/*.hpp RPMBUILD/SOURCES/include/uhal/.
-	cp -p include/uhal/TemplateDefinitions/*.hxx RPMBUILD/SOURCES/include/uhal/TemplateDefinitions/.
+	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
+	cp -p include/uhal/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/.
+	cp -p include/uhal/TemplateDefinitions/*.hxx ${RPMBUILD_DIR}/SOURCES/include/uhal/TemplateDefinitions/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p obj
@@ -79,10 +81,10 @@ ${OBJECT_FILES}: obj/%.o : src/common/%.cpp
 
 rpm: _rpmall
 _rpmall: 
-	rpmbuild -bb -bl --buildroot=${PackagePath}/RPMBUILD/BUILD						\
-			--define  "_topdir ${PackagePath}/RPMBUILD"						\
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
+			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\
-			--define "sources_dir ${PackagePath}/RPMBUILD/SOURCES"					\
+			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
 			--define "name ${PackageName}"								\
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
