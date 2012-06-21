@@ -9,10 +9,9 @@ namespace uhal
 	template< typename T , uint32_t WIDTH >
 	void log_inserter ( const _Real< T , RealFmt<WIDTH> >& aReal )
 	{
-		char lBuffer[ WIDTH ];
-		double lDouble ( aReal.value() ); //it appears that some platforms require this to prevent a segfault
-		gcvt ( lDouble , WIDTH , lBuffer );
-		fputs ( lBuffer , log_configuration::getDestination() );
+		char lBuffer[ WIDTH<<4 ]; //Make the buffer plenty wide enough, since the exponent is not counted in the width term!
+		gcvt ( aReal.value() , WIDTH , lBuffer );
+		fputs( lBuffer , log_configuration::getDestination() );
 	}
 
 	template< typename FORMAT >
