@@ -2,29 +2,30 @@
 # spec file for controlhub
 #
 
-Name: %{name} 
+Name: %{name}
 Summary: IPbus packet-router
 Version: %{version}
 Release: %{release}
-License: BSD License 
+License: BSD License
 URL: http://www.erlang.org/
-Group: CACTUS 
+Group: CACTUS
 Source: %{tarball_file}
 Requires: cactus-extern-erlang
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot 
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
-%description 
+%description
 IPbus packet-router
 
 %prep
 
 %build
 
-%install 
+%install
 curdir=`pwd`
 rm -rf $RPM_BUILD_ROOT
 
 # copy lib content to RPM_BUILD_ROOT
+echo "I AM HERE"
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 
@@ -37,16 +38,16 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/releases
 
 #return to working directory
-cd $curdir 
+cd $curdir
 
-%clean 
+%clean
 
 
-%post 
+%post
 
-%postun 
+%postun
 
-%files 
-%defattr(-, root, root) 
+%files
+%defattr(-, root, root)
 %{_prefix}/lib/*
 %{_prefix}/releases/*
