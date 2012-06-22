@@ -30,10 +30,10 @@
   <!--_JTAG_interface_-->
   
   <node id="JTAG_BASE_ADDR" address="0x0600">
-	<node id="a" mask="0x1" />
-	<node id="b" mask="0x2" />
-	<node id="c" mask="0x4" />
-	<node id="d" mask="0x8" />
+	<node id="a" bit-mask="0x1" />
+	<node id="b" bit-mask="0x2" />
+	<node id="c" bit-mask="0x4" />
+	<node id="d" bit-mask="0x8" />
   </node>
   
   <node id="SYSTEM1" module="file://~/uhal/tests/addr/uhal_module_address_table.xml" address="0x0500"/>

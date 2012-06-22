@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<node id="H">
+	<node id="HA" address="0x000" permission="r"/>
+	<node id="HB" address="0x001" permission="read"/>
+	<node id="HC" address="0x002" permission="rw"/>
+	<node id="HD" address="0x003" permission="wr"/>
+	<node id="HE" address="0x004" permission="readwrite"/>
+	<node id="HF" address="0x005" permission="writeread"/>
+	<node id="HG" address="0x006" permission="w" />
+	<node id="HH" address="0x007" permission="write" />
+</node>
+
+

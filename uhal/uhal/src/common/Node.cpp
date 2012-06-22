@@ -111,7 +111,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			mAddr = aParentAddr;
 		}
 
-		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address-mask" , mAddrMask ) )
+		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mAddrMask ) )
 		{
 			if ( mAddrMask & ~aParentMask )
 			{
@@ -162,7 +162,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		}
 		else
 		{
-			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
+			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "bit-mask" , mMask );
 			std::string lPermission;
 
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
