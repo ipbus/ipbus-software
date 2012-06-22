@@ -33,7 +33,7 @@ void hwInterface_creation()
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -172,7 +172,7 @@ void rawClientAccess()
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -213,7 +213,7 @@ void navigation_and_traversal_test()
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -258,7 +258,7 @@ void read_test()
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -358,7 +358,7 @@ void write_test()
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -390,7 +390,7 @@ void read_write_mask()
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -536,7 +536,7 @@ void addOperationToQueue ( HwInterface& hw , const std::vector<int>& aOperationL
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -655,14 +655,14 @@ void allInstructionPermutations()
 				lStr << messages[ *lIt ] << ", ";
 			}
 
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			log ( Error() , "TEST SEQUENCE WAS : " , lStr.str() );
 			throw exception ( aExc );
 		}
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }
@@ -685,7 +685,7 @@ int main ( int argc,char* argv[] )
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw exception ( aExc );
 	}
 }

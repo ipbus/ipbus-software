@@ -57,7 +57,7 @@ namespace __gnu_cxx
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -87,8 +87,8 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-				log ( Error() , "Expression \"" , aSemicolonDelimitedUriList , "\" must be a semicolon delimeted list and all files must be in the form \"protocol://address\"" );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+				log ( Error() , "Expression " , Quote(aSemicolonDelimitedUriList) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
 				return false;
 			}
 
@@ -96,16 +96,16 @@ namespace uhal
 			{
 				try
 				{
-					log ( Info() , "Parsed \"" , aSemicolonDelimitedUriList , "\" to:" );
+					log ( Info() , "Parsed " , Quote(aSemicolonDelimitedUriList) , " to:" );
 
 					for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
 					{
-						log ( Info() , " > [" , lIt->first , "] \"" , lIt->second , "\"" );
+						log ( Info() , " > [" , lIt->first , "] " , Quote(lIt->second) );
 					}
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					// Just debugging so although exception	is worrying, it is not critical
 				}
 			}
@@ -173,7 +173,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				return false;
 			}
 
@@ -189,7 +189,7 @@ namespace uhal
 					{
 						if ( aFiles || aDirectories )
 						{
-							log ( lLoggingLevel , "Shell expansion of \"" , aFilenameExpr , "\" returned:" );
+							log ( lLoggingLevel , "Shell expansion of " , Quote(aFilenameExpr) , " returned:" );
 						}
 
 						if ( aFiles )
@@ -220,7 +220,7 @@ namespace uhal
 					}
 					catch ( const std::exception& aExc )
 					{
-						log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+						log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 						// Just debugging so although exception	is worrying, it is not critical
 					}
 				}
@@ -245,7 +245,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -280,7 +280,7 @@ namespace uhal
 					}
 					catch ( const std::exception& aExc )
 					{
-						log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+						log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 						// Just debugging so although exception	is worrying, it is not critical
 					}
 				}
@@ -294,7 +294,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -325,7 +325,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -350,7 +350,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -386,7 +386,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -417,7 +417,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -470,7 +470,7 @@ namespace uhal
 						}
 						catch ( const std::exception& aExc )
 						{
-							log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+							log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 							throw uhal::exception ( aExc );
 						}
 					}
@@ -482,7 +482,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -513,7 +513,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
 
@@ -521,7 +521,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -548,13 +548,13 @@ namespace uhal
 				}
 				else
 				{
-					log ( Error() , "Protocol \"" , aProtocol , "\" is unknown and I am, thus, ignoring file \"" , aFilenameExpr , "\". Continuing for now but be aware!" );
+					log ( Error() , "Protocol " , Quote(aProtocol) , " is unknown and I am, thus, ignoring file " , Quote(aFilenameExpr) , ". Continuing for now but be aware!" );
 					return false;
 				}
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -628,7 +628,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute " , Quote(aAttrName)  );
 					}
 
 					return false;
@@ -636,7 +636,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -664,7 +664,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute " , Quote(aAttrName)  );
 					}
 
 					return false;
@@ -672,7 +672,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -732,7 +732,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute " , Quote(aAttrName)  );
 					}
 
 					return false;
@@ -740,7 +740,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -800,7 +800,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute " , Quote(aAttrName)  );
 					}
 
 					return false;
@@ -808,7 +808,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -836,7 +836,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute " , Quote(aAttrName)  );
 					}
 
 					return false;
@@ -844,7 +844,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -872,7 +872,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute " , Quote(aAttrName)  );
 					}
 
 					return false;
@@ -880,7 +880,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -908,7 +908,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute \"" , aAttrName , "\"" );
+						log ( Error() , "Failed to get attribute " , Quote(aAttrName)  );
 					}
 
 					return false;
@@ -916,7 +916,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}

@@ -36,7 +36,7 @@ namespace uhal
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -63,7 +63,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -85,7 +85,7 @@ namespace uhal
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -124,7 +124,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -147,7 +147,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -174,7 +174,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -187,7 +187,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -200,7 +200,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -216,7 +216,7 @@ namespace uhal
 
 			if ( ! lInsert.second )
 			{
-				log ( Info() , "File \"" , ( aProtocol+ ( aPath.string() ) ) , "\" has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
+				log ( Info() , "File " ,  Quote( aProtocol+ ( aPath.string() ) ) , " has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
 				return;
 			}
 
@@ -267,7 +267,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

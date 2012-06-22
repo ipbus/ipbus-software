@@ -24,7 +24,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -38,7 +38,7 @@ namespace uhal
 
 			if ( lAddressFiles.size() != 1 )
 			{
-				log ( Error() , "Exactly one address table file must be specified. The expression \"" , aFilenameExpr , "\" contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
+				log ( Error() , "Exactly one address table file must be specified. The expression " , Quote(aFilenameExpr) , " contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw IncorrectAddressTableFileCount();
 			}
@@ -47,14 +47,14 @@ namespace uhal
 
 			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , aAddr , aAddrMask , boost::ref ( lNodes ) ) ) )
 			{
-				log ( Error() , "Failed to open address table file \"" , lAddressFiles[0].second , "\"" );
+				log ( Error() , "Failed to open address table file " , Quote(lAddressFiles[0].second) );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw FailedToOpenAddressTableFile();
 			}
 
 			if ( lNodes.size() != 1 )
 			{
-				log ( Error() , "Exactly one address table file must be specified. The expression \"" , lAddressFiles[0].second , "\" refers to " , Integer ( lNodes.size() ) , " valid files." );
+				log ( Error() , "Exactly one address table file must be specified. The expression " , Quote(lAddressFiles[0].second) , " refers to " , Integer ( lNodes.size() ) , " valid files." );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw IncorrectAddressTableFileCount();
 			}
@@ -63,7 +63,7 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -101,7 +101,7 @@ namespace uhal
 
 				if ( !lXmlNode )
 				{
-					log ( Error() , "No XML node called \"node\" in file " , aPath.c_str() );
+					log ( Error() , "No XML node called ", Quote("node") , " in file " , aPath.c_str() );
 					return;
 				}
 
@@ -139,13 +139,13 @@ namespace uhal
 			}
 			else
 			{
-				log ( Error() , "Extension \"" , lExtension , "\" not known." );
+				log ( Error() , "Extension " , Quote(lExtension) , " not known." );
 				return;
 			}
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -180,7 +180,7 @@ namespace uhal
 					lStr << "\n > " << lIt2->first ;
 				}
 
-				log ( Warning() , "Node subclass \"" , lClass , "\" does not exists in map of creators. Options are:" , lStr.str() , "\nWill create a plain base node for now but be warned." );
+				log ( Warning() , "Node subclass " , Quote( lClass ) , " does not exists in map of creators. Options are:" , lStr.str() , "\nWill create a plain base node for now but be warned." );
 				lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aParentAddr , aParentMask ) );
 			}
 		}

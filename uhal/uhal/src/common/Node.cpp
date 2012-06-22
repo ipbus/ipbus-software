@@ -156,7 +156,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -179,7 +179,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
 			}
@@ -200,7 +200,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
 			}
@@ -219,7 +219,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -237,7 +237,7 @@ Node::Node ( ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -276,7 +276,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -290,7 +290,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -303,7 +303,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -316,7 +316,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -329,7 +329,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -367,7 +367,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -381,7 +381,7 @@ Node::Node ( ) try :
 
 			if ( lIt==mChildrenMap->end() )
 			{
-				log ( Error() , "No branch found with ID-path \"" , aId , "\"" );
+				log ( Error() , "No branch found with ID-path " ,  Quote( aId) );
 				std::size_t lPos ( std::string::npos );
 				bool lPartialMatch ( false );
 
@@ -398,7 +398,7 @@ Node::Node ( ) try :
 
 					if ( lIt!=mChildrenMap->end() )
 					{
-						log ( Error() , "Partial match \"" , aId.substr ( 0 , lPos ) , "\" found for ID-path \"" , aId , "\"" );
+						log ( Error() , "Partial match " ,  Quote(aId.substr ( 0 , lPos )) , " found for ID-path " ,  Quote(aId) );
 						log ( Error() , "Tree structure of partial match is:" , lIt->second );
 						lPartialMatch = true;
 						break;
@@ -409,7 +409,7 @@ Node::Node ( ) try :
 
 				if ( !lPartialMatch )
 				{
-					log ( Error() , "Not even a partial match found for ID-path \"" , aId , "\". Tree structure is:" , *this );
+					log ( Error() , "Not even a partial match found for ID-path " ,  Quote(aId) , ". Tree structure is:" , *this );
 				}
 
 				log ( Error() , "Throwing at " , ThisLocation() );
@@ -420,7 +420,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -442,7 +442,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -473,7 +473,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -486,7 +486,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -499,7 +499,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -528,7 +528,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -541,7 +541,7 @@ Node::Node ( ) try :
 			if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
-				log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=\"incremental\"' flags there" );
+				log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote("incremental") , "' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BulkTransferOnSingleRegister();
 			}
@@ -561,7 +561,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -591,7 +591,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -604,7 +604,7 @@ Node::Node ( ) try :
 			if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
-				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=\"incremental\"' flags there" );
+				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote("incremental") , "' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BulkTransferOnSingleRegister();
 			}
@@ -624,7 +624,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -653,7 +653,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -666,7 +666,7 @@ Node::Node ( ) try :
 			if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
-				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=\"incremental\"' flags there" );
+				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote("incremental") , "' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BulkTransferOnSingleRegister();
 			}
@@ -686,7 +686,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -711,7 +711,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -735,7 +735,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -751,7 +751,7 @@ Node::Node ( ) try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

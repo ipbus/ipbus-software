@@ -48,11 +48,11 @@ namespace uhal
 										);
 		uint16_t lPort = boost::lexical_cast< uint16_t > ( lPortStr->second );
 		uint32_t lIPaddress = ( lIP.at ( 0 ) <<24 ) | ( lIP.at ( 1 ) <<16 ) | ( lIP.at ( 2 ) <<8 ) | ( lIP.at ( 3 ) );
-		log ( Info() , "Converted IP address string \"" , lIPstr->second ,
-			  "\" to " , Integer ( lIP.at ( 0 ) ) , "." , Integer ( lIP.at ( 1 ) ) , "." , Integer ( lIP.at ( 2 ) ) , "." , Integer ( lIP.at ( 3 ) ) ,
+		log ( Info() , "Converted IP address string " ,  Quote(lIPstr->second) ,
+			  " to " , Integer ( lIP.at ( 0 ) ) , "." , Integer ( lIP.at ( 1 ) ) , "." , Integer ( lIP.at ( 2 ) ) , "." , Integer ( lIP.at ( 3 ) ) ,
 			  " and converted this to " , Integer ( lIPaddress, IntFmt< hex , fixed >() ) ,
-			  ". Converted port string \"" , lPortStr->second ,
-			  "\" to " , Integer ( lPort, IntFmt< hex , fixed >() )	);
+			  ". Converted port string " ,  Quote(lPortStr->second ,
+			  " to " , Integer ( lPort, IntFmt< hex , fixed >() )	);
 		*/
 		
 		
@@ -68,7 +68,7 @@ namespace uhal
 		
 		if ( lIt == aUri.mArguments.end() )
 		{
-			log ( Error() , "This function expects arguments of the form \"target=192.168.200.200:50001\". It appears that this is missing." );
+			log ( Error() , "This function expects arguments of the form " , Quote( "target=192.168.200.200:50001" ) ,". It appears that this is missing." );
 			log ( Error() , "Throwing at " , ThisLocation() );
 			throw XMLfileMissingRequiredParameters();
 		}
@@ -82,8 +82,8 @@ namespace uhal
 										);
 
 		uint32_t lIPaddress = ( lIP.mIP1 <<24 ) | ( lIP.mIP2 <<16 ) | ( lIP.mIP3 <<8 ) | ( lIP.mIP4 );
-		log ( Info() , "Converted IP address string \"" , lIt->second ,
-			  "\" to " , Integer ( lIP.mIP1 ) , "." , Integer ( lIP.mIP2 ) , "." , Integer ( lIP.mIP3 ) , "." , Integer ( lIP.mIP4 ) , ":" , Integer ( lIP.mPort ) ,
+		log ( Info() , "Converted IP address string " ,  Quote(lIt->second) ,
+			  " to " , Integer ( lIP.mIP1 ) , "." , Integer ( lIP.mIP2 ) , "." , Integer ( lIP.mIP3 ) , "." , Integer ( lIP.mIP4 ) , ":" , Integer ( lIP.mPort ) ,
 			  " and converted this to IP " , Integer ( lIPaddress, IntFmt< hex , fixed >() ) , ", port " , Integer ( lIP.mPort, IntFmt< hex , fixed >() )	);								
 										
 		return std::make_pair ( lIPaddress , lIP.mPort );

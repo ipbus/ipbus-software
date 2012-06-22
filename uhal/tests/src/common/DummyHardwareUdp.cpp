@@ -16,7 +16,7 @@ class UDPdummyHardware
 			{}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 
@@ -142,7 +142,7 @@ class UDPdummyHardware
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -183,7 +183,7 @@ int main ( int argc, char* argv[] )
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 

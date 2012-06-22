@@ -1,9 +1,7 @@
 
 #include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log_inserters.string.hpp>
 
-#ifdef __GNUG__
-#include <cxxabi.h>
-#endif
 
 namespace uhal
 {

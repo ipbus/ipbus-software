@@ -13,14 +13,15 @@ namespace uhal
 
 	template< typename T > _Quote< T > Quote ( const T& aT );
 
+	_Quote< const char* > Quote ( const char* aStr );
+
 	template< typename T >
 	class _Quote : public RefWrapper< T >
 	{
 			friend _Quote< T > Quote<> ( const T& aT );
+			friend _Quote< const char* > Quote ( const char* aStr );
 			_Quote ( const T& aT ) : RefWrapper< T > ( aT ) {}
 	};
-
-
 
 
 }
