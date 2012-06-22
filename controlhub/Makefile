@@ -1,8 +1,8 @@
-###################################################################################
+#########################################################################################
 #
 #  ControlHub Makefile; there are four top-level options for you:
-#     - Do "make" to do a standard clean release build.
-#     - Do "make dev" if you are just developing the code.
+#     - Do "make" to do a standard release build.
+#     - Do "make dev" if you're just developing the code (completely local build + test).
 #     - Do "make rpm" to build the release RPM (do a normal "make" first!).
 #     - Do "make clean" to clean.
 #
@@ -16,7 +16,7 @@
 #   Robert Frazier
 #   March 2012
 #
-###################################################################################
+#########################################################################################
 
 
 CACTUS_ROOT = $(shell pwd)/..
@@ -25,7 +25,9 @@ include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = controlhub
 PackagePath = $(CACTUS_ROOT)/${Package}
-PackageName = cactus-extern-controlhub
+PackageName = cactus-controlhub
+
+Packager = Robert Frazier
 
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 1
@@ -35,8 +37,7 @@ PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 1
 
 # A tarball is generated as part of the Erlang release-building mechanism
-TARBALL_DIR = controlhub
-TARBALL_FILE = ${TARBALL_DIR}.tar.gz
+TARBALL_FILE = controlhub.tar.gz
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
@@ -72,9 +73,10 @@ TEST_OBJECTS = $(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
 
 CONTROLHUB_RELEASE_FILES = controlhub.rel controlhub.boot $(TARBALL_FILE)
 
+
 .PHONY: all _all clean  _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
-.PHONY: dev
+.PHONY: _rpmdirs dev _check_test_build_dir
 
 default: build
 
@@ -82,18 +84,29 @@ all: _all
 build: _all
 buildall: _all
 
-_all: clean $(OBJECTS) $(CONTROLHUB_RELEASE_FILES)
+_all: _rpmdirs $(OBJECTS) $(CONTROLHUB_RELEASE_FILES)
+	tar -xvzf ${TARBALL_FILE} -C ${RPMBUILD_DIR}/SOURCES | sed 's/^/extracted to RPMBUILD\/SOURCES: /'
+	
 
-dev: $(OBJECTS) check_test_build_dir $(TEST_OBJECTS) test
+dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
 
 rpm: _rpmall
 _rpmall:
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	tar -xvzf ${TARBALL_FILE} | sed 's/^/extracted: /'
-	
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
+		--define  "_topdir ${RPMBUILD_DIR}" \
+		--define "_prefix ${INSTALL_PREFIX}" \
+		--define "tarball_file ${TARBALL_FILE}" \
+		--define "sources_dir ${RPMBUILD_DIR}/SOURCES" \
+		--define "name ${PackageName}" \
+		--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}" \
+		--define "release ${PACKAGE_RELEASE}" \
+		--define "packager ${Packager}" \
+		${PackageName}.spec
+
 
 clean: _cleanall
 _cleanall:
+	rm -rf $(RPMBUILD_DIR)
 	rm -f ebin/*.beam
 	rm -rf ebin/unittest
 	rm -f controlhub.rel
@@ -102,9 +115,10 @@ _cleanall:
 	rm -f controlhub.tar.gz
 
 
-
-
 ############## Nitty gritty ######################
+
+_rpmdirs:
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 
 ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
@@ -113,7 +127,7 @@ ebin/%.beam : src/%.erl $(INCLUDES)
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
 
 
-check_test_build_dir:
+_check_test_build_dir:
 	test -d ebin/unittest || mkdir ebin/unittest
 
 test:
@@ -123,26 +137,23 @@ test:
 
 $(TARBALL_FILE): controlhub.boot controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
-	 'case systools:make_tar("controlhub", []) of \
-	 ok -> halt(0); _ -> halt(1) end.'
+	 'case systools:make_tar("controlhub", []) of ok -> halt(0); _ -> halt(1) end.'
 
 # Auto-generate the release boot and script files
 controlhub.boot: controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
-	 'case systools:make_script("'$(basename $@)'",[]) of \
-	 ok -> halt(0); _ -> halt(1) end.'
+	 'case systools:make_script("controlhub",[]) of ok -> halt(0); _ -> halt(1) end.'
 
 # Auto-generate the control.rel file.
 controlhub.rel: ebin/controlhub.app Makefile
-	echo $(basename $@)
 	$(ERL) -pa ebin -noshell +B -eval \
-	 "ok = application:load($(basename $@)), \
+	 "ok = application:load(controlhub), \
 	 {ok, ControlHubVsn} = application:get_key(controlhub, vsn), \
-	 {ok, Apps} = application:get_key($(basename $@), applications), \
+	 {ok, Apps} = application:get_key(controlhub, applications), \
 	 {ok, F} = file:open("$@", [write]), \
-	 io:format(F, \"~p.~n\", [{release, {\"$(basename $@)\", ControlHubVsn}, \
+	 io:format(F, \"~p.~n\", [{release, {\"controlhub\", ControlHubVsn}, \
 	 {erts, erlang:system_info(version)}, \
 	 lists:map(fun (App) -> application:load(App), \
 	 {ok, Vsn} = application:get_key(App, vsn), \
-         {App, Vsn} end, Apps ++ [$(basename $@)])}]), \
+         {App, Vsn} end, Apps ++ [controlhub])}]), \
 	 file:close(F), halt(0)."
