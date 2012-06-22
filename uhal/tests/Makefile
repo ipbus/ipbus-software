@@ -76,7 +76,6 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/bin
 	mkdir -p bin
 	g++ ${LINK_FLAGS} $< -o $@
-	chmod 777 bin/*.exe
 	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/.
 
 obj/%.o: src/common/%.cpp

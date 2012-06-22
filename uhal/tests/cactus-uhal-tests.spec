@@ -29,7 +29,7 @@ mkdir -p $RPM_BUILD_ROOT%{_prefix}/bin
 cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 
 #Change access rights
-chmod -R 555 $RPM_BUILD_ROOT%{_prefix}/bin
+chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
 
 #return to working directory
 cd $curdir 
