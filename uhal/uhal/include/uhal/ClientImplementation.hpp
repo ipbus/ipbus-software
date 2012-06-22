@@ -80,9 +80,11 @@ namespace uhal
 
 	};
 
+}
 	// ----------------------------------------------------------------------------------------------------------------
 
-
+namespace uhal
+{
 	//! A class to directly access locally-connected devices via IPbus over UDP
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class IPBusTCPClient : public ClientInterface
@@ -135,10 +137,12 @@ namespace uhal
 			tTransportProtocol mTransportProtocol;
 
 	};
-
+}
 
 	// ----------------------------------------------------------------------------------------------------------------
 
+namespace uhal
+{
 	//! Exception class to handle the case where the received header does not match the expected header. Uses the base uhal::exception implementation of what()
 	class XMLfileMissingRequiredParameters: public uhal::exception {};
 
@@ -148,7 +152,7 @@ namespace uhal
 		@return a pair containing an IP-address (first) and port number (second)
 	*/
 	std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri );
-
+	
 	//! A class to indirectly access (via a Control Hub Host) devices via IPbus over UDP
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubClient : public ClientInterface
@@ -206,14 +210,29 @@ namespace uhal
 
 	};
 
-
-
-
-
-
-
-
+	struct IPaddr
+	{
+		uint16_t mIP1;  //must be 16 bit to stop it being interpretted as a char...
+		uint16_t mIP2;
+		uint16_t mIP3;
+		uint16_t mIP4;
+		uint16_t mPort;
+	};	
+			
 }
+
+
+BOOST_FUSION_ADAPT_STRUCT (
+	uhal::IPaddr,
+	( uint16_t , mIP1 )
+	( uint16_t , mIP2 )
+	( uint16_t , mIP3 )
+	( uint16_t , mIP4 )
+	( uint16_t , mPort )
+);	
+
+
+
 
 #include "uhal/TemplateDefinitions/ClientImplementation.hxx"
 
