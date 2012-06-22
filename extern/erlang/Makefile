@@ -2,7 +2,9 @@
 # Makefile for ErlangOTP
 #
 
-include $(shell pwd)/../../config/Makefile.macros
+CACTUS_ROOT = $(shell pwd)/../..
+
+include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = extern/erlang
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}

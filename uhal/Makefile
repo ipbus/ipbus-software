@@ -3,7 +3,8 @@ PACKAGES = \
 	log \
 	grammars \
 	uhal \
-	tests 
+	tests \
+	tutorials
 
 TARGETS=clean rpm build all
 

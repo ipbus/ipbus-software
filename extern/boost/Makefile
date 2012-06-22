@@ -2,7 +2,9 @@
 # Makefile for boost
 #
 
-include $(shell pwd)/../../config/Makefile.macros
+CACTUS_ROOT = $(shell pwd)/../..
+
+include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = extern/boost
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}

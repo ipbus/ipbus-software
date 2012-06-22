@@ -18,9 +18,9 @@
 #
 ###################################################################################
 
-BUILD_HOME = $(shell pwd)/..
+CACTUS_ROOT = $(shell pwd)/..
 
-include $(BUILD_HOME)/config/Makefile.macros
+include $(CACTUS_ROOT)/config/Makefile.macros
 
 UNAME := $(shell uname)
 

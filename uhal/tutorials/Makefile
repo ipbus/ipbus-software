@@ -2,7 +2,9 @@
 # Makefile for uhal tutorials
 #
 
-include $(shell pwd)/../../config/Makefile.macros
+CACTUS_ROOT = $(shell pwd)/../..
+
+include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/tutorials
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
@@ -50,7 +52,8 @@ export
 
 MAKE=make
 PACKAGES = \
-	tutorial_1 
+	tutorial_1 \
+	tutorial_2 
 
 TARGETS=all _all build _buildall install _installall test _testall spec_update
 .PHONY: $(TARGETS) rpm _rpmall clean _cleanall

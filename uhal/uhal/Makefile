@@ -2,7 +2,9 @@
 # Makefile for uhal 
 #
 
-include $(shell pwd)/../../config/Makefile.macros
+CACTUS_ROOT = $(shell pwd)/../..
+
+include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/uhal
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}

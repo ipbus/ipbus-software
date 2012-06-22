@@ -1,5 +1,5 @@
 INSTALL_PREFIX ?= /opt/cactus
-CACTUS_BUILD_ROOT ?= $(shell pwd)/../..
+CACTUS_BUILD_ROOT ?= $(CACTUS_ROOT)
 
 #extern/erlang
 EXTERN_ERLANG_PREFIX = $(CACTUS_BUILD_ROOT)/extern/erlang/RPMBUILD/SOURCES
