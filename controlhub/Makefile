@@ -18,13 +18,32 @@
 #
 ###################################################################################
 
+
 CACTUS_ROOT = $(shell pwd)/..
 
 include $(CACTUS_ROOT)/config/Makefile.macros
 
-UNAME := $(shell uname)
+Package = controlhub
+PackagePath = $(CACTUS_ROOT)/${Package}
+PackageName = cactus-extern-controlhub
 
-# Allows me to still develop on Mac OS X
+PACKAGE_VER_MAJOR = 1
+PACKAGE_VER_MINOR = 1
+PACKAGE_VER_PATCH = 0
+
+# This is the version number for the RPM packaging.
+PACKAGE_RELEASE = 1
+
+# A tarball is generated as part of the Erlang release-building mechanism
+TARBALL_DIR = controlhub
+TARBALL_FILE = ${TARBALL_DIR}.tar.gz
+
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+
+
+####################  Define path to erlang runtime and compiler  ####################
+UNAME := $(shell uname)
+# Allows me to still develop on Mac OS X with a standard Erlang install
 ifeq ($(UNAME), Darwin)
 ERL=erl
 ERLC=erlc
@@ -38,35 +57,40 @@ ERL=$(INSTALL_PREFIX)/bin/erl
 ERLC=$(INSTALL_PREFIX)/bin/erlc
 endif
 endif
+######################################################################################
 
 ERLC_FLAGS=
 
-INCLUDE_DIR=include
-INCLUDES=$(wildcard $(INCLUDE_DIR)/*.hrl)
+INCLUDE_DIR = include
+INCLUDES = $(wildcard $(INCLUDE_DIR)/*.hrl)
 
-SOURCES=$(wildcard src/*.erl)
-TEST_SOURCES=$(wildcard src/unittest/*.erl)
+SOURCES = $(wildcard src/*.erl)
+TEST_SOURCES = $(wildcard src/unittest/*.erl)
 
-OBJECTS=$(SOURCES:src/%.erl=ebin/%.beam)
-TEST_OBJECTS=$(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
+OBJECTS = $(SOURCES:src/%.erl=ebin/%.beam)
+TEST_OBJECTS = $(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
 
-.PHONY: all _all build_controlhub build_and_run_tests check_test_build_dir clean  _cleanall test install _installall rpm _rpmall
+CONTROLHUB_RELEASE_FILES = controlhub.rel controlhub.boot $(TARBALL_FILE)
 
-default: _all
+.PHONY: all _all clean  _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
+
+.PHONY: dev
+
+default: build
+
+all: _all
 build: _all
 buildall: _all
-all: _all
-_all: build_controlhub build_and_run_tests
 
-build_controlhub: $(OBJECTS)
+_all: clean $(OBJECTS) $(CONTROLHUB_RELEASE_FILES)
 
-build_and_run_tests: check_test_build_dir $(TEST_OBJECTS) test
+dev: $(OBJECTS) check_test_build_dir $(TEST_OBJECTS) test
 
-ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
-	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
-
-ebin/%.beam : src/%.erl $(INCLUDES)
-	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
+rpm: _rpmall
+_rpmall:
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	tar -xvzf ${TARBALL_FILE} | sed 's/^/extracted: /'
+	
 
 clean: _cleanall
 _cleanall:
@@ -77,13 +101,27 @@ _cleanall:
 	rm -f controlhub.script
 	rm -f controlhub.tar.gz
 
+
+
+
+############## Nitty gritty ######################
+
+ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
+	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
+
+ebin/%.beam : src/%.erl $(INCLUDES)
+	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
+
+
 check_test_build_dir:
 	test -d ebin/unittest || mkdir ebin/unittest
 
 test:
 	$(ERL) -noshell -pa ebin ebin/unittest -eval 'eunit:test("ebin",[verbose])' -s init stop
 
-release: clean build_controlhub controlhub.boot
+
+
+$(TARBALL_FILE): controlhub.boot controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
 	 'case systools:make_tar("controlhub", []) of \
 	 ok -> halt(0); _ -> halt(1) end.'
@@ -108,6 +146,3 @@ controlhub.rel: ebin/controlhub.app Makefile
 	 {ok, Vsn} = application:get_key(App, vsn), \
          {App, Vsn} end, Apps ++ [$(basename $@)])}]), \
 	 file:close(F), halt(0)."
-
-	 
-	 
