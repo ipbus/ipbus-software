@@ -45,7 +45,7 @@ _all:
 	tar -xvzf ${TARBALL_FILE} | sed 's/^/extracted: /'
 	cd ${TARBALL_DIR}; ./configure \
 		--prefix=${RPMBUILD_DIR}/SOURCES \
-		--exec-prefix=${RPMBUILD_DIR}/SOURCES 
+		--exec-prefix=${RPMBUILD_DIR}/SOURCES \
 		--without-javac
 	cd ${TARBALL_DIR}; make
 	cd ${TARBALL_DIR}; make install
