@@ -34,16 +34,19 @@ all: _all
 build: _all
 buildall: _all
 _all:
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	tar -xvjf ${TARBALL_NAME}.tar.bz2 | sed 's/^/extracted: /'
-	cd ${TARBALL_NAME};./bootstrap.sh
-	cd ${TARBALL_NAME};./b2 --without-mpi					\
+	if [ ! -d  ${RPMBUILD_DIR} ]; then \
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}; \
+	tar -xvjf ${TARBALL_NAME}.tar.bz2 | sed 's/^/extracted: /'; \
+	cd ${TARBALL_NAME};                                        \
+	./bootstrap.sh;                                           \
+	./b2 --without-mpi					\
 				--prefix=${RPMBUILD_DIR}/SOURCES	\
 				--exec-prefix=${RPMBUILD_DIR}/SOURCES	\
 				variant=release					\
 				link=shared					\
 				threading=multi					\
-				install
+				install;                                     \
+	fi;
 
 rpm: _rpmall
 _rpmall: 
