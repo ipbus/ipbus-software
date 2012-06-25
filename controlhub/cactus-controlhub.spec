@@ -25,7 +25,6 @@ curdir=`pwd`
 rm -rf $RPM_BUILD_ROOT
 
 # copy lib content to RPM_BUILD_ROOT
-echo "I AM HERE"
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 
