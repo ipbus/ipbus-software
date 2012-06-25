@@ -117,8 +117,6 @@ _cleanall:
 
 ############## Nitty gritty ######################
 
-_rpmdirs:
-
 
 ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
