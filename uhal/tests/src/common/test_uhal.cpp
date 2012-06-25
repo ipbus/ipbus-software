@@ -366,20 +366,107 @@ void write_test()
 void read_write_mask()
 {
 	try
-	{
+	{	
 		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
+
+		hw.getNode ( "JTAG_BASE_ADDR" ).write ( 0x00000000 );
+		ValWord< uint32_t > mem = hw.getNode ( "JTAG_BASE_ADDR" ).read();
+		hw.dispatch();	
+		if ( mem!=0x00000000 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0x00000000" );
+			throw 0;
+		}
+		
 		hw.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
-		hw.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
-		hw.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
-		hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
+		mem = hw.getNode ( "JTAG_BASE_ADDR" ).read();
 		hw.dispatch();
-		HwInterface hw2 = manager.getDevice ( "hcal.crate1.slot2" );
-		hw2.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
-		hw2.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
-		hw2.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
-		hw2.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
-		hw2.dispatch();
+		if ( mem!=0x00000001 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0x00000001" );
+			throw 0;
+		}
+		
+		hw.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
+		mem = hw.getNode ( "JTAG_BASE_ADDR" ).read();
+		hw.dispatch();
+		if ( mem!=0x00000003 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0x00000003" );
+			throw 0;
+		}		
+		
+		hw.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
+		mem = hw.getNode ( "JTAG_BASE_ADDR" ).read();
+		hw.dispatch();
+		if ( mem!=0x00000007 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0x00000007" );
+			throw 0;
+		}	
+
+		hw.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
+		mem = hw.getNode ( "JTAG_BASE_ADDR" ).read();
+		hw.dispatch();
+		if ( mem!=0x0000000F )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0x0000000F" );
+			throw 0;
+		}	
+
+		
+		
+		hw.getNode ( "JTAG_BASE_ADDR" ).write ( 0x0000000A );
+		mem = hw.getNode ( "JTAG_BASE_ADDR" ).read();
+		hw.dispatch();	
+		if ( mem!=0x0000000A )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0x0000000A" );
+			throw 0;
+		}
+
+		mem = hw.getNode ( "JTAG_BASE_ADDR.a" ).read();
+		hw.dispatch();
+		if ( mem!=0 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0" );
+			throw 0;
+		}
+
+		mem = hw.getNode ( "JTAG_BASE_ADDR.b" ).read();
+		hw.dispatch();
+		if ( mem!=1 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 1" );
+			throw 0;
+		}
+
+		mem = hw.getNode ( "JTAG_BASE_ADDR.c" ).read();
+		hw.dispatch();
+		if ( mem!=0 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 0" );
+			throw 0;
+		}
+		
+		mem = hw.getNode ( "JTAG_BASE_ADDR.d" ).read();
+		hw.dispatch();
+		if ( mem!=1 )
+		{
+			log ( Error() , "MISMATCH : Read " , Integer ( mem.value() , IntFmt< hex , fixed>() ) , " when expected 1" );
+			throw 0;
+		}
+		
+		
+		// HwInterface hw2 = manager.getDevice ( "hcal.crate1.slot2" );
+		// hw2.getNode ( "JTAG_BASE_ADDR.a" ).write ( 0x1 );
+		// hw2.getNode ( "JTAG_BASE_ADDR.b" ).write ( 0x1 );
+		// hw2.getNode ( "JTAG_BASE_ADDR.c" ).write ( 0x1 );
+		// hw2.getNode ( "JTAG_BASE_ADDR.d" ).write ( 0x1 );
+		// hw2.dispatch();
+		
+		
 		// ValWord< uint32_t > mem = hw.getNode("REGISTER_MASK_0xF0").read();
 		// //BOOST_CHECK(mem >=0 && mem <=0xF);
 		// uint32_t val = 0x3;
