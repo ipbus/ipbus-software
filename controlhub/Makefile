@@ -76,7 +76,7 @@ CONTROLHUB_RELEASE_FILES = controlhub.rel controlhub.boot $(TARBALL_FILE)
 
 .PHONY: all _all clean  _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
-.PHONY: _rpmdirs dev _check_test_build_dir
+.PHONY: dev _check_test_build_dir
 
 default: build
 
@@ -84,14 +84,14 @@ all: _all
 build: _all
 buildall: _all
 
-_all: _rpmdirs $(OBJECTS) $(CONTROLHUB_RELEASE_FILES)
-	tar -xvzf ${TARBALL_FILE} -C ${RPMBUILD_DIR}/SOURCES | sed 's/^/extracted to RPMBUILD\/SOURCES: /'
-	
+_all: $(OBJECTS) $(CONTROLHUB_RELEASE_FILES)
 
 dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
 
 rpm: _rpmall
 _rpmall:
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	tar -xvzf ${TARBALL_FILE} -C ${RPMBUILD_DIR}/SOURCES | sed 's/^/extracted to RPMBUILD\/SOURCES: /'
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${INSTALL_PREFIX}" \
@@ -118,7 +118,7 @@ _cleanall:
 ############## Nitty gritty ######################
 
 _rpmdirs:
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+
 
 ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
@@ -142,7 +142,7 @@ $(TARBALL_FILE): controlhub.boot controlhub.rel Makefile
 # Auto-generate the release boot and script files
 controlhub.boot: controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
-	 'case systools:make_script("controlhub",[]) of ok -> halt(0); _ -> halt(1) end.'
+	 'case systools:make_script("controlhub",[local]) of ok -> halt(0); _ -> halt(1) end.'
 
 # Auto-generate the control.rel file.
 controlhub.rel: ebin/controlhub.app Makefile
