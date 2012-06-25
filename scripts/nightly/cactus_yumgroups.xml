@@ -9,7 +9,14 @@
 <uservisible>true</uservisible>
 <grouplist></grouplist>
 <packagelist>
-<!--packagereq type="mandatory"></packagereq -->
+<packagereq type="mandatory">cactus-extern-boost</packagereq>
+<packagereq type="mandatory">cactus-extern-erlang</packagereq>
+<packagereq type="mandatory">cactus-extern-pugixml</packagereq>
+<packagereq type="mandatory">cactus-uhal-grammars</packagereq>
+<packagereq type="mandatory">cactus-uhal-log</packagereq>
+<packagereq type="mandatory">cactus-uhal-uhal</packagereq>
+<packagereq type="mandatory">cactus-uhal-tests</packagereq>
+<packagereq type="mandatory">cactus-controlhub</packagereq>
 </packagelist>
 </group>
 
