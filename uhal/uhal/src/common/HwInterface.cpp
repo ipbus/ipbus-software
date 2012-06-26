@@ -28,10 +28,15 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			aNode.mHw = this;
 
-			for ( std::hash_map< std::string , Node >::iterator lIt = aNode.mChildrenMap->begin() ; lIt != aNode.mChildrenMap->end() ; ++lIt )
+			for ( std::deque< Node >::iterator lIt = aNode.mChildren->begin(); lIt != aNode.mChildren->end(); ++lIt )
 			{
-				claimNode ( lIt->second );
+				claimNode ( *lIt );
 			}
+			
+			// for ( std::hash_map< std::string , Node >::iterator lIt = aNode.mChildrenMap->begin() ; lIt != aNode.mChildrenMap->end() ; ++lIt )
+			// {
+				// claimNode ( lIt->second );
+			// }
 		}
 		catch ( const std::exception& aExc )
 		{

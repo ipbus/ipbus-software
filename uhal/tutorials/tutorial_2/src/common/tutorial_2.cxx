@@ -29,7 +29,7 @@ int main ( int argc , char** argv )
 			log( Info() , "Regex returned Device ID string " , Quote( *lIt ) );
 		}
 
-		HwInterface lHwInterface = lConnectionManager2.getDevice ( "sys1.crate1.slot1" );
+		HwInterface lHwInterface = lConnectionManager.getDevice ( "sys1.crate1.slot1" );
 		
 		lHwInterface.ping();	
 		

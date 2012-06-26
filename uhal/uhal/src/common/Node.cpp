@@ -83,7 +83,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
-			mChildrenMap ( new std::hash_map< std::string , Node >() )
+			mChildren ( new std::deque< Node >() ),
+			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
 		if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
 		{
@@ -146,13 +147,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			try
 			{
-				Node lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , mAddr , mAddrMask )->clone() );
-				mChildrenMap->insert ( std::make_pair ( lNode.mUid , lNode ) );
-
-				for ( std::hash_map< std::string , Node >::iterator lSubMapIt = lNode.mChildrenMap->begin() ; lSubMapIt != lNode.mChildrenMap->end() ; ++lSubMapIt )
-				{
-					mChildrenMap->insert ( std::make_pair ( ( lNode.mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-				}
+				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , mAddr , mAddrMask )->clone() );
 			}
 			catch ( const std::exception& aExc )
 			{
@@ -207,15 +202,22 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 
 			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
 			{
-				Node lNode ( NodeTreeBuilder::getInstance().create ( lXmlNode , mAddr , mAddrMask )->clone() );
-				mChildrenMap->insert ( std::make_pair ( lNode.mUid , lNode ) );
-
-				for ( std::hash_map< std::string , Node >::iterator lSubMapIt = lNode.mChildrenMap->begin() ; lSubMapIt != lNode.mChildrenMap->end() ; ++lSubMapIt )
-				{
-					mChildrenMap->insert ( std::make_pair ( ( lNode.mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-				}
+				mChildren->push_back ( NodeTreeBuilder::getInstance().create ( lXmlNode , mAddr , mAddrMask )->clone() );
 			}
+		
 		}
+		
+		
+		for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
+		{
+			mChildrenMap->insert ( std::make_pair ( lIt->mUid , &(*lIt) ) );
+			
+			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap->begin() ; lSubMapIt != lIt->mChildrenMap->end() ; ++lSubMapIt )
+			{
+				mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			}
+		}		
+					
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -232,7 +234,8 @@ Node::Node ( ) try :
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
-			mChildrenMap ( new std::hash_map< std::string , Node >() )
+			mChildren ( new std::deque< Node >() ),
+			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
 	}
 	catch ( const std::exception& aExc )
@@ -241,6 +244,26 @@ Node::Node ( ) try :
 		throw uhal::exception ( aExc );
 	}
 
+	
+Node::Node( const Node& aNode ) try :
+		mHw ( aNode.mHw ),
+			mUid ( aNode.mUid ),
+			mAddr ( aNode.mAddr ),
+			mAddrMask ( aNode.mAddrMask ),
+			mMask ( aNode.mMask ),
+			mPermission ( aNode.mPermission ),
+			mMode ( aNode.mMode ),
+			mChildren ( aNode.mChildren ),
+			mChildrenMap ( aNode.mChildrenMap )
+	{
+	}
+	catch ( const std::exception& aExc )
+	{
+		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		throw uhal::exception ( aExc );
+	}
+	
+	
 
 	Node Node::clone() const
 	{
@@ -252,12 +275,24 @@ Node::Node ( ) try :
 		lNode.mMask = mMask;
 		lNode.mPermission = mPermission;
 		lNode.mMode = mMode ;
-
-		for ( std::hash_map< std::string , Node >::const_iterator lIt = mChildrenMap->begin() ; lIt != mChildrenMap->end() ; ++lIt )
+				
+		for ( std::deque< Node >::const_iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 		{
-			lNode.mChildrenMap->insert ( std::make_pair ( lIt->first , lIt->second.clone() ) );
+			lNode.mChildren->push_back( lIt->clone() );
 		}
 
+		for ( std::deque< Node >::iterator lIt = lNode.mChildren->begin(); lIt != lNode.mChildren->end(); ++lIt )
+		{
+			lNode.mChildrenMap->insert ( std::make_pair ( lIt->mUid , &(*lIt) ) );
+			
+			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap->begin() ; lSubMapIt != lIt->mChildrenMap->end() ; ++lSubMapIt )
+			{
+				lNode.mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			}
+		}	
+
+		//std::cout << "Cloning " << mUid << " Children: " << mChildren->size() << "->" << lNode.mChildren->size() << " ChildrenMap: " << mChildrenMap->size() << "->" << lNode.mChildrenMap->size() << std::endl;
+		
 		return lNode;
 	}
 
@@ -360,10 +395,16 @@ Node::Node ( ) try :
 					break;
 			}
 
-			for ( std::hash_map< std::string , Node >::const_iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			// for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			// {
+				// aStream << '\n' << std::string ( aIndent+2 , ' ' ) << "- Map entry " << (lIt->first);
+			// }
+			
+			for ( std::deque< Node >::const_iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 			{
-				lIt->second.stream ( aStream , aIndent+2 );
+				lIt->stream ( aStream , aIndent+2 );
 			}
+			
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -377,7 +418,8 @@ Node::Node ( ) try :
 	{
 		try
 		{
-			std::hash_map< std::string , Node >::iterator lIt = mChildrenMap->find ( aId );
+						
+			std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->find ( aId );
 
 			if ( lIt==mChildrenMap->end() )
 			{
@@ -394,12 +436,12 @@ Node::Node ( ) try :
 						break;
 					}
 
-					std::hash_map< std::string , Node >::iterator lIt = mChildrenMap->find ( aId.substr ( 0 , lPos ) );
+					std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->find ( aId.substr ( 0 , lPos ) );
 
 					if ( lIt!=mChildrenMap->end() )
 					{
 						log ( Error() , "Partial match " ,  Quote(aId.substr ( 0 , lPos )) , " found for ID-path " ,  Quote(aId) );
-						log ( Error() , "Tree structure of partial match is:" , lIt->second );
+						log ( Error() , "Tree structure of partial match is:" , *(lIt->second) );
 						lPartialMatch = true;
 						break;
 					}
@@ -416,7 +458,7 @@ Node::Node ( ) try :
 				throw NoBranchFoundWithGivenUID();
 			}
 
-			return lIt->second;
+			return *(lIt->second);
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -433,7 +475,7 @@ Node::Node ( ) try :
 			std::vector<std::string> lNodes;
 			lNodes.reserve ( mChildrenMap->size() ); //prevent reallocations
 
-			for ( std::hash_map< std::string , Node >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
 			{
 				lNodes.push_back ( lIt->first );
 			}
@@ -456,7 +498,7 @@ Node::Node ( ) try :
 			lNodes.reserve ( mChildrenMap->size() ); //prevent reallocations
 			log ( Info() , "Regular Expression : " , aRegex.str() );
 
-			for ( std::hash_map< std::string , Node >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
 			{
 				boost::cmatch lMatch;
 

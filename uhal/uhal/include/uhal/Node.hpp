@@ -73,6 +73,12 @@ namespace uhal
 			Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
 
 			/**
+				Lightweight Copy constructor
+			*/
+			Node( const Node& aNode );
+			
+			
+			/**
 				Destructor
 			*/
 			virtual ~Node();
@@ -290,8 +296,11 @@ namespace uhal
 			//! Whether the node represents a single register, a block of registers or a block-read/write port
 			defs::BlockReadWriteMode mMode;
 
+			//! The direct children of the child node
+			boost::shared_ptr< std::deque< Node > > mChildren;
+			
 			//! Helper to assist look-up of a particular child node, given a name
-			boost::shared_ptr< std::hash_map< std::string , Node > > mChildrenMap;
+			boost::shared_ptr< std::hash_map< std::string , Node* > > mChildrenMap;
 
 			//! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
 			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>
