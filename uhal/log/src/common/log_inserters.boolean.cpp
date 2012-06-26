@@ -1,7 +1,7 @@
 
 #include <uhal/log/log_inserters.boolean.hpp>
 
-#include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log.hpp>
 
 namespace uhal
 {
@@ -11,11 +11,11 @@ namespace uhal
 	{
 		if ( aBoolean.value() )
 		{
-			fputs ( "True" , log_configuration::getDestination() );
+			put ( "True" );
 		}
 		else
 		{
-			fputs ( "False" , log_configuration::getDestination() );
+			put ( "False" );
 		}
 	}
 
@@ -25,11 +25,11 @@ namespace uhal
 	{
 		if ( aBoolean.value() )
 		{
-			fputc ( '1' , log_configuration::getDestination() );
+			put ( '1' );
 		}
 		else
 		{
-			fputc ( '0' , log_configuration::getDestination() );
+			put ( '0' );
 		}
 	}
 

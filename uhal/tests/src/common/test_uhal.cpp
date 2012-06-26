@@ -633,7 +633,7 @@ void addOperationToQueue ( HwInterface& hw , const std::vector<int>& aOperationL
 
 void allInstructionPermutations()
 {
-	log_configuration::setLogLevelTo ( Notice() );
+	setLogLevelTo ( Notice() );
 
 	try
 	{
@@ -759,7 +759,7 @@ int main ( int argc,char* argv[] )
 {
 	try
 	{
-		log_configuration::setLogLevelTo ( Debug() );
+		setLogLevelTo ( Debug() );
 		hwInterface_creation();
 		rawClientAccess();
 		navigation_and_traversal_test();

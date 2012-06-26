@@ -180,7 +180,7 @@ namespace uhal
 			// Don't bother with Logging if the logger won't include it!
 			Info lLoggingLevel;
 
-			if ( log_configuration::LoggingIncludes ( lLoggingLevel ) )
+			if ( LoggingIncludes ( lLoggingLevel ) )
 			{
 				// After that we listen to the user's preference
 				if ( DebugInfo )

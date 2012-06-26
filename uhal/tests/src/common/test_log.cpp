@@ -107,10 +107,10 @@ int main ( int argc,char* argv[] )
 		log ( Notice() , "Pointer : " , Pointer ( argv ) );
 		log ( Notice() , "Pointer : " , Pointer ( *argv ) );
 		// Test setting logging levels
-		log_configuration::setLogLevelTo ( Error() );
+		setLogLevelTo ( Error() );
 		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
 		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
-		log_configuration::setLogLevelTo ( Notice() );
+		setLogLevelTo ( Notice() );
 		log ( Notice() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
 		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
 		//		log ( Notice() , "Dodgy cast : " , Integer ( bool(true) , IntFmt<hex , fixed>() ) );

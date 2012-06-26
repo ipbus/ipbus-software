@@ -1,5 +1,5 @@
 
-#include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log.hpp>
 
 namespace uhal
 {
@@ -106,14 +106,14 @@ namespace uhal
 	void log_inserter ( const _Integer< T , IntFmt<bin , fixed , WIDTH> >& aInt )
 	{
 		uint32_t lSize ( sizeof ( T ) << 3 ); //number of characters
-		fputs ( "0b" , log_configuration::getDestination() );
+		put ( "0b" );
 		int32_t i ( WIDTH-lSize );
 
 		if ( i > 0 )
 		{
 			for ( ; i!=0 ; --i )
 			{
-				fputc ( '0' , log_configuration::getDestination() );
+				put ( '0' );
 			}
 		}
 
@@ -123,7 +123,7 @@ namespace uhal
 
 		for ( uint32_t i=0 ; i!=lSize ; ++i )
 		{
-			fputc ( ( lValue & lMask ) ?'1':'0' , log_configuration::getDestination() );
+			put ( ( lValue & lMask ) ?'1':'0' );
 			lValue <<= 1;
 		}
 	}
@@ -154,13 +154,13 @@ namespace uhal
 		{
 			for ( ; i!=0 ; --i )
 			{
-				fputc ( '0' , log_configuration::getDestination() );
+				put ( '0' );
 			}
 		}
 
 		do
 		{
-			fputc ( * ( --lPtr ) , log_configuration::getDestination() );
+			put ( * ( --lPtr ) );
 		}
 		while ( lPtr!=lBuffer );
 	}
@@ -171,14 +171,14 @@ namespace uhal
 	{
 		uint32_t lSize ( sizeof ( T ) << 1 ); //number of characters
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
-		fputs ( "0x" , log_configuration::getDestination() );
+		put ( "0x" );
 		int32_t i ( WIDTH-lSize );
 
 		if ( i > 0 )
 		{
 			for ( ; i!=0 ; --i )
 			{
-				fputc ( '0' , log_configuration::getDestination() );
+				put ( '0' );
 			}
 		}
 
@@ -188,8 +188,8 @@ namespace uhal
 		do
 		{
 			--lPtr;
-			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0xF0 ) >>4 ) ) , log_configuration::getDestination() );
-			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0x0F ) ) ) , log_configuration::getDestination() );
+			put ( * ( lCharacterMapping + ( ( ( *lPtr ) &0xF0 ) >>4 ) ) );
+			put ( * ( lCharacterMapping + ( ( ( *lPtr ) &0x0F ) ) ) );
 		}
 		while ( lPtr!=lStart );
 	}
@@ -202,12 +202,12 @@ namespace uhal
 	{
 		if ( aInt.value() == 0 )
 		{
-			fputs ( "0b0" , log_configuration::getDestination() );
+			put ( "0b0" );
 		}
 		else
 		{
 			uint32_t lSize ( sizeof ( T ) <<3 );
-			fputs ( "0b" , log_configuration::getDestination() );
+			put ( "0b" );
 			T lValue ( aInt.value() );
 			T lMask ( 0x1 );
 			lMask <<= ( lSize-1 );
@@ -220,7 +220,7 @@ namespace uhal
 
 				if ( lPrint |= lCurrent )
 				{
-					fputc ( lCurrent?'1':'0' , log_configuration::getDestination() );
+					put ( lCurrent?'1':'0' );
 				}
 
 				lValue <<= 1;
@@ -251,7 +251,7 @@ namespace uhal
 
 		do
 		{
-			fputc ( * ( --lPtr ) , log_configuration::getDestination() );
+			put ( * ( --lPtr ) );
 		}
 		while ( lPtr!=lBuffer );
 	}
@@ -265,12 +265,12 @@ namespace uhal
 
 		if ( aInt.value() == 0 )
 		{
-			fputs ( "0x0" , log_configuration::getDestination() );
+			put ( "0x0" );
 		}
 		else
 		{
 			uint32_t lSize ( sizeof ( T ) );
-			fputs ( "0x" , log_configuration::getDestination() );
+			put ( "0x" );
 			bool lPrint ( false );
 			uint32_t lPos ( 0 );
 			uint8_t* lStart ( ( uint8_t* ) ( & aInt.value() ) );
@@ -283,14 +283,14 @@ namespace uhal
 
 				if ( lPrint |= ( bool ) ( lPos ) )
 				{
-					fputc ( * ( lCharacterMapping + lPos ) , log_configuration::getDestination() );
+					put ( * ( lCharacterMapping + lPos ) );
 				}
 
 				lPos = ( ( *lPtr ) &0x0F );
 
 				if ( lPrint |= ( bool ) ( lPos ) )
 				{
-					fputc ( * ( lCharacterMapping + lPos ) , log_configuration::getDestination() );
+					put ( * ( lCharacterMapping + lPos ) );
 				}
 			}
 			while ( lPtr!=lStart );

@@ -1,5 +1,5 @@
 
-#include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log.hpp>
 #include <uhal/log/log_inserters.integer.hpp>
 
 #ifdef __GNUG__
@@ -12,15 +12,15 @@ namespace uhal
 	template< typename T >
 	void log_inserter ( const _Pointer< T >& aPointer )
 	{
-		fputc ( '(' , log_configuration::getDestination() );
+		put ( '(' );
 #ifdef __GNUG__
 		// this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
 		int lStatus ( 0 );
-		fputs ( abi::__cxa_demangle ( typeid ( T* ).name() , 0 , 0 , &lStatus ) , log_configuration::getDestination() );
+		put ( abi::__cxa_demangle ( typeid ( T* ).name() , 0 , 0 , &lStatus ) );
 #else
-		fputs ( typeid ( *this ).name() , log_configuration::getDestination() );
+		put ( typeid ( *this ).name() );
 #endif
-		fputs ( ")(0x" , log_configuration::getDestination() );
+		put ( ")(0x" );
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
 		uint64_t lPointer ( ( uint64_t ) ( aPointer.value() ) );
 		uint8_t* lStart ( ( uint8_t* ) ( &lPointer ) );
@@ -29,14 +29,14 @@ namespace uhal
 		do
 		{
 			--lPtr;
-			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0xF0 ) >>4 ) ) , log_configuration::getDestination() );
-			fputc ( * ( lCharacterMapping + ( ( ( *lPtr ) &0x0F ) ) ) , log_configuration::getDestination() );
+			put ( * ( lCharacterMapping + ( ( ( *lPtr ) &0xF0 ) >>4 ) ) );
+			put ( * ( lCharacterMapping + ( ( ( *lPtr ) &0x0F ) ) ) );
 		}
 		while ( lPtr!=lStart );
 
-		fputs ( ")(+" , log_configuration::getDestination() );
+		put ( ")(+" );
 		log_inserter ( Integer ( sizeof ( T ) ) );
-		fputc ( ')' , log_configuration::getDestination() );
+		put ( ')' );
 	}
 
 

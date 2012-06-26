@@ -1,7 +1,7 @@
 
 #include <uhal/log/log_inserters.string.hpp>
 
-#include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log.hpp>
 
 namespace uhal
 {
@@ -9,18 +9,18 @@ namespace uhal
 	template<>
 	void log_inserter< char > ( const char& aChar )
 	{
-		fputc ( aChar , log_configuration::getDestination() );
+		put ( aChar );
 	}
 
 	void log_inserter ( const char* aStr )
 	{
-		fputs ( aStr , log_configuration::getDestination() );
+		put ( aStr );
 	}
 
 	template<>
 	void log_inserter< std::string > ( const std::string& aStr )
 	{
-		fwrite ( aStr.data() , 1 , aStr.size() , log_configuration::getDestination() );
+		put ( aStr.data() , aStr.size() );
 	}
 
 }

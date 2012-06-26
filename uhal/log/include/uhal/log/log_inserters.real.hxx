@@ -1,5 +1,5 @@
 
-#include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log.hpp>
 
 #include <stdlib.h>
 
@@ -11,7 +11,7 @@ namespace uhal
 	{
 		char lBuffer[ WIDTH<<4 ]; //Make the buffer plenty wide enough, since the exponent is not counted in the width term!
 		gcvt ( aReal.value() , WIDTH , lBuffer );
-		fputs( lBuffer , log_configuration::getDestination() );
+		put ( lBuffer );
 	}
 
 	template< typename FORMAT >

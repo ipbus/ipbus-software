@@ -21,7 +21,7 @@ int main ( int argc,char* argv[] )
 {
 	try
 	{
-		log_configuration::setLogLevelTo ( Debug() );
+		setLogLevelTo ( Debug() );
 		ConnectionManager manager ( "file://tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		uint32_t SIZE=10500;

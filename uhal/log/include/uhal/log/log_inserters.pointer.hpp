@@ -20,9 +20,6 @@ namespace uhal
 			_Pointer ( const T* aT ) : RefWrapper< T* > ( aT ) {}
 	};
 
-
-
-
 }
 
 #include <uhal/log/log_inserters.pointer.hxx>

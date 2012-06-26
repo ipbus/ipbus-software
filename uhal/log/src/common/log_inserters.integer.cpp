@@ -9,7 +9,7 @@ namespace uhal
 	{
 		if ( aInt < int8_t ( 0 ) )
 		{
-			fputc ( '-' , log_configuration::getDestination() );
+			put ( '-' );
 		}
 	}
 
@@ -18,7 +18,7 @@ namespace uhal
 	{
 		if ( aInt < int16_t ( 0 ) )
 		{
-			fputc ( '-' , log_configuration::getDestination() );
+			put ( '-' );
 		}
 	}
 
@@ -27,7 +27,7 @@ namespace uhal
 	{
 		if ( aInt < int32_t ( 0 ) )
 		{
-			fputc ( '-' , log_configuration::getDestination() );
+			put ( '-' );
 		}
 	}
 
@@ -36,7 +36,7 @@ namespace uhal
 	{
 		if ( aInt < int64_t ( 0 ) )
 		{
-			fputc ( '-' , log_configuration::getDestination() );
+			put ( '-' );
 		}
 	}
 

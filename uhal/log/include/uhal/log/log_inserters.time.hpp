@@ -49,7 +49,7 @@ namespace uhal
 	template< time_element T >
 	struct TimeSpecializationHelper
 	{
-		static void print ( FILE* aFile , const tm* aTm , const uint32_t& aUsec );
+		static void print (  const tm* aTm , const uint32_t& aUsec );
 	};
 
 	template< typename T > _Time< T , DefaultTimeFmt > Time ( const T& aT );

@@ -2,7 +2,7 @@
 #include <uhal/log/log_inserters.location.hpp>
 #include <uhal/log/log_inserters.integer.hpp>
 
-#include <uhal/log/log_configuration.hpp>
+#include <uhal/log/log.hpp>
 
 namespace uhal
 {
@@ -16,13 +16,13 @@ namespace uhal
 	template<>
 	void log_inserter< Location > ( const Location& aLocation )
 	{
-		fputs ( "function \"" , log_configuration::getDestination() );
-		fputs ( aLocation.mFunction , log_configuration::getDestination() );
-		fputs ( "\" in " , log_configuration::getDestination() );
-		fputs ( aLocation.mFile , log_configuration::getDestination() );
-		fputs ( ", line " , log_configuration::getDestination() );
+		put ( "function \"" );
+		put ( aLocation.mFunction );
+		put ( "\" in " );
+		put ( aLocation.mFile );
+		put ( ", line " );
 		log_inserter ( Integer ( aLocation.mLine ) );
-		fputc ( '.' , log_configuration::getDestination() );
+		put ( '.' );
 	}
 
 }

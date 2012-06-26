@@ -22,13 +22,13 @@ namespace uhal
 			_Quote ( const T& aT ) : RefWrapper< T > ( aT ) {}
 	};
 
-	
+
 	template<>
 	class _Quote< const char* > : public RefWrapper< const char* >
 	{
 			friend _Quote< const char* > Quote ( const char* aStr );
 			_Quote ( const char* aStr ) : RefWrapper< const char* > ( aStr ) {}
-	};	
+	};
 
 }
 

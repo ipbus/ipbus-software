@@ -37,7 +37,7 @@ namespace uhal
 		log_inserter ( "\n > NameValuePairs =\n" );
 		log_inserter ( aHttpResponse.headers );
 		log_inserter ( "\n > Content =\n" );
-		fwrite ( & ( aHttpResponse.content[0] ) , 1 , aHttpResponse.content.size() , log_configuration::getDestination() );
+		put ( (const char*)( & ( aHttpResponse.content[0] )) , aHttpResponse.content.size() );
 	}
 }
 

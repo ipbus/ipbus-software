@@ -22,7 +22,7 @@ namespace uhal
 
 		while ( lIt!=lEnd )
 		{
-			fputc ( *lIt++ , log_configuration::getDestination() );
+			put ( *lIt++ );
 		}
 	}
 }

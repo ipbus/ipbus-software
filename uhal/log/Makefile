@@ -41,7 +41,7 @@ LINK_EXECUTABLE_FLAGS = -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
-.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
+.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update generator
 
 default: build
 
@@ -55,18 +55,20 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: ${LIBRARY} ${EXECUTABLES}
+_all: ${LIBRARY}
+
+generator: ${EXECUTABLES}
 
 #Executables will be compiled but they won't be packaged
-${EXECUTABLES}: bin/%.exe: obj/%.o ${LIBRARY_OBJECT_FILES} ${EXECUTABLE_OBJECT_FILES}
+${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	mkdir -p bin
-	g++ ${LINK_EXECUTABLE_FLAGS} ${LIBRARY_OBJECT_FILES} $< -o $@
+	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
 #Library will be compiled and will be packaged
-${LIBRARY}: ${LIBRARY_OBJECT_FILES} ${EXECUTABLES}
+${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/log}
 	mkdir -p lib

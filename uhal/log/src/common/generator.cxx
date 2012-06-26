@@ -3,13 +3,14 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include <boost/algorithm/string.hpp>
 
-#include <uhal/log/log_configuration.hpp>
+static const std::string gLogLevelsChar[] = { "Emergency" , "Alert" , "Critical" , "Error" , "Warning" , "Notice" , "Info" , "Debug" };
 
+static const std::vector< std::string > gLogLevels ( gLogLevelsChar , gLogLevelsChar+8 );
 
-uint32_t gLogLevelCount ( 8 );
 
 
 std::string gDivider (	"// " + std::string ( 150,'=' ) + "\n" +
@@ -24,15 +25,14 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
 				<< "#ifndef _log_hpp_\n"
 				<< "#define _log_hpp_\n"
 				<< "\n"
-				<< "#include <uhal/log/log_configuration.hpp>\n"
+				<< "#include <uhal/log/log_backend.hpp>\n"
+				<< "#include <uhal/log/log_inserters.hpp>\n"
 				<< "\n"
 				<< "namespace uhal{\n"
 				<< "\n"
 				<< gDivider
 				<< "\n";
 	aHxxFile	<< "\n"
-				<< "#include <uhal/log/log_inserters.hpp>\n"
-				<< "\n"
 				<< "namespace uhal{\n"
 				<< "\n"
 				<< gDivider
@@ -47,13 +47,77 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
 }
 
 
+void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
+{
+	std::stringstream lIfDefs, lIfDefs2, lEndIfs;
 
-void fileContent ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
+	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+	{
+		lIfDefs << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << "\n";
+		lIfDefs2 << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << " // A waste of time to change any level below this if it is going to disabled by compile-time checking anyway... \n"
+				 << "\t\tlog_configuration::mLoggingIncludes" << *lIt << " = true;\n";
+		lEndIfs << "\t#endif\n";
+		aHppFile << "struct " << *lIt << " {};\n";
+		aHppFile << "void setLogLevelTo ( const " << *lIt << "& );\n";
+		aCppFile << "void setLogLevelTo ( const " << *lIt << "& )\n"
+				 << "{\n"
+				 << lIfDefs2.str();
+
+		for ( std::vector< std::string >::const_iterator lIt2 = lIt+1 ; lIt2 != gLogLevels.end() ; ++lIt2 )
+		{
+			aCppFile << "\t\tlog_configuration::mLoggingIncludes" << *lIt2 << " = false;\n";
+		}
+
+		aCppFile << lEndIfs.str()
+				 << "}\n"
+				 << "\n";
+		aHppFile << "const bool& LoggingIncludes ( const " << *lIt << "& );\n"
+				 << "\n";
+		aCppFile << "const bool& LoggingIncludes ( const " << *lIt << "& )\n"
+				 << "{\n"
+				 << lIfDefs.str()
+				 << "\t\treturn log_configuration::mLoggingIncludes" << *lIt << ";\n"
+				 << lEndIfs.str()
+				 << "\treturn log_configuration::mFalse;\n"
+				 << "}\n"
+				 << "\n";
+	}
+
+	aHppFile << "class log_configuration\n"
+			 << "{\n"
+			 << "\tlog_configuration();\n"
+			 << "\tvirtual ~log_configuration();\n"
+			 << "\n";
+
+	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+	{
+		aHppFile << "\tstatic bool mLoggingIncludes" << *lIt << ";\n";
+		aCppFile << "bool log_configuration::mLoggingIncludes" << *lIt << " = true; // No #ifdefs required here since they are implemented in all the access functions.\n";
+		aHppFile << "\tfriend void setLogLevelTo ( const " << *lIt << "& );\n"
+				 << "\tfriend const bool& LoggingIncludes ( const " << *lIt << "& );\n"
+				 << "\n";
+	}
+
+	aHppFile << "\tstatic const bool mTrue;\n"
+			 << "\tstatic const bool mFalse;\n"
+			 << "};\n"
+			 << "\n";
+	aCppFile << "\n"
+			 << "const bool log_configuration::mTrue = true;\n"
+			 << "const bool log_configuration::mFalse = false;\n"
+			 << "\n";
+	aHppFile	<< gDivider
+				<< "\n";
+	aCppFile	<< gDivider
+				<< "\n";
+}
+
+
+void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
 	std::stringstream lIfDefs , lEndIfs;
-	std::vector< std::string > lLogLevels = uhal::log_configuration::getLogLevels();
 
-	for ( std::vector< std::string >::iterator lIt = lLogLevels.begin() ; lIt != lLogLevels.end() ; ++lIt )
+	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
 	{
 		lIfDefs << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << "\n";
 		lEndIfs << "\t#endif\n";
@@ -77,10 +141,10 @@ void fileContent ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
 						<< "void log( const " <<*lIt << "& " << boost::to_upper_copy ( *lIt ) << " ," << lArgsStr << " )\n"
 						<< "{\n"
 						<< lIfDefs.str()
-						<< "\t\tif( log_configuration::LoggingIncludes( " << boost::to_upper_copy ( *lIt ) << " ) ){\n"
-						<< "\t\t\tlog_configuration::log_head( " << boost::to_upper_copy ( *lIt ) << " );\n"
+						<< "\t\tif( LoggingIncludes( " << boost::to_upper_copy ( *lIt ) << " ) ){\n"
+						<< "\t\t\tlog_formatter< " << *lIt << " >::head();\n"
 						<< lInstructions.str()
-						<< "\t\t\tlog_configuration::log_tail( " << boost::to_upper_copy ( *lIt ) << " );\n"
+						<< "\t\t\tlog_formatter< " << *lIt << " >::tail();\n"
 						<< "\t\t}\n"
 						<< lEndIfs.str()
 						<< "}\n"
@@ -137,7 +201,8 @@ int main ( int argc , char* argv[] )
 		}
 
 		fileHeaders ( lHppFile , lHxxFile , lCppFile );
-		fileContent ( lHppFile , lHxxFile , lCppFile );
+		log_configuration_functions ( lHppFile , lHxxFile , lCppFile );
+		log_functions ( lHppFile , lHxxFile , lCppFile );
 		fileFooters ( lHppFile , lHxxFile , lCppFile );
 		lHppFile.close();
 		lHxxFile.close();
@@ -146,7 +211,7 @@ int main ( int argc , char* argv[] )
 	catch ( const std::exception& aExc )
 	{
 		std::cerr << "ERROR: Caught Exception : " << aExc.what() << std::endl;
-		exit(1);
+		exit ( 1 );
 	}
 }
 

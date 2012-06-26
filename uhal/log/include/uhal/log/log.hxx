@@ -1,6 +1,4 @@
 
-#include <uhal/log/log_inserters.hpp>
-
 namespace uhal{
 
 // ======================================================================================================================================================
@@ -11,10 +9,10 @@ template< typename T0 >
 void log( const Emergency& EMERGENCY , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -23,11 +21,11 @@ template< typename T0 , typename T1 >
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -36,12 +34,12 @@ template< typename T0 , typename T1 , typename T2 >
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -50,13 +48,13 @@ template< typename T0 , typename T1 , typename T2 , typename T3 >
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -65,14 +63,14 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -81,15 +79,15 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -98,8 +96,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -107,7 +105,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -116,8 +114,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -126,7 +124,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -135,8 +133,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -146,7 +144,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -155,8 +153,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -167,7 +165,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -176,8 +174,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -189,7 +187,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -198,8 +196,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -212,7 +210,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -221,8 +219,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -236,7 +234,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -245,8 +243,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -261,7 +259,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -270,8 +268,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -287,7 +285,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -296,8 +294,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -314,7 +312,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -323,8 +321,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -342,7 +340,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -351,8 +349,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -371,7 +369,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -380,8 +378,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -401,7 +399,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -410,8 +408,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -432,7 +430,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -441,8 +439,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -464,7 +462,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -473,8 +471,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -497,7 +495,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -506,8 +504,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -531,7 +529,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -540,8 +538,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -566,7 +564,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -575,8 +573,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -602,7 +600,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -611,8 +609,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -639,7 +637,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -648,8 +646,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -677,7 +675,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -686,8 +684,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -716,7 +714,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -725,8 +723,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -756,7 +754,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -765,8 +763,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -797,7 +795,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -806,8 +804,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -839,7 +837,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -848,8 +846,8 @@ template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , 
 void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
-		if( log_configuration::LoggingIncludes( EMERGENCY ) ){
-			log_configuration::log_head( EMERGENCY );
+		if( LoggingIncludes( EMERGENCY ) ){
+			log_formatter< Emergency >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -882,7 +880,7 @@ void log( const Emergency& EMERGENCY , const T0& aArg0 , const T1& aArg1 , const
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( EMERGENCY );
+			log_formatter< Emergency >::tail();
 		}
 	#endif
 }
@@ -896,10 +894,10 @@ void log( const Alert& ALERT , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -910,11 +908,11 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -925,12 +923,12 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -941,13 +939,13 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -958,14 +956,14 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -976,15 +974,15 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -995,8 +993,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1004,7 +1002,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1015,8 +1013,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1025,7 +1023,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1036,8 +1034,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1047,7 +1045,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1058,8 +1056,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1070,7 +1068,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1081,8 +1079,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1094,7 +1092,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1105,8 +1103,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1119,7 +1117,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1130,8 +1128,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1145,7 +1143,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1156,8 +1154,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1172,7 +1170,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1183,8 +1181,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1200,7 +1198,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1211,8 +1209,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1229,7 +1227,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1240,8 +1238,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1259,7 +1257,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1270,8 +1268,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1290,7 +1288,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1301,8 +1299,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1322,7 +1320,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1333,8 +1331,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1355,7 +1353,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1366,8 +1364,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1389,7 +1387,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1400,8 +1398,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1424,7 +1422,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1435,8 +1433,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1460,7 +1458,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1471,8 +1469,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1497,7 +1495,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1508,8 +1506,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1535,7 +1533,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1546,8 +1544,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1574,7 +1572,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1585,8 +1583,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1614,7 +1612,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1625,8 +1623,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1655,7 +1653,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1666,8 +1664,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1697,7 +1695,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1708,8 +1706,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1740,7 +1738,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1751,8 +1749,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1784,7 +1782,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1795,8 +1793,8 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 {
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
-		if( log_configuration::LoggingIncludes( ALERT ) ){
-			log_configuration::log_head( ALERT );
+		if( LoggingIncludes( ALERT ) ){
+			log_formatter< Alert >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1829,7 +1827,7 @@ void log( const Alert& ALERT , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( ALERT );
+			log_formatter< Alert >::tail();
 		}
 	#endif
 	#endif
@@ -1845,10 +1843,10 @@ void log( const Critical& CRITICAL , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -1861,11 +1859,11 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -1878,12 +1876,12 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -1896,13 +1894,13 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -1915,14 +1913,14 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -1935,15 +1933,15 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -1956,8 +1954,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1965,7 +1963,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -1978,8 +1976,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1988,7 +1986,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2001,8 +1999,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2012,7 +2010,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2025,8 +2023,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2037,7 +2035,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2050,8 +2048,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2063,7 +2061,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2076,8 +2074,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2090,7 +2088,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2103,8 +2101,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2118,7 +2116,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2131,8 +2129,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2147,7 +2145,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2160,8 +2158,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2177,7 +2175,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2190,8 +2188,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2208,7 +2206,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2221,8 +2219,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2240,7 +2238,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2253,8 +2251,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2273,7 +2271,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2286,8 +2284,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2307,7 +2305,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2320,8 +2318,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2342,7 +2340,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2355,8 +2353,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2378,7 +2376,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2391,8 +2389,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2415,7 +2413,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2428,8 +2426,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2453,7 +2451,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2466,8 +2464,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2492,7 +2490,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2505,8 +2503,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2532,7 +2530,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2545,8 +2543,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2573,7 +2571,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2586,8 +2584,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2615,7 +2613,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2628,8 +2626,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2658,7 +2656,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2671,8 +2669,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2702,7 +2700,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2715,8 +2713,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2747,7 +2745,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2760,8 +2758,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2793,7 +2791,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2806,8 +2804,8 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_EMERGENCY
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
-		if( log_configuration::LoggingIncludes( CRITICAL ) ){
-			log_configuration::log_head( CRITICAL );
+		if( LoggingIncludes( CRITICAL ) ){
+			log_formatter< Critical >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2840,7 +2838,7 @@ void log( const Critical& CRITICAL , const T0& aArg0 , const T1& aArg1 , const T
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( CRITICAL );
+			log_formatter< Critical >::tail();
 		}
 	#endif
 	#endif
@@ -2858,10 +2856,10 @@ void log( const Error& ERROR , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -2876,11 +2874,11 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -2895,12 +2893,12 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -2915,13 +2913,13 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -2936,14 +2934,14 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -2958,15 +2956,15 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -2981,8 +2979,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2990,7 +2988,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3005,8 +3003,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3015,7 +3013,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3030,8 +3028,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3041,7 +3039,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3056,8 +3054,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3068,7 +3066,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3083,8 +3081,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3096,7 +3094,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3111,8 +3109,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3125,7 +3123,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3140,8 +3138,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3155,7 +3153,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3170,8 +3168,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3186,7 +3184,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3201,8 +3199,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3218,7 +3216,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3233,8 +3231,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3251,7 +3249,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3266,8 +3264,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3285,7 +3283,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3300,8 +3298,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3320,7 +3318,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3335,8 +3333,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3356,7 +3354,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3371,8 +3369,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3393,7 +3391,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3408,8 +3406,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3431,7 +3429,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3446,8 +3444,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3470,7 +3468,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3485,8 +3483,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3510,7 +3508,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3525,8 +3523,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3551,7 +3549,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3566,8 +3564,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3593,7 +3591,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3608,8 +3606,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3636,7 +3634,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3651,8 +3649,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3680,7 +3678,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3695,8 +3693,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3725,7 +3723,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3740,8 +3738,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3771,7 +3769,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3786,8 +3784,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3818,7 +3816,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3833,8 +3831,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3866,7 +3864,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3881,8 +3879,8 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_ALERT
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( log_configuration::LoggingIncludes( ERROR ) ){
-			log_configuration::log_head( ERROR );
+		if( LoggingIncludes( ERROR ) ){
+			log_formatter< Error >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -3915,7 +3913,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( ERROR );
+			log_formatter< Error >::tail();
 		}
 	#endif
 	#endif
@@ -3935,10 +3933,10 @@ void log( const Warning& WARNING , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -3955,11 +3953,11 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -3976,12 +3974,12 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -3998,13 +3996,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4021,14 +4019,14 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4045,15 +4043,15 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4070,8 +4068,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4079,7 +4077,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4096,8 +4094,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4106,7 +4104,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4123,8 +4121,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4134,7 +4132,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4151,8 +4149,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4163,7 +4161,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4180,8 +4178,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4193,7 +4191,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4210,8 +4208,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4224,7 +4222,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4241,8 +4239,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4256,7 +4254,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4273,8 +4271,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4289,7 +4287,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4306,8 +4304,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4323,7 +4321,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4340,8 +4338,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4358,7 +4356,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4375,8 +4373,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4394,7 +4392,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4411,8 +4409,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4431,7 +4429,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4448,8 +4446,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4469,7 +4467,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4486,8 +4484,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4508,7 +4506,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4525,8 +4523,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4548,7 +4546,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4565,8 +4563,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4589,7 +4587,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4606,8 +4604,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4631,7 +4629,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4648,8 +4646,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4674,7 +4672,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4691,8 +4689,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4718,7 +4716,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4735,8 +4733,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4763,7 +4761,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4780,8 +4778,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4809,7 +4807,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4826,8 +4824,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4856,7 +4854,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4873,8 +4871,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4904,7 +4902,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4921,8 +4919,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4953,7 +4951,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -4970,8 +4968,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5003,7 +5001,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -5020,8 +5018,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_CRITICAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( log_configuration::LoggingIncludes( WARNING ) ){
-			log_configuration::log_head( WARNING );
+		if( LoggingIncludes( WARNING ) ){
+			log_formatter< Warning >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5054,7 +5052,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( WARNING );
+			log_formatter< Warning >::tail();
 		}
 	#endif
 	#endif
@@ -5076,10 +5074,10 @@ void log( const Notice& NOTICE , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5098,11 +5096,11 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5121,12 +5119,12 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5145,13 +5143,13 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5170,14 +5168,14 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5196,15 +5194,15 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5223,8 +5221,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5232,7 +5230,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5251,8 +5249,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5261,7 +5259,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5280,8 +5278,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5291,7 +5289,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5310,8 +5308,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5322,7 +5320,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5341,8 +5339,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5354,7 +5352,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5373,8 +5371,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5387,7 +5385,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5406,8 +5404,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5421,7 +5419,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5440,8 +5438,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5456,7 +5454,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5475,8 +5473,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5492,7 +5490,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5511,8 +5509,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5529,7 +5527,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5548,8 +5546,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5567,7 +5565,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5586,8 +5584,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5606,7 +5604,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5625,8 +5623,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5646,7 +5644,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5665,8 +5663,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5687,7 +5685,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5706,8 +5704,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5729,7 +5727,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5748,8 +5746,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5772,7 +5770,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5791,8 +5789,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5816,7 +5814,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5835,8 +5833,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5861,7 +5859,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5880,8 +5878,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5907,7 +5905,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5926,8 +5924,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5954,7 +5952,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -5973,8 +5971,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6002,7 +6000,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -6021,8 +6019,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6051,7 +6049,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -6070,8 +6068,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6101,7 +6099,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -6120,8 +6118,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6152,7 +6150,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -6171,8 +6169,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6204,7 +6202,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -6223,8 +6221,8 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( log_configuration::LoggingIncludes( NOTICE ) ){
-			log_configuration::log_head( NOTICE );
+		if( LoggingIncludes( NOTICE ) ){
+			log_formatter< Notice >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6257,7 +6255,7 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( NOTICE );
+			log_formatter< Notice >::tail();
 		}
 	#endif
 	#endif
@@ -6281,10 +6279,10 @@ void log( const Info& INFO , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6305,11 +6303,11 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6330,12 +6328,12 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6356,13 +6354,13 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6383,14 +6381,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6411,15 +6409,15 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6440,8 +6438,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6449,7 +6447,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6470,8 +6468,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6480,7 +6478,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6501,8 +6499,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6512,7 +6510,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6533,8 +6531,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6545,7 +6543,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6566,8 +6564,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6579,7 +6577,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6600,8 +6598,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6614,7 +6612,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6635,8 +6633,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6650,7 +6648,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6671,8 +6669,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6687,7 +6685,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6708,8 +6706,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6725,7 +6723,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6746,8 +6744,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6764,7 +6762,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6785,8 +6783,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6804,7 +6802,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6825,8 +6823,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6845,7 +6843,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6866,8 +6864,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6887,7 +6885,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6908,8 +6906,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6930,7 +6928,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6951,8 +6949,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6974,7 +6972,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -6995,8 +6993,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7019,7 +7017,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7040,8 +7038,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7065,7 +7063,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7086,8 +7084,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7112,7 +7110,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7133,8 +7131,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7160,7 +7158,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7181,8 +7179,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7209,7 +7207,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7230,8 +7228,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7259,7 +7257,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7280,8 +7278,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7310,7 +7308,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7331,8 +7329,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7362,7 +7360,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7383,8 +7381,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7415,7 +7413,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7436,8 +7434,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7469,7 +7467,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7490,8 +7488,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-		if( log_configuration::LoggingIncludes( INFO ) ){
-			log_configuration::log_head( INFO );
+		if( LoggingIncludes( INFO ) ){
+			log_formatter< Info >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7524,7 +7522,7 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( INFO );
+			log_formatter< Info >::tail();
 		}
 	#endif
 	#endif
@@ -7550,10 +7548,10 @@ void log( const Debug& DEBUG , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7576,11 +7574,11 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7603,12 +7601,12 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7631,13 +7629,13 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7660,14 +7658,14 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7690,15 +7688,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7721,8 +7719,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7730,7 +7728,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7753,8 +7751,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7763,7 +7761,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7786,8 +7784,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7797,7 +7795,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7820,8 +7818,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7832,7 +7830,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7855,8 +7853,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7868,7 +7866,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7891,8 +7889,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7905,7 +7903,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7928,8 +7926,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7943,7 +7941,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -7966,8 +7964,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -7982,7 +7980,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8005,8 +8003,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8022,7 +8020,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8045,8 +8043,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8063,7 +8061,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8086,8 +8084,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8105,7 +8103,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8128,8 +8126,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8148,7 +8146,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8171,8 +8169,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8192,7 +8190,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8215,8 +8213,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8237,7 +8235,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8260,8 +8258,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8283,7 +8281,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8306,8 +8304,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8330,7 +8328,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8353,8 +8351,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8378,7 +8376,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8401,8 +8399,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8427,7 +8425,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8450,8 +8448,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8477,7 +8475,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8500,8 +8498,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8528,7 +8526,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8551,8 +8549,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8580,7 +8578,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8603,8 +8601,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8633,7 +8631,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8656,8 +8654,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8687,7 +8685,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8710,8 +8708,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8742,7 +8740,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8765,8 +8763,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8798,7 +8796,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
@@ -8821,8 +8819,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( log_configuration::LoggingIncludes( DEBUG ) ){
-			log_configuration::log_head( DEBUG );
+		if( LoggingIncludes( DEBUG ) ){
+			log_formatter< Debug >::head();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -8855,7 +8853,7 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_configuration::log_tail( DEBUG );
+			log_formatter< Debug >::tail();
 		}
 	#endif
 	#endif
