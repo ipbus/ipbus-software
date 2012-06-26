@@ -1,0 +1,9 @@
+#!%INSTALL_PREFIX%/bin/escript
+%% -*- erlang -*-
+%%! -sname tempshellstop -hidden
+
+main(_Ignore) ->
+  {ok, Hostname} = inet:gethostname(),
+  NodeStr = "controlhub@" ++ Hostname,
+  Result = rpc:call(list_to_atom(NodeStr), init, stop, [0]),
+  io:format("~p~n", [Result]).
