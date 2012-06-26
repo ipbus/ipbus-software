@@ -106,5 +106,12 @@ namespace uhal
 	{
 		log_inserter ( Integer ( uint32_t ( aTime.value().tv_usec ) , IntFmt<dec , fixed , 6>() ) );
 	}
+	
+	timeval Now()
+	{
+		timeval lTime;
+		gettimeofday ( &lTime, NULL );
+		return lTime;
+	}
 
 }

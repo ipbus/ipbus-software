@@ -54,6 +54,8 @@ namespace uhal
 
 	template< typename T > _Time< T , DefaultTimeFmt > Time ( const T& aT );
 	template< typename T , typename FORMAT > _Time< T , FORMAT > Time ( const T& aT , const FORMAT& aFmt );
+	
+	timeval Now();
 
 }
 

@@ -1,8 +1,5 @@
 #include <uhal/log/log.hpp>
 
-#include <sys/time.h>
-#include <uhal/log/log_inserters.time.hpp>
-
 namespace uhal
 {
 
