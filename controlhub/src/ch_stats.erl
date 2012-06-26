@@ -34,7 +34,8 @@
          get_udp_malformed/0,
          get_udp_out/0,
          get_udp_response_timeouts/0,
-         report_to_console/0]).
+         report_to_console/0,
+         report_to_string/0]).
 
 %% Behavioural exports - the gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -251,10 +252,19 @@ get_udp_response_timeouts() -> gen_server:call(?MODULE, get_udp_response_timeout
 %% ----------------------------------------------------------------------------
 %% @doc Prints a report of all the current stats to the console.
 %%
-%% @spec get_all_stats() -> ok
+%% @spec report_to_console() -> ok
 %% @end
 %% ----------------------------------------------------------------------------
 report_to_console() -> gen_server:cast(?MODULE, report_to_console).
+
+
+%% ----------------------------------------------------------------------------
+%% @doc Returns a current stats report in string form (well, a list really...).
+%%
+%% @spec report_to_string() -> string()
+%% @end
+%% ----------------------------------------------------------------------------
+report_to_string() -> gen_server:call(?MODULE, report_to_string).
 
 
 
@@ -312,6 +322,9 @@ handle_call(get_udp_out, _From,  State) ->
 handle_call(get_udp_response_timeouts, _From,  State) ->
     {reply, State#state.udp_response_timeouts, State};
 
+handle_call(report_to_string, _From, State) ->
+    {reply, report_to_string(State), State};
+
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
@@ -366,23 +379,7 @@ handle_cast(udp_response_timeout, State = #state{udp_response_timeouts = Value})
     {noreply, NewState};
 
 handle_cast(report_to_console, State) ->
-    io:format("~nControl Hub Stats Report~n"
-              "------------------------~n~n"
-              "CLIENT  Active connections: ~p (peak=~p)~n"
-              "         Requests received: ~p (of which ~p were malformed)~n"
-              "            Responses sent: ~p~n~n"
-              "UDP            Packets Out: ~p~n"
-              "                Packets In: ~p (of which ~p were malformed)~n"
-              "                  Timeouts: ~p~n",
-              [State#state.active_clients,
-               State#state.max_active_clients,
-               State#state.request_count,
-               State#state.malformed_request_count,
-               State#state.response_count,
-               State#state.udp_out,
-               State#state.udp_in,
-               State#state.udp_malformed,
-               State#state.udp_response_timeouts]),
+    io:format("~n~s~n", [report_to_string(State)]),
     {noreply, State};
 
 handle_cast(stop, State) ->
@@ -425,3 +422,22 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions (private)
 %%% --------------------------------------------------------------------
 
+%% Returns a stats report in string form
+report_to_string(State) ->
+    lists:flatten(io_lib:format("Control Hub Stats Report~n"
+                                "------------------------~n~n"
+                                "CLIENT  Active connections: ~p (peak=~p)~n"
+                                "         Requests received: ~p (of which ~p were malformed)~n"
+                                "            Responses sent: ~p~n~n"
+                                "UDP            Packets Out: ~p~n"
+                                "                Packets In: ~p (of which ~p were malformed)~n"
+                                "                  Timeouts: ~p",
+                                [State#state.active_clients,
+                                 State#state.max_active_clients,
+                                 State#state.request_count,
+                                 State#state.malformed_request_count,
+                                 State#state.response_count,
+                                 State#state.udp_out,
+                                 State#state.udp_in,
+                                 State#state.udp_malformed,
+                                 State#state.udp_response_timeouts])).
