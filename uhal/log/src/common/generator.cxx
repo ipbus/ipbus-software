@@ -7,9 +7,10 @@
 
 #include <boost/algorithm/string.hpp>
 
-static const std::string gLogLevelsChar[] = { "Emergency" , "Alert" , "Critical" , "Error" , "Warning" , "Notice" , "Info" , "Debug" };
+static const std::string gLogLevelsChar[] = { "Fatal" , "Error" , "Warning" , "Notice" , "Info" , "Debug" };
+static const uint32_t gNumberEntries( 6 );
 
-static const std::vector< std::string > gLogLevels ( gLogLevelsChar , gLogLevelsChar+8 );
+static const std::vector< std::string > gLogLevels ( gLogLevelsChar , gLogLevelsChar+gNumberEntries );
 
 
 

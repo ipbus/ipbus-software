@@ -8,29 +8,7 @@ namespace uhal
 
 	template<>
 	template<>
-	void log_formatter< Emergency >::template_specialization_helper< Emergency >::print ( )
-	{
-		put ( "\033[0;31m[" ); //standard red
-		timeval lTime;
-		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-		put ( " EMERGENCY] " );
-	}
-
-	template<>
-	template<>
-	void log_formatter< Alert >::template_specialization_helper< Alert >::print ( )
-	{
-		put ( "\033[0;31m[" ); //standard red
-		timeval lTime;
-		gettimeofday ( &lTime, NULL );
-		log_inserter ( Time ( lTime , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-		put ( " ALERT] " );
-	}
-
-	template<>
-	template<>
-	void log_formatter< Critical >::template_specialization_helper< Critical >::print ( )
+	void log_formatter< Fatal >::template_specialization_helper< Fatal >::print ( )
 	{
 		put ( "\033[0;31m[" ); //standard red
 		timeval lTime;
