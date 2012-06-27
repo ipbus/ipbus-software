@@ -9,7 +9,17 @@
 # Get current working directory
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-# Open a remote shell to the controlhub node.
-#   -- $RANDOM is used to give the startup shell a random node name in order
-#      to prevent name clashes if more that one remote shell is open.
-${DIR}/erl +B -sname $RANDOM -remsh controlhub@`hostname -s` -hidden
+
+# See if the controlhub is up
+${DIR}/controlhub_status > /dev/null
+CONTROLHUBSTATUS=$?
+
+if [ $CONTROLHUBSTATUS = 0 ]; then
+  # Open a remote shell to the controlhub node.
+  #   -- $RANDOM is used to give the startup shell a random node name in order
+  #      to prevent name clashes if more that one remote shell is open.
+  ${DIR}/erl +B -sname $RANDOM -remsh controlhub@`hostname -s` -hidden
+else
+  echo "Control Hub is down"
+  exit 1
+fi
