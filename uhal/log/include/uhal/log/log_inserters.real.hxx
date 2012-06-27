@@ -10,8 +10,8 @@ namespace uhal
 	void log_inserter ( const _Real< T , RealFmt<WIDTH> >& aReal )
 	{
 		char lBuffer[ WIDTH+10 ]; // Make the buffer plenty wide enough, since the exponent is not counted in the width term!
-									// An IEEE double has an 11=bit exponent = -1023 to 1024, adding the "e" character means that the 
-									// maximum size of the exponent is 6 characters. 10 is a nice round number and is on the safe side.
+		// An IEEE double has an 11=bit exponent = -1023 to 1024, adding the "e" character means that the
+		// maximum size of the exponent is 6 characters. 10 is a nice round number and is on the safe side.
 		gcvt ( aReal.value() , WIDTH , lBuffer );
 		put ( lBuffer );
 	}

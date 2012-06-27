@@ -11,7 +11,7 @@ namespace uhal
 		{
 			try
 			{
-				log ( Error() , "Failed to parse file " , aPath.c_str() , ". PugiXML returned the following description " , Quote( aLoadResult.description() ) , "." );
+				log ( Error() , "Failed to parse file " , aPath.c_str() , ". PugiXML returned the following description " , Quote ( aLoadResult.description() ) , "." );
 				std::size_t lLineCounter ( 1 );
 				std::vector<uint8_t>::const_iterator lIt0 ( aFile.begin() );
 				std::vector<uint8_t>::const_iterator lIt1 ( aFile.begin() + aLoadResult.offset );
@@ -67,7 +67,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}
@@ -124,7 +124,7 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 				throw uhal::exception ( aExc );
 			}
 		}

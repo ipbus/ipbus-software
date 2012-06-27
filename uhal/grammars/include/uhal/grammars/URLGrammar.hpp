@@ -26,7 +26,7 @@ namespace uhal
 		std::string mPath;
 		//! The "ext" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"
 		std::string mExtension;
-		//! The "key1=val1&key2=val2&key3=val3" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"	stored as a vector of key/val pairs	
+		//! The "key1=val1&key2=val2&key3=val3" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"	stored as a vector of key/val pairs
 		NameValuePairVectorType mArguments;
 	};
 }

@@ -13,7 +13,7 @@ _ValHeader_::_ValHeader_ ( const bool& aValid ) try :
 		{}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -29,7 +29,7 @@ _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t 
 		{}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -42,7 +42,7 @@ _ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid 
 		{}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -56,7 +56,7 @@ ValHeader::ValHeader() try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -68,7 +68,7 @@ ValHeader::ValHeader() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -81,7 +81,7 @@ ValHeader::ValHeader() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -99,7 +99,7 @@ ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -111,7 +111,7 @@ ValWord< T >::ValWord ( const ValWord<T>& aVal ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -123,7 +123,7 @@ ValWord< T >::ValWord() try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -136,7 +136,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -150,7 +150,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -165,7 +165,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -199,7 +199,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -222,7 +222,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -245,7 +245,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -259,7 +259,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -273,7 +273,7 @@ ValWord< T >::ValWord() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -291,7 +291,7 @@ ValVector< T >::ValVector ( const std::vector<T>& aValues ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -303,7 +303,7 @@ ValVector< T >::ValVector ( const ValVector& aValues ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -315,7 +315,7 @@ ValVector< T >::ValVector ( uint32_t aSize ) try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -327,7 +327,7 @@ ValVector< T >::ValVector() try :
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -340,7 +340,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -354,7 +354,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -379,7 +379,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -402,7 +402,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -425,7 +425,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -451,7 +451,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -466,7 +466,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -489,7 +489,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -512,7 +512,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -535,7 +535,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -558,7 +558,7 @@ ValVector< T >::ValVector() try :
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

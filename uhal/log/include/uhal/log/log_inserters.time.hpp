@@ -29,7 +29,7 @@ namespace uhal
 
 	//! Forward declaration
 	template< typename T , typename FORMAT > class _Time;
-	
+
 	//! A helper struct to allow us to do template specialization if necessary
 	template< typename T , typename FORMAT >
 	struct TimeFactory
@@ -41,8 +41,8 @@ namespace uhal
 		*/
 		static _Time< T , FORMAT > Construct ( const T& aTime );
 	};
-	
-	
+
+
 	//! A struct whose template parameters represent a time format
 	template< time_element T0 , char D0 = ' ' ,
 	time_element T1 = null, char D1 = ' ' ,
@@ -71,7 +71,7 @@ namespace uhal
 			_Time ( const T& aT ) : RefWrapper< T > ( aT ) {}
 	};
 
-	
+
 	//! A helper struct to allow us to do template specialization when formatting the time for sending to the log
 	template< time_element T >
 	struct TimeSpecializationHelper
@@ -81,7 +81,7 @@ namespace uhal
 			@param aTm a tm struct containing the time to be formatted (down to the second)
 			@param aUsec the number of microseconds past the second
 		*/
-		static void print (  const tm* aTm , const uint32_t& aUsec );
+		static void print ( const tm* aTm , const uint32_t& aUsec );
 	};
 
 	/**
@@ -90,7 +90,7 @@ namespace uhal
 		@return a time wrapper object whose template parameters fully encapsulate the default formatting
 	*/
 	template< typename T > _Time< T , DefaultTimeFmt > Time ( const T& aT );
-	
+
 	/**
 		Helper function which wrap the template uglyness in a pretty package
 		@param aT a time object to be formatted and logged

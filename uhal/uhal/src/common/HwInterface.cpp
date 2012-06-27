@@ -13,7 +13,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -32,15 +32,15 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 			{
 				claimNode ( *lIt );
 			}
-			
+
 			// for ( std::hash_map< std::string , Node >::iterator lIt = aNode.mChildrenMap->begin() ; lIt != aNode.mChildrenMap->end() ; ++lIt )
 			// {
-				// claimNode ( lIt->second );
+			// claimNode ( lIt->second );
 			// }
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -53,7 +53,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -66,7 +66,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -79,7 +79,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -106,7 +106,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -119,7 +119,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -132,7 +132,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -145,7 +145,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -158,7 +158,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -171,7 +171,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

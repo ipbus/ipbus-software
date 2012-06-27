@@ -26,7 +26,7 @@ namespace uhal
 				Destructor
 			*/
 			virtual ~exception() throw();
-			
+
 			/**
 				Function which returns the error message associated with an exception
 				If no error message has previously been defined, then it makes the typename readable (where appropriate) and returns this instead.
@@ -40,7 +40,7 @@ namespace uhal
 				@param aExc an exception whose message is to be copied
 			*/
 			exception ( const std::exception& aExc );
-			
+
 		private:
 
 			//! The message given to the exception at the time of construction

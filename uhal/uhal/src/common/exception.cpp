@@ -38,8 +38,8 @@ namespace uhal
 		return abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
 #else
 		return typeid ( *this ).name();
-#endif				
+#endif
 	}
-	
+
 
 }

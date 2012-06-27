@@ -8,7 +8,7 @@
 #include <boost/algorithm/string.hpp>
 
 static const std::string gLogLevelsChar[] = { "Fatal" , "Error" , "Warning" , "Notice" , "Info" , "Debug" };
-static const uint32_t gNumberEntries( 6 );
+static const uint32_t gNumberEntries ( 6 );
 
 static const std::vector< std::string > gLogLevels ( gLogLevelsChar , gLogLevelsChar+gNumberEntries );
 
@@ -58,15 +58,13 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 		lIfDefs2 << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << " // A waste of time to change any level below this if it is going to disabled by compile-time checking anyway... \n"
 				 << "\t\tlog_configuration::mLoggingIncludes" << *lIt << " = true;\n";
 		lEndIfs << "\t#endif\n";
-		
 		aHppFile << "//! Helper struct representing the " << *lIt << " log level to allow us to specialize functions according to their log level\n"
-					<< "struct " << *lIt << " {};\n";
-					
+				 << "struct " << *lIt << " {};\n";
 		aHppFile << "/**\n"
-					<< "\tFunction to specify, at runtime, that only messages with a severity level above " << *lIt << " should be logged\n"
-					<< "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n"
-					<< "*/\n"
-					<< "void setLogLevelTo ( const " << *lIt << "& a" << *lIt << " );\n";
+				 << "\tFunction to specify, at runtime, that only messages with a severity level above " << *lIt << " should be logged\n"
+				 << "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n"
+				 << "*/\n"
+				 << "void setLogLevelTo ( const " << *lIt << "& a" << *lIt << " );\n";
 		aCppFile << "void setLogLevelTo ( const " << *lIt << "& a" << *lIt << " )\n"
 				 << "{\n"
 				 << lIfDefs2.str();
@@ -80,11 +78,11 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 				 << "}\n"
 				 << "\n";
 		aHppFile << "/**\n"
-					<< "\tFunction to check at runtime whether the level " << *lIt << " is to be included in the log output\n"
-					<< "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n"
-					<< "\t@return whether the level " << *lIt << " is to be included in the log output\n"
-					<< "*/\n"
-					<< "const bool& LoggingIncludes ( const " << *lIt << "& a" << *lIt << " );\n"
+				 << "\tFunction to check at runtime whether the level " << *lIt << " is to be included in the log output\n"
+				 << "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n"
+				 << "\t@return whether the level " << *lIt << " is to be included in the log output\n"
+				 << "*/\n"
+				 << "const bool& LoggingIncludes ( const " << *lIt << "& a" << *lIt << " );\n"
 				 << "\n";
 		aCppFile << "const bool& LoggingIncludes ( const " << *lIt << "& a" << *lIt << " )\n"
 				 << "{\n"
@@ -97,7 +95,7 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 	}
 
 	aHppFile << "//! Class to restrict access to the log configuration parameters\n"
-				<< "class log_configuration\n"
+			 << "class log_configuration\n"
 			 << "{\n"
 			 << "\t//! Constructor\n"
 			 << "\tlog_configuration();\n"
@@ -108,18 +106,18 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
 	{
 		aHppFile << "\t//! static bool storing whether the " << *lIt << " level is to be included in the log output\n"
-					<< "\tstatic bool mLoggingIncludes" << *lIt << ";\n";
+				 << "\tstatic bool mLoggingIncludes" << *lIt << ";\n";
 		aCppFile << "bool log_configuration::mLoggingIncludes" << *lIt << " = true; // No #ifdefs required here since they are implemented in all the access functions.\n";
 		aHppFile << "\t//!Make setLogLevelTo function a friend so it can access our private members\n"
-					<< "\tfriend void setLogLevelTo ( const " << *lIt << "& );\n"
-					<< "\t//!Make LoggingIncludes function a friend so it can access our private members\n"
+				 << "\tfriend void setLogLevelTo ( const " << *lIt << "& );\n"
+				 << "\t//!Make LoggingIncludes function a friend so it can access our private members\n"
 				 << "\tfriend const bool& LoggingIncludes ( const " << *lIt << "& );\n"
 				 << "\n";
 	}
 
 	aHppFile << "\t//!Define a static const member variable to have a value of true so that we can safely return a const reference to true\n"
-			<< "\tstatic const bool mTrue;\n"
-			<< "\t//!Define a static const member variable to have a value of false so that we can safely return a const reference to false\n"
+			 << "\tstatic const bool mTrue;\n"
+			 << "\t//!Define a static const member variable to have a value of false so that we can safely return a const reference to false\n"
 			 << "\tstatic const bool mFalse;\n"
 			 << "};\n"
 			 << "\n";
@@ -134,7 +132,7 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 }
 
 
-std::string suffix( uint32_t i )
+std::string suffix ( uint32_t i )
 {
 	i = i % 100;
 
@@ -142,9 +140,8 @@ std::string suffix( uint32_t i )
 	{
 		return "th";
 	}
-	
+
 	char* lIndices[] = { "th" , "st" , "nd" , "rd" , "th" , "th" , "th" , "th" , "th" , "th" };
-	
 	return lIndices[ i%10 ];
 }
 
@@ -152,7 +149,7 @@ std::string suffix( uint32_t i )
 void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
 	std::stringstream lIfDefs , lEndIfs;
-	
+
 	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
 	{
 		lIfDefs << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << "\n";
@@ -161,10 +158,9 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
 		std::stringstream lArgs;
 		std::stringstream lInstructions;
 		std::stringstream lDoxygen;
-		
 		lDoxygen << "\tFunction to add a log entry at " << *lIt << " level\n"
-					<< "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n";
-		
+				 << "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n";
+
 		for ( uint32_t i = 0 ; i!=MAX_NUM_ARGS ; ++i )
 		{
 			lTemplates << " typename T" << i << " ,";
@@ -174,26 +170,25 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
 			std::string lArgsStr ( lArgs.str() );
 			lArgsStr.resize ( lArgsStr.size()-1 );
 			lInstructions << "\t\t\tlog_inserter( aArg" << i << " );\n";
-			lDoxygen << "\t@param aArg" << i << " a templated argument to be added to the log " << (i+1) << suffix(i+1) <<"\n";
-			
+			lDoxygen << "\t@param aArg" << i << " a templated argument to be added to the log " << ( i+1 ) << suffix ( i+1 ) <<"\n";
 			aHppFile << "/**\n"
-						<< lDoxygen.str()
-						<< "*/\n"
-						<< "template<" << lTemplatesStr << ">\n"
-						<< "void log( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
-						<< "\n";
+					 << lDoxygen.str()
+					 << "*/\n"
+					 << "template<" << lTemplatesStr << ">\n"
+					 << "void log( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
+					 << "\n";
 			aHxxFile << "template<" << lTemplatesStr << ">\n"
-						<< "void log( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
-						<< "{\n"
-						<< lIfDefs.str()
-						<< "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
-						<< "\t\t\tlog_head< " << *lIt << " >();\n"
-						<< lInstructions.str()
-						<< "\t\t\tlog_tail< " << *lIt << " >();\n"
-						<< "\t\t}\n"
-						<< lEndIfs.str()
-						<< "}\n"
-						<< "\n";
+					 << "void log( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
+					 << "{\n"
+					 << lIfDefs.str()
+					 << "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
+					 << "\t\t\tlog_head< " << *lIt << " >();\n"
+					 << lInstructions.str()
+					 << "\t\t\tlog_tail< " << *lIt << " >();\n"
+					 << "\t\t}\n"
+					 << lEndIfs.str()
+					 << "}\n"
+					 << "\n";
 		}
 
 		aHppFile	<< gDivider

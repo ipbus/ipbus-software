@@ -81,7 +81,7 @@ namespace uhal
 	};
 
 }
-	// ----------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------
 
 namespace uhal
 {
@@ -139,7 +139,7 @@ namespace uhal
 	};
 }
 
-	// ----------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------
 
 namespace uhal
 {
@@ -152,7 +152,7 @@ namespace uhal
 		@return a pair containing an IP-address (first) and port number (second)
 	*/
 	std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri );
-	
+
 	//! A class to indirectly access (via a Control Hub Host) devices via IPbus over UDP
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class ControlHubClient : public ClientInterface
@@ -237,8 +237,8 @@ namespace uhal
 			The port field of the IP address
 		*/
 		uint16_t mPort;
-	};	
-			
+	};
+
 }
 
 //! A boost::fusion adaptive struct used by the boost::qi parser
@@ -249,7 +249,7 @@ BOOST_FUSION_ADAPT_STRUCT (
 	( uint16_t , mIP3 )
 	( uint16_t , mIP4 )
 	( uint16_t , mPort )
-);	
+);
 
 
 

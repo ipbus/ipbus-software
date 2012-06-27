@@ -4,20 +4,20 @@
 
 // std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse )
 // {
-	// aStream << " > method = " << aHttpResponse.method << "\n";
-	// aStream << " > version = " << aHttpResponse.version << "\n";
-	// aStream << " > status = " << aHttpResponse.status << "\n";
-	// aStream << " > status_string = " << aHttpResponse.status_string << "\n";
-	// aStream << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
-	// aStream << " > Content =\n";
+// aStream << " > method = " << aHttpResponse.method << "\n";
+// aStream << " > version = " << aHttpResponse.version << "\n";
+// aStream << " > status = " << aHttpResponse.status << "\n";
+// aStream << " > status_string = " << aHttpResponse.status_string << "\n";
+// aStream << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
+// aStream << " > Content =\n";
 
-	// for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
-	// {
-		// aStream << char ( *lIt );
-	// }
+// for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
+// {
+// aStream << char ( *lIt );
+// }
 
-	// aStream << std::endl;
-	// return aStream;
+// aStream << std::endl;
+// return aStream;
 // }
 
 
@@ -42,7 +42,7 @@ namespace uhal
 		log_inserter ( "\n > NameValuePairs =\n" );
 		log_inserter ( aHttpResponse.headers );
 		log_inserter ( "\n > Content =\n" );
-		put ( (const char*)( & ( aHttpResponse.content[0] )) , aHttpResponse.content.size() );
+		put ( ( const char* ) ( & ( aHttpResponse.content[0] ) ) , aHttpResponse.content.size() );
 	}
 }
 

@@ -41,7 +41,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -57,7 +57,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		}
 	}
 
@@ -95,7 +95,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			mTcpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
 		}
 		catch ( boost::thread_interrupted& )
@@ -173,7 +173,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -205,7 +205,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -237,7 +237,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		}
 	}
 
@@ -255,7 +255,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 				if ( mAsynchronousException )
 				{
 					uhal::exception lExc ( *mAsynchronousException );
-					log ( Error() , "Exception " , Quote( lExc.what() ) , " caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote ( lExc.what() ) , " caught at " , ThisLocation() );
 					throw lExc;
 				}
 
@@ -270,7 +270,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -297,7 +297,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 					if ( mAsynchronousException )
 					{
 						uhal::exception lExc ( *mAsynchronousException );
-						log ( Error() , "Exception " , Quote( lExc.what() ) , " caught at " , ThisLocation() );
+						log ( Error() , "Exception " , Quote ( lExc.what() ) , " caught at " , ThisLocation() );
 						throw lExc;
 					}
 
@@ -321,7 +321,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

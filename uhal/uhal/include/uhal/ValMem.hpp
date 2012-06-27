@@ -38,7 +38,7 @@ namespace uhal
 	// Forward declaration so we can define friends
 	template< typename T > class ValVector;
 
-	
+
 	//! A helper struct wrapping an IPbus header and a valid flag
 	struct _ValHeader_
 	{

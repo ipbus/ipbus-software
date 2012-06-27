@@ -10,7 +10,7 @@ namespace uhal
 
 	// Template specialization for printing the year field of a time struct as a 4 digit number
 	template<>
-	void TimeSpecializationHelper< year >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< year >::print ( const tm* aTm , const uint32_t& )
 	{
 		// the tm struct stores years as int number of years since 1900
 		log_inserter ( Integer ( aTm->tm_year+1900 ) );
@@ -18,7 +18,7 @@ namespace uhal
 
 	// Template specialization for printing the year field of a time struct as a 2 digit number
 	template<>
-	void TimeSpecializationHelper< yr >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< yr >::print ( const tm* aTm , const uint32_t& )
 	{
 		static const char* lCharacterMapping (	"00010203040506070809"
 												"10111213141516171819"
@@ -35,7 +35,7 @@ namespace uhal
 
 	// Template specialization for printing the month field of a time struct as a three character string
 	template<>
-	void TimeSpecializationHelper< strmth >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< strmth >::print ( const tm* aTm , const uint32_t& )
 	{
 		// the tm struct stores months as int with values 0 - 11 (not 1 - 12)
 		static const char* lCharacterMapping ( "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec" );
@@ -44,7 +44,7 @@ namespace uhal
 
 	// Template specialization for printing the month field of a time struct as a 2 digit number
 	template<>
-	void TimeSpecializationHelper< mth >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< mth >::print ( const tm* aTm , const uint32_t& )
 	{
 		// the tm struct stores months as int with values 0 - 11 (not 1 - 12)
 		static const char* lCharacterMapping ( "010203040506070809101112" );
@@ -53,7 +53,7 @@ namespace uhal
 
 	// Template specialization for printing the day field of a time struct as a 2 digit number
 	template<>
-	void TimeSpecializationHelper< day >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< day >::print ( const tm* aTm , const uint32_t& )
 	{
 		// the tm struct stores days as int with values 1 - 31 (so I add a dummy entry to start of LUT)
 		static const char* lCharacterMapping (	"xx010203040506070809"
@@ -65,7 +65,7 @@ namespace uhal
 
 	// Template specialization for printing the hour field of a time struct as a 2 digit number
 	template<>
-	void TimeSpecializationHelper< hr >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< hr >::print ( const tm* aTm , const uint32_t& )
 	{
 		// the tm struct stores hours as int with values 0-23
 		static const char* lCharacterMapping (	"00010203040506070809"
@@ -76,7 +76,7 @@ namespace uhal
 
 	// Template specialization for printing the minute field of a time struct as a 2 digit number
 	template<>
-	void TimeSpecializationHelper< min >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< min >::print ( const tm* aTm , const uint32_t& )
 	{
 		// the tm struct stores minutes as int with values 0-59
 		static const char* lCharacterMapping (	"00010203040506070809"
@@ -90,7 +90,7 @@ namespace uhal
 
 	// Template specialization for printing the second field of a time struct as a 2 digit number
 	template<>
-	void TimeSpecializationHelper< sec >::print (  const tm* aTm , const uint32_t& )
+	void TimeSpecializationHelper< sec >::print ( const tm* aTm , const uint32_t& )
 	{
 		// the tm struct stores minutes as int with values 0-61 to take into account the double leap second
 		static const char* lCharacterMapping (	"00010203040506070809"
@@ -104,7 +104,7 @@ namespace uhal
 	}
 
 	template<>
-	void TimeSpecializationHelper< usec >::print (  const tm* , const uint32_t& aUsec )
+	void TimeSpecializationHelper< usec >::print ( const tm* , const uint32_t& aUsec )
 	{
 		// the uSeconds are just a 32bit number so print it as an integer
 		log_inserter ( Integer ( aUsec , IntFmt<dec , fixed , 6>() ) );
@@ -114,7 +114,7 @@ namespace uhal
 	{
 		log_inserter ( Integer ( uint32_t ( aTime.value().tv_usec ) , IntFmt<dec , fixed , 6>() ) );
 	}
-	
+
 	timeval Now()
 	{
 		timeval lTime;

@@ -200,7 +200,7 @@ namespace uhal
 	template< typename T >
 	void log_inserter ( const _Integer< T , IntFmt<bin , variable , 0> >& aInt )
 	{
-		if ( aInt.value() == 0 )
+		if ( aInt.value() == T ( 0 ) )
 		{
 			put ( "0b0" );
 		}
@@ -263,7 +263,7 @@ namespace uhal
 	{
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );
 
-		if ( aInt.value() == 0 )
+		if ( aInt.value() == T ( 0 ) )
 		{
 			put ( "0x0" );
 		}

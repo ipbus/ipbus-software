@@ -55,7 +55,7 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: ${EXECUTABLES} ${GENERATE} ${LIBRARY} 
+_all: ${EXECUTABLES} ${LIBRARY} 
 
 #Executables will be compiled but they won't be packaged
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}

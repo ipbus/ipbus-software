@@ -79,22 +79,22 @@ namespace uhal
 				@param aNode a node to lightweight copy.
 				@note this copy constructor copies the member pointers, not the object they are pointing to. To duplicate the underlying object, rather than the the pointer to it, use the clone() method.
 			*/
-			Node( const Node& aNode );		
-			
+			Node ( const Node& aNode );
+
 			/**
 				Destructor
 			*/
 			virtual ~Node();
 
-		private:	
-		
+		private:
+
 			/**
 				Function to create a true clone of the full hierarchical Node tree
 				@return a true clone of the current node tree
 			*/
 			virtual Node clone() const;
-			
-		public:	
+
+		public:
 			/**
 				A function to determine whether two Nodes are identical
 				@param aNode a Node to compare
@@ -324,7 +324,7 @@ namespace uhal
 
 			//! The direct children of the child node
 			boost::shared_ptr< std::deque< Node > > mChildren;
-			
+
 			//! Helper to assist look-up of a particular child node, given a name
 			boost::shared_ptr< std::hash_map< std::string , Node* > > mChildrenMap;
 

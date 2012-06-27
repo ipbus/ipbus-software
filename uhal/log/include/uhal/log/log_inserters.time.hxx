@@ -14,19 +14,19 @@ namespace uhal
 	void log_inserter ( const _Time< timeval , TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,D5,T6> >& aTime )
 	{
 		tm* lLocalTime ( localtime ( &aTime.value().tv_sec ) );
-		TimeSpecializationHelper< T0 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T0 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D0 );
-		TimeSpecializationHelper< T1 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T1 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D1 );
-		TimeSpecializationHelper< T2 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T2 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D2 );
-		TimeSpecializationHelper< T3 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T3 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D3 );
-		TimeSpecializationHelper< T4 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T4 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D4 );
-		TimeSpecializationHelper< T5 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T5 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D5 );
-		TimeSpecializationHelper< T6 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T6 >::print ( lLocalTime , aTime.value().tv_usec );
 	}
 
 	template< time_element T0, char D0 ,
@@ -38,17 +38,17 @@ namespace uhal
 	void log_inserter ( const _Time< timeval , TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,' ',null> >& aTime )
 	{
 		tm* lLocalTime ( localtime ( &aTime.value().tv_sec ) );
-		TimeSpecializationHelper< T0 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T0 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D0 );
-		TimeSpecializationHelper< T1 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T1 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D1 );
-		TimeSpecializationHelper< T2 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T2 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D2 );
-		TimeSpecializationHelper< T3 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T3 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D3 );
-		TimeSpecializationHelper< T4 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T4 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D4 );
-		TimeSpecializationHelper< T5 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T5 >::print ( lLocalTime , aTime.value().tv_usec );
 	}
 
 	template< time_element T0, char D0 ,
@@ -59,15 +59,15 @@ namespace uhal
 	void log_inserter ( const _Time< timeval , TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,' ',null,' ',null> >& aTime )
 	{
 		tm* lLocalTime ( localtime ( &aTime.value().tv_sec ) );
-		TimeSpecializationHelper< T0 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T0 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D0 );
-		TimeSpecializationHelper< T1 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T1 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D1 );
-		TimeSpecializationHelper< T2 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T2 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D2 );
-		TimeSpecializationHelper< T3 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T3 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D3 );
-		TimeSpecializationHelper< T4 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T4 >::print ( lLocalTime , aTime.value().tv_usec );
 	}
 
 	template< time_element T0, char D0 ,
@@ -77,13 +77,13 @@ namespace uhal
 	void log_inserter ( const _Time< timeval , TimeFmt<T0,D0,T1,D1,T2,D2,T3,' ',null,' ',null,' ',null> >& aTime )
 	{
 		tm* lLocalTime ( localtime ( &aTime.value().tv_sec ) );
-		TimeSpecializationHelper< T0 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T0 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D0 );
-		TimeSpecializationHelper< T1 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T1 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D1 );
-		TimeSpecializationHelper< T2 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T2 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D2 );
-		TimeSpecializationHelper< T3 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T3 >::print ( lLocalTime , aTime.value().tv_usec );
 	}
 
 	template< time_element T0, char D0 ,
@@ -92,11 +92,11 @@ namespace uhal
 	void log_inserter ( const _Time< timeval , TimeFmt<T0,D0,T1,D1,T2,' ',null,' ',null,' ',null,' ',null> >& aTime )
 	{
 		tm* lLocalTime ( localtime ( &aTime.value().tv_sec ) );
-		TimeSpecializationHelper< T0 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T0 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D0 );
-		TimeSpecializationHelper< T1 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T1 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D1 );
-		TimeSpecializationHelper< T2 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T2 >::print ( lLocalTime , aTime.value().tv_usec );
 	}
 
 	template< time_element T0, char D0 ,
@@ -104,16 +104,16 @@ namespace uhal
 	void log_inserter ( const _Time< timeval , TimeFmt<T0,D0,T1,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime )
 	{
 		tm* lLocalTime ( localtime ( &aTime.value().tv_sec ) );
-		TimeSpecializationHelper< T0 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T0 >::print ( lLocalTime , aTime.value().tv_usec );
 		put ( D0 );
-		TimeSpecializationHelper< T1 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T1 >::print ( lLocalTime , aTime.value().tv_usec );
 	}
 
 	template< time_element T0 >
 	void log_inserter ( const _Time< timeval , TimeFmt<T0,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime )
 	{
 		tm* lLocalTime ( localtime ( &aTime.value().tv_sec ) );
-		TimeSpecializationHelper< T0 >::print (  lLocalTime , aTime.value().tv_usec );
+		TimeSpecializationHelper< T0 >::print ( lLocalTime , aTime.value().tv_usec );
 	}
 
 

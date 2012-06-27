@@ -79,14 +79,14 @@ namespace uhal
 			/**
 				Helper function to add a destination object to the reply queue
 				@param aPtr a pointer to some persistent object which can be written to when the transaction is performed
-			*/			
+			*/
 			template< typename T >
 			void receive ( T* aPtr );
 
 			/**
 				Helper function to add a destination object to the reply queue
 				@param aRef a reference to some persistent object which can be written to when the transaction is performed
-			*/	
+			*/
 			template< typename T >
 			void receive ( T& aRef );
 
@@ -102,7 +102,7 @@ namespace uhal
 				@param aValMem a validated memory to be associated with this buffer
 			*/
 			void add ( const ValHeader& aValMem );
-			
+
 			/**
 				Helper function to associate a validated memory with this buffer so that it is guaranteed to exist when the transaction is performed
 				@param aValMem a validated memory to be associated with this buffer
@@ -129,7 +129,7 @@ namespace uhal
 
 			/**
 				Get a pointer to the start of the send buffer
-				@return a pointer to the start of the send buffer 
+				@return a pointer to the start of the send buffer
 			*/
 			uint8_t* getSendBuffer();
 
@@ -156,15 +156,15 @@ namespace uhal
 			//! The queue of reply destinations
 			std::deque< std::pair< uint8_t* , uint32_t > > mReplyBuffer;
 
-			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed 
+			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
 			std::deque< ValHeader > mValHeaders;
-			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed 
+			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
 			std::deque< ValWord< uint32_t > > mUnsignedValWords;
-			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed 
+			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
 			std::deque< ValWord< int32_t > > mSignedValWords;
-			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed 
+			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
 			std::deque< ValVector< uint32_t > > mUnsignedValVectors;
-			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed 
+			//! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
 			std::deque< ValVector< int32_t > > mSignedValVectors;
 	};
 
@@ -364,7 +364,7 @@ namespace uhal
 				@param aSendSize the amount of data that the current instruction wishes to send
 				@param aReplySize the amount of data that the current instruction expects to receive
 				@param aAvailableSendSize return the amount of space available for outgoing IPbus packets
-				@param aAvailableReplySize return the amount of space available for incoming IPbus packets 
+				@param aAvailableReplySize return the amount of space available for incoming IPbus packets
 			*/
 			virtual void checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 

@@ -21,8 +21,8 @@ namespace uhal
 		public:
 			/**
 				Constructor
-				@param aDeviceIPaddr The IP address of the target device that is connected to the Control Hub 
-				@param aDevicePort The port number of the target device that is connected to the Control Hub 
+				@param aDeviceIPaddr The IP address of the target device that is connected to the Control Hub
+				@param aDevicePort The port number of the target device that is connected to the Control Hub
 				@param aMaxSendSize The size of the buffer in the target device for receiving IPbus data packets from uhal via the Control Hub
 				@param aMaxReplySize The size of the buffer in the target device for sending IPbus data packets to uhal via the Control Hub
 			*/
@@ -76,10 +76,10 @@ namespace uhal
 			virtual bool Validate ( Buffers* aBuffers );
 
 		private:
-			//! The IP address of the target device that is connected to the Control Hub 
+			//! The IP address of the target device that is connected to the Control Hub
 			uint32_t mDeviceIPaddress;
-			
-			//! The port number of the target device that is connected to the Control Hub 
+
+			//! The port number of the target device that is connected to the Control Hub
 			uint16_t mDevicePort;
 
 			//! The transaction counter which will be incremented in the sent IPbus headers
@@ -107,7 +107,7 @@ namespace uhal
 
 			//! A MutEx lock used to make the Validate function thread safe
 			boost::mutex mMutex;
-			
+
 			//! A queue of preample structs making the memory used by the preambles persistent during the dispatch
 			std::deque< tPreamble > mPreambles;
 

@@ -55,8 +55,8 @@ namespace uhal
 		put ( " DEBUG] " );
 	}
 
-	
-	
+
+
 
 	void put ( const char& aChar )
 	{
@@ -72,6 +72,6 @@ namespace uhal
 	{
 		fwrite ( aStart , 1 , aSize , stdout );
 	}
-	
+
 }
 

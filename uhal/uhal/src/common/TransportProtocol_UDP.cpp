@@ -35,7 +35,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 		{}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -51,7 +51,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		}
 	}
 
@@ -89,7 +89,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			mUdpTransportProtocol.mAsynchronousException = new uhal::exception ( aExc );
 		}
 		catch ( boost::thread_interrupted& )
@@ -162,7 +162,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -194,7 +194,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		throw uhal::exception ( aExc );
 	}
 
@@ -226,7 +226,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 		}
 	}
 
@@ -244,7 +244,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 				if ( mAsynchronousException )
 				{
 					uhal::exception lExc ( *mAsynchronousException );
-					log ( Error() , "Exception " , Quote( lExc.what() ) , " caught at " , ThisLocation() );
+					log ( Error() , "Exception " , Quote ( lExc.what() ) , " caught at " , ThisLocation() );
 					throw lExc;
 				}
 
@@ -259,7 +259,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}
@@ -286,7 +286,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 					if ( mAsynchronousException )
 					{
 						uhal::exception lExc ( *mAsynchronousException );
-						log ( Error() , "Exception " , Quote( lExc.what() ) , " caught at " , ThisLocation() );
+						log ( Error() , "Exception " , Quote ( lExc.what() ) , " caught at " , ThisLocation() );
 						throw lExc;
 					}
 
@@ -310,7 +310,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
 		}
 	}

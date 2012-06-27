@@ -14,5 +14,5 @@ namespace uhal
 	{
 		log_head_template_specialization_helper< T >::print ( );
 	}
-	
+
 }
