@@ -6,98 +6,98 @@ namespace uhal{
 // ======================================================================================================================================================
 
 template< typename T0 >
-void log( const Fatal& FATAL , const T0& aArg0  )
+void log( const Fatal& aFatal , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -105,17 +105,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -124,17 +124,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -144,17 +144,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -165,17 +165,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -187,17 +187,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -210,17 +210,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -234,17 +234,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -259,17 +259,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -285,17 +285,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -312,17 +312,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -340,17 +340,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -369,17 +369,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -399,17 +399,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -430,17 +430,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -462,17 +462,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -495,17 +495,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -529,17 +529,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -564,17 +564,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -600,17 +600,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -637,17 +637,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -675,17 +675,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -714,17 +714,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -754,17 +754,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -795,17 +795,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -837,17 +837,17 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 , typename T31 >
-void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
+void log( const Fatal& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
-		if( LoggingIncludes( FATAL ) ){
-			log_formatter< Fatal >::head();
+		if( LoggingIncludes( aFatal ) ){
+			log_head< Fatal >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -880,7 +880,7 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_formatter< Fatal >::tail();
+			log_tail< Fatal >();
 		}
 	#endif
 }
@@ -890,111 +890,111 @@ void log( const Fatal& FATAL , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 // ======================================================================================================================================================
 
 template< typename T0 >
-void log( const Error& ERROR , const T0& aArg0  )
+void log( const Error& aError , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1002,19 +1002,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1023,19 +1023,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1045,19 +1045,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1068,19 +1068,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1092,19 +1092,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1117,19 +1117,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1143,19 +1143,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1170,19 +1170,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1198,19 +1198,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1227,19 +1227,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1257,19 +1257,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1288,19 +1288,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1320,19 +1320,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1353,19 +1353,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1387,19 +1387,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1422,19 +1422,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1458,19 +1458,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1495,19 +1495,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1533,19 +1533,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1572,19 +1572,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1612,19 +1612,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1653,19 +1653,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1695,19 +1695,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1738,19 +1738,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1782,19 +1782,19 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 , typename T31 >
-void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
+void log( const Error& aError , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
-		if( LoggingIncludes( ERROR ) ){
-			log_formatter< Error >::head();
+		if( LoggingIncludes( aError ) ){
+			log_head< Error >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1827,7 +1827,7 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_formatter< Error >::tail();
+			log_tail< Error >();
 		}
 	#endif
 	#endif
@@ -1838,15 +1838,15 @@ void log( const Error& ERROR , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 // ======================================================================================================================================================
 
 template< typename T0 >
-void log( const Warning& WARNING , const T0& aArg0  )
+void log( const Warning& aWarning , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1854,16 +1854,16 @@ void log( const Warning& WARNING , const T0& aArg0  )
 }
 
 template< typename T0 , typename T1 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1871,17 +1871,17 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1  )
 }
 
 template< typename T0 , typename T1 , typename T2 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1889,18 +1889,18 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1908,19 +1908,19 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1928,20 +1928,20 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1949,13 +1949,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1963,7 +1963,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1971,13 +1971,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -1986,7 +1986,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -1994,13 +1994,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2010,7 +2010,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2018,13 +2018,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2035,7 +2035,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2043,13 +2043,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2061,7 +2061,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2069,13 +2069,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2088,7 +2088,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2096,13 +2096,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2116,7 +2116,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2124,13 +2124,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2145,7 +2145,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2153,13 +2153,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2175,7 +2175,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2183,13 +2183,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2206,7 +2206,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2214,13 +2214,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2238,7 +2238,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2246,13 +2246,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2271,7 +2271,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2279,13 +2279,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2305,7 +2305,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2313,13 +2313,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2340,7 +2340,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2348,13 +2348,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2376,7 +2376,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2384,13 +2384,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2413,7 +2413,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2421,13 +2421,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2451,7 +2451,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2459,13 +2459,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2490,7 +2490,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2498,13 +2498,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2530,7 +2530,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2538,13 +2538,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2571,7 +2571,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2579,13 +2579,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2613,7 +2613,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2621,13 +2621,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2656,7 +2656,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2664,13 +2664,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2700,7 +2700,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2708,13 +2708,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2745,7 +2745,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2753,13 +2753,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2791,7 +2791,7 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
 	#endif
 	#endif
@@ -2799,13 +2799,13 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 , typename T31 >
-void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
+void log( const Warning& aWarning , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
-		if( LoggingIncludes( WARNING ) ){
-			log_formatter< Warning >::head();
+		if( LoggingIncludes( aWarning ) ){
+			log_head< Warning >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -2838,1084 +2838,8 @@ void log( const Warning& WARNING , const T0& aArg0 , const T1& aArg1 , const T2&
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_formatter< Warning >::tail();
+			log_tail< Warning >();
 		}
-	#endif
-	#endif
-	#endif
-}
-
-// ======================================================================================================================================================
-// WARNING! This file is automatically generated! Do not modify it! Any changes will be overwritten!
-// ======================================================================================================================================================
-
-template< typename T0 >
-void log( const Notice& NOTICE , const T0& aArg0  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_inserter( aArg25 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_inserter( aArg25 );
-			log_inserter( aArg26 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_inserter( aArg25 );
-			log_inserter( aArg26 );
-			log_inserter( aArg27 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_inserter( aArg25 );
-			log_inserter( aArg26 );
-			log_inserter( aArg27 );
-			log_inserter( aArg28 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_inserter( aArg25 );
-			log_inserter( aArg26 );
-			log_inserter( aArg27 );
-			log_inserter( aArg28 );
-			log_inserter( aArg29 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_inserter( aArg25 );
-			log_inserter( aArg26 );
-			log_inserter( aArg27 );
-			log_inserter( aArg28 );
-			log_inserter( aArg29 );
-			log_inserter( aArg30 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
-	#endif
-	#endif
-	#endif
-}
-
-template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 , typename T31 >
-void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
-{
-	#ifndef LOGGING_EXCLUDE_FATAL
-	#ifndef LOGGING_EXCLUDE_ERROR
-	#ifndef LOGGING_EXCLUDE_WARNING
-	#ifndef LOGGING_EXCLUDE_NOTICE
-		if( LoggingIncludes( NOTICE ) ){
-			log_formatter< Notice >::head();
-			log_inserter( aArg0 );
-			log_inserter( aArg1 );
-			log_inserter( aArg2 );
-			log_inserter( aArg3 );
-			log_inserter( aArg4 );
-			log_inserter( aArg5 );
-			log_inserter( aArg6 );
-			log_inserter( aArg7 );
-			log_inserter( aArg8 );
-			log_inserter( aArg9 );
-			log_inserter( aArg10 );
-			log_inserter( aArg11 );
-			log_inserter( aArg12 );
-			log_inserter( aArg13 );
-			log_inserter( aArg14 );
-			log_inserter( aArg15 );
-			log_inserter( aArg16 );
-			log_inserter( aArg17 );
-			log_inserter( aArg18 );
-			log_inserter( aArg19 );
-			log_inserter( aArg20 );
-			log_inserter( aArg21 );
-			log_inserter( aArg22 );
-			log_inserter( aArg23 );
-			log_inserter( aArg24 );
-			log_inserter( aArg25 );
-			log_inserter( aArg26 );
-			log_inserter( aArg27 );
-			log_inserter( aArg28 );
-			log_inserter( aArg29 );
-			log_inserter( aArg30 );
-			log_inserter( aArg31 );
-			log_formatter< Notice >::tail();
-		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -3926,19 +2850,17 @@ void log( const Notice& NOTICE , const T0& aArg0 , const T1& aArg1 , const T2& a
 // ======================================================================================================================================================
 
 template< typename T0 >
-void log( const Info& INFO , const T0& aArg0  )
+void log( const Notice& aNotice , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -3946,20 +2868,18 @@ void log( const Info& INFO , const T0& aArg0  )
 }
 
 template< typename T0 , typename T1 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -3967,21 +2887,19 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1  )
 }
 
 template< typename T0 , typename T1 , typename T2 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -3989,22 +2907,20 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4012,23 +2928,21 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4036,24 +2950,22 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4061,15 +2973,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4077,9 +2988,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4087,15 +2997,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4104,9 +3013,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4114,15 +3022,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4132,9 +3039,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4142,15 +3048,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4161,9 +3066,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4171,15 +3075,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4191,9 +3094,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4201,15 +3103,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4222,9 +3123,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4232,15 +3132,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4254,9 +3153,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4264,15 +3162,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4287,9 +3184,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4297,15 +3193,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4321,9 +3216,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4331,15 +3225,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4356,9 +3249,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4366,15 +3258,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4392,9 +3283,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4402,15 +3292,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4429,9 +3318,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4439,15 +3327,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4467,9 +3354,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4477,15 +3363,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4506,9 +3391,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4516,15 +3400,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4546,9 +3429,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4556,15 +3438,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4587,9 +3468,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4597,15 +3477,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4629,9 +3508,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4639,15 +3517,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4672,9 +3549,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4682,15 +3558,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4716,9 +3591,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4726,15 +3600,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4761,9 +3634,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4771,15 +3643,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4807,9 +3678,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4817,15 +3687,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4854,9 +3723,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4864,15 +3732,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4902,9 +3769,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4912,15 +3778,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -4951,9 +3816,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -4961,15 +3825,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5001,9 +3864,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5011,15 +3873,14 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 , typename T31 >
-void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
+void log( const Notice& aNotice , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
-	#ifndef LOGGING_EXCLUDE_INFO
-		if( LoggingIncludes( INFO ) ){
-			log_formatter< Info >::head();
+		if( LoggingIncludes( aNotice ) ){
+			log_head< Notice >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5052,9 +3913,8 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_formatter< Info >::tail();
+			log_tail< Notice >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5066,20 +3926,18 @@ void log( const Info& INFO , const T0& aArg0 , const T1& aArg1 , const T2& aArg2
 // ======================================================================================================================================================
 
 template< typename T0 >
-void log( const Debug& DEBUG , const T0& aArg0  )
+void log( const Info& aInfo , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5088,21 +3946,19 @@ void log( const Debug& DEBUG , const T0& aArg0  )
 }
 
 template< typename T0 , typename T1 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5111,22 +3967,20 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1  )
 }
 
 template< typename T0 , typename T1 , typename T2 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5135,23 +3989,21 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5160,24 +4012,22 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5186,25 +4036,23 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
 			log_inserter( aArg3 );
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5213,16 +4061,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5230,9 +4077,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg4 );
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5241,16 +4087,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5259,9 +4104,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg5 );
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5270,16 +4114,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5289,9 +4132,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg6 );
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5300,16 +4142,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5320,9 +4161,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg7 );
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5331,16 +4171,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5352,9 +4191,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg8 );
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5363,16 +4201,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5385,9 +4222,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg9 );
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5396,16 +4232,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5419,9 +4254,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg10 );
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5430,16 +4264,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5454,9 +4287,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg11 );
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5465,16 +4297,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5490,9 +4321,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg12 );
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5501,16 +4331,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5527,9 +4356,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg13 );
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5538,16 +4366,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5565,9 +4392,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg14 );
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5576,16 +4402,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5604,9 +4429,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg15 );
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5615,16 +4439,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5644,9 +4467,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg16 );
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5655,16 +4477,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5685,9 +4506,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg17 );
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5696,16 +4516,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5727,9 +4546,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg18 );
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5738,16 +4556,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5770,9 +4587,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg19 );
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5781,16 +4597,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5814,9 +4629,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg20 );
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5825,16 +4639,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5859,9 +4672,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg21 );
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5870,16 +4682,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5905,9 +4716,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg22 );
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5916,16 +4726,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -5952,9 +4761,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg23 );
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -5963,16 +4771,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6000,9 +4807,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg24 );
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -6011,16 +4817,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6049,9 +4854,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg25 );
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -6060,16 +4864,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6099,9 +4902,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg26 );
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -6110,16 +4912,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6150,9 +4951,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg27 );
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -6161,16 +4961,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6202,9 +5001,8 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg28 );
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
 		}
-	#endif
 	#endif
 	#endif
 	#endif
@@ -6213,16 +5011,15 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 }
 
 template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 , typename T31 >
-void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
+void log( const Info& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
-	#ifndef LOGGING_EXCLUDE_DEBUG
-		if( LoggingIncludes( DEBUG ) ){
-			log_formatter< Debug >::head();
+		if( LoggingIncludes( aInfo ) ){
+			log_head< Info >();
 			log_inserter( aArg0 );
 			log_inserter( aArg1 );
 			log_inserter( aArg2 );
@@ -6255,7 +5052,1210 @@ void log( const Debug& DEBUG , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 			log_inserter( aArg29 );
 			log_inserter( aArg30 );
 			log_inserter( aArg31 );
-			log_formatter< Debug >::tail();
+			log_tail< Info >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+// ======================================================================================================================================================
+// WARNING! This file is automatically generated! Do not modify it! Any changes will be overwritten!
+// ======================================================================================================================================================
+
+template< typename T0 >
+void log( const Debug& aDebug , const T0& aArg0  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_inserter( aArg25 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_inserter( aArg25 );
+			log_inserter( aArg26 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_inserter( aArg25 );
+			log_inserter( aArg26 );
+			log_inserter( aArg27 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_inserter( aArg25 );
+			log_inserter( aArg26 );
+			log_inserter( aArg27 );
+			log_inserter( aArg28 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_inserter( aArg25 );
+			log_inserter( aArg26 );
+			log_inserter( aArg27 );
+			log_inserter( aArg28 );
+			log_inserter( aArg29 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_inserter( aArg25 );
+			log_inserter( aArg26 );
+			log_inserter( aArg27 );
+			log_inserter( aArg28 );
+			log_inserter( aArg29 );
+			log_inserter( aArg30 );
+			log_tail< Debug >();
+		}
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+	#endif
+}
+
+template< typename T0 , typename T1 , typename T2 , typename T3 , typename T4 , typename T5 , typename T6 , typename T7 , typename T8 , typename T9 , typename T10 , typename T11 , typename T12 , typename T13 , typename T14 , typename T15 , typename T16 , typename T17 , typename T18 , typename T19 , typename T20 , typename T21 , typename T22 , typename T23 , typename T24 , typename T25 , typename T26 , typename T27 , typename T28 , typename T29 , typename T30 , typename T31 >
+void log( const Debug& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& aArg2 , const T3& aArg3 , const T4& aArg4 , const T5& aArg5 , const T6& aArg6 , const T7& aArg7 , const T8& aArg8 , const T9& aArg9 , const T10& aArg10 , const T11& aArg11 , const T12& aArg12 , const T13& aArg13 , const T14& aArg14 , const T15& aArg15 , const T16& aArg16 , const T17& aArg17 , const T18& aArg18 , const T19& aArg19 , const T20& aArg20 , const T21& aArg21 , const T22& aArg22 , const T23& aArg23 , const T24& aArg24 , const T25& aArg25 , const T26& aArg26 , const T27& aArg27 , const T28& aArg28 , const T29& aArg29 , const T30& aArg30 , const T31& aArg31  )
+{
+	#ifndef LOGGING_EXCLUDE_FATAL
+	#ifndef LOGGING_EXCLUDE_ERROR
+	#ifndef LOGGING_EXCLUDE_WARNING
+	#ifndef LOGGING_EXCLUDE_NOTICE
+	#ifndef LOGGING_EXCLUDE_INFO
+	#ifndef LOGGING_EXCLUDE_DEBUG
+		if( LoggingIncludes( aDebug ) ){
+			log_head< Debug >();
+			log_inserter( aArg0 );
+			log_inserter( aArg1 );
+			log_inserter( aArg2 );
+			log_inserter( aArg3 );
+			log_inserter( aArg4 );
+			log_inserter( aArg5 );
+			log_inserter( aArg6 );
+			log_inserter( aArg7 );
+			log_inserter( aArg8 );
+			log_inserter( aArg9 );
+			log_inserter( aArg10 );
+			log_inserter( aArg11 );
+			log_inserter( aArg12 );
+			log_inserter( aArg13 );
+			log_inserter( aArg14 );
+			log_inserter( aArg15 );
+			log_inserter( aArg16 );
+			log_inserter( aArg17 );
+			log_inserter( aArg18 );
+			log_inserter( aArg19 );
+			log_inserter( aArg20 );
+			log_inserter( aArg21 );
+			log_inserter( aArg22 );
+			log_inserter( aArg23 );
+			log_inserter( aArg24 );
+			log_inserter( aArg25 );
+			log_inserter( aArg26 );
+			log_inserter( aArg27 );
+			log_inserter( aArg28 );
+			log_inserter( aArg29 );
+			log_inserter( aArg30 );
+			log_inserter( aArg31 );
+			log_tail< Debug >();
 		}
 	#endif
 	#endif

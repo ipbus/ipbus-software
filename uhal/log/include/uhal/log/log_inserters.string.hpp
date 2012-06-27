@@ -9,8 +9,12 @@
 namespace uhal
 {
 
-	//extra function needed to handle the c-style string case, for convenience.
-	void log_inserter ( const char* );
+	/**
+		The log_inserter function needed to handle the null-terminated, c-style strings
+		A special case since everything else is passed by reference and is handled by template functions
+		@param aStr a null-terminated string to add to the log output
+	*/
+	void log_inserter ( const char* aStr );
 
 }
 

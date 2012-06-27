@@ -8,6 +8,7 @@
 namespace uhal
 {
 
+	// Template specialization for printing the year field of a time struct as a 4 digit number
 	template<>
 	void TimeSpecializationHelper< year >::print (  const tm* aTm , const uint32_t& )
 	{
@@ -15,6 +16,7 @@ namespace uhal
 		log_inserter ( Integer ( aTm->tm_year+1900 ) );
 	}
 
+	// Template specialization for printing the year field of a time struct as a 2 digit number
 	template<>
 	void TimeSpecializationHelper< yr >::print (  const tm* aTm , const uint32_t& )
 	{
@@ -31,6 +33,7 @@ namespace uhal
 		put ( lCharacterMapping + ( ( aTm->tm_year%100 ) <<1 ) , 2 );
 	}
 
+	// Template specialization for printing the month field of a time struct as a three character string
 	template<>
 	void TimeSpecializationHelper< strmth >::print (  const tm* aTm , const uint32_t& )
 	{
@@ -39,6 +42,7 @@ namespace uhal
 		put ( lCharacterMapping + ( aTm->tm_mon<<2 ) , 3 );
 	}
 
+	// Template specialization for printing the month field of a time struct as a 2 digit number
 	template<>
 	void TimeSpecializationHelper< mth >::print (  const tm* aTm , const uint32_t& )
 	{
@@ -47,6 +51,7 @@ namespace uhal
 		put ( lCharacterMapping + ( aTm->tm_mon<<1 ) , 2 );
 	}
 
+	// Template specialization for printing the day field of a time struct as a 2 digit number
 	template<>
 	void TimeSpecializationHelper< day >::print (  const tm* aTm , const uint32_t& )
 	{
@@ -58,6 +63,7 @@ namespace uhal
 		put ( lCharacterMapping + ( aTm->tm_mday<<1 ) , 2 );
 	}
 
+	// Template specialization for printing the hour field of a time struct as a 2 digit number
 	template<>
 	void TimeSpecializationHelper< hr >::print (  const tm* aTm , const uint32_t& )
 	{
@@ -68,6 +74,7 @@ namespace uhal
 		put ( lCharacterMapping + ( aTm->tm_hour<<1 ) , 2 );
 	}
 
+	// Template specialization for printing the minute field of a time struct as a 2 digit number
 	template<>
 	void TimeSpecializationHelper< min >::print (  const tm* aTm , const uint32_t& )
 	{
@@ -81,6 +88,7 @@ namespace uhal
 		put ( lCharacterMapping + ( aTm->tm_min<<1 ) , 2 );
 	}
 
+	// Template specialization for printing the second field of a time struct as a 2 digit number
 	template<>
 	void TimeSpecializationHelper< sec >::print (  const tm* aTm , const uint32_t& )
 	{

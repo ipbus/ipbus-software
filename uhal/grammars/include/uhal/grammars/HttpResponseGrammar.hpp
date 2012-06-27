@@ -31,10 +31,11 @@ namespace uhal
 	};
 }
 
-std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse );
+// std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse );
 
 
 // Call to BOOST_FUSION_ADAPT_STRUCT must be at global scope
+//! A boost::fusion adaptive struct used by the boost::qi parser
 BOOST_FUSION_ADAPT_STRUCT (
 	uhal::HttpResponseType,
 	( std::string, method )
@@ -48,10 +49,12 @@ BOOST_FUSION_ADAPT_STRUCT (
 
 namespace grammars
 {
+	//! A struct wrapping a set of rules as a grammar that can parse an HTTP response packet
 	struct HttpResponseGrammar : boost::spirit::qi::grammar< std::vector<uint8_t>::iterator , uhal::HttpResponseType() ,	boost::spirit::ascii::space_type >
 	{
+		//! Default Constructor where we will define the boost::qi rules relating the members
 		HttpResponseGrammar();
-		//! Boost spirit parsing rule for parsing the incoming http packet info
+		//! Boost spirit parsing rule for parsing the incoming http packet
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator,	uhal::HttpResponseType(),								boost::spirit::ascii::space_type > response;
 		//! Boost spirit parsing rule for parsing the incoming http packet
 		boost::spirit::qi::rule< std::vector<uint8_t>::iterator, std::string(),												boost::spirit::ascii::space_type > nospace_sequence;

@@ -2,20 +2,6 @@
 
 #include "uhal/log/log.hpp"
 
-namespace grammars
-{
-
-	URIGrammarShort::URIGrammarShort() :
-		URIGrammarShort::base_type ( data_pair )
-	{
-		using namespace boost::spirit;
-		data_pair = data_pair_1 >> data_pair_2;
-		data_pair_1 = + ( qi::char_ - "/" ) >> -qi::lit ( "/" );
-		data_pair_2 = + ( qi::char_ );
-	}
-}
-
-
 std::ostream& operator<< ( std::ostream& aStream , const uhal::URI& aURI )
 {
 	aStream << " > protocol : " << aURI.mProtocol << "\n";
@@ -38,6 +24,10 @@ std::ostream& operator<< ( std::ostream& aStream , const uhal::URI& aURI )
 
 namespace uhal
 {
+	/**
+		The log_inserter function to add a URI object to a log entry
+		@param aURI a URI object to format and print to log
+	*/
 	template < >
 	void log_inserter< URI > ( const URI& aURI )
 	{

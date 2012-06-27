@@ -8,8 +8,7 @@ namespace uhal
 {
 
 	template<>
-	template<>
-	void log_formatter< Fatal >::template_specialization_helper< Fatal >::print ( )
+	void log_head_template_specialization_helper< Fatal >::print ( )
 	{
 		put ( "\033[0;31m[" ); //standard red
 		log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
@@ -17,8 +16,7 @@ namespace uhal
 	}
 
 	template<>
-	template<>
-	void log_formatter< Error >::template_specialization_helper< Error >::print ( )
+	void log_head_template_specialization_helper< Error >::print ( )
 	{
 		put ( "\033[0;31m[" ); //standard red
 		log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
@@ -26,8 +24,7 @@ namespace uhal
 	}
 
 	template<>
-	template<>
-	void log_formatter< Warning >::template_specialization_helper< Warning >::print ( )
+	void log_head_template_specialization_helper< Warning >::print ( )
 	{
 		put ( "\033[0;33m[" ); //standard yellow
 		log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
@@ -35,8 +32,7 @@ namespace uhal
 	}
 
 	template<>
-	template<>
-	void log_formatter< Notice >::template_specialization_helper< Notice >::print ( )
+	void log_head_template_specialization_helper< Notice >::print ( )
 	{
 		put ( "\033[0;32m[" ); //standard green
 		log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
@@ -44,8 +40,7 @@ namespace uhal
 	}
 
 	template<>
-	template<>
-	void log_formatter< Info >::template_specialization_helper< Info >::print ( )
+	void log_head_template_specialization_helper< Info >::print ( )
 	{
 		put ( "\033[0;36m[" ); //standard cyan
 		log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
@@ -53,8 +48,7 @@ namespace uhal
 	}
 
 	template<>
-	template<>
-	void log_formatter< Debug >::template_specialization_helper< Debug >::print ( )
+	void log_head_template_specialization_helper< Debug >::print ( )
 	{
 		put ( "\033[1;34m[" ); //standard blue
 		log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );

@@ -4,15 +4,15 @@ namespace uhal
 {
 
 	template< typename T >
-	void log_formatter< T >::tail ( )
+	void log_tail ( )
 	{
 		put ( "\033[0m\n" );
 	}
 
 	template< typename T >
-	void log_formatter< T >::head ( )
+	void log_head ( )
 	{
-		template_specialization_helper< T >::print ( );
+		log_head_template_specialization_helper< T >::print ( );
 	}
 	
 }

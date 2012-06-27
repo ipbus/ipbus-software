@@ -289,8 +289,12 @@ namespace uhal
 
 				try
 				{
-					grammars::URIGrammarShort lGrammar;
-					boost::spirit::qi::phrase_parse ( aURL.begin() , aURL.end() , lGrammar , boost::spirit::ascii::space , lURLPair );
+					//split at the first slash
+					boost::spirit::qi::phrase_parse ( aURL.begin() , 
+														aURL.end() , 
+														+ ( boost::spirit::qi::char_ - "/" ) >> -boost::spirit::qi::lit ( "/" ) >> + ( boost::spirit::qi::char_ ) , 
+														boost::spirit::ascii::space , 
+														lURLPair );
 				}
 				catch ( const std::exception& aExc )
 				{
