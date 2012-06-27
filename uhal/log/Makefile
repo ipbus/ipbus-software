@@ -61,13 +61,11 @@ _all: ${EXECUTABLES} ${GENERATE} ${LIBRARY}
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	mkdir -p bin
 	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
-
+	./bin/generator.exe	
+	
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	mkdir -p obj
 	g++ -c ${CPP_FLAGS}  $< -o $@
-
-${GENERATE}:
-	./bin/generator.exe	
 	
 #Library will be compiled and will be packaged
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
