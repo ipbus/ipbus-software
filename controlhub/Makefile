@@ -40,6 +40,7 @@ PACKAGE_RELEASE = 1
 TARBALL_FILE = controlhub.tar.gz
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+RPMBUILD_SOURCES_DIR = ${RPMBUILD_DIR}/SOURCES
 
 
 ####################  Define path to erlang runtime and compiler  ####################
@@ -73,6 +74,9 @@ TEST_OBJECTS = $(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
 
 CONTROLHUB_RELEASE_FILES = controlhub.rel controlhub.boot $(TARBALL_FILE)
 
+UNPACKED_TARBALL_RPM_SOURCES_DIRS = ${RPMBUILD_SOURCES_DIR}/lib ${RPMBUILD_SOURCES_DIR}/releases
+
+CONTROLHUB_BIN_SCRIPTS = $(wildcard scripts/controlhub_*) 
 
 .PHONY: all _all clean  _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
@@ -84,19 +88,17 @@ all: _all
 build: _all
 buildall: _all
 
-_all: $(OBJECTS) $(CONTROLHUB_RELEASE_FILES)
+_all: $(RPMBUILD_DIR) $(OBJECTS) $(CONTROLHUB_RELEASE_FILES) $(UNPACKED_TARBALL_RPM_SOURCES_DIRS) ${RPMBUILD_SOURCES_DIR}/bin
 
 dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
 
 rpm: _rpmall
 _rpmall:
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	tar -xvzf ${TARBALL_FILE} -C ${RPMBUILD_DIR}/SOURCES | sed 's/^/extracted to RPMBUILD\/SOURCES: /'
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${INSTALL_PREFIX}" \
 		--define "tarball_file ${TARBALL_FILE}" \
-		--define "sources_dir ${RPMBUILD_DIR}/SOURCES" \
+		--define "sources_dir ${RPMBUILD_SOURCES_DIR}" \
 		--define "name ${PackageName}" \
 		--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}" \
 		--define "release ${PACKAGE_RELEASE}" \
@@ -117,9 +119,13 @@ _cleanall:
 
 ############## Nitty gritty ######################
 
+$(RPMBUILD_DIR):
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+
 
 ebin/unittest/%.beam : src/unittest/%.erl $(INCLUDES)
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/unittest/ $<
+
 
 ebin/%.beam : src/%.erl $(INCLUDES)
 	$(ERLC) $(ERLC_FLAGS) -I $(INCLUDE_DIR) -o ebin/ $<
@@ -128,14 +134,16 @@ ebin/%.beam : src/%.erl $(INCLUDES)
 _check_test_build_dir:
 	test -d ebin/unittest || mkdir ebin/unittest
 
+
 test:
 	$(ERL) -noshell -pa ebin ebin/unittest -eval 'eunit:test("ebin",[verbose])' -s init stop
 
 
-
-$(TARBALL_FILE): controlhub.boot controlhub.rel Makefile
+# Auto-generate the release tarball.
+$(TARBALL_FILE): $(SOURCES) controlhub.boot controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
 	 'case systools:make_tar("controlhub", []) of ok -> halt(0); _ -> halt(1) end.'
+
 
 # Auto-generate the release boot and script files
 controlhub.boot: controlhub.rel Makefile
@@ -155,3 +163,15 @@ controlhub.rel: ebin/controlhub.app Makefile
 	 {ok, Vsn} = application:get_key(App, vsn), \
          {App, Vsn} end, Apps ++ [controlhub])}]), \
 	 file:close(F), halt(0)."
+
+
+${UNPACKED_TARBALL_RPM_SOURCES_DIRS}: $(TARBALL_FILE)
+	tar -xvzf ${TARBALL_FILE} -C ${RPMBUILD_SOURCES_DIR} | sed 's/^/extracted to RPMBUILD\/SOURCES: /'
+	touch $@
+
+
+${RPMBUILD_SOURCES_DIR}/bin: $(CONTROLHUB_BIN_SCRIPTS)
+	mkdir -p ${RPMBUILD_SOURCES_DIR}/bin
+	touch ${RPMBUILD_SOURCES_DIR}/bin
+	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
+	 
