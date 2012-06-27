@@ -61,6 +61,7 @@ _all: ${EXECUTABLES} ${LIBRARY}
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	mkdir -p bin
 	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
+	./bin/generator.exe
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	mkdir -p obj
@@ -68,7 +69,6 @@ ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 
 #Library will be compiled and will be packaged
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
-	./bin/generator.exe
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/log}
 	mkdir -p lib
