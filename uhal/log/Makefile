@@ -55,18 +55,20 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: ${EXECUTABLES} ${LIBRARY} 
+_all: ${EXECUTABLES} ${GENERATE} ${LIBRARY} 
 
 #Executables will be compiled but they won't be packaged
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	mkdir -p bin
 	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
-	./bin/generator.exe
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	mkdir -p obj
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
+${GENERATE}:
+	./bin/generator.exe	
+	
 #Library will be compiled and will be packaged
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
