@@ -1,0 +1,33 @@
+#!/bin/env escript
+%% -*- erlang -*-
+%%! -sname tempshellstats -hidden
+
+%####################################################################################
+% Attempts to get a statistics report from the Control Hub and print it to console.
+%
+% This script has the following return codes:
+%   * Return code is 0 if stats were retreived successfully.
+%   * Return code is 1 if the Control Hub is down.
+%   * Return code is 2 if there was an error during the remote procedure call.
+%
+% Robert Frazier, June 2012
+%####################################################################################
+
+main(_Ignore) ->
+    {ok, Hostname} = inet:gethostname(),
+    Node = list_to_atom("controlhub@" ++ Hostname),
+    ReturnCode = case net_adm:ping(Node) of
+                     pang ->
+                         io:format("Control Hub is down~n"),
+                         1;
+                     pong ->
+                         case rpc:call(Node, ch_stats, report_to_string, []) of
+                             {badrpc, Reason} ->
+                                 io:format("Error running remote procedure call: ~p~n", [Reason]),
+                                 2;
+                             StatsString ->
+                                 io:format("~s~n", [StatsString]),
+                                 0
+                         end
+                 end,
+    halt(ReturnCode).

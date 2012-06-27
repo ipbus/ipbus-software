@@ -1,0 +1,39 @@
+#!/bin/env escript
+%% -*- erlang -*-
+%%! -sname tempshellstop -hidden
+
+%###############################################################################
+% Stops the Control Hub if it's running.
+%
+% This script has the following return codes:
+%   * Return code is 0 if the Control Hub was stopped successfully.
+%   * Return code is 1 if the Control Hub was already stopped.
+%   * Return code is 2 if there was an error during the remote procedure call.
+%   * Return code is 3 if there was a general error during stopping.
+%
+%
+% Robert Frazier, June 2012
+%###############################################################################
+
+main(_Ignore) ->
+    {ok, Hostname} = inet:gethostname(),
+    Node = list_to_atom("controlhub@" ++ Hostname),
+    ReturnCode = case net_adm:ping(Node) of
+                     pang ->
+                         io:format("Control Hub already stopped~n"),
+                         1;
+                     pong ->
+                         io:format("Stopping Control Hub... "),
+                         case rpc:call(Node, init, stop, [0]) of
+                             ok ->
+                                 io:format("ok~n"),
+                                 0;
+                             {badrpc, Reason} ->
+                                 io:format("Failed!~n  ==> Error running remote procedure call: ~p~n", [Reason]),
+                                 2;
+                             Else ->
+                                 io:format("Failed!~n  ==> Error: ~p~n", [Else]),
+                                 3
+                         end
+                 end,
+    halt(ReturnCode).

@@ -1,0 +1,21 @@
+#!/bin/env bash
+
+######################################################
+# Starts the Control Hub if it isn't already running.
+#
+# Robert Frazier, June 2012
+######################################################
+
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+# See if the controlhub is up
+${DIR}/controlhub_status > /dev/null
+CONTROLHUBSTATUS=$?
+
+if [ $CONTROLHUBSTATUS != 0 ]; then
+  echo -n "Starting Control Hub... "
+  ${DIR}/erl -sname controlhub -boot ${DIR}/../releases/1.1.0/start -config ${DIR}/../releases/1.1.0/sys -detached
+  echo "ok"
+else
+  echo "Control Hub already running!"
+fi

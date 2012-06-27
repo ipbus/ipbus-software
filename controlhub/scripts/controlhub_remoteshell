@@ -1,0 +1,15 @@
+#!/bin/env bash
+
+#############################################################################################
+# For opening a remote-shell to the Control Hub node, to allow interactive debugging, etc.
+#
+# Robert Frazier, June 2012
+#############################################################################################
+
+# Get current working directory
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+# Open a remote shell to the controlhub node.
+#   -- $RANDOM is used to give the startup shell a random node name in order
+#      to prevent name clashes if more that one remote shell is open.
+${DIR}/erl +B -sname $RANDOM -remsh controlhub@`hostname -s` -hidden
