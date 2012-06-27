@@ -38,7 +38,8 @@ namespace uhal
 	// Forward declaration so we can define friends
 	template< typename T > class ValVector;
 
-
+	
+	//! A helper struct wrapping an IPbus header and a valid flag
 	struct _ValHeader_
 	{
 		public:
@@ -60,7 +61,7 @@ namespace uhal
 
 
 
-	//! A Template helper struct wrapping a register for storing a single word of data, a valid flag and a mask for modifying returned values
+	//! A Template helper struct wrapping an IPbus header, a register for storing a single word of data, a valid flag and a mask for modifying returned values
 	template< typename T >
 	struct _ValWord_
 	{
@@ -88,7 +89,7 @@ namespace uhal
 	};
 
 
-	//! A Template helper struct wrapping a register for storing a block of data and a valid flag
+	//! A Template helper struct wrapping a block of IPbus header, a register for storing a block of data and a valid flag
 	template< typename T >
 	struct _ValVector_
 	{

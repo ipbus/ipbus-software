@@ -69,20 +69,32 @@ namespace uhal
 			/**
 				Construct a node from a PugiXML node
 				@param aXmlNode a PugiXML node from which to construct a node
+				@param aParentAddr the address of the parent node for hierarchical addressing and address collision detection
+				@param aParentMask the address-mask of the parent node for hierarchical addressing and address collision detection
 			*/
 			Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
 
 			/**
 				Lightweight Copy constructor
+				@param aNode a node to lightweight copy.
+				@note this copy constructor copies the member pointers, not the object they are pointing to. To duplicate the underlying object, rather than the the pointer to it, use the clone() method.
 			*/
-			Node( const Node& aNode );
-			
+			Node( const Node& aNode );		
 			
 			/**
 				Destructor
 			*/
 			virtual ~Node();
 
+		private:	
+		
+			/**
+				Function to create a true clone of the full hierarchical Node tree
+				@return a true clone of the current node tree
+			*/
+			virtual Node clone() const;
+			
+		public:	
 			/**
 				A function to determine whether two Nodes are identical
 				@param aNode a Node to compare
@@ -176,9 +188,14 @@ namespace uhal
 				Write a block of data to a block of registers or a block-write port
 				@param aValues the values to write to the registers or a block-write port
 			*/
-			//@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
-			void writeBlock ( const std::vector< uint32_t >& aValues ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			void writeBlock ( const std::vector< uint32_t >& aValues );
 
+			/**
+				DEPRICATED! Write a block of data to a block of registers or a block-write port
+				@param aValues the values to write to the registers or a block-write port
+				@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
+				@warning DEPRICATED and will be removed in the next release!
+			*/
 			void writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
 			{
 				log ( Error() , "THIS METHOD IS DEPRECATED! "
@@ -203,9 +220,15 @@ namespace uhal
 				@param aSize the number of words to read
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-			ValVector< uint32_t > readBlock ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			ValVector< uint32_t > readBlock ( const uint32_t& aSize );
 
+			/**
+				DEPRICATED! Read a block of unsigned data from a block of registers or a block-read port
+				@param aSize the number of words to read
+				@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+				@return a Validated Memory which wraps the location to which the reply data is to be written
+				@warning DEPRICATED and will be removed in the next release!
+			*/
 			ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
 			{
 				log ( Error() , "THIS METHOD IS DEPRECATED! "
@@ -231,10 +254,16 @@ namespace uhal
 				@param aSize the number of words to read
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			//@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize ); //, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize );
 
 
+			/**
+				DEPRICATED! Read a block of data from a block of registers or a block-read port and interpret it as being signed data
+				@param aSize the number of words to read
+				@return a Validated Memory which wraps the location to which the reply data is to be written
+				@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+				@warning DEPRICATED and will be removed in the next release!
+			*/
 			ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
 			{
 				log ( Error() , "THIS METHOD IS DEPRECATED! "
@@ -273,9 +302,6 @@ namespace uhal
 			boost::shared_ptr<ClientInterface> getClient();
 
 		private:
-
-			Node clone() const;
-
 
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
@@ -320,21 +346,8 @@ namespace uhal
 
 	};
 
-
-	template< typename T>
-	T& Node::getNode ( const std::string& aId )
-	{
-		try
-		{
-			return dynamic_cast< T > ( getNode ( aId ) );
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-
 }
+
+#include "uhal/TemplateDefinitions/Node.hxx"
 
 #endif

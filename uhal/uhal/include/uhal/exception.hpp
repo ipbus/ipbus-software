@@ -10,10 +10,6 @@
 #include <exception>
 #include <string>
 
-#ifdef __GNUG__
-#include <cxxabi.h>
-#endif
-
 namespace uhal
 {
 
@@ -24,42 +20,27 @@ namespace uhal
 			/**
 				Default constructor
 			*/
-			exception() :
-				std::exception() ,
-				mMessage ( "" )
-			{}
-
-			/**
-				Constructor
-			*/
-			exception ( const std::exception& aExc ) :
-				std::exception ( aExc ) ,
-				mMessage ( aExc.what() )
-			{}
+			exception();
 
 			/**
 				Destructor
 			*/
-			virtual ~exception() throw() {}
-
+			virtual ~exception() throw();
+			
 			/**
 				Function which returns the error message associated with an exception
 				If no error message has previously been defined, then it makes the typename readable (where appropriate) and returns this instead.
+				@return the error message associated with an exception
 			*/
-			virtual const char* what() const throw()
-			{
-				if ( mMessage.size() )
-				{
-					return mMessage.c_str();
-				}
+			virtual const char* what() const throw();
 
-#ifdef __GNUG__
-				// this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
-				int lStatus ( 0 );
-				return abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
-#endif
-				return typeid ( *this ).name();
-			}
+			// Doxygen does something very, very odd if this is placed above any of the other functions...
+			/**
+				Constructor
+				@param aExc an exception whose message is to be copied
+			*/
+			exception ( const std::exception& aExc );
+			
 		private:
 
 			//! The message given to the exception at the time of construction

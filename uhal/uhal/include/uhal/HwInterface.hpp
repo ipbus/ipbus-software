@@ -8,7 +8,6 @@
 #define _uhal_HwInterface_hpp_
 
 #include "uhal/Node.hpp"
-#include "uhal/exception.hpp"
 #include "uhal/ClientInterface.hpp"
 
 #include <boost/regex.hpp>
@@ -22,6 +21,8 @@ namespace uhal
 		public:
 			/**
 				Constructor
+				@param aClientInterface a shared pointer to a client interface which performs the transport
+				@param aNode a shared pointer to a >>const<< node representing the endpoint structure. This node is cloned to form the member variable.
 			*/
 			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< const Node >& aNode );
 
@@ -120,20 +121,8 @@ namespace uhal
 
 	};
 
-	template< typename T>
-	T& HwInterface::getNode ( const std::string& aId )
-	{
-		try
-		{
-			return dynamic_cast< T > ( getNode ( aId ) );
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-
 }
+
+#include "uhal/TemplateDefinitions/HwInterface.hxx"
 
 #endif

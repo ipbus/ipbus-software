@@ -12,6 +12,10 @@
 
 namespace uhal
 {
+	/**
+		The log_inserter function to add the node object to a log entry
+		@param aNode a node to format and print to log
+	*/
 	template < >
 	void log_inserter< uhal::Node > ( const uhal::Node& aNode )
 	{
