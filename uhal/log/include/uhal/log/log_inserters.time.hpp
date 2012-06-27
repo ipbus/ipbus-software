@@ -32,7 +32,7 @@ namespace uhal
 	
 	//! A helper struct to allow us to do template specialization if necessary
 	template< typename T , typename FORMAT >
-	struct TimeFactory < T , FORMAT >
+	struct TimeFactory
 	{
 		/**
 			A factory function
@@ -74,10 +74,8 @@ namespace uhal
 	
 	//! A helper struct to allow us to do template specialization when formatting the time for sending to the log
 	template< time_element T >
-	class TimeSpecializationHelper
+	struct TimeSpecializationHelper
 	{
-		//! Make the log_inserter function a friend since it is the only function which should be using this
-		template < typename U > friend void log_inserter ( const U& );
 		/**
 			Format a time element for for sending to the log
 			@param aTm a tm struct containing the time to be formatted (down to the second)
