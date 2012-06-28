@@ -27,6 +27,7 @@
          udp_response_timeout/0,
          get_active_clients/0,
          get_max_active_clients/0,
+         get_cumulative_client_count/0,
          get_total_client_requests/0,
          get_total_client_malformed_requests/0,
          get_total_client_responses/0,
@@ -43,6 +44,7 @@
 %% Server state record definition - all of type integer().
 -record(state, {active_clients = 0 :: integer(),
                 max_active_clients = 0 :: integer(),
+                cumulative_client_count = 0 :: integer(),
                 request_count = 0 :: integer(),
                 malformed_request_count = 0 :: integer(),
                 response_count = 0 :: integer(),
@@ -180,6 +182,15 @@ get_active_clients() -> gen_server:call(?MODULE, get_active_clients).
 %% ---------------------------------------------------------------------
 get_max_active_clients() -> gen_server:call(?MODULE, get_max_active_clients).
 
+%% ---------------------------------------------------------------------
+%% @doc Returns the total number of clients that have ever connected
+%%      within the lifetime of the software instance.
+%%
+%% @spec get_cumulative_client_count() -> integer()
+%% @end
+%% ---------------------------------------------------------------------
+get_cumulative_client_count() -> gen_server:call(?MODULE, get_cumulative_client_count).
+
 
 %% ---------------------------------------------------------------------
 %% @doc Returns the total number of client requests that have been
@@ -232,6 +243,7 @@ get_udp_in() -> gen_server:call(?MODULE, get_udp_in).
 %% ----------------------------------------------------------------------------
 get_udp_malformed() -> gen_server:call(?MODULE, get_udp_malformed).
 
+
 %% ----------------------------------------------------------------------------
 %% @doc Returns the current total of UDP packets that have been sent.
 %%
@@ -239,6 +251,7 @@ get_udp_malformed() -> gen_server:call(?MODULE, get_udp_malformed).
 %% @end
 %% ----------------------------------------------------------------------------
 get_udp_out() -> gen_server:call(?MODULE, get_udp_out).
+
 
 %% ----------------------------------------------------------------------------
 %% @doc Returns the current total of UDP reponse timeouts that have occurred.
@@ -301,6 +314,9 @@ handle_call(get_active_clients, _From,  State) ->
 handle_call(get_max_active_clients, _From,  State) ->
     {reply, State#state.max_active_clients, State};
 
+handle_call(get_cumulative_client_count, _From,  State) ->
+    {reply, State#state.cumulative_client_count, State};
+
 handle_call(get_total_client_requests, _From,  State) ->
     {reply, State#state.request_count, State};
 
@@ -336,14 +352,18 @@ handle_call(_Request, _From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_cast(client_connected, State = #state{active_clients = Clients, max_active_clients = MaxClients}) ->
-    NewClients = Clients+1,
-    NewMaxClients = if
-                        MaxClients < NewClients -> NewClients;
-                        true -> MaxClients
-                    end,
-    NewState = State#state{active_clients = NewClients,
-                           max_active_clients = NewMaxClients},
+handle_cast(client_connected, State = #state{active_clients = ActiveClients,
+                                             max_active_clients = MaxActiveClients,
+                                             cumulative_client_count = AllTimeClients}) ->
+    NewActiveClients = ActiveClients+1,
+    NewAllTimeClients = AllTimeClients+1,
+    NewMaxActiveClients = if
+                              MaxActiveClients < NewActiveClients -> NewActiveClients;
+                              true -> MaxActiveClients
+                          end,
+    NewState = State#state{active_clients = NewActiveClients,
+                           max_active_clients = NewMaxActiveClients,
+                           cumulative_client_count = NewAllTimeClients},
     {noreply, NewState};
 
 handle_cast(client_disconnected, State = #state{active_clients = Clients}) ->
@@ -426,13 +446,15 @@ code_change(_OldVsn, State, _Extra) ->
 report_to_string(State) ->
     lists:flatten(io_lib:format("Control Hub Stats Report~n"
                                 "------------------------~n~n"
-                                "CLIENT  Active connections: ~p (peak=~p)~n"
-                                "         Requests received: ~p (of which ~p were malformed)~n"
-                                "            Responses sent: ~p~n~n"
-                                "UDP            Packets Out: ~p~n"
-                                "                Packets In: ~p (of which ~p were malformed)~n"
-                                "                  Timeouts: ~p",
-                                [State#state.active_clients,
+                                "CLIENT  All-time connections: ~p~n"  
+                                "          Active connections: ~p (peak=~p)~n"
+                                "           Requests received: ~p (of which ~p were malformed)~n"
+                                "              Responses sent: ~p~n~n"
+                                "UDP              Packets Out: ~p~n"
+                                "                  Packets In: ~p (of which ~p were malformed)~n"
+                                "                    Timeouts: ~p",
+                                [State#state.cumulative_client_count,
+                                 State#state.active_clients,
                                  State#state.max_active_clients,
                                  State#state.request_count,
                                  State#state.malformed_request_count,

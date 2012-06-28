@@ -27,15 +27,18 @@ ch_stats_test_() ->
     { setup,
       fun setup/0,
       fun teardown/1,
-      [ fun test_client_connections/0,
-        fun test_client_request_in/0,
-        fun test_client_request_malformed/0,
-        fun test_client_response_sent/0,
-        fun test_udp_in/0,
-        fun test_udp_malformed/0,
-        fun test_udp_out/0,
-        fun test_udp_response_timeout/0
-      ]
+      { inorder,
+        [ fun test_client_connections/0,
+          fun test_client_request_in/0,
+          fun test_client_request_malformed/0,
+          fun test_client_response_sent/0,
+          fun test_udp_in/0,
+          fun test_udp_malformed/0,
+          fun test_udp_out/0,
+          fun test_udp_response_timeout/0,
+          fun test_report_to_string/0
+        ]
+      }
     }.
 
 %% Setup function for test fixture - starts up the ch_stats server
@@ -55,16 +58,25 @@ teardown(_Ignore) -> ch_stats:stop().
 
 test_client_connections() ->
     ?assertEqual(0, ch_stats:get_active_clients()),
+    ?assertEqual(0, ch_stats:get_max_active_clients()),
+    ?assertEqual(0, ch_stats:get_cumulative_client_count()),
     n_call(7, fun ch_stats:client_connected/0),
     ?assertEqual(7, ch_stats:get_active_clients()),
+    ?assertEqual(7, ch_stats:get_max_active_clients()),
+    ?assertEqual(7, ch_stats:get_cumulative_client_count()),
     n_call(5, fun ch_stats:client_disconnected/0),
     ?assertEqual(2, ch_stats:get_active_clients()),
-    ?assertEqual(7, ch_stats:get_max_active_clients()).
+    ?assertEqual(7, ch_stats:get_max_active_clients()),
+    ?assertEqual(7, ch_stats:get_cumulative_client_count()),
+    n_call(10, fun ch_stats:client_connected/0),
+    ?assertEqual(12, ch_stats:get_active_clients()),
+    ?assertEqual(12, ch_stats:get_max_active_clients()),
+    ?assertEqual(17, ch_stats:get_cumulative_client_count()).
 
 test_client_request_in() ->
     ?assertEqual(0, ch_stats:get_total_client_requests()),
-    n_call(11, fun ch_stats:client_request_in/0),
-    ?assertEqual(11, ch_stats:get_total_client_requests()).
+    n_call(20, fun ch_stats:client_request_in/0),
+    ?assertEqual(20, ch_stats:get_total_client_requests()).
 
 test_client_request_malformed() ->
     ?assertEqual(0, ch_stats:get_total_client_malformed_requests()),
@@ -73,8 +85,8 @@ test_client_request_malformed() ->
 
 test_client_response_sent() ->
     ?assertEqual(0, ch_stats:get_total_client_responses()),
-    n_call(17, fun ch_stats:client_response_sent/0),
-    ?assertEqual(17, ch_stats:get_total_client_responses()).
+    n_call(7, fun ch_stats:client_response_sent/0),
+    ?assertEqual(7, ch_stats:get_total_client_responses()).
 
 test_udp_in() ->
     ?assertEqual(0, ch_stats:get_udp_in()),
@@ -83,8 +95,8 @@ test_udp_in() ->
 
 test_udp_malformed() ->
     ?assertEqual(0, ch_stats:get_udp_malformed()),
-    n_call(23, fun ch_stats:udp_malformed/0),
-    ?assertEqual(23, ch_stats:get_udp_malformed()).
+    n_call(3, fun ch_stats:udp_malformed/0),
+    ?assertEqual(3, ch_stats:get_udp_malformed()).
 
 test_udp_out() ->
     ?assertEqual(0, ch_stats:get_udp_out()),
@@ -96,6 +108,18 @@ test_udp_response_timeout() ->
     n_call(31, fun ch_stats:udp_response_timeout/0),
     ?assertEqual(31, ch_stats:get_udp_response_timeouts()).
 
+test_report_to_string() ->
+    StatsReportString = ch_stats:report_to_string(),
+    ExpectedResult = "Control Hub Stats Report\n"
+                     "------------------------\n\n"
+                     "CLIENT  All-time connections: 17\n"  
+                     "          Active connections: 12 (peak=12)\n"
+                     "           Requests received: 20 (of which 13 were malformed)\n"
+                     "              Responses sent: 7\n\n"
+                     "UDP              Packets Out: 29\n"
+                     "                  Packets In: 19 (of which 3 were malformed)\n"
+                     "                    Timeouts: 31",
+    ?assertEqual(ExpectedResult, StatsReportString).
 
 %%% ==========================================================================
 %%% Test Helper Functions
