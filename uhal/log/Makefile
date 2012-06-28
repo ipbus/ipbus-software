@@ -51,6 +51,9 @@ _cleanall:
 	rm -rf obj
 	rm -rf bin
 	rm -rf lib
+#These files are created by the generator which runs as part of make and so should be removed by make clean
+	rm src/common/log.cpp
+	rm include/uhal/log/log.{hpp,hxx}
 
 all: _all
 build: _all
@@ -72,7 +75,10 @@ ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/log}
 	mkdir -p lib
-	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
+#Make evaluates the list of files before it starts and does not pick up the existence of the file created during the ${EXECUTABLES} stage. We must, therefore, explicitly specify that it is built.
+	g++ -c ${CPP_FLAGS} src/common/log.cpp -o obj/log.o
+#And similarly, we must manually specify the inclusion of the object file created in the line above into the shared object file
+	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} obj/log.o -o $@
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/log/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/uhal/log/.
 
