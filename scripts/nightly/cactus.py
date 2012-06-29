@@ -33,7 +33,7 @@ TEST_PASSED_LIST  = ['TEST OK, ']
 
 
 ####ENVIRONMENT
-#environ['CVSROOT'] = ':pserver:anonymous:98passwd@isscvs.cern.ch:/local/reps/tridas'
+environ["LD_LIBRARY_PATH"] = "/opt/cactus/lib:" + environ["LD_LIBRARY_PATH"]
 
 ####COMMANDS
 UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
