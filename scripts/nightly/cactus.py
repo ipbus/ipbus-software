@@ -37,7 +37,9 @@ TEST_PASSED_LIST  = ['TEST OK, ']
 
 ####COMMANDS
 UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
-                  "mkdir -p %s" % BUILD_HOME]
+                  "mkdir -p %s" % BUILD_HOME.
+                  "sudo yum groupremove cactus",
+                  "rpm -qa | grep cactus- | xargs sudo rpm -ev"]
 
 ENVIRONMENT_CMDS = ["env"]
 
