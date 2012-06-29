@@ -33,11 +33,11 @@ TEST_PASSED_LIST  = ['TEST OK, ']
 
 
 ####ENVIRONMENT
-environ["LD_LIBRARY_PATH"] = "/opt/cactus/lib:" + environ["LD_LIBRARY_PATH"]
+environ["LD_LIBRARY_PATH"] = "/opt/cactus/lib:" + environ.get("LD_LIBARY_PATH","")
 
 ####COMMANDS
 UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
-                  "mkdir -p %s" % BUILD_HOME.
+                  "mkdir -p %s" % BUILD_HOME,
                   "sudo yum groupremove cactus",
                   "rpm -qa | grep cactus- | xargs sudo rpm -ev"]
 
@@ -62,12 +62,14 @@ RELEASE_CMDS = ["rm -rf %s" % RELEASE_DIR,
                 "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_DIR),
                 "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_DIR]
 
+print "sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/.")
+
 INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "sudo yum clean all",
                 "sudo yum -y groupinstall cactus",
-                "cd %s; doxygen cactus_Doxyfile" % join(BUILD_HOME,"trunk/scripts/nightly"),
+                "cd /build/cactus; doxygen %s" % join(BUILD_HOME,"trunk/scripts/nightly/cactus_Doxyfile"),
                 "mkdir -p %s" % join(WEB_DIR,"api"),
-                "cd %s;mv html %s" % (join(BUILD_HOME,"trunk/scripts/nightly"),join(WEB_DIR,"api"))]
+                "cd /build/cactus;mv html %s" % join(WEB_DIR,"api/.")]
 
 TEST_CMDS = []
 
