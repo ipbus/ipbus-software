@@ -64,7 +64,10 @@ RELEASE_CMDS = ["rm -rf %s" % RELEASE_DIR,
 
 INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "sudo yum clean all",
-                "sudo yum -y groupinstall cactus"]
+                "sudo yum -y groupinstall cactus",
+                "cd %s; doxygen cactus_Doxyfile" % join(BUILD_HOME,"trunk/scripts/nightly"),
+                "mkdir -p %s" % join(WEB_DIR,"api"),
+                "cd %s;mv html %s" % (join(BUILD_HOME,"trunk/scripts/nightly"),join(WEB_DIR,"api"))]
 
 TEST_CMDS = []
 
