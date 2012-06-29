@@ -32,6 +32,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 	}
 
+	
 	void ClientInterface::ping()
 	{
 		try
@@ -55,7 +56,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 	}
 
-	std::string ClientInterface::url()
+	std::string ClientInterface::uri()
 	{
 		try
 		{

@@ -38,6 +38,19 @@ namespace uhal
 			boost::shared_ptr<ClientInterface> getClient();
 
 			/**
+				Return the url of the target for this client
+				@return the url of the target for this client
+			*/
+			std::string uri();
+
+			/**
+				Return the identifier of the target for this client
+				@return the identifier of the target for this client
+			*/
+			const std::string& id();
+
+			
+			/**
 				Make the IPbus client issue a dispatch
 			*/
 			void dispatch ();

@@ -84,6 +84,34 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 	}
 
+	
+	const std::string& HwInterface::id()
+	{
+		try
+		{
+			return mClientInterface->id();
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+	
+
+	std::string HwInterface::uri()
+	{
+		try
+		{
+			return mClientInterface->uri();
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+	
 
 	void HwInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
 	{

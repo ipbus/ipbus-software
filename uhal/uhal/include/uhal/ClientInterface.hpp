@@ -34,6 +34,7 @@ namespace uhal
 	//! Exception class to handle the case where pinging of a client failed. Uses the base uhal::exception implementation of what()
 	class PingFailed: public uhal::exception {};
 
+	
 	//! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing funcationality
 	class ClientInterface
 	{
@@ -65,7 +66,7 @@ namespace uhal
 				Return the url of the target for this client
 				@return the url of the target for this client
 			*/
-			std::string url();
+			std::string uri();
 
 			/*
 				Return a description of the behaviour this client
