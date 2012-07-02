@@ -42,14 +42,16 @@ build: _all
 buildall: _all
 _all:
 	if [ ! -d  ${RPMBUILD_DIR} ]; then                                                     \
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};     \
-	tar -xvzf ${TARBALL_FILE} | sed 's/^/extracted: /';                                    \
-	cd ${TARBALL_DIR}; ./configure                                                         \
-		--prefix=${RPMBUILD_DIR}/SOURCES                                               \
-		--exec-prefix=${RPMBUILD_DIR}/SOURCES                                          \
-		--without-javac;                                                               \
-	make;                                                                                  \
-	make install;                                                                          \
+		mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};     \
+		echo "Extracting: ${TARBALL_FILE}";												 \
+		$(CACTUS_ROOT)/config/progress.sh $(shell tar -tf ${TARBALL_FILE} | wc -l) 'tar -xvzf ${TARBALL_FILE}'; \
+		cd ${TARBALL_DIR};																\
+		./configure                                                         \
+			--prefix=${RPMBUILD_DIR}/SOURCES                                               \
+			--exec-prefix=${RPMBUILD_DIR}/SOURCES                                          \
+			--without-javac;                                                               \
+		make;                                                                                  \
+		make install;                                                                          \
 	fi;
 
 rpm: _rpmall

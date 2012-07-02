@@ -18,6 +18,7 @@ PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 2
 
 TARBALL_NAME = boost_${PACKAGE_VER_MAJOR}_${PACKAGE_VER_MINOR}_${PACKAGE_VER_PATCH}
+TARBALL_FILE = ${TARBALL_NAME}.tar.bz2
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
@@ -35,17 +36,18 @@ build: _all
 buildall: _all
 _all:
 	if [ ! -d  ${RPMBUILD_DIR} ]; then \
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}; \
-	tar -xvjf ${TARBALL_NAME}.tar.bz2 | sed 's/^/extracted: /'; \
-	cd ${TARBALL_NAME};                                        \
-	./bootstrap.sh;                                           \
-	./b2 --without-mpi					\
-				--prefix=${RPMBUILD_DIR}/SOURCES	\
-				--exec-prefix=${RPMBUILD_DIR}/SOURCES	\
-				variant=release					\
-				link=shared					\
-				threading=multi					\
-				install;                                     \
+		mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}; \
+		echo "Extracting: ${TARBALL_FILE}";												 \
+		$(CACTUS_ROOT)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvjf ${TARBALL_FILE}';                         \
+		cd ${TARBALL_NAME};                                        \
+		./bootstrap.sh;                                           \
+		./b2 --without-mpi					\
+					--prefix=${RPMBUILD_DIR}/SOURCES	\
+					--exec-prefix=${RPMBUILD_DIR}/SOURCES	\
+					variant=release					\
+					link=shared					\
+					threading=multi					\
+					install;                                     \
 	fi;
 
 rpm: _rpmall
