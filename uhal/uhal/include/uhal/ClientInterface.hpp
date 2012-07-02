@@ -27,6 +27,7 @@
 // #include <uhal/performance.hpp>
 
 
+
 namespace uhal
 {
 	// //! Exception class to handle the case where an Atomic Transaction was requested but could not be performed. Uses the base uhal::exception implementation of what()

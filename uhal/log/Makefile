@@ -17,6 +17,7 @@ PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
+INCLUDES = $(wildcard include/uhal/log/*.hpp)
 LIBRARY = lib/libcactus_uhal_log.so
 LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
@@ -82,7 +83,7 @@ ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/log/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/uhal/log/.
 
-${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
+${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}  
 	mkdir -p obj
 	g++ -c ${CPP_FLAGS} $< -o $@
 

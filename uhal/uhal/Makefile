@@ -19,6 +19,7 @@ PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_uhal.so
 
+INCLUDES = $(wildcard include/uhal/*.hpp include/uhal/TemplateDefinitions/*.hxx)
 SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
@@ -75,7 +76,7 @@ ${LIBRARY}: ${OBJECT_FILES}
 	cp -p include/uhal/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/.
 	cp -p include/uhal/TemplateDefinitions/*.hxx ${RPMBUILD_DIR}/SOURCES/include/uhal/TemplateDefinitions/.
 
-${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
+${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
 	mkdir -p obj
 	g++ ${CPP_FLAGS} -c $< -o $@
 

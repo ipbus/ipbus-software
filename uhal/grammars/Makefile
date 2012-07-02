@@ -19,6 +19,7 @@ PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_grammars.so
 
+INCLUDES = $(wildcard include/uhal/grammars/*.hpp)
 SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
@@ -59,7 +60,7 @@ ${LIBRARY}: ${OBJECT_FILES}
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/grammars/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/grammars/.
 
-${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
+${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES} 
 	mkdir -p obj
 	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
 
