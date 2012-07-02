@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """
 Usage: nightly.py [options] [configuration.py]
-Executes the nightly build sript.
+Executes the nightly build sript. The system is not cleaned up after its use. 
 
 arguments:
    configuration.py  Python configuration file (default configuration.py)
@@ -9,7 +9,6 @@ arguments:
 options:
    -h, --help        help
    -s, --silent      Do not create the final report and notifications (just logging)
-   -k, --keep        Do not uninstall/wipe everything at the end
 """
 
 from clone_setup import clone_setup
@@ -115,23 +114,18 @@ if __name__== "__main__":
         
     # Execute build/test/etc.
     try:
-        try:
-            uninstall()
-            environment()
-            checkout()
-            dependencies()
-            build()
-            release()
-            install()
-            test()
-        except KeyboardInterrupt,e:
-            logger.warning('Aborting after CTRL-C...\n')
-            sys.exit(1)
-        except Exception,e:
-            logger.error(e)
-    finally:
-        if not keep:
-            uninstall()
+        environment()
+        checkout()
+        dependencies()
+        build()
+        release()
+        install()
+        test()
+    except KeyboardInterrupt,e:
+        logger.warning('Aborting after CTRL-C...\n')
+        sys.exit(1)
+    except Exception,e:
+        logger.error(e)
 
     # Reporting.
     try:

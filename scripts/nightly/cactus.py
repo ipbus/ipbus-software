@@ -39,7 +39,7 @@ environ["LD_LIBRARY_PATH"] = "/opt/cactus/lib:" + environ.get("LD_LIBARY_PATH","
 UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
                   "mkdir -p %s" % BUILD_HOME,
                   "sudo yum -y groupremove cactus",
-                  "rpm -qa | grep cactus- | xargs sudo rpm -ev"]
+                  "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null"]
 
 ENVIRONMENT_CMDS = ["env"]
 
