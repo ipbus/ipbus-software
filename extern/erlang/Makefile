@@ -36,15 +36,16 @@ clean: _cleanall
 _cleanall:
 	rm -rf ${RPMBUILD_DIR}
 	rm -rf ${TARBALL_DIR}
+	rm -rf .build_done
 
 all: _all
 build: _all
 buildall: _all
 _all:
-	if [ ! -d  ${RPMBUILD_DIR} ]; then                                                     \
+	if [ ! -f .build_done ]; then                                                     \
 		mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};     \
 		echo "Extracting: ${TARBALL_FILE}";												 \
-		$(CACTUS_ROOT)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvzf ${TARBALL_FILE}'; \
+		source $(CACTUS_ROOT)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvzf ${TARBALL_FILE}'; \
 		cd ${TARBALL_DIR};																\
 		./configure                                                         \
 			--prefix=${RPMBUILD_DIR}/SOURCES                                               \
@@ -52,6 +53,7 @@ _all:
 			--without-javac;                                                               \
 		make;                                                                                  \
 		make install;                                                                          \
+		date > .build_done;																	\
 	fi;
 
 rpm: _rpmall
