@@ -40,7 +40,8 @@ ch_transaction_manager_test_() ->
         [ fun test_normal_operation_single_req_single_target/1,
           fun test_normal_operation_multi_req_single_target/1,
           fun test_normal_operation_same_req_multi_targets/1,
-          fun test_normal_operation_multi_req_multi_targets/1
+          fun test_normal_operation_multi_req_multi_targets/1,
+          fun ignore_bad_data_non_integer_number_of_words/1
         ]
       }
     }.
@@ -240,13 +241,28 @@ test_normal_operation_multi_req_multi_targets(TestBaggage) ->
     ?assertEqual(ExpectedResponse, ReceivedResponse).
 
 
+% Tests to see if the transaction manager ignores requests
+% that are a non-integer number of 32-bit words.
+ignore_bad_data_non_integer_number_of_words(TestBaggage) ->
+    Common = <<?LOCALHOST:32,
+               (lists:nth(1, ?DUMMY_HW_PORTS_LIST)):16, 2:16,  % claiming there are 2 IPbus words to follow   
+               16#01020304:32 >>,
+    Request_104bits = << Common/binary, 16#05:8>>,
+    Request_112bits = << Common/binary, 16#0506:16>>,
+    Request_120bits = << Common/binary, 16#050607:24>>,
+    ?assertEqual(no_response, create_send_receive(TestBaggage#test_baggage.listen_socket, Request_104bits)),
+    ?assertEqual(no_response, create_send_receive(TestBaggage#test_baggage.listen_socket, Request_112bits)),
+    ?assertEqual(no_response, create_send_receive(TestBaggage#test_baggage.listen_socket, Request_120bits)).
+    
 
 %%% ==========================================================================
 %%% Test Helper Functions
 %%% ==========================================================================
 
 % Creates the transaction manager under test, sends the test request to it, receives
-% and returns the response.
+% and returns the response binary.  If there is no response before the timeout is
+% reached, it returns the atom no_response
+% @spec create_send_receive(TcpListenSocket::socket(), TestRequest::binary) -> Response::binary() | no_response
 create_send_receive(TcpListenSocket, TestRequest) ->
     ch_transaction_manager:start_link(TcpListenSocket),
     % Connect to the transaction manager
@@ -254,6 +270,8 @@ create_send_receive(TcpListenSocket, TestRequest) ->
     ok = gen_tcp:send(ClientSocket, TestRequest),
     ReceivedResponse = receive
                            {tcp, ClientSocket, Bin} -> Bin
+                       after 10 ->
+                           no_response
                        end,
     gen_tcp:close(ClientSocket),
     % Wait for the transaction manager to shut down normally. Can cause problems in debug
