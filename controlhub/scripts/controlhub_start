@@ -27,7 +27,7 @@ if [ $CONTROLHUBSTATUS != 0 ]; then
     echo "ok"
   else
     echo "FAILED!"
-    echo "    ==> see '/tmp/controlhub.log' for more info"
+    echo "    ==> see '/var/log/controlhub.log' for more info"
     exit 4
   fi
 else
