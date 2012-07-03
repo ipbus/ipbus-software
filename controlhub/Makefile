@@ -74,8 +74,6 @@ TEST_OBJECTS = $(TEST_SOURCES:src/unittest/%.erl=ebin/unittest/%.beam)
 
 CONTROLHUB_RELEASE_FILES = controlhub.rel controlhub.boot $(TARBALL_FILE)
 
-UNPACKED_TARBALL_RPM_SOURCES_DIRS = ${RPMBUILD_SOURCES_DIR}/lib ${RPMBUILD_SOURCES_DIR}/releases
-
 CONTROLHUB_BIN_SCRIPTS = $(wildcard scripts/controlhub_*) 
 
 .PHONY: all _all clean  _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
@@ -88,7 +86,7 @@ all: _all
 build: _all
 buildall: _all
 
-_all: $(RPMBUILD_DIR) $(OBJECTS) $(CONTROLHUB_RELEASE_FILES) $(UNPACKED_TARBALL_RPM_SOURCES_DIRS) ${RPMBUILD_SOURCES_DIR}/bin
+_all: $(RPMBUILD_DIR) $(OBJECTS) $(CONTROLHUB_RELEASE_FILES) ${RPMBUILD_SOURCES_DIR}/lib/controlhub ${RPMBUILD_SOURCES_DIR}/bin
 
 dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
 
@@ -142,13 +140,14 @@ test:
 # Auto-generate the release tarball.
 $(TARBALL_FILE): $(SOURCES) controlhub.boot controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
-	 'case systools:make_tar("controlhub", []) of ok -> halt(0); _ -> halt(1) end.'
+	 'case systools:make_tar("controlhub", [{erts, code:root_dir()}]) of ok -> halt(0); _ -> halt(1) end.'
 
 
 # Auto-generate the release boot and script files
 controlhub.boot: controlhub.rel Makefile
 	$(ERL) -pa ebin -noshell +B -eval \
-	 'case systools:make_script("controlhub",[local]) of ok -> halt(0); _ -> halt(1) end.'
+	 'case systools:make_script("controlhub",[]) of ok -> halt(0); _ -> halt(1) end.'
+
 
 # Auto-generate the control.rel file.
 controlhub.rel: ebin/controlhub.app Makefile
@@ -165,13 +164,15 @@ controlhub.rel: ebin/controlhub.app Makefile
 	 file:close(F), halt(0)."
 
 
-${UNPACKED_TARBALL_RPM_SOURCES_DIRS}: $(TARBALL_FILE)
-	tar -xvzf ${TARBALL_FILE} -C ${RPMBUILD_SOURCES_DIR} | sed 's/^/extracted to RPMBUILD\/SOURCES: /'
+${RPMBUILD_SOURCES_DIR}/lib/controlhub: $(TARBALL_FILE)
+	mkdir -p $@
+	tar -xvzf ${TARBALL_FILE} -C $@
 	touch $@
 
 
-${RPMBUILD_SOURCES_DIR}/bin: $(CONTROLHUB_BIN_SCRIPTS)
-	mkdir -p ${RPMBUILD_SOURCES_DIR}/bin
-	touch ${RPMBUILD_SOURCES_DIR}/bin
+${RPMBUILD_SOURCES_DIR}/bin: $(CONTROLHUB_BIN_SCRIPTS) ${RPMBUILD_SOURCES_DIR}/lib/controlhub
+	mkdir -p $@
 	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
+	sed s:%FINAL_ROOTDIR%:${INSTALL_PREFIX}/lib/controlhub: ${RPMBUILD_SOURCES_DIR}/lib/controlhub/erts*/bin/erl.src > $@/erl_controlhub 
+	touch $@
 	 

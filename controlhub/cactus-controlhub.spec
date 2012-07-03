@@ -32,10 +32,6 @@ cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 
-# copy releases content to RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{_prefix}/releases
-cp -rp %{sources_dir}/releases/* $RPM_BUILD_ROOT%{_prefix}/releases/.
-
 # Now update the escript executable paths in various controlhub scripts
 cd $RPM_BUILD_ROOT%{_prefix}/bin
 sed -i "s|/bin/env escript|%{_prefix}/bin/escript|" controlhub_*
@@ -44,7 +40,6 @@ cd $curdir
 #Change access rights
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
-chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/releases
 
 #return to working directory
 cd $curdir
@@ -60,4 +55,3 @@ cd $curdir
 %defattr(-, root, root)
 %{_prefix}/bin/*
 %{_prefix}/lib/*
-%{_prefix}/releases/*

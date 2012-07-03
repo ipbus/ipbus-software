@@ -12,10 +12,17 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 ${DIR}/controlhub_status > /dev/null
 CONTROLHUBSTATUS=$?
 
+CONTROLHUB_ROOTDIR=${DIR}/../lib/controlhub
+
 if [ $CONTROLHUBSTATUS != 0 ]; then
   echo -n "Starting Control Hub... "
-  ${DIR}/erl -sname controlhub -boot ${DIR}/../releases/1.1.0/start -config ${DIR}/../releases/1.1.0/sys -detached
-  echo "ok"
+  ${DIR}/erl_controlhub -sname controlhub -boot ${CONTROLHUB_ROOTDIR}/releases/1.1.0/start -config ${CONTROLHUB_ROOTDIR}/releases/1.1.0/sys -detached
+  ${DIR}/controlhub_status > /dev/null
+  if [ $? = 0 ]; then
+    echo "ok"
+  else
+    echo "failed!"
+  fi
 else
   echo "Control Hub already running!"
 fi

@@ -90,11 +90,15 @@ init([]) ->
         {ok, TcpListenSocket} ->
             {ok, spawn_acceptor(#state{socket = TcpListenSocket})};
         {error, eaddrinuse} ->
-            io:format("~n*****~nError starting the Control Hub's TCP listener:~n"
-                      "\tport ~p is already in use!~n*****~n~n", [?CONTROL_HUB_TCP_LISTEN_PORT]),
+            FormatStr = "~n*****~nError starting the Control Hub's TCP listener:~n"
+                        "\tport ~p is already in use!~n*****~n~n",
+            error_logger:error_msg(FormatStr, [?CONTROL_HUB_TCP_LISTEN_PORT]),
+            io:format(FormatStr, [?CONTROL_HUB_TCP_LISTEN_PORT]),
             {stop, "The Control Hub listen port is already in use"};
         {error, What} ->
-            io:format("~n*****~nError starting the Control Hub's TCP listener:~n\t~p~n*****~n~n", [What]),
+            FormatStr = "~n*****~nError starting the Control Hub's TCP listener:~n\t~p~n*****~n~n",
+       	    error_logger:error_msg(FormatStr, [What]),
+            io:format(FormatStr, [What]),
             {stop, {"Error starting the Control Hub TCP listener", What}}
     end.    
 
