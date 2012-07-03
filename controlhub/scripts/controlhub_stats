@@ -1,6 +1,6 @@
 #!/bin/env escript
 %% -*- erlang -*-
-%%! -sname tempshellstats -hidden
+%%! -sname tempshellstats -setcookie ch_cookie -hidden
 
 %####################################################################################
 % Attempts to get a statistics report from the Control Hub and print it to console.

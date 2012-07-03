@@ -1,6 +1,6 @@
 #!/bin/env escript
 %% -*- erlang -*-
-%%! -sname tempshellstatus -hidden
+%%! -sname tempshellstatus -setcookie ch_cookie -hidden
 
 %########################################################################
 % Prints the status of the Control Hub and returns a corresponding code:

@@ -1,6 +1,6 @@
 #!/bin/env escript
 %% -*- erlang -*-
-%%! -sname tempshellstop -hidden
+%%! -sname tempshellstop -setcookie ch_cookie -hidden
 
 %###############################################################################
 % Stops the Control Hub if it's running.

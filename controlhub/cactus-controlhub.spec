@@ -38,7 +38,9 @@ sed -i "s|/bin/env escript|%{_prefix}/bin/escript|" controlhub_*
 cd $curdir
 
 #Change access rights
-chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
+chmod -R 711 $RPM_BUILD_ROOT%{_prefix}/bin
+chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_stats
+chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_status
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 
 #return to working directory
