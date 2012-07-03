@@ -1,10 +1,14 @@
 #!/bin/env bash
 
-######################################################
+#######################################################################################
 # Starts the Control Hub if it isn't already running.
 #
+# This script has the following return codes:
+#   * Return code is 0 if the Control Hub started successfully or was already running.
+#   * Return code is 4 if the Control Hub failed to start.
+#
 # Robert Frazier, June 2012
-######################################################
+#######################################################################################
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
@@ -17,11 +21,14 @@ CONTROLHUB_ROOTDIR=${DIR}/../lib/controlhub
 if [ $CONTROLHUBSTATUS != 0 ]; then
   echo -n "Starting Control Hub... "
   ${DIR}/erl_controlhub -sname controlhub -boot ${CONTROLHUB_ROOTDIR}/releases/1.1.0/start -config ${CONTROLHUB_ROOTDIR}/releases/1.1.0/sys -detached
+  sleep 1
   ${DIR}/controlhub_status > /dev/null
   if [ $? = 0 ]; then
     echo "ok"
   else
-    echo "failed!"
+    echo "FAILED!"
+    echo "    ==> see '/tmp/controlhub.log' for more info"
+    exit 4
   fi
 else
   echo "Control Hub already running!"
