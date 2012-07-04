@@ -25,11 +25,8 @@ uHAL Library Tests
 curdir=`pwd` 
 
 # copy includes to RPM_BUILD_ROOT and set aliases
-mkdir -p $RPM_BUILD_ROOT%{_prefix}/bin
-cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
-
-#Change access rights
-chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
+mkdir -p $RPM_BUILD_ROOT%{_prefix}
+cp -rp %{sources_dir}/* $RPM_BUILD_ROOT%{_prefix}/.
 
 #return to working directory
 cd $curdir 
@@ -44,4 +41,6 @@ cd $curdir
 %files 
 %defattr(-, root, root) 
 %{_prefix}/bin/*
-
+%{_prefix}/lib/*
+%{_prefix}/etc/*
+%{_prefix}/include/*
