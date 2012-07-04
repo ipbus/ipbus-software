@@ -10,7 +10,7 @@ Package = uhal/tests
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
 PackageName = cactus-uhal-tests
 
-Packager = Andrew Rose
+Packager = Andrew Rose, Marc Magrans de Arbil
 
 PACKAGE_VER_MAJOR = 0
 PACKAGE_VER_MINOR = 0
@@ -26,7 +26,7 @@ EXECUTABLE_SOURCES = 	src/common/test_uhal.cxx \
 		src/common/DummyHardwareUdp.cxx \
 		src/common/DummyHardwareTcp.cxx \
 		src/common/test_log.cxx \
-		src/common/test_uhal_simple.cxx
+		src/common/test_single_read_write.cxx
 
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
