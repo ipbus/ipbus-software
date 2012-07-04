@@ -19,8 +19,6 @@
 #include "uhal/PackingProtocol_IPbusHwAccess.hpp"
 #include "uhal/PackingProtocol_ControlHubHost.hpp"
 
-#include "boost/lexical_cast.hpp"
-
 namespace uhal
 {
 
