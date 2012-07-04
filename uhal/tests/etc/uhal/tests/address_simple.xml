@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <node id="SYSTEM">
-    <node id="REG" address="0x0000" permission="rw"/>
+    <node id="REG" address="0x0010" permission="rw"/>
+
+    <!-- two registers with the same underlying address -->
+    <node id="REG_READ_ONLY" address="0x0020" permission="r"/>
+    <node id="REG_WRITE_ONLY" address="0x0020" permission="w"/>
+    
 </node>
