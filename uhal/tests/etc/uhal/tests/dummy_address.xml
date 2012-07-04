@@ -7,4 +7,8 @@
     <node id="REG_READ_ONLY" address="0x0020" permission="r"/>
     <node id="REG_WRITE_ONLY" address="0x0020" permission="w"/>
     
+    <node id="FIFO" address="0x0100" permission="rw" mode="non-incremental"/>
+
+    <node id="MEM" address="0x0200" permission="rw" mode="block"/>
+
 </node>

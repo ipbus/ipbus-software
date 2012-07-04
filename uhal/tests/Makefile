@@ -26,8 +26,9 @@ EXECUTABLE_SOURCES = 	src/common/test_uhal.cxx \
 		src/common/DummyHardwareUdp.cxx \
 		src/common/DummyHardwareTcp.cxx \
 		src/common/test_log.cxx \
-		src/common/test_single_read_write.cxx \
-		src/common/test_block_read_write.cxx
+		src/common/test_dummy_single.cxx \
+		src/common/test_dummy_check_permissions.cxx \
+		src/common/test_dummy_block.cxx
 
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
