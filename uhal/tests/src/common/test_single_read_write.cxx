@@ -60,7 +60,7 @@ int main ( int argc,char* argv[] )
   
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-  std::cout << "TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')" << std::endl;
+  std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   
   CACTUS_TEST(connect_write_read(connection_file,device_id));
   CACTUS_TEST(check_permissions(connection_file,device_id));

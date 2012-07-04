@@ -23,16 +23,14 @@ namespace uhal {
   do {	\
     try {								\
       if (cond) { \
-	std::cout << "CHECK(" << #cond << ") PASSED @" << __FILE__ << ":" << __LINE__ << std::endl; \
+	std::cout << "CHECK PASSED: " << #cond << std::endl; \
       }  else  {							\
-	std::cerr << "CHECK(" << #cond << ") FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
+	std::cerr << "CHECK FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
       }									\
     } catch(std::exception& e) {						\
-      std::cerr << "CHECK(" << #cond << ") FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << ": " \
-		<< e.what() << std::endl;	\
+      std::cerr << "CHECK FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << std::endl; \
     } catch(...) {							\
-      std::cerr << "CHECK(" << #cond << ") FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << ": " \
-		<< "Unknown exception caught" << std::endl;		\
+      std::cerr << "CHECK FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << std::endl; \
     }									\
   } while(0)
 
@@ -44,13 +42,11 @@ namespace uhal {
       gettimeofday ( &start, NULL );		\
       expr;					\
       gettimeofday ( &end, NULL );					\
-      std::cout << "TEST(" #expr ") PASSED in " << uhal::tests::usdiff(end,start) << "usec @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cout << "TEST PASSED in " << uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
     } catch(std::exception& e) {					\
-      std::cerr << "TEST("  #expr  ") FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << ": " \
-		<< e.what() << std::endl;				\
+      std::cerr << "TEST FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << std::endl; \
     } catch(...) {							\
-      std::cerr << "TEST("  #expr  ") FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << ": " \
-		<< "Unknown exception caught" << std::endl;		\
+      std::cerr << "TEST FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << std::endl; \
     }									\
   } while(0)
 
@@ -58,13 +54,11 @@ namespace uhal {
   do {						\
     try{					\
       expr;					\
-      std::cout << "TEST_NOTHROW(" #expr ") PASSED @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cout << "TEST_NOTHROW PASSED: "  << #expr << std::endl; \
     } catch(std::exception& e) {					\
-      std::cerr << "TEST_NOTHROW("  #expr  ") FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << ": " \
-		<< e.what() << std::endl;				\
+      std::cerr << "TEST_NOTHROW FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << ": " << std::endl; \
     } catch(...) {							\
-      std::cerr << "TEST_NOTHROW("  #expr  ") FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << ": " \
-		<< "Unknown exception caught" << std::endl;		\
+      std::cerr << "TEST_NOTHROW FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << ": " << std::endl; \
     }									\
   } while(0)
 
@@ -73,13 +67,13 @@ namespace uhal {
   do {						\
     try{					\
       expr;								\
-      std::cerr << "TEST_THROW(" << #expr << "," << #signature << ") FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl; \
     } catch(signature& e) {					\
-      std::cout << "TEST_THROW(" << #expr << "," << #signature << ") PASSED @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cout << "TEST_THROW PASSED: " << #expr << std::endl; \
     } catch(std::exception& e) {						\
-      std::cerr << "TEST_THROW(" << #expr << "," << #signature << ") FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "TEST_THROW FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << std::endl; \
     }	catch(...) {							\
-      std::cerr << "TEST_THROW(" << #expr << "," << #signature << ") FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "TEST_THROW FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << std::endl; \
     }									\
   } while(0)
 

@@ -1,5 +1,7 @@
 #include "uhal/tests/tools.hpp"
 
+#include "uhal/log/log.hpp"
+
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
@@ -38,6 +40,7 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing(int argc,char
     result["verbose"] = "true";
   } else {
     result["verbose"] = "false";
+    uhal::setLogLevelTo(uhal::Fatal());
   }
 
   return result;
