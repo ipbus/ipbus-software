@@ -58,7 +58,7 @@ namespace uhal {
   do {						\
     try{					\
       expr;					\
-      std::cout << "TEST_NOTHROW(" #expr ") PASSED in " << uhal::tests::usdiff(end,start) << "usec @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cout << "TEST_NOTHROW(" #expr ") PASSED @" << __FILE__ << ":" << __LINE__ << std::endl; \
     } catch(std::exception& e) {					\
       std::cerr << "TEST_NOTHROW("  #expr  ") FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << ": " \
 		<< e.what() << std::endl;				\
