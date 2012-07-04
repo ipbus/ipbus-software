@@ -105,8 +105,8 @@ ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 
 cactus_build:
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin,lib,include/uhal/log,etc/uhal/tests}
-	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/.
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin/uhal/tests,lib,include/uhal/log,etc/uhal/tests}
+	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/uhal/tests/.
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p etc/uhal/tests/*.xml ${RPMBUILD_DIR}/SOURCES/etc/uhal/tests
 
