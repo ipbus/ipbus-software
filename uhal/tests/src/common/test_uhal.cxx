@@ -20,7 +20,7 @@ void hwInterface_creation()
 {
 	try
 	{
-		ConnectionManager manager ( "     file://tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  " ); // http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
+		ConnectionManager manager ( "     file://~/uhal/tests/addr*/*connections.xml   ; file://~/connection*.xml  ;  ;;; ; ;  " ); // http://svnweb.cern.ch/world/wsvn/cactus/trunk/uhal/tests/addr/connections.xml?op=dl&rev=head      ");
 		HwInterface hw=manager.getDevice ( "hcal.crate1.slot1" );
 		//BOOST_CHECK(manager.ping());
 		// manager.getDevice("hcal.crate1.slot2");
@@ -43,7 +43,7 @@ void rawClientAccess()
 {
 	try
 	{
-		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://~/uhal/tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		log ( Notice() , "ATTEMPTING SINGLE WORD WRITE/READ" ) ;
 		//write register
@@ -182,7 +182,7 @@ void navigation_and_traversal_test()
 {
 	try
 	{
-		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://~/uhal/tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		std::vector<std::string> lNodes = hw.getNodes();
 
@@ -223,7 +223,7 @@ void read_test()
 {
 	try
 	{
-		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://~/uhal/tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//read register
 		log ( Notice() , "ATTEMPTING SINGLE WORD READ" ) ;
@@ -267,7 +267,7 @@ void write_test()
 {
 	try
 	{
-		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://~/uhal/tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		//write register
 		uint32_t val = static_cast<uint32_t> ( rand() );
@@ -367,7 +367,7 @@ void read_write_mask()
 {
 	try
 	{
-		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://~/uhal/tests/addr/connections.xml" );
 		HwInterface hw = manager.getDevice ( "hcal.crate1.slot1" );
 		hw.getNode ( "JTAG_BASE_ADDR" ).write ( 0x00000000 );
 		ValWord< uint32_t > mem = hw.getNode ( "JTAG_BASE_ADDR" ).read();
@@ -641,7 +641,7 @@ void allInstructionPermutations()
 
 	try
 	{
-		ConnectionManager manager ( "file://tests/addr/connections.xml" );
+		ConnectionManager manager ( "file://~/uhal/tests/addr/connections.xml" );
 		std::vector< HwInterface > hw;
 		hw.push_back ( manager.getDevice ( "hcal.crate1.slot1" ) );
 		hw.push_back ( manager.getDevice ( "hcal.crate1.slot2" ) );
