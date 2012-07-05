@@ -20,7 +20,7 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing(int argc,char
     ("help,h", "produce help message")
     ("connection_file,c", po::value<std::string>()->default_value("", "Connection file URI"))
     ("device_id,d", po::value<std::string>()->default_value("", "Device identifier"))
-    ("verbose,v", po::value<bool>()->default_value(false, "Verbose output"))
+    ("verbose,v", "Verbose output")
     ;
   
   po::variables_map vm;
@@ -36,7 +36,7 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing(int argc,char
   result["connection_file"] = vm["connection_file"].as<std::string>();
   result["device_id"] = vm["device_id"].as<std::string>();
 
-  if (vm["verbose"].as<bool>()) {
+  if (vm.count("verbose")) {
     result["verbose"] = "true";
   } else {
     result["verbose"] = "false";

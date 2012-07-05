@@ -5,6 +5,9 @@
 <!-- DUMMY UDP -->
 <connection id="dummy.udp" uri="ipbusudp-1.3://localhost:50001"	address_table="file://~/trunk/uhal/tests/etc/uhal/tests/dummy_address.xml" />
 
+<!-- DUMMY UDP with ASCII Address table-->
+<connection id="dummy.udp.txt" uri="ipbusudp-1.3://localhost:50001"	address_table="file://~/trunk/uhal/tests/etc/uhal/tests/dummy_address.txt" />
+
 <!-- DUMMY TCP -->
 <connection id="dummy.tcp" uri="ipbustcp-1.3://localhost:50002"	address_table="file://~/trunk/uhal/tests/etc/uhal/tests/dummy_address.xml" />
 
