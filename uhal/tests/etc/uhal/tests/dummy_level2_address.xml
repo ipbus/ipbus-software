@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<node id="SUBSYSTEM">
-    <node id="REG" address="0x0010" permission="rw"/>
 
-    <node id="MEM" address="0x0200" permission="rw" mode="incremental"/>
+<node id="SUBSYSTEM">
+    <node id="REG" address="0x0001" permission="rw"/>
+
+    <node id="MEM" address="0x0002" permission="rw" mode="incremental"/>
 
 </node>

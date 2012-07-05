@@ -37,15 +37,6 @@ void write_read_masked(const std::string& connection, const std::string& id) {
   CACTUS_TEST(hw.dispatch()); 
   CACTUS_CHECK(mem1.valid() && mem2.valid() && mem3.valid() && mem4.valid() );
 
-  std::cout << std::setfill('0') << std::hex;
-  std::cout << "Written first, unmasked : x1 = 0x" << std::setw(8) << x1 << std::endl;
-  std::cout << "Read back, unmasked : mem1 = 0x" << std::setw(8) << mem1.value() << std::endl;
-  std::cout << "Read back, masked : mem2 = 0x" << std::setw(8) << mem2.value() << std::endl;
-  std::cout << "Written second, masked with 0xFFFF and left shifted by 8 bits : x2 = 0x" << std::setw(8) << x2 << std::endl;
-  std::cout << "Read back, unmasked : mem3 = 0x" << std::setw(8) << mem3.value() << std::endl;
-  std::cout << "Read back, masked : mem4 = 0x" << std::setw(8) << mem4.value() << std::endl;
-  std::cout << std::dec;
-  
   CACTUS_CHECK( mem1.value() == x1 );
   CACTUS_CHECK( mem2.value() == ( ( x1 >> 8 ) & 0xffff ) );
   CACTUS_CHECK( mem3.value() == ( ( x1 & 0xff0000ff ) | ( ( x2 & 0xffff ) << 8 ) ) );
