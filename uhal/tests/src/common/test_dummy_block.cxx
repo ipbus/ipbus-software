@@ -47,6 +47,31 @@ void block_write_read(size_t N,const std::string& connection, const std::string&
   CACTUS_TEST_NOTHROW(mem.at(N-1));
 }
 
+void fifo_write_read(size_t N,const std::string& connection, const std::string& id) {
+  ConnectionManager manager(connection);
+  
+  HwInterface hw=manager.getDevice(id);
+  
+  std::vector<uint32_t> xx;
+  for(size_t i=0; i!= N; ++i)
+    xx.push_back(static_cast<uint32_t>(rand()));
+	    
+  hw.getNode("FIFO").writeBlock(xx);
+  ValVector< uint32_t > mem = hw.getNode("FIFO").readBlock(N);
+  
+  CACTUS_CHECK(!mem.valid());
+  CACTUS_CHECK(mem.size() == N);
+  CACTUS_TEST_THROW(mem.at(0),uhal::exception);
+  //CACTUS_TEST_THROW(mem.size(),uhal::NonValidatedMemory); --> https://svnweb.cern.ch/trac/cactus/ticket/32
+  
+  CACTUS_TEST(hw.dispatch());
+  
+  CACTUS_CHECK(mem.valid());
+  CACTUS_CHECK(mem.size() == N);
+
+  //The FIFO implementation on the dummy HW is a single memory location so there is not much to check
+}
+
 int main ( int argc,char* argv[] )
 {
   std::map<std::string,std::string> params = tests::default_arg_parsing(argc,argv);
@@ -58,7 +83,11 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST(block_write_read(N_1kB,connection_file,device_id));
   CACTUS_TEST(block_write_read(N_100kB,connection_file,device_id));
   CACTUS_TEST(block_write_read(N_10MB,connection_file,device_id));
-  //10MB hangs the test PC...swapping
+  //1GB hangs the test PC...swapping
   
+  CACTUS_TEST(fifo_write_read(N_1kB,connection_file,device_id));
+  CACTUS_TEST(fifo_write_read(N_100kB,connection_file,device_id));
+  CACTUS_TEST(fifo_write_read(N_10MB,connection_file,device_id));
+
   return 0;
 }

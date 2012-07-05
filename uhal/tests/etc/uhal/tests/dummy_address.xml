@@ -9,6 +9,7 @@
     
     <node id="FIFO" address="0x0100" permission="rw" mode="non-incremental"/>
 
-    <node id="MEM" address="0x0200" permission="rw" mode="block"/>
+    <node id="MEM" address="0x0200" permission="rw" mode="incremental"/>
+
 
 </node>
