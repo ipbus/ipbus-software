@@ -8,7 +8,7 @@
     <node id="REG_WRITE_ONLY" address="0x0002" permission="w"/>
     
     <node id="REG_WITHOUT_MASK" address="0x0003" permission="rw"/>
-    <node id="REG_WITH_MASK" address="0x0003" mask="0x00ffff00" permission="rw"/>
+    <node id="REG_WITH_MASK" address="0x0003" bit-mask="0x00ffff00" permission="rw"/>
     
     <node id="FIFO" address="0x0100" permission="rw" mode="non-incremental"/>
 
