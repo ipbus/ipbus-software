@@ -50,8 +50,41 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
 
 void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
-	std::stringstream lIfDefs, lIfDefs2, lEndIfs;
 
+	aHppFile << "/**\n"
+			 << "\tFunction to specify that the logging level should be retrieved from an environment variable\n"
+			 << "\t@param aEnvVar the name of the environment variable which is used to specify the logging level\n"
+			 << "*/\n"
+			 << "void setLogLevelFromEnvironment ( const char* aEnvVar );\n";
+
+	aCppFile << "void setLogLevelFromEnvironment ( const char* aEnvVar )\n"
+			 << "{\n"
+			 << "\tchar * lEnvVar = getenv ( aEnvVar );\n"
+			 << "\tif( !lEnvVar ) throw std::string( \"No environment varible with name \" ) + aEnvVar + \" exists\";\n"
+			 << "\t//Just comparing the first letter of the environment variable for speed!!!\n"
+			 << "\tswitch ( lEnvVar[0] )\n"
+			 << "\t{\n";
+	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+	{
+		aCppFile << "\t\tcase '" << char(std::tolower ( lIt->at(0) )) << "' :\n"
+				 << "\t\tcase '" << char(std::toupper ( lIt->at(0) )) << "' :\n"
+				 << "\t\t\tsetLogLevelTo ( " << *lIt << "() );\n"
+				 << "\t\t\tbreak;\n";
+	}
+	aCppFile << "\t\tdefault:\n"
+			 << "\t\t\tthrow std::string( \"Environment varible has invalid value '\" ) + lEnvVar + \"'\";\n"
+			 << "\t}\n"
+			 << "}\n"
+			 << "\n";
+
+			 
+	aCppFile	<< gDivider
+				<< "\n";
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+				
+	std::stringstream lIfDefs, lIfDefs2, lEndIfs;
+	
 	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
 	{
 		lIfDefs << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << "\n";

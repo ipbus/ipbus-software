@@ -19,7 +19,7 @@ PACKAGE_RELEASE = 1
 
 INCLUDES = $(wildcard include/uhal/log/*.hpp)
 LIBRARY = lib/libcactus_uhal_log.so
-LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
+LIBRARY_SOURCES = $(wildcard src/common/log_*.cpp)
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 
 EXECUTABLE_SOURCES = 	src/common/generator.cxx
@@ -66,6 +66,7 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	mkdir -p bin
 	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
 	./bin/generator.exe	
+	rm obj/log.o
 	
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	mkdir -p obj
