@@ -16,8 +16,8 @@ void write_read_masked(const std::string& connection, const std::string& id) {
   
   hw.ping();
 
-  uint32_t x1 = static_cast<uint32_t>(rand());
-  uint32_t x2 = static_cast<uint32_t>(rand());
+  uint32_t x1 = static_cast<uint32_t>( rand() );
+  uint32_t x2 = static_cast<uint32_t>( rand() & 0xffff );
 
   hw.getNode("REG_WITHOUT_MASK").write(x1);
   ValWord< uint32_t > mem1 = hw.getNode("REG_WITHOUT_MASK").read();
@@ -50,6 +50,9 @@ void write_read_masked(const std::string& connection, const std::string& id) {
   CACTUS_CHECK( mem2.value() == ( ( x1 >> 8 ) & 0xffff ) );
   CACTUS_CHECK( mem3.value() == ( ( x1 & 0xff0000ff ) | ( ( x2 & 0xffff ) << 8 ) ) );
   CACTUS_CHECK( mem4.value() == ( x2 & 0xffff ) );
+  
+ CACTUS_TEST_THROW( hw.getNode("REG_WITH_MASK").write( 0xffff0000 ) , uhal::exception );  
+  
 }
 
 int main ( int argc,char* argv[] )

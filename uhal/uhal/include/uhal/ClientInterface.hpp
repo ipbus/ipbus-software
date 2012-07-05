@@ -35,6 +35,9 @@ namespace uhal
 	//! Exception class to handle the case where pinging of a client failed. Uses the base uhal::exception implementation of what()
 	class PingFailed: public uhal::exception {};
 
+	//! Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds. Uses the base uhal::exception implementation of what()
+	class BitsSetWhichAreForbiddenByBitMask: public uhal::exception {};
+
 	
 	//! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing funcationality
 	class ClientInterface
