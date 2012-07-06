@@ -1,4 +1,3 @@
-MAKE=make
 PACKAGES = \
 	extern/boost \
 	extern/erlang \
@@ -9,11 +8,14 @@ PACKAGES = \
 	uhal/tests \
 	controlhub
 
-TARGETS=clean rpm build all
+VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
 
+TARGETS=clean rpm build all
 
 .PHONY: $(TARGETS)
 default: build
 
-$(TARGETS):
-	for p in $(PACKAGES) ; do $(MAKE) -C $$p $@ ; done
+$(TARGETS): ${VIRTUAL_PACKAGES}
+
+${VIRTUAL_PACKAGES}: 
+	${MAKE} ${MAKEFLAGS} -C $(@D) $(MAKECMDGOALS)
