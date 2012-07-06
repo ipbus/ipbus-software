@@ -35,13 +35,14 @@ all: _all
 build: _all
 buildall: _all
 _all:
-	if [ ! -f ${TARBALL_DIR}/.build_done ]; then                                                     \
+	if [ ! -f ${TARBALL_NAME}/.build_done ]; then                                                     \
 		mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}; \
 		echo "Extracting: ${TARBALL_FILE}";												 \
 		source $(CACTUS_ROOT)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvjf ${TARBALL_FILE}';                         \
 		cd ${TARBALL_NAME};                                        \
 		./bootstrap.sh;                                           \
-		./b2 --without-mpi					\
+		./b2                    -d0                                \
+					--without-mpi			\
 					--prefix=${RPMBUILD_DIR}/SOURCES	\
 					--exec-prefix=${RPMBUILD_DIR}/SOURCES	\
 					variant=release					\
