@@ -76,7 +76,26 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 			 << "\t}\n"
 			 << "}\n"
 			 << "\n";
+			 
+	aCppFile	<< gDivider
+				<< "\n";
 
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+				
+	aHppFile << "/**\n"
+			 << "\tFunction to disable all logging levels\n"
+			 << "*/\n"
+			 << "void disableLogging();\n";
+
+	 aCppFile << "void disableLogging()\n"
+			 << "{\n";
+	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+	{
+		aCppFile << "\tlog_configuration::mLoggingIncludes" << *lIt << " = false;\n";
+	}
+	aCppFile << "}\n"
+			 << "\n";			 
+			 
 			 
 	aCppFile	<< gDivider
 				<< "\n";
@@ -134,6 +153,8 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 			 << "\tlog_configuration();\n"
 			 << "\t//! Destructor\n"
 			 << "\tvirtual ~log_configuration();\n"
+			 << "\n"
+			 << "\tfriend void disableLogging();\n"
 			 << "\n";
 
 	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )

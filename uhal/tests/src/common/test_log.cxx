@@ -120,6 +120,9 @@ int main ( int argc,char* argv[] )
 		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
 		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
 
+		disableLogging();
+		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
+		log ( Error() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
 		
 	}
 	catch ( const std::exception& aExc )
