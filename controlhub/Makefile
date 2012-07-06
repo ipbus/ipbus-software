@@ -88,6 +88,7 @@ buildall: _all
 
 _all: $(RPMBUILD_DIR) $(OBJECTS) $(CONTROLHUB_RELEASE_FILES) ${RPMBUILD_SOURCES_DIR}/lib/controlhub ${RPMBUILD_SOURCES_DIR}/bin
 
+
 dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
 
 rpm: _rpmall

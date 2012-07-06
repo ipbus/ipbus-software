@@ -43,8 +43,6 @@ void block_write_read(size_t N,const std::string& connection, const std::string&
   }
   
   CACTUS_CHECK(correct_block_write_read);
-  CACTUS_TEST_NOTHROW(mem.at(0));
-  CACTUS_TEST_NOTHROW(mem.at(N-1));
 }
 
 void fifo_write_read(size_t N,const std::string& connection, const std::string& id) {
