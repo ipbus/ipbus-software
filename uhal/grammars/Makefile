@@ -51,6 +51,8 @@ all: _all
 build: _all
 buildall: _all
 _all: make_dirs ${LIBRARY} copy_to_build
+
+make_dirs:
 	mkdir -p {lib,obj}
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/grammars}
