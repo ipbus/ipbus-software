@@ -17,15 +17,16 @@ using namespace uhal;
 
 void job ( const std::string& connection, const std::string& id )
 {
-	for ( size_t iter=0; iter != N_ITERATIONS; ++iter )
+	for ( size_t iter=0; ; ++iter )
 	{
 		ConnectionManager manager ( connection );
 		HwInterface hw=manager.getDevice ( id );
+
 		uint32_t x = static_cast<uint32_t> ( rand() );
 		hw.getNode ( "REG" ).write ( x );
 		ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
-		std::vector<uint32_t> xx;
 
+		std::vector<uint32_t> xx;
 		for ( size_t i=0; i!= N_SIZE; ++i )
 		{
 			xx.push_back ( static_cast<uint32_t> ( rand() ) );
@@ -33,8 +34,10 @@ void job ( const std::string& connection, const std::string& id )
 
 		hw.getNode ( "MEM" ).writeBlock ( xx );
 		ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+
 		hw.dispatch();
 		CACTUS_CHECK ( reg.value() == x );
+
 		bool correct_block_write_read = true;
 		ValVector< uint32_t >::const_iterator i=mem.begin();
 		std::vector< uint32_t >::const_iterator j=xx.begin();
