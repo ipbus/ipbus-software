@@ -115,15 +115,12 @@ int main ( int argc,char* argv[] )
 		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
 		//		log ( Notice() , "Dodgy cast : " , Integer ( bool(true) , IntFmt<hex , fixed>() ) );
 		//		log ( Notice() , "Dodgy cast : " , Boolean ( uint32_t(13) ) );
-		
-		setLogLevelFromEnvironment( "UHAL_LOG_LEVEL" );
+		setLogLevelFromEnvironment ( "UHAL_LOG_LEVEL" );
 		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
 		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
-
 		disableLogging();
 		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
 		log ( Error() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
-		
 	}
 	catch ( const std::exception& aExc )
 	{

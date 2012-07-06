@@ -7,18 +7,20 @@
 #include <exception>
 #include <sys/time.h>
 
-namespace uhal {
-  namespace tests {
-    
-    //!timeval difference in micro seconds
-    long usdiff(const timeval& end, const timeval& start);
-    
-    //!Return the first argument 
-    std::map<std::string,std::string> default_arg_parsing(int argc,char* argv[]);
-  }
+namespace uhal
+{
+	namespace tests
+	{
+
+		//!timeval difference in micro seconds
+		long usdiff ( const timeval& end, const timeval& start );
+
+		//!Return the first argument
+		std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
+	}
 }
 
-//!Checks if the condition is fullfilled and it does not throw. 
+//!Checks if the condition is fullfilled and it does not throw.
 #define CACTUS_CHECK(cond) \
   do {	\
     try {								\
@@ -34,7 +36,7 @@ namespace uhal {
     }									\
   } while(0)
 
-//!Test that the expression is executed without exceptions and measures the execution time    
+//!Test that the expression is executed without exceptions and measures the execution time
 #define CACTUS_TEST(expr)				\
   do {						\
     try{					\
@@ -62,7 +64,7 @@ namespace uhal {
     }									\
   } while(0)
 
-//!Test that the expression throws a specific signature   
+//!Test that the expression throws a specific signature
 #define CACTUS_TEST_THROW(expr,signature)		\
   do {						\
     try{					\

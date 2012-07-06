@@ -9,6 +9,7 @@
 
 #include <exception>
 #include <string>
+#include <typeinfo>
 
 namespace uhal
 {
@@ -34,17 +35,28 @@ namespace uhal
 			*/
 			virtual const char* what() const throw();
 
+			const std::type_info* type() const throw();
+
 			// Doxygen does something very, very odd if this is placed above any of the other functions...
 			/**
 				Constructor
-				@param aExc an exception whose message is to be copied
+				@param aExc a standard exception whose message is to be copied
 			*/
 			exception ( const std::exception& aExc );
+
+			/**
+				Copy constructor
+				@param aExc a uhal exception to be copied
+			*/
+			exception ( const exception& aExc );
 
 		private:
 
 			//! The message given to the exception at the time of construction
 			std::string mMessage;
+
+			//! Store the type of the original exception
+			const std::type_info* mTypeInfo;
 
 	};
 

@@ -26,6 +26,7 @@ namespace uhal
 		}
 
 		IPaddr lIP;
+
 		try
 		{
 			boost::spirit::qi::phrase_parse (	lIt->second.begin() ,
@@ -38,10 +39,10 @@ namespace uhal
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			log ( Error() , "Expected a string of the form " , Quote( "aaa.bbb.ccc.ddd:eeeee" ) , " but received " , Quote( lIt->second ) , "." );
+			log ( Error() , "Expected a string of the form " , Quote ( "aaa.bbb.ccc.ddd:eeeee" ) , " but received " , Quote ( lIt->second ) , "." );
 			throw uhal::exception ( aExc );
 		}
-													  
+
 		uint32_t lIPaddress = ( lIP.mIP1 <<24 ) | ( lIP.mIP2 <<16 ) | ( lIP.mIP3 <<8 ) | ( lIP.mIP4 );
 		log ( Info() , "Converted IP address string " ,  Quote ( lIt->second ) ,
 			  " to " , Integer ( lIP.mIP1 ) , "." , Integer ( lIP.mIP2 ) , "." , Integer ( lIP.mIP3 ) , "." , Integer ( lIP.mIP4 ) , ":" , Integer ( lIP.mPort ) ,

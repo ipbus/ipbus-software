@@ -13,8 +13,8 @@ namespace uhal
 {
 
 
-	ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess ) try :
-		connection_file( aConnectionFile )
+ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess ) try :
+		connection_file ( aConnectionFile )
 	{
 		aSuccess=false;
 
@@ -59,11 +59,11 @@ namespace uhal
 			{
 				return false;
 			}
-			
+
 			if ( connection_file != aConnectionDescriptor.connection_file )
 			{
 				return false;
-			}			
+			}
 
 			return true;
 		}
@@ -139,7 +139,8 @@ namespace uhal
 	//Static method for building device on the fly
 	HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr )
 	{
-		try{
+		try
+		{
 			boost::shared_ptr< const Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , "/" ) );
 			log ( Info() , "ConnectionManager created node tree: " , *lNode );
 			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
@@ -149,10 +150,10 @@ namespace uhal
 		{
 			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			throw uhal::exception ( aExc );
-		}			
+		}
 	}
-	
-	
+
+
 	//Given a regex return the ids that match the
 	std::vector<std::string> ConnectionManager::getDevices ( )
 	{

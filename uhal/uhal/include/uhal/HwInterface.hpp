@@ -49,7 +49,7 @@ namespace uhal
 			*/
 			const std::string& id();
 
-			
+
 			/**
 				Make the IPbus client issue a dispatch
 			*/

@@ -32,7 +32,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		}
 	}
 
-	
+
 	void ClientInterface::ping()
 	{
 		try
@@ -123,19 +123,19 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			uint32_t lBitShiftedSource( aSource << utilities::TrailingRightBits ( aMask ) );
-			uint32_t lOverlap( lBitShiftedSource & ~aMask );
-			
-			if( lOverlap )
+			uint32_t lBitShiftedSource ( aSource << utilities::TrailingRightBits ( aMask ) );
+			uint32_t lOverlap ( lBitShiftedSource & ~aMask );
+
+			if ( lOverlap )
 			{
 				log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ")"
-								" has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
-								Integer ( lOverlap , IntFmt<hex,fixed>() )
+					  " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
+					  Integer ( lOverlap , IntFmt<hex,fixed>() )
 					);
 				log ( Error() , "Throwing at " , ThisLocation() );
 				throw BitsSetWhichAreForbiddenByBitMask();
 			}
-		
+
 			getPackingProtocol().rmw_bits ( aAddr , ~aMask , lBitShiftedSource & aMask );
 		}
 		catch ( const std::exception& aExc )

@@ -110,7 +110,7 @@ namespace uhal
 			*/
 			std::vector<std::string> getDevices ( const std::string& aRegex );
 
-			
+
 			/**
 				Use the specified protocol, host, and port to create an IPbus Client
 				Use the specified address table to create the Node tree
@@ -121,7 +121,7 @@ namespace uhal
 				@return a HwInterface which encapsulates the Node tree and the IPbus Client
 			 */
 			static HwInterface getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr );
-			
+
 		private:
 			/**
 				Method called once the file specified in the constructor has been opened

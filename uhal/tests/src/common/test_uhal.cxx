@@ -26,11 +26,9 @@ void hwInterface_creation()
 		// manager.getDevice("hcal.crate1.slot2");
 		// hw.dispatch();
 		std::vector<std::string> ids = manager.getDevices ( "hcal.crate1.*" );
-
 		//for ( std::vector<std::string>::const_iterator i ( ids.begin() ); i != ids.end(); ++i )
-			//BOOST_CHECK(manager.getDevice(*i).getClient().ping();
-			//;
-			
+		//BOOST_CHECK(manager.getDevice(*i).getClient().ping();
+		//;
 		HwInterface hw2 = ConnectionManager::getDevice ( "hcal.crate1.OnTheFly" , "chtcp-1.3://localhost:10203?target=127.0.0.1:50003" , "file://~/uhal/tests/addr/uhal_address_table.xml" );
 		hw2.ping();
 	}
@@ -762,11 +760,41 @@ void allInstructionPermutations()
 }
 
 
+void testException()
+{
+	ValWord< uint32_t > mem;
+
+	try
+	{
+		mem.value();
+	}
+	catch ( uhal::NonValidatedMemory& e )
+	{
+		log ( Notice() , "uhal::NonValidatedMemory caught correctly!" );
+	}
+	catch ( uhal::exception& e )
+	{
+		log ( Notice() , "generic uhal exception caught correctly!" );
+		log ( Notice() , e.what() );
+		log ( Notice() , e.type()->name() );
+		log ( Notice() , "Address returned by exception member function, type() :  " , Pointer ( e.type() ) );
+		log ( Notice() , "Address returned by typeid() operating on class itself : " , Pointer ( & typeid ( uhal::NonValidatedMemory ) ) );
+	}
+	catch ( std::exception& e )
+	{
+		log ( Notice() , "Caught something else " , typeid ( e ).name() );
+	}
+}
+
+
+
+
 int main ( int argc,char* argv[] )
 {
 	try
 	{
 		setLogLevelTo ( Debug() );
+		testException();
 		hwInterface_creation();
 		rawClientAccess();
 		navigation_and_traversal_test();

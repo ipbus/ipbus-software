@@ -149,14 +149,11 @@ namespace uhal
 				for ( std::size_t i = 0 ; i != lShellExpansion.we_wordc ; i++ )
 				{
 					boost::filesystem::path lPath ( lShellExpansion.we_wordv[i] );
-					
-					log( Debug() , "lPath was " , Quote( lPath.c_str() ) );
-					log( Debug() , "aParentPath is " , Quote( aParentPath.c_str() ) );
-					
-					lPath = boost::filesystem::absolute( lPath , aParentPath );
+					log ( Debug() , "lPath was " , Quote ( lPath.c_str() ) );
+					log ( Debug() , "aParentPath is " , Quote ( aParentPath.c_str() ) );
+					lPath = boost::filesystem::absolute ( lPath , aParentPath );
+					log ( Debug() , "lPath now " , Quote ( lPath.c_str() ) );
 
-					log( Debug() , "lPath now " , Quote( lPath.c_str() ) );
-					
 					if ( boost::filesystem::exists ( lPath ) )
 					{
 						if ( aFiles )

@@ -84,7 +84,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 	}
 
-	
+
 	const std::string& HwInterface::id()
 	{
 		try
@@ -97,7 +97,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 			throw uhal::exception ( aExc );
 		}
 	}
-	
+
 
 	std::string HwInterface::uri()
 	{
@@ -111,7 +111,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 			throw uhal::exception ( aExc );
 		}
 	}
-	
+
 
 	void HwInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
 	{
