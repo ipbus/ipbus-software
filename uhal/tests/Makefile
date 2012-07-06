@@ -25,6 +25,7 @@ EXECUTABLE_SOURCES = 	src/common/test_uhal.cxx \
 		src/common/test_timing.cxx \
 		src/common/DummyHardwareUdp.cxx \
 		src/common/DummyHardwareTcp.cxx \
+		src/common/test_uhal.cxx \
 		src/common/test_log.cxx \
 		src/common/test_dummy_single.cxx \
 		src/common/test_dummy_masking.cxx \

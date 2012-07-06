@@ -136,7 +136,23 @@ namespace uhal
 		}
 	}
 
-
+	//Static method for building device on the fly
+	HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr )
+	{
+		try{
+			boost::shared_ptr< const Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , "/" ) );
+			log ( Info() , "ConnectionManager created node tree: " , *lNode );
+			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
+			return HwInterface ( lClientInterface , lNode );
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}			
+	}
+	
+	
 	//Given a regex return the ids that match the
 	std::vector<std::string> ConnectionManager::getDevices ( )
 	{
