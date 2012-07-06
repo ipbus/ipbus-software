@@ -27,9 +27,9 @@ ERROR_LIST        = ['TEST FAILED, ',
                      ' Error ',
                      'FAILED']
 
-IGNORE_ERROR_LIST = ['command @param is not found in the argument list of uhal::log_configuration::LoggingIncludes(const Error &)']
+IGNORE_ERROR_LIST = ["Warning: argument `aError'"]
 
-TEST_PASSED_LIST  = ['TEST OK, ']
+TEST_PASSED_LIST  = []
 
 
 ####ENVIRONMENT
