@@ -10,40 +10,32 @@
 
 using namespace uhal;
 
-#define N_10_THREADS     1
-#define N_1k_ITERATIONS  10
-#define N_1MB_SIZE       1024*1024/4
-#define TIMEOUT_S        50  
+#define N_THREADS     1
+#define N_ITERATIONS  1000
+#define N_SIZE        1024*1024/4
+#define TIMEOUT_S     50  
 
 void job(const std::string& connection, const std::string& id) {
-  for(size_t iter=0; iter != N_1k_ITERATIONS; ++iter) {
+  for(size_t iter=0; iter != N_ITERATIONS; ++iter) {
     ConnectionManager manager(connection);
     
     HwInterface hw=manager.getDevice(id);
-  
-    hw.ping();
-
     uint32_t x = static_cast<uint32_t>(rand());
     
     hw.getNode("REG").write(x);
     ValWord< uint32_t > reg = hw.getNode("REG").read();
     
-    CACTUS_CHECK(!reg.valid());
-    CACTUS_TEST_THROW(reg.value(),uhal::exception);
-    
     std::vector<uint32_t> xx;
-    for(size_t i=0; i!= N_1MB_SIZE; ++i)
+    for(size_t i=0; i!= N_SIZE; ++i)
       xx.push_back(static_cast<uint32_t>(rand()));
     
     hw.getNode("MEM").writeBlock(xx);
-    ValVector< uint32_t > mem = hw.getNode("MEM").readBlock(N_1MB_SIZE);
+    ValVector< uint32_t > mem = hw.getNode("MEM").readBlock(N_SIZE);
     
-    CACTUS_CHECK(!mem.valid());
-    CACTUS_CHECK(mem.size() == N_1MB_SIZE);
-    CACTUS_TEST_THROW(mem.at(0),uhal::exception);
+    hw.dispatch();
     
-    CACTUS_TEST(hw.dispatch());
-    
+    CACTUS_CHECK(reg.value() == x);
+
     bool correct_block_write_read = true;
     ValVector< uint32_t >::const_iterator i=mem.begin();
     std::vector< uint32_t >::const_iterator j=xx.begin();
@@ -77,7 +69,7 @@ int main ( int argc,char* argv[] )
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   
-  CACTUS_TEST(launch_threads(N_10_THREADS,connection_file,device_id));
+  CACTUS_TEST(launch_threads(N_THREADS,connection_file,device_id));
   
   return 0;
 }
