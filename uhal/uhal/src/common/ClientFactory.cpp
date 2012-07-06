@@ -70,11 +70,20 @@ namespace uhal
 		try
 		{
 			URI lUri;
-			grammars::URIGrammar lGrammar;
-			boost::spirit::qi::phrase_parse ( aUri.begin() , aUri.end() , lGrammar , boost::spirit::ascii::space , lUri );
+			try{
+				grammars::URIGrammar lGrammar;
+				boost::spirit::qi::phrase_parse ( aUri.begin() , aUri.end() , lGrammar , boost::spirit::ascii::space , lUri );
+			}
+			catch ( const std::exception& aExc )
+			{
+				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+				log ( Error() , "Failed to parse URI " , Quote ( aUri ) );
+				throw uhal::exception ( aExc );
+			}
+
 			log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
 			std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
-
+			
 			if ( lIt == mCreators.end() )
 			{
 				std::stringstream lStr;

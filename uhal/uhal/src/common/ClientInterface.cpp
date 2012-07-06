@@ -65,13 +65,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			lReturn << mUri.mProtocol << "://" << mUri.mHostname << ":" << mUri.mPort;
 
 			// there is sometimes a path
-			if ( mUri.mPath != __PRETTY_FUNCTION__ )
+			if ( mUri.mPath != "" )
 			{
 				lReturn << "/" << mUri.mPath;
 			}
 
 			// there is sometimes a filename extension
-			if ( mUri.mExtension != __PRETTY_FUNCTION__ )
+			if ( mUri.mExtension != "" )
 			{
 				lReturn << "." << mUri.mExtension;
 			}

@@ -141,7 +141,7 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 	{
 		try
 		{
-			boost::shared_ptr< const Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , "/" ) );
+			boost::shared_ptr< const Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
 			log ( Info() , "ConnectionManager created node tree: " , *lNode );
 			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
 			return HwInterface ( lClientInterface , lNode );
