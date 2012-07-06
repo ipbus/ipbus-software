@@ -40,7 +40,7 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing(int argc,char
     result["verbose"] = "true";
   } else {
     result["verbose"] = "false";
-    uhal::setLogLevelTo(uhal::Fatal());
+    uhal::disableLogging();
   }
 
   return result;
