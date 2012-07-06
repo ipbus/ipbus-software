@@ -28,7 +28,7 @@ namespace uhal
 
 
 	template <class T>
-	boost::shared_ptr< const Node > NodeTreeBuilder::Creator<T>::create ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , const uint32_t& aParentMask )
+	boost::shared_ptr< const Node > NodeTreeBuilder::Creator<T>::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr , const uint32_t& aParentMask )
 	{
 		try
 		{

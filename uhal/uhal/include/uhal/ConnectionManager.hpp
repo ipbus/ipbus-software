@@ -38,9 +38,10 @@ namespace uhal
 				/**
 					Constructor
 					@param aNode a PugiXML node from which to extract the details of the connection
+					@param aConnectionFile the connection file which this entry is contained in
 					@param aSuccess return whether all the necessary values were extracted from the PugiXML node
 				*/
-				ConnectionDescriptor ( const pugi::xml_node& aNode , bool& aSuccess );
+				ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess );
 
 				/**
 					Comparison operation
@@ -55,6 +56,8 @@ namespace uhal
 				std::string uri;
 				//! The address table for building the node tree
 				std::string address_table;
+				//! The connection file which provided this entry
+				boost::filesystem::path connection_file;
 			};
 
 
@@ -117,8 +120,6 @@ namespace uhal
 			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile );
 
 		private:
-			//! All the connections found matching the semi-colon delimeted list of glob expressions specified in the constructor
-			std::vector< std::pair<std::string, std::string> >  mConnectionFiles;	//protocol, filename
 			//! A map of connection identifiers to stucts containing details of the parsed XML node
 			std::map< std::string, ConnectionDescriptor >  mConnectionDescriptors;	//connection identifier, parsed descriptor (also contains the connection identifier)
 			//! A set of previously opened filenames, so that the same file is not parsed multiple times

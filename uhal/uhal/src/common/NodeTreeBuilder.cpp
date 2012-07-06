@@ -29,7 +29,7 @@ namespace uhal
 		}
 	}
 
-	boost::shared_ptr< const Node > NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const uint32_t& aAddr , const uint32_t& aAddrMask )
+	boost::shared_ptr< const Node > NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath , const uint32_t& aAddr , const uint32_t& aAddrMask )
 	{
 		try
 		{
@@ -45,7 +45,7 @@ namespace uhal
 
 			std::vector< boost::shared_ptr< const Node > > lNodes;
 
-			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , aAddr , aAddrMask , boost::ref ( lNodes ) ) ) )
+			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , aAddr , aAddrMask , boost::ref ( lNodes ) ) ) )
 			{
 				log ( Error() , "Failed to open address table file " , Quote ( lAddressFiles[0].second ) );
 				log ( Error() , "Throwing at " , ThisLocation() );
@@ -105,7 +105,7 @@ namespace uhal
 					return;
 				}
 
-				boost::shared_ptr< const Node > lNode ( create ( lXmlNode , aAddr , aAddrMask ) );
+				boost::shared_ptr< const Node > lNode ( create ( lXmlNode , aPath , aAddr , aAddrMask ) );
 				mNodes.insert ( std::make_pair ( lName , lNode ) );
 				aNodes.push_back ( lNode );
 				return;
@@ -158,7 +158,7 @@ namespace uhal
 
 
 
-	boost::shared_ptr< const Node > NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , const uint32_t& aParentMask )
+	boost::shared_ptr< const Node > NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr , const uint32_t& aParentMask )
 	{
 		std::string lClass;
 		boost::shared_ptr< const Node > lNode;
@@ -169,7 +169,7 @@ namespace uhal
 
 			if ( lIt != mCreators.end() )
 			{
-				lNode = lIt->second->create ( aXmlNode , aParentAddr , aParentMask );
+				lNode = lIt->second->create ( aXmlNode , aPath , aParentAddr , aParentMask );
 			}
 			else
 			{
@@ -181,12 +181,12 @@ namespace uhal
 				}
 
 				log ( Warning() , "Node subclass " , Quote ( lClass ) , " does not exists in map of creators. Options are:" , lStr.str() , "\nWill create a plain base node for now but be warned." );
-				lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aParentAddr , aParentMask ) );
+				lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aParentAddr , aParentMask ) );
 			}
 		}
 		else
 		{
-			lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aParentAddr , aParentMask ) );
+			lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aParentAddr , aParentMask ) );
 		}
 
 		return lNode;

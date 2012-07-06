@@ -14,7 +14,7 @@
 
     <node id="MEM" address="0x0200" permission="rw" mode="incremental"/>
 
-    <node id="SUBSYSTEM1" address="0x1000" module="file://etc/uhal/tests/dummy_level2_address.xml" />
-    <node id="SUBSYSTEM2" address="0x2000"  module="file://etc/uhal/tests/dummy_level2_address.xml" />
-   
+    <node id="SUBSYSTEM1" address="0x1000" module="file://dummy_level2_address.xml" />
+    <node id="SUBSYSTEM2" address="0x2000"  module="file://dummy_level2_address.xml" />
+
 </node>

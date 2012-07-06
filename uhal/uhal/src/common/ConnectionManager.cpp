@@ -13,7 +13,8 @@ namespace uhal
 {
 
 
-	ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , bool& aSuccess ) try
+	ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess ) try :
+		connection_file( aConnectionFile )
 	{
 		aSuccess=false;
 
@@ -58,6 +59,11 @@ namespace uhal
 			{
 				return false;
 			}
+			
+			if ( connection_file != aConnectionDescriptor.connection_file )
+			{
+				return false;
+			}			
 
 			return true;
 		}
@@ -76,11 +82,12 @@ namespace uhal
 
 	ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr ) try
 	{
-		uhal::utilities::ParseSemicolonDelimitedUriList<true> ( aFilenameExpr , mConnectionFiles );
+		std::vector< std::pair<std::string, std::string> >  lConnectionFiles;	//protocol, filename
+		uhal::utilities::ParseSemicolonDelimitedUriList<true> ( aFilenameExpr , lConnectionFiles );
 
-		for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = mConnectionFiles.begin() ; lIt != mConnectionFiles.end() ; ++lIt )
+		for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = lConnectionFiles.begin() ; lIt != lConnectionFiles.end() ; ++lIt )
 		{
-			uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::bind ( &ConnectionManager::CallBack, boost::ref ( *this ) , _1 , _2 , _3 ) );
+			uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , boost::bind ( &ConnectionManager::CallBack, boost::ref ( *this ) , _1 , _2 , _3 ) );
 		}
 	}
 	catch ( const std::exception& aExc )
@@ -117,7 +124,7 @@ namespace uhal
 			}
 
 			//The node tree builder returns a newly created shared_ptr to a Node
-			boost::shared_ptr< const Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table ) );
+			boost::shared_ptr< const Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
 			log ( Info() , "ConnectionManager created node tree: " , *lNode );
 			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );
 			return HwInterface ( lClientInterface , lNode );
@@ -235,7 +242,7 @@ namespace uhal
 			for ( pugi::xpath_node_set::const_iterator lConnectionIt = lConnections.begin(); lConnectionIt != lConnections.end(); ++lConnectionIt )
 			{
 				bool lSuccess;
-				ConnectionDescriptor lDescriptor ( lConnectionIt->node() , lSuccess );
+				ConnectionDescriptor lDescriptor ( lConnectionIt->node() , aPath , lSuccess );
 
 				if ( lSuccess )
 				{

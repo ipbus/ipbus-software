@@ -69,10 +69,11 @@ namespace uhal
 			/**
 				Construct a node from a PugiXML node
 				@param aXmlNode a PugiXML node from which to construct a node
+				@param aPath The fully qualified path to the XML file containing this node
 				@param aParentAddr the address of the parent node for hierarchical addressing and address collision detection
 				@param aParentMask the address-mask of the parent node for hierarchical addressing and address collision detection
 			*/
-			Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
+			Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
 
 			/**
 				Lightweight Copy constructor

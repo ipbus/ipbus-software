@@ -79,7 +79,7 @@ namespace uhal
 
 
 
-Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , const uint32_t& aParentMask ) try :
+Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr , const uint32_t& aParentMask ) try :
 		mHw ( NULL ),
 			mUid ( "" ),
 			mAddr ( 0x00000000 ),
@@ -151,7 +151,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 		{
 			try
 			{
-				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , mAddr , mAddrMask )->clone() );
+				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , mAddr , mAddrMask )->clone() );
 			}
 			catch ( const std::exception& aExc )
 			{
@@ -206,7 +206,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const uint32_t& aParentAddr , cons
 
 			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
 			{
-				mChildren->push_back ( NodeTreeBuilder::getInstance().create ( lXmlNode , mAddr , mAddrMask )->clone() );
+				mChildren->push_back ( NodeTreeBuilder::getInstance().create ( lXmlNode , aPath , mAddr , mAddrMask )->clone() );
 			}
 		}
 

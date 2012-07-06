@@ -126,12 +126,13 @@ namespace uhal
 		/**
 			Perform shell expansion of a linux shell expression ( e.g. "~/c*.xml" -> "/usr/home/awr/connections.xml" ) and convert into boost::filesystem::paths
 			@param aFilenameExpr a c-style string containing a linux shell expression to be expanded
+			@param aParentPath a path which will be prepended to relative file names
 			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
 			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
 			@return success/failure status
 		*/
 		template < bool DebugInfo >
-		bool ShellExpandFilenameExpr ( const char* aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
+		bool ShellExpandFilenameExpr ( const char* aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
 		{
 			if ( !aFiles && !aDirectories )
 			{
@@ -148,14 +149,21 @@ namespace uhal
 				for ( std::size_t i = 0 ; i != lShellExpansion.we_wordc ; i++ )
 				{
 					boost::filesystem::path lPath ( lShellExpansion.we_wordv[i] );
+					
+					log( Debug() , "lPath was " , Quote( lPath.c_str() ) );
+					log( Debug() , "aParentPath is " , Quote( aParentPath.c_str() ) );
+					
+					lPath = boost::filesystem::absolute( lPath , aParentPath );
 
+					log( Debug() , "lPath now " , Quote( lPath.c_str() ) );
+					
 					if ( boost::filesystem::exists ( lPath ) )
 					{
 						if ( aFiles )
 						{
 							if ( boost::filesystem::is_regular_file ( lPath ) )
 							{
-								aFiles->push_back ( boost::filesystem::absolute ( lPath ) );
+								aFiles->push_back ( lPath );
 							}
 						}
 
@@ -163,7 +171,7 @@ namespace uhal
 						{
 							if ( boost::filesystem::is_directory ( lPath ) )
 							{
-								aDirectories->push_back ( boost::filesystem::absolute ( lPath ) );
+								aDirectories->push_back ( lPath );
 							}
 						}
 					}
@@ -232,16 +240,17 @@ namespace uhal
 		/**
 			Perform shell expansion of a linux shell expression ( e.g. "~/c*.xml" -> "/usr/home/awr/connections.xml" ) and convert into boost::filesystem::paths
 			@param aFilenameExpr a string containing a linux shell expression to be expanded
+			@param aParentPath a path which will be prepended to relative file names
 			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
-			@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
+			@param aDirectories a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
 			@return success/failure status
 		*/
 		template < bool DebugInfo >
-		bool ShellExpandFilenameExpr ( const std::string& aFilenameExpr , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
+		bool ShellExpandFilenameExpr ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
 		{
 			try
 			{
-				return ShellExpandFilenameExpr< DebugInfo > ( aFilenameExpr.c_str() , aFiles , aDirectories );
+				return ShellExpandFilenameExpr< DebugInfo > ( aFilenameExpr.c_str() , aParentPath.c_str() , aFiles , aDirectories );
 			}
 			catch ( const std::exception& aExc )
 			{
@@ -439,17 +448,18 @@ namespace uhal
 		/**
 			Given a linux shell expression, open all files which match it and call the callback function on each of them
 			@param aFilenameExpr a linux shell expression to be expanded
+			@param aParentPath a path which will be prepended to relative file names
 			@param aBinder a callback function to be called on each file matching the linux shell expression
 			@return success/failure status
 		*/
 		template < typename R , typename F , typename L>
-		bool OpenFileLocal ( const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder )
+		bool OpenFileLocal ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
 		{
 			try
 			{
 				std::vector< boost::filesystem::path > lFilePaths;
 
-				if ( !uhal::utilities::ShellExpandFilenameExpr<true> ( aFilenameExpr , &lFilePaths ) )
+				if ( !uhal::utilities::ShellExpandFilenameExpr<true> ( aFilenameExpr , aParentPath , &lFilePaths ) )
 				{
 					return false;
 				}
@@ -534,17 +544,18 @@ namespace uhal
 			Given a protocol and either a URL or a linux shell expression, open the file and call the callback function on each of them
 			@param aProtocol the protocol to be used to retrieve the file
 			@param aFilenameExpr a linux shell expression to be expanded or a URL to be retrieved
+			@param aParentPath a path which will be prepended to relative file names for local files. No meaning for http files.
 			@param aBinder a callback function to be called on the files
 			@return success/failure status
 		*/
 		template < typename R , typename F , typename L>
-		bool OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , boost::_bi::bind_t<R,F,L> aBinder )
+		bool OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
 		{
 			try
 			{
 				if ( aProtocol == "file" )
 				{
-					return uhal::utilities::OpenFileLocal ( aFilenameExpr , aBinder );
+					return uhal::utilities::OpenFileLocal ( aFilenameExpr , aParentPath , aBinder );
 				}
 				else if ( aProtocol == "http" )
 				{
