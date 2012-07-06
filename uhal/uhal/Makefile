@@ -65,7 +65,7 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: make_dirs ${LIBRARY} copy_to_buid
+_all: make_dirs ${LIBRARY} copy_to_build
 
 make_dirs:
 	mkdir -p {lib,obj}
