@@ -65,20 +65,23 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: ${LIBRARY}
+_all: make_dirs ${LIBRARY} copy_to_buid
 
-${LIBRARY}: ${OBJECT_FILES}
+make_dirs:
+	mkdir -p {lib,obj}
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal,include/uhal/TemplateDefinitions}
-	mkdir -p lib
+
+${LIBRARY}: ${OBJECT_FILES}
 	g++ ${LINK_FLAGS} ${OBJECT_FILES} -o $@
+
+${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
+	g++ ${CPP_FLAGS} -c $< -o $@
+
+copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/.
 	cp -p include/uhal/TemplateDefinitions/*.hxx ${RPMBUILD_DIR}/SOURCES/include/uhal/TemplateDefinitions/.
-
-${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
-	mkdir -p obj
-	g++ ${CPP_FLAGS} -c $< -o $@
 
 
 

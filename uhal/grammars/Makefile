@@ -50,20 +50,21 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: ${LIBRARY}
-
-${LIBRARY}: ${OBJECT_FILES}
+_all: make_dirs ${LIBRARY} copy_to_build
+	mkdir -p {lib,obj}
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/grammars}
-	mkdir -p lib
+
+
+${LIBRARY}: ${OBJECT_FILES}
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
-	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
-	cp -p include/uhal/grammars/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/grammars/.
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES} 
-	mkdir -p obj
 	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
 
+copy_to_build:
+	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
+	cp -p include/uhal/grammars/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/grammars/.
 
 
 rpm: _rpmall
