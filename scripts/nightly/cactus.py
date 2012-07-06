@@ -27,7 +27,7 @@ ERROR_LIST        = ['TEST FAILED, ',
                      ' Error ',
                      'FAILED']
 
-IGNORE_ERROR_LIST = ["Warning: argument `aError'"]
+IGNORE_ERROR_LIST = []
 
 TEST_PASSED_LIST  = []
 
