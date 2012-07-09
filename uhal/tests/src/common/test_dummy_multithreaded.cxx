@@ -11,44 +11,46 @@
 using namespace uhal;
 
 #define N_THREADS     1
-#define N_ITERATIONS  1000
+#define N_ITERATIONS  10000
 #define N_SIZE        1024*1024/4
 #define TIMEOUT_S     50
 
 void job ( const std::string& connection, const std::string& id )
 {
-	for ( size_t iter=0; ; ++iter )
+
+
+  for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
+    {
+      ConnectionManager manager ( connection );
+      HwInterface hw=manager.getDevice ( id );
+      
+
+      uint32_t x = static_cast<uint32_t> ( rand() );
+      hw.getNode ( "REG" ).write ( x );
+      ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
+
+
+      std::vector<uint32_t> xx;
+      for ( size_t i=0; i!= N_SIZE; ++i )
 	{
-		ConnectionManager manager ( connection );
-		HwInterface hw=manager.getDevice ( id );
-
-		uint32_t x = static_cast<uint32_t> ( rand() );
-		hw.getNode ( "REG" ).write ( x );
-		ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
-
-		std::vector<uint32_t> xx;
-		for ( size_t i=0; i!= N_SIZE; ++i )
-		{
-			xx.push_back ( static_cast<uint32_t> ( rand() ) );
-		}
-
-		hw.getNode ( "MEM" ).writeBlock ( xx );
-		ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
-
-		hw.dispatch();
-		CACTUS_CHECK ( reg.value() == x );
-
-		bool correct_block_write_read = true;
-		ValVector< uint32_t >::const_iterator i=mem.begin();
-		std::vector< uint32_t >::const_iterator j=xx.begin();
-
-		for ( ValVector< uint32_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
-		{
-			correct_block_write_read = correct_block_write_read && ( *i == *j );
-		}
-
-		CACTUS_CHECK ( correct_block_write_read );
+	  xx.push_back ( static_cast<uint32_t> ( rand() ) );
 	}
+
+
+      hw.dispatch();
+      CACTUS_CHECK ( reg.value() == x );
+
+      bool correct_block_write_read = true;
+      ValVector< uint32_t >::const_iterator i=mem.begin();
+      std::vector< uint32_t >::const_iterator j=xx.begin();
+
+      for ( ValVector< uint32_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
+	{
+	  correct_block_write_read = correct_block_write_read && ( *i == *j );
+	}
+
+      CACTUS_CHECK ( correct_block_write_read );
+    }
 }
 
 void launch_threads ( size_t n_threads,const std::string& connection_file,const std::string& device_id )
@@ -60,12 +62,13 @@ void launch_threads ( size_t n_threads,const std::string& connection_file,const 
 		jobs.push_back ( new boost::thread ( job,connection_file,device_id ) );
 	}
 
-	boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
 
 	for ( size_t i=0; i!=n_threads; ++i )
 	{
-		CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
-		delete jobs[i];
+	  //boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
+	  //CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
+	  CACTUS_TEST_NOTHROW ( jobs[i]->join());
+	  delete jobs[i];
 	}
 }
 
