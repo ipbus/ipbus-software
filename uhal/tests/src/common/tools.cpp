@@ -25,13 +25,22 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing ( int argc,ch
 	( "verbose,v", "Verbose output" )
 	;
 	po::variables_map vm;
-	po::store ( po::parse_command_line ( argc, argv, desc ), vm );
-	po::notify ( vm );
+	try {
+	  po::store ( po::parse_command_line ( argc, argv, desc ), vm );
+	  po::notify ( vm );
+	} catch(std::exception& e) {
+	  std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+	  std::cout << "Usage: " << argv[0] << " [OPTIONS]" << std::endl;
+	  std::cout << desc << std::endl;
+	  exit(1);
+	}
+
 
 	if ( vm.count ( "help" ) )
 	{
-		std::cout << desc << std::endl;
-		exit ( 0 );
+	  std::cout << "Usage: " << argv[0] << " [OPTIONS]" << std::endl;
+	  std::cout << desc << std::endl;
+	  exit ( 0 );
 	}
 
 	std::map<std::string,std::string> result;

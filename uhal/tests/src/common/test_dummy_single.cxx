@@ -12,18 +12,22 @@ using namespace uhal;
 
 void connect_write_read ( const std::string& connection, const std::string& id )
 {
-	ConnectionManager manager ( connection );
-	HwInterface hw=manager.getDevice ( id );
-	hw.ping();
-	uint32_t x = static_cast<uint32_t> ( rand() );
-	hw.getNode ( "REG" ).write ( x );
-	ValWord< uint32_t > mem = hw.getNode ( "REG" ).read();
-	CACTUS_CHECK ( !mem.valid() );
-	CACTUS_TEST_THROW ( mem.value(),uhal::exception );
-	//CACTUS_TEST_THROW(mem.value(),uhal::NonValidatedMemory); --> https://svnweb.cern.ch/trac/cactus/ticket/32
-	CACTUS_TEST ( hw.dispatch() );
-	CACTUS_CHECK ( mem.valid() );
-	CACTUS_CHECK ( mem.value() == x );
+  ConnectionManager manager ( connection );
+  HwInterface hw=manager.getDevice ( id );
+  hw.ping();
+
+  uint32_t x = static_cast<uint32_t> ( rand() );
+  hw.getNode ( "REG" ).write ( x );
+  ValWord< uint32_t > mem = hw.getNode ( "REG" ).read();
+
+  CACTUS_CHECK ( !mem.valid() );
+  CACTUS_TEST_THROW ( mem.value(),uhal::exception );
+
+  //CACTUS_TEST_THROW(mem.value(),uhal::NonValidatedMemory); --> https://svnweb.cern.ch/trac/cactus/ticket/32
+  CACTUS_TEST ( hw.dispatch() );
+
+  CACTUS_CHECK ( mem.valid() );
+  CACTUS_CHECK ( mem.value() == x );
 }
 
 void on_the_fly_connect_write_read(const std::string& connection, const std::string& id) {
