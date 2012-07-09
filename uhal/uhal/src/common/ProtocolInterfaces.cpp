@@ -610,38 +610,38 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 
 
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	ValVector< uint32_t > PackingProtocol::readReservedAddressInfo ()
-	{
-		try
-		{
-			// IPbus packet format is:
-			// HEADER
-			uint32_t lSendByteCount ( 1 << 2 );
-			// IPbus reply packet format is:
-			// HEADER
-			// WORD
-			// WORD
-			uint32_t lReplyByteCount ( 3 << 2 );
-			uint32_t lSendBytesAvailable;
-			uint32_t  lReplyBytesAvailable;
-			this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-			mCurrentBuffers->send ( this->calculateIPbusHeader ( R_A_I , 0 ) );
-			ValVector< uint32_t > lReply ( 2 );
-			mCurrentBuffers->add ( lReply );
-			_ValVector_< uint32_t >& lReplyMem = * ( lReply.mMembers );
-			lReplyMem.IPbusHeaders.push_back ( 0 );
-			mCurrentBuffers->receive ( lReplyMem.IPbusHeaders[0] );
-			mCurrentBuffers->receive ( ( uint8_t* ) ( & ( lReplyMem.value[0] ) ) , 2<<2 );
-			return lReply;
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ValVector< uint32_t > PackingProtocol::readReservedAddressInfo ()
+	// {
+		// try
+		// {
+			// // IPbus packet format is:
+			// // HEADER
+			// uint32_t lSendByteCount ( 1 << 2 );
+			// // IPbus reply packet format is:
+			// // HEADER
+			// // WORD
+			// // WORD
+			// uint32_t lReplyByteCount ( 3 << 2 );
+			// uint32_t lSendBytesAvailable;
+			// uint32_t  lReplyBytesAvailable;
+			// this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+			// mCurrentBuffers->send ( this->calculateIPbusHeader ( R_A_I , 0 ) );
+			// ValVector< uint32_t > lReply ( 2 );
+			// mCurrentBuffers->add ( lReply );
+			// _ValVector_< uint32_t >& lReplyMem = * ( lReply.mMembers );
+			// lReplyMem.IPbusHeaders.push_back ( 0 );
+			// mCurrentBuffers->receive ( lReplyMem.IPbusHeaders[0] );
+			// mCurrentBuffers->receive ( ( uint8_t* ) ( & ( lReplyMem.value[0] ) ) , 2<<2 );
+			// return lReply;
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			// throw uhal::exception ( aExc );
+		// }
+	// }
+	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

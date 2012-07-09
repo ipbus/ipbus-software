@@ -96,28 +96,16 @@ namespace uhal
 
 			/**
 				Return all node IDs known to this connection manager which match a (boost) regular expression
-				@param aRegex a (boost) regular expression against which the node IDs are tested
-				@return all node IDs known to this connection manager
-			*/
-			std::vector<std::string> getNodes ( const boost::regex& aRegex );
-			/**
-				Return all node IDs known to this connection manager which match a (boost) regular expression
-				@param aRegex a const char* expression which is converted to a (boost) regular expression against which the node IDs are tested
-				@return all node IDs known to this connection manager
-			*/
-			std::vector<std::string> getNodes ( const char* aRegex );
-			/**
-				Return all node IDs known to this connection manager which match a (boost) regular expression
 				@param aRegex a string expression which is converted to a (boost) regular expression against which the node IDs are tested
 				@return all node IDs known to this connection manager
 			*/
 			std::vector<std::string> getNodes ( const std::string& aRegex );
 
-			/**
-				Get the target device's reserved address information
-				@return a Validated Memory which wraps the location to which the reserved address information will be written
-			*/
-			ValVector< uint32_t > readReservedAddressInfo ();
+			// /**
+				// Get the target device's reserved address information
+				// @return a Validated Memory which wraps the location to which the reserved address information will be written
+			// */
+			// ValVector< uint32_t > readReservedAddressInfo ();
 
 		private:
 			/**

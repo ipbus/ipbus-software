@@ -152,37 +152,11 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 	}
 
-	std::vector<std::string> HwInterface::getNodes ( const boost::regex& aRegex )
-	{
-		try
-		{
-			return mNode->getNodes ( boost::regex ( aRegex ) );
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-
-	std::vector<std::string> HwInterface::getNodes ( const char* aRegex )
-	{
-		try
-		{
-			return mNode->getNodes ( boost::regex ( aRegex ) );
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-
 	std::vector<std::string> HwInterface::getNodes ( const std::string& aRegex )
 	{
 		try
 		{
-			return mNode->getNodes ( boost::regex ( aRegex ) );
+			return mNode->getNodes ( aRegex );
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -191,24 +165,18 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 	}
 
-	ValVector< uint32_t > HwInterface::readReservedAddressInfo ()
-	{
-		try
-		{
-			return mClientInterface->readReservedAddressInfo();
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-
-	// Node& HwInterface::getNodeTree()
+	// ValVector< uint32_t > HwInterface::readReservedAddressInfo ()
 	// {
-	// return mAddressTable;
+		// try
+		// {
+			// return mClientInterface->readReservedAddressInfo();
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			// throw uhal::exception ( aExc );
+		// }
 	// }
-
 
 }
 

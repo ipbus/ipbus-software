@@ -296,11 +296,11 @@ namespace uhal
 			*/
 			virtual ValVector< int32_t > readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
-			/**
-				Retrieve the reserved address information from the target
-				@return a Validated Memory which wraps the location to which the reserved address information will be written
-			*/
-			virtual ValVector< uint32_t > readReservedAddressInfo ();
+			// /**
+				// Retrieve the reserved address information from the target
+				// @return a Validated Memory which wraps the location to which the reserved address information will be written
+			// */
+			// virtual ValVector< uint32_t > readReservedAddressInfo ();
 
 			/**
 				Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user

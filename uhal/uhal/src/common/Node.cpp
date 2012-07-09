@@ -87,6 +87,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
+			mTags ( "" ),
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
@@ -144,7 +145,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 
 			mAddrMask &= ~mAddr;
 		}
-
+				
 		std::string lModule;
 
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
@@ -219,6 +220,10 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 				mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
 			}
 		}
+
+// Add the optional "tag" attribute
+		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
+		
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -235,6 +240,7 @@ Node::Node ( ) try :
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
+			mTags ( "" ),
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
@@ -254,6 +260,7 @@ Node::Node ( const Node& aNode ) try :
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
 			mMode ( aNode.mMode ),
+			mTags ( aNode.mTags ),
 			mChildren ( aNode.mChildren ),
 			mChildrenMap ( aNode.mChildrenMap )
 	{
@@ -275,7 +282,8 @@ Node::Node ( const Node& aNode ) try :
 		lNode.mAddrMask = mAddrMask;
 		lNode.mMask = mMask;
 		lNode.mPermission = mPermission;
-		lNode.mMode = mMode ;
+		lNode.mMode = mMode;
+		lNode.mTags = mTags;
 
 		for ( std::deque< Node >::const_iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 		{
@@ -317,7 +325,7 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
-	std::string Node::getId() const
+	const std::string& Node::getId() const
 	{
 		try
 		{
@@ -330,7 +338,7 @@ Node::Node ( const Node& aNode ) try :
 		}
 	}
 
-	uint32_t Node::getAddress() const
+	const uint32_t& Node::getAddress() const
 	{
 		try
 		{
@@ -343,7 +351,7 @@ Node::Node ( const Node& aNode ) try :
 		}
 	}
 
-	uint32_t Node::getMask() const
+	const uint32_t& Node::getMask() const
 	{
 		try
 		{
@@ -355,8 +363,21 @@ Node::Node ( const Node& aNode ) try :
 			throw uhal::exception ( aExc );
 		}
 	}
+	
+	const defs::BlockReadWriteMode& Node::getMode() const
+	{
+		try
+		{
+			return mMode;
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
 
-	defs::NodePermission Node::getPermission() const
+	const defs::NodePermission& Node::getPermission() const
 	{
 		try
 		{
@@ -369,6 +390,22 @@ Node::Node ( const Node& aNode ) try :
 		}
 	}
 
+
+	const std::string& Node::getTags() const
+	{
+		try
+		{
+			return mTags;
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+	
+
+			
 
 	void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
 	{

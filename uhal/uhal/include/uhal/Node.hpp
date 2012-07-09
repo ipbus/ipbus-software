@@ -140,26 +140,38 @@ namespace uhal
 				Return the unique ID of the current node
 				@return the unique ID of the current node
 			*/
-			std::string getId() const;
+			const std::string& getId() const;
 
 			/**
 				Return the register address with which this node is associated
 				@return the register address with which this node is associated
 			*/
-			uint32_t getAddress() const;
+			const uint32_t& getAddress() const;
 
 			/**
 				Return the mask to be applied if this node is a sub-field, rather than an entire register
 				@return the mask to be applied if this node is a sub-field, rather than an entire register
 			*/
-			uint32_t getMask() const;
+			const uint32_t& getMask() const;
 
+			/**
+				Return whether the node represents a single register, a block of registers or a block-read/write port
+				@return whether the node represents a single register, a block of registers or a block-read/write port
+			*/
+			const defs::BlockReadWriteMode& getMode() const;			
+			
 			/**
 				Return the read/write access permissions of this node
 				@return the read/write access permissions of this node
 			*/
-			defs::NodePermission getPermission() const;
+			const defs::NodePermission& getPermission() const;
 
+			/**
+				Return the optional tags string which the user can specify the current node
+				@return the optional tags string which the user can specify the current node
+			*/
+			const std::string& getTags() const;			
+			
 			/**
 				A streaming helper function to create pretty, indented tree diagrams
 				@param aStream a stream to write to
@@ -291,6 +303,7 @@ namespace uhal
 			*/
 			boost::shared_ptr<ClientInterface> getClient();
 
+			
 		private:
 
 			//! The parent hardware interface of which this node is a child (or rather decendent)
@@ -298,20 +311,20 @@ namespace uhal
 			// std::string mFullId;
 			//! The Unique ID of this node
 			std::string mUid;
+
 			//! The register address with which this node is associated
 			uint32_t mAddr;
-
 			//! The register address with which this node is associated
 			uint32_t mAddrMask;
-
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
 			//! The read/write access permissions of this node
 			defs::NodePermission mPermission;
-
 			//! Whether the node represents a single register, a block of registers or a block-read/write port
 			defs::BlockReadWriteMode mMode;
-
+			//! Optional string which the user can specify
+			std::string mTags;
+			
 			//! The direct children of the child node
 			boost::shared_ptr< std::deque< Node > > mChildren;
 
