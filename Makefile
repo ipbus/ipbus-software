@@ -20,4 +20,4 @@ default: build
 $(TARGETS): ${VIRTUAL_PACKAGES}
 
 ${VIRTUAL_PACKAGES}:
-        ${MAKE} ${FLAGS} -C $(@D) $(MAKECMDGOALS)
+	${MAKE} ${FLAGS} -C $(@D) $(MAKECMDGOALS)
