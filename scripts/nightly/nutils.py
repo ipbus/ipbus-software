@@ -1,6 +1,5 @@
 import logging
-import os
-import time
+import subprocess
 
 
 def system(cmd, exception = True, log=True):
@@ -12,10 +11,9 @@ def system(cmd, exception = True, log=True):
 
     '''
 
-    fin, fout  = os.popen4(cmd)
-    content    = fout.read().strip()
-    time.sleep(0.1)
-    pid, error = os.wait()
+    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
+    content, err = p.communicate()
+    error = p.wait()
 
     if error:
         if exception:
