@@ -176,8 +176,8 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 		}
 	}
 
-	//Given a regex return the ids that match the
-	std::vector<std::string> ConnectionManager::getDevices ( const boost::regex& aRegex )
+	
+	std::vector<std::string> ConnectionManager::getDevices ( const std::string& aRegex )
 	{
 		try
 		{
@@ -188,39 +188,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			{
 				boost::cmatch lMatch;
 
-				if ( boost::regex_match ( lIt->first.c_str() , lMatch , aRegex ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
+				if ( boost::regex_match ( lIt->first.c_str() , lMatch ,  boost::regex ( aRegex ) ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
 				{
 					lDevices.push_back ( lIt->first );
 				}
 			}
 
 			return lDevices;
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-
-	std::vector<std::string> ConnectionManager::getDevices ( const char* aRegex )
-	{
-		try
-		{
-			return getDevices ( boost::regex ( aRegex ) );
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
-		}
-	}
-
-	std::vector<std::string> ConnectionManager::getDevices ( const std::string& aRegex )
-	{
-		try
-		{
-			return getDevices ( boost::regex ( aRegex ) );
 		}
 		catch ( const std::exception& aExc )
 		{

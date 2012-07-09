@@ -127,18 +127,7 @@ namespace uhal
 			*/
 			std::vector<std::string> getNodes();
 
-			/**
-				Return all node IDs known to this connection manager which match a (boost) regular expression
-				@param aRegex a (boost) regular expression against which the node IDs are tested
-				@return all node IDs known to this connection manager
-			*/
-			std::vector<std::string> getNodes ( const boost::regex& aRegex );
-			/**
-				Return all node IDs known to this connection manager which match a (boost) regular expression
-				@param aRegex a const char* expression which is converted to a (boost) regular expression against which the node IDs are tested
-				@return all node IDs known to this connection manager
-			*/
-			std::vector<std::string> getNodes ( const char* aRegex );
+			
 			/**
 				Return all node IDs known to this connection manager which match a (boost) regular expression
 				@param aRegex a string expression which is converted to a (boost) regular expression against which the node IDs are tested
