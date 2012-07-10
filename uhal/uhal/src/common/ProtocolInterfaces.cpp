@@ -177,6 +177,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 	void PackingProtocol::Preamble( )
 	{
+		log( Debug() , "Preamble"  );	
 		try
 		{
 			this->ByteOrderTransaction();
@@ -194,6 +195,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 	void PackingProtocol::Dispatch( )
 	{
+		log( Debug() , "Dispatch"  );	
 		if ( mCurrentBuffers )
 		{
 			this->Predispatch();
@@ -244,6 +246,9 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			{
 				log ( Error() , "Returned Transaction Type " , Integer ( ( uint8_t ) ( lReplyIPbusTransactionType ), IntFmt< hex , fixed >() ) ,
 					  " does not match that sent " , Integer ( ( uint8_t ) ( lSendIPbusTransactionType ), IntFmt< hex , fixed >() ) );
+
+				log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
+								" whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
 				return false;
 			}
 
@@ -251,6 +256,9 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			{
 				log ( Error() , "Returned Transaction Id " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
 					  " does not match that sent " , Integer ( lSendTransactionId, IntFmt< hex , fixed >() ) );
+
+				log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
+								" whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
 				return false;
 			}
 
@@ -330,6 +338,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Byte Order Transaction" );
 			// IPbus send packet format is:
 			// HEADER
 			uint32_t lSendByteCount ( 1 << 2 );
@@ -356,6 +365,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Write " , Integer( aSource , IntFmt<hex,fixed>() ) , " to address " , Integer( aAddr , IntFmt<hex,fixed>() )  );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -386,6 +396,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Write block of size " , Integer( aSource.size() , IntFmt<hex,fixed>() ) , " to address " , Integer( aAddr , IntFmt<hex,fixed>() )  );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -443,6 +454,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Read one unsigned word from address " , Integer( aAddr , IntFmt<hex,fixed>() )  );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -474,6 +486,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Read unsigned block of size " , Integer( aSize , IntFmt<hex,fixed>() ) , " from address " , Integer( aAddr , IntFmt<hex,fixed>() )  );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -529,6 +542,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Read one signed word from address " , Integer( aAddr , IntFmt<hex,fixed>() )  );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -560,6 +574,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Read signed block of size " , Integer( aSize , IntFmt<hex,fixed>() ) , " from address " , Integer( aAddr , IntFmt<hex,fixed>() )  );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -608,8 +623,6 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
 	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// ValVector< uint32_t > PackingProtocol::readReservedAddressInfo ()
 	// {
@@ -643,12 +656,12 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	// }
 	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	ValWord< uint32_t > PackingProtocol::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
 	{
 		try
 		{
+			log( Debug() , "Read/Modify/Write bits (and=" , Integer( aANDterm , IntFmt<hex,fixed>() ) , ", or=" , Integer( aORterm , IntFmt<hex,fixed>() ) , ") from address " , Integer( aAddr , IntFmt<hex,fixed>() )  );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -687,7 +700,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
-			// IPbus packet format is:
+			log( Debug() , "Read/Modify/Write sum (addend=" , Integer( aAddend , IntFmt<hex,fixed>() ) , ") from address " , Integer( aAddr , IntFmt<hex,fixed>() )  );			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
 			// ADDEND
@@ -723,6 +736,8 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log( Debug() , "Checking buffer space"  );	
+
 			if ( !mCurrentBuffers )
 			{
 				mCurrentBuffers = new Buffers ( mMaxSendSize );

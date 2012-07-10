@@ -20,6 +20,7 @@
 
 #include <exception>
 #include <vector>
+#include <set>
 #include <string>
 #include <sstream>
 
@@ -35,6 +36,7 @@ namespace uhal
 namespace uhal
 {
 	class HwInterface;
+	class NodeTreeBuilder;
 
 	//! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
 	class WriteAccessDenied: public uhal::exception {  };
@@ -56,6 +58,7 @@ namespace uhal
 	class Node
 	{
 			friend class HwInterface;
+			friend class NodeTreeBuilder;
 
 		private:
 			/**
@@ -70,10 +73,8 @@ namespace uhal
 				Construct a node from a PugiXML node
 				@param aXmlNode a PugiXML node from which to construct a node
 				@param aPath The fully qualified path to the XML file containing this node
-				@param aParentAddr the address of the parent node for hierarchical addressing and address collision detection
-				@param aParentMask the address-mask of the parent node for hierarchical addressing and address collision detection
 			*/
-			Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
+			Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath );
 
 			/**
 				Lightweight Copy constructor
@@ -306,6 +307,13 @@ namespace uhal
 			
 		private:
 
+			/**
+				Propagate the partial addresses down through the hierarchical structure and make a record of all used addresses for collision detection
+				@param aAddr the full address of the current branch which will be applied to the current children 
+				@param aUsedAddresses a set containing all of the addresses used so far
+			*/
+			void calculateHierarchicalAddresses( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses );
+
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
 			// std::string mFullId;
@@ -314,8 +322,6 @@ namespace uhal
 
 			//! The register address with which this node is associated
 			uint32_t mAddr;
-			//! The register address with which this node is associated
-			uint32_t mAddrMask;
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
 			//! The read/write access permissions of this node

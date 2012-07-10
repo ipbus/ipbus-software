@@ -29,7 +29,7 @@ namespace uhal
 		}
 	}
 
-	boost::shared_ptr< const Node > NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath , const uint32_t& aAddr , const uint32_t& aAddrMask )
+	boost::shared_ptr< Node > NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath , const bool& aCalculateHierarchicalAddresses )
 	{
 		try
 		{
@@ -45,7 +45,7 @@ namespace uhal
 
 			std::vector< boost::shared_ptr< const Node > > lNodes;
 
-			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , aAddr , aAddrMask , boost::ref ( lNodes ) ) ) )
+			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , boost::ref ( lNodes ) ) ) )
 			{
 				log ( Error() , "Failed to open address table file " , Quote ( lAddressFiles[0].second ) );
 				log ( Error() , "Throwing at " , ThisLocation() );
@@ -59,7 +59,14 @@ namespace uhal
 				throw IncorrectAddressTableFileCount();
 			}
 
-			return lNodes[0];
+			boost::shared_ptr< Node > lNode( new Node ( lNodes[0]->clone() ) );
+			
+			std::set< uint32_t > lUsedAddresses;
+			if( aCalculateHierarchicalAddresses )
+			{
+				lNode->calculateHierarchicalAddresses( 0x0 , lUsedAddresses );
+			}
+			return lNode;
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -69,7 +76,7 @@ namespace uhal
 	}
 
 
-	void NodeTreeBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< boost::shared_ptr< const Node > >& aNodes )
+	void NodeTreeBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< boost::shared_ptr< const Node > >& aNodes )
 	{
 		try
 		{
@@ -105,7 +112,7 @@ namespace uhal
 					return;
 				}
 
-				boost::shared_ptr< const Node > lNode ( create ( lXmlNode , aPath , aAddr , aAddrMask ) );
+				boost::shared_ptr< const Node > lNode ( create ( lXmlNode , aPath ) );
 				mNodes.insert ( std::make_pair ( lName , lNode ) );
 				aNodes.push_back ( lNode );
 				return;
@@ -113,7 +120,7 @@ namespace uhal
 			else if ( lExtension == ".txt" )
 			{
 				log ( Info() , "TXT file" );
-				log ( Error() , "Parser problems mean that this method has been disabled. Please fix me! Please?!?" );
+				log ( Error() , "Parser problems mean that this method has been disabled." );
 				log ( Error() , "At " , ThisLocation() );
 				return;
 				/*
@@ -158,7 +165,7 @@ namespace uhal
 
 
 
-	boost::shared_ptr< const Node > NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr , const uint32_t& aParentMask )
+	boost::shared_ptr< const Node > NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath )
 	{
 		std::string lClass;
 		boost::shared_ptr< const Node > lNode;
@@ -169,7 +176,7 @@ namespace uhal
 
 			if ( lIt != mCreators.end() )
 			{
-				lNode = lIt->second->create ( aXmlNode , aPath , aParentAddr , aParentMask );
+				lNode = lIt->second->create ( aXmlNode , aPath );
 			}
 			else
 			{
@@ -181,12 +188,12 @@ namespace uhal
 				}
 
 				log ( Warning() , "Node subclass " , Quote ( lClass ) , " does not exists in map of creators. Options are:" , lStr.str() , "\nWill create a plain base node for now but be warned." );
-				lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aParentAddr , aParentMask ) );
+				lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath ) );
 			}
 		}
 		else
 		{
-			lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aParentAddr , aParentMask ) );
+			lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath ) );
 		}
 
 		return lNode;

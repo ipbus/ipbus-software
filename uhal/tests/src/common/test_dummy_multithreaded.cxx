@@ -37,8 +37,12 @@ void job ( const std::string& connection, const std::string& id )
 	}
 
 
-      hw.dispatch();
-      CACTUS_CHECK ( reg.value() == x );
+ 	hw.getNode ( "MEM" ).writeBlock ( xx );
+	ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+	CACTUS_TEST ( hw.dispatch() );
+        CACTUS_CHECK ( reg.value() == x );
+	CACTUS_CHECK ( mem.valid() );
+	CACTUS_CHECK ( mem.size() == N_SIZE );
 
       bool correct_block_write_read = true;
       ValVector< uint32_t >::const_iterator i=mem.begin();

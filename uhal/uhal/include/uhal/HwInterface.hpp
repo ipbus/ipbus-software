@@ -22,9 +22,9 @@ namespace uhal
 			/**
 				Constructor
 				@param aClientInterface a shared pointer to a client interface which performs the transport
-				@param aNode a shared pointer to a >>const<< node representing the endpoint structure. This node is cloned to form the member variable.
+				@param aNode a shared pointer to a >>freshly cloned<< node representing the >>full<< endpoint structure
 			*/
-			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< const Node >& aNode );
+			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr<  Node >& aNode );
 
 			/**
 				Destructor

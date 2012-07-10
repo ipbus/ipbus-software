@@ -9,7 +9,6 @@
 
 #include <iomanip>
 
-
 namespace uhal
 {
 	/**
@@ -79,11 +78,10 @@ namespace uhal
 
 
 
-Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr , const uint32_t& aParentMask ) try :
+Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath ) try :
 		mHw ( NULL ),
 			mUid ( "" ),
 			mAddr ( 0x00000000 ),
-			mAddrMask ( 0x00000000 ),
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
@@ -98,6 +96,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			throw NodeMustHaveUID();
 		}
 
+
+		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
+/*
 		uint32_t lAddr ( 0x00000000 );
 
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
@@ -116,7 +117,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		{
 			mAddr = aParentAddr;
 		}
+*/
 
+/*
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mAddrMask ) )
 		{
 			if ( mAddrMask & ~aParentMask )
@@ -145,14 +148,16 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 
 			mAddrMask &= ~mAddr;
 		}
-				
+*/
+
 		std::string lModule;
 
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
 		{
 			try
 			{
-				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , mAddr , mAddrMask )->clone() );
+				log( Debug() , mUid , " : " , Integer( mAddr , IntFmt<hex,fixed>() ) );
+				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
 			}
 			catch ( const std::exception& aExc )
 			{
@@ -207,7 +212,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 
 			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
 			{
-				mChildren->push_back ( NodeTreeBuilder::getInstance().create ( lXmlNode , aPath , mAddr , mAddrMask )->clone() );
+				mChildren->push_back ( NodeTreeBuilder::getInstance().create ( lXmlNode , aPath )->clone() );
 			}
 		}
 
@@ -236,7 +241,6 @@ Node::Node ( ) try :
 		mHw ( NULL ),
 			mUid ( "" ),
 			mAddr ( 0x00000000 ),
-			mAddrMask ( 0x00000000 ),
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
@@ -256,7 +260,6 @@ Node::Node ( const Node& aNode ) try :
 		mHw ( aNode.mHw ),
 			mUid ( aNode.mUid ),
 			mAddr ( aNode.mAddr ),
-			mAddrMask ( aNode.mAddrMask ),
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
 			mMode ( aNode.mMode ),
@@ -279,7 +282,6 @@ Node::Node ( const Node& aNode ) try :
 		lNode.mHw = mHw;
 		lNode.mUid = mUid ;
 		lNode.mAddr = mAddr;
-		lNode.mAddrMask = mAddrMask;
 		lNode.mMask = mMask;
 		lNode.mPermission = mPermission;
 		lNode.mMode = mMode;
@@ -305,7 +307,8 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
-	Node::~Node() {}
+	Node::~Node()
+	{}
 
 
 	bool Node::operator == ( const Node& aNode )
@@ -415,7 +418,6 @@ Node::Node ( const Node& aNode ) try :
 			aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
 			aStream << "Node \"" << mUid << "\", ";
 			aStream << "Address 0x" << std::setw ( 8 ) << mAddr << ", ";
-			aStream << "Address Mask 0x" << std::setw ( 8 ) << mAddrMask << ", ";
 			aStream << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
 			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) << ", ";
 
@@ -792,6 +794,50 @@ Node::Node ( const Node& aNode ) try :
 
 
 
+	void Node::calculateHierarchicalAddresses( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses )
+	{
+		try
+		{
+			log ( Debug() , "Entering " , mUid );
+	
+			if ( mAddr )
+			{
+				if ( aAddr & mAddr )
+				{
+					log ( Warning() , "The partial address of the current branch, " , mUid , " , (" , Integer( mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer( mAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+				}
+	
+				mAddr |= aAddr;
+	
+				log ( Info() , mUid , " -> " , Integer( mAddr , IntFmt<hex,fixed>() ) );
+	
+				std::pair< std::set< uint32_t >::iterator,bool> lRes;
+				lRes = aUsedAddresses.insert ( mAddr );
+	
+				if( ! lRes.second )
+				{
+					log( Error() , "Branch address " , Integer( mAddr , IntFmt<hex,fixed>() ) , " requested by branch " , mUid , " has already been used!");
+					log ( Error() , "Throwing at " , ThisLocation() );
+					throw ReadAccessDenied();
+				}
+			}else{
+				mAddr = aAddr;
+			}
+
+			for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
+			{
+				lIt->calculateHierarchicalAddresses( mAddr , aUsedAddresses );
+			}
+
+			log ( Debug() , "Leaving " , mUid );
+
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
 
 	boost::shared_ptr<ClientInterface> Node::getClient()
 	{

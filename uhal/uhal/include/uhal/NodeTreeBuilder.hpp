@@ -83,22 +83,19 @@ namespace uhal
 				Construct a node tree from file whose name is specified
 				@param aFilenameExpr a Filename Expression
 				@param aPath a path that will be prepended to relative filenames for local files. Ignored for http files.
-				@param aAddr the address of the parent node for hierarchical addressing and address collision detection
-				@param aAddrMask the address-mask of the parent node for hierarchical addressing and address collision detection
-				@return a node tree which must be copied before it can be used
+				@param aCalculateHierarchicalAddresses flag to indicate whether address tree should be calculated. For retrieving top-level trees, then this should be true, for sub-trees false.
+				@return a freshly cloned node tree
 			*/
-			boost::shared_ptr< const Node > getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath , const uint32_t& aAddr = 0x00000000 , const uint32_t& aAddrMask = 0xFFFFFFFF );
+			boost::shared_ptr< Node > getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath , const bool& aCalculateHierarchicalAddresses = true );
 
 			/**
 				Method called once the file specified in the call to getNodeTree( aFilenameExpr ) has been opened
 				@param aProtocol The protocol by which the file was loaded
 				@param aPath The fully qualified path to the file which has been opened
 				@param aFile A byte vector containing the content of the opened file. Done like this since the routine handles local and http files identically
-				@param aAddr the address of the parent node for hierarchical addressing and address collision detection
-				@param aAddrMask the address-mask of the parent node for hierarchical addressing and address collision detection
 				@param aAddressTable The address table constructed from the file
 			*/
-			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , const uint32_t& aAddr , const uint32_t& aAddrMask , std::vector< boost::shared_ptr< const Node > >& aAddressTable );
+			void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< boost::shared_ptr< const Node > >& aAddressTable );
 
 		private:
 
@@ -125,11 +122,9 @@ namespace uhal
 						Interface to a function which create a new IPbus client based on the protocol identifier specified
 						@param aXmlNode a PugiXML node from which to construct a node
 						@param aPath The fully qualified path to the XML file containing this node
-						@param aParentAddr the address of the parent node for hierarchical addressing and address collision detection
-						@param aParentMask the address-mask of the parent node for hierarchical addressing and address collision detection
 						@return a shared pointer to a node tree which must be copied before it can be used
 					*/
-					virtual boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr , const uint32_t& aParentMask ) = 0;
+					virtual boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath ) = 0;
 			};
 
 			//! Templated concrete implementation with a CreatorInterface interface
@@ -154,7 +149,7 @@ namespace uhal
 						@param aParentMask the address-mask of the parent node for hierarchical addressing and address collision detection
 						@return a node tree which must be copied before it can be used
 					*/
-					boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr = 0x00000000 , const uint32_t& aParentMask = 0xFFFFFFFF );
+					boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath );
 			};
 
 
@@ -162,11 +157,9 @@ namespace uhal
 				Helper function which reads the class type from the XML node and calls the appropriate creator
 				@param aXmlNode a PugiXML node from which to construct a node
 				@param aPath The fully qualified path to the XML file containing this node
-				@param aParentAddr the address of the parent node for hierarchical addressing and address collision detection
-				@param aParentMask the address-mask of the parent node for hierarchical addressing and address collision detection
 				@return a node tree which must be copied before it can be used
 			*/
-			boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const uint32_t& aParentAddr , const uint32_t& aParentMask );
+			boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath );
 
 
 		private:

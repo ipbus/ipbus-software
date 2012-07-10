@@ -5,9 +5,9 @@
 namespace uhal
 {
 
-HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< const Node >& aNode ) try :
+HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) try :
 		mClientInterface ( aClientInterface ),
-						 mNode ( boost::shared_ptr<Node> ( new Node ( aNode->clone() ) ) )
+					mNode( aNode ) 
 	{
 		claimNode ( *mNode );
 	}
