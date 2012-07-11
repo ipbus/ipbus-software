@@ -85,6 +85,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
+			mSize ( 0x00000000 ),
 			mTags ( "" ),
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
@@ -208,6 +209,23 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
+			
+				if( mMode == defs::INCREMENTAL)
+				{
+					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
+					{
+						log ( Error() , "Nodes " , Quote(mUid) , " has type " , Quote( "INCREMENTAL" ) , " require a " , Quote( "size" ) , " attribute" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						throw NodeMustHaveUID();
+					}
+				}
+				else if( mMode == defs::NON_INCREMENTAL )
+				{
+					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
+					{
+						log ( Notice() , "Node " , Quote(mUid) , " has type " , Quote( "NON_INCREMENTAL" ) , " does not have a " , Quote( "size" ) , " attribute. This is not necessarily a problem, but if there is a limit to the size of the read/write operation from this port, then please consider adding this attribute for the sake of safety." );
+					}
+				}
 			}
 
 			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
@@ -244,6 +262,7 @@ Node::Node ( ) try :
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
+			mSize ( 0x00000000 ),
 			mTags ( "" ),
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
@@ -263,6 +282,7 @@ Node::Node ( const Node& aNode ) try :
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
 			mMode ( aNode.mMode ),
+			mSize ( aNode.mSize ),
 			mTags ( aNode.mTags ),
 			mChildren ( aNode.mChildren ),
 			mChildrenMap ( aNode.mChildrenMap )
@@ -285,6 +305,7 @@ Node::Node ( const Node& aNode ) try :
 		lNode.mMask = mMask;
 		lNode.mPermission = mPermission;
 		lNode.mMode = mMode;
+		lNode.mSize = mSize;
 		lNode.mTags = mTags;
 
 		for ( std::deque< Node >::const_iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
@@ -372,6 +393,19 @@ Node::Node ( const Node& aNode ) try :
 		try
 		{
 			return mMode;
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+
+	const uint32_t& Node::getSize() const
+	{
+		try
+		{
+			return mSize;
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -599,6 +633,13 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
+				if ( (mSize != 1) && (aValues.size()>mSize) )
+				{
+					log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
+					log ( Error() , "Throwing at " , ThisLocation() );
+					throw BulkTransferRequestedTooLarge();
+				}
+
 				if ( mPermission & defs::WRITE )
 				{
 					mHw->getClient()->writeBlock ( mAddr , aValues , mMode ); //aMode );
@@ -662,6 +703,13 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
+				if ( (mSize != 1) && (aSize>mSize) )
+				{
+					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
+					log ( Error() , "Throwing at " , ThisLocation() );
+					throw BulkTransferRequestedTooLarge();
+				}
+
 				if ( mPermission & defs::READ )
 				{
 					return mHw->getClient()->readBlock ( mAddr , aSize , mMode ); //aMode );
@@ -724,6 +772,13 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
+				if ( (mSize != 1) && (aSize>mSize) )
+				{
+					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
+					log ( Error() , "Throwing at " , ThisLocation() );
+					throw BulkTransferRequestedTooLarge();
+				}
+
 				if ( mPermission & defs::READ )
 				{
 					return mHw->getClient()->readBlockSigned ( mAddr , aSize , mMode ); //aMode );
@@ -798,28 +853,38 @@ Node::Node ( const Node& aNode ) try :
 	{
 		try
 		{
-			log ( Debug() , "Entering " , mUid );
+//			log ( Debug() , "Entering " , mUid );
 	
 			if ( mAddr )
 			{
-				if ( aAddr & mAddr )
-				{
-					log ( Warning() , "The partial address of the current branch, " , mUid , " , (" , Integer( mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer( mAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
-				}
-	
+				uint32_t lCount( 1 );
+				uint32_t lAddr( mAddr );
 				mAddr |= aAddr;
-	
-				log ( Info() , mUid , " -> " , Integer( mAddr , IntFmt<hex,fixed>() ) );
-	
-				std::pair< std::set< uint32_t >::iterator,bool> lRes;
-				lRes = aUsedAddresses.insert ( mAddr );
-	
-				if( ! lRes.second )
+
+				if( mMode == defs::INCREMENTAL )
 				{
-					log( Error() , "Branch address " , Integer( mAddr , IntFmt<hex,fixed>() ) , " requested by branch " , mUid , " has already been used!");
-					log ( Error() , "Throwing at " , ThisLocation() );
-					throw ReadAccessDenied();
+					lCount = mSize;
 				}
+
+				log ( Debug() , mUid , " : " , Integer( lCount ) );
+	
+				for( uint32_t i(0) ; i!=lCount ; ++i , ++lAddr )
+				{
+					if ( lAddr & aAddr )
+					{
+						log ( Warning() , "The partial address of the current branch, " , Quote( mUid ) , " , (" , Integer( lAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+					}
+			
+					std::pair< std::set< uint32_t >::iterator,bool> lRes( aUsedAddresses.insert ( lAddr | aAddr ) );
+		
+					if( ! lRes.second )
+					{
+						log( Error() , "Branch address " , Integer( lAddr | aAddr , IntFmt<hex,fixed>() ) , " requested by branch " , Quote( mUid ) , " has already been used!");
+						log ( Error() , "Throwing at " , ThisLocation() );
+						throw ReadAccessDenied();
+					}
+				}
+
 			}else{
 				mAddr = aAddr;
 			}
@@ -829,7 +894,7 @@ Node::Node ( const Node& aNode ) try :
 				lIt->calculateHierarchicalAddresses( mAddr , aUsedAddresses );
 			}
 
-			log ( Debug() , "Leaving " , mUid );
+//			log ( Debug() , "Leaving " , mUid );
 
 		}
 		catch ( const std::exception& aExc )

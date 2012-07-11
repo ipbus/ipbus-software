@@ -217,92 +217,100 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 									 std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
 									 std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
 	{
-		eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
-		uint32_t lSendWordCount , lReplyWordCount;
-		uint32_t lSendTransactionId , lReplyTransactionId;
-		uint8_t lSendResponseGood , lReplyResponseGood;
-
-		do
+		try
 		{
-			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
+			eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
+			uint32_t lSendWordCount , lReplyWordCount;
+			uint32_t lSendTransactionId , lReplyTransactionId;
+			uint8_t lSendResponseGood , lReplyResponseGood;
+	
+			do
 			{
-				log ( Error() , "Unable to parse send header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) );
-				return false;
+				if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
+				{
+					log ( Error() , "Unable to parse send header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) );
+					return false;
+				}
+	
+				if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
+				{
+					log ( Error() , "Unable to parse reply header " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) );
+					return false;
+				}
+	
+				if ( lReplyResponseGood )
+				{
+					log ( Error() , "Returned Response " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicated error" );
+					return false;
+				}
+	
+				if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
+				{
+					log ( Error() , "Returned Transaction Type " , Integer ( ( uint8_t ) ( lReplyIPbusTransactionType ), IntFmt< hex , fixed >() ) ,
+						" does not match that sent " , Integer ( ( uint8_t ) ( lSendIPbusTransactionType ), IntFmt< hex , fixed >() ) );
+	
+					log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
+									" whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
+					return false;
+				}
+	
+				if ( lSendTransactionId != lReplyTransactionId )
+				{
+					log ( Error() , "Returned Transaction Id " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
+						" does not match that sent " , Integer ( lSendTransactionId, IntFmt< hex , fixed >() ) );
+	
+					log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
+									" whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
+					return false;
+				}
+	
+				switch ( lSendIPbusTransactionType )
+				{
+					case B_O_T:
+					case R_A_I:
+						aSendBufferStart += ( 1<<2 );
+						break;
+					case NI_READ:
+					case READ:
+						aSendBufferStart += ( 2<<2 );
+						break;
+					case NI_WRITE:
+					case WRITE:
+						aSendBufferStart += ( ( 2+lSendWordCount ) <<2 );
+						break;
+					case RMW_SUM:
+						aSendBufferStart += ( 3<<2 );
+						break;
+					case RMW_BITS:
+						aSendBufferStart += ( 4<<2 );
+						break;
+				}
+	
+				switch ( lReplyIPbusTransactionType )
+				{
+					case B_O_T:
+					case NI_WRITE:
+					case WRITE:
+						aReplyStartIt++;
+						break;
+					case R_A_I:
+					case NI_READ:
+					case READ:
+					case RMW_SUM:
+					case RMW_BITS:
+						aReplyStartIt+=2;
+						break;
+				}
 			}
-
-			if ( ! this->extractIPbusHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
-			{
-				log ( Error() , "Unable to parse reply header " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) );
-				return false;
-			}
-
-			if ( lReplyResponseGood )
-			{
-				log ( Error() , "Returned Response " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicated error" );
-				return false;
-			}
-
-			if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
-			{
-				log ( Error() , "Returned Transaction Type " , Integer ( ( uint8_t ) ( lReplyIPbusTransactionType ), IntFmt< hex , fixed >() ) ,
-					  " does not match that sent " , Integer ( ( uint8_t ) ( lSendIPbusTransactionType ), IntFmt< hex , fixed >() ) );
-
-				log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
-								" whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
-				return false;
-			}
-
-			if ( lSendTransactionId != lReplyTransactionId )
-			{
-				log ( Error() , "Returned Transaction Id " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
-					  " does not match that sent " , Integer ( lSendTransactionId, IntFmt< hex , fixed >() ) );
-
-				log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
-								" whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
-				return false;
-			}
-
-			switch ( lSendIPbusTransactionType )
-			{
-				case B_O_T:
-				case R_A_I:
-					aSendBufferStart += ( 1<<2 );
-					break;
-				case NI_READ:
-				case READ:
-					aSendBufferStart += ( 2<<2 );
-					break;
-				case NI_WRITE:
-				case WRITE:
-					aSendBufferStart += ( ( 2+lSendWordCount ) <<2 );
-					break;
-				case RMW_SUM:
-					aSendBufferStart += ( 3<<2 );
-					break;
-				case RMW_BITS:
-					aSendBufferStart += ( 4<<2 );
-					break;
-			}
-
-			switch ( lReplyIPbusTransactionType )
-			{
-				case B_O_T:
-				case NI_WRITE:
-				case WRITE:
-					aReplyStartIt++;
-					break;
-				case R_A_I:
-				case NI_READ:
-				case READ:
-				case RMW_SUM:
-				case RMW_BITS:
-					aReplyStartIt+=2;
-					break;
-			}
+			while ( ( aSendBufferEnd - aSendBufferStart != 0 ) && ( aReplyEndIt - aReplyStartIt != 0 ) );
+	
+			return true;
 		}
-		while ( ( aSendBufferEnd - aSendBufferStart != 0 ) && ( aReplyEndIt - aReplyStartIt != 0 ) );
-
-		return true;
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
 	}
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -317,17 +325,25 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 	bool PackingProtocol::Validate ( Buffers* aBuffers )
 	{
-		bool lRet = this->Validate ( aBuffers->getSendBuffer() ,
-									 aBuffers->getSendBuffer() +aBuffers->sendCounter() ,
-									 aBuffers->getReplyBuffer().begin() ,
-									 aBuffers->getReplyBuffer().end() );
-
-		if ( lRet )
+		try
 		{
-			aBuffers->validate();
+			bool lRet = this->Validate ( aBuffers->getSendBuffer() ,
+										aBuffers->getSendBuffer() +aBuffers->sendCounter() ,
+										aBuffers->getReplyBuffer().begin() ,
+										aBuffers->getReplyBuffer().end() );
+	
+			if ( lRet )
+			{
+				aBuffers->validate();
+			}
+	
+			return lRet;
 		}
-
-		return lRet;
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
 	}
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -761,6 +777,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 				return;
 			}
 
+			log( Debug() , "Triggering automated dispatch"  );	
 			this->Predispatch();
 			mTransportProtocol->Dispatch ( mCurrentBuffers );
 			mCurrentBuffers = new Buffers ( mMaxSendSize );

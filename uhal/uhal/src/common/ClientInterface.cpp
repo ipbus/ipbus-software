@@ -300,6 +300,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
+			log( Debug() , "Manual dispatch"  );	
 			getPackingProtocol().Dispatch();
 		}
 		catch ( const std::exception& aExc )

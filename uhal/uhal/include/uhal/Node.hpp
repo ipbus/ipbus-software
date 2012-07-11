@@ -52,7 +52,8 @@ namespace uhal
 	class ChildHasAddressMaskOverlap: public uhal::exception {  };
 	//! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
 	class BulkTransferOnSingleRegister: public uhal::exception {  };
-
+	//! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
+	class BulkTransferRequestedTooLarge: public uhal::exception {  };
 
 	//! A heirarchical node for navigating heirarchical firmwares
 	class Node
@@ -160,6 +161,12 @@ namespace uhal
 				@return whether the node represents a single register, a block of registers or a block-read/write port
 			*/
 			const defs::BlockReadWriteMode& getMode() const;			
+
+			/**
+				Return the maximum size available to a block read/write
+				@return the maximum size available to a block read/write
+			*/
+			const uint32_t& getSize() const;	
 			
 			/**
 				Return the read/write access permissions of this node
@@ -328,6 +335,9 @@ namespace uhal
 			defs::NodePermission mPermission;
 			//! Whether the node represents a single register, a block of registers or a block-read/write port
 			defs::BlockReadWriteMode mMode;
+			//! The maximum size available to a block read/write
+			uint32_t mSize;
+
 			//! Optional string which the user can specify
 			std::string mTags;
 			
