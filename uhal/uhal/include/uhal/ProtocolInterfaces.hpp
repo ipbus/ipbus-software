@@ -297,8 +297,8 @@ namespace uhal
 			virtual ValVector< int32_t > readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
 			// /**
-				// Retrieve the reserved address information from the target
-				// @return a Validated Memory which wraps the location to which the reserved address information will be written
+			// Retrieve the reserved address information from the target
+			// @return a Validated Memory which wraps the location to which the reserved address information will be written
 			// */
 			// virtual ValVector< uint32_t > readReservedAddressInfo ();
 

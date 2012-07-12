@@ -102,8 +102,8 @@ namespace uhal
 			std::vector<std::string> getNodes ( const std::string& aRegex );
 
 			// /**
-				// Get the target device's reserved address information
-				// @return a Validated Memory which wraps the location to which the reserved address information will be written
+			// Get the target device's reserved address information
+			// @return a Validated Memory which wraps the location to which the reserved address information will be written
 			// */
 			// ValVector< uint32_t > readReservedAddressInfo ();
 

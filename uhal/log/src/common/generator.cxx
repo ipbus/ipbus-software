@@ -10,6 +10,8 @@
 static const std::string gLogLevelsChar[] = { "Fatal" , "Error" , "Warning" , "Notice" , "Info" , "Debug" };
 static const uint32_t gNumberEntries ( 6 );
 
+static const std::string gDefaultLevel ( "Info" );
+
 static const std::vector< std::string > gLogLevels ( gLogLevelsChar , gLogLevelsChar+gNumberEntries );
 
 
@@ -58,7 +60,13 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 	aCppFile << "void setLogLevelFromEnvironment ( const char* aEnvVar )\n"
 			 << "{\n"
 			 << "\tchar * lEnvVar = getenv ( aEnvVar );\n"
-			 << "\tif( !lEnvVar ) throw std::string( \"No environment varible with name \" ) + aEnvVar + \" exists\";\n"
+			 << "\tif( !lEnvVar )\n"
+			 << "\t{\n"
+			 << "\t\tlog( Warning() , \"No environment variable \" , Quote( aEnvVar ) , \" set. Using level \" , Quote( \"Info\" ) , \" instead.\" );\n"
+			 << "\t\tsetLogLevelTo ( " << gDefaultLevel << "() );\n"
+			 << "\t\treturn;\n"
+			 << "\t}\n"
+			 << "\n"
 			 << "\t//Just comparing the first letter of the environment variable for speed!!!\n"
 			 << "\tswitch ( lEnvVar[0] )\n"
 			 << "\t{\n";
@@ -150,12 +158,27 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 			 << "\n"
 			 << "\tfriend void disableLogging();\n"
 			 << "\n";
+	bool lIncludeLevelByDefault ( true );
 
 	for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
 	{
 		aHppFile << "\t//! static bool storing whether the " << *lIt << " level is to be included in the log output\n"
 				 << "\tstatic bool mLoggingIncludes" << *lIt << ";\n";
-		aCppFile << "bool log_configuration::mLoggingIncludes" << *lIt << " = true; // No #ifdefs required here since they are implemented in all the access functions.\n";
+
+		if ( lIncludeLevelByDefault )
+		{
+			aCppFile << "bool log_configuration::mLoggingIncludes" << *lIt << " = true; // No #ifdefs required here since they are implemented in all the access functions.\n";
+		}
+		else
+		{
+			aCppFile << "bool log_configuration::mLoggingIncludes" << *lIt << " = false; // No #ifdefs required here since they are implemented in all the access functions.\n";
+		}
+
+		if ( *lIt == gDefaultLevel )
+		{
+			lIncludeLevelByDefault = false;
+		}
+
 		aHppFile << "\t//!Make setLogLevelTo function a friend so it can access our private members\n"
 				 << "\tfriend void setLogLevelTo ( const " << *lIt << "& );\n"
 				 << "\t//!Make LoggingIncludes function a friend so it can access our private members\n"

@@ -176,7 +176,7 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 		}
 	}
 
-	
+
 	std::vector<std::string> ConnectionManager::getDevices ( const std::string& aRegex )
 	{
 		try

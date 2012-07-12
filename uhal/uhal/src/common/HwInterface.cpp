@@ -7,7 +7,7 @@ namespace uhal
 
 HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) try :
 		mClientInterface ( aClientInterface ),
-					mNode( aNode ) 
+						 mNode ( aNode )
 	{
 		claimNode ( *mNode );
 	}
@@ -167,15 +167,15 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 
 	// ValVector< uint32_t > HwInterface::readReservedAddressInfo ()
 	// {
-		// try
-		// {
-			// return mClientInterface->readReservedAddressInfo();
-		// }
-		// catch ( const std::exception& aExc )
-		// {
-			// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			// throw uhal::exception ( aExc );
-		// }
+	// try
+	// {
+	// return mClientInterface->readReservedAddressInfo();
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+	// throw uhal::exception ( aExc );
+	// }
 	// }
 
 }

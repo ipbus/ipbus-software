@@ -97,67 +97,64 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			throw NodeMustHaveUID();
 		}
 
-
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
-/*
-		uint32_t lAddr ( 0x00000000 );
+		/*
+				uint32_t lAddr ( 0x00000000 );
 
-		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
-		{
-			if ( lAddr & ~aParentMask )
-			{
-				log ( Error() , "Node address " , Integer ( lAddr, IntFmt< hex , fixed >() ) ,
-					  " overlaps with the mask specified by the parent node, " , Integer ( aParentMask, IntFmt< hex , fixed >() ) );
-				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ChildHasAddressOverlap();
-			}
-
-			mAddr = aParentAddr | ( lAddr & aParentMask );
-		}
-		else
-		{
-			mAddr = aParentAddr;
-		}
-*/
-
-/*
-		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mAddrMask ) )
-		{
-			if ( mAddrMask & ~aParentMask )
-			{
-				log ( Error() , "Node address mask " , Integer ( mAddrMask, IntFmt< hex , fixed >() ) ,
-					  " overlaps with the parent mask " , Integer ( aParentMask, IntFmt< hex , fixed >() ) ,
-					  ". This makes the child's address subspace larger than the parent and is not allowed" );
-				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ChildHasAddressMaskOverlap();
-			}
-		}
-		else
-		{
-			//we have already checked that the address doesn't overlap with the parent mask, therefore, this calculation cannot produce a mask which overlaps the parent mask either.
-			mAddrMask = 0x00000001 ;
-
-			for ( uint32_t i=0 ; i!=32 ; ++i )
-			{
-				if ( mAddrMask & mAddr )
+				if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
 				{
-					break;
+					if ( lAddr & ~aParentMask )
+					{
+						log ( Error() , "Node address " , Integer ( lAddr, IntFmt< hex , fixed >() ) ,
+							  " overlaps with the mask specified by the parent node, " , Integer ( aParentMask, IntFmt< hex , fixed >() ) );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						throw ChildHasAddressOverlap();
+					}
+
+					mAddr = aParentAddr | ( lAddr & aParentMask );
 				}
+				else
+				{
+					mAddr = aParentAddr;
+				}
+		*/
+		/*
+				if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mAddrMask ) )
+				{
+					if ( mAddrMask & ~aParentMask )
+					{
+						log ( Error() , "Node address mask " , Integer ( mAddrMask, IntFmt< hex , fixed >() ) ,
+							  " overlaps with the parent mask " , Integer ( aParentMask, IntFmt< hex , fixed >() ) ,
+							  ". This makes the child's address subspace larger than the parent and is not allowed" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						throw ChildHasAddressMaskOverlap();
+					}
+				}
+				else
+				{
+					//we have already checked that the address doesn't overlap with the parent mask, therefore, this calculation cannot produce a mask which overlaps the parent mask either.
+					mAddrMask = 0x00000001 ;
 
-				mAddrMask = ( mAddrMask << 1 ) | 0x00000001;
-			}
+					for ( uint32_t i=0 ; i!=32 ; ++i )
+					{
+						if ( mAddrMask & mAddr )
+						{
+							break;
+						}
 
-			mAddrMask &= ~mAddr;
-		}
-*/
+						mAddrMask = ( mAddrMask << 1 ) | 0x00000001;
+					}
 
+					mAddrMask &= ~mAddr;
+				}
+		*/
 		std::string lModule;
 
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
 		{
 			try
 			{
-				log( Debug() , mUid , " : " , Integer( mAddr , IntFmt<hex,fixed>() ) );
+				log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
 				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
 			}
 			catch ( const std::exception& aExc )
@@ -209,21 +206,21 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 					throw uhal::exception ( aExc );
 				}
-			
-				if( mMode == defs::INCREMENTAL)
+
+				if ( mMode == defs::INCREMENTAL )
 				{
 					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
 					{
-						log ( Error() , "Nodes " , Quote(mUid) , " has type " , Quote( "INCREMENTAL" ) , " require a " , Quote( "size" ) , " attribute" );
+						log ( Error() , "Nodes " , Quote ( mUid ) , " has type " , Quote ( "INCREMENTAL" ) , " require a " , Quote ( "size" ) , " attribute" );
 						log ( Error() , "Throwing at " , ThisLocation() );
 						throw NodeMustHaveUID();
 					}
 				}
-				else if( mMode == defs::NON_INCREMENTAL )
+				else if ( mMode == defs::NON_INCREMENTAL )
 				{
 					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
 					{
-						log ( Notice() , "Node " , Quote(mUid) , " has type " , Quote( "NON_INCREMENTAL" ) , " does not have a " , Quote( "size" ) , " attribute. This is not necessarily a problem, but if there is a limit to the size of the read/write operation from this port, then please consider adding this attribute for the sake of safety." );
+						log ( Notice() , "Node " , Quote ( mUid ) , " has type " , Quote ( "NON_INCREMENTAL" ) , " does not have a " , Quote ( "size" ) , " attribute. This is not necessarily a problem, but if there is a limit to the size of the read/write operation from this port, then please consider adding this attribute for the sake of safety." );
 					}
 				}
 			}
@@ -244,9 +241,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			}
 		}
 
-// Add the optional "tag" attribute
+		// Add the optional "tag" attribute
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
-		
 	}
 	catch ( const std::exception& aExc )
 	{
@@ -387,7 +383,7 @@ Node::Node ( const Node& aNode ) try :
 			throw uhal::exception ( aExc );
 		}
 	}
-	
+
 	const defs::BlockReadWriteMode& Node::getMode() const
 	{
 		try
@@ -440,9 +436,9 @@ Node::Node ( const Node& aNode ) try :
 			throw uhal::exception ( aExc );
 		}
 	}
-	
 
-			
+
+
 
 	void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
 	{
@@ -633,7 +629,7 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				if ( (mSize != 1) && (aValues.size()>mSize) )
+				if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
 				{
 					log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
 					log ( Error() , "Throwing at " , ThisLocation() );
@@ -703,7 +699,7 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				if ( (mSize != 1) && (aSize>mSize) )
+				if ( ( mSize != 1 ) && ( aSize>mSize ) )
 				{
 					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
 					log ( Error() , "Throwing at " , ThisLocation() );
@@ -772,7 +768,7 @@ Node::Node ( const Node& aNode ) try :
 			}
 			else
 			{
-				if ( (mSize != 1) && (aSize>mSize) )
+				if ( ( mSize != 1 ) && ( aSize>mSize ) )
 				{
 					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
 					log ( Error() , "Throwing at " , ThisLocation() );
@@ -849,53 +845,52 @@ Node::Node ( const Node& aNode ) try :
 
 
 
-	void Node::calculateHierarchicalAddresses( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses )
+	void Node::calculateHierarchicalAddresses ( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses )
 	{
 		try
 		{
-//			log ( Debug() , "Entering " , mUid );
-	
+			//			log ( Debug() , "Entering " , mUid );
 			if ( mAddr )
 			{
-				uint32_t lCount( 1 );
-				uint32_t lAddr( mAddr );
+				uint32_t lCount ( 1 );
+				uint32_t lAddr ( mAddr );
 				mAddr |= aAddr;
 
-				if( mMode == defs::INCREMENTAL )
+				if ( mMode == defs::INCREMENTAL )
 				{
 					lCount = mSize;
 				}
 
-				log ( Debug() , mUid , " : " , Integer( lCount ) );
-	
-				for( uint32_t i(0) ; i!=lCount ; ++i , ++lAddr )
+				log ( Debug() , mUid , " : " , Integer ( lCount ) );
+
+				for ( uint32_t i ( 0 ) ; i!=lCount ; ++i , ++lAddr )
 				{
 					if ( lAddr & aAddr )
 					{
-						log ( Warning() , "The partial address of the current branch, " , Quote( mUid ) , " , (" , Integer( lAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+						log ( Warning() , "The partial address of the current branch, " , Quote ( mUid ) , " , (" , Integer ( lAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
 					}
-			
-					std::pair< std::set< uint32_t >::iterator,bool> lRes( aUsedAddresses.insert ( lAddr | aAddr ) );
-		
-					if( ! lRes.second )
+
+					std::pair< std::set< uint32_t >::iterator,bool> lRes ( aUsedAddresses.insert ( lAddr | aAddr ) );
+
+					if ( ! lRes.second )
 					{
-						log( Error() , "Branch address " , Integer( lAddr | aAddr , IntFmt<hex,fixed>() ) , " requested by branch " , Quote( mUid ) , " has already been used!");
+						log ( Error() , "Branch address " , Integer ( lAddr | aAddr , IntFmt<hex,fixed>() ) , " requested by branch " , Quote ( mUid ) , " has already been used!" );
 						log ( Error() , "Throwing at " , ThisLocation() );
 						throw ReadAccessDenied();
 					}
 				}
-
-			}else{
+			}
+			else
+			{
 				mAddr = aAddr;
 			}
 
 			for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 			{
-				lIt->calculateHierarchicalAddresses( mAddr , aUsedAddresses );
+				lIt->calculateHierarchicalAddresses ( mAddr , aUsedAddresses );
 			}
 
-//			log ( Debug() , "Leaving " , mUid );
-
+			//			log ( Debug() , "Leaving " , mUid );
 		}
 		catch ( const std::exception& aExc )
 		{

@@ -59,13 +59,14 @@ namespace uhal
 				throw IncorrectAddressTableFileCount();
 			}
 
-			boost::shared_ptr< Node > lNode( new Node ( lNodes[0]->clone() ) );
-			
+			boost::shared_ptr< Node > lNode ( new Node ( lNodes[0]->clone() ) );
 			std::set< uint32_t > lUsedAddresses;
-			if( aCalculateHierarchicalAddresses )
+
+			if ( aCalculateHierarchicalAddresses )
 			{
-				lNode->calculateHierarchicalAddresses( 0x0 , lUsedAddresses );
+				lNode->calculateHierarchicalAddresses ( 0x0 , lUsedAddresses );
 			}
+
 			return lNode;
 		}
 		catch ( const std::exception& aExc )

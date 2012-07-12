@@ -129,7 +129,7 @@ namespace uhal
 			*/
 			std::vector<std::string> getNodes();
 
-			
+
 			/**
 				Return all node IDs known to this connection manager which match a (boost) regular expression
 				@param aRegex a string expression which is converted to a (boost) regular expression against which the node IDs are tested
@@ -160,14 +160,14 @@ namespace uhal
 				Return whether the node represents a single register, a block of registers or a block-read/write port
 				@return whether the node represents a single register, a block of registers or a block-read/write port
 			*/
-			const defs::BlockReadWriteMode& getMode() const;			
+			const defs::BlockReadWriteMode& getMode() const;
 
 			/**
 				Return the maximum size available to a block read/write
 				@return the maximum size available to a block read/write
 			*/
-			const uint32_t& getSize() const;	
-			
+			const uint32_t& getSize() const;
+
 			/**
 				Return the read/write access permissions of this node
 				@return the read/write access permissions of this node
@@ -178,8 +178,8 @@ namespace uhal
 				Return the optional tags string which the user can specify the current node
 				@return the optional tags string which the user can specify the current node
 			*/
-			const std::string& getTags() const;			
-			
+			const std::string& getTags() const;
+
 			/**
 				A streaming helper function to create pretty, indented tree diagrams
 				@param aStream a stream to write to
@@ -311,15 +311,15 @@ namespace uhal
 			*/
 			boost::shared_ptr<ClientInterface> getClient();
 
-			
+
 		private:
 
 			/**
 				Propagate the partial addresses down through the hierarchical structure and make a record of all used addresses for collision detection
-				@param aAddr the full address of the current branch which will be applied to the current children 
+				@param aAddr the full address of the current branch which will be applied to the current children
 				@param aUsedAddresses a set containing all of the addresses used so far
 			*/
-			void calculateHierarchicalAddresses( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses );
+			void calculateHierarchicalAddresses ( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses );
 
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
@@ -340,7 +340,7 @@ namespace uhal
 
 			//! Optional string which the user can specify
 			std::string mTags;
-			
+
 			//! The direct children of the child node
 			boost::shared_ptr< std::deque< Node > > mChildren;
 

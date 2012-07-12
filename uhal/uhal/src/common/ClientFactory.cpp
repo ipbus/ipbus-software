@@ -70,7 +70,9 @@ namespace uhal
 		try
 		{
 			URI lUri;
-			try{
+
+			try
+			{
 				grammars::URIGrammar lGrammar;
 				boost::spirit::qi::phrase_parse ( aUri.begin() , aUri.end() , lGrammar , boost::spirit::ascii::space , lUri );
 			}
@@ -83,7 +85,7 @@ namespace uhal
 
 			log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
 			std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
-			
+
 			if ( lIt == mCreators.end() )
 			{
 				std::stringstream lStr;

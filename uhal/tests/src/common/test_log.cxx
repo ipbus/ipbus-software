@@ -108,19 +108,23 @@ int main ( int argc,char* argv[] )
 		log ( Notice() , "Pointer : " , Pointer ( *argv ) );
 		// Test setting logging levels
 		setLogLevelTo ( Error() );
-		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
-		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
+		log ( Notice() , std::string ( "setLogLevelTo ( Error() ) : IF YOU >>DO<< SEE THIS, THEN THERE IS AN ERROR" ) );
+		log ( Error() , std::string ( "setLogLevelTo ( Error() ) : IF YOU DON'T SEE THIS, THEN THERE IS AN ERROR" ) );
 		setLogLevelTo ( Notice() );
-		log ( Notice() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
-		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
+		log ( Notice() , std::string ( "setLogLevelTo ( Notice() ) : IF YOU DON'T SEE THIS, THEN THERE IS AN ERROR" ) );
+		log ( Error() , std::string ( "setLogLevelTo ( Notice() ) : IF YOU DON'T SEE THIS, THEN THERE IS AN ERROR" ) );
 		//		log ( Notice() , "Dodgy cast : " , Integer ( bool(true) , IntFmt<hex , fixed>() ) );
 		//		log ( Notice() , "Dodgy cast : " , Boolean ( uint32_t(13) ) );
 		setLogLevelFromEnvironment ( "UHAL_LOG_LEVEL" );
-		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
-		log ( Error() , std::string ( "IF YOU DONT SEE THIS THEN THERE IS AN ERROR" ) );
+		log ( Notice() , std::string ( "setLogLevelFromEnvironment ( \"UHAL_LOG_LEVEL\" ) : IF \"UHAL_LOG_LEVEL\" IS DEFINED ABOVE \"Notice()\" AND YOU >>DO<< SEE THIS, THEN THERE IS AN ERROR" ) );
+		log ( Error() , std::string ( "setLogLevelFromEnvironment ( \"UHAL_LOG_LEVEL\" ) : IF \"UHAL_LOG_LEVEL\" IS NOT DEFINED ABOVE \"Error()\" AND YOU DON'T SEE THIS, THEN THERE IS AN ERROR" ) );
 		disableLogging();
-		log ( Notice() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
-		log ( Error() , std::string ( "IF YOU >>DO<< SEE THIS THEN THERE IS AN ERROR" ) );
+		log ( Notice() , std::string ( "disableLogging() : IF YOU >>DO<< SEE THIS, THEN THERE IS AN ERROR" ) );
+		log ( Error() , std::string ( "disableLogging() : IF YOU >>DO<< SEE THIS, THEN THERE IS AN ERROR" ) );
+		//Set log back to notice
+		setLogLevelTo ( Notice() );
+		log ( Notice() , std::string ( "setLogLevelTo ( Notice() ) : IF YOU DON'T SEE THIS, THEN THERE IS AN ERROR" ) );
+		log ( Error() , std::string ( "setLogLevelTo ( Notice() ) : IF YOU DON'T SEE THIS, THEN THERE IS AN ERROR" ) );
 	}
 	catch ( const std::exception& aExc )
 	{

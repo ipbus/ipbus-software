@@ -250,15 +250,15 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// ValVector< uint32_t > ClientInterface::readReservedAddressInfo ()
 	// {
-		// try
-		// {
-			// return getPackingProtocol().readReservedAddressInfo ();
-		// }
-		// catch ( const std::exception& aExc )
-		// {
-			// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			// throw uhal::exception ( aExc );
-		// }
+	// try
+	// {
+	// return getPackingProtocol().readReservedAddressInfo ();
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+	// throw uhal::exception ( aExc );
+	// }
 	// }
 	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -300,7 +300,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			log( Debug() , "Manual dispatch"  );	
+			log ( Debug() , "Manual dispatch" );
 			getPackingProtocol().Dispatch();
 		}
 		catch ( const std::exception& aExc )

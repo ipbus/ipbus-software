@@ -17,44 +17,37 @@ using namespace uhal;
 
 void job ( const std::string& connection, const std::string& id )
 {
-
-
-  for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
-    {
-      ConnectionManager manager ( connection );
-      HwInterface hw=manager.getDevice ( id );
-      
-
-      uint32_t x = static_cast<uint32_t> ( rand() );
-      hw.getNode ( "REG" ).write ( x );
-      ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
-
-
-      std::vector<uint32_t> xx;
-      for ( size_t i=0; i!= N_SIZE; ++i )
+	for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
 	{
-	  xx.push_back ( static_cast<uint32_t> ( rand() ) );
+		ConnectionManager manager ( connection );
+		HwInterface hw=manager.getDevice ( id );
+		uint32_t x = static_cast<uint32_t> ( rand() );
+		hw.getNode ( "REG" ).write ( x );
+		ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
+		std::vector<uint32_t> xx;
+
+		for ( size_t i=0; i!= N_SIZE; ++i )
+		{
+			xx.push_back ( static_cast<uint32_t> ( rand() ) );
+		}
+
+		hw.getNode ( "MEM" ).writeBlock ( xx );
+		ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+		CACTUS_TEST ( hw.dispatch() );
+		CACTUS_CHECK ( reg.value() == x );
+		CACTUS_CHECK ( mem.valid() );
+		CACTUS_CHECK ( mem.size() == N_SIZE );
+		bool correct_block_write_read = true;
+		ValVector< uint32_t >::const_iterator i=mem.begin();
+		std::vector< uint32_t >::const_iterator j=xx.begin();
+
+		for ( ValVector< uint32_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
+		{
+			correct_block_write_read = correct_block_write_read && ( *i == *j );
+		}
+
+		CACTUS_CHECK ( correct_block_write_read );
 	}
-
-
- 	hw.getNode ( "MEM" ).writeBlock ( xx );
-	ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
-	CACTUS_TEST ( hw.dispatch() );
-        CACTUS_CHECK ( reg.value() == x );
-	CACTUS_CHECK ( mem.valid() );
-	CACTUS_CHECK ( mem.size() == N_SIZE );
-
-      bool correct_block_write_read = true;
-      ValVector< uint32_t >::const_iterator i=mem.begin();
-      std::vector< uint32_t >::const_iterator j=xx.begin();
-
-      for ( ValVector< uint32_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
-	{
-	  correct_block_write_read = correct_block_write_read && ( *i == *j );
-	}
-
-      CACTUS_CHECK ( correct_block_write_read );
-    }
 }
 
 void launch_threads ( size_t n_threads,const std::string& connection_file,const std::string& device_id )
@@ -66,13 +59,12 @@ void launch_threads ( size_t n_threads,const std::string& connection_file,const 
 		jobs.push_back ( new boost::thread ( job,connection_file,device_id ) );
 	}
 
-
 	for ( size_t i=0; i!=n_threads; ++i )
 	{
-	  //boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
-	  //CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
-	  CACTUS_TEST_NOTHROW ( jobs[i]->join());
-	  delete jobs[i];
+		//boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
+		//CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
+		CACTUS_TEST_NOTHROW ( jobs[i]->join() );
+		delete jobs[i];
 	}
 }
 
