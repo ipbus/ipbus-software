@@ -213,7 +213,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 					{
 						log ( Error() , "Nodes " , Quote ( mUid ) , " has type " , Quote ( "INCREMENTAL" ) , " require a " , Quote ( "size" ) , " attribute" );
 						log ( Error() , "Throwing at " , ThisLocation() );
-						throw NodeMustHaveUID();
+						throw IncrementalNodeRequiresSizeAttribute();
 					}
 				}
 				else if ( mMode == defs::NON_INCREMENTAL )
