@@ -72,7 +72,7 @@ INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "sudo yum -y groupinstall cactus",
                 "cd /build/cactus; doxygen %s" % join(BUILD_HOME,"trunk/scripts/nightly/cactus_Doxyfile"),
                 "mkdir -p %s" % join(WEB_DIR,"api"),
-                "cd /build/cactus;mv html %s" % join(WEB_DIR,"api/.")]
+                "cd /build/cactus;rm -rf %s;mv html %s" % (join(WEB_DIR,"api/html"), join(WEB_DIR, "api/."))]
 
 TEST_CMDS = []
 ## "%s 50001 &> %s &" % (join(INSTALL_PREFIX,"DummyHardwareUdp.exe"),
