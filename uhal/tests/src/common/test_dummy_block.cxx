@@ -43,6 +43,15 @@ void block_write_read ( size_t N,const std::string& connection, const std::strin
 	}
 
 	CACTUS_CHECK ( correct_block_write_read );
+
+	for ( size_t i=N; i!= 5000000; ++i )
+	{
+		xx.push_back ( 0x0 );
+	}
+
+	CACTUS_TEST_THROW ( hw.getNode ( "MEM" ).writeBlock ( xx ) , uhal::exception );
+	CACTUS_TEST_THROW ( mem = hw.getNode ( "MEM" ).readBlock ( 5000000 ) , uhal::exception );
+
 }
 
 void fifo_write_read ( size_t N,const std::string& connection, const std::string& id )

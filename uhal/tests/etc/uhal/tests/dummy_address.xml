@@ -10,9 +10,9 @@
     <node id="REG_WITHOUT_MASK" address="0x0003" permission="rw"/>
     <node id="REG_WITH_MASK" address="0x0003" bit-mask="0x00ffff00" permission="rw"/>
     
-    <node id="FIFO" address="0x0100" permission="rw" mode="non-incremental"/>
+	<node id="FIFO" address="0x0100" permission="rw" mode="non-incremental" size="3000000"/>
 
-    <node id="MEM" address="0x0200" permission="rw" mode="incremental"/>
+    <node id="MEM" address="0x0200" permission="rw" mode="incremental" size="3000000"/>
 
     <node id="SUBSYSTEM1" address="0x1000" module="file://dummy_level2_address.xml" />
     <node id="SUBSYSTEM2" address="0x2000"  module="file://dummy_level2_address.xml" />

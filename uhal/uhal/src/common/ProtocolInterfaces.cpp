@@ -412,7 +412,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
-			log ( Debug() , "Write block of size " , Integer ( aSource.size() , IntFmt<hex,fixed>() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+			log ( Debug() , "Write block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -502,7 +502,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
-			log ( Debug() , "Read unsigned block of size " , Integer ( aSize , IntFmt<hex,fixed>() ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+			log ( Debug() , "Read unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS
@@ -590,7 +590,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
-			log ( Debug() , "Read signed block of size " , Integer ( aSize , IntFmt<hex,fixed>() ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+			log ( Debug() , "Read signed block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
 			// IPbus packet format is:
 			// HEADER
 			// BASE ADDRESS

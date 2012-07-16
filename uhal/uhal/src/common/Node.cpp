@@ -518,7 +518,7 @@ Node::Node ( const Node& aNode ) try :
 
 				if ( !lPartialMatch )
 				{
-					log ( Error() , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". Tree structure is:" , *this );
+					log ( Error() , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
 				}
 
 				log ( Error() , "Throwing at " , ThisLocation() );
