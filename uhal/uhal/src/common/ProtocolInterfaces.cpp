@@ -199,7 +199,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		log ( Debug() , "Dispatch" );
 
 		if ( mCurrentBuffers )
-		{
+		{				
 			this->Predispatch();
 			mTransportProtocol->Dispatch ( mCurrentBuffers );
 			mCurrentBuffers = NULL;

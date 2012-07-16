@@ -90,6 +90,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
+		//ID is a compulsory attribute for identifying a node
 		if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
 		{
 			//error description is given in the function itself so no more elaboration required
@@ -97,59 +98,12 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			throw NodeMustHaveUID();
 		}
 
+		
+		//Address is an optional attribute for hierarchical addressing
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
-		/*
-				uint32_t lAddr ( 0x00000000 );
 
-				if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , lAddr ) )
-				{
-					if ( lAddr & ~aParentMask )
-					{
-						log ( Error() , "Node address " , Integer ( lAddr, IntFmt< hex , fixed >() ) ,
-							  " overlaps with the mask specified by the parent node, " , Integer ( aParentMask, IntFmt< hex , fixed >() ) );
-						log ( Error() , "Throwing at " , ThisLocation() );
-						throw ChildHasAddressOverlap();
-					}
-
-					mAddr = aParentAddr | ( lAddr & aParentMask );
-				}
-				else
-				{
-					mAddr = aParentAddr;
-				}
-		*/
-		/*
-				if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mAddrMask ) )
-				{
-					if ( mAddrMask & ~aParentMask )
-					{
-						log ( Error() , "Node address mask " , Integer ( mAddrMask, IntFmt< hex , fixed >() ) ,
-							  " overlaps with the parent mask " , Integer ( aParentMask, IntFmt< hex , fixed >() ) ,
-							  ". This makes the child's address subspace larger than the parent and is not allowed" );
-						log ( Error() , "Throwing at " , ThisLocation() );
-						throw ChildHasAddressMaskOverlap();
-					}
-				}
-				else
-				{
-					//we have already checked that the address doesn't overlap with the parent mask, therefore, this calculation cannot produce a mask which overlaps the parent mask either.
-					mAddrMask = 0x00000001 ;
-
-					for ( uint32_t i=0 ; i!=32 ; ++i )
-					{
-						if ( mAddrMask & mAddr )
-						{
-							break;
-						}
-
-						mAddrMask = ( mAddrMask << 1 ) | 0x00000001;
-					}
-
-					mAddrMask &= ~mAddr;
-				}
-		*/
+		//Module is an optional attribute for pointing to other xml files. When specified, module implies that certain other attributes be ignored
 		std::string lModule;
-
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
 		{
 			try
@@ -165,9 +119,11 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		}
 		else
 		{
-			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "bit-mask" , mMask );
+			//Mask as an optional attribute to identify subfields of a register
+			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
+			
+			//Permissions is an optional attribute for specifying read/write permissions
 			std::string lPermission;
-
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
 			{
 				try
@@ -187,8 +143,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 				}
 			}
 
+			//Mode is an optional attribute for specifying whether a block is incremental, non-incremental or a single register
 			std::string lMode;
-
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
 			{
 				try
@@ -209,6 +165,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 
 				if ( mMode == defs::INCREMENTAL )
 				{
+					//If a block is incremental it requires a size attribute
 					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
 					{
 						log ( Error() , "Nodes " , Quote ( mUid ) , " has type " , Quote ( "INCREMENTAL" ) , " require a " , Quote ( "size" ) , " attribute" );
@@ -218,6 +175,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 				}
 				else if ( mMode == defs::NON_INCREMENTAL )
 				{
+					//If a block is non-incremental, then a size attribute is recommended
 					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
 					{
 						log ( Notice() , "Node " , Quote ( mUid ) , " has type " , Quote ( "NON_INCREMENTAL" ) , " does not have a " , Quote ( "size" ) , " attribute. This is not necessarily a problem, but if there is a limit to the size of the read/write operation from this port, then please consider adding this attribute for the sake of safety." );
@@ -241,7 +199,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			}
 		}
 
-		// Add the optional "tag" attribute
+		//Tags is an optional attribute to allow the user to add a description to a node
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
 	}
 	catch ( const std::exception& aExc )

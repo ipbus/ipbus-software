@@ -36,4 +36,11 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
 		return IPbusHeaderHelper<IPbusProtocolVersion>::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
 	}
 
+	
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	void IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
+	{
+		log( Notice() , "Predispatch Size: " , Integer( mCurrentBuffers->sendCounter() ) );		
+	}	
+	
 }

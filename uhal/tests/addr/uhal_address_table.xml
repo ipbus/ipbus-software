@@ -30,10 +30,10 @@
   <!--_JTAG_interface_-->
   
   <node id="JTAG_BASE_ADDR" address="0x0600">
-	<node id="a" bit-mask="0x1" />
-	<node id="b" bit-mask="0x2" />
-	<node id="c" bit-mask="0x4" />
-	<node id="d" bit-mask="0x8" />
+	<node id="a" mask="0x1" />
+	<node id="b" mask="0x2" />
+	<node id="c" mask="0x4" />
+	<node id="d" mask="0x8" />
   </node>
   
   <node id="SYSTEM1" module="file://~/uhal/tests/addr/uhal_module_address_table.xml" address="0x0500"/>
@@ -107,7 +107,7 @@
 
   <!--_RCT_data_capture_interface_-->
 
-  <node id="RCT_CAPTURE" address="0x0200" mask="0x00FF">
+  <node id="RCT_CAPTURE" address="0x0200">
     <node id="SYNC_RESET" address="0x0000" />
     <node id="LENGTHS" address="0x0001" />
     <node id="TRIGGER_MODE" address="0x0002" />
@@ -152,7 +152,7 @@
 
   <!--_I2C_interfaces_for_TTCrx_&_LM83_-->
 
-  <node id="I2C_TEMP" address="0x0300" mask="0x00FF">
+  <node id="I2C_TEMP" address="0x0300">
     <node id="RESET" address="0x0000" />
     <node id="DATA" address="0x0001" />
     <node id="TRIGGER" address="0x0002" />
