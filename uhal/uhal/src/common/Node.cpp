@@ -803,7 +803,7 @@ Node::Node ( const Node& aNode ) try :
 
 
 
-	void Node::calculateHierarchicalAddresses ( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses )
+	void Node::calculateHierarchicalAddresses ( const uint32_t& aAddr , std::map< uint32_t , uint32_t >& aUsedAddresses )
 	{
 		try
 		{
@@ -828,13 +828,24 @@ Node::Node ( const Node& aNode ) try :
 						log ( Warning() , "The partial address of the current branch, " , Quote ( mUid ) , " , (" , Integer ( lAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
 					}
 
-					std::pair< std::set< uint32_t >::iterator,bool> lRes ( aUsedAddresses.insert ( lAddr | aAddr ) );
+					std::map< uint32_t , uint32_t >::iterator lRes = aUsedAddresses.find ( lAddr | aAddr );
 
-					if ( ! lRes.second )
+					if ( lRes == aUsedAddresses.end() )
 					{
-						log ( Error() , "Branch address " , Integer ( lAddr | aAddr , IntFmt<hex,fixed>() ) , " requested by branch " , Quote ( mUid ) , " has already been used!" );
-						log ( Error() , "Throwing at " , ThisLocation() );
-						throw ReadAccessDenied();
+						aUsedAddresses.insert ( std::make_pair( lAddr | aAddr , mMask ) );
+					}
+					else
+					{
+						if( mMask & lRes->second )
+						{
+							log ( Error() , "Bit(s) " , Integer( mMask , IntFmt<hex,fixed>() ) , " of branch address " , Integer ( lAddr | aAddr , IntFmt<hex,fixed>() ) , " requested by branch " , Quote ( mUid ) , " has already been used!" );
+							log ( Error() , "Throwing at " , ThisLocation() );
+							throw ReadAccessDenied();
+						}
+						else
+						{
+							lRes->second |= mMask;
+						}						
 					}
 				}
 			}

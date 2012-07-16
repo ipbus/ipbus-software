@@ -20,7 +20,7 @@
 
 #include <exception>
 #include <vector>
-#include <set>
+#include <map>
 #include <string>
 #include <sstream>
 
@@ -319,9 +319,9 @@ namespace uhal
 			/**
 				Propagate the partial addresses down through the hierarchical structure and make a record of all used addresses for collision detection
 				@param aAddr the full address of the current branch which will be applied to the current children
-				@param aUsedAddresses a set containing all of the addresses used so far
+				@param aUsedAddresses a map containing all of the addresses and subset of bits used by those addresses which have already been claimed
 			*/
-			void calculateHierarchicalAddresses ( const uint32_t& aAddr , std::set< uint32_t >& aUsedAddresses );
+			void calculateHierarchicalAddresses ( const uint32_t& aAddr , std::map< uint32_t , uint32_t >& aUsedAddresses );
 
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;

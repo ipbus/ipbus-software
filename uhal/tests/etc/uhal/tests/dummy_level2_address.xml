@@ -4,6 +4,6 @@
 <node id="SUBSYSTEM">
     <node id="REG" address="0x0001" permission="rw"/>
 
-    <node id="MEM" address="0x0002" permission="rw" mode="incremental"/>
+    <node id="MEM" address="0x0002" permission="rw" mode="incremental" size="3000000" />
 
 </node>

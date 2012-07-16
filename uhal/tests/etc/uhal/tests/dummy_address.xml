@@ -5,16 +5,20 @@
     
     <!-- two registers with the same underlying address -->
     <node id="REG_READ_ONLY" address="0x0002" permission="r"/>
-    <node id="REG_WRITE_ONLY" address="0x0002" permission="w"/>
+    <!--node id="REG_WRITE_ONLY" address="0x0002" permission="w"/-->
     
-    <node id="REG_WITHOUT_MASK" address="0x0003" permission="rw"/>
-    <node id="REG_WITH_MASK" address="0x0003" mask="0x00ffff00" permission="rw"/>
-    
+    <node id="REG_WITHOUT_MASK" address="0x0003" permission="rw">
+		<node id="REG_WITH_MASK" mask="0x00ffff00" />
+    </node>
+	
+	<node id="REG_WITH_MASK_2a" address="0x0004" mask="0xffff0000" permission="rw"/>
+	<node id="REG_WITH_MASK_2b" address="0x0004" mask="0x0000ffff" permission="rw"/>
+	
 	<node id="FIFO" address="0x0100" permission="rw" mode="non-incremental" size="3000000"/>
 
     <node id="MEM" address="0x0200" permission="rw" mode="incremental" size="3000000"/>
 
-    <node id="SUBSYSTEM1" address="0x1000" module="file://dummy_level2_address.xml" />
-    <node id="SUBSYSTEM2" address="0x2000"  module="file://dummy_level2_address.xml" />
+    <!--node id="SUBSYSTEM1" address="0x1000" module="file://dummy_level2_address.xml" />
+    <node id="SUBSYSTEM2" address="0x2000"  module="file://dummy_level2_address.xml" /-->
 
 </node>

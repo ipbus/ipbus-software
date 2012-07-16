@@ -60,7 +60,7 @@ namespace uhal
 			}
 
 			boost::shared_ptr< Node > lNode ( new Node ( lNodes[0]->clone() ) );
-			std::set< uint32_t > lUsedAddresses;
+			std::map< uint32_t , uint32_t > lUsedAddresses;
 
 			if ( aCalculateHierarchicalAddresses )
 			{

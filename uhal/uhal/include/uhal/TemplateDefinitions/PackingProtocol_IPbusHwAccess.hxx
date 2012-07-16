@@ -40,7 +40,16 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	void IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
 	{
-		log( Notice() , "Predispatch Size: " , Integer( mCurrentBuffers->sendCounter() ) );		
+		uint32_t lWords( mCurrentBuffers->sendCounter()  >> 2 );
+	
+		if( lWords < 8 )
+		{
+			log( Info() , "Adding " , Integer( 8 - lWords ) , " of padding." );		
+			for( ; lWords != 8 ; ++lWords )
+			{
+				this->ByteOrderTransaction();
+			}
+		}
 	}	
 	
 }
