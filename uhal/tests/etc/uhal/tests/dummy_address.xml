@@ -14,11 +14,11 @@
 	<node id="REG_WITH_MASK_2a" address="0x0004" mask="0xffff0000" permission="rw"/>
 	<node id="REG_WITH_MASK_2b" address="0x0004" mask="0x0000ffff" permission="rw"/>
 	
-	<node id="FIFO" address="0x0100" permission="rw" mode="non-incremental" size="3000000"/>
+	<node id="FIFO" address="0x0100" permission="rw" mode="non-incremental" size="2621440"/>
 
-    <node id="MEM" address="0x1000000000" permission="rw" mode="incremental" size="3000000"/>
+    <node id="MEM" address="0x300000" permission="rw" mode="incremental" size="2621440"/>
 
-    <node id="SUBSYSTEM1" address="0x2000000000" module="file://dummy_level2_address.xml" />
-    <node id="SUBSYSTEM2" address="0x3000000000"  module="file://dummy_level2_address.xml"/>
+    <node id="SUBSYSTEM1" address="0x600000" module="file://dummy_level2_address.xml" />
+    <node id="SUBSYSTEM2" address="0x900000"  module="file://dummy_level2_address.xml"/>
 
 </node>
