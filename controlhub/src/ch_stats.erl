@@ -447,7 +447,7 @@ report_to_string(State) ->
     lists:flatten(io_lib:format("Control Hub Stats Report~n"
                                 "------------------------~n~n"
                                 "CLIENT  All-time connections: ~p~n"  
-                                "          Active connections: ~p (peak=~p)~n"
+                                "          Active connections: ~p (peak: ~p)~n"
                                 "           Requests received: ~p (of which ~p were malformed)~n"
                                 "              Responses sent: ~p~n~n"
                                 "UDP              Packets Out: ~p~n"

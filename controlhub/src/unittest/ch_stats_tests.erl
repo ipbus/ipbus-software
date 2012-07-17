@@ -113,7 +113,7 @@ test_report_to_string() ->
     ExpectedResult = "Control Hub Stats Report\n"
                      "------------------------\n\n"
                      "CLIENT  All-time connections: 17\n"  
-                     "          Active connections: 12 (peak=12)\n"
+                     "          Active connections: 12 (peak: 12)\n"
                      "           Requests received: 20 (of which 13 were malformed)\n"
                      "              Responses sent: 7\n\n"
                      "UDP              Packets Out: 29\n"
