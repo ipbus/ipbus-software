@@ -123,7 +123,17 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			uint32_t lBitShiftedSource ( aSource << utilities::TrailingRightBits ( aMask ) );
+			uint32_t lShiftSize( utilities::TrailingRightBits ( aMask ) );
+		
+			uint32_t lBitShiftedSource ( aSource << lShiftSize );
+			
+			if( (lBitShiftedSource >> lShiftSize) != aSource )
+			{
+				log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
+				log ( Error() , "Throwing at " , ThisLocation() );
+				throw BitsSetWhichAreForbiddenByBitMask();				
+			}
+			
 			uint32_t lOverlap ( lBitShiftedSource & ~aMask );
 
 			if ( lOverlap )
