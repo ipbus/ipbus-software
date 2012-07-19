@@ -79,10 +79,10 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		uint32_t lWords( mCurrentBuffers->sendCounter()  >> 2 );
 		if( lWords < 11 ) // 8 words of data + 3 words of preamble
 		{
-			log( Info() , "Adding " , Integer( 11 - lWords ) , " of padding." );		
+			log( Info() , "Adding " , Integer( 11 - lWords ) , " words of padding." );		
 			for( ; lWords != 11 ; ++lWords )
 			{
-				this->ByteOrderTransaction();
+				this->Padding();
 			}
 		}
 		

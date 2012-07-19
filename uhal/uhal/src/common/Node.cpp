@@ -826,9 +826,9 @@ Node::Node ( const Node& aNode ) try :
 					uint64_t lCurrentTop( (uint64_t)(mAddr) + (uint64_t)(mSize-1) );
 					
 					//Test for overlap with parent
-					if ( lCurrentTop & aAddr ) //should set the most significant bit of the child address and then AND this with the parent address
+					if ( (uint32_t)(lCurrentTop) & aAddr ) //should set the most significant bit of the child address and then AND this with the parent address
 					{
-						log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( mUid ) , " , (" , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+						log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( mUid ) , " , (" , Integer ( (uint32_t)(lCurrentTop) , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
 					}	
 
 					//Update the addresses with parent address

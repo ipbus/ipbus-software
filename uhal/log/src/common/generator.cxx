@@ -80,7 +80,8 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
 	}
 
 	aCppFile << "\t\tdefault:\n"
-			 << "\t\t\tthrow std::string( \"Environment varible has invalid value '\" ) + lEnvVar + \"'\";\n"
+			 << "\t\t\tlog ( Warning() , \"Environment varible has invalid value \" , Quote( lEnvVar ) , \". Using level \" , Quote ( \"Info\" ) , \" instead.\" );\n"
+			 << "\t\t\tsetLogLevelTo ( Info() );\n"
 			 << "\t}\n"
 			 << "}\n"
 			 << "\n";

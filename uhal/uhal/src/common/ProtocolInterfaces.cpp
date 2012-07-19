@@ -199,11 +199,14 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		log ( Debug() , "Dispatch" );
 
 		if ( mCurrentBuffers )
-		{				
-			this->Predispatch();
-			mTransportProtocol->Dispatch ( mCurrentBuffers );
-			mCurrentBuffers = NULL;
-			mTransportProtocol->Flush();
+		{	
+			if( mCurrentBuffers->sendCounter() )
+			{
+				this->Predispatch();
+				mTransportProtocol->Dispatch ( mCurrentBuffers );
+				mCurrentBuffers = NULL;
+				mTransportProtocol->Flush();
+			}
 		}
 	}
 
@@ -221,6 +224,8 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	{
 		try
 		{
+			log ( Debug() , "Underlying Validation" );
+
 			eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
 			uint32_t lSendWordCount , lReplyWordCount;
 			uint32_t lSendTransactionId , lReplyTransactionId;
@@ -304,6 +309,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			}
 			while ( ( aSendBufferEnd - aSendBufferStart != 0 ) && ( aReplyEndIt - aReplyStartIt != 0 ) );
 
+			log ( Debug() , "Validation Complete!" );
 			return true;
 		}
 		catch ( const std::exception& aExc )
@@ -348,7 +354,32 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
+	void PackingProtocol::Padding()
+	{
+		try
+		{
+			log ( Debug() , "Padding" );
+			// IPbus send packet format is:
+			// HEADER
+			uint32_t lSendByteCount ( 1 << 2 );
+			// IPbus reply packet format is:
+			// HEADER
+			uint32_t lReplyByteCount ( 1 << 2 );
+			uint32_t lSendBytesAvailable;
+			uint32_t  lReplyBytesAvailable;
+			mCurrentBuffers->send ( this->calculateIPbusHeader ( B_O_T , 0 ) );
+			ValHeader lReply;
+			mCurrentBuffers->add ( lReply );
+			mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
+			//return lReply;
+		}
+		catch ( const std::exception& aExc )
+		{
+			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+			throw uhal::exception ( aExc );
+		}
+	}
+	
 
 	void PackingProtocol::ByteOrderTransaction()
 	{
@@ -763,6 +794,20 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			uint32_t lSendBufferFreeSpace ( mMaxSendSize - mCurrentBuffers->sendCounter() );
 			uint32_t lReplyBufferFreeSpace ( mMaxReplySize - mCurrentBuffers->replyCounter() );
 
+			// log ( Debug() , "Current buffer:\n" ,
+					// " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
+					// " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
+					// "\n" ,
+					// " mMaxSendSize " , Integer( mMaxSendSize ) ,
+					// " | mMaxReplySize " , Integer( mMaxReplySize ) ,
+					// "\n" ,
+					// " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
+					// " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
+					// "\n" ,
+					// " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
+					// " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
+			// );
+			
 			if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
 			{
 				aAvailableSendSize = aRequestedSendSize;
@@ -782,9 +827,24 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mTransportProtocol->Dispatch ( mCurrentBuffers );
 			mCurrentBuffers = new Buffers ( mMaxSendSize );
 			this->Preamble();
+			
 			lSendBufferFreeSpace = mMaxSendSize - mCurrentBuffers->sendCounter();
 			lReplyBufferFreeSpace = mMaxReplySize - mCurrentBuffers->replyCounter();
-
+		
+			// log ( Debug() , "Newly created buffer:\n" ,
+					// " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
+					// " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
+					// "\n" ,
+					// " mMaxSendSize " , Integer( mMaxSendSize ) ,
+					// " | mMaxReplySize " , Integer( mMaxReplySize ) ,
+					// "\n" ,
+					// " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
+					// " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
+					// "\n" ,
+					// " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
+					// " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
+			// );
+			
 			if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
 			{
 				aAvailableSendSize = aRequestedSendSize;

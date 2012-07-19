@@ -23,6 +23,7 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing ( int argc,ch
 	( "connection_file,c", po::value<std::string>()->default_value ( "", "Connection file URI" ) )
 	( "device_id,d", po::value<std::string>()->default_value ( "", "Device identifier" ) )
 	( "verbose,v", "Verbose output" )
+	( "very_verbose,V", "Very verbose output" )
 	;
 	po::variables_map vm;
 
@@ -50,14 +51,23 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing ( int argc,ch
 	result["connection_file"] = vm["connection_file"].as<std::string>();
 	result["device_id"] = vm["device_id"].as<std::string>();
 
-	if ( vm.count ( "verbose" ) )
+	if ( vm.count ( "very_verbose" ) )
 	{
+		uhal::setLogLevelTo ( Debug() );
+		result["very_verbose"] = "true";
+		result["verbose"] = "true";
+	}
+	else if ( vm.count ( "verbose" ) )
+	{
+		uhal::setLogLevelTo ( Notice() );
+		result["very_verbose"] = "false";
 		result["verbose"] = "true";
 	}
 	else
 	{
-		result["verbose"] = "false";
 		uhal::disableLogging();
+		result["very_verbose"] = "false";
+		result["verbose"] = "false";
 	}
 
 	return result;

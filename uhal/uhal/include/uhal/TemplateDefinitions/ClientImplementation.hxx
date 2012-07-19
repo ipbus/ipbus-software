@@ -1,4 +1,6 @@
 
+#define ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary 8
+
 namespace uhal
 {
 	// ----------------------------------------------------------------------------------------------------------------
@@ -8,7 +10,7 @@ namespace uhal
 
 IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId , const URI& aUri ) try :
 		ClientInterface ( aId , aUri ),
-						mPackingProtocol ( mMaxPacketLength , mMaxPacketLength ),
+						mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
 						mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
 	{
 		Link ( mTransportProtocol , mPackingProtocol );
@@ -67,7 +69,7 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 
 IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId , const URI& aUri ) try :
 		ClientInterface ( aId , aUri ),
-						mPackingProtocol ( mMaxPacketLength , mMaxPacketLength ),
+						mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
 						mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
 	{
 		Link ( mTransportProtocol , mPackingProtocol );
@@ -138,7 +140,7 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& aId , const URI& aUri ) try :
 		ClientInterface ( aId , aUri ),
 						mTargetId ( ExtractTargetID ( aUri ) ),
-						mPackingProtocol ( mTargetId.first , mTargetId.second , mMaxPacketLength , mMaxPacketLength ),
+						mPackingProtocol ( mTargetId.first , mTargetId.second , mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
 						mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
 	{
 		Link ( mTransportProtocol , mPackingProtocol );
