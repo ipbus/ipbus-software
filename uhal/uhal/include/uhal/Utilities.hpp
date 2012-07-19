@@ -804,8 +804,28 @@ namespace uhal
 						ss << lAttrStr;
 					}
 
-					ss >> aTarget;
+					// ss >> aTarget;
 					// aTarget = lAttr.as_uint();
+
+					if ( ss.str().size() > 10 )
+					{
+						log( Error() , "XML attribute " , Quote( aAttrName ) , " has value " , Quote( ss.str() ) , " which is too big to fit into 32-bit number" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						throw uhal::exception();						
+					}				
+					
+					uint64_t lTarget;
+					ss >> lTarget;
+					
+					if ( lTarget>>32 )
+					{
+						log( Error() , "XML attribute " , Quote( aAttrName ) , " has value " , Quote( ss.str() ) , " which is too big to fit into 32-bit number" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						throw uhal::exception();						
+					}
+
+					aTarget = (uint32_t)(lTarget);
+					
 					return true;
 				}
 				else

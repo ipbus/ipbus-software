@@ -82,6 +82,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		mHw ( NULL ),
 			mUid ( "" ),
 			mAddr ( 0x00000000 ),
+			mAddrValid ( false ),
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
@@ -213,6 +214,7 @@ Node::Node ( ) try :
 		mHw ( NULL ),
 			mUid ( "" ),
 			mAddr ( 0x00000000 ),
+			mAddrValid ( false ),
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
@@ -233,6 +235,7 @@ Node::Node ( const Node& aNode ) try :
 		mHw ( aNode.mHw ),
 			mUid ( aNode.mUid ),
 			mAddr ( aNode.mAddr ),
+			mAddrValid ( aNode.mAddrValid ),
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
 			mMode ( aNode.mMode ),
@@ -256,6 +259,7 @@ Node::Node ( const Node& aNode ) try :
 		lNode.mHw = mHw;
 		lNode.mUid = mUid ;
 		lNode.mAddr = mAddr;
+		lNode.mAddrValid = mAddrValid;
 		lNode.mMask = mMask;
 		lNode.mPermission = mPermission;
 		lNode.mMode = mMode;
@@ -402,26 +406,34 @@ Node::Node ( const Node& aNode ) try :
 	{
 		try
 		{
-			aStream << std::hex << std::setfill ( '0' ) << std::uppercase;
+			aStream << std::setfill ( '0' ) << std::uppercase;
 			aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
 			aStream << "Node \"" << mUid << "\", ";
-			aStream << "Address 0x" << std::setw ( 8 ) << mAddr << ", ";
-			aStream << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
-			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) << ", ";
 
 			switch ( mMode )
 			{
 				case defs::SINGLE:
-					aStream << "Mode SINGLE register access";
+					aStream << "SINGLE register, "
+							<< std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
+							<< std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
 					break;
 				case defs::INCREMENTAL:
-					aStream << "Mode INCREMENTAL block access";
+					aStream << "INCREMENTAL block, "
+							<< std::dec << "Size " << mSize << ", "
+							<< std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << (mAddr+mSize-1) << "], ";
 					break;
 				case defs::NON_INCREMENTAL:
-					aStream << "Mode NON-INCREMENTAL block access";
+					aStream << "NON-INCREMENTAL block, ";
+					if( mSize )
+					{
+						aStream << std::dec << "Size " << mSize << ", ";
+					}
+					aStream << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", ";
 					break;
 			}
 
+			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+			
 			// for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
 			// {
 			// aStream << '\n' << std::string ( aIndent+2 , ' ' ) << "- Map entry " << (lIt->first);
@@ -803,65 +815,152 @@ Node::Node ( const Node& aNode ) try :
 
 
 
-	void Node::calculateHierarchicalAddresses ( const uint32_t& aAddr , std::map< uint32_t , uint32_t >& aUsedAddresses )
+	void Node::calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode )
 	{
 		try
 		{
-			//			log ( Debug() , "Entering " , mUid );
 			if ( mAddr )
-			{
-				uint32_t lCount ( 1 );
-				uint32_t lAddr ( mAddr );
-				mAddr |= aAddr;
-
-				if ( mMode == defs::INCREMENTAL )
+			{				
+				if( mMode == defs::INCREMENTAL )
 				{
-					lCount = mSize;
-				}
-
-				log ( Debug() , mUid , " size : " , Integer ( lCount ) );
-
-				for ( uint32_t i ( 0 ) ; i!=lCount ; ++i , ++lAddr )
-				{
-					if ( lAddr & aAddr )
+					uint64_t lCurrentTop( (uint64_t)(mAddr) + (uint64_t)(mSize-1) );
+					
+					//Test for overlap with parent
+					if ( lCurrentTop & aAddr ) //should set the most significant bit of the child address and then AND this with the parent address
 					{
-						log ( Warning() , "The partial address of the current branch, " , Quote ( mUid ) , " , (" , Integer ( lAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+						log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( mUid ) , " , (" , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+					}	
+
+					//Update the addresses with parent address
+					mAddr |= aAddr;
+					lCurrentTop = (uint64_t)(mAddr) + (uint64_t)(mSize-1);
+
+					// log ( Error() , Quote ( mUid ) , 
+								// " : Size " , Integer ( mSize , IntFmt<hex,fixed>() ) , 
+								// " : Base Address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
+								// " : lCurrentTop " ,  Integer ( lCurrentTop , IntFmt<hex,fixed>() )
+					// );
+							
+					//Check that the requested block size does not extend outside register space
+					if( lCurrentTop >> 32 )
+					{
+						log ( Error() , "A block size of " , Integer ( mSize ) , " and a base address of " , Integer ( mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						throw ArraySizeExceedsRegisterBound();
 					}
-
-					std::map< uint32_t , uint32_t >::iterator lRes = aUsedAddresses.find ( lAddr | aAddr );
-
-					if ( lRes == aUsedAddresses.end() )
+					
+					//Compare against all other branches
+					for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap->begin() ; lIt != aTopLevelNode.mChildrenMap->end() ; ++lIt )
 					{
-						aUsedAddresses.insert ( std::make_pair( lAddr | aAddr , mMask ) );
-					}
-					else
-					{
-						if( mMask & lRes->second )
+						const Node& lComparison( *lIt->second );
+						if( lComparison.mAddrValid )
 						{
-							log ( Error() , "Bit(s) " , Integer( mMask , IntFmt<hex,fixed>() ) , " of branch address " , Integer ( lAddr | aAddr , IntFmt<hex,fixed>() ) , " requested by branch " , Quote ( mUid ) , " has already been used!" );
-							log ( Error() , "Throwing at " , ThisLocation() );
-							throw ReadAccessDenied();
+							if( lComparison.mMode == defs::INCREMENTAL )
+							{
+								// Current and comparison are both incremental
+								uint32_t lComparisonTop( lComparison.mAddr + (lComparison.mSize-1) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
+								
+								if( ((lComparisonTop >= mAddr) && (lComparisonTop <= lCurrentTop)) || ((lCurrentTop >= lComparison.mAddr) && (lCurrentTop <= lComparisonTop))  )
+								{
+									log ( Error() , "Branch " , Quote ( mUid ) , 
+													" has address range [" , Integer( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lCurrentTop , IntFmt<hex,fixed>() ) , 
+													"] which overlaps with branch " , Quote ( lComparison.mUid ) ,
+													" which has address range [" , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lComparisonTop , IntFmt<hex,fixed>() ) , 
+													"]."													
+										);
+									log ( Error() , "Throwing at " , ThisLocation() );
+									throw AddressSpaceOverlap();
+								}
+							}
+							else
+							{
+								// Current is incremental, comparison is static
+								if( (lComparison.mAddr >= mAddr) && (lComparison.mAddr <= lCurrentTop) )
+								{
+									log ( Error() , "Branch " , Quote ( mUid ) , 
+													" has address range [" , Integer( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lCurrentTop , IntFmt<hex,fixed>() ) , 
+													"] which overlaps with branch " , Quote ( lComparison.mUid ) ,
+													" which has address " , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) , "]."													
+										);
+									log ( Error() , "Throwing at " , ThisLocation() );
+									throw AddressSpaceOverlap();
+								}							
+							}
 						}
-						else
-						{
-							lRes->second |= mMask;
-						}						
-					}
+					}	
+					
 				}
+				else
+				{
+
+					//Test for overlap with parent
+					if ( mAddr & aAddr )
+					{
+						log ( Warning() , "The partial address of the current branch, " , Quote ( mUid ) , " , (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+					}					
+
+					//Update the addresses with parent address
+					mAddr |= aAddr;
+					
+					for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap->begin() ; lIt != aTopLevelNode.mChildrenMap->end() ; ++lIt )
+					{
+						const Node& lComparison( *lIt->second );
+						if( lComparison.mAddrValid )
+						{
+							if( lComparison.mMode == defs::INCREMENTAL )
+							{
+								// Current is static, comparison is incremental
+								uint32_t lComparisonTop( lComparison.mAddr + (lComparison.mSize-1) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
+								
+								if( (mAddr >= lComparison.mAddr) && (mAddr <= lComparisonTop) )
+								{
+									log ( Error() , "Branch " , Quote ( mUid ) , 
+													" has address " , Integer( mAddr , IntFmt<hex,fixed>() ) ,
+													" which overlaps with branch " , Quote ( lComparison.mUid ) ,
+													" which has address range [" , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lComparisonTop , IntFmt<hex,fixed>() ) , 
+													"]."													
+										);
+									log ( Error() , "Throwing at " , ThisLocation() );
+									throw AddressSpaceOverlap();
+								}
+							}
+							else
+							{
+								// Current and comparison are both static
+								if( mAddr == lComparison.mAddr )
+								{
+									if( mMask & lComparison.mMask )
+									{
+										log ( Error() , "Branch " , Quote ( mUid ) , 
+														" has address " , Integer( mAddr , IntFmt<hex,fixed>() ) ,
+														" and mask " , Integer( mMask , IntFmt<hex,fixed>() ) ,														
+														" which overlaps with branch " , Quote ( lComparison.mUid ) ,
+														" which has address " , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) ,
+														" and mask " , Integer( lComparison.mMask , IntFmt<hex,fixed>() ) 													
+										);
+										log ( Error() , "Throwing at " , ThisLocation() );
+										throw AddressSpaceOverlap();
+									}
+								}
+								
+							}
+						}
+					}					
+				}
+				
 			}
 			else
 			{
 				mAddr = aAddr;
 			}
-
-			log ( Debug() , mUid , " address : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
-			
+		
 			for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 			{
-				lIt->calculateHierarchicalAddresses ( mAddr , aUsedAddresses );
+				lIt->calculateHierarchicalAddresses ( mAddr , aTopLevelNode );
 			}
+			
+			mAddrValid = true;
 
-			//			log ( Debug() , "Leaving " , mUid );
 		}
 		catch ( const std::exception& aExc )
 		{
@@ -870,6 +969,7 @@ Node::Node ( const Node& aNode ) try :
 		}
 	}
 
+	
 	boost::shared_ptr<ClientInterface> Node::getClient()
 	{
 		try

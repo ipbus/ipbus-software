@@ -57,6 +57,13 @@ namespace uhal
 	//! Exception class to handle the case where an incremental node is specified without a size attribute. Uses the base uhal::exception implementation of what()
 	class IncrementalNodeRequiresSizeAttribute: public uhal::exception {  };
 
+	//! Exception class to handle the case where a memory block has a size which would exceed the available register space. Uses the base uhal::exception implementation of what()
+	class ArraySizeExceedsRegisterBound: public uhal::exception {  };
+	//! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
+	class AddressSpaceOverlap: public uhal::exception {  };
+
+	
+	
 	//! A heirarchical node for navigating heirarchical firmwares
 	class Node
 	{
@@ -321,7 +328,7 @@ namespace uhal
 				@param aAddr the full address of the current branch which will be applied to the current children
 				@param aUsedAddresses a map containing all of the addresses and subset of bits used by those addresses which have already been claimed
 			*/
-			void calculateHierarchicalAddresses ( const uint32_t& aAddr , std::map< uint32_t , uint32_t >& aUsedAddresses );
+			void calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode );
 
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
@@ -331,6 +338,9 @@ namespace uhal
 
 			//! The register address with which this node is associated
 			uint32_t mAddr;
+			//! Mark whether the address is fully formed
+			bool mAddrValid;
+			
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
 			//! The read/write access permissions of this node
