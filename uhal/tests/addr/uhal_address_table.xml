@@ -164,6 +164,6 @@
     <node id="STATUS" address="0x0003" />
   </node>
 
-  <node id="BIG" address="0xFFFF0000" mode="inc" size="10000" />
+  <node id="BIG" address="0x4000" mode="inc" size="1000000000" />
  
 </node>
