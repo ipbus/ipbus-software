@@ -9,19 +9,19 @@
     <node id="CONFIG" address="0x0000" permission="r"/>
     <node id="MAX_CAPTURE" address="0x0001" permission="read"/>
     <node id="CONFIG_RESET" address="0x0002" permission="rw"/>
-    <node id="CAPTURE_AMT" address="0x0002"  permission="wr"/>
+    <node id="CAPTURE_AMT" address="0x0003"  permission="wr"/>
     <node id="CRC">
-      <node id="RECEIVED" address="0x0003"  permission="readwrite"/>
-      <node id="CALCULATED" address="0x0004" permission="writeread"/>
+      <node id="RECEIVED" address="0x0004"  permission="readwrite"/>
+      <node id="CALCULATED" address="0x0005" permission="writeread"/>
       <node id="GOOD">
-		<node id="CNT_H" address="0x0005" permission="w" />
-		<node id="CNT_M" address="0x0006" permission="write" />
-		<node id="CNT_L" address="0x0007" />
+		<node id="CNT_H" address="0x0006" permission="w" />
+		<node id="CNT_M" address="0x0007" permission="write" />
+		<node id="CNT_L" address="0x0008" />
       </node>
       <node id="BAD">
-		<node id="CNT_H" address="0x0008" />
-		<node id="CNT_M" address="0x0009" />
-		<node id="CNT_L" address="0x000A" />
+		<node id="CNT_H" address="0x0009" />
+		<node id="CNT_M" address="0x000A" />
+		<node id="CNT_L" address="0x000B" />
       </node>
     </node>
   </node>
@@ -45,18 +45,18 @@
       <node id="CLKBUF" address="0x0001" />
       <node id="QPLL" address="0x0002" />
       <node id="SERDES">
-	<node id="CONFIG" address="0x0003" />
-	<node id="ENABLE" address="0x0004" />
+		<node id="CONFIG" address="0x0003" />
+		<node id="ENABLE" address="0x0004" />
       </node>
       <node id="OPTO_TEMP_STATUS" address="0x0005" />
       <node id="FIRMWARE_VERSION" address="0x0006" />
       <node id="ROUTING_MODE" address="0x0007" />
       <node id="TTC">
-	<node id="INFO" address="0x0008" />
-	<node id="DEBUG" address="0x0009" />
-	<node id="CODES" address="0x000A" />
-	<node id="ADDRESS" address="0x000C" />
-	<node id="ADDR_LATCH" address="0x000D" />
+		<node id="INFO" address="0x0008" />
+		<node id="DEBUG" address="0x0009" />
+		<node id="CODES" address="0x000A" />
+		<node id="ADDRESS" address="0x000C" />
+		<node id="ADDR_LATCH" address="0x000D" />
       </node>
     </node>
   </node>
@@ -66,11 +66,11 @@
   <node id="TRANSMITTER" address="0x0100">
     <node id="CONFIG" address="0x0000" />
     <node id="FSM_MODE" address="0x0001" mode="single"/>
-    <node id="TRIGGER_MODE" address="0x0002" mode="block" />
+    <node id="TRIGGER_MODE" address="0x0002" mode="block" size="100" />
     <node id="BRAM_ADDRESS" address="0x0003" mode="port" />
-    <node id="BRAM_DATA" address="0x0004" mode="incremental" />
+    <node id="BRAM_DATA" address="0x0004" mode="incremental" size="100" />
     <node id="RUNNING_PERIOD" address="0x0005" mode="non-incremental" />
-    <node id="LOOP_PERIOD" address="0x0007" mode="inc" />
+    <node id="LOOP_PERIOD" address="0x0007" mode="inc" size="100" />
     <node id="DELAY_PERIOD" address="0x0008" mode="non-inc" />
     <node id="MASK">
       <node id="A" address="0x0009" />

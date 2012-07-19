@@ -819,7 +819,7 @@ Node::Node ( const Node& aNode ) try :
 					lCount = mSize;
 				}
 
-				log ( Debug() , mUid , " : " , Integer ( lCount ) );
+				log ( Debug() , mUid , " size : " , Integer ( lCount ) );
 
 				for ( uint32_t i ( 0 ) ; i!=lCount ; ++i , ++lAddr )
 				{
@@ -854,6 +854,8 @@ Node::Node ( const Node& aNode ) try :
 				mAddr = aAddr;
 			}
 
+			log ( Debug() , mUid , " address : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
+			
 			for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 			{
 				lIt->calculateHierarchicalAddresses ( mAddr , aUsedAddresses );

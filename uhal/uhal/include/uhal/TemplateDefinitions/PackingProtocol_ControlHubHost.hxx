@@ -75,6 +75,17 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		mMutex.lock();
 		tPreamble& lPreamble ( mPreambles.back() );
 		mMutex.unlock();
+
+		uint32_t lWords( mCurrentBuffers->sendCounter()  >> 2 );
+		if( lWords < 11 ) // 8 words of data + 3 words of preamble
+		{
+			log( Info() , "Adding " , Integer( 11 - lWords ) , " of padding." );		
+			for( ; lWords != 11 ; ++lWords )
+			{
+				this->ByteOrderTransaction();
+			}
+		}
+		
 		uint32_t lByteCount ( mCurrentBuffers->sendCounter() );
 		*lPreamble.mSendByteCountPtr = htonl ( lByteCount-4 );
 		*lPreamble.mSendWordCountPtr = htons ( ( lByteCount-12 ) >>2 );
