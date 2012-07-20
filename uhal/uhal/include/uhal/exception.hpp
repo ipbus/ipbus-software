@@ -20,16 +20,9 @@
 namespace uhal
 {
 
-	//! A simple exception class providing a little more functionality than std::exception
+	//! An abstract base exception class providing an interface to a throw/rethrow mechanism which will allow us to catch the base type and rethrow the derived type
 	class exception : public std::exception
 	{
-		protected:
-			/**
-				Constructor
-				@param aExc a standard string to be used as a message
-			*/
-			exception ( const std::string& aExc = "" );
-
 		public:
 			/**
 				Destructor
@@ -55,6 +48,13 @@ namespace uhal
 			*/
 			virtual void rethrowFrom_ ( const Location& aLocation ) = 0;
 
+		protected:
+			/**
+				Constructor
+				@param aExc a standard string to be used as a message
+			*/
+			exception ( const std::string& aExc = "" );
+			
 		private:
 
 			//! The message given to the exception at the time of construction
@@ -62,16 +62,10 @@ namespace uhal
 
 	};
 
+	//! A concrete exception class using CRTP to provide an implementation for the throw/rethrow mechanism, allowing us to catch the base type and rethrow the derived type
 	template < class Derived >
 	class _exception : public exception
 	{
-		protected:
-			/**
-				Constructor
-				@param aExc a standard string to be used as a message
-			*/
-			_exception ( const std::string& aExc = "" );
-
 		public:
 			/**
 				Destructor
@@ -89,6 +83,13 @@ namespace uhal
 				@param aLocation a location object which holds the function name, file name and line number where the rethrow occured
 			*/
 			void rethrowFrom_ ( const Location& aLocation );
+			
+		protected:
+			/**
+				Constructor
+				@param aExc a standard string to be used as a message
+			*/
+			_exception ( const std::string& aExc = "" );			
 	};
 
 

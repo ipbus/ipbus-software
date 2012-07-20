@@ -326,7 +326,7 @@ namespace uhal
 			/**
 				Propagate the partial addresses down through the hierarchical structure and make a record of all used addresses for collision detection
 				@param aAddr the full address of the current branch which will be applied to the current children
-				@param aUsedAddresses a map containing all of the addresses and subset of bits used by those addresses which have already been claimed
+				@param aTopLevelNode the top-level node which contains the hash-map of all known children, against which we will check the address for overlaps
 			*/
 			void calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode );
 

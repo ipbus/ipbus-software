@@ -145,8 +145,6 @@ namespace uhal
 						Concrete function which creates a new IPbus client based on the protocol identifier specified
 						@param aXmlNode a PugiXML node from which to construct a node
 						@param aPath The fully qualified path to the XML file containing this node
-						@param aParentAddr the address of the parent node for hierarchical addressing and address collision detection
-						@param aParentMask the address-mask of the parent node for hierarchical addressing and address collision detection
 						@return a node tree which must be copied before it can be used
 					*/
 					boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath );
