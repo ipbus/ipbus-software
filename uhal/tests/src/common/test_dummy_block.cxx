@@ -67,8 +67,8 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
 	ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlock ( N );
 	CACTUS_CHECK ( !mem.valid() );
 	CACTUS_CHECK ( mem.size() == N );
-	CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception );
-	//CACTUS_TEST_THROW(mem.size(),uhal::NonValidatedMemory); --> https://svnweb.cern.ch/trac/cactus/ticket/32
+	//CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception );
+	CACTUS_TEST_THROW(mem.size(),uhal::NonValidatedMemory); //--> https://svnweb.cern.ch/trac/cactus/ticket/32
 	CACTUS_TEST ( hw.dispatch() );
 	CACTUS_CHECK ( mem.valid() );
 	CACTUS_CHECK ( mem.size() == N );

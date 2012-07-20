@@ -15,7 +15,6 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 

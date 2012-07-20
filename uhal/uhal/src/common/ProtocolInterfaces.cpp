@@ -216,8 +216,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			{
 				this->Predispatch();
 				mTransportProtocol->Dispatch ( mCurrentBuffers );
-				delete mCurrentBuffers;
-				mCurrentBuffers = NULL;
+				mCurrentBuffers = NULL; //Not deleting the underlying buffer, just flagging that we need a new buffer next time
 				mTransportProtocol->Flush();
 			}
 		}
@@ -356,6 +355,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			if ( lRet )
 			{
 				aBuffers->validate();
+				delete aBuffers; //We have now checked the returned data and marked as valid the underlying memory. We can, therefore, delete the local storage and from this point onward, the validated memory will only exist if the user kept their own copy
 			}
 
 			return lRet;

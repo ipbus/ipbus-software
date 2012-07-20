@@ -17,7 +17,6 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
@@ -165,6 +164,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		if ( lRet )
 		{
 			aBuffers->validate();
+			delete aBuffers; //We have now checked the returned data and marked as valid the underlying memory. We can, therefore, delete the local storage and from this point onward, the validated memory will only exist if the user kept their own copy
 		}
 
 		return lRet;
