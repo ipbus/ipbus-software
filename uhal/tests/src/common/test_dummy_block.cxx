@@ -28,7 +28,7 @@ void block_write_read ( size_t N,const std::string& connection, const std::strin
 	ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N );
 	CACTUS_CHECK ( !mem.valid() );
 	CACTUS_CHECK ( mem.size() == N );
-	CACTUS_TEST_THROW ( mem.size(),uhal::NonValidatedMemory );
+	CACTUS_TEST_THROW ( mem.at(0),uhal::NonValidatedMemory );
 	CACTUS_TEST ( hw.dispatch() );
 	CACTUS_CHECK ( mem.valid() );
 	CACTUS_CHECK ( mem.size() == N );
