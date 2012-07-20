@@ -95,7 +95,6 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
 		{
 			//error description is given in the function itself so no more elaboration required
-			log ( Error() , "Throwing at " , ThisLocation() );
 			NodeMustHaveUID().throwFrom ( ThisLocation() );
 		}
 
@@ -179,7 +178,6 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
 					{
 						log ( Error() , "Nodes " , Quote ( mUid ) , " has type " , Quote ( "INCREMENTAL" ) , " require a " , Quote ( "size" ) , " attribute" );
-						log ( Error() , "Throwing at " , ThisLocation() );
 						IncrementalNodeRequiresSizeAttribute().throwFrom ( ThisLocation() );
 					}
 				}
@@ -537,7 +535,6 @@ Node::Node ( const Node& aNode ) try :
 					log ( Error() , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
 				}
 
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NoBranchFoundWithGivenUID().throwFrom ( ThisLocation() );
 			}
 
@@ -629,7 +626,6 @@ Node::Node ( const Node& aNode ) try :
 			else
 			{
 				log ( Error() , "Node permissions denied write access" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				WriteAccessDenied().throwFrom ( ThisLocation() );
 			}
 		}
@@ -652,7 +648,6 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
 			}
 			else
@@ -660,7 +655,6 @@ Node::Node ( const Node& aNode ) try :
 				if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
 				{
 					log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
 				}
 
@@ -671,7 +665,6 @@ Node::Node ( const Node& aNode ) try :
 				else
 				{
 					log ( Error() , "Node permissions denied write access" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					WriteAccessDenied().throwFrom ( ThisLocation() );
 				}
 			}
@@ -705,7 +698,6 @@ Node::Node ( const Node& aNode ) try :
 			else
 			{
 				log ( Error() , "Node permissions denied read access" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
 		}
@@ -728,7 +720,6 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
 			}
 			else
@@ -736,7 +727,6 @@ Node::Node ( const Node& aNode ) try :
 				if ( ( mSize != 1 ) && ( aSize>mSize ) )
 				{
 					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
 				}
 
@@ -747,7 +737,6 @@ Node::Node ( const Node& aNode ) try :
 				else
 				{
 					log ( Error() , "Node permissions denied read access" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					ReadAccessDenied().throwFrom ( ThisLocation() );
 				}
 			}
@@ -780,7 +769,6 @@ Node::Node ( const Node& aNode ) try :
 			else
 			{
 				log ( Error() , "Node permissions denied read access" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
 		}
@@ -803,7 +791,6 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
 			}
 			else
@@ -811,7 +798,6 @@ Node::Node ( const Node& aNode ) try :
 				if ( ( mSize != 1 ) && ( aSize>mSize ) )
 				{
 					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
 				}
 
@@ -822,7 +808,6 @@ Node::Node ( const Node& aNode ) try :
 				else
 				{
 					log ( Error() , "Node permissions denied read access" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					ReadAccessDenied().throwFrom ( ThisLocation() );
 				}
 			}
@@ -851,7 +836,6 @@ Node::Node ( const Node& aNode ) try :
 			else
 			{
 				log ( Error() , "Node permissions denied read/write access" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
 		}
@@ -878,7 +862,6 @@ Node::Node ( const Node& aNode ) try :
 			else
 			{
 				log ( Error() , "Node permissions denied read/write access" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
 		}
@@ -923,7 +906,6 @@ Node::Node ( const Node& aNode ) try :
 					if ( lCurrentTop >> 32 )
 					{
 						log ( Error() , "A block size of " , Integer ( mSize ) , " and a base address of " , Integer ( mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
-						log ( Error() , "Throwing at " , ThisLocation() );
 						ArraySizeExceedsRegisterBound().throwFrom ( ThisLocation() );
 					}
 
@@ -947,7 +929,6 @@ Node::Node ( const Node& aNode ) try :
 										  " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
 										  "]."
 										);
-									log ( Error() , "Throwing at " , ThisLocation() );
 									AddressSpaceOverlap().throwFrom ( ThisLocation() );
 								}
 							}
@@ -961,7 +942,6 @@ Node::Node ( const Node& aNode ) try :
 										  "] which overlaps with branch " , Quote ( lComparison.mUid ) ,
 										  " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , "]."
 										);
-									log ( Error() , "Throwing at " , ThisLocation() );
 									AddressSpaceOverlap().throwFrom ( ThisLocation() );
 								}
 							}
@@ -998,7 +978,6 @@ Node::Node ( const Node& aNode ) try :
 										  " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
 										  "]."
 										);
-									log ( Error() , "Throwing at " , ThisLocation() );
 									AddressSpaceOverlap().throwFrom ( ThisLocation() );
 								}
 							}
@@ -1016,7 +995,6 @@ Node::Node ( const Node& aNode ) try :
 											  " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) ,
 											  " and mask " , Integer ( lComparison.mMask , IntFmt<hex,fixed>() )
 											);
-										log ( Error() , "Throwing at " , ThisLocation() );
 										AddressSpaceOverlap().throwFrom ( ThisLocation() );
 									}
 								}

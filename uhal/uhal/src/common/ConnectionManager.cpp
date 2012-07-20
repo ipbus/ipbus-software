@@ -119,7 +119,6 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			if ( mConnectionDescriptors.size() == 0 )
 			{
 				log ( Error() , "Connection map contains no entries" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ConnectionUIDDoesNotExist().throwFrom ( ThisLocation() );
 			}
 
@@ -128,7 +127,6 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			if ( lIt == mConnectionDescriptors.end() )
 			{
 				log ( Error() , aId , " does not exist in connection map" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ConnectionUIDDoesNotExist().throwFrom ( ThisLocation() );
 			}
 
@@ -273,7 +271,6 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 						else
 						{
 							log ( Error() , "Duplicate connection ID found but parameters do not match! Bailing!" );
-							log ( Error() , "Throwing at " , ThisLocation() );
 							DuplicatedUID().throwFrom ( ThisLocation() );
 						}
 					}

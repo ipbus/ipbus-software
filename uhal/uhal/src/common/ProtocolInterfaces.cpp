@@ -377,19 +377,11 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		try
 		{
 			log ( Debug() , "Padding" );
-			// IPbus send packet format is:
-			// HEADER
-			uint32_t lSendByteCount ( 1 << 2 );
-			// IPbus reply packet format is:
-			// HEADER
-			uint32_t lReplyByteCount ( 1 << 2 );
-			uint32_t lSendBytesAvailable;
-			uint32_t  lReplyBytesAvailable;
+			// We do not need to check for space here as I have deliberately made the maximum reply buffer size too small by 8 words so that we can add up to 8 words of padding if it is needed for a block read
 			mCurrentBuffers->send ( this->calculateIPbusHeader ( B_O_T , 0 ) );
 			ValHeader lReply;
 			mCurrentBuffers->add ( lReply );
 			mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
-			//return lReply;
 		}
 		catch ( uhal::exception& aExc )
 		{

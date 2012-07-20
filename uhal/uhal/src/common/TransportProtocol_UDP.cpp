@@ -126,7 +126,6 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			if ( mErrorCode )
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ErrorInUdpCallback().throwFrom ( ThisLocation() );
 			}
 
@@ -152,14 +151,12 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			if ( mErrorCode )
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ErrorInUdpCallback().throwFrom ( ThisLocation() );
 			}
 
 			if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
 				log ( Error() , "Validation function reported an error!" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				IPbusValidationError ().throwFrom ( ThisLocation() );
 			}
 		}
@@ -192,7 +189,6 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		if ( sigaction ( SIGALRM, &sa, 0 ) < 0 )
 		{
 			log ( Error() , "Can't establish signal handler" );
-			log ( Error() , "Throwing at " , ThisLocation() );
 			UdpTimeout().throwFrom ( ThisLocation() );
 		}
 
@@ -312,7 +308,6 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 				if ( lTimeTaken > mTimeoutPeriod )
 				{
 					log ( Error() , "UDP Timeout" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					UdpTimeout().throwFrom ( ThisLocation() );
 				}
 			}

@@ -21,7 +21,6 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
@@ -29,7 +28,18 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	std::string IPBusUDPClient< IPbusProtocolVersion >::description()
 	{
-		return "Direct access to hardware via UDP, using " + toString ( IPbusProtocolVersion );
+		try
+		{
+			return "Direct access to hardware via UDP, using " + toString ( IPbusProtocolVersion );
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
 	}
 
 
@@ -46,7 +56,6 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
@@ -65,7 +74,6 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
@@ -92,7 +100,6 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
@@ -117,7 +124,6 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
@@ -136,7 +142,6 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
@@ -175,7 +180,6 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
@@ -202,7 +206,6 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
@@ -221,7 +224,6 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}

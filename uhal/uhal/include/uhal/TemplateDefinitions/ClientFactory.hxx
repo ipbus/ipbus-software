@@ -11,7 +11,7 @@ namespace uhal
 
 			if ( lIt != mCreators.end() )
 			{
-				//log ( Error() , "Throwing at " , ThisLocation() );
+				//
 				//ProtocolAlreadyExist().throwFrom( ThisLocation() );
 				log ( Warning() , "Protocol \"" , aProtocol , "\" already exists in map of creators. Continuing for now, but be warned." );
 				return;
@@ -34,7 +34,6 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
@@ -53,7 +52,6 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}

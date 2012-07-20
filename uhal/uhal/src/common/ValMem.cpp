@@ -221,7 +221,7 @@ ValWord< T >::ValWord() try :
 	// }
 	// else
 	// {
-	// log ( Error() , "Throwing at " , ThisLocation() );
+	//
 	// NonValidatedMemory().throwFrom( ThisLocation() );
 	// }
 	// }
@@ -255,7 +255,6 @@ ValWord< T >::ValWord() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
 		}
@@ -281,7 +280,6 @@ ValWord< T >::ValWord() try :
 			else
 			{
 				log ( Error() , "Attempted  to modify validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ValMemImutabilityViolation().throwFrom ( ThisLocation() );
 			}
 		}
@@ -442,7 +440,6 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Attempted  to modify validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ValMemImutabilityViolation().throwFrom ( ThisLocation() );
 			}
 		}
@@ -468,7 +465,6 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
 		}
@@ -494,7 +490,6 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
 		}
@@ -522,7 +517,7 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
+
 				NonValidatedMemory().throwFrom( ThisLocation() );
 			}
 			*/
@@ -567,7 +562,6 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
 		}
@@ -593,7 +587,6 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
 		}
@@ -619,7 +612,6 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
 		}
@@ -645,7 +637,6 @@ ValVector< T >::ValVector() try :
 			else
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
 		}
@@ -673,7 +664,7 @@ ValVector< T >::ValVector() try :
 				else
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-					log ( Error() , "Throwing at " , ThisLocation() );
+
 					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}
@@ -700,7 +691,7 @@ ValVector< T >::ValVector() try :
 				else
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-					log ( Error() , "Throwing at " , ThisLocation() );
+
 					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}
@@ -727,7 +718,7 @@ ValVector< T >::ValVector() try :
 				else
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_reverse_iterator." );
-					log ( Error() , "Throwing at " , ThisLocation() );
+
 					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}
@@ -754,7 +745,7 @@ ValVector< T >::ValVector() try :
 				else
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-					log ( Error() , "Throwing at " , ThisLocation() );
+
 					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}

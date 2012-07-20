@@ -135,7 +135,6 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			if ( mErrorCode )
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ErrorInTcpCallback().throwFrom ( ThisLocation() );
 			}
 
@@ -163,14 +162,12 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			if ( mErrorCode )
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ErrorInTcpCallback().throwFrom ( ThisLocation() );
 			}
 
 			if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
 				log ( Error() , "Validation function reported an error!" );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				IPbusValidationError ().throwFrom ( ThisLocation() );
 			}
 		}
@@ -203,7 +200,6 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		if ( sigaction ( SIGALRM, &sa, 0 ) < 0 )
 		{
 			log ( Error() , "Can't establish signal handler" );
-			log ( Error() , "Throwing at " , ThisLocation() );
 			TcpTimeout().throwFrom ( ThisLocation() );
 		}
 
@@ -323,7 +319,6 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 				if ( lTimeTaken > mTimeoutPeriod )
 				{
 					log ( Error() , "TCP Timeout" );
-					log ( Error() , "Throwing at " , ThisLocation() );
 					TcpTimeout().throwFrom ( ThisLocation() );
 				}
 			}

@@ -14,7 +14,6 @@ namespace uhal
 			}
 			else
 			{
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ValMemImutabilityViolation().throwFrom ( ThisLocation() );
 			}
 		}
@@ -24,7 +23,6 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}

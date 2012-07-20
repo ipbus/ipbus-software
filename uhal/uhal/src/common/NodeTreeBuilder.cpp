@@ -42,7 +42,6 @@ namespace uhal
 			if ( lAddressFiles.size() != 1 )
 			{
 				log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( aFilenameExpr ) , " contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				IncorrectAddressTableFileCount().throwFrom ( ThisLocation() );
 			}
 
@@ -51,14 +50,12 @@ namespace uhal
 			if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , boost::ref ( lNodes ) ) ) )
 			{
 				log ( Error() , "Failed to open address table file " , Quote ( lAddressFiles[0].second ) );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				FailedToOpenAddressTableFile().throwFrom ( ThisLocation() );
 			}
 
 			if ( lNodes.size() != 1 )
 			{
 				log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( lAddressFiles[0].second ) , " refers to " , Integer ( lNodes.size() ) , " valid files." );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				IncorrectAddressTableFileCount().throwFrom ( ThisLocation() );
 			}
 

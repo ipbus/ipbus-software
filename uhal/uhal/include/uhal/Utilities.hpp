@@ -331,7 +331,6 @@ namespace uhal
 
 					if ( lErrorCode )
 					{
-						log ( Error() , "Throwing at " , ThisLocation() );
 						throw boost::system::system_error ( lErrorCode );
 					}
 				}
@@ -356,7 +355,6 @@ namespace uhal
 
 					if ( lErrorCode )
 					{
-						log ( Error() , "Throwing at " , ThisLocation() );
 						throw boost::system::system_error ( lErrorCode );
 					}
 				}
@@ -388,7 +386,6 @@ namespace uhal
 							}
 							else
 							{
-								log ( Error() , "Throwing at " , ThisLocation() );
 								throw boost::system::system_error ( lErrorCode );
 							}
 						}
@@ -778,7 +775,6 @@ namespace uhal
 					if ( ss.str().size() > 10 )
 					{
 						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-						log ( Error() , "Throwing at " , ThisLocation() );
 						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
 					}
 
@@ -788,7 +784,6 @@ namespace uhal
 					if ( lTarget>>32 )
 					{
 						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-						log ( Error() , "Throwing at " , ThisLocation() );
 						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
 					}
 
@@ -868,7 +863,6 @@ namespace uhal
 					if ( ss.str().size() > 10 )
 					{
 						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-						log ( Error() , "Throwing at " , ThisLocation() );
 						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
 					}
 
@@ -878,7 +872,6 @@ namespace uhal
 					if ( lTarget>>32 )
 					{
 						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-						log ( Error() , "Throwing at " , ThisLocation() );
 						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
 					}
 

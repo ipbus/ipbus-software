@@ -51,7 +51,6 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			if ( WEXITSTATUS ( lPingStatus ) )
 			{
 				log ( Error() , "Ping returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				PingFailed().throwFrom ( ThisLocation() );
 			}
 		}
@@ -144,7 +143,6 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
 			{
 				log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				BitsSetWhichAreForbiddenByBitMask().throwFrom ( ThisLocation() );
 			}
 
@@ -156,7 +154,6 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 					  " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
 					  Integer ( lOverlap , IntFmt<hex,fixed>() )
 					);
-				log ( Error() , "Throwing at " , ThisLocation() );
 				BitsSetWhichAreForbiddenByBitMask().throwFrom ( ThisLocation() );
 			}
 

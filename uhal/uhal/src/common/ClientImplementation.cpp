@@ -21,7 +21,6 @@ namespace uhal
 		if ( lIt == aUri.mArguments.end() )
 		{
 			log ( Error() , "This function expects arguments of the form " , Quote ( "target=192.168.200.200:50001" ) ,". It appears that this is missing." );
-			log ( Error() , "Throwing at " , ThisLocation() );
 			XMLfileMissingRequiredParameters().throwFrom ( ThisLocation() );
 		}
 

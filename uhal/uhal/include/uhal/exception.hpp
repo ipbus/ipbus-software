@@ -12,6 +12,11 @@
 
 #include "uhal/log/log.hpp"
 
+//! An alias for the member "throwFrom" function which allows us to reassure the compiler that the catch block is actually going to rethrow...
+#define throwFrom(LOC) throwFrom_ ( LOC ); throw 0;
+//! An alias for the member "rethrowFrom" function which allows us to reassure the compiler that the catch block is actually going to rethrow...
+#define rethrowFrom(LOC) rethrowFrom_ ( LOC ); throw 0;
+
 namespace uhal
 {
 
@@ -42,13 +47,13 @@ namespace uhal
 				Abstract function to throw the current exception
 				@param aLocation a location object which holds the function name, file name and line number where the throw occured
 			*/
-			virtual void throwFrom ( const Location& aLocation ) = 0;
+			virtual void throwFrom_ ( const Location& aLocation ) = 0;
 
 			/**
 				Abstract function to rethrow the current exception
 				@param aLocation a location object which holds the function name, file name and line number where the rethrow occured
 			*/
-			virtual void rethrowFrom ( const Location& aLocation ) = 0;
+			virtual void rethrowFrom_ ( const Location& aLocation ) = 0;
 
 		private:
 
@@ -77,18 +82,18 @@ namespace uhal
 				Concrete implementation of function to throw the current exception
 				@param aLocation a location object which holds the function name, file name and line number where the throw occured
 			*/
-			void throwFrom ( const Location& aLocation );
+			void throwFrom_ ( const Location& aLocation );
 
 			/**
 				Concrete implementation of function to rethrow the current exception
 				@param aLocation a location object which holds the function name, file name and line number where the rethrow occured
 			*/
-			void rethrowFrom ( const Location& aLocation );
+			void rethrowFrom_ ( const Location& aLocation );
 	};
 
 
 
-	//! Exception class to handle the case where the supposedly unique ID is duplicated. Uses the base uhal::exception implementation of what()
+	//! Exception class to handle the case where we catch a std::exception and want to throw it as a uhal::exception. Uses the base uhal::exception implementation of what()
 	class StdException: public uhal::_exception< StdException >
 	{
 		public:

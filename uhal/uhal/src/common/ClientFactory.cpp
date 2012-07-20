@@ -98,7 +98,6 @@ namespace uhal
 				}
 
 				log ( Error() , "Protocol " , Quote ( lUri.mProtocol ) , " does not exists in map of creators. Options are:" , lStr.str() );
-				log ( Error() , "Throwing at " , ThisLocation() );
 				ProtocolDoesNotExist().throwFrom ( ThisLocation() );
 			}
 
