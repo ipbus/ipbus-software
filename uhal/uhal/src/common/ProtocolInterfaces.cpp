@@ -204,6 +204,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			{
 				this->Predispatch();
 				mTransportProtocol->Dispatch ( mCurrentBuffers );
+				delete mCurrentBuffers;
 				mCurrentBuffers = NULL;
 				mTransportProtocol->Flush();
 			}
