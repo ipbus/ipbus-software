@@ -65,10 +65,13 @@ namespace uhal
 					  "LINE           : " , lLine , "\n"
 					  "ERROR LOCATION : " , std::string ( lDist0 , '_' ) , "^" , std::string ( lDist1 , '_' ) );
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -122,10 +125,13 @@ namespace uhal
 
 				return lReturn;
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 	}

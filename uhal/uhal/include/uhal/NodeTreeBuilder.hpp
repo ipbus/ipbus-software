@@ -29,9 +29,9 @@
 namespace uhal
 {
 	//! Exception class to handle the case where too many or two few address files are specified. Uses the base uhal::exception implementation of what()
-	class IncorrectAddressTableFileCount: public uhal::exception {  };
+	class IncorrectAddressTableFileCount: public uhal::_exception< IncorrectAddressTableFileCount > {  };
 	//! Exception class to handle the case where the address file failed to open. Uses the base uhal::exception implementation of what()
-	class FailedToOpenAddressTableFile: public uhal::exception {  };
+	class FailedToOpenAddressTableFile: public uhal::_exception< FailedToOpenAddressTableFile > {  };
 
 
 	//! A class to build a node tree from an Address table file

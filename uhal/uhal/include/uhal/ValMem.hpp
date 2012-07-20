@@ -23,9 +23,9 @@
 namespace uhal
 {
 	//! Exception class to handle the case of attempted access on unvalidated memory. Uses the base uhal::exception implementation of what()
-	class NonValidatedMemory: public uhal::exception {  };
+	class NonValidatedMemory: public uhal::_exception< NonValidatedMemory > {  };
 	//! Exception class to handle the case of attempted modification of validated memory. Uses the base uhal::exception implementation of what()
-	class ValMemImutabilityViolation: public uhal::exception { };
+	class ValMemImutabilityViolation: public uhal::_exception< ValMemImutabilityViolation > { };
 
 	// Forward declare PackingProtocol so it can be our friend
 	class PackingProtocol;

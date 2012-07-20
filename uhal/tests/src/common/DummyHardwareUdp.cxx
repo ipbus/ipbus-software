@@ -14,10 +14,13 @@ class UDPdummyHardware
 			mIOservice(),
 					   mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) )
 			{}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 
 		~UDPdummyHardware() {}
@@ -140,10 +143,13 @@ class UDPdummyHardware
 					mSocket.send_to ( boost::asio::buffer ( mUDPreplyBuffer , ( lReplyPtr-mUDPreplyBuffer ) <<2 ) , mSenderEndpoint );
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -181,10 +187,13 @@ int main ( int argc, char* argv[] )
 		UDPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) );
 		lDummyHardware.run();
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	return 0;

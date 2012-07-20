@@ -35,10 +35,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
 		aSuccess=true;
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	bool ConnectionManager::ConnectionDescriptor::operator== ( const ConnectionDescriptor& aConnectionDescriptor ) const
@@ -67,10 +70,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
 			return true;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -90,10 +96,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , boost::bind ( &ConnectionManager::CallBack, boost::ref ( *this ) , _1 , _2 , _3 ) );
 		}
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	ConnectionManager::~ConnectionManager () {}
@@ -111,7 +120,7 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			{
 				log ( Error() , "Connection map contains no entries" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ConnectionUIDDoesNotExist();
+				ConnectionUIDDoesNotExist().throwFrom ( ThisLocation() );
 			}
 
 			std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.find ( aId );
@@ -120,7 +129,7 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			{
 				log ( Error() , aId , " does not exist in connection map" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ConnectionUIDDoesNotExist();
+				ConnectionUIDDoesNotExist().throwFrom ( ThisLocation() );
 			}
 
 			//The node tree builder returns a newly created shared_ptr to a Node
@@ -129,10 +138,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );
 			return HwInterface ( lClientInterface , lNode );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -146,10 +158,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
 			return HwInterface ( lClientInterface , lNode );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -169,10 +184,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
 			return lDevices;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -196,10 +214,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
 			return lDevices;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -253,7 +274,7 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 						{
 							log ( Error() , "Duplicate connection ID found but parameters do not match! Bailing!" );
 							log ( Error() , "Throwing at " , ThisLocation() );
-							throw DuplicatedUID();
+							DuplicatedUID().throwFrom ( ThisLocation() );
 						}
 					}
 				}
@@ -263,10 +284,13 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 				}
 			}
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

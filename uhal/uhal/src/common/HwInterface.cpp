@@ -11,10 +11,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 	{
 		claimNode ( *mNode );
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -38,10 +41,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 			// claimNode ( lIt->second );
 			// }
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -51,10 +57,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			return mClientInterface;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -64,10 +73,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			mClientInterface->ping();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -77,10 +89,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			mClientInterface->dispatch ();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -91,10 +106,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			return mClientInterface->id();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -105,10 +123,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			return mClientInterface->uri();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -132,10 +153,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			return mNode->getNode ( aId );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -145,10 +169,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			return mNode->getNodes();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -158,10 +185,13 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			return mNode->getNodes ( aRegex );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -171,10 +201,14 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 	// {
 	// return mClientInterface->readReservedAddressInfo();
 	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom( ThisLocation() );
+	// }
 	// catch ( const std::exception& aExc )
 	// {
-	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-	// throw uhal::exception ( aExc );
+	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );	// uhal::StdException lExc( aExc );
+	// lExc.throwFrom( ThisLocation() );
 	// }
 	// }
 

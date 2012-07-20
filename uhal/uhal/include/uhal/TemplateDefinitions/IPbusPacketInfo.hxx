@@ -21,6 +21,10 @@ namespace uhal
 			aResponseGood = aHeader & 0x3;
 			return true;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			return false;

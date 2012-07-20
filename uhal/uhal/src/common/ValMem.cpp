@@ -11,10 +11,13 @@ _ValHeader_::_ValHeader_ ( const bool& aValid ) try :
 		valid ( aValid ) ,
 			  IPbusHeader ( 0 )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -27,10 +30,13 @@ _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t 
 			  mask ( aMask ) ,
 			  IPbusHeader ( 0 )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -40,10 +46,13 @@ _ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid 
 		value ( aValue ) ,
 			  valid ( aValid )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -54,10 +63,13 @@ ValHeader::ValHeader() try :
 		mMembers ( new _ValHeader_ ( false ) )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	bool ValHeader::valid()
@@ -66,10 +78,13 @@ ValHeader::ValHeader() try :
 		{
 			return mMembers->valid;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -79,10 +94,13 @@ ValHeader::ValHeader() try :
 		{
 			mMembers->valid = aValid;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -97,10 +115,13 @@ ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) try :
 		mMembers ( new _ValWord_<T> ( aValue , false , aMask ) )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< typename T >
@@ -109,10 +130,13 @@ ValWord< T >::ValWord ( const ValWord<T>& aVal ) try :
 		mMembers ( aVal.mMembers )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< typename T >
@@ -121,10 +145,13 @@ ValWord< T >::ValWord() try :
 		mMembers ( new _ValWord_<T> ( T() , false , 0xFFFFFFFF ) )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< typename T >
@@ -134,10 +161,13 @@ ValWord< T >::ValWord() try :
 		{
 			return mMembers->valid;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -148,10 +178,13 @@ ValWord< T >::ValWord() try :
 		{
 			mMembers->valid = aValid;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -163,10 +196,13 @@ ValWord< T >::ValWord() try :
 			mMembers->value = aValue ;
 			return *this;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -186,7 +222,7 @@ ValWord< T >::ValWord() try :
 	// else
 	// {
 	// log ( Error() , "Throwing at " , ThisLocation() );
-	// throw NonValidatedMemory();
+	// NonValidatedMemory().throwFrom( ThisLocation() );
 	// }
 	// }
 
@@ -197,10 +233,13 @@ ValWord< T >::ValWord() try :
 		{
 			return value();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -217,13 +256,16 @@ ValWord< T >::ValWord() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -240,13 +282,16 @@ ValWord< T >::ValWord() try :
 			{
 				log ( Error() , "Attempted  to modify validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ValMemImutabilityViolation();
+				ValMemImutabilityViolation().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -257,10 +302,13 @@ ValWord< T >::ValWord() try :
 		{
 			return mMembers->mask;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -271,10 +319,13 @@ ValWord< T >::ValWord() try :
 		{
 			mMembers->mask = aMask ;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -289,10 +340,13 @@ ValVector< T >::ValVector ( const std::vector<T>& aValues ) try :
 		mMembers ( new _ValVector_<T> ( aValues , false ) )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< typename T >
@@ -301,10 +355,13 @@ ValVector< T >::ValVector ( const ValVector& aValues ) try :
 		mMembers ( aValues.mMembers )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< typename T >
@@ -313,10 +370,13 @@ ValVector< T >::ValVector ( uint32_t aSize ) try :
 		mMembers ( new _ValVector_<T> ( std::vector<T> ( aSize , T() ) , false ) )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< typename T >
@@ -325,10 +385,13 @@ ValVector< T >::ValVector() try :
 		mMembers ( new _ValVector_<T> ( std::vector<T>() , false ) )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< typename T >
@@ -338,10 +401,13 @@ ValVector< T >::ValVector() try :
 		{
 			return mMembers->valid;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -352,10 +418,13 @@ ValVector< T >::ValVector() try :
 		{
 			mMembers->valid = aValid;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -374,13 +443,16 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Attempted  to modify validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ValMemImutabilityViolation();
+				ValMemImutabilityViolation().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -397,13 +469,16 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -420,13 +495,16 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -445,14 +523,17 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom( ThisLocation() );
 			}
 			*/
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -464,10 +545,13 @@ ValVector< T >::ValVector() try :
 			mMembers->valid = false;
 			mMembers->value.clear();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -484,13 +568,16 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -507,13 +594,16 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -530,13 +620,16 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -553,13 +646,16 @@ ValVector< T >::ValVector() try :
 			{
 				log ( Error() , "Access attempted on non-validated memory" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NonValidatedMemory();
+				NonValidatedMemory().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -578,13 +674,17 @@ ValVector< T >::ValVector() try :
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw ValMemImutabilityViolation();
+					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}
-			catch ( const std::exception& aExc )
+			catch ( uhal::exception& aExc )
+	{
+	aExc.rethrowFrom( ThisLocation() );
+	}
+	catch ( const std::exception& aExc )
 			{
 				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+	StdException ( aExc ).throwFrom( ThisLocation() );
 			}
 		}
 
@@ -601,13 +701,17 @@ ValVector< T >::ValVector() try :
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw ValMemImutabilityViolation();
+					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}
-			catch ( const std::exception& aExc )
+			catch ( uhal::exception& aExc )
+	{
+	aExc.rethrowFrom( ThisLocation() );
+	}
+	catch ( const std::exception& aExc )
 			{
 				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+	StdException ( aExc ).throwFrom( ThisLocation() );
 			}
 		}
 
@@ -624,13 +728,17 @@ ValVector< T >::ValVector() try :
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_reverse_iterator." );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw ValMemImutabilityViolation();
+					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}
-			catch ( const std::exception& aExc )
+			catch ( uhal::exception& aExc )
+	{
+	aExc.rethrowFrom( ThisLocation() );
+	}
+	catch ( const std::exception& aExc )
 			{
 				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+	StdException ( aExc ).throwFrom( ThisLocation() );
 			}
 		}
 
@@ -647,13 +755,17 @@ ValVector< T >::ValVector() try :
 				{
 					log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw ValMemImutabilityViolation();
+					ValMemImutabilityViolation().throwFrom( ThisLocation() );
 				}
 			}
-			catch ( const std::exception& aExc )
+			catch ( uhal::exception& aExc )
+	{
+	aExc.rethrowFrom( ThisLocation() );
+	}
+	catch ( const std::exception& aExc )
 			{
 				log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+	StdException ( aExc ).throwFrom( ThisLocation() );
 			}
 		}
 	*/

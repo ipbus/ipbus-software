@@ -345,7 +345,7 @@ namespace uhal
 				@note This is part of the dirty hack to bypass a limitation in the v1.3 firmware and should not really be required
 			*/
 			virtual void Padding( );
-			
+
 			/**
 				Function which the transport protocol calls when the IPbus reply is received to check that the headers are as expected
 				@param aSendBufferStart a pointer to the start of the first word of IPbus data which was sent (i.e. with no preamble)

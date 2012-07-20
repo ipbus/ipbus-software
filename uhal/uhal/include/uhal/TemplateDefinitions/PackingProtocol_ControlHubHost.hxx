@@ -11,10 +11,14 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 						mDevicePort ( htons ( aDevicePort ) ),
 						mTransactionCounter ( 0 )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
 		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
@@ -75,17 +79,18 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
 		mMutex.lock();
 		tPreamble& lPreamble ( mPreambles.back() );
 		mMutex.unlock();
+		uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
 
-		uint32_t lWords( mCurrentBuffers->sendCounter()  >> 2 );
-		if( lWords < 11 ) // 8 words of data + 3 words of preamble
+		if ( lWords < 11 ) // 8 words of data + 3 words of preamble
 		{
-			log( Info() , "Adding " , Integer( 11 - lWords ) , " words of padding." );		
-			for( ; lWords != 11 ; ++lWords )
+			log ( Info() , "Adding " , Integer ( 11 - lWords ) , " words of padding." );
+
+			for ( ; lWords != 11 ; ++lWords )
 			{
 				this->Padding();
 			}
 		}
-		
+
 		uint32_t lByteCount ( mCurrentBuffers->sendCounter() );
 		*lPreamble.mSendByteCountPtr = htonl ( lByteCount-4 );
 		*lPreamble.mSendWordCountPtr = htons ( ( lByteCount-12 ) >>2 );

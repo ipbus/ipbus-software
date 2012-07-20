@@ -26,7 +26,7 @@ namespace uhal
 {
 
 	//! Exception class to handle the case where we were unable to validate the IPbus header. Uses the base uhal::exception implementation of what()
-	class IPbusValidationError: public uhal::exception {  };
+	class IPbusValidationError: public uhal::_exception< IPbusValidationError > {  };
 
 
 	/**

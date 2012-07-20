@@ -9,10 +9,13 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 					 mReplyCounter ( 0 ),
 					 mSendBuffer ( new uint8_t[ aMaxSendSize ] )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -131,10 +134,13 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 TransportProtocol::TransportProtocol ( const uint32_t& aTimeoutPeriod ) try :
 		mTimeoutPeriod ( aTimeoutPeriod )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	TransportProtocol::~TransportProtocol() {}
@@ -159,10 +165,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 						   mMaxSendSize ( aMaxSendSize ),
 						   mMaxReplySize ( aMaxReplySize )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	PackingProtocol::~PackingProtocol()
@@ -183,10 +192,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		{
 			this->ByteOrderTransaction();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -199,8 +211,8 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		log ( Debug() , "Dispatch" );
 
 		if ( mCurrentBuffers )
-		{	
-			if( mCurrentBuffers->sendCounter() )
+		{
+			if ( mCurrentBuffers->sendCounter() )
 			{
 				this->Predispatch();
 				mTransportProtocol->Dispatch ( mCurrentBuffers );
@@ -226,7 +238,6 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 		try
 		{
 			log ( Debug() , "Underlying Validation" );
-
 			eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
 			uint32_t lSendWordCount , lReplyWordCount;
 			uint32_t lSendTransactionId , lReplyTransactionId;
@@ -313,10 +324,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			log ( Debug() , "Validation Complete!" );
 			return true;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -346,10 +360,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 			return lRet;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -374,13 +391,16 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
 			//return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
-	
+
 
 	void PackingProtocol::ByteOrderTransaction()
 	{
@@ -402,10 +422,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
 			//return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -433,10 +456,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
 			//return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -486,10 +512,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 				mCurrentBuffers->receive ( lReply.mMembers->IPbusHeader );
 			}
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -523,10 +552,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->receive ( lReplyMem.value );
 			return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -575,10 +607,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->add ( lReply ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
 			return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -611,10 +646,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->receive ( lReplyMem.value );
 			return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -663,10 +701,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->add ( lReply ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
 			return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -696,10 +737,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 	// mCurrentBuffers->receive ( ( uint8_t* ) ( & ( lReplyMem.value[0] ) ) , 2<<2 );
 	// return lReply;
 	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom( ThisLocation() );
+	// }
 	// catch ( const std::exception& aExc )
 	// {
-	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-	// throw uhal::exception ( aExc );
+	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );	// StdException ( aExc ).throwFrom( ThisLocation() );
 	// }
 	// }
 	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -734,10 +778,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->receive ( lReplyMem.value );
 			return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -770,10 +817,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->receive ( lReplyMem.value );
 			return lReply;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -794,21 +844,20 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 			uint32_t lSendBufferFreeSpace ( mMaxSendSize - mCurrentBuffers->sendCounter() );
 			uint32_t lReplyBufferFreeSpace ( mMaxReplySize - mCurrentBuffers->replyCounter() );
-
 			// log ( Debug() , "Current buffer:\n" ,
-					// " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
-					// " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
-					// "\n" ,
-					// " mMaxSendSize " , Integer( mMaxSendSize ) ,
-					// " | mMaxReplySize " , Integer( mMaxReplySize ) ,
-					// "\n" ,
-					// " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
-					// " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
-					// "\n" ,
-					// " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
-					// " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
+			// " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
+			// " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
+			// "\n" ,
+			// " mMaxSendSize " , Integer( mMaxSendSize ) ,
+			// " | mMaxReplySize " , Integer( mMaxReplySize ) ,
+			// "\n" ,
+			// " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
+			// " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
+			// "\n" ,
+			// " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
+			// " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
 			// );
-			
+
 			if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
 			{
 				aAvailableSendSize = aRequestedSendSize;
@@ -828,24 +877,22 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mTransportProtocol->Dispatch ( mCurrentBuffers );
 			mCurrentBuffers = new Buffers ( mMaxSendSize );
 			this->Preamble();
-			
 			lSendBufferFreeSpace = mMaxSendSize - mCurrentBuffers->sendCounter();
 			lReplyBufferFreeSpace = mMaxReplySize - mCurrentBuffers->replyCounter();
-		
 			// log ( Debug() , "Newly created buffer:\n" ,
-					// " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
-					// " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
-					// "\n" ,
-					// " mMaxSendSize " , Integer( mMaxSendSize ) ,
-					// " | mMaxReplySize " , Integer( mMaxReplySize ) ,
-					// "\n" ,
-					// " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
-					// " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
-					// "\n" ,
-					// " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
-					// " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
+			// " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
+			// " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
+			// "\n" ,
+			// " mMaxSendSize " , Integer( mMaxSendSize ) ,
+			// " | mMaxReplySize " , Integer( mMaxReplySize ) ,
+			// "\n" ,
+			// " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
+			// " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
+			// "\n" ,
+			// " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
+			// " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
 			// );
-			
+
 			if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
 			{
 				aAvailableSendSize = aRequestedSendSize;
@@ -856,10 +903,13 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			aAvailableSendSize = lSendBufferFreeSpace;
 			aAvailableReplySize = lReplyBufferFreeSpace;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

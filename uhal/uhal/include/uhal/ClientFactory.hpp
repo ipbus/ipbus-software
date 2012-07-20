@@ -20,9 +20,9 @@
 namespace uhal
 {
 	// //! Exception class to handle the case where a protocol already exists in the creator map. Uses the base uhal::exception implementation of what()
-	// class ProtocolAlreadyExist: public uhal::exception { };
+	// class ProtocolAlreadyExist: public uhal::_exception< ProtocolAlreadyExist > { };
 	//! Exception class to handle the case where the protocol requested does not exists in the creator map. Uses the base uhal::exception implementation of what()
-	class ProtocolDoesNotExist: public uhal::exception { };
+	class ProtocolDoesNotExist: public uhal::_exception< ProtocolDoesNotExist > { };
 
 	//! A class to construct an IPbus client based on the protocol identifier specified
 	class ClientFactory: private boost::noncopyable

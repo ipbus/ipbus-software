@@ -15,13 +15,17 @@ namespace uhal
 			else
 			{
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ValMemImutabilityViolation();
+				ValMemImutabilityViolation().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

@@ -50,7 +50,7 @@ namespace uhal
 			virtual bool extractIPbusHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood );
 
 			void Predispatch( );
-	
+
 		private:
 			//! The transaction counter which will be incremented in the sent IPbus headers
 			uint32_t mTransactionCounter;

@@ -96,15 +96,14 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		{
 			//error description is given in the function itself so no more elaboration required
 			log ( Error() , "Throwing at " , ThisLocation() );
-			throw NodeMustHaveUID();
+			NodeMustHaveUID().throwFrom ( ThisLocation() );
 		}
 
-		
 		//Address is an optional attribute for hierarchical addressing
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
-
 		//Module is an optional attribute for pointing to other xml files. When specified, module implies that certain other attributes be ignored
 		std::string lModule;
+
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
 		{
 			try
@@ -112,19 +111,22 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 				log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
 				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 		else
 		{
 			//Mask as an optional attribute to identify subfields of a register
 			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
-			
 			//Permissions is an optional attribute for specifying read/write permissions
 			std::string lPermission;
+
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
 			{
 				try
@@ -137,15 +139,19 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 						mPermission
 					);
 				}
+				catch ( uhal::exception& aExc )
+				{
+					aExc.rethrowFrom ( ThisLocation() );
+				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-					throw uhal::exception ( aExc );
+					StdException ( aExc ).throwFrom ( ThisLocation() );
 				}
 			}
 
 			//Mode is an optional attribute for specifying whether a block is incremental, non-incremental or a single register
 			std::string lMode;
+
 			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
 			{
 				try
@@ -158,10 +164,13 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 						mMode
 					);
 				}
+				catch ( uhal::exception& aExc )
+				{
+					aExc.rethrowFrom ( ThisLocation() );
+				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-					throw uhal::exception ( aExc );
+					StdException ( aExc ).throwFrom ( ThisLocation() );
 				}
 
 				if ( mMode == defs::INCREMENTAL )
@@ -171,7 +180,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 					{
 						log ( Error() , "Nodes " , Quote ( mUid ) , " has type " , Quote ( "INCREMENTAL" ) , " require a " , Quote ( "size" ) , " attribute" );
 						log ( Error() , "Throwing at " , ThisLocation() );
-						throw IncrementalNodeRequiresSizeAttribute();
+						IncrementalNodeRequiresSizeAttribute().throwFrom ( ThisLocation() );
 					}
 				}
 				else if ( mMode == defs::NON_INCREMENTAL )
@@ -203,10 +212,13 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		//Tags is an optional attribute to allow the user to add a description to a node
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -224,10 +236,13 @@ Node::Node ( ) try :
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -245,10 +260,13 @@ Node::Node ( const Node& aNode ) try :
 			mChildrenMap ( aNode.mChildrenMap )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -299,10 +317,13 @@ Node::Node ( const Node& aNode ) try :
 				   this->getPermission() == aNode.getPermission() &&
 				   this->getId() == aNode.getId();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -313,10 +334,13 @@ Node::Node ( const Node& aNode ) try :
 		{
 			return mUid;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -326,10 +350,13 @@ Node::Node ( const Node& aNode ) try :
 		{
 			return mAddr;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -339,10 +366,13 @@ Node::Node ( const Node& aNode ) try :
 		{
 			return mMask;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -352,10 +382,13 @@ Node::Node ( const Node& aNode ) try :
 		{
 			return mMode;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -365,10 +398,13 @@ Node::Node ( const Node& aNode ) try :
 		{
 			return mSize;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -378,10 +414,13 @@ Node::Node ( const Node& aNode ) try :
 		{
 			return mPermission;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -392,10 +431,13 @@ Node::Node ( const Node& aNode ) try :
 		{
 			return mTags;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -414,26 +456,27 @@ Node::Node ( const Node& aNode ) try :
 			{
 				case defs::SINGLE:
 					aStream << "SINGLE register, "
-							<< std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
-							<< std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
+					<< std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
+					<< std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
 					break;
 				case defs::INCREMENTAL:
 					aStream << "INCREMENTAL block, "
-							<< std::dec << "Size " << mSize << ", "
-							<< std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << (mAddr+mSize-1) << "], ";
+					<< std::dec << "Size " << mSize << ", "
+					<< std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << ( mAddr+mSize-1 ) << "], ";
 					break;
 				case defs::NON_INCREMENTAL:
 					aStream << "NON-INCREMENTAL block, ";
-					if( mSize )
+
+					if ( mSize )
 					{
 						aStream << std::dec << "Size " << mSize << ", ";
 					}
+
 					aStream << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", ";
 					break;
 			}
 
 			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
-			
 			// for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
 			// {
 			// aStream << '\n' << std::string ( aIndent+2 , ' ' ) << "- Map entry " << (lIt->first);
@@ -444,10 +487,13 @@ Node::Node ( const Node& aNode ) try :
 				lIt->stream ( aStream , aIndent+2 );
 			}
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -492,15 +538,18 @@ Node::Node ( const Node& aNode ) try :
 				}
 
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw NoBranchFoundWithGivenUID();
+				NoBranchFoundWithGivenUID().throwFrom ( ThisLocation() );
 			}
 
 			return * ( lIt->second );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -519,10 +568,13 @@ Node::Node ( const Node& aNode ) try :
 
 			return lNodes;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -549,10 +601,13 @@ Node::Node ( const Node& aNode ) try :
 			std::sort ( lNodes.begin(), lNodes.end() );
 			return lNodes;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -575,13 +630,16 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Node permissions denied write access" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw WriteAccessDenied();
+				WriteAccessDenied().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -595,7 +653,7 @@ Node::Node ( const Node& aNode ) try :
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw BulkTransferOnSingleRegister();
+				BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
 			}
 			else
 			{
@@ -603,7 +661,7 @@ Node::Node ( const Node& aNode ) try :
 				{
 					log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw BulkTransferRequestedTooLarge();
+					BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
 				}
 
 				if ( mPermission & defs::WRITE )
@@ -614,14 +672,17 @@ Node::Node ( const Node& aNode ) try :
 				{
 					log ( Error() , "Node permissions denied write access" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw WriteAccessDenied();
+					WriteAccessDenied().throwFrom ( ThisLocation() );
 				}
 			}
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -645,13 +706,16 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Node permissions denied read access" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ReadAccessDenied();
+				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -665,7 +729,7 @@ Node::Node ( const Node& aNode ) try :
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw BulkTransferOnSingleRegister();
+				BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
 			}
 			else
 			{
@@ -673,7 +737,7 @@ Node::Node ( const Node& aNode ) try :
 				{
 					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw BulkTransferRequestedTooLarge();
+					BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
 				}
 
 				if ( mPermission & defs::READ )
@@ -684,14 +748,17 @@ Node::Node ( const Node& aNode ) try :
 				{
 					log ( Error() , "Node permissions denied read access" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw ReadAccessDenied();
+					ReadAccessDenied().throwFrom ( ThisLocation() );
 				}
 			}
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -714,13 +781,16 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Node permissions denied read access" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ReadAccessDenied();
+				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -734,7 +804,7 @@ Node::Node ( const Node& aNode ) try :
 				log ( Error() , "Bulk Transfer requested on single register node" );
 				log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw BulkTransferOnSingleRegister();
+				BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
 			}
 			else
 			{
@@ -742,7 +812,7 @@ Node::Node ( const Node& aNode ) try :
 				{
 					log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw BulkTransferRequestedTooLarge();
+					BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
 				}
 
 				if ( mPermission & defs::READ )
@@ -753,14 +823,17 @@ Node::Node ( const Node& aNode ) try :
 				{
 					log ( Error() , "Node permissions denied read access" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw ReadAccessDenied();
+					ReadAccessDenied().throwFrom ( ThisLocation() );
 				}
 			}
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -779,13 +852,16 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Node permissions denied read/write access" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ReadAccessDenied();
+				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -803,13 +879,16 @@ Node::Node ( const Node& aNode ) try :
 			{
 				log ( Error() , "Node permissions denied read/write access" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ReadAccessDenied();
+				ReadAccessDenied().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -820,166 +899,168 @@ Node::Node ( const Node& aNode ) try :
 		try
 		{
 			if ( mAddr )
-			{				
-				if( mMode == defs::INCREMENTAL )
+			{
+				if ( mMode == defs::INCREMENTAL )
 				{
-					uint64_t lCurrentTop( (uint64_t)(mAddr) + (uint64_t)(mSize-1) );
-					
+					uint64_t lCurrentTop ( ( uint64_t ) ( mAddr ) + ( uint64_t ) ( mSize-1 ) );
+
 					//Test for overlap with parent
-					if ( (uint32_t)(lCurrentTop) & aAddr ) //should set the most significant bit of the child address and then AND this with the parent address
+					if ( ( uint32_t ) ( lCurrentTop ) & aAddr ) //should set the most significant bit of the child address and then AND this with the parent address
 					{
-						log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( mUid ) , " , (" , Integer ( (uint32_t)(lCurrentTop) , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
-					}	
+						log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( mUid ) , " , (" , Integer ( ( uint32_t ) ( lCurrentTop ) , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+					}
 
 					//Update the addresses with parent address
 					mAddr |= aAddr;
-					lCurrentTop = (uint64_t)(mAddr) + (uint64_t)(mSize-1);
-
-					// log ( Error() , Quote ( mUid ) , 
-								// " : Size " , Integer ( mSize , IntFmt<hex,fixed>() ) , 
-								// " : Base Address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
-								// " : lCurrentTop " ,  Integer ( lCurrentTop , IntFmt<hex,fixed>() )
+					lCurrentTop = ( uint64_t ) ( mAddr ) + ( uint64_t ) ( mSize-1 );
+					// log ( Error() , Quote ( mUid ) ,
+					// " : Size " , Integer ( mSize , IntFmt<hex,fixed>() ) ,
+					// " : Base Address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
+					// " : lCurrentTop " ,  Integer ( lCurrentTop , IntFmt<hex,fixed>() )
 					// );
-							
+
 					//Check that the requested block size does not extend outside register space
-					if( lCurrentTop >> 32 )
+					if ( lCurrentTop >> 32 )
 					{
 						log ( Error() , "A block size of " , Integer ( mSize ) , " and a base address of " , Integer ( mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
 						log ( Error() , "Throwing at " , ThisLocation() );
-						throw ArraySizeExceedsRegisterBound();
+						ArraySizeExceedsRegisterBound().throwFrom ( ThisLocation() );
 					}
-					
+
 					//Compare against all other branches
 					for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap->begin() ; lIt != aTopLevelNode.mChildrenMap->end() ; ++lIt )
 					{
-						const Node& lComparison( *lIt->second );
-						if( lComparison.mAddrValid )
+						const Node& lComparison ( *lIt->second );
+
+						if ( lComparison.mAddrValid )
 						{
-							if( lComparison.mMode == defs::INCREMENTAL )
+							if ( lComparison.mMode == defs::INCREMENTAL )
 							{
 								// Current and comparison are both incremental
-								uint32_t lComparisonTop( lComparison.mAddr + (lComparison.mSize-1) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
-								
-								if( ((lComparisonTop >= mAddr) && (lComparisonTop <= lCurrentTop)) || ((lCurrentTop >= lComparison.mAddr) && (lCurrentTop <= lComparisonTop))  )
+								uint32_t lComparisonTop ( lComparison.mAddr + ( lComparison.mSize-1 ) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
+
+								if ( ( ( lComparisonTop >= mAddr ) && ( lComparisonTop <= lCurrentTop ) ) || ( ( lCurrentTop >= lComparison.mAddr ) && ( lCurrentTop <= lComparisonTop ) ) )
 								{
-									log ( Error() , "Branch " , Quote ( mUid ) , 
-													" has address range [" , Integer( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lCurrentTop , IntFmt<hex,fixed>() ) , 
-													"] which overlaps with branch " , Quote ( lComparison.mUid ) ,
-													" which has address range [" , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lComparisonTop , IntFmt<hex,fixed>() ) , 
-													"]."													
+									log ( Error() , "Branch " , Quote ( mUid ) ,
+										  " has address range [" , Integer ( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) ,
+										  "] which overlaps with branch " , Quote ( lComparison.mUid ) ,
+										  " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
+										  "]."
 										);
 									log ( Error() , "Throwing at " , ThisLocation() );
-									throw AddressSpaceOverlap();
+									AddressSpaceOverlap().throwFrom ( ThisLocation() );
 								}
 							}
 							else
 							{
 								// Current is incremental, comparison is static
-								if( (lComparison.mAddr >= mAddr) && (lComparison.mAddr <= lCurrentTop) )
+								if ( ( lComparison.mAddr >= mAddr ) && ( lComparison.mAddr <= lCurrentTop ) )
 								{
-									log ( Error() , "Branch " , Quote ( mUid ) , 
-													" has address range [" , Integer( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lCurrentTop , IntFmt<hex,fixed>() ) , 
-													"] which overlaps with branch " , Quote ( lComparison.mUid ) ,
-													" which has address " , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) , "]."													
+									log ( Error() , "Branch " , Quote ( mUid ) ,
+										  " has address range [" , Integer ( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) ,
+										  "] which overlaps with branch " , Quote ( lComparison.mUid ) ,
+										  " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , "]."
 										);
 									log ( Error() , "Throwing at " , ThisLocation() );
-									throw AddressSpaceOverlap();
-								}							
+									AddressSpaceOverlap().throwFrom ( ThisLocation() );
+								}
 							}
 						}
-					}	
-					
+					}
 				}
 				else
 				{
-
 					//Test for overlap with parent
 					if ( mAddr & aAddr )
 					{
 						log ( Warning() , "The partial address of the current branch, " , Quote ( mUid ) , " , (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
-					}					
+					}
 
 					//Update the addresses with parent address
 					mAddr |= aAddr;
-					
+
 					for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap->begin() ; lIt != aTopLevelNode.mChildrenMap->end() ; ++lIt )
 					{
-						const Node& lComparison( *lIt->second );
-						if( lComparison.mAddrValid )
+						const Node& lComparison ( *lIt->second );
+
+						if ( lComparison.mAddrValid )
 						{
-							if( lComparison.mMode == defs::INCREMENTAL )
+							if ( lComparison.mMode == defs::INCREMENTAL )
 							{
 								// Current is static, comparison is incremental
-								uint32_t lComparisonTop( lComparison.mAddr + (lComparison.mSize-1) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
-								
-								if( (mAddr >= lComparison.mAddr) && (mAddr <= lComparisonTop) )
+								uint32_t lComparisonTop ( lComparison.mAddr + ( lComparison.mSize-1 ) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
+
+								if ( ( mAddr >= lComparison.mAddr ) && ( mAddr <= lComparisonTop ) )
 								{
-									log ( Error() , "Branch " , Quote ( mUid ) , 
-													" has address " , Integer( mAddr , IntFmt<hex,fixed>() ) ,
-													" which overlaps with branch " , Quote ( lComparison.mUid ) ,
-													" which has address range [" , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer( lComparisonTop , IntFmt<hex,fixed>() ) , 
-													"]."													
+									log ( Error() , "Branch " , Quote ( mUid ) ,
+										  " has address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
+										  " which overlaps with branch " , Quote ( lComparison.mUid ) ,
+										  " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
+										  "]."
 										);
 									log ( Error() , "Throwing at " , ThisLocation() );
-									throw AddressSpaceOverlap();
+									AddressSpaceOverlap().throwFrom ( ThisLocation() );
 								}
 							}
 							else
 							{
 								// Current and comparison are both static
-								if( mAddr == lComparison.mAddr )
+								if ( mAddr == lComparison.mAddr )
 								{
-									if( mMask & lComparison.mMask )
+									if ( mMask & lComparison.mMask )
 									{
-										log ( Error() , "Branch " , Quote ( mUid ) , 
-														" has address " , Integer( mAddr , IntFmt<hex,fixed>() ) ,
-														" and mask " , Integer( mMask , IntFmt<hex,fixed>() ) ,														
-														" which overlaps with branch " , Quote ( lComparison.mUid ) ,
-														" which has address " , Integer( lComparison.mAddr , IntFmt<hex,fixed>() ) ,
-														" and mask " , Integer( lComparison.mMask , IntFmt<hex,fixed>() ) 													
-										);
+										log ( Error() , "Branch " , Quote ( mUid ) ,
+											  " has address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
+											  " and mask " , Integer ( mMask , IntFmt<hex,fixed>() ) ,
+											  " which overlaps with branch " , Quote ( lComparison.mUid ) ,
+											  " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) ,
+											  " and mask " , Integer ( lComparison.mMask , IntFmt<hex,fixed>() )
+											);
 										log ( Error() , "Throwing at " , ThisLocation() );
-										throw AddressSpaceOverlap();
+										AddressSpaceOverlap().throwFrom ( ThisLocation() );
 									}
 								}
-								
 							}
 						}
-					}					
+					}
 				}
-				
 			}
 			else
 			{
 				mAddr = aAddr;
 			}
-		
+
 			for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 			{
 				lIt->calculateHierarchicalAddresses ( mAddr , aTopLevelNode );
 			}
-			
-			mAddrValid = true;
 
+			mAddrValid = true;
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
-	
+
 	boost::shared_ptr<ClientInterface> Node::getClient()
 	{
 		try
 		{
 			return mHw->getClient();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

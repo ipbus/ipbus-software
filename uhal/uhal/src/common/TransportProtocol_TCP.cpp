@@ -14,7 +14,7 @@ void TCPtimeout ( int signal )
 {
 	log ( uhal::Error() , "TCP Timeout" );
 	log ( uhal::Error() , "Throwing at " , ThisLocation() );
-	throw uhal::TcpTimeout();
+	uhal::TcpTimeout().throwFrom ( ThisLocation() );
 }
 
 #endif
@@ -39,10 +39,13 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
 		log ( Info() , "TCP connection succeeded" );
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -133,7 +136,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ErrorInTcpCallback();
+				ErrorInTcpCallback().throwFrom ( ThisLocation() );
 			}
 
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -161,20 +164,23 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ErrorInTcpCallback();
+				ErrorInTcpCallback().throwFrom ( ThisLocation() );
 			}
 
 			if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
 				log ( Error() , "Validation function reported an error!" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw IPbusValidationError ();
+				IPbusValidationError ().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -198,15 +204,18 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		{
 			log ( Error() , "Can't establish signal handler" );
 			log ( Error() , "Throwing at " , ThisLocation() );
-			throw TcpTimeout();
+			TcpTimeout().throwFrom ( ThisLocation() );
 		}
 
 #endif
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -268,10 +277,13 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 			alarm ( 0 );
 #endif
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -312,17 +324,20 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 				{
 					log ( Error() , "TCP Timeout" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw TcpTimeout();
+					TcpTimeout().throwFrom ( ThisLocation() );
 				}
 			}
 			while ( lContinue );
 
 #endif
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

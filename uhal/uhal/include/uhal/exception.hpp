@@ -9,7 +9,8 @@
 
 #include <exception>
 #include <string>
-#include <typeinfo>
+
+#include "uhal/log/log.hpp"
 
 namespace uhal
 {
@@ -17,12 +18,14 @@ namespace uhal
 	//! A simple exception class providing a little more functionality than std::exception
 	class exception : public std::exception
 	{
-		public:
+		protected:
 			/**
-				Default constructor
+				Constructor
+				@param aExc a standard string to be used as a message
 			*/
-			exception();
+			exception ( const std::string& aExc = "" );
 
+		public:
 			/**
 				Destructor
 			*/
@@ -35,32 +38,71 @@ namespace uhal
 			*/
 			virtual const char* what() const throw();
 
-			const std::type_info* type() const throw();
-
-			// Doxygen does something very, very odd if this is placed above any of the other functions...
 			/**
-				Constructor
-				@param aExc a standard exception whose message is to be copied
+				Abstract function to throw the current exception
+				@param aLocation a location object which holds the function name, file name and line number where the throw occured
 			*/
-			exception ( const std::exception& aExc );
+			virtual void throwFrom ( const Location& aLocation ) = 0;
 
 			/**
-				Copy constructor
-				@param aExc a uhal exception to be copied
+				Abstract function to rethrow the current exception
+				@param aLocation a location object which holds the function name, file name and line number where the rethrow occured
 			*/
-			exception ( const exception& aExc );
+			virtual void rethrowFrom ( const Location& aLocation ) = 0;
 
 		private:
 
 			//! The message given to the exception at the time of construction
 			std::string mMessage;
 
-			//! Store the type of the original exception
-			const std::type_info* mTypeInfo;
-
 	};
+
+	template < class Derived >
+	class _exception : public exception
+	{
+		protected:
+			/**
+				Constructor
+				@param aExc a standard string to be used as a message
+			*/
+			_exception ( const std::string& aExc = "" );
+
+		public:
+			/**
+				Destructor
+			*/
+			virtual ~_exception() throw();
+
+			/**
+				Concrete implementation of function to throw the current exception
+				@param aLocation a location object which holds the function name, file name and line number where the throw occured
+			*/
+			void throwFrom ( const Location& aLocation );
+
+			/**
+				Concrete implementation of function to rethrow the current exception
+				@param aLocation a location object which holds the function name, file name and line number where the rethrow occured
+			*/
+			void rethrowFrom ( const Location& aLocation );
+	};
+
+
+
+	//! Exception class to handle the case where the supposedly unique ID is duplicated. Uses the base uhal::exception implementation of what()
+	class StdException: public uhal::_exception< StdException >
+	{
+		public:
+			/**
+				Constructor
+				@param aExc a standard exception whose message is to be copied
+			*/
+			StdException ( const std::exception& aExc );
+	};
+
 
 }
 
+
+#include "uhal/TemplateDefinitions/exception.hxx"
 
 #endif

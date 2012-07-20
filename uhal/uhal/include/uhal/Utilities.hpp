@@ -55,10 +55,13 @@ namespace __gnu_cxx
 			{
 				return hash< const char* >() ( x.c_str() );
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 	};
@@ -87,7 +90,6 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 				log ( Error() , "Expression " , Quote ( aSemicolonDelimitedUriList ) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
 				return false;
 			}
@@ -105,8 +107,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-					// Just debugging so although exception	is worrying, it is not critical
+					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );					// Just debugging so although exception	is worrying, it is not critical
 				}
 			}
 
@@ -225,8 +226,7 @@ namespace uhal
 					}
 					catch ( const std::exception& aExc )
 					{
-						log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-						// Just debugging so although exception	is worrying, it is not critical
+						log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );						// Just debugging so although exception	is worrying, it is not critical
 					}
 				}
 			}
@@ -249,10 +249,13 @@ namespace uhal
 			{
 				return ShellExpandFilenameExpr< DebugInfo > ( aFilenameExpr.c_str() , aParentPath.c_str() , aFiles , aDirectories );
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -286,8 +289,7 @@ namespace uhal
 					}
 					catch ( const std::exception& aExc )
 					{
-						log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-						// Just debugging so although exception	is worrying, it is not critical
+						log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );						// Just debugging so although exception	is worrying, it is not critical
 					}
 				}
 
@@ -304,7 +306,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+					// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -335,7 +337,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+					// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -360,7 +362,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+					// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -396,7 +398,7 @@ namespace uhal
 				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+					// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 					return false;
 				}
 
@@ -410,6 +412,10 @@ namespace uhal
 					try
 					{
 						log ( Info() , "HTTP response parsed as:\n" , aResponse );
+					}
+					catch ( uhal::exception& aExc )
+					{
+						aExc.rethrowFrom ( ThisLocation() );
 					}
 					catch ( const std::exception& aExc )
 					{
@@ -425,10 +431,13 @@ namespace uhal
 
 				return true;
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 	}
@@ -479,10 +488,13 @@ namespace uhal
 							lStr.read ( ( char* ) & ( lFile[0] ) , lFile.size() );
 							aBinder ( std::string ( "file" ) , *lIt2 , boost::ref ( lFile ) );
 						}
+						catch ( uhal::exception& aExc )
+						{
+							aExc.rethrowFrom ( ThisLocation() );
+						}
 						catch ( const std::exception& aExc )
 						{
-							log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-							throw uhal::exception ( aExc );
+							StdException ( aExc ).throwFrom ( ThisLocation() );
 						}
 					}
 
@@ -491,10 +503,13 @@ namespace uhal
 
 				return true;
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -522,18 +537,24 @@ namespace uhal
 					boost::filesystem::path lFilePath = boost::filesystem::path ( aURL );
 					aBinder ( std::string ( "http" ) , lFilePath , boost::ref ( lHttpResponse.content ) );
 				}
+				catch ( uhal::exception& aExc )
+				{
+					aExc.rethrowFrom ( ThisLocation() );
+				}
 				catch ( const std::exception& aExc )
 				{
-					log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-					throw uhal::exception ( aExc );
+					StdException ( aExc ).throwFrom ( ThisLocation() );
 				}
 
 				return true;
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -564,10 +585,13 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -646,12 +670,16 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
+
 
 		/**
 			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
@@ -682,12 +710,20 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
+
+
+		//! Exception class to handle the case where the string will not fit into a 32-bit number. Uses the base uhal::exception implementation of what()
+		class StringNumberWillNotFitInto32BitNumber: public uhal::_exception< StdException > {  };
+
 
 		/**
 			Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
@@ -736,8 +772,27 @@ namespace uhal
 						ss << lAttrStr;
 					}
 
-					ss >> aTarget;
+					// ss >> aTarget;
 					// aTarget = lAttr.as_int();
+
+					if ( ss.str().size() > 10 )
+					{
+						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
+					}
+
+					int64_t lTarget;
+					ss >> lTarget;
+
+					if ( lTarget>>32 )
+					{
+						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
+					}
+
+					aTarget = ( int32_t ) ( lTarget );
 					return true;
 				}
 				else
@@ -750,10 +805,13 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -809,23 +867,22 @@ namespace uhal
 
 					if ( ss.str().size() > 10 )
 					{
-						log( Error() , "XML attribute " , Quote( aAttrName ) , " has value " , Quote( ss.str() ) , " which is too big to fit into 32-bit number" );
+						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
 						log ( Error() , "Throwing at " , ThisLocation() );
-						throw uhal::exception();						
-					}				
-					
-					uint64_t lTarget;
-					ss >> lTarget;
-					
-					if ( lTarget>>32 )
-					{
-						log( Error() , "XML attribute " , Quote( aAttrName ) , " has value " , Quote( ss.str() ) , " which is too big to fit into 32-bit number" );
-						log ( Error() , "Throwing at " , ThisLocation() );
-						throw uhal::exception();						
+						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
 					}
 
-					aTarget = (uint32_t)(lTarget);
-					
+					uint64_t lTarget;
+					ss >> lTarget;
+
+					if ( lTarget>>32 )
+					{
+						log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+						log ( Error() , "Throwing at " , ThisLocation() );
+						StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
+					}
+
+					aTarget = ( uint32_t ) ( lTarget );
 					return true;
 				}
 				else
@@ -838,10 +895,13 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -874,10 +934,13 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -910,10 +973,13 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -946,10 +1012,13 @@ namespace uhal
 					return false;
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 

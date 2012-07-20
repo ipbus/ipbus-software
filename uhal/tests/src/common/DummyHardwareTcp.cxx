@@ -17,10 +17,13 @@ class TCPdummyHardware
 		{
 			mAcceptor.accept ( mSocket );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 
 		~TCPdummyHardware() {}
@@ -150,10 +153,13 @@ class TCPdummyHardware
 					boost::asio::write ( mSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
 				}
 			}
+			catch ( uhal::exception& aExc )
+			{
+				aExc.rethrowFrom ( ThisLocation() );
+			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 		}
 
@@ -196,10 +202,13 @@ int main ( int argc, char* argv[] )
 			//if the connection is closed, open a new one
 		}
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	return 0;

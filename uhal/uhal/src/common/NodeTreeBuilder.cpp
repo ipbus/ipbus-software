@@ -22,10 +22,13 @@ namespace uhal
 
 			return *mInstance;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -40,7 +43,7 @@ namespace uhal
 			{
 				log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( aFilenameExpr ) , " contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw IncorrectAddressTableFileCount();
+				IncorrectAddressTableFileCount().throwFrom ( ThisLocation() );
 			}
 
 			std::vector< boost::shared_ptr< const Node > > lNodes;
@@ -49,14 +52,14 @@ namespace uhal
 			{
 				log ( Error() , "Failed to open address table file " , Quote ( lAddressFiles[0].second ) );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw FailedToOpenAddressTableFile();
+				FailedToOpenAddressTableFile().throwFrom ( ThisLocation() );
 			}
 
 			if ( lNodes.size() != 1 )
 			{
 				log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( lAddressFiles[0].second ) , " refers to " , Integer ( lNodes.size() ) , " valid files." );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw IncorrectAddressTableFileCount();
+				IncorrectAddressTableFileCount().throwFrom ( ThisLocation() );
 			}
 
 			boost::shared_ptr< Node > lNode ( new Node ( lNodes[0]->clone() ) );
@@ -68,10 +71,13 @@ namespace uhal
 
 			return lNode;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -150,10 +156,13 @@ namespace uhal
 				return;
 			}
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

@@ -27,11 +27,11 @@ namespace uhal
 {
 
 	//! Exception class to handle the case where the UDP connection timed out. Uses the base uhal::exception implementation of what()
-	class UdpTimeout: public uhal::exception {  };
+	class UdpTimeout: public uhal::_exception< UdpTimeout > {  };
 	//! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
-	class ErrorInUdpCallback: public uhal::exception {  };
+	class ErrorInUdpCallback: public uhal::_exception< ErrorInUdpCallback > {  };
 	//! Exception class to handle a failure to create a UDP socket. Uses the base uhal::exception implementation of what()
-	class ErrorAtUdpSocketCreation: public uhal::exception {  };
+	class ErrorAtUdpSocketCreation: public uhal::_exception< ErrorAtUdpSocketCreation > {  };
 
 	//! Transport protocol to transfer an IPbus buffer via UDP
 	class UdpTransportProtocol : public TransportProtocol

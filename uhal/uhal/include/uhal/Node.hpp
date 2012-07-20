@@ -39,31 +39,31 @@ namespace uhal
 	class NodeTreeBuilder;
 
 	//! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
-	class WriteAccessDenied: public uhal::exception {  };
+	class WriteAccessDenied: public uhal::_exception< WriteAccessDenied > {  };
 	//! Exception class to handle the case where a read was performed on a register which does not allow read access. Uses the base uhal::exception implementation of what()
-	class ReadAccessDenied: public uhal::exception {  };
+	class ReadAccessDenied: public uhal::_exception< ReadAccessDenied > {  };
 	//! Exception class to handle the case where creation of a node was attempted without it having a UID. Uses the base uhal::exception implementation of what()
-	class NodeMustHaveUID: public uhal::exception {  };
+	class NodeMustHaveUID: public uhal::_exception< NodeMustHaveUID > {  };
 	//! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
-	class NoBranchFoundWithGivenUID: public uhal::exception {  };
+	class NoBranchFoundWithGivenUID: public uhal::_exception< NoBranchFoundWithGivenUID > {  };
 	//! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
-	class ChildHasAddressOverlap: public uhal::exception {  };
+	class ChildHasAddressOverlap: public uhal::_exception< ChildHasAddressOverlap > {  };
 	//! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
-	class ChildHasAddressMaskOverlap: public uhal::exception {  };
+	class ChildHasAddressMaskOverlap: public uhal::_exception< ChildHasAddressMaskOverlap > {  };
 	//! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
-	class BulkTransferOnSingleRegister: public uhal::exception {  };
+	class BulkTransferOnSingleRegister: public uhal::_exception< BulkTransferOnSingleRegister > {  };
 	//! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
-	class BulkTransferRequestedTooLarge: public uhal::exception {  };
+	class BulkTransferRequestedTooLarge: public uhal::_exception< BulkTransferRequestedTooLarge > {  };
 	//! Exception class to handle the case where an incremental node is specified without a size attribute. Uses the base uhal::exception implementation of what()
-	class IncrementalNodeRequiresSizeAttribute: public uhal::exception {  };
+	class IncrementalNodeRequiresSizeAttribute: public uhal::_exception< IncrementalNodeRequiresSizeAttribute > {  };
 
 	//! Exception class to handle the case where a memory block has a size which would exceed the available register space. Uses the base uhal::exception implementation of what()
-	class ArraySizeExceedsRegisterBound: public uhal::exception {  };
+	class ArraySizeExceedsRegisterBound: public uhal::_exception< ArraySizeExceedsRegisterBound > {  };
 	//! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
-	class AddressSpaceOverlap: public uhal::exception {  };
+	class AddressSpaceOverlap: public uhal::_exception< AddressSpaceOverlap > {  };
 
-	
-	
+
+
 	//! A heirarchical node for navigating heirarchical firmwares
 	class Node
 	{
@@ -340,7 +340,7 @@ namespace uhal
 			uint32_t mAddr;
 			//! Mark whether the address is fully formed
 			bool mAddrValid;
-			
+
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
 			//! The read/write access permissions of this node

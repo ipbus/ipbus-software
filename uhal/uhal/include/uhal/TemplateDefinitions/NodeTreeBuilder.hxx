@@ -12,17 +12,21 @@ namespace uhal
 			if ( lIt != mCreators.end() )
 			{
 				//log ( Error() , "Throwing at " , ThisLocation() );
-				//throw ProtocolAlreadyExist();
+				//ProtocolAlreadyExist().throwFrom( ThisLocation() );
 				log ( Warning() , "Protocol \"" , aNodeTypeIdentifier , "\" already exists in map of creators. Continuing for now, but be warned." );
 				return;
 			}
 
 			mCreators[aNodeTypeIdentifier] =  boost::shared_ptr<CreatorInterface> ( new Creator<T>() );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -34,10 +38,14 @@ namespace uhal
 		{
 			return boost::shared_ptr< const Node > ( new T ( aXmlNode , aPath ) );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

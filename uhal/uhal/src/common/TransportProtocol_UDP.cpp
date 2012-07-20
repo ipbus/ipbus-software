@@ -10,7 +10,7 @@ void UDPtimeout ( int signal )
 {
 	log ( uhal::Error() , "UDP Timeout" );
 	log ( uhal::Error() , "Throwing at " , ThisLocation() );
-	throw uhal::UdpTimeout();
+	uhal::UdpTimeout().throwFrom ( ThisLocation() );
 }
 
 #endif
@@ -33,10 +33,13 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 																							  )
 										)
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -124,7 +127,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ErrorInUdpCallback();
+				ErrorInUdpCallback().throwFrom ( ThisLocation() );
 			}
 
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,20 +153,23 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ErrorInUdpCallback();
+				ErrorInUdpCallback().throwFrom ( ThisLocation() );
 			}
 
 			if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
 				log ( Error() , "Validation function reported an error!" );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw IPbusValidationError ();
+				IPbusValidationError ().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -187,15 +193,18 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 		{
 			log ( Error() , "Can't establish signal handler" );
 			log ( Error() , "Throwing at " , ThisLocation() );
-			throw UdpTimeout();
+			UdpTimeout().throwFrom ( ThisLocation() );
 		}
 
 #endif
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -257,10 +266,13 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 			alarm ( 0 );
 #endif
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -301,17 +313,20 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 				{
 					log ( Error() , "UDP Timeout" );
 					log ( Error() , "Throwing at " , ThisLocation() );
-					throw UdpTimeout();
+					UdpTimeout().throwFrom ( ThisLocation() );
 				}
 			}
 			while ( lContinue );
 
 #endif
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

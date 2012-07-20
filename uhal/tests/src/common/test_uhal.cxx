@@ -32,10 +32,13 @@ void hwInterface_creation()
 		HwInterface hw2 = ConnectionManager::getDevice ( "hcal.crate1.OnTheFly" , "chtcp-1.3://localhost:10203?target=127.0.0.1:50003" , "file://~/uhal/tests/addr/uhal_address_table.xml" );
 		hw2.ping();
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -171,10 +174,13 @@ void rawClientAccess()
 			throw 0;
 		}
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -212,10 +218,13 @@ void navigation_and_traversal_test()
 		//BOOST_CHECK_THROW(branch.write(rand()),std::exception);
 		std::vector<std::string> children = branch.getNodes();
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -257,10 +266,13 @@ void read_test()
 		//BOOST_CHECK(block1.rbegin()->valid() && block2.rbegin()->valid());
 		//BOOST_CHECK(*block1.rbegin() == *block2.rbegin());
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -357,10 +369,13 @@ void write_test()
 
 		log ( Notice() , "ALL GOOD" ) ;
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -480,10 +495,13 @@ void read_write_mask()
 		// hw.dispatch();
 		// //BOOST_CHECK(mem == val);
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -626,10 +644,13 @@ void addOperationToQueue ( HwInterface& hw , const std::vector<int>& aOperationL
 			}
 		}
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -735,6 +756,10 @@ void allInstructionPermutations()
 
 			// ----------------------------------------------------------------------------------------------------------------------------------------
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			std::stringstream lStr;
@@ -747,15 +772,17 @@ void allInstructionPermutations()
 				lStr << messages[ *lIt ] << ", ";
 			}
 
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			log ( Error() , "TEST SEQUENCE WAS : " , lStr.str() );
-			throw exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
+	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
 	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 }
 
@@ -774,11 +801,8 @@ void testException()
 	}
 	catch ( uhal::exception& e )
 	{
-		log ( Notice() , "generic uhal exception caught correctly!" );
+		log ( Notice() , "generic uhal exception caught! Partially correct!" );
 		log ( Notice() , e.what() );
-		log ( Notice() , e.type()->name() );
-		log ( Notice() , "Address returned by exception member function, type() :  " , Pointer ( e.type() ) );
-		log ( Notice() , "Address returned by typeid() operating on class itself : " , Pointer ( & typeid ( uhal::NonValidatedMemory ) ) );
 	}
 	catch ( std::exception& e )
 	{
@@ -808,6 +832,5 @@ int main ( int argc,char* argv[] )
 	catch ( const std::exception& aExc )
 	{
 		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw exception ( aExc );
 	}
 }

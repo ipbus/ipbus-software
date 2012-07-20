@@ -11,10 +11,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			mUri ( aUri )
 	{
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
-		log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	ClientInterface::~ClientInterface() {}
@@ -25,10 +28,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return mId;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -46,13 +52,16 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			{
 				log ( Error() , "Ping returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw PingFailed();
+				PingFailed().throwFrom ( ThisLocation() );
 			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -97,10 +106,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 			return lReturn.str();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -112,10 +124,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			getPackingProtocol().write ( aAddr , aSource );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -123,17 +138,16 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	{
 		try
 		{
-			uint32_t lShiftSize( utilities::TrailingRightBits ( aMask ) );
-		
+			uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
 			uint32_t lBitShiftedSource ( aSource << lShiftSize );
-			
-			if( (lBitShiftedSource >> lShiftSize) != aSource )
+
+			if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
 			{
 				log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw BitsSetWhichAreForbiddenByBitMask();				
+				BitsSetWhichAreForbiddenByBitMask().throwFrom ( ThisLocation() );
 			}
-			
+
 			uint32_t lOverlap ( lBitShiftedSource & ~aMask );
 
 			if ( lOverlap )
@@ -143,15 +157,18 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 					  Integer ( lOverlap , IntFmt<hex,fixed>() )
 					);
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw BitsSetWhichAreForbiddenByBitMask();
+				BitsSetWhichAreForbiddenByBitMask().throwFrom ( ThisLocation() );
 			}
 
 			getPackingProtocol().rmw_bits ( aAddr , ~aMask , lBitShiftedSource & aMask );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -161,10 +178,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			getPackingProtocol().writeBlock ( aAddr, aSource, aMode );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -178,10 +198,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().read ( aAddr );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -191,10 +214,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().read ( aAddr, aMask );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -204,10 +230,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().readBlock ( aAddr, aSize, aMode );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -221,10 +250,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().readSigned ( aAddr );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -234,10 +266,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().readSigned ( aAddr , aMask );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -247,10 +282,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().readBlockSigned ( aAddr, aSize, aMode );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -264,10 +302,14 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	// {
 	// return getPackingProtocol().readReservedAddressInfo ();
 	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom( ThisLocation() );
+	// }
 	// catch ( const std::exception& aExc )
 	// {
-	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-	// throw uhal::exception ( aExc );
+	// log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );	// uhal::StdException lExc( aExc );
+	// lExc.throwFrom( ThisLocation() );
 	// }
 	// }
 	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -280,10 +322,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().rmw_bits ( aAddr , aANDterm , aORterm );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -296,10 +341,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		{
 			return getPackingProtocol().rmw_sum ( aAddr , aAddend );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,10 +361,13 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 			log ( Debug() , "Manual dispatch" );
 			getPackingProtocol().Dispatch();
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

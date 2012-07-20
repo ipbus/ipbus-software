@@ -15,10 +15,14 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 	{
 		Link ( mTransportProtocol , mPackingProtocol );
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
 		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -36,10 +40,14 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 		{
 			return mPackingProtocol;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -51,10 +59,14 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 		{
 			return mTransportProtocol;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -74,10 +86,14 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 	{
 		Link ( mTransportProtocol , mPackingProtocol );
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
 		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -95,10 +111,14 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 		{
 			return mPackingProtocol;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -110,10 +130,14 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 		{
 			return mTransportProtocol;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -145,10 +169,14 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 	{
 		Link ( mTransportProtocol , mPackingProtocol );
 	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
 		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 
@@ -168,10 +196,14 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 		{
 			return mPackingProtocol;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -183,10 +215,14 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 		{
 			return mTransportProtocol;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
 			log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 

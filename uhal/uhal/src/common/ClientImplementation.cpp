@@ -22,7 +22,7 @@ namespace uhal
 		{
 			log ( Error() , "This function expects arguments of the form " , Quote ( "target=192.168.200.200:50001" ) ,". It appears that this is missing." );
 			log ( Error() , "Throwing at " , ThisLocation() );
-			throw XMLfileMissingRequiredParameters();
+			XMLfileMissingRequiredParameters().throwFrom ( ThisLocation() );
 		}
 
 		IPaddr lIP;
@@ -38,9 +38,8 @@ namespace uhal
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 			log ( Error() , "Expected a string of the form " , Quote ( "aaa.bbb.ccc.ddd:eeeee" ) , " but received " , Quote ( lIt->second ) , "." );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 
 		uint32_t lIPaddress = ( lIP.mIP1 <<24 ) | ( lIP.mIP2 <<16 ) | ( lIP.mIP3 <<8 ) | ( lIP.mIP4 );

@@ -9,10 +9,14 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
 		PackingProtocol ( aMaxSendSize<<2 , aMaxReplySize<<2 ),
 						mTransactionCounter ( 0 )
 		{}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
 	catch ( const std::exception& aExc )
 	{
 		log ( Error() , "Exception \"" , aExc.what() , "\" caught at " , ThisLocation() );
-		throw uhal::exception ( aExc );
+		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
@@ -36,22 +40,22 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
 		return IPbusHeaderHelper<IPbusProtocolVersion>::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
 	}
 
-	
+
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	void IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
 	{
-		uint32_t lWords( mCurrentBuffers->sendCounter()  >> 2 );
+		uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
+		log ( Info() , "Predispatch size : " , Integer ( lWords ) , " words " );
 
-		log ( Info() , "Predispatch size : " , Integer( lWords ) , " words " );
-		
-		if( lWords < 8 )
+		if ( lWords < 8 )
 		{
-			log( Info() , "Adding " , Integer( 8 - lWords ) , " words of padding." );		
-			for( ; lWords != 8 ; ++lWords )
+			log ( Info() , "Adding " , Integer ( 8 - lWords ) , " words of padding." );
+
+			for ( ; lWords != 8 ; ++lWords )
 			{
 				this->Padding();
 			}
-		}	
-	}	
-	
+		}
+	}
+
 }

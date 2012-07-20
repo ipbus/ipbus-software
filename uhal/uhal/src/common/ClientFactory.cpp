@@ -48,10 +48,13 @@ namespace uhal
 
 			return *mInstance;
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -78,9 +81,8 @@ namespace uhal
 			}
 			catch ( const std::exception& aExc )
 			{
-				log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
 				log ( Error() , "Failed to parse URI " , Quote ( aUri ) );
-				throw uhal::exception ( aExc );
+				StdException ( aExc ).throwFrom ( ThisLocation() );
 			}
 
 			log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
@@ -97,15 +99,18 @@ namespace uhal
 
 				log ( Error() , "Protocol " , Quote ( lUri.mProtocol ) , " does not exists in map of creators. Options are:" , lStr.str() );
 				log ( Error() , "Throwing at " , ThisLocation() );
-				throw ProtocolDoesNotExist();
+				ProtocolDoesNotExist().throwFrom ( ThisLocation() );
 			}
 
 			return lIt->second->create ( aId , lUri );
 		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-			throw uhal::exception ( aExc );
+			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
