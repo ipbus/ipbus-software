@@ -108,7 +108,13 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			try
 			{
 				log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
-				mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
+				//mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
+
+				boost::shared_ptr< Node > lNode( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false ) );
+				for ( std::deque< Node >::iterator lIt = lNode->mChildren->begin(); lIt != lNode->mChildren->end(); ++lIt )
+				{
+					mChildren->push_back ( lIt->clone() );
+				}
 			}
 			catch ( uhal::exception& aExc )
 			{
