@@ -208,46 +208,48 @@ namespace uhal
 
 	};
 
-	//! A struct for parsing a string of type "xxx.xxx.xxx.xxx:yyyyy"
-	struct IPaddr
-	{
-		/**
-			The 1st most significant field of the IP address
-			Must be 16 bit to stop it being interpretted as a char...
-		*/
-		uint16_t mIP1;
-		/**
-			The 2nd most significant field of the IP address
-			Must be 16 bit to stop it being interpretted as a char...
-		*/
-		uint16_t mIP2;
-		/**
-			The 3rd most significant field of the IP address
-			Must be 16 bit to stop it being interpretted as a char...
-		*/
-		uint16_t mIP3;
-		/**
-			The 4th most significant field of the IP address
-			Must be 16 bit to stop it being interpretted as a char...
-		*/
-		uint16_t mIP4;
-		/**
-			The port field of the IP address
-		*/
-		uint16_t mPort;
-	};
+
+//	//! A struct for parsing a string of type "xxx.xxx.xxx.xxx:yyyyy"
+// 	struct IPaddr
+// 	{
+// 		/**
+// 			The 1st most significant field of the IP address
+// 			Must be 16 bit to stop it being interpretted as a char...
+// 		*/
+// 		uint16_t mIP1;
+// 		/**
+// 			The 2nd most significant field of the IP address
+// 			Must be 16 bit to stop it being interpretted as a char...
+// 		*/
+// 		uint16_t mIP2;
+// 		/**
+// 			The 3rd most significant field of the IP address
+// 			Must be 16 bit to stop it being interpretted as a char...
+// 		*/
+// 		uint16_t mIP3;
+// 		/**
+// 			The 4th most significant field of the IP address
+// 			Must be 16 bit to stop it being interpretted as a char...
+// 		*/
+// 		uint16_t mIP4;
+// 		/**
+// 			The port field of the IP address
+// 		*/
+// 		uint16_t mPort;
+// 	};
 
 }
 
-//! A boost::fusion adaptive struct used by the boost::qi parser
-BOOST_FUSION_ADAPT_STRUCT (
-	uhal::IPaddr,
-	( uint16_t , mIP1 )
-	( uint16_t , mIP2 )
-	( uint16_t , mIP3 )
-	( uint16_t , mIP4 )
-	( uint16_t , mPort )
-);
+
+// //! A boost::fusion adaptive struct used by the boost::qi parser
+// BOOST_FUSION_ADAPT_STRUCT (
+// 	uhal::IPaddr,
+// 	( uint16_t , mIP1 )
+// 	( uint16_t , mIP2 )
+// 	( uint16_t , mIP3 )
+// 	( uint16_t , mIP4 )
+// 	( uint16_t , mPort )
+// );
 
 
 

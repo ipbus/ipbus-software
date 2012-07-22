@@ -13,5 +13,5 @@
 
 
 <!-- DUMMY ControlHub to DUMMY UDP -->
-<connection id="dummy.controlhub" uri="chtcp-1.3://localhost:10203?target=127.0.0.1:50001"	address_table="file://dummy_address.xml" />
+<connection id="dummy.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"	address_table="file://dummy_address.xml" />
 </connections>
