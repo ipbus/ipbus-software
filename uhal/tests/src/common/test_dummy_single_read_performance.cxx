@@ -28,7 +28,7 @@ void job(const size_t n_threads, const std::string& connection, const std::strin
     hw.dispatch();
     gettimeofday(&end,NULL);
     
-    uhal::log ( Notice() ,Integer(n_threads), ", ", Integer(uhal::tests::usdiff(end,start)));
+    uhal::log ( Notice() ,Integer( (uint64_t)(n_threads) ), ", ", Integer( (uint64_t)(uhal::tests::usdiff(end,start) )) );
     
   }
 }
