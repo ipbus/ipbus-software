@@ -11,7 +11,7 @@ using namespace uhal;
 
 #define N_1kB    1024/4
 #define N_100kB  100*1024/4
-#define N_10MB   10*1024*1024/4
+#define N_1MB   1024*1024/4
 
 void block_write_read ( size_t N,const std::string& connection, const std::string& id )
 {
@@ -84,10 +84,10 @@ int main ( int argc,char* argv[] )
 	std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
 	CACTUS_TEST ( block_write_read ( N_1kB,connection_file,device_id ) );
 	CACTUS_TEST ( block_write_read ( N_100kB,connection_file,device_id ) );
-	CACTUS_TEST ( block_write_read ( N_10MB,connection_file,device_id ) );
+	CACTUS_TEST ( block_write_read ( N_1MB,connection_file,device_id ) );
 	// //1GB hangs the test PC...swapping
 	CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
 	CACTUS_TEST ( fifo_write_read ( N_100kB,connection_file,device_id ) );
-	CACTUS_TEST ( fifo_write_read ( N_10MB,connection_file,device_id ) );
+	CACTUS_TEST ( fifo_write_read ( N_1MB,connection_file,device_id ) );
 	return 0;
 }
