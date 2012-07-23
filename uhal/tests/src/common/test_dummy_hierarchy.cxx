@@ -9,7 +9,7 @@
 
 using namespace uhal;
 
-#define N    1024*1024/4
+#define N_1MB    1024*1024/4
 
 void write_read_hierarchy ( const std::string& connection, const std::string& id )
 {
@@ -30,32 +30,32 @@ void write_read_hierarchy ( const std::string& connection, const std::string& id
 	ValWord< uint32_t > reg2 = hw.getNode ( "SUBSYSTEM2.REG" ).read();
 
 	std::vector<uint32_t> xx1;
-	for ( size_t i=0; i!= N; ++i )
+	for ( size_t i=0; i!= N_1MB; ++i )
 	{
 		xx1.push_back ( static_cast<uint32_t> ( rand() ) );
 	}
 
 	hw.getNode ( "SUBSYSTEM1.MEM" ).writeBlock ( xx1 );
-	ValVector< uint32_t > mem1 = hw.getNode ( "SUBSYSTEM1.MEM" ).readBlock ( N );
+	ValVector< uint32_t > mem1 = hw.getNode ( "SUBSYSTEM1.MEM" ).readBlock ( N_1MB );
 
 	std::vector<uint32_t> xx2;
-	for ( size_t i=0; i!= N; ++i )
+	for ( size_t i=0; i!= N_1MB; ++i )
 	{
 		xx2.push_back ( static_cast<uint32_t> ( rand() ) );
 	}
 
 	hw.getNode ( "SUBSYSTEM2.MEM" ).writeBlock ( xx2 );
-	ValVector< uint32_t > mem2 = hw.getNode ( "SUBSYSTEM2.MEM" ).readBlock ( N );
+	ValVector< uint32_t > mem2 = hw.getNode ( "SUBSYSTEM2.MEM" ).readBlock ( N_1MB );
 
 	//check some preconditions
 	CACTUS_CHECK ( !reg1.valid());
 	CACTUS_CHECK ( !reg2.valid());
 	CACTUS_CHECK ( !mem1.valid());
 	CACTUS_CHECK ( !mem2.valid());
-	CACTUS_CHECK ( mem1.size() == N );
-	CACTUS_CHECK ( mem2.size() == N );
-	CACTUS_TEST_THROW ( mem1.at ( rand() % N ),uhal::NonValidatedMemory);
-	CACTUS_TEST_THROW ( mem2.at ( rand() % N ),uhal::NonValidatedMemory);
+	CACTUS_CHECK ( mem1.size() == N_1MB );
+	CACTUS_CHECK ( mem2.size() == N_1MB );
+	CACTUS_TEST_THROW ( mem1.at ( rand() % N_1MB ),uhal::NonValidatedMemory);
+	CACTUS_TEST_THROW ( mem2.at ( rand() % N_1MB ),uhal::NonValidatedMemory);
 
 	//send packet
 	CACTUS_TEST ( hw.dispatch() );
@@ -71,7 +71,7 @@ void write_read_hierarchy ( const std::string& connection, const std::string& id
 		correct_block_write_read_subsystem1 = correct_block_write_read_subsystem1 && ( *i1 == *j1 );
 	}
 
-	CACTUS_CHECK ( mem1.size() == N );
+	CACTUS_CHECK ( mem1.size() == N_1MB );
 	CACTUS_CHECK ( correct_block_write_read_subsystem1 );
 	CACTUS_CHECK ( reg2.value() == x2 );
 	bool correct_block_write_read_subsystem2 = true;
@@ -83,7 +83,7 @@ void write_read_hierarchy ( const std::string& connection, const std::string& id
 		correct_block_write_read_subsystem2 = correct_block_write_read_subsystem2 && ( *i2 == *j2 );
 	}
 
-	CACTUS_CHECK ( mem2.size() == N );
+	CACTUS_CHECK ( mem2.size() == N_1MB );
 	CACTUS_CHECK ( correct_block_write_read_subsystem2 );
 }
 

@@ -9,8 +9,8 @@
 
 using namespace uhal;
 
-#define N_1kB    1024/4
-#define N_100kB  100*1024/4
+#define N_4B    1
+#define N_1kB   1024/4
 #define N_1MB   1024*1024/4
 
 void block_write_read ( size_t N,const std::string& connection, const std::string& id )
@@ -48,8 +48,6 @@ void block_write_read ( size_t N,const std::string& connection, const std::strin
 		xx.push_back ( 0x0 );
 	}
 
-	CACTUS_TEST_THROW ( hw.getNode ( "MEM" ).writeBlock ( xx ) , uhal::BulkTransferRequestedTooLarge );
-	CACTUS_TEST_THROW ( mem = hw.getNode ( "MEM" ).readBlock ( 5000000 ) , uhal::BulkTransferRequestedTooLarge);
 }
 
 void fifo_write_read ( size_t N,const std::string& connection, const std::string& id )
@@ -76,18 +74,36 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
 	//The FIFO implementation on the dummy HW is a single memory location so there is not much to check
 }
 
+void block_too_big(const std::string& connection, const std::string& id ) {
+	ConnectionManager manager ( connection );
+	HwInterface hw=manager.getDevice ( id );
+
+  	std::vector<uint32_t> xx;
+	for ( size_t i=0; i!= 10*1024*1024; ++i )
+	{
+		xx.push_back ( 0x0 );
+	}
+
+	CACTUS_TEST_THROW ( hw.getNode ( "MEM" ).writeBlock ( xx ) , uhal::BulkTransferRequestedTooLarge );
+	CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( 10*1024*1024 ) , uhal::BulkTransferRequestedTooLarge);
+}
+
 int main ( int argc,char* argv[] )
 {
 	std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
 	std::string connection_file = params["connection_file"];
 	std::string device_id = params["device_id"];
 	std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
+	
+	//Memory
+	CACTUS_TEST ( block_write_read ( N_4B,connection_file,device_id ) );
 	CACTUS_TEST ( block_write_read ( N_1kB,connection_file,device_id ) );
-	CACTUS_TEST ( block_write_read ( N_100kB,connection_file,device_id ) );
 	CACTUS_TEST ( block_write_read ( N_1MB,connection_file,device_id ) );
-	// //1GB hangs the test PC...swapping
+	//FIFO
+	CACTUS_TEST ( fifo_write_read ( N_4B,connection_file,device_id ) );
 	CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
-	CACTUS_TEST ( fifo_write_read ( N_100kB,connection_file,device_id ) );
 	CACTUS_TEST ( fifo_write_read ( N_1MB,connection_file,device_id ) );
+	//Block to big
+	CACTUS_TEST_THROW(block_too_big(connection_file,device_id ),uhal::BulkTransferRequestedTooLarge);
 	return 0;
 }
