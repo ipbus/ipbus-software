@@ -48,8 +48,8 @@ void block_write_read ( size_t N,const std::string& connection, const std::strin
 		xx.push_back ( 0x0 );
 	}
 
-	CACTUS_TEST_THROW ( hw.getNode ( "MEM" ).writeBlock ( xx ) , uhal::exception );
-	CACTUS_TEST_THROW ( mem = hw.getNode ( "MEM" ).readBlock ( 5000000 ) , uhal::exception );
+	CACTUS_TEST_THROW ( hw.getNode ( "MEM" ).writeBlock ( xx ) , uhal::BulkTransferRequestedTooLarge );
+	CACTUS_TEST_THROW ( mem = hw.getNode ( "MEM" ).readBlock ( 5000000 ) , uhal::BulkTransferRequestedTooLarge);
 }
 
 void fifo_write_read ( size_t N,const std::string& connection, const std::string& id )
@@ -67,9 +67,10 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
 	ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlock ( N );
 	CACTUS_CHECK ( !mem.valid() );
 	CACTUS_CHECK ( mem.size() == N );
-	//CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception );
-	CACTUS_TEST_THROW ( mem.size(),uhal::NonValidatedMemory ); //--> https://svnweb.cern.ch/trac/cactus/ticket/32
+	CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::NonValidatedMemory );
+
 	CACTUS_TEST ( hw.dispatch() );
+
 	CACTUS_CHECK ( mem.valid() );
 	CACTUS_CHECK ( mem.size() == N );
 	//The FIFO implementation on the dummy HW is a single memory location so there is not much to check
@@ -82,11 +83,11 @@ int main ( int argc,char* argv[] )
 	std::string device_id = params["device_id"];
 	std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
 	CACTUS_TEST ( block_write_read ( N_1kB,connection_file,device_id ) );
-	// CACTUS_TEST ( block_write_read ( N_100kB,connection_file,device_id ) );
-	// CACTUS_TEST ( block_write_read ( N_10MB,connection_file,device_id ) );
+	CACTUS_TEST ( block_write_read ( N_100kB,connection_file,device_id ) );
+	CACTUS_TEST ( block_write_read ( N_10MB,connection_file,device_id ) );
 	// //1GB hangs the test PC...swapping
-	// CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
-	// CACTUS_TEST ( fifo_write_read ( N_100kB,connection_file,device_id ) );
-	// CACTUS_TEST ( fifo_write_read ( N_10MB,connection_file,device_id ) );
+	CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
+	CACTUS_TEST ( fifo_write_read ( N_100kB,connection_file,device_id ) );
+	CACTUS_TEST ( fifo_write_read ( N_10MB,connection_file,device_id ) );
 	return 0;
 }

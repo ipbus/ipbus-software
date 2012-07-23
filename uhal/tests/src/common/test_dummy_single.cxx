@@ -19,7 +19,7 @@ void connect_write_read ( const std::string& connection, const std::string& id )
 	hw.getNode ( "REG" ).write ( x );
 	ValWord< uint32_t > mem = hw.getNode ( "REG" ).read();
 	CACTUS_CHECK ( !mem.valid() );
-	CACTUS_TEST_THROW ( mem.value(),uhal::exception );
+	CACTUS_TEST_THROW ( mem.value(),uhal::NonValidatedMemory );
 	CACTUS_TEST ( hw.dispatch() );
 	CACTUS_CHECK ( mem.valid() );
 	CACTUS_CHECK ( mem.value() == x );
@@ -45,7 +45,7 @@ void on_the_fly_connect_write_read ( const std::string& connection, const std::s
 	hw.getNode ( "REG" ).write ( x );
 	ValWord< uint32_t > mem = hw.getNode ( "REG" ).read();
 	CACTUS_CHECK ( !mem.valid() );
-	CACTUS_TEST_THROW ( mem.value(),uhal::exception );
+	CACTUS_TEST_THROW ( mem.value(),uhal::NonValidatedMemory );
 	CACTUS_TEST ( hw.dispatch() );
 	CACTUS_CHECK ( mem.valid() );
 	CACTUS_CHECK ( mem.value() == x );

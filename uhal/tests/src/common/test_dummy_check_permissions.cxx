@@ -12,8 +12,8 @@ void check_permissions ( const std::string& connection, const std::string& id )
 {
 	ConnectionManager manager ( connection );
 	HwInterface hw=manager.getDevice ( id );
-	CACTUS_TEST_THROW ( hw.getNode ( "REG_READ_ONLY" ).write ( 1 ),uhal::exception );
-	CACTUS_TEST_THROW ( hw.getNode ( "REG_WRITE_ONLY" ).read(),uhal::exception );
+	CACTUS_TEST_THROW ( hw.getNode ( "REG_READ_ONLY" ).write ( 1 ),uhal::WriteAccessDenied );
+	CACTUS_TEST_THROW ( hw.getNode ( "REG_WRITE_ONLY" ).read(),uhal::ReadAccessDenied );
 	uint32_t x = static_cast<uint32_t> ( rand() );
 	hw.getNode ( "REG_WRITE_ONLY" ).write ( x );
 	ValWord< uint32_t > mem = hw.getNode ( "REG_READ_ONLY" ).read();
