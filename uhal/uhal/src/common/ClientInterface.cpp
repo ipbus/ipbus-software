@@ -50,7 +50,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 			if ( WEXITSTATUS ( lPingStatus ) )
 			{
-				log ( Error() , "Ping returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
+				log ( Error() , "Pinging " , Quote ( mId ) , " at address " , Quote( mUri.mHostname ) , " returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
 				PingFailed().throwFrom ( ThisLocation() );
 			}
 		}
