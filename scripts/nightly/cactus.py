@@ -79,22 +79,27 @@ INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "cd /build/cactus;rm -rf %s;mv html %s" % (join(WEB_DIR,"api/html"), join(WEB_DIR, "api/."))]
 
 TEST_CMDS = ["sudo chmod +w /var/log",
-             #DUMMY UDP TESTS
+             #TIMEOUT TESTS
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "sudo /opt/cactus/bin/controlhub_start",
+             "/opt/cactus/bin/controlhub_status",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             #UDP TESTS
              "DummyHardwareUdp.exe 50001 &> /var/log/DummyHardwareUdp.exe.log &",
              "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
-             #DUMMY CONTROL HUB TESTS
-             "sudo /opt/cactus/bin/controlhub_start",
-             "/opt/cactus/bin/controlhub_status",
+             #CONTROL HUB TESTS
              "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
-             #DUMMY TCP TESTS
+             #TCP TESTS
              "DummyHardwareTcp.exe 50002 &> /var/log/DummyHardwareTcp.exe.log &",
              "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
