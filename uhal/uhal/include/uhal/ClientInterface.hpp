@@ -62,7 +62,7 @@ namespace uhal
 			const std::string& id();
 
 			// /**
-				// Ping the target for this client
+			// Ping the target for this client
 			// */
 			// void ping();
 
@@ -83,7 +83,7 @@ namespace uhal
 				@param aAddr the address of the register to write
 				@param aValue the value to write to the register
 			*/
-			virtual void write ( const uint32_t& aAddr, const uint32_t& aValue );
+			virtual ValHeader write ( const uint32_t& aAddr, const uint32_t& aValue );
 
 			/**
 				Write a single, masked word to a register
@@ -91,7 +91,7 @@ namespace uhal
 				@param aValue the value to write to the register
 				@param aMask the mask to apply to the value
 			*/
-			virtual void write ( const uint32_t& aAddr, const uint32_t& aValue, const uint32_t& aMask );
+			virtual ValHeader write ( const uint32_t& aAddr, const uint32_t& aValue, const uint32_t& aMask );
 
 			/**
 				Write a block of data to a block of registers or a block-write port
@@ -99,7 +99,7 @@ namespace uhal
 				@param aValues the values to write to the registers or a block-write port
 				@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
 			*/
-			virtual void writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			virtual ValHeader writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
 			/**
 				Read a single, unmasked, unsigned word
@@ -126,26 +126,26 @@ namespace uhal
 			virtual ValVector< uint32_t > readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
 			// /**
-				// Read a single, unmasked word and interpret it as being signed
-				// @param aAddr the address of the register to read
-				// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// Read a single, unmasked word and interpret it as being signed
+			// @param aAddr the address of the register to read
+			// @return a Validated Memory which wraps the location to which the reply data is to be written
 			// */
 			// virtual ValWord< int32_t > readSigned ( const uint32_t& aAddr );
 
 			// /**
-				// Read a single word, mask it and interpret it as being signed
-				// @param aAddr the address of the register to read
-				// @param aMask the mask to apply to the value after reading
-				// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// Read a single word, mask it and interpret it as being signed
+			// @param aAddr the address of the register to read
+			// @param aMask the mask to apply to the value after reading
+			// @return a Validated Memory which wraps the location to which the reply data is to be written
 			// */
 			// virtual ValWord< int32_t > readSigned ( const uint32_t& aAddr, const uint32_t& aMask );
 
 			// /**
-				// Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-				// @param aAddr the lowest address in the block of registers or the address of the block-read port
-				// @param aSize the number of words to read
-				// @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-				// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// Read a block of data from a block of registers or a block-read port and interpret it as being signed data
+			// @param aAddr the lowest address in the block of registers or the address of the block-read port
+			// @param aSize the number of words to read
+			// @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+			// @return a Validated Memory which wraps the location to which the reply data is to be written
 			// */
 			// virtual ValVector< int32_t > readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 

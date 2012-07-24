@@ -14,7 +14,7 @@ void connect_write_read ( const std::string& connection, const std::string& id )
 {
 	ConnectionManager manager ( connection );
 	HwInterface hw=manager.getDevice ( id );
-	hw.ping();
+	// hw.ping();
 	uint32_t x = static_cast<uint32_t> ( rand() );
 	hw.getNode ( "REG" ).write ( x );
 	ValWord< uint32_t > mem = hw.getNode ( "REG" ).read();

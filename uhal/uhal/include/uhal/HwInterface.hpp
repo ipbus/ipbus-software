@@ -68,7 +68,7 @@ namespace uhal
 			const uint32_t& getTimeoutPeriod();
 
 			// /**
-				// Ping the target for this client
+			// Ping the target for this client
 			// */
 			// void ping();
 

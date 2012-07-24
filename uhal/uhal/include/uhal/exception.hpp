@@ -54,7 +54,7 @@ namespace uhal
 				@param aExc a standard string to be used as a message
 			*/
 			exception ( const std::string& aExc = "" );
-			
+
 		private:
 
 			//! The message given to the exception at the time of construction
@@ -83,13 +83,13 @@ namespace uhal
 				@param aLocation a location object which holds the function name, file name and line number where the rethrow occured
 			*/
 			void rethrowFrom_ ( const Location& aLocation );
-			
+
 		protected:
 			/**
 				Constructor
 				@param aExc a standard string to be used as a message
 			*/
-			_exception ( const std::string& aExc = "" );			
+			_exception ( const std::string& aExc = "" );
 	};
 
 

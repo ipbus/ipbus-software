@@ -8,8 +8,7 @@ namespace uhal
 {
 
 _ValHeader_::_ValHeader_ ( const bool& aValid ) try :
-		valid ( aValid ) ,
-			  IPbusHeader ( 0 )
+		valid ( aValid )
 		{}
 	catch ( uhal::exception& aExc )
 	{
@@ -25,10 +24,9 @@ _ValHeader_::_ValHeader_ ( const bool& aValid ) try :
 	template< typename T >
 
 _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask ) try :
-		value ( aValue ) ,
-			  valid ( aValid ) ,
-			  mask ( aMask ) ,
-			  IPbusHeader ( 0 )
+		_ValHeader_ ( aValid ) ,
+					value ( aValue ) ,
+					mask ( aMask )
 		{}
 	catch ( uhal::exception& aExc )
 	{
@@ -43,8 +41,8 @@ _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t 
 	template< typename T >
 
 _ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid ) try :
-		value ( aValue ) ,
-			  valid ( aValid )
+		_ValHeader_ ( aValid ),
+					value ( aValue )
 		{}
 	catch ( uhal::exception& aExc )
 	{
@@ -71,6 +69,7 @@ ValHeader::ValHeader() try :
 	{
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
+
 
 	bool ValHeader::valid()
 	{
@@ -105,6 +104,29 @@ ValHeader::ValHeader() try :
 	}
 
 
+	const std::deque<uint32_t>& ValHeader::returnedHeaders()
+	{
+		try
+		{
+			if ( mMembers->valid )
+			{
+				return mMembers->IPbusHeaders ;
+			}
+			else
+			{
+				log ( Error() , "Access attempted on non-validated memory" );
+				NonValidatedMemory().throwFrom ( ThisLocation() );
+			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}
 
 
 
@@ -316,6 +338,32 @@ ValWord< T >::ValWord() try :
 		try
 		{
 			mMembers->mask = aMask ;
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}
+
+
+	template< typename T >
+	const std::deque<uint32_t>& ValWord< T >::returnedHeaders()
+	{
+		try
+		{
+			if ( mMembers->valid )
+			{
+				return mMembers->IPbusHeaders ;
+			}
+			else
+			{
+				log ( Error() , "Access attempted on non-validated memory" );
+				NonValidatedMemory().throwFrom ( ThisLocation() );
+			}
 		}
 		catch ( uhal::exception& aExc )
 		{
@@ -760,6 +808,33 @@ ValVector< T >::ValVector() try :
 			}
 		}
 	*/
+
+
+	template< typename T >
+	const std::deque<uint32_t>& ValVector< T >::returnedHeaders()
+	{
+		try
+		{
+			if ( mMembers->valid )
+			{
+				return mMembers->IPbusHeaders ;
+			}
+			else
+			{
+				log ( Error() , "Access attempted on non-validated memory" );
+				NonValidatedMemory().throwFrom ( ThisLocation() );
+			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}
+
 
 
 	template class ValWord< uint32_t >;

@@ -95,7 +95,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									mMemory[ mAddress & ADDRESSMASK ] = *lReceivePtr;
+									mMemory[ mAddress& ADDRESSMASK ] = *lReceivePtr;
 									lReceivePtr++;
 								}
 
@@ -118,7 +118,7 @@ class UDPdummyHardware
 							case RMW_SUM:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory[ mAddress & ADDRESSMASK ] += ( int32_t ) ( *lReceivePtr );
+								mMemory[ mAddress& ADDRESSMASK ] += ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;
@@ -128,9 +128,9 @@ class UDPdummyHardware
 							case RMW_BITS:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory[ mAddress & ADDRESSMASK ] &= ( int32_t ) ( *lReceivePtr );
+								mMemory[ mAddress& ADDRESSMASK ] &= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
-								mMemory[ mAddress & ADDRESSMASK ] |= ( int32_t ) ( *lReceivePtr );
+								mMemory[ mAddress& ADDRESSMASK ] |= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;

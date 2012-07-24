@@ -109,8 +109,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			{
 				log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
 				//mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
+				boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false ) );
 
-				boost::shared_ptr< Node > lNode( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false ) );
 				for ( std::deque< Node >::iterator lIt = lNode->mChildren->begin(); lIt != lNode->mChildren->end(); ++lIt )
 				{
 					mChildren->push_back ( lIt->clone() );
@@ -614,7 +614,7 @@ Node::Node ( const Node& aNode ) try :
 		}
 	}
 
-	void Node::write ( const uint32_t& aValue )
+	ValHeader  Node::write ( const uint32_t& aValue )
 	{
 		try
 		{
@@ -622,11 +622,11 @@ Node::Node ( const Node& aNode ) try :
 			{
 				if ( mMask == defs::NOMASK )
 				{
-					mHw->getClient()->write ( mAddr , aValue );
+					return mHw->getClient()->write ( mAddr , aValue );
 				}
 				else
 				{
-					mHw->getClient()->write ( mAddr , aValue , mMask );
+					return mHw->getClient()->write ( mAddr , aValue , mMask );
 				}
 			}
 			else
@@ -646,7 +646,7 @@ Node::Node ( const Node& aNode ) try :
 	}
 
 
-	void Node::writeBlock ( const std::vector< uint32_t >& aValues ) // , const defs::BlockReadWriteMode& aMode )
+	ValHeader  Node::writeBlock ( const std::vector< uint32_t >& aValues ) // , const defs::BlockReadWriteMode& aMode )
 	{
 		try
 		{
@@ -666,7 +666,7 @@ Node::Node ( const Node& aNode ) try :
 
 				if ( mPermission & defs::WRITE )
 				{
-					mHw->getClient()->writeBlock ( mAddr , aValues , mMode ); //aMode );
+					return mHw->getClient()->writeBlock ( mAddr , aValues , mMode ); //aMode );
 				}
 				else
 				{
@@ -759,73 +759,73 @@ Node::Node ( const Node& aNode ) try :
 
 	// ValWord< int32_t > Node::readSigned()
 	// {
-		// try
-		// {
-			// if ( mPermission & defs::READ )
-			// {
-				// if ( mMask == defs::NOMASK )
-				// {
-					// return mHw->getClient()->readSigned ( mAddr );
-				// }
-				// else
-				// {
-					// return mHw->getClient()->readSigned ( mAddr , mMask );
-				// }
-			// }
-			// else
-			// {
-				// log ( Error() , "Node permissions denied read access" );
-				// ReadAccessDenied().throwFrom ( ThisLocation() );
-			// }
-		// }
-		// catch ( uhal::exception& aExc )
-		// {
-			// aExc.rethrowFrom ( ThisLocation() );
-		// }
-		// catch ( const std::exception& aExc )
-		// {
-			// StdException ( aExc ).throwFrom ( ThisLocation() );
-		// }
+	// try
+	// {
+	// if ( mPermission & defs::READ )
+	// {
+	// if ( mMask == defs::NOMASK )
+	// {
+	// return mHw->getClient()->readSigned ( mAddr );
+	// }
+	// else
+	// {
+	// return mHw->getClient()->readSigned ( mAddr , mMask );
+	// }
+	// }
+	// else
+	// {
+	// log ( Error() , "Node permissions denied read access" );
+	// ReadAccessDenied().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
 	// }
 
 
 	// ValVector< int32_t > Node::readBlockSigned ( const uint32_t& aSize ) //, const defs::BlockReadWriteMode& aMode )
 	// {
-		// try
-		// {
-			// if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
-			// {
-				// log ( Error() , "Bulk Transfer requested on single register node" );
-				// log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-				// BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
-			// }
-			// else
-			// {
-				// if ( ( mSize != 1 ) && ( aSize>mSize ) )
-				// {
-					// log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-					// BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
-				// }
+	// try
+	// {
+	// if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
+	// {
+	// log ( Error() , "Bulk Transfer requested on single register node" );
+	// log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
+	// BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
+	// }
+	// else
+	// {
+	// if ( ( mSize != 1 ) && ( aSize>mSize ) )
+	// {
+	// log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
+	// BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
+	// }
 
-				// if ( mPermission & defs::READ )
-				// {
-					// return mHw->getClient()->readBlockSigned ( mAddr , aSize , mMode ); //aMode );
-				// }
-				// else
-				// {
-					// log ( Error() , "Node permissions denied read access" );
-					// ReadAccessDenied().throwFrom ( ThisLocation() );
-				// }
-			// }
-		// }
-		// catch ( uhal::exception& aExc )
-		// {
-			// aExc.rethrowFrom ( ThisLocation() );
-		// }
-		// catch ( const std::exception& aExc )
-		// {
-			// StdException ( aExc ).throwFrom ( ThisLocation() );
-		// }
+	// if ( mPermission & defs::READ )
+	// {
+	// return mHw->getClient()->readBlockSigned ( mAddr , aSize , mMode ); //aMode );
+	// }
+	// else
+	// {
+	// log ( Error() , "Node permissions denied read access" );
+	// ReadAccessDenied().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
 	// }
 
 

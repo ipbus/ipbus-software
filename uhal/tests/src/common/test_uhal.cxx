@@ -30,7 +30,7 @@ void hwInterface_creation()
 		//BOOST_CHECK(manager.getDevice(*i).getClient().ping();
 		//;
 		HwInterface hw2 = ConnectionManager::getDevice ( "hcal.crate1.OnTheFly" , "chtcp-1.3://localhost:10203?target=127.0.0.1:50003" , "file://~/uhal/tests/addr/uhal_address_table.xml" );
-		hw2.ping();
+		// hw2.ping();
 	}
 	catch ( uhal::exception& aExc )
 	{

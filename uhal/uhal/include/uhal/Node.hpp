@@ -201,13 +201,13 @@ namespace uhal
 				Write a single, unmasked word to a register
 				@param aValue the value to write to the register
 			*/
-			void write ( const uint32_t& aValue );
+			ValHeader write ( const uint32_t& aValue );
 
 			/**
 				Write a block of data to a block of registers or a block-write port
 				@param aValues the values to write to the registers or a block-write port
 			*/
-			void writeBlock ( const std::vector< uint32_t >& aValues );
+			ValHeader writeBlock ( const std::vector< uint32_t >& aValues );
 
 			/**
 				DEPRICATED! Write a block of data to a block of registers or a block-write port
@@ -215,7 +215,7 @@ namespace uhal
 				@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
 				@warning DEPRICATED and will be removed in the next release!
 			*/
-			void writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
+			ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
 			{
 				log ( Error() , "THIS METHOD IS DEPRECATED! "
 					  "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
@@ -224,8 +224,9 @@ namespace uhal
 					  "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
 				defs::BlockReadWriteMode lMode ( mMode );
 				mMode = aMode;
-				writeBlock ( aValues );
+				ValHeader lReply ( writeBlock ( aValues ) );
 				mMode = lMode;
+				return lReply;
 			}
 
 			/**
@@ -263,38 +264,38 @@ namespace uhal
 			}
 
 			// /**
-				// Read a single, unmasked word and interpret it as being signed
-				// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// Read a single, unmasked word and interpret it as being signed
+			// @return a Validated Memory which wraps the location to which the reply data is to be written
 			// */
 			// ValWord< int32_t > readSigned ( );
 
 			// /**
-				// Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-				// @param aSize the number of words to read
-				// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// Read a block of data from a block of registers or a block-read port and interpret it as being signed data
+			// @param aSize the number of words to read
+			// @return a Validated Memory which wraps the location to which the reply data is to be written
 			// */
 			// ValVector< int32_t > readBlockSigned ( const uint32_t& aSize );
 
 
 			// /**
-				// DEPRICATED! Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-				// @param aSize the number of words to read
-				// @return a Validated Memory which wraps the location to which the reply data is to be written
-				// @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-				// @warning DEPRICATED and will be removed in the next release!
+			// DEPRICATED! Read a block of data from a block of registers or a block-read port and interpret it as being signed data
+			// @param aSize the number of words to read
+			// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+			// @warning DEPRICATED and will be removed in the next release!
 			// */
 			// ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
 			// {
-				// log ( Error() , "THIS METHOD IS DEPRECATED! "
-					  // "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-					  // "AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
-					  // "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-					  // "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-				// defs::BlockReadWriteMode lMode ( mMode );
-				// mMode = aMode;
-				// ValVector< int32_t > lRet ( readBlockSigned ( aSize ) );
-				// mMode = lMode;
-				// return lRet;
+			// log ( Error() , "THIS METHOD IS DEPRECATED! "
+			// "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+			// "AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
+			// "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+			// "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+			// defs::BlockReadWriteMode lMode ( mMode );
+			// mMode = aMode;
+			// ValVector< int32_t > lRet ( readBlockSigned ( aSize ) );
+			// mMode = lMode;
+			// return lRet;
 			// }
 
 

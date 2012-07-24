@@ -29,48 +29,46 @@ namespace uhal
 			XMLfileMissingRequiredParameters().throwFrom ( ThisLocation() );
 		}
 
-/*
-		IPaddr lIP;
+		/*
+				IPaddr lIP;
+
+				try
+				{
+					boost::spirit::qi::phrase_parse (	lIt->second.begin() ,
+														lIt->second.end() ,
+														( boost::spirit::qi::eps >
+															boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
+															boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
+															boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
+															boost::spirit::qi::uint_ > boost::spirit::qi::lit ( ":" ) >
+															boost::spirit::qi::uint_ ) ,
+														boost::spirit::ascii::space ,
+														lIP
+													);
+				}
+				catch ( const std::exception& aExc )
+				{
+					log ( Error() , "Expected a string of the form " , Quote ( "aaa.bbb.ccc.ddd:eeeee" ) , " but received " , Quote ( lIt->second ) , "." );
+					StdException ( aExc ).throwFrom ( ThisLocation() );
+				}
+
+				uint32_t lIPaddress = ( lIPAddr[0] <<24 ) | ( lIPAddr[1] <<16 ) | ( lIPAddr[2] <<8 ) | ( lIPAddr[3] );
+				log ( Info() , "Converted IP address string " ,  Quote ( lIt->second ) ,
+					  " to " , Integer ( lIPAddr[0] ) , "." , Integer ( lIPAddr[1] ) , "." , Integer ( lIPAddr[2] ) , "." , Integer ( lIPAddr[3] ) , ":" , Integer ( lIP.mPort ) ,
+					  " and converted this to IP " , Integer ( lIPaddress, IntFmt< hex , fixed >() ) , ", port " , Integer ( lIP.mPort, IntFmt< hex , fixed >() )	);
+				return std::make_pair ( lIPaddress , lIP.mPort );
+			}
+		*/
+		std::pair< std::string , std::string > lIP;
 
 		try
 		{
 			boost::spirit::qi::phrase_parse (	lIt->second.begin() ,
 												lIt->second.end() ,
-												( boost::spirit::qi::eps > 
-													boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
-													boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
-													boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
-													boost::spirit::qi::uint_ > boost::spirit::qi::lit ( ":" ) >
-													boost::spirit::qi::uint_ ) ,
-												boost::spirit::ascii::space ,
-												lIP
-											);
-		}
-		catch ( const std::exception& aExc )
-		{
-			log ( Error() , "Expected a string of the form " , Quote ( "aaa.bbb.ccc.ddd:eeeee" ) , " but received " , Quote ( lIt->second ) , "." );
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-
-		uint32_t lIPaddress = ( lIPAddr[0] <<24 ) | ( lIPAddr[1] <<16 ) | ( lIPAddr[2] <<8 ) | ( lIPAddr[3] );
-		log ( Info() , "Converted IP address string " ,  Quote ( lIt->second ) ,
-			  " to " , Integer ( lIPAddr[0] ) , "." , Integer ( lIPAddr[1] ) , "." , Integer ( lIPAddr[2] ) , "." , Integer ( lIPAddr[3] ) , ":" , Integer ( lIP.mPort ) ,
-			  " and converted this to IP " , Integer ( lIPaddress, IntFmt< hex , fixed >() ) , ", port " , Integer ( lIP.mPort, IntFmt< hex , fixed >() )	);
-		return std::make_pair ( lIPaddress , lIP.mPort );
-	}
-*/
-
-	
-		std::pair< std::string , std::string > lIP;	
-	
-		try
-		{
-			boost::spirit::qi::phrase_parse (	lIt->second.begin() ,
-												lIt->second.end() ,
-												( boost::spirit::qi::eps > 
-													*(boost::spirit::qi::char_ - boost::spirit::qi::lit ( ":" )) >
-													boost::spirit::qi::lit ( ":" ) > 
-													*boost::spirit::qi::char_ ) ,
+												( boost::spirit::qi::eps >
+												  * ( boost::spirit::qi::char_ - boost::spirit::qi::lit ( ":" ) ) >
+												  boost::spirit::qi::lit ( ":" ) >
+												  *boost::spirit::qi::char_ ) ,
 												boost::spirit::ascii::space ,
 												lIP
 											);
@@ -80,14 +78,13 @@ namespace uhal
 			log ( Error() , "Expected a string of the form " , Quote ( "hostIP:port" ) , " or " , Quote ( "hostname:port" ) , " but received " , Quote ( lIt->second ) , "." );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
-	
+
 		std::string lAddr;
 		uint16_t lPort;
-	
+
 		try
 		{
 			boost::asio::io_service lService;
-	
 			boost::asio::ip::udp::endpoint lEndpoint (
 				*boost::asio::ip::udp::resolver::iterator (
 					boost::asio::ip::udp::resolver ( lService ).resolve (
@@ -95,7 +92,6 @@ namespace uhal
 					)
 				)
 			);
-
 			lAddr = lEndpoint.address().to_string();
 			lPort = lEndpoint.port();
 		}
@@ -104,35 +100,33 @@ namespace uhal
 			log ( Error() , "Look up failed for hostname=" , lIP.first , ", port=" , lIP.second );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
-	
+
 		std::vector< uint32_t > lIPAddr;
-	
+
 		try
 		{
 			boost::spirit::qi::phrase_parse (	lAddr.begin() ,
 												lAddr.end() ,
-												( boost::spirit::qi::eps > 
-													boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
-													boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
-													boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
-													boost::spirit::qi::uint_ ),
+												( boost::spirit::qi::eps >
+												  boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
+												  boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
+												  boost::spirit::qi::uint_ > boost::spirit::qi::lit ( "." ) >
+												  boost::spirit::qi::uint_ ),
 												boost::spirit::ascii::space ,
 												lIPAddr
 											);
 		}
 		catch ( const std::exception& aExc )
 		{
-			log ( Error() , "Boost::ASIO returned address " , Quote( lAddr ) , " which could not be parsed as " , Quote( "aaa.bbb.ccc.ddd" ) );
+			log ( Error() , "Boost::ASIO returned address " , Quote ( lAddr ) , " which could not be parsed as " , Quote ( "aaa.bbb.ccc.ddd" ) );
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
-	
-		uint32_t lIPaddress = ( lIPAddr[0] <<24 ) | ( lIPAddr[1] <<16 ) | ( lIPAddr[2] <<8 ) | ( lIPAddr[3] );
-		log ( Info() , "Converted IP address string " ,  Quote ( lIt->second ) , " to " , 
-						Integer ( lIPAddr[0] ) , "." , Integer ( lIPAddr[1] ) , "." , Integer ( lIPAddr[2] ) , "." , Integer ( lIPAddr[3] ) , ":" , Integer ( lPort ) ,
-						" and converted this to IP " , Integer ( lIPaddress, IntFmt< hex , fixed >() ) , ", port " , Integer ( lPort, IntFmt< hex , fixed >() ) );
-		
-		return std::make_pair ( lIPaddress , lPort );
 
+		uint32_t lIPaddress = ( lIPAddr[0] <<24 ) | ( lIPAddr[1] <<16 ) | ( lIPAddr[2] <<8 ) | ( lIPAddr[3] );
+		log ( Info() , "Converted IP address string " ,  Quote ( lIt->second ) , " to " ,
+			  Integer ( lIPAddr[0] ) , "." , Integer ( lIPAddr[1] ) , "." , Integer ( lIPAddr[2] ) , "." , Integer ( lIPAddr[3] ) , ":" , Integer ( lPort ) ,
+			  " and converted this to IP " , Integer ( lIPaddress, IntFmt< hex , fixed >() ) , ", port " , Integer ( lPort, IntFmt< hex , fixed >() ) );
+		return std::make_pair ( lIPaddress , lPort );
 	}
 }
 

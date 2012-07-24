@@ -46,9 +46,9 @@ namespace uhal
 			//! A flag for marking whether the data is actually valid
 			bool valid;
 			//! The IPbus header associated with the transaction that returned this data
-			uint32_t IPbusHeader;
+			std::deque<uint32_t> IPbusHeaders;
 
-		private:
+		protected:
 			//! Make ValHeader a friend since it is the only class that should be able to create an instance this struct
 			friend class ValHeader;
 			/**
@@ -63,19 +63,19 @@ namespace uhal
 
 	//! A Template helper struct wrapping an IPbus header, a register for storing a single word of data, a valid flag and a mask for modifying returned values
 	template< typename T >
-	struct _ValWord_
+	struct _ValWord_ : public _ValHeader_
 	{
 		public:
 			//! A register for storing data
 			T value;
-			//! A flag for marking whether the data is actually valid
-			bool valid;
+			// //! A flag for marking whether the data is actually valid
+			// bool valid;
 			//! A mask for modifying returned values
 			uint32_t mask;
-			//! The IPbus header associated with the transaction that returned this data
-			uint32_t IPbusHeader;
+			// //! The IPbus header associated with the transaction that returned this data
+			// uint32_t IPbusHeader;
 
-		private:
+		protected:
 			//! Make ValWord a friend since it is the only class that should be able to create an instance this struct
 			friend class ValWord<T>;
 			/**
@@ -91,17 +91,17 @@ namespace uhal
 
 	//! A Template helper struct wrapping a block of IPbus header, a register for storing a block of data and a valid flag
 	template< typename T >
-	struct _ValVector_
+	struct _ValVector_ : public _ValHeader_
 	{
 		public:
 			//! A block of memory for storing data
 			std::vector<T> value;
-			//! A flag for marking whether the data is actually valid
-			bool valid;
-			//! The IPbus header associated with the transaction that returned this data
-			std::deque<uint32_t> IPbusHeaders;
+			// //! A flag for marking whether the data is actually valid
+			// bool valid;
+			// //! The IPbus header associated with the transaction that returned this data
+			// std::deque<uint32_t> IPbusHeaders;
 
-		private:
+		protected:
 			//! Make ValVector a friend since it is the only class that should be able to create an instance this struct
 			friend class ValVector<T>;
 			/**
@@ -126,6 +126,22 @@ namespace uhal
 				Default constructor
 			*/
 			ValHeader();
+
+			/**
+				Constructor to allow you to throw away returned information in a ValWord and just keep reply headers and validity state
+				@param aValWord a ValWord whose reply headers and validity state are to be copied
+			*/
+			template< typename T >
+			ValHeader ( const ValWord<T>& aValWord );
+
+			/**
+				Constructor to allow you to throw away returned information in a ValVector and just keep reply headers and validity state
+				@param aValVector a ValVector whose reply headers and validity state are to be copied
+			*/
+			template< typename T >
+			ValHeader ( const ValVector<T>& aValVector );
+
+
 			/**
 				Return whether the Validated memory is marked as valid
 				@return whether the Validated memory is marked as valid
@@ -137,7 +153,14 @@ namespace uhal
 			*/
 			void valid ( bool aValid );
 
-		private:
+			/**
+				Return a std::deque containing all the IPbus headers returned during the transaction
+				@return a std::deque containing all the IPbus headers returned during the transaction
+				@note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			*/
+			const std::deque<uint32_t>& returnedHeaders();
+
+		protected:
 			//! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory
 			boost::shared_ptr< _ValHeader_ > mMembers;
 	};
@@ -150,6 +173,9 @@ namespace uhal
 
 			//! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
 			friend class PackingProtocol;
+
+			//! Make the ValHeader class a friend so we can downcast the members
+			friend class ValHeader;
 
 		public:
 			/**
@@ -211,18 +237,29 @@ namespace uhal
 			*/
 			void mask ( const uint32_t& aMask );
 
+			/**
+				Return a std::deque containing all the IPbus headers returned during the transaction
+				@return a std::deque containing all the IPbus headers returned during the transaction
+				@note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			*/
+			const std::deque<uint32_t>& returnedHeaders();
+
 		private:
 			//! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory
 			boost::shared_ptr< _ValWord_<T> > mMembers;
 
 	};
 
+
 	//! A class which wraps a block of data and marks whether or not it is valid
 	template< typename T >
-	class ValVector
+	class ValVector : public ValHeader
 	{
 			//! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
 			friend class PackingProtocol;
+
+			//! Make the ValHeader class a friend so we can downcast the members
+			friend class ValHeader;
 
 		public:
 			//! typedef iterator to be that of the underlying storage type
@@ -340,6 +377,12 @@ namespace uhal
 						reverse_iterator rend();
 			*/
 
+			/**
+				Return a std::deque containing all the IPbus headers returned during the transaction
+				@return a std::deque containing all the IPbus headers returned during the transaction
+				@note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			*/
+			const std::deque<uint32_t>& returnedHeaders();
 
 		private:
 			//! A shared pointer to a _ValVector_ struct, so that every copy of this ValVector points to the same underlying memory
