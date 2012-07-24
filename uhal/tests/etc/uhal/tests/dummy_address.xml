@@ -19,4 +19,8 @@
     <node id="SUBSYSTEM1" address="0x200000" module="file://dummy_level2_address.xml" />
     <node id="SUBSYSTEM2" address="0x300000"  module="file://dummy_level2_address.xml"/>
 
+    <node id="SMALL_MEM" address="0x400000" permission="rw" mode="incremental" size="256"/>
+
+    <node id="LARGE_MEM" address="0x500000"  permission="rw" mode="incremental" size="26214400"/>
+
 </node>
