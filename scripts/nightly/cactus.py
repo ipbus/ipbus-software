@@ -86,6 +86,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "sudo /opt/cactus/bin/controlhub_start",
              "/opt/cactus/bin/controlhub_status",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "sudo /opt/cactus/bin/controlhub_stop",
              #UDP TESTS
              "DummyHardwareUdp.exe 50001 &> /var/log/DummyHardwareUdp.exe.log &",
              "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
@@ -99,17 +100,16 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             "sudo /opt/cactus/bin/controlhub_stop",
              #TCP TESTS
              "DummyHardwareTcp.exe 50002 &> /var/log/DummyHardwareTcp.exe.log &",
              "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
-             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp"
-             #KILL SERVERS
-             "pkill -f \"DummyHardwareTcp.exe\"",
-             "pkill -f \"DummyHardwareUdp.exe\"",
-             "sudo /opt/cactus/bin/controlhub_stop"
+             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
+             "pkill -f \"DummyHardwareTcp.exe\""
              ]
 
 REPORT_CMDS = ["python $HOME/nightly/nanalyzer.py cactus.py"]
