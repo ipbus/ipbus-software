@@ -30,11 +30,15 @@ ERROR_LIST        = ['TEST FAILED, ',
 
 IGNORE_ERROR_LIST = []
 
-TEST_PASSED_LIST  = []
+TEST_PASSED_LIST  = ["TEST PASSED",
+                     "CHECK PASSED",
+                     "TEST_THROW PASSED",
+                     "TEST_NOTHROW PASSED"]
 
 
 ####ENVIRONMENT
 environ["LD_LIBRARY_PATH"] = join(INSTALL_PREFIX,"lib") + ":" + environ.get("LD_LIBARY_PATH","")
+environ["PATH"]            = join(INSTALL_PREFIX,"bin/uhal/tests") + ":" + environ.get("PATH","")
 
 ####COMMANDS
 UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
@@ -74,24 +78,34 @@ INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "mkdir -p %s" % join(WEB_DIR,"api"),
                 "cd /build/cactus;rm -rf %s;mv html %s" % (join(WEB_DIR,"api/html"), join(WEB_DIR, "api/."))]
 
-TEST_CMDS = []
-## "%s 50001 &> %s &" % (join(INSTALL_PREFIX,"DummyHardwareUdp.exe"),
-##                                    join("var/log","DummyHardwareUdp.exe.log")),
-##              "%s 50002 &> %s &" % (join(INSTALL_PREFIX,"DummyHardwareTcp.exe"),
-##                                    join("var/log","DummyHardwareTcp.exe.log")),
-##              join(INSTALL_PREFIX,"controlhub_start"),
-##              join(INSTALL_PREFIX,"controlhub_status"),
-##              #tests
-             
-##              #clean up
-##              join(INSTALL_PREFIX,"controlhub_stats"),
-##              "pkill -f DummyHardwareTcp.exe &> /dev/null",
-##              "pkill -f DummyHardwareUdp.exe &> /dev/null",
-##              join(INSTALL_PREFIX,"controlhub_stop"),
-                  
-             
-##              "%s 50001 &> /var/log/DummyHardwareUdp.log &" % join(INSTALL_PREFIX,"DummyHardwareUdp.exe"),
-##              ]
+TEST_CMDS = ["sudo chmod +w /var/log",
+             #DUMMY UDP TESTS
+             "DummyHardwareUdp.exe 50001 &> /var/log/DummyHardwareUdp.exe.log &",
+             "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             #DUMMY CONTROL HUB TESTS
+             "sudo /opt/cactus/bin/controlhub_start",
+             "/opt/cactus/bin/controlhub_status",
+             "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             #DUMMY TCP TESTS
+             "DummyHardwareTcp.exe 50002 &> /var/log/DummyHardwareTcp.exe.log &",
+             "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
+             "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
+             "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
+             "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
+             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp"
+             #KILL SERVERS
+             "pkill -f \"DummyHardwareTcp.exe\"",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             "sudo /opt/cactus/bin/controlhub_stop"
+             ]
 
 REPORT_CMDS = ["python $HOME/nightly/nanalyzer.py cactus.py"]
 
