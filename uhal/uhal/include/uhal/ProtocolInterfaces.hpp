@@ -279,22 +279,22 @@ namespace uhal
 			*/
 			virtual ValVector< uint32_t > readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
-			/**
-				Read a single word, mask it and interpret it as being signed
-				@param aAddr the address of the register to read
-				@param aMask the mask to apply to the value after reading
-				@return a Validated Memory which wraps the location to which the reply data is to be written
-			*/
-			virtual ValWord< int32_t > readSigned ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
+			// /**
+				// Read a single word, mask it and interpret it as being signed
+				// @param aAddr the address of the register to read
+				// @param aMask the mask to apply to the value after reading
+				// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// */
+			// virtual ValWord< int32_t > readSigned ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
 
-			/**
-				Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-				@param aAddr the lowest address in the block of registers or the address of the block-read port
-				@param aSize the number of words to read
-				@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-				@return a Validated Memory which wraps the location to which the reply data is to be written
-			*/
-			virtual ValVector< int32_t > readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+			// /**
+				// Read a block of data from a block of registers or a block-read port and interpret it as being signed data
+				// @param aAddr the lowest address in the block of registers or the address of the block-read port
+				// @param aSize the number of words to read
+				// @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+				// @return a Validated Memory which wraps the location to which the reply data is to be written
+			// */
+			// virtual ValVector< int32_t > readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
 			// /**
 			// Retrieve the reserved address information from the target

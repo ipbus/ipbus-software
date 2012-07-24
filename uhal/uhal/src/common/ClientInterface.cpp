@@ -39,30 +39,31 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 	}
 
 
-	void ClientInterface::ping()
-	{
-		try
-		{
-			std::string lInstruction ( "ping -q -c 1 " + mUri.mHostname + " &> /dev/null" );
-			log ( Info() , "Pinging " ,  Quote ( mId ) , " with instruction : " , lInstruction );
-			//Cant use ICMP here because it requires raw socket (and hence superuser) access, so use system PING instead
-			int lPingStatus = system ( lInstruction.c_str() );
+	// void ClientInterface::ping()
+	// {
+		// try
+		// {
+			// std::string lInstruction ( "ping -q -c 1 " + mUri.mHostname + " &> /dev/null" );
+			// log ( Info() , "Pinging " ,  Quote ( mId ) , " with instruction : " , lInstruction );
+			// //Cant use ICMP here because it requires raw socket (and hence superuser) access, so use system PING instead
+			// int lPingStatus = system ( lInstruction.c_str() );
 
-			if ( WEXITSTATUS ( lPingStatus ) )
-			{
-				log ( Error() , "Pinging " , Quote ( mId ) , " at address " , Quote( mUri.mHostname ) , " returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
-				PingFailed().throwFrom ( ThisLocation() );
-			}
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+			// if ( WEXITSTATUS ( lPingStatus ) )
+			// {
+				// log ( Error() , "Pinging " , Quote ( mId ) , " at address " , Quote( mUri.mHostname ) , " returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
+				// PingFailed().throwFrom ( ThisLocation() );
+			// }
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
+
 
 	std::string ClientInterface::uri()
 	{
@@ -240,55 +241,55 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 
 
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	ValWord< int32_t > ClientInterface::readSigned ( const uint32_t& aAddr )
-	{
-		try
-		{
-			return getPackingProtocol().readSigned ( aAddr );
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ValWord< int32_t > ClientInterface::readSigned ( const uint32_t& aAddr )
+	// {
+		// try
+		// {
+			// return getPackingProtocol().readSigned ( aAddr );
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
-	ValWord< int32_t > ClientInterface::readSigned ( const uint32_t& aAddr, const uint32_t& aMask )
-	{
-		try
-		{
-			return getPackingProtocol().readSigned ( aAddr , aMask );
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// ValWord< int32_t > ClientInterface::readSigned ( const uint32_t& aAddr, const uint32_t& aMask )
+	// {
+		// try
+		// {
+			// return getPackingProtocol().readSigned ( aAddr , aMask );
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
-	ValVector< int32_t > ClientInterface::readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
-	{
-		try
-		{
-			return getPackingProtocol().readBlockSigned ( aAddr, aSize, aMode );
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ValVector< int32_t > ClientInterface::readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+	// {
+		// try
+		// {
+			// return getPackingProtocol().readBlockSigned ( aAddr, aSize, aMode );
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
+	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 

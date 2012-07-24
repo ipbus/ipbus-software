@@ -616,97 +616,97 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 
 
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	ValWord< int32_t > PackingProtocol::readSigned ( const uint32_t& aAddr, const uint32_t& aMask )
-	{
-		try
-		{
-			log ( Debug() , "Read one signed word from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
-			// IPbus packet format is:
-			// HEADER
-			// BASE ADDRESS
-			uint32_t lSendByteCount ( 2 << 2 );
-			// IPbus reply packet format is:
-			// HEADER
-			// WORD
-			uint32_t lReplyByteCount ( 2 << 2 );
-			uint32_t lSendBytesAvailable;
-			uint32_t  lReplyBytesAvailable;
-			this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-			mCurrentBuffers->send ( this->calculateIPbusHeader ( READ , 1 ) );
-			mCurrentBuffers->send ( aAddr );
-			ValWord< int32_t > lReply ( 0 , aMask );
-			mCurrentBuffers->add ( lReply );
-			_ValWord_< int32_t >& lReplyMem = * ( lReply.mMembers );
-			mCurrentBuffers->receive ( lReplyMem.IPbusHeader );
-			mCurrentBuffers->receive ( lReplyMem.value );
-			return lReply;
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ValWord< int32_t > PackingProtocol::readSigned ( const uint32_t& aAddr, const uint32_t& aMask )
+	// {
+		// try
+		// {
+			// log ( Debug() , "Read one signed word from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+			// // IPbus packet format is:
+			// // HEADER
+			// // BASE ADDRESS
+			// uint32_t lSendByteCount ( 2 << 2 );
+			// // IPbus reply packet format is:
+			// // HEADER
+			// // WORD
+			// uint32_t lReplyByteCount ( 2 << 2 );
+			// uint32_t lSendBytesAvailable;
+			// uint32_t  lReplyBytesAvailable;
+			// this->checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+			// mCurrentBuffers->send ( this->calculateIPbusHeader ( READ , 1 ) );
+			// mCurrentBuffers->send ( aAddr );
+			// ValWord< int32_t > lReply ( 0 , aMask );
+			// mCurrentBuffers->add ( lReply );
+			// _ValWord_< int32_t >& lReplyMem = * ( lReply.mMembers );
+			// mCurrentBuffers->receive ( lReplyMem.IPbusHeader );
+			// mCurrentBuffers->receive ( lReplyMem.value );
+			// return lReply;
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
-	ValVector< int32_t > PackingProtocol::readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
-	{
-		try
-		{
-			log ( Debug() , "Read signed block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
-			// IPbus packet format is:
-			// HEADER
-			// BASE ADDRESS
-			uint32_t lSendByteCount ( 2 << 2 );
-			// IPbus reply packet format is:
-			// HEADER
-			// WORD
-			// WORD
-			// ....
-			uint32_t lReplyHeaderByteCount ( 1 << 2 );
-			uint32_t lSendBytesAvailable;
-			uint32_t  lReplyBytesAvailable;
-			ValVector< int32_t > lReply ( aSize );
-			_ValVector_< int32_t >& lReplyMem = * ( lReply.mMembers );
-			uint8_t* lReplyPtr = ( uint8_t* ) ( & ( lReplyMem.value[0] ) );
-			eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
-			int32_t lPayloadByteCount ( aSize << 2 );
-			uint32_t lAddr ( aAddr );
+	// ValVector< int32_t > PackingProtocol::readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+	// {
+		// try
+		// {
+			// log ( Debug() , "Read signed block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+			// // IPbus packet format is:
+			// // HEADER
+			// // BASE ADDRESS
+			// uint32_t lSendByteCount ( 2 << 2 );
+			// // IPbus reply packet format is:
+			// // HEADER
+			// // WORD
+			// // WORD
+			// // ....
+			// uint32_t lReplyHeaderByteCount ( 1 << 2 );
+			// uint32_t lSendBytesAvailable;
+			// uint32_t  lReplyBytesAvailable;
+			// ValVector< int32_t > lReply ( aSize );
+			// _ValVector_< int32_t >& lReplyMem = * ( lReply.mMembers );
+			// uint8_t* lReplyPtr = ( uint8_t* ) ( & ( lReplyMem.value[0] ) );
+			// eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
+			// int32_t lPayloadByteCount ( aSize << 2 );
+			// uint32_t lAddr ( aAddr );
 
-			while ( lPayloadByteCount > 0 )
-			{
-				this->checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-				uint32_t lReplyBytesAvailableForPayload ( ( lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
-				mCurrentBuffers->send ( this->calculateIPbusHeader ( lType , lReplyBytesAvailableForPayload>>2 ) );
-				mCurrentBuffers->send ( lAddr );
-				lReplyMem.IPbusHeaders.push_back ( 0 );
-				mCurrentBuffers->receive ( lReplyMem.IPbusHeaders.back() );
-				mCurrentBuffers->receive ( lReplyPtr , lReplyBytesAvailableForPayload );
-				lReplyPtr += lReplyBytesAvailableForPayload;
-				lPayloadByteCount -= lReplyBytesAvailableForPayload;
+			// while ( lPayloadByteCount > 0 )
+			// {
+				// this->checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+				// uint32_t lReplyBytesAvailableForPayload ( ( lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
+				// mCurrentBuffers->send ( this->calculateIPbusHeader ( lType , lReplyBytesAvailableForPayload>>2 ) );
+				// mCurrentBuffers->send ( lAddr );
+				// lReplyMem.IPbusHeaders.push_back ( 0 );
+				// mCurrentBuffers->receive ( lReplyMem.IPbusHeaders.back() );
+				// mCurrentBuffers->receive ( lReplyPtr , lReplyBytesAvailableForPayload );
+				// lReplyPtr += lReplyBytesAvailableForPayload;
+				// lPayloadByteCount -= lReplyBytesAvailableForPayload;
 
-				if ( aMode == defs::INCREMENTAL )
-				{
-					lAddr += ( lReplyBytesAvailableForPayload>>2 );
-				}
-			}
+				// if ( aMode == defs::INCREMENTAL )
+				// {
+					// lAddr += ( lReplyBytesAvailableForPayload>>2 );
+				// }
+			// }
 
-			mCurrentBuffers->add ( lReply ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
-			return lReply;
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+			// mCurrentBuffers->add ( lReply ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
+			// return lReply;
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
+	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	// //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// ValVector< uint32_t > PackingProtocol::readReservedAddressInfo ()

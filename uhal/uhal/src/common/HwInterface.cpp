@@ -67,21 +67,21 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 	}
 
-	void HwInterface::ping()
-	{
-		try
-		{
-			mClientInterface->ping();
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// void HwInterface::ping()
+	// {
+		// try
+		// {
+			// mClientInterface->ping();
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
 	void HwInterface::dispatch ()
 	{

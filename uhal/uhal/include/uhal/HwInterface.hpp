@@ -67,10 +67,10 @@ namespace uhal
 			*/
 			const uint32_t& getTimeoutPeriod();
 
-			/**
-				Ping the target for this client
-			*/
-			void ping();
+			// /**
+				// Ping the target for this client
+			// */
+			// void ping();
 
 			/**
 				Retrieve the Node given by a full-stop delimeted name path relative, to the top-level node
