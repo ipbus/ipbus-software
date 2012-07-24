@@ -39,10 +39,10 @@ uhal::tests::PerfTester::PerfTester():
   // ***** DECLARE TESTS HERE - descriptions should not be longer than a shortish line. *****:
   // Receive bandwidth test
   m_testFuncMap["BandwidthRx"] = &PerfTester::bandwidthRxTest;
-  m_testDescMap["BandwidthRx"] = "Block read test (default depth = 350) to find the receive bandwidth.";
+  m_testDescMap["BandwidthRx"] = "Block read test (default depth = 340) to find the receive bandwidth.";
   // Transmit bandwidth test
   m_testFuncMap["BandwidthTx"] = &PerfTester::bandwidthTxTest;
-  m_testDescMap["BandwidthTx"] = "Block write test (default depth = 350) to find the transmit bandwidth.";
+  m_testDescMap["BandwidthTx"] = "Block write test (default depth = 340) to find the transmit bandwidth.";
   // Validation test
   m_testFuncMap["Validation"] = &PerfTester::validationTest;
   m_testDescMap["Validation"] = "For validating downstream subsystems, such as the Control Hub or the IPbus firmware.";
