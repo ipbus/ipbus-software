@@ -260,7 +260,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 				{
 					log ( Error() , "Returned Header, " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ),
 						  " ( transaction id = " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
-						  ", transaction type = " , Integer ( ( uint8_t ) ( lReplyIPbusTransactionType ), IntFmt< hex , fixed >() ) ,
+						  ", transaction type = " , Integer ( ( uint8_t ) ( ( lReplyIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) ,
 						  ", word count = " , Integer ( lReplyWordCount ) ,
 						  " ) had response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicating an error" );
 					return false;
@@ -268,8 +268,8 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 				if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
 				{
-					log ( Error() , "Returned Transaction Type " , Integer ( ( uint8_t ) ( lReplyIPbusTransactionType ), IntFmt< hex , fixed >() ) ,
-						  " does not match that sent " , Integer ( ( uint8_t ) ( lSendIPbusTransactionType ), IntFmt< hex , fixed >() ) );
+					log ( Error() , "Returned Transaction Type " , Integer ( ( uint8_t ) ( ( lReplyIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) ,
+						  " does not match that sent " , Integer ( ( uint8_t ) ( ( lSendIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) );
 					log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
 						  " whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
 					return false;
