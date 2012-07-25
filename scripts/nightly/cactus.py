@@ -41,14 +41,15 @@ environ["LD_LIBRARY_PATH"] = join(INSTALL_PREFIX,"lib") + ":" + environ.get("LD_
 environ["PATH"]            = join(INSTALL_PREFIX,"bin/uhal/tests") + ":" + environ.get("PATH","")
 
 ####COMMANDS
-UNINSTALL_CMDS = ["rm -rf %s" % BUILD_HOME,
+UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
+                  "pkill -f \"DummyHardwareUdp.exe\" &> /dev/null",
+                  "pkill -f \"cactus.*erlang\" &> /dev/null",
+                  "pkill -f \"cactus.*controlhub\" &> /dev/null",
+                  "rm -rf %s" % BUILD_HOME,
                   "mkdir -p %s" % BUILD_HOME,
                   "sudo yum -y groupremove cactus",
                   "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null",
-                  "pkill -f DummyHardwareTcp.exe &> /dev/null",
-                  "pkill -f DummyHardwareUdp.exe &> /dev/null",
-                  "pkill -f \"cactus.*erlang\" &> /dev/null",
-                  "pkill -f \"cactus.*controlhub\" &> /dev/null"]
+                  ]
 
 ENVIRONMENT_CMDS = ["env"]
 
@@ -84,7 +85,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "sudo /opt/cactus/bin/controlhub_start",
-             "/opt/cactus/bin/controlhub_status",
+             "sudo /opt/cactus/bin/controlhub_status",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "sudo /opt/cactus/bin/controlhub_stop",
              #UDP TESTS
@@ -94,7 +95,11 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "pkill -f \"DummyHardwareUdp.exe\"",
              #CONTROL HUB TESTS
+             "DummyHardwareUdp.exe 50001 &> /var/log/DummyHardwareUdp.exe.log &",
+             "sudo /opt/cactus/bin/controlhub_start",
+             "sudo /opt/cactus/bin/controlhub_status",
              "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
