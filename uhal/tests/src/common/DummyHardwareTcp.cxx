@@ -12,11 +12,12 @@ class TCPdummyHardware
 {
 	public:
 
-	TCPdummyHardware ( const uint16_t& aPort ) try :
+	TCPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay ) try :
 			mIOservice(),
 					   mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) ),
 					   mSocket ( mIOservice ),
-					   mMemory( ADDRESSMASK+1 , 0x00000000 )
+					   mMemory( ADDRESSMASK+1 , 0x00000000 ),
+					   mReplyDelay( aReplyDelay )
 		{
 			mAcceptor.accept ( mSocket );
 		}
@@ -153,6 +154,7 @@ class TCPdummyHardware
 					}
 					while ( lReceivePtr!=lReceiveEnd );
 
+					sleep( mReplyDelay );
 					boost::asio::write ( mSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
 				}
 			}
@@ -184,6 +186,8 @@ class TCPdummyHardware
 
 		uint32_t mAddress;
 
+		uint32_t mReplyDelay;
+
 };
 
 
@@ -192,15 +196,22 @@ int main ( int argc, char* argv[] )
 {
 	try
 	{
-		if ( argc != 2 )
+		if ( argc < 2 || argc > 3 )
 		{
-			log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port>" );
+			log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay in seconds>" );
 			return 1;
 		}
 
+		uint32_t lReplyDelay( 0 );
+		
+		if( argc == 3 )
+		{
+			lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
+		}
+		
 		for ( ;; )
 		{
-			TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) );
+			TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
 			lDummyHardware.run();
 			//if the connection is closed, open a new one
 		}
