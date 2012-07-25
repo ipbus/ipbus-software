@@ -15,19 +15,17 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		mTcpTransportProtocol ( aTcpTransportProtocol ),
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
 							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) ),
+							  mEndpoint ( boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > (
+											new boost::asio::ip::tcp::resolver::iterator (
+												boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
+													boost::asio::ip::tcp::resolver::query ( aHostname , aServiceOrPort )
+												)
+											)
+										) 
+									),
 							mDeadlineTimer( *mIOservice ),
 							mTimeoutPeriod( aTimeoutPeriod )
 	{
-		log ( Info() , "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
-		boost::asio::connect ( *mSocket ,
-							   boost::asio::ip::tcp::resolver::iterator (
-								   boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
-									   boost::asio::ip::tcp::resolver::query ( aHostname , aServiceOrPort )
-								   )
-							   )
-							 );
-		mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-		log ( Info() , "TCP connection succeeded" );
 		mDeadlineTimer.async_wait(boost::bind(&TcpTransportProtocol::DispatchWorker::CheckDeadline, this));
 	}
 	catch ( uhal::exception& aExc )
@@ -109,6 +107,15 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 	{
 		try
 		{
+		
+			if( ! mSocket->is_open() )
+			{
+				log ( Info() , "Attempting to create TCP connection to '" , (**mEndpoint).host_name() , "' port " , (**mEndpoint).service_name() , "." );
+				boost::asio::connect ( *mSocket , *mEndpoint );
+				mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
+				log ( Info() , "TCP connection succeeded" );
+			}
+		
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			// Send data
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------

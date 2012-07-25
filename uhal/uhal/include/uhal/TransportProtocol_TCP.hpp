@@ -83,6 +83,9 @@ namespace uhal
 
 					//! A shared pointer to a boost::asio udp socket through which the operation will be performed
 					boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
+					
+					boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > mEndpoint;
+					
 
 					//! Error code for the async callbacks to fill
 					boost::system::error_code mErrorCode;
