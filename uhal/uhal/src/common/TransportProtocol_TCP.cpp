@@ -169,10 +169,18 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 		}
 		catch ( uhal::exception& aExc )
 		{
+			if ( mSocket.unique() )
+			{
+				mSocket->close();
+			}
 			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
 		{
+			if ( mSocket.unique() )
+			{
+				mSocket->close();
+			}
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
