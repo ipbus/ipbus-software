@@ -19,7 +19,7 @@ void job ( const std::string& connection, const std::string& id )
 {
 	for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
 	{
-		std::cout << "thread = " << boost::this_thread::get_id() << std::endl;
+	  //std::cout << "thread = " << boost::this_thread::get_id() << std::endl;
 		ConnectionManager manager ( connection );
 		HwInterface hw=manager.getDevice ( id );
 		uint32_t x = static_cast<uint32_t> ( rand() );
@@ -35,19 +35,11 @@ void job ( const std::string& connection, const std::string& id )
 		hw.getNode ( "MEM" ).writeBlock ( xx );
 		ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
 		CACTUS_TEST ( hw.dispatch() );
-		CACTUS_CHECK ( reg.value() == x );
+		CACTUS_CHECK ( reg.valid() );
 		CACTUS_CHECK ( mem.valid() );
 		CACTUS_CHECK ( mem.size() == N_SIZE );
-		bool correct_block_write_read = true;
-		ValVector< uint32_t >::const_iterator i=mem.begin();
-		std::vector< uint32_t >::const_iterator j=xx.begin();
-
-		for ( ValVector< uint32_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
-		{
-			correct_block_write_read = correct_block_write_read && ( *i == *j );
-		}
-
-		CACTUS_CHECK ( correct_block_write_read );
+		
+		//can not check content in the mutlithreaded case
 	}
 }
 
