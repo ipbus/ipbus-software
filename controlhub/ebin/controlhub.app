@@ -21,7 +21,8 @@
               ch_utils]},
    {registered, [ch_device_client_registry,
                  ch_stats,
-                 ch_sup]},
+                 ch_sup,
+                 ch_tcp_listener]},
    {applications, [kernel, sasl, stdlib]},
    {mod, {controlhub_app, []}}
  ]
