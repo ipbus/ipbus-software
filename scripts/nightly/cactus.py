@@ -80,7 +80,7 @@ INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "cd /build/cactus;rm -rf %s;mv html %s" % (join(WEB_DIR,"api/html"), join(WEB_DIR, "api/."))]
 
 TEST_CMDS = ["sudo chmod +w /var/log",
-             #TIMEOUT TESTS
+             #SERVER NOT REACHABLE TESTS
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
@@ -88,6 +88,17 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "sudo /opt/cactus/bin/controlhub_status",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
              "sudo /opt/cactus/bin/controlhub_stop",
+             #TIMEOUT TESTS
+             "DummyHardwareUdp.exe 50001 20 &> /var/log/DummyHardwareUdp.exe.log &",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "sudo /opt/cactus/bin/controlhub_start",
+             "sudo /opt/cactus/bin/controlhub_status",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             "sudo /opt/cactus/bin/controlhub_stop",
+             "DummyHardwareTcp.exe 50001 20 &> /var/log/DummyHardwareUdp.exe.log &",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
+             "pkill -f \"DummyHardwareTcp.exe\"",
              #UDP TESTS
              "DummyHardwareUdp.exe 50001 &> /var/log/DummyHardwareUdp.exe.log &",
              "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
