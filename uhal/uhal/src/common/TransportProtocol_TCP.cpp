@@ -119,9 +119,8 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
 
 			mErrorCode = boost::asio::error::would_block;
-			boost::asio::write ( *mSocket , lAsioSendBuffer , mErrorCode );
 			boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-							do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
+			do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
 
 			if ( mErrorCode )
 			{
@@ -146,7 +145,6 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
 
 			mErrorCode = boost::asio::error::would_block;
-			boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), mErrorCode );
 			boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
 			do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
 
