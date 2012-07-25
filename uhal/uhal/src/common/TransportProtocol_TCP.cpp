@@ -2,31 +2,21 @@
 #include "uhal/TransportProtocol_TCP.hpp"
 
 // #include <boost/lambda/bind.hpp>
-// #include <boost/lambda/lambda.hpp>
+#include <boost/lambda/lambda.hpp>
 
 
-#ifdef USE_TCP_MULTITHREADED
 #include <sys/time.h>
-#else
-#include <signal.h>
-
-void TCPtimeout ( int signal )
-{
-	log ( uhal::Error() , "TCP Timeout" );
-	log ( uhal::Error() , "Throwing at " , ThisLocation() );
-	uhal::TcpTimeout().throwFrom ( ThisLocation() );
-}
-
-#endif
 
 namespace uhal
 {
 
 
-TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
+TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
 		mTcpTransportProtocol ( aTcpTransportProtocol ),
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
-							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) )
+							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) ),
+							mDeadlineTimer( *mIOservice ),
+							mTimeoutPeriod( aTimeoutPeriod )
 	{
 		log ( Info() , "Attempting to create TCP connection to '" , aHostname , "' port " , aServiceOrPort , "." );
 		boost::asio::connect ( *mSocket ,
@@ -38,6 +28,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 							 );
 		mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
 		log ( Info() , "TCP connection succeeded" );
+		mDeadlineTimer.async_wait(boost::bind(&TcpTransportProtocol::DispatchWorker::CheckDeadline, this));
 	}
 	catch ( uhal::exception& aExc )
 	{
@@ -124,13 +115,13 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
 			log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-			/*
-							NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
-			*/
-			/*				mErrorCode = boost::asio::error::would_block;*/
+
+			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
+
+			mErrorCode = boost::asio::error::would_block;
 			boost::asio::write ( *mSocket , lAsioSendBuffer , mErrorCode );
-			/*				boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-							do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
+			boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
+							do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
 
 			if ( mErrorCode )
 			{
@@ -151,13 +142,13 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			}
 
 			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
-			/*
-							NOTE! Using the async_methods appears to give you a 10-20% hit in performance. I don't really understand why but I will stick with the synchronous methods for now...
-			*/
-			/*				mErrorCode = boost::asio::error::would_block;*/
+
+			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
+
+			mErrorCode = boost::asio::error::would_block;
 			boost::asio::read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), mErrorCode );
-			/*				boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-							do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );*/
+			boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
+			do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
 
 			if ( mErrorCode )
 			{
@@ -182,29 +173,38 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 	}
 
 
+	
+	void TcpTransportProtocol::DispatchWorker::CheckDeadline()
+	{
+
+		// Check whether the deadline has passed. We compare the deadline against
+		// the current time since a new asynchronous operation may have moved the
+		// deadline before this actor had a chance to run.
+		if (mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+		{
+			// The deadline has passed. The socket is closed so that any outstanding
+			// asynchronous operations are cancelled.
+			mSocket->close();
+
+			// There is no longer an active deadline. The expiry is set to positive
+			// infinity so that the actor takes no action until a new deadline is set.
+			mDeadlineTimer.expires_at(boost::posix_time::pos_infin);
+		}
+
+		// Put the actor back to sleep.
+		mDeadlineTimer.async_wait(boost::bind(&TcpTransportProtocol::DispatchWorker::CheckDeadline, this));
+	}
+	
 
 
-TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod ) try :
+TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
 		TransportProtocol ( aTimeoutPeriod ),
 						  mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort , aTimeoutPeriod ) ) )
 #ifdef USE_TCP_MULTITHREADED
 						  , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
 						  mAsynchronousException ( NULL )
 #endif
-	{
-#ifndef USE_TCP_MULTITHREADED
-		struct sigaction sa;
-		memset ( &sa, 0, sizeof ( sa ) );
-		sa.sa_handler = TCPtimeout;
-
-		if ( sigaction ( SIGALRM, &sa, 0 ) < 0 )
-		{
-			log ( Error() , "Can't establish signal handler" );
-			TcpTimeout().throwFrom ( ThisLocation() );
-		}
-
-#endif
-	}
+	{}
 	catch ( uhal::exception& aExc )
 	{
 		aExc.rethrowFrom ( ThisLocation() );
@@ -259,18 +259,14 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 
 				if ( mAsynchronousException )
 				{
-					uhal::exception lExc ( *mAsynchronousException );
-					log ( Error() , "Exception " , Quote ( lExc.what() ) , " caught at " , ThisLocation() );
-					throw lExc;
+					mAsynchronousException->throwFrom ( ThisLocation() );
 				}
 
 				mPendingSendBuffers.push_back ( aBuffers );
 
 			}
 #else
-			alarm ( mTimeoutPeriod );
 			mDispatchWorker->Dispatch ( aBuffers );
-			alarm ( 0 );
 #endif
 		}
 		catch ( uhal::exception& aExc )
@@ -290,37 +286,19 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 		try
 		{
 #ifdef USE_TCP_MULTITHREADED
-			// 				timeval lStart, lEnd;
-			// 				gettimeofday ( &lStart, NULL );
-			time_t lStart, lEnd; //we don't need us resolution
-			time ( &lStart );
 			bool lContinue ( true );
 
 			do
 			{
+				boost::lock_guard<boost::mutex> lLock ( mMutex );
+
+				// kill time while pending buffers are emptied and check for exceptions on the thread...
+				if ( mAsynchronousException )
 				{
-					boost::lock_guard<boost::mutex> lLock ( mMutex );
-
-					// kill time while pending buffers are emptied and check for exceptions on the thread...
-					if ( mAsynchronousException )
-					{
-						uhal::exception lExc ( *mAsynchronousException );
-						log ( Error() , "Exception " , Quote ( lExc.what() ) , " caught at " , ThisLocation() );
-						throw lExc;
-					}
-
-					lContinue = ( mPendingSendBuffers.size() );
+					mAsynchronousException->throwFrom ( ThisLocation() );
 				}
-				// 					gettimeofday ( &lEnd, NULL );
-				time ( &lEnd );
-				/*					double lTimeTaken ( ((double)(lEnd.tv_sec-lStart.tv_sec)*1e6) + (double)(lEnd.tv_usec-lStart.tv_usec) );*/
-				double lTimeTaken ( difftime ( lEnd , lStart ) );
 
-				if ( lTimeTaken > mTimeoutPeriod )
-				{
-					log ( Error() , "TCP Timeout" );
-					TcpTimeout().throwFrom ( ThisLocation() );
-				}
+				lContinue = ( mPendingSendBuffers.size() );
 			}
 			while ( lContinue );
 

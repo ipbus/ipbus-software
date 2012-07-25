@@ -16,6 +16,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/deadline_timer.hpp>
 
 #ifdef USE_UDP_MULTITHREADED
 #include <boost/thread/thread.hpp>
@@ -49,7 +50,7 @@ namespace uhal
 						@param aServiceOrPort the target port
 						@param aTimeoutPeriod the default timeout period (can be changed later)
 					*/
-					DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod );
+					DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod );
 
 					/**
 						Destructor
@@ -71,6 +72,8 @@ namespace uhal
 					void Dispatch ( Buffers* aBuffers );
 
 
+					void CheckDeadline();
+					
 				private:
 
 					//! A reference to the parent of this DispatchWorker
@@ -87,6 +90,10 @@ namespace uhal
 
 					//! Error code for the async callbacks to fill
 					boost::system::error_code mErrorCode;
+					
+					boost::asio::deadline_timer mDeadlineTimer;
+					
+					uint32_t mTimeoutPeriod;
 
 			};
 
@@ -100,7 +107,7 @@ namespace uhal
 				@param aServiceOrPort the target port
 				@param aTimeoutPeriod the default timeout period (can be changed later)
 			*/
-			UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , uint32_t aTimeoutPeriod = 10 );
+			UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod = 10 );
 			/**
 				Destructor
 			*/
