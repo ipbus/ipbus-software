@@ -13,7 +13,8 @@ class UDPdummyHardware
 
 	UDPdummyHardware ( const uint16_t& aPort ) try :
 			mIOservice(),
-					   mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) )
+					   mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) ),
+					   mMemory(  ADDRESSMASK+1 , 0x00000000 )
 			{}
 		catch ( uhal::exception& aExc )
 		{
@@ -71,7 +72,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									*lReplyPtr = mMemory[ mAddress & ADDRESSMASK ];
+									*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
 									lReplyPtr++;
 								}
 
@@ -84,7 +85,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									*lReplyPtr = mMemory[ mAddress++ & ADDRESSMASK ];
+									*lReplyPtr = mMemory.at( mAddress++ & ADDRESSMASK );
 									lReplyPtr++;
 								}
 
@@ -95,7 +96,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									mMemory[ mAddress& ADDRESSMASK ] = *lReceivePtr;
+									mMemory.at( mAddress & ADDRESSMASK ) = *lReceivePtr;
 									lReceivePtr++;
 								}
 
@@ -108,7 +109,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									mMemory[ mAddress++ & ADDRESSMASK ] = *lReceivePtr;
+									mMemory.at( mAddress++ & ADDRESSMASK ) = *lReceivePtr;
 									lReceivePtr++;
 								}
 
@@ -118,23 +119,23 @@ class UDPdummyHardware
 							case RMW_SUM:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory[ mAddress& ADDRESSMASK ] += ( int32_t ) ( *lReceivePtr );
+								mMemory.at( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;
-								*lReplyPtr = mMemory[ mAddress & ADDRESSMASK ];
+								*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
 								lReplyPtr++;
 								break;
 							case RMW_BITS:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory[ mAddress& ADDRESSMASK ] &= ( int32_t ) ( *lReceivePtr );
+								mMemory.at( mAddress & ADDRESSMASK ) &= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
-								mMemory[ mAddress& ADDRESSMASK ] |= ( int32_t ) ( *lReceivePtr );
+								mMemory.at( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;
-								*lReplyPtr = mMemory[ mAddress & ADDRESSMASK ];
+								*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
 								lReplyPtr++;
 								break;
 						}
@@ -159,7 +160,7 @@ class UDPdummyHardware
 		udp::socket mSocket;
 		udp::endpoint mSenderEndpoint;
 
-		uint32_t mMemory[ ADDRESSMASK+1 ];
+		std::vector< uint32_t > mMemory;
 
 		uint32_t mUDPreceiveBuffer[500];
 		uint32_t mUDPreplyBuffer[500];

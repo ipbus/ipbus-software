@@ -5,7 +5,7 @@
 using boost::asio::ip::tcp;
 using namespace uhal;
 
-#define ADDRESSMASK 0xFFFFFF
+#define ADDRESSMASK 0xFFFFF
 
 
 class TCPdummyHardware
@@ -15,7 +15,8 @@ class TCPdummyHardware
 	TCPdummyHardware ( const uint16_t& aPort ) try :
 			mIOservice(),
 					   mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) ),
-					   mSocket ( mIOservice )
+					   mSocket ( mIOservice ),
+					   mMemory( ADDRESSMASK+1 , 0x00000000 )
 		{
 			mAcceptor.accept ( mSocket );
 		}
@@ -82,7 +83,7 @@ class TCPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									*lReplyPtr = mMemory[ mAddress & ADDRESSMASK ];
+									*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
 									lReplyPtr++;
 								}
 
@@ -95,7 +96,7 @@ class TCPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									*lReplyPtr = mMemory[ mAddress++ & ADDRESSMASK ];
+									*lReplyPtr = mMemory.at( mAddress++ & ADDRESSMASK );
 									lReplyPtr++;
 								}
 
@@ -106,7 +107,7 @@ class TCPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									mMemory[ mAddress& ADDRESSMASK ] = *lReceivePtr;
+									mMemory.at( mAddress & ADDRESSMASK ) = *lReceivePtr;
 									lReceivePtr++;
 								}
 
@@ -119,7 +120,7 @@ class TCPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									mMemory[ mAddress++ & ADDRESSMASK ] = *lReceivePtr;
+									mMemory.at( mAddress++ & ADDRESSMASK ) = *lReceivePtr;
 									lReceivePtr++;
 								}
 
@@ -129,23 +130,23 @@ class TCPdummyHardware
 							case RMW_SUM:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory[ mAddress& ADDRESSMASK ] += ( int32_t ) ( *lReceivePtr );
+								mMemory.at( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;
-								*lReplyPtr = mMemory[ mAddress & ADDRESSMASK ];
+								*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
 								lReplyPtr++;
 								break;
 							case RMW_BITS:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory[ mAddress& ADDRESSMASK ] &= ( int32_t ) ( *lReceivePtr );
+								mMemory.at( mAddress & ADDRESSMASK ) &= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
-								mMemory[ mAddress& ADDRESSMASK ] |= ( int32_t ) ( *lReceivePtr );
+								mMemory.at( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;
-								*lReplyPtr = mMemory[ mAddress & ADDRESSMASK ];
+								*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
 								lReplyPtr++;
 								break;
 						}
@@ -171,7 +172,7 @@ class TCPdummyHardware
 		tcp::socket mSocket;
 		tcp::endpoint mSenderEndpoint;
 
-		uint32_t mMemory[ ADDRESSMASK+1 ];
+		std::vector< uint32_t > mMemory;
 
 		uint32_t mTCPreceiveBuffer[500];
 		uint32_t mTCPreplyBuffer[500];
