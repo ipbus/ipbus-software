@@ -31,11 +31,11 @@ namespace uhal
 
 
 	template <class T>
-	boost::shared_ptr< const Node > NodeTreeBuilder::Creator<T>::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath )
+	boost::shared_ptr< const Node > NodeTreeBuilder::Creator<T>::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId )
 	{
 		try
 		{
-			return boost::shared_ptr< const Node > ( new T ( aXmlNode , aPath ) );
+			return boost::shared_ptr< const Node > ( new T ( aXmlNode , aPath , aRequireId ) );
 		}
 		catch ( uhal::exception& aExc )
 		{

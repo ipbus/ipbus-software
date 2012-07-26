@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<node id="SYSTEM">
+<node>
 
     <node id="REG" address="0x0001" permission="rw" tags="test"/>
 

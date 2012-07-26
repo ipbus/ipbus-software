@@ -122,9 +122,10 @@ namespace uhal
 						Interface to a function which create a new IPbus client based on the protocol identifier specified
 						@param aXmlNode a PugiXML node from which to construct a node
 						@param aPath The fully qualified path to the XML file containing this node
+						@param aRequireId specify whether an exception should be thrown if the id attribute is not set
 						@return a shared pointer to a node tree which must be copied before it can be used
 					*/
-					virtual boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath ) = 0;
+					virtual boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true ) = 0;
 			};
 
 			//! Templated concrete implementation with a CreatorInterface interface
@@ -145,9 +146,10 @@ namespace uhal
 						Concrete function which creates a new IPbus client based on the protocol identifier specified
 						@param aXmlNode a PugiXML node from which to construct a node
 						@param aPath The fully qualified path to the XML file containing this node
+						@param aRequireId specify whether an exception should be thrown if the id attribute is not set
 						@return a node tree which must be copied before it can be used
 					*/
-					boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath );
+					boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true );
 			};
 
 
@@ -155,9 +157,10 @@ namespace uhal
 				Helper function which reads the class type from the XML node and calls the appropriate creator
 				@param aXmlNode a PugiXML node from which to construct a node
 				@param aPath The fully qualified path to the XML file containing this node
+				@param aRequireId specify whether an exception should be thrown if the id attribute is not set
 				@return a node tree which must be copied before it can be used
 			*/
-			boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath );
+			boost::shared_ptr< const Node > create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true );
 
 
 		private:

@@ -661,7 +661,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) );
+						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
 					}
 
 					return false;
@@ -701,7 +701,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) );
+						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
 					}
 
 					return false;
@@ -794,7 +794,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) );
+						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
 					}
 
 					return false;
@@ -882,7 +882,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) );
+						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
 					}
 
 					return false;
@@ -921,7 +921,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) );
+						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
 					}
 
 					return false;
@@ -960,7 +960,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) );
+						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
 					}
 
 					return false;
@@ -999,7 +999,7 @@ namespace uhal
 				{
 					if ( DebugInfo )
 					{
-						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) );
+						log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
 					}
 
 					return false;

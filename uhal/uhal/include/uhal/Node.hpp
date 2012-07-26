@@ -83,8 +83,9 @@ namespace uhal
 				Construct a node from a PugiXML node
 				@param aXmlNode a PugiXML node from which to construct a node
 				@param aPath The fully qualified path to the XML file containing this node
+				@param aRequireId specify whether an exception should be thrown if the id attribute is not set
 			*/
-			Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath );
+			Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true );
 
 			/**
 				Lightweight Copy constructor

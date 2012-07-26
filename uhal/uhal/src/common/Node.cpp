@@ -78,7 +78,7 @@ namespace uhal
 
 
 
-Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath ) try :
+Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId ) try :
 		mHw ( NULL ),
 			mUid ( "" ),
 			mAddr ( 0x00000000 ),
@@ -86,18 +86,27 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
-			mSize ( 0x00000000 ),
+			mSize ( 0x00000001 ),
 			mTags ( "" ),
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
-		//ID is a compulsory attribute for identifying a node
-		if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
-		{
-			//error description is given in the function itself so no more elaboration required
-			NodeMustHaveUID().throwFrom ( ThisLocation() );
-		}
 
+
+		//Apart from top-level nodes, ID is a compulsory attribute for identifying a node
+		if( aRequireId )
+		{
+			if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
+			{
+				//error description is given in the function itself so no more elaboration required
+				NodeMustHaveUID().throwFrom ( ThisLocation() );
+			}
+		}
+		else
+		{
+			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "id" , mUid );
+		}
+			
 		//Address is an optional attribute for hierarchical addressing
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
 		//Module is an optional attribute for pointing to other xml files. When specified, module implies that certain other attributes be ignored
@@ -108,13 +117,29 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			try
 			{
 				log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
+				
+				/*
+					This added the top-level node of the module as a child of the current node [https://svnweb.cern.ch/trac/cactus/ticket/39]
+				*/
 				//mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
+				
+				/*
+					Marc, however, said that the top-level node of the module should be ignored and its children appended instead.
+				*/				
 				boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false ) );
-
+			
 				for ( std::deque< Node >::iterator lIt = lNode->mChildren->begin(); lIt != lNode->mChildren->end(); ++lIt )
 				{
 					mChildren->push_back ( lIt->clone() );
 				}
+				
+				//Since we are "ignoring" the top-level node of the module by appending its children, rather than the node itself, we must modify the address of this node to take into account any hierarchical address info of the top-level node [https://svnweb.cern.ch/trac/cactus/ticket/39]
+				if ( mAddr & lNode->mAddr )
+				{
+					log ( Warning() , "The partial address of the module, " , Quote ( lModule ) , " , (" , Integer ( lNode->mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the current branch (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+				}
+				mAddr |= lNode->mAddr;
+				
 			}
 			catch ( uhal::exception& aExc )
 			{
@@ -234,7 +259,7 @@ Node::Node ( ) try :
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
-			mSize ( 0x00000000 ),
+			mSize ( 0x00000001 ),
 			mTags ( "" ),
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
@@ -471,7 +496,7 @@ Node::Node ( const Node& aNode ) try :
 				case defs::NON_INCREMENTAL:
 					aStream << "NON-INCREMENTAL block, ";
 
-					if ( mSize )
+					if ( mSize != 1 )
 					{
 						aStream << std::dec << "Size " << mSize << ", ";
 					}

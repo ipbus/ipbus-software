@@ -115,7 +115,7 @@ namespace uhal
 					return;
 				}
 
-				boost::shared_ptr< const Node > lNode ( create ( lXmlNode , aPath ) );
+				boost::shared_ptr< const Node > lNode ( create ( lXmlNode , aPath , false ) );
 				mNodes.insert ( std::make_pair ( lName , lNode ) );
 				aNodes.push_back ( lNode );
 				return;
@@ -171,7 +171,7 @@ namespace uhal
 
 
 
-	boost::shared_ptr< const Node > NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath )
+	boost::shared_ptr< const Node > NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId )
 	{
 		std::string lClass;
 		boost::shared_ptr< const Node > lNode;
@@ -182,7 +182,7 @@ namespace uhal
 
 			if ( lIt != mCreators.end() )
 			{
-				lNode = lIt->second->create ( aXmlNode , aPath );
+				lNode = lIt->second->create ( aXmlNode , aPath , aRequireId );
 			}
 			else
 			{
@@ -194,12 +194,12 @@ namespace uhal
 				}
 
 				log ( Warning() , "Node subclass " , Quote ( lClass ) , " does not exists in map of creators. Options are:" , lStr.str() , "\nWill create a plain base node for now but be warned." );
-				lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath ) );
+				lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aRequireId ) );
 			}
 		}
 		else
 		{
-			lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath ) );
+			lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aRequireId ) );
 		}
 
 		return lNode;
