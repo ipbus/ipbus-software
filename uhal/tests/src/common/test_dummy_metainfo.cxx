@@ -16,6 +16,13 @@ void check_meta_info ( const std::string& connection, const std::string& id )
 	HwInterface hw=manager.getDevice ( id );
 	
 	//REG
+	CACTUS_CHECK(hw.getNode ( "REG" ).getAddress() == 0x000001 );
+	CACTUS_CHECK(hw.getNode ( "REG" ).getId() == "REG");
+	CACTUS_CHECK(hw.getNode ( "REG" ).getPermission() == uhal::defs::READWRITE );
+	CACTUS_CHECK(hw.getNode ( "REG" ).getSize() == 1);
+	CACTUS_CHECK(hw.getNode ( "REG" ).getMask() == uhal::defs::NOMASK);
+	CACTUS_CHECK(hw.getNode ( "REG" ).getMode() == uhal::defs::SINGLE);
+	CACTUS_CHECK(hw.getNode ( "REG" ).getTags() == "test");
 
 	
 	//REG_READ_ONLY
@@ -72,6 +79,60 @@ void check_meta_info ( const std::string& connection, const std::string& id )
 	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.REG" ).getMask() == uhal::defs::NOMASK);
 	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.REG" ).getMode() == uhal::defs::SINGLE);
 	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.REG" ).getTags() == "test");
+
+	//FIFO
+	CACTUS_CHECK(hw.getNode ( "FIFO" ).getAddress() == 0x0100 );
+	CACTUS_CHECK(hw.getNode ( "FIFO" ).getId() == "FIFO");
+	CACTUS_CHECK(hw.getNode ( "FIFO" ).getPermission() == uhal::defs::READWRITE );
+	CACTUS_CHECK(hw.getNode ( "FIFO" ).getSize() == 1024*1024/4);
+	CACTUS_CHECK(hw.getNode ( "FIFO" ).getMask() == uhal::defs::NOMASK);
+	CACTUS_CHECK(hw.getNode ( "FIFO" ).getMode() == uhal::defs::NON_INCREMENTAL);
+	CACTUS_CHECK(hw.getNode ( "FIFO" ).getTags() == "test");
+
+	//MEM
+	CACTUS_CHECK(hw.getNode ( "MEM" ).getAddress() == 0x100000 );
+	CACTUS_CHECK(hw.getNode ( "MEM" ).getId() == "MEM");
+	CACTUS_CHECK(hw.getNode ( "MEM" ).getPermission() == uhal::defs::READWRITE );
+	CACTUS_CHECK(hw.getNode ( "MEM" ).getSize() == 1024*1024/4);
+	CACTUS_CHECK(hw.getNode ( "MEM" ).getMask() == uhal::defs::NOMASK);
+	CACTUS_CHECK(hw.getNode ( "MEM" ).getMode() == uhal::defs::INCREMENTAL);
+	CACTUS_CHECK(hw.getNode ( "MEM" ).getTags() == "");
+
+	//SMALL_MEM
+	CACTUS_CHECK(hw.getNode ( "SMALL_MEM" ).getAddress() == 0x400000 );
+	CACTUS_CHECK(hw.getNode ( "SMALL_MEM" ).getId() == "SMALL_MEM");
+	CACTUS_CHECK(hw.getNode ( "SMALL_MEM" ).getPermission() == uhal::defs::READWRITE );
+	CACTUS_CHECK(hw.getNode ( "SMALL_MEM" ).getSize() == 256);
+	CACTUS_CHECK(hw.getNode ( "SMALL_MEM" ).getMask() == uhal::defs::NOMASK);
+	CACTUS_CHECK(hw.getNode ( "SMALL_MEM" ).getMode() == uhal::defs::INCREMENTAL);
+	CACTUS_CHECK(hw.getNode ( "SMALL_MEM" ).getTags() == "");
+
+	//LARGE_MEM
+	CACTUS_CHECK(hw.getNode ( "LARGE_MEM" ).getAddress() == 0x500000 );
+	CACTUS_CHECK(hw.getNode ( "LARGE_MEM" ).getId() == "LARGE_MEM");
+	CACTUS_CHECK(hw.getNode ( "LARGE_MEM" ).getPermission() == uhal::defs::READWRITE );
+	CACTUS_CHECK(hw.getNode ( "LARGE_MEM" ).getSize() == 10*1024*1024/4);
+	CACTUS_CHECK(hw.getNode ( "LARGE_MEM" ).getMask() == uhal::defs::NOMASK);
+	CACTUS_CHECK(hw.getNode ( "LARGE_MEM" ).getMode() == uhal::defs::INCREMENTAL);
+	CACTUS_CHECK(hw.getNode ( "LARGE_MEM" ).getTags() == "");
+
+	//SUBSYSTEM1.MEM
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM1.MEM" ).getAddress() == 0x200002 );
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM1.MEM" ).getId() == "MEM");
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM1.MEM" ).getPermission() == uhal::defs::READWRITE );
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM1.MEM" ).getSize() == 1024*1024/4);
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM1.MEM" ).getMask() == uhal::defs::NOMASK);
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM1.MEM" ).getMode() == uhal::defs::INCREMENTAL);
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM1.MEM" ).getTags() == "test");
+
+	//SUBSYSTEM2.MEM
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.MEM" ).getAddress() == 0x300002 );
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.MEM" ).getId() == "MEM");
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.MEM" ).getPermission() == uhal::defs::READWRITE );
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.MEM" ).getSize() == 1024*1024/4);
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.MEM" ).getMask() == uhal::defs::NOMASK);
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.MEM" ).getMode() == uhal::defs::INCREMENTAL);
+	CACTUS_CHECK(hw.getNode ( "SUBSYSTEM2.MEM" ).getTags() == "test");
 }
 
 int main ( int argc,char* argv[] )
