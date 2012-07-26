@@ -317,7 +317,7 @@ namespace uhal
 				@param aAddend the addend to add to the existing value in the target register
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			virtual ValWord< int32_t > rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend );
+			virtual ValWord< uint32_t > rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend );
 
 			/**
 				Finalize the currently filling packet and pass it to the transport protocol

@@ -798,7 +798,7 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	ValWord< int32_t > PackingProtocol::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
+	ValWord< uint32_t > PackingProtocol::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
 	{
 		try
 		{
@@ -817,9 +817,9 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 			mCurrentBuffers->send ( this->calculateIPbusHeader ( RMW_SUM , 1 ) );
 			mCurrentBuffers->send ( aAddr );
 			mCurrentBuffers->send ( static_cast< uint32_t > ( aAddend ) );
-			ValWord< int32_t > lReply ( 0 );
+			ValWord< uint32_t > lReply ( 0 );
 			mCurrentBuffers->add ( lReply );
-			_ValWord_< int32_t >& lReplyMem = * ( lReply.mMembers );
+			_ValWord_< uint32_t >& lReplyMem = * ( lReply.mMembers );
 			lReplyMem.IPbusHeaders.push_back ( 0 );
 			mCurrentBuffers->receive ( lReplyMem.IPbusHeaders.back() );
 			// mCurrentBuffers->receive ( lReplyMem.IPbusHeader );

@@ -857,7 +857,7 @@ Node::Node ( const Node& aNode ) try :
 
 
 
-	ValWord< int32_t > Node::rmw_sum ( const int32_t& aAddend )
+	ValWord< uint32_t > Node::rmw_sum ( const int32_t& aAddend )
 	{
 		try
 		{

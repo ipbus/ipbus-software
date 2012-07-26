@@ -333,7 +333,7 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 
 	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	ValWord< int32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
+	ValWord< uint32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
 	{
 		try
 		{

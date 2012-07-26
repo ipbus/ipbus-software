@@ -312,7 +312,7 @@ namespace uhal
 				@param aAddend the addend to add to the existing value in the target register
 				@return a Validated Memory which wraps the location to which the reply data is to be written
 			*/
-			ValWord< int32_t > rmw_sum ( const int32_t& aAddend );
+			ValWord< uint32_t > rmw_sum ( const int32_t& aAddend );
 
 
 			/**
