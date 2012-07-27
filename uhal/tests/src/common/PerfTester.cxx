@@ -396,15 +396,15 @@ void uhal::tests::PerfTester::validationTest()
   }
   catch(const std::exception& e) { cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl; ++nFail; }
 
-  cout << "\n12) Write read-back test: Random values, depth = 16:" << endl;
-  tempBuffer = getRandomBuffer(16);
+  cout << "\n12) Write read-back test: Random values, depth = 500:" << endl;
+  tempBuffer = getRandomBuffer(500);
   try
   {
     bool testFail = false;
     BOOST_FOREACH(ClientPtr& iClient, m_clients)
     {
       iClient->writeBlock(m_baseAddr, tempBuffer);
-      U32ValVec result = iClient->readBlock(m_baseAddr, 16);
+      U32ValVec result = iClient->readBlock(m_baseAddr, 500);
       iClient->dispatch();
       if(!buffersEqual(tempBuffer, result)) { testFail = true; }
     }
