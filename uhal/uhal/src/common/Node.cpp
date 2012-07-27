@@ -874,55 +874,55 @@ Node::Node ( const Node& aNode ) try :
 
 
 
-	ValWord< uint32_t > Node::rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm )
-	{
-		try
-		{
-			if ( mPermission == defs::READWRITE )
-			{
-				return mHw->getClient()->rmw_bits ( mAddr , aANDterm , aORterm );
-			}
-			else
-			{
-				log ( Error() , "Node permissions denied read/write access" );
-				ReadAccessDenied().throwFrom ( ThisLocation() );
-			}
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// ValWord< uint32_t > Node::rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm )
+	// {
+		// try
+		// {
+			// if ( mPermission == defs::READWRITE )
+			// {
+				// return mHw->getClient()->rmw_bits ( mAddr , aANDterm , aORterm );
+			// }
+			// else
+			// {
+				// log ( Error() , "Node permissions denied read/write access" );
+				// ReadAccessDenied().throwFrom ( ThisLocation() );
+			// }
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
 
 
-	ValWord< uint32_t > Node::rmw_sum ( const int32_t& aAddend )
-	{
-		try
-		{
-			if ( mPermission == defs::READWRITE )
-			{
-				return mHw->getClient()->rmw_sum ( mAddr , aAddend );
-			}
-			else
-			{
-				log ( Error() , "Node permissions denied read/write access" );
-				ReadAccessDenied().throwFrom ( ThisLocation() );
-			}
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// ValWord< uint32_t > Node::rmw_sum ( const int32_t& aAddend )
+	// {
+		// try
+		// {
+			// if ( mPermission == defs::READWRITE )
+			// {
+				// return mHw->getClient()->rmw_sum ( mAddr , aAddend );
+			// }
+			// else
+			// {
+				// log ( Error() , "Node permissions denied read/write access" );
+				// ReadAccessDenied().throwFrom ( ThisLocation() );
+			// }
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
 
 
