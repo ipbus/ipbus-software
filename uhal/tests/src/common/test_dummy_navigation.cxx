@@ -19,6 +19,7 @@ void navigation_and_traversal ( const std::string& connection, const std::string
 	HwInterface hw=manager.getDevice ( id );
 	
 	std::vector<std::string> ids = hw.getNodes();
+	std::cout << "getNodes(): ";
 	std::copy(ids.begin(),
 		  ids.end(),
 		  std::ostream_iterator<std::string>(std::cout,", "));
@@ -26,6 +27,7 @@ void navigation_and_traversal ( const std::string& connection, const std::string
 	std::cout << std::endl;
 	
 	ids = hw.getNodes(".*MEM.*");
+	std::cout << "getNodes(\".*MEM.*\"): ";
 	std::copy(ids.begin(),
 		  ids.end(),
 		  std::ostream_iterator<std::string>(std::cout,", "));
@@ -33,6 +35,7 @@ void navigation_and_traversal ( const std::string& connection, const std::string
 	std::cout << std::endl;
 
 	ids = hw.getNode("SUBSYSTEM1").getNodes();
+	std::cout << "getNode(\"SUBSYSTEM1\").getNodes(): ";
 	std::copy(ids.begin(),
 		  ids.end(),
 		  std::ostream_iterator<std::string>(std::cout,", "));
