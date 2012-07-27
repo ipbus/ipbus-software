@@ -112,6 +112,9 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		//Module is an optional attribute for pointing to other xml files. When specified, module implies that certain other attributes be ignored
 		std::string lModule;
 
+		//Tags is an optional attribute to allow the user to add a description to a node
+		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
+		
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
 		{
 			try
@@ -139,6 +142,18 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 					log ( Warning() , "The partial address of the module, " , Quote ( lModule ) , " , (" , Integer ( lNode->mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the current branch (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
 				}
 				mAddr |= lNode->mAddr;
+				
+				//Similarly for the permissions, etc.
+				mPermission = lNode->mPermission;
+				mMode = lNode->mMode;
+				mSize = lNode->mSize;
+				mMask = lNode->mMask;
+				
+				//We extend the tags string attribute 
+				if( lNode->mTags.size() ){
+					mTags += ';';
+					mTags += lNode->mTags
+				}
 				
 			}
 			catch ( uhal::exception& aExc )
@@ -238,8 +253,6 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			}
 		}
 
-		//Tags is an optional attribute to allow the user to add a description to a node
-		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
 	}
 	catch ( uhal::exception& aExc )
 	{
@@ -510,6 +523,11 @@ Node::Node ( const Node& aNode ) try :
 			// {
 			// aStream << '\n' << std::string ( aIndent+2 , ' ' ) << "- Map entry " << (lIt->first);
 			// }
+			
+			if( mTags.size() )
+			{
+				aStream << ", Tags \"" << mTags << "\"";
+			}
 
 			for ( std::deque< Node >::const_iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
 			{
