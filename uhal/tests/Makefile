@@ -35,6 +35,7 @@ EXECUTABLE_SOURCES = 	src/common/test_uhal.cxx \
 		src/common/test_dummy_timeout.cxx \
 		src/common/test_dummy_single_read_performance.cxx \
 		src/common/test_dummy_metainfo.cxx \
+		src/common/test_dummy_navigation.cxx \
 		src/common/PerfTester.cxx
 
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
