@@ -2,8 +2,6 @@
 
 #include "uhal/tests/tools.hpp"
 
-#include <boost/filesystem.hpp>
-
 #include <iostream>
 #include <cstdlib>
 #include <typeinfo>
