@@ -440,8 +440,8 @@ void uhal::tests::PerfTester::validationTest()
     BOOST_FOREACH(ClientPtr& iClient, m_clients)
     {
       iClient->write(m_baseAddr, 0x00000000); // Write a start value of 0x00000000 into the test register
-      ValWord<int32_t> result1 = iClient->rmw_sum(m_baseAddr, 0xabcd);  // Add 0xabcd to 0...
-      ValWord<int32_t> result2 = iClient->rmw_sum(m_baseAddr, 0xffff5434);  // Add 0xffff5434 to 0xabcd... this should overflow past the 32-bit max value and result in a 1.
+      ValWord<uint32_t> result1 = iClient->rmw_sum(m_baseAddr, 0xabcd);  // Add 0xabcd to 0...
+      ValWord<uint32_t> result2 = iClient->rmw_sum(m_baseAddr, 0xffff5434);  // Add 0xffff5434 to 0xabcd... this should overflow past the 32-bit max value and result in a 1.
       ValWord<uint32_t> result3 = iClient->read(m_baseAddr);  // Read back the result normally to double-check.
       iClient->dispatch();
       if(result1 != 0x0000abcd) { testFail = true; }

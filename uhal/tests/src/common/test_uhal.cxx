@@ -161,7 +161,7 @@ void rawClientAccess()
 
 		log ( Notice() , "ATTEMPTING RMW-SUM" ) ;
 		int32_t expected2 ( expected + 0x0BADBABE );
-		ValWord< int32_t > mem2 = hw.getClient()->rmw_sum ( 0xBA5EADD4 , 0x0BADBABE );
+		ValWord< uint32_t > mem2 = hw.getClient()->rmw_sum ( 0xBA5EADD4 , 0x0BADBABE );
 		hw.dispatch();
 
 		if ( mem2 == expected2 )
