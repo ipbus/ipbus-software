@@ -21,8 +21,7 @@ LIBRARY = lib/libcactus_uhal_tests.so
 LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 
-EXECUTABLE_SOURCES = 	src/common/test_uhal.cxx \
-		src/common/test_timing.cxx \
+EXECUTABLE_SOURCES = \
 		src/common/DummyHardwareUdp.cxx \
 		src/common/DummyHardwareTcp.cxx \
 		src/common/test_log.cxx \
