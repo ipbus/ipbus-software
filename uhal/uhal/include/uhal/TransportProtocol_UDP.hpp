@@ -73,7 +73,7 @@ namespace uhal
 
 
 					void CheckDeadline();
-					
+
 				private:
 
 					//! A reference to the parent of this DispatchWorker
@@ -90,9 +90,9 @@ namespace uhal
 
 					//! Error code for the async callbacks to fill
 					boost::system::error_code mErrorCode;
-					
+
 					boost::asio::deadline_timer mDeadlineTimer;
-					
+
 					uint32_t mTimeoutPeriod;
 
 			};

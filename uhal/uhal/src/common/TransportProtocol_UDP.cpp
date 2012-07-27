@@ -23,11 +23,11 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 										  )
 																							  )
 										),
-							mDeadlineTimer( *mIOservice ),
-							mTimeoutPeriod( aTimeoutPeriod )
-		{
-			mDeadlineTimer.async_wait(boost::bind(&UdpTransportProtocol::DispatchWorker::CheckDeadline, this));
-		}
+							  mDeadlineTimer ( *mIOservice ),
+							  mTimeoutPeriod ( aTimeoutPeriod )
+	{
+		mDeadlineTimer.async_wait ( boost::bind ( &UdpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
+	}
 	catch ( uhal::exception& aExc )
 	{
 		aExc.rethrowFrom ( ThisLocation() );
@@ -113,13 +113,16 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
 			log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-
-			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
-			
+			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
 			mErrorCode = boost::asio::error::would_block;
-			mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-			do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
-			
+			mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+			do
+			{
+				mIOservice->run_one();
+			}
+			while ( mErrorCode == boost::asio::error::would_block );
+
 			if ( mErrorCode )
 			{
 				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
@@ -140,16 +143,20 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
 			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
 			boost::asio::ip::udp::endpoint lEndpoint;
-
-			
-			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
+			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
 			mErrorCode = boost::asio::error::would_block;
-			mSocket->async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-			do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );			
-			
+			mSocket->async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+			do
+			{
+				mIOservice->run_one();
+			}
+			while ( mErrorCode == boost::asio::error::would_block );
+
 			if ( mErrorCode )
 			{
-				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+				log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
+				mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
 				ErrorInUdpCallback().throwFrom ( ThisLocation() );
 			}
 
@@ -173,27 +180,25 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
 	void UdpTransportProtocol::DispatchWorker::CheckDeadline()
 	{
-
 		// Check whether the deadline has passed. We compare the deadline against
 		// the current time since a new asynchronous operation may have moved the
 		// deadline before this actor had a chance to run.
-		if (mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+		if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
 		{
 			// The deadline has passed. The socket is closed so that any outstanding
 			// asynchronous operations are cancelled.
 			mSocket->close();
-
 			// There is no longer an active deadline. The expiry is set to positive
 			// infinity so that the actor takes no action until a new deadline is set.
-			mDeadlineTimer.expires_at(boost::posix_time::pos_infin);
+			mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
 		}
 
 		// Put the actor back to sleep.
-		mDeadlineTimer.async_wait(boost::bind(&UdpTransportProtocol::DispatchWorker::CheckDeadline, this));
+		mDeadlineTimer.async_wait ( boost::bind ( &UdpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
 	}
 
-  
-	
+
+
 
 UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
 		TransportProtocol ( aTimeoutPeriod ),
@@ -202,7 +207,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 						  , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
 						  mAsynchronousException ( NULL )
 #endif
-	{}
+		{}
 	catch ( uhal::exception& aExc )
 	{
 		aExc.rethrowFrom ( ThisLocation() );
@@ -295,7 +300,7 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 					mAsynchronousException->throwFrom ( ThisLocation() );
 				}
 
-				lContinue = (bool)( mPendingSendBuffers.size() );
+				lContinue = ( bool ) ( mPendingSendBuffers.size() );
 			}
 			while ( lContinue );
 

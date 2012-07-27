@@ -58,8 +58,7 @@ void search_device_id ( const std::string& connection, const std::string& id )
 {
 	ConnectionManager manager ( connection );
 	std::vector<std::string> ids = manager.getDevices ( "$" + id + "^" );
-	CACTUS_CHECK(std::find(ids.begin(),ids.end(),id) != ids.end());
-	
+	CACTUS_CHECK ( std::find ( ids.begin(),ids.end(),id ) != ids.end() );
 }
 
 int main ( int argc,char* argv[] )
@@ -71,6 +70,5 @@ int main ( int argc,char* argv[] )
 	CACTUS_TEST ( connect_write_read ( connection_file,device_id ) );
 	CACTUS_TEST ( on_the_fly_connect_write_read ( connection_file,device_id ) );
 	CACTUS_TEST ( search_device_id ( connection_file,device_id ) );
-	
 	return 0;
 }

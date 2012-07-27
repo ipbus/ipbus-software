@@ -72,7 +72,7 @@ namespace uhal
 
 
 					void CheckDeadline();
-					
+
 				private:
 
 					//! A reference to the parent of this DispatchWorker
@@ -83,17 +83,17 @@ namespace uhal
 
 					//! A shared pointer to a boost::asio udp socket through which the operation will be performed
 					boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
-					
+
 					boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > mEndpoint;
-					
+
 
 					//! Error code for the async callbacks to fill
 					boost::system::error_code mErrorCode;
 
-					boost::asio::deadline_timer mDeadlineTimer;		
+					boost::asio::deadline_timer mDeadlineTimer;
 
 					uint32_t mTimeoutPeriod;
-					
+
 			};
 
 			//! Make the dispatch worker a friend so that it can access our private members

@@ -16,17 +16,17 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
 							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) ),
 							  mEndpoint ( boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > (
-											new boost::asio::ip::tcp::resolver::iterator (
-												boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
-													boost::asio::ip::tcp::resolver::query ( aHostname , aServiceOrPort )
-												)
-											)
-										) 
-									),
-							mDeadlineTimer( *mIOservice ),
-							mTimeoutPeriod( aTimeoutPeriod )
+											  new boost::asio::ip::tcp::resolver::iterator (
+													  boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
+															  boost::asio::ip::tcp::resolver::query ( aHostname , aServiceOrPort )
+													  )
+											  )
+										  )
+										),
+							  mDeadlineTimer ( *mIOservice ),
+							  mTimeoutPeriod ( aTimeoutPeriod )
 	{
-		mDeadlineTimer.async_wait(boost::bind(&TcpTransportProtocol::DispatchWorker::CheckDeadline, this));
+		mDeadlineTimer.async_wait ( boost::bind ( &TcpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
 	}
 	catch ( uhal::exception& aExc )
 	{
@@ -107,27 +107,29 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 	{
 		try
 		{
-		
-			if( ! mSocket->is_open() )
+			if ( ! mSocket->is_open() )
 			{
-				log ( Info() , "Attempting to create TCP connection to '" , (**mEndpoint).host_name() , "' port " , (**mEndpoint).service_name() , "." );
+				log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
 				boost::asio::connect ( *mSocket , *mEndpoint );
 				mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
 				log ( Info() , "TCP connection succeeded" );
 			}
-		
+
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			// Send data
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
 			log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-
-			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
-
+			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
 			mErrorCode = boost::asio::error::would_block;
-			boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-			do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
+			boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+			do
+			{
+				mIOservice->run_one();
+			}
+			while ( mErrorCode == boost::asio::error::would_block );
 
 			if ( mErrorCode )
 			{
@@ -148,16 +150,20 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			}
 
 			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
-
-			mDeadlineTimer.expires_from_now(boost::posix_time::seconds(mTimeoutPeriod));
-
+			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
 			mErrorCode = boost::asio::error::would_block;
-			boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var(mErrorCode) = boost::lambda::_1 );
-			do mIOservice->run_one(); while ( mErrorCode == boost::asio::error::would_block );
+			boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+			do
+			{
+				mIOservice->run_one();
+			}
+			while ( mErrorCode == boost::asio::error::would_block );
 
 			if ( mErrorCode )
 			{
-				log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+				log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
+				mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
 				ErrorInTcpCallback().throwFrom ( ThisLocation() );
 			}
 
@@ -173,6 +179,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			{
 				mSocket->close();
 			}
+
 			aExc.rethrowFrom ( ThisLocation() );
 		}
 		catch ( const std::exception& aExc )
@@ -181,33 +188,32 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			{
 				mSocket->close();
 			}
+
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
 
 
-	
+
 	void TcpTransportProtocol::DispatchWorker::CheckDeadline()
 	{
-
 		// Check whether the deadline has passed. We compare the deadline against
 		// the current time since a new asynchronous operation may have moved the
 		// deadline before this actor had a chance to run.
-		if (mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+		if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
 		{
 			// The deadline has passed. The socket is closed so that any outstanding
 			// asynchronous operations are cancelled.
 			mSocket->close();
-
 			// There is no longer an active deadline. The expiry is set to positive
 			// infinity so that the actor takes no action until a new deadline is set.
-			mDeadlineTimer.expires_at(boost::posix_time::pos_infin);
+			mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
 		}
 
 		// Put the actor back to sleep.
-		mDeadlineTimer.async_wait(boost::bind(&TcpTransportProtocol::DispatchWorker::CheckDeadline, this));
+		mDeadlineTimer.async_wait ( boost::bind ( &TcpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
 	}
-	
+
 
 
 TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
@@ -217,7 +223,7 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
 						  , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
 						  mAsynchronousException ( NULL )
 #endif
-	{}
+		{}
 	catch ( uhal::exception& aExc )
 	{
 		aExc.rethrowFrom ( ThisLocation() );

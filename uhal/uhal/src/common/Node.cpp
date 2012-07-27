@@ -91,10 +91,8 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 			mChildren ( new std::deque< Node >() ),
 			mChildrenMap ( new std::hash_map< std::string , Node* >() )
 	{
-
-
 		//Apart from top-level nodes, ID is a compulsory attribute for identifying a node
-		if( aRequireId )
+		if ( aRequireId )
 		{
 			if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
 			{
@@ -106,55 +104,52 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 		{
 			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "id" , mUid );
 		}
-			
+
 		//Address is an optional attribute for hierarchical addressing
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
 		//Module is an optional attribute for pointing to other xml files. When specified, module implies that certain other attributes be ignored
 		std::string lModule;
-
 		//Tags is an optional attribute to allow the user to add a description to a node
 		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
-		
+
 		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
 		{
 			try
 			{
 				log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
-				
 				/*
 					This added the top-level node of the module as a child of the current node [https://svnweb.cern.ch/trac/cactus/ticket/39]
 				*/
 				//mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
-				
 				/*
 					Marc, however, said that the top-level node of the module should be ignored and its children appended instead.
-				*/				
+				*/
 				boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false ) );
-			
+
 				for ( std::deque< Node >::iterator lIt = lNode->mChildren->begin(); lIt != lNode->mChildren->end(); ++lIt )
 				{
 					mChildren->push_back ( lIt->clone() );
 				}
-				
+
 				//Since we are "ignoring" the top-level node of the module by appending its children, rather than the node itself, we must modify the address of this node to take into account any hierarchical address info of the top-level node [https://svnweb.cern.ch/trac/cactus/ticket/39]
 				if ( mAddr & lNode->mAddr )
 				{
 					log ( Warning() , "The partial address of the module, " , Quote ( lModule ) , " , (" , Integer ( lNode->mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the current branch (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
 				}
+
 				mAddr |= lNode->mAddr;
-				
 				//Similarly for the permissions, etc.
 				mPermission = lNode->mPermission;
 				mMode = lNode->mMode;
 				mSize = lNode->mSize;
 				mMask = lNode->mMask;
-				
-				//We extend the tags string attribute 
-				if( lNode->mTags.size() ){
+
+				//We extend the tags string attribute
+				if ( lNode->mTags.size() )
+				{
 					mTags += ';';
 					mTags += lNode->mTags;
 				}
-				
 			}
 			catch ( uhal::exception& aExc )
 			{
@@ -252,7 +247,6 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 				mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
 			}
 		}
-
 	}
 	catch ( uhal::exception& aExc )
 	{
@@ -523,8 +517,8 @@ Node::Node ( const Node& aNode ) try :
 			// {
 			// aStream << '\n' << std::string ( aIndent+2 , ' ' ) << "- Map entry " << (lIt->first);
 			// }
-			
-			if( mTags.size() )
+
+			if ( mTags.size() )
 			{
 				aStream << ", Tags \"" << mTags << "\"";
 			}
@@ -876,52 +870,52 @@ Node::Node ( const Node& aNode ) try :
 
 	// ValWord< uint32_t > Node::rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm )
 	// {
-		// try
-		// {
-			// if ( mPermission == defs::READWRITE )
-			// {
-				// return mHw->getClient()->rmw_bits ( mAddr , aANDterm , aORterm );
-			// }
-			// else
-			// {
-				// log ( Error() , "Node permissions denied read/write access" );
-				// ReadAccessDenied().throwFrom ( ThisLocation() );
-			// }
-		// }
-		// catch ( uhal::exception& aExc )
-		// {
-			// aExc.rethrowFrom ( ThisLocation() );
-		// }
-		// catch ( const std::exception& aExc )
-		// {
-			// StdException ( aExc ).throwFrom ( ThisLocation() );
-		// }
+	// try
+	// {
+	// if ( mPermission == defs::READWRITE )
+	// {
+	// return mHw->getClient()->rmw_bits ( mAddr , aANDterm , aORterm );
+	// }
+	// else
+	// {
+	// log ( Error() , "Node permissions denied read/write access" );
+	// ReadAccessDenied().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
 	// }
 
 
 
 	// ValWord< uint32_t > Node::rmw_sum ( const int32_t& aAddend )
 	// {
-		// try
-		// {
-			// if ( mPermission == defs::READWRITE )
-			// {
-				// return mHw->getClient()->rmw_sum ( mAddr , aAddend );
-			// }
-			// else
-			// {
-				// log ( Error() , "Node permissions denied read/write access" );
-				// ReadAccessDenied().throwFrom ( ThisLocation() );
-			// }
-		// }
-		// catch ( uhal::exception& aExc )
-		// {
-			// aExc.rethrowFrom ( ThisLocation() );
-		// }
-		// catch ( const std::exception& aExc )
-		// {
-			// StdException ( aExc ).throwFrom ( ThisLocation() );
-		// }
+	// try
+	// {
+	// if ( mPermission == defs::READWRITE )
+	// {
+	// return mHw->getClient()->rmw_sum ( mAddr , aAddend );
+	// }
+	// else
+	// {
+	// log ( Error() , "Node permissions denied read/write access" );
+	// ReadAccessDenied().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
 	// }
 
 

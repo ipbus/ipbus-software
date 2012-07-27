@@ -14,8 +14,8 @@ class UDPdummyHardware
 	UDPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay ) try :
 			mIOservice(),
 					   mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) ),
-					   mMemory(  ADDRESSMASK+1 , 0x00000000 ),
-					   mReplyDelay( aReplyDelay )
+					   mMemory ( ADDRESSMASK+1 , 0x00000000 ),
+					   mReplyDelay ( aReplyDelay )
 			{}
 		catch ( uhal::exception& aExc )
 		{
@@ -73,7 +73,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
+									*lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
 									lReplyPtr++;
 								}
 
@@ -86,7 +86,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									*lReplyPtr = mMemory.at( mAddress++ & ADDRESSMASK );
+									*lReplyPtr = mMemory.at ( mAddress++ & ADDRESSMASK );
 									lReplyPtr++;
 								}
 
@@ -97,7 +97,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									mMemory.at( mAddress & ADDRESSMASK ) = *lReceivePtr;
+									mMemory.at ( mAddress & ADDRESSMASK ) = *lReceivePtr;
 									lReceivePtr++;
 								}
 
@@ -110,7 +110,7 @@ class UDPdummyHardware
 
 								for ( ; mWordCounter!=0 ; --mWordCounter )
 								{
-									mMemory.at( mAddress++ & ADDRESSMASK ) = *lReceivePtr;
+									mMemory.at ( mAddress++ & ADDRESSMASK ) = *lReceivePtr;
 									lReceivePtr++;
 								}
 
@@ -120,30 +120,30 @@ class UDPdummyHardware
 							case RMW_SUM:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory.at( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
+								mMemory.at ( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;
-								*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
+								*lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
 								lReplyPtr++;
 								break;
 							case RMW_BITS:
 								mAddress = *lReceivePtr;
 								lReceivePtr++;
-								mMemory.at( mAddress & ADDRESSMASK ) &= ( int32_t ) ( *lReceivePtr );
+								mMemory.at ( mAddress & ADDRESSMASK ) &= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
-								mMemory.at( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
+								mMemory.at ( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
 								lReceivePtr++;
 								*lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
 								lReplyPtr++;
-								*lReplyPtr = mMemory.at( mAddress & ADDRESSMASK );
+								*lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
 								lReplyPtr++;
 								break;
 						}
 					}
 					while ( lReceivePtr!=lReceiveEnd );
 
-					sleep( mReplyDelay );
+					sleep ( mReplyDelay );
 					mSocket.send_to ( boost::asio::buffer ( mUDPreplyBuffer , ( lReplyPtr-mUDPreplyBuffer ) <<2 ) , mSenderEndpoint );
 				}
 			}
@@ -184,16 +184,15 @@ int main ( int argc, char* argv[] )
 {
 	try
 	{
-	
 		if ( argc < 2 || argc > 3 )
 		{
 			log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay in seconds>" );
 			return 1;
 		}
 
-		uint32_t lReplyDelay( 0 );
-		
-		if( argc == 3 )
+		uint32_t lReplyDelay ( 0 );
+
+		if ( argc == 3 )
 		{
 			lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
 		}

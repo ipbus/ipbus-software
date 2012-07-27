@@ -17,31 +17,24 @@ void navigation_and_traversal ( const std::string& connection, const std::string
 {
 	ConnectionManager manager ( connection );
 	HwInterface hw=manager.getDevice ( id );
-	
 	std::vector<std::string> ids = hw.getNodes();
 	std::cout << "getNodes(): ";
-	std::copy(ids.begin(),
-		  ids.end(),
-		  std::ostream_iterator<std::string>(std::cout,", "));
-	
+	std::copy ( ids.begin(),
+				ids.end(),
+				std::ostream_iterator<std::string> ( std::cout,", " ) );
 	std::cout << std::endl;
-	
-	ids = hw.getNodes(".*MEM.*");
+	ids = hw.getNodes ( ".*MEM.*" );
 	std::cout << "getNodes(\".*MEM.*\"): ";
-	std::copy(ids.begin(),
-		  ids.end(),
-		  std::ostream_iterator<std::string>(std::cout,", "));
-	
+	std::copy ( ids.begin(),
+				ids.end(),
+				std::ostream_iterator<std::string> ( std::cout,", " ) );
 	std::cout << std::endl;
-
-	ids = hw.getNode("SUBSYSTEM1").getNodes();
+	ids = hw.getNode ( "SUBSYSTEM1" ).getNodes();
 	std::cout << "getNode(\"SUBSYSTEM1\").getNodes(): ";
-	std::copy(ids.begin(),
-		  ids.end(),
-		  std::ostream_iterator<std::string>(std::cout,", "));
-	
+	std::copy ( ids.begin(),
+				ids.end(),
+				std::ostream_iterator<std::string> ( std::cout,", " ) );
 	std::cout << std::endl;
-	
 }
 
 
@@ -52,6 +45,5 @@ int main ( int argc,char* argv[] )
 	std::string device_id = params["device_id"];
 	std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
 	CACTUS_TEST ( navigation_and_traversal ( connection_file,device_id ) );
-
 	return 0;
 }

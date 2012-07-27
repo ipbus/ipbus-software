@@ -19,7 +19,7 @@ void job ( const std::string& connection, const std::string& id )
 {
 	for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
 	{
-	  //std::cout << "thread = " << boost::this_thread::get_id() << std::endl;
+		//std::cout << "thread = " << boost::this_thread::get_id() << std::endl;
 		ConnectionManager manager ( connection );
 		HwInterface hw=manager.getDevice ( id );
 		uint32_t x = static_cast<uint32_t> ( rand() );
@@ -38,7 +38,6 @@ void job ( const std::string& connection, const std::string& id )
 		CACTUS_CHECK ( reg.valid() );
 		CACTUS_CHECK ( mem.valid() );
 		CACTUS_CHECK ( mem.size() == N_SIZE );
-		
 		//can not check content in the mutlithreaded case
 	}
 }
