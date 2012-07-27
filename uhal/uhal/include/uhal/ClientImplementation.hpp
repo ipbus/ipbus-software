@@ -36,7 +36,7 @@ namespace uhal
 			The maximum allowed IPbus packet length.
 			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
 			*/
-			static const int mMaxPacketLength = 128;
+			static const int mMaxPacketLength = 350;
 
 			//! Typedef the packing protocol which will be used by this IPbus Client
 			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
@@ -83,7 +83,7 @@ namespace uhal
 
 namespace uhal
 {
-	//! A class to directly access locally-connected devices via IPbus over UDP
+	//! A class to directly access locally-connected devices via IPbus over TCP
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
 	class IPBusTCPClient : public ClientInterface
 	{
@@ -94,7 +94,7 @@ namespace uhal
 			The maximum allowed IPbus packet length.
 			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
 			*/
-			static const int mMaxPacketLength = 128;
+			static const int mMaxPacketLength = 350;
 
 			//! Typedef the packing protocol which will be used by this IPbus Client
 			typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
@@ -162,7 +162,7 @@ namespace uhal
 			The maximum allowed IPbus packet length.
 			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
 			*/
-			static const int mMaxPacketLength = 128;
+			static const int mMaxPacketLength = 350;
 
 
 			//! Typedef the packing protocol which will be used by this IPbus Client

@@ -152,7 +152,7 @@ Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPa
 				//We extend the tags string attribute 
 				if( lNode->mTags.size() ){
 					mTags += ';';
-					mTags += lNode->mTags
+					mTags += lNode->mTags;
 				}
 				
 			}
