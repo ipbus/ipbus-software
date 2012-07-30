@@ -57,7 +57,7 @@ void on_the_fly_connect_write_read ( const std::string& connection, const std::s
 void search_device_id ( const std::string& connection, const std::string& id )
 {
 	ConnectionManager manager ( connection );
-	std::vector<std::string> ids = manager.getDevices ( "$" + id + "^" );
+	std::vector<std::string> ids = manager.getDevices ( "^" + id + "$" );
 	CACTUS_CHECK ( std::find ( ids.begin(),ids.end(),id ) != ids.end() );
 }
 
