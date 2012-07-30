@@ -53,8 +53,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
 	CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getMode() == uhal::defs::SINGLE );
 	CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getTags() == "" );
 	//SUBSYSTEM1.REG
-	std::cout << hw.getNode ( "SUBSYSTEM1.REG" ).getAddress() << std::endl;
-	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getAddress() == 0x200001 );
+	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getAddress() == 0x210001 );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getId() == "REG" );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getPermission() == uhal::defs::READWRITE );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getSize() == 1 );
@@ -62,7 +61,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getMode() == uhal::defs::SINGLE );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getTags() == "test" );
 	//SUBSYSTEM2.REG
-	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getAddress() == 0x300001 );
+	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getAddress() == 0x310001 );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getId() == "REG" );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getPermission() == uhal::defs::READWRITE );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getSize() == 1 );
@@ -97,12 +96,12 @@ void check_meta_info ( const std::string& connection, const std::string& id )
 	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getAddress() == 0x500000 );
 	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getId() == "LARGE_MEM" );
 	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getPermission() == uhal::defs::READWRITE );
-	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getSize() == 10*1024*1024/4 );
+	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getSize() == 100*1024*1024/4 );
 	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getMask() == uhal::defs::NOMASK );
 	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getMode() == uhal::defs::INCREMENTAL );
 	CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getTags() == "" );
 	//SUBSYSTEM1.MEM
-	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getAddress() == 0x200002 );
+	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getAddress() == 0x210002 );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getId() == "MEM" );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getPermission() == uhal::defs::READWRITE );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getSize() == 1024*1024/4 );
@@ -110,7 +109,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getMode() == uhal::defs::INCREMENTAL );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getTags() == "test" );
 	//SUBSYSTEM2.MEM
-	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getAddress() == 0x300002 );
+	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getAddress() == 0x310002 );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getId() == "MEM" );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getPermission() == uhal::defs::READWRITE );
 	CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getSize() == 1024*1024/4 );
