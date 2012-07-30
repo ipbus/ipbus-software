@@ -1,4 +1,4 @@
-#include "uhal/tests/PerfTester.hpp"
+#include "uhal/tests/PerfTester.hxx"
 
 // C++ headers
 #include <iostream>
