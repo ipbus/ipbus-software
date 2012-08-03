@@ -14,10 +14,6 @@
 #include "uhal/Utilities.hpp"
 #include "uhal/ClientInterface.hpp"
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/regex.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include <exception>
 #include <vector>
 #include <map>
@@ -54,13 +50,6 @@ namespace uhal
 	class BulkTransferOnSingleRegister: public uhal::_exception< BulkTransferOnSingleRegister > {  };
 	//! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
 	class BulkTransferRequestedTooLarge: public uhal::_exception< BulkTransferRequestedTooLarge > {  };
-	//! Exception class to handle the case where an incremental node is specified without a size attribute. Uses the base uhal::exception implementation of what()
-	class IncrementalNodeRequiresSizeAttribute: public uhal::_exception< IncrementalNodeRequiresSizeAttribute > {  };
-
-	//! Exception class to handle the case where a memory block has a size which would exceed the available register space. Uses the base uhal::exception implementation of what()
-	class ArraySizeExceedsRegisterBound: public uhal::_exception< ArraySizeExceedsRegisterBound > {  };
-	//! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
-	class AddressSpaceOverlap: public uhal::_exception< AddressSpaceOverlap > {  };
 
 
 
@@ -76,38 +65,31 @@ namespace uhal
 			*/
 			Node ( );
 
-
-		public:
-
 			/**
-				Construct a node from a PugiXML node
-				@param aXmlNode a PugiXML node from which to construct a node
-				@param aPath The fully qualified path to the XML file containing this node
-				@param aRequireId specify whether an exception should be thrown if the id attribute is not set
-			*/
-			Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true );
-
-			/**
-				Lightweight Copy constructor
-				@param aNode a node to lightweight copy.
-				@note this copy constructor copies the member pointers, not the object they are pointing to. To duplicate the underlying object, rather than the the pointer to it, use the clone() method.
+				Copy constructor
+				@param aNode a node to copy.
 			*/
 			Node ( const Node& aNode );
 
+			/**
+				Assignment operator
+				@param aNode a Node to copy
+				@return reference to this object for chained assignment
+			*/
+			virtual Node& operator= ( const Node& aNode );
+
+			/**
+				Function to produce a new copy of the current Node
+				@return a new copy of the current Node
+			*/
+			virtual Node* clone() const;
+
+		public:
 			/**
 				Destructor
 			*/
 			virtual ~Node();
 
-		private:
-
-			/**
-				Function to create a true clone of the full hierarchical Node tree
-				@return a true clone of the current node tree
-			*/
-			virtual Node clone() const;
-
-		public:
 			/**
 				A function to determine whether two Nodes are identical
 				@param aNode a Node to compare
@@ -320,17 +302,17 @@ namespace uhal
 				Get the underlying IPbus client
 				@return the IPbus client that will be used to issue a dispatch
 			*/
-			boost::shared_ptr<ClientInterface> getClient();
+			ClientInterface& getClient();
 
 
 		private:
 
-			/**
-				Propagate the partial addresses down through the hierarchical structure and make a record of all used addresses for collision detection
-				@param aAddr the full address of the current branch which will be applied to the current children
-				@param aTopLevelNode the top-level node which contains the hash-map of all known children, against which we will check the address for overlaps
-			*/
-			void calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode );
+			// /**
+			// Propagate the partial addresses down through the hierarchical structure and make a record of all used addresses for collision detection
+			// @param aAddr the full address of the current branch which will be applied to the current children
+			// @param aTopLevelNode the top-level node which contains the hash-map of all known children, against which we will check the address for overlaps
+			// */
+			// void calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode );
 
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
@@ -339,9 +321,11 @@ namespace uhal
 			std::string mUid;
 
 			//! The register address with which this node is associated
+			uint32_t mPartialAddr;
+			//! The register address with which this node is associated
 			uint32_t mAddr;
-			//! Mark whether the address is fully formed
-			bool mAddrValid;
+			// Mark whether the address is fully formed
+			//bool mAddrValid;
 
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
@@ -355,26 +339,12 @@ namespace uhal
 			//! Optional string which the user can specify
 			std::string mTags;
 
-			//! The direct children of the child node
-			boost::shared_ptr< std::deque< Node > > mChildren;
+			//! The direct children of the node
+			std::deque< Node* > mChildren;
 
 			//! Helper to assist look-up of a particular child node, given a name
-			boost::shared_ptr< std::hash_map< std::string , Node* > > mChildrenMap;
+			std::hash_map< std::string , Node* > mChildrenMap;
 
-			//! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
-			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>
-			{
-				//! The actual function that the boost qi parser uses for associating strings with enumerated permissions types
-				permissions_lut();
-			} mPermissionsLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
-
-
-			//! A look-up table that the boost qi parser uses for associating strings ("single","block","port","incremental","non-incremental","inc","non-inc") with enumerated mode types
-			static const struct mode_lut : boost::spirit::qi::symbols<char, defs::BlockReadWriteMode>
-			{
-				//! The actual function that the boost qi parser uses for associating strings with enumerated permissions types
-				mode_lut();
-			} mModeLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
 
 
 	};

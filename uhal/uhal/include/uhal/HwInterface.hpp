@@ -24,7 +24,7 @@ namespace uhal
 				@param aClientInterface a shared pointer to a client interface which performs the transport
 				@param aNode a shared pointer to a >>freshly cloned<< node representing the >>full<< endpoint structure
 			*/
-			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr<  Node >& aNode );
+			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode );
 
 			/**
 				Destructor
@@ -35,7 +35,7 @@ namespace uhal
 				Get the underlying IPbus client
 				@return the underlying IPbus client
 			*/
-			boost::shared_ptr<ClientInterface> getClient();
+			ClientInterface& getClient();
 
 			/**
 				Return the url of the target for this client
@@ -59,18 +59,24 @@ namespace uhal
 				A method to modify the timeout period for any pending or future transactions
 				@param aTimeoutPeriod the desired timeout period in seconds
 			*/
-			void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
+			void setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod );
 
 			/**
 				A method to retrieve the timeout period currently being used
 				@return the timeout period currently being used
 			*/
-			const uint32_t& getTimeoutPeriod();
+			const boost::posix_time::time_duration& getTimeoutPeriod();
 
 			// /**
 			// Ping the target for this client
 			// */
 			// void ping();
+
+			/**
+				Retrieve the top-level node
+				@return the top-level node
+			*/
+			Node& getNode ();
 
 			/**
 				Retrieve the Node given by a full-stop delimeted name path relative, to the top-level node

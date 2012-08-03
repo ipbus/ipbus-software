@@ -50,7 +50,7 @@ namespace uhal
 						@param aServiceOrPort the target port
 						@param aTimeoutPeriod the default timeout period (can be changed later)
 					*/
-					DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod );
+					DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod );
 
 					/**
 						Destructor
@@ -93,7 +93,7 @@ namespace uhal
 
 					boost::asio::deadline_timer mDeadlineTimer;
 
-					uint32_t mTimeoutPeriod;
+					const boost::posix_time::time_duration& mTimeoutPeriod;
 
 			};
 
@@ -107,7 +107,7 @@ namespace uhal
 				@param aServiceOrPort the target port
 				@param aTimeoutPeriod the default timeout period (can be changed later)
 			*/
-			UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod = 10 );
+			UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod = boost::posix_time::seconds ( 10 ) );
 			/**
 				Destructor
 			*/

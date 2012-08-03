@@ -31,7 +31,7 @@ namespace uhal
 	{
 
 			//! The timeout period for UDP transactions in seconds
-			static const int mDefaultTimeoutPeriod = 10;
+			static boost::posix_time::time_duration mDefaultTimeoutPeriod;
 			/**
 			The maximum allowed IPbus packet length.
 			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
@@ -78,6 +78,10 @@ namespace uhal
 
 	};
 
+
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	boost::posix_time::time_duration IPBusUDPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 10 );
+
 }
 // ----------------------------------------------------------------------------------------------------------------
 
@@ -89,7 +93,7 @@ namespace uhal
 	{
 
 			//! The timeout period for UDP transactions in seconds
-			static const int mDefaultTimeoutPeriod = 10;
+			static boost::posix_time::time_duration mDefaultTimeoutPeriod;
 			/**
 			The maximum allowed IPbus packet length.
 			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
@@ -135,6 +139,10 @@ namespace uhal
 			tTransportProtocol mTransportProtocol;
 
 	};
+
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	boost::posix_time::time_duration IPBusTCPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 10 );
+
 }
 
 // ----------------------------------------------------------------------------------------------------------------
@@ -157,7 +165,7 @@ namespace uhal
 	{
 
 			//! The timeout period for UDP transactions in seconds
-			static const int mDefaultTimeoutPeriod = 10;
+			static boost::posix_time::time_duration mDefaultTimeoutPeriod;
 			/**
 			The maximum allowed IPbus packet length.
 			@todo Now that the IPbusPacketInfo is templated can this be moved into the IPbusPacketInfo class itself?
@@ -208,48 +216,12 @@ namespace uhal
 
 	};
 
-
-	//	//! A struct for parsing a string of type "xxx.xxx.xxx.xxx:yyyyy"
-	// 	struct IPaddr
-	// 	{
-	// 		/**
-	// 			The 1st most significant field of the IP address
-	// 			Must be 16 bit to stop it being interpretted as a char...
-	// 		*/
-	// 		uint16_t mIP1;
-	// 		/**
-	// 			The 2nd most significant field of the IP address
-	// 			Must be 16 bit to stop it being interpretted as a char...
-	// 		*/
-	// 		uint16_t mIP2;
-	// 		/**
-	// 			The 3rd most significant field of the IP address
-	// 			Must be 16 bit to stop it being interpretted as a char...
-	// 		*/
-	// 		uint16_t mIP3;
-	// 		/**
-	// 			The 4th most significant field of the IP address
-	// 			Must be 16 bit to stop it being interpretted as a char...
-	// 		*/
-	// 		uint16_t mIP4;
-	// 		/**
-	// 			The port field of the IP address
-	// 		*/
-	// 		uint16_t mPort;
-	// 	};
+	template< eIPbusProtocolVersion IPbusProtocolVersion >
+	boost::posix_time::time_duration ControlHubClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 10 );
 
 }
 
 
-// //! A boost::fusion adaptive struct used by the boost::qi parser
-// BOOST_FUSION_ADAPT_STRUCT (
-// 	uhal::IPaddr,
-// 	( uint16_t , mIP1 )
-// 	( uint16_t , mIP2 )
-// 	( uint16_t , mIP3 )
-// 	( uint16_t , mIP4 )
-// 	( uint16_t , mPort )
-// );
 
 
 

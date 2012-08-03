@@ -10,7 +10,7 @@ namespace uhal
 {
 
 
-UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
+UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) try :
 		mUdpTransportProtocol ( aUdpTransportProtocol ),
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
 							  mSocket ( boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) ) ),
@@ -113,7 +113,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
 			log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
+			mDeadlineTimer.expires_from_now ( mTimeoutPeriod );
 			mErrorCode = boost::asio::error::would_block;
 			mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
 
@@ -143,7 +143,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
 			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
 			boost::asio::ip::udp::endpoint lEndpoint;
-			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
+			mDeadlineTimer.expires_from_now ( mTimeoutPeriod );
 			mErrorCode = boost::asio::error::would_block;
 			mSocket->async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
 
@@ -200,7 +200,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
 
 
-UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
+UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) try :
 		TransportProtocol ( aTimeoutPeriod ),
 						  mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort , aTimeoutPeriod ) ) )
 #ifdef USE_UDP_MULTITHREADED

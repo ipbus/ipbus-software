@@ -131,7 +131,7 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 
 
 
-TransportProtocol::TransportProtocol ( const uint32_t& aTimeoutPeriod ) try :
+TransportProtocol::TransportProtocol ( const boost::posix_time::time_duration& aTimeoutPeriod ) try :
 		mTimeoutPeriod ( aTimeoutPeriod )
 		{}
 	catch ( uhal::exception& aExc )
@@ -146,12 +146,12 @@ TransportProtocol::TransportProtocol ( const uint32_t& aTimeoutPeriod ) try :
 	TransportProtocol::~TransportProtocol() {}
 
 
-	void TransportProtocol::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
+	void TransportProtocol::setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod )
 	{
 		mTimeoutPeriod = aTimeoutPeriod;
 	}
 
-	const uint32_t& TransportProtocol::getTimeoutPeriod()
+	const boost::posix_time::time_duration& TransportProtocol::getTimeoutPeriod()
 	{
 		return mTimeoutPeriod;
 	}

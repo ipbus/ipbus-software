@@ -42,7 +42,7 @@ namespace uhal
 	//! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing funcationality
 	class ClientInterface
 	{
-		public:
+		protected:
 			/**
 				Constructor
 				@param aId the uinique identifier that the client will be given.
@@ -50,6 +50,26 @@ namespace uhal
 			*/
 			ClientInterface ( const std::string& aId, const URI& aUri );
 
+		private:
+			/**
+				Null Constructor
+			*/
+			ClientInterface ();
+
+			/**
+				Copy Constructor
+				@param aClientInterface a ClientInterface to copy
+			*/
+			ClientInterface ( const ClientInterface& aClientInterface );
+
+			/**
+				Assignment operator
+				@param aClientInterface a ClientInterface to copy
+				@return reference to this object for chained assignment
+			*/
+			virtual ClientInterface& operator= ( const ClientInterface& aClientInterface );
+
+		public:
 			/**
 				Destructor
 			*/
@@ -181,13 +201,13 @@ namespace uhal
 				A method to modify the timeout period for any pending or future transactions
 				@param aTimeoutPeriod the desired timeout period in seconds
 			*/
-			virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
+			virtual void setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod );
 
 			/**
 				A method to retrieve the timeout period currently being used
 				@return the timeout period currently being used
 			*/
-			virtual const uint32_t& getTimeoutPeriod();
+			virtual const boost::posix_time::time_duration& getTimeoutPeriod();
 
 		private:
 

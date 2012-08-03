@@ -11,7 +11,7 @@ namespace uhal
 {
 
 
-TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
+TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) try :
 		mTcpTransportProtocol ( aTcpTransportProtocol ),
 							  mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
 							  mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) ),
@@ -121,7 +121,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			std::vector< boost::asio::const_buffer > lAsioSendBuffer;
 			lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
 			log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
+			mDeadlineTimer.expires_from_now ( mTimeoutPeriod );
 			mErrorCode = boost::asio::error::would_block;
 			boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
 
@@ -150,7 +150,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			}
 
 			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
-			mDeadlineTimer.expires_from_now ( boost::posix_time::seconds ( mTimeoutPeriod ) );
+			mDeadlineTimer.expires_from_now ( mTimeoutPeriod );
 			mErrorCode = boost::asio::error::would_block;
 			boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
 
@@ -216,7 +216,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 
 
 
-TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const uint32_t& aTimeoutPeriod ) try :
+TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) try :
 		TransportProtocol ( aTimeoutPeriod ),
 						  mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort , aTimeoutPeriod ) ) )
 #ifdef USE_TCP_MULTITHREADED

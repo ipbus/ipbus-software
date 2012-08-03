@@ -130,7 +130,7 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 				ConnectionUIDDoesNotExist().throwFrom ( ThisLocation() );
 			}
 
-			//The node tree builder returns a newly created shared_ptr to a Node
+			//The node tree builder returns a newly created Node which we can safely wrap as a shared_ptr
 			boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
 			log ( Info() , "ConnectionManager created node tree: " , *lNode );
 			boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );

@@ -39,237 +39,205 @@ namespace uhal
 namespace uhal
 {
 
-	Node::permissions_lut::permissions_lut()
-	{
-		add
-		( "r"			, defs::READ )
-		( "w"			, defs::WRITE )
-		( "read"		, defs::READ )
-		( "write"		, defs::WRITE )
-		( "rw"			, defs::READWRITE )
-		( "wr"			, defs::READWRITE )
-		( "readwrite"	, defs::READWRITE )
-		( "writeread"	, defs::READWRITE )
-		;
-	}
-
-	const Node::permissions_lut Node::mPermissionsLut;
-
-
-	Node::mode_lut::mode_lut()
-	{
-		add
-		( "single"			, defs::SINGLE )
-		( "block"			, defs::INCREMENTAL )
-		( "port"			, defs::NON_INCREMENTAL )
-		( "incremental"		, defs::INCREMENTAL )
-		( "non-incremental"	, defs::NON_INCREMENTAL )
-		( "inc"				, defs::INCREMENTAL )
-		( "non-inc"			, defs::NON_INCREMENTAL )
-		;
-	}
-
-	const Node::mode_lut Node::mModeLut;
 
 
 
 
 
 
+	// Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId ) try :
+	// mHw ( NULL ),
+	// mUid ( "" ),
+	// mAddr ( 0x00000000 ),
+	// mAddrValid ( false ),
+	// mMask ( defs::NOMASK ),
+	// mPermission ( defs::READWRITE ),
+	// mMode ( defs::SINGLE ),
+	// mSize ( 0x00000001 ),
+	// mTags ( "" ),
+	// mChildren ( new std::deque< Node* >() ),
+	// mChildrenMap ( new std::hash_map< std::string , Node* >() )
+	// {
+	// //Apart from top-level nodes, ID is a compulsory attribute for identifying a node
+	// if ( aRequireId )
+	// {
+	// if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
+	// {
+	// //error description is given in the function itself so no more elaboration required
+	// NodeMustHaveUID().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// else
+	// {
+	// uhal::utilities::GetXMLattribute<false> ( aXmlNode , "id" , mUid );
+	// }
 
+	// //Address is an optional attribute for hierarchical addressing
+	// uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
+	// //Module is an optional attribute for pointing to other xml files. When specified, module implies that certain other attributes be ignored
+	// std::string lModule;
+	// //Tags is an optional attribute to allow the user to add a description to a node
+	// uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
 
-Node::Node ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId ) try :
-		mHw ( NULL ),
-			mUid ( "" ),
-			mAddr ( 0x00000000 ),
-			mAddrValid ( false ),
-			mMask ( defs::NOMASK ),
-			mPermission ( defs::READWRITE ),
-			mMode ( defs::SINGLE ),
-			mSize ( 0x00000001 ),
-			mTags ( "" ),
-			mChildren ( new std::deque< Node >() ),
-			mChildrenMap ( new std::hash_map< std::string , Node* >() )
-	{
-		//Apart from top-level nodes, ID is a compulsory attribute for identifying a node
-		if ( aRequireId )
-		{
-			if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , "id" , mUid ) )
-			{
-				//error description is given in the function itself so no more elaboration required
-				NodeMustHaveUID().throwFrom ( ThisLocation() );
-			}
-		}
-		else
-		{
-			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "id" , mUid );
-		}
+	// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
+	// {
+	// try
+	// {
+	// log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
+	// /*
+	// This added the top-level node of the module as a child of the current node [https://svnweb.cern.ch/trac/cactus/ticket/39]
+	// */
+	// //mChildren.push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
+	// /*
+	// Marc, however, said that the top-level node of the module should be ignored and its children appended instead.
+	// */
+	// boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false ) );
 
-		//Address is an optional attribute for hierarchical addressing
-		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "address" , mAddr );
-		//Module is an optional attribute for pointing to other xml files. When specified, module implies that certain other attributes be ignored
-		std::string lModule;
-		//Tags is an optional attribute to allow the user to add a description to a node
-		uhal::utilities::GetXMLattribute<false> ( aXmlNode , "tags" , mTags );
+	// for ( std::deque< Node* >::iterator lIt = lNode->mChildren.begin(); lIt != lNode->mChildren.end(); ++lIt )
+	// {
+	// mChildren.push_back ( lIt->clone() );
+	// }
 
-		if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "module" , lModule ) )
-		{
-			try
-			{
-				log ( Debug() , mUid , " : " , Integer ( mAddr , IntFmt<hex,fixed>() ) );
-				/*
-					This added the top-level node of the module as a child of the current node [https://svnweb.cern.ch/trac/cactus/ticket/39]
-				*/
-				//mChildren->push_back ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false )->clone() );
-				/*
-					Marc, however, said that the top-level node of the module should be ignored and its children appended instead.
-				*/
-				boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lModule , aPath , false ) );
+	// //Since we are "ignoring" the top-level node of the module by appending its children, rather than the node itself, we must modify the address of this node to take into account any hierarchical address info of the top-level node [https://svnweb.cern.ch/trac/cactus/ticket/39]
+	// if ( mAddr & lNode->mAddr )
+	// {
+	// log ( Warning() , "The partial address of the module, " , Quote ( lModule ) , " , (" , Integer ( lNode->mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the current branch (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+	// }
 
-				for ( std::deque< Node >::iterator lIt = lNode->mChildren->begin(); lIt != lNode->mChildren->end(); ++lIt )
-				{
-					mChildren->push_back ( lIt->clone() );
-				}
+	// mAddr |= lNode->mAddr;
+	// //Similarly for the permissions, etc.
+	// mPermission = lNode->mPermission;
+	// mMode = lNode->mMode;
+	// mSize = lNode->mSize;
+	// mMask = lNode->mMask;
 
-				//Since we are "ignoring" the top-level node of the module by appending its children, rather than the node itself, we must modify the address of this node to take into account any hierarchical address info of the top-level node [https://svnweb.cern.ch/trac/cactus/ticket/39]
-				if ( mAddr & lNode->mAddr )
-				{
-					log ( Warning() , "The partial address of the module, " , Quote ( lModule ) , " , (" , Integer ( lNode->mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the current branch (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
-				}
+	// //We extend the tags string attribute
+	// if ( lNode->mTags.size() )
+	// {
+	// mTags += ';';
+	// mTags += lNode->mTags;
+	// }
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
+	// }
+	// else
+	// {
+	// //Mask as an optional attribute to identify subfields of a register
+	// uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
+	// //Permissions is an optional attribute for specifying read/write permissions
+	// std::string lPermission;
 
-				mAddr |= lNode->mAddr;
-				//Similarly for the permissions, etc.
-				mPermission = lNode->mPermission;
-				mMode = lNode->mMode;
-				mSize = lNode->mSize;
-				mMask = lNode->mMask;
+	// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
+	// {
+	// try
+	// {
+	// boost::spirit::qi::phrase_parse (
+	// lPermission.begin(),
+	// lPermission.end(),
+	// Node::mPermissionsLut,
+	// boost::spirit::ascii::space,
+	// mPermission
+	// );
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
+	// }
 
-				//We extend the tags string attribute
-				if ( lNode->mTags.size() )
-				{
-					mTags += ';';
-					mTags += lNode->mTags;
-				}
-			}
-			catch ( uhal::exception& aExc )
-			{
-				aExc.rethrowFrom ( ThisLocation() );
-			}
-			catch ( const std::exception& aExc )
-			{
-				StdException ( aExc ).throwFrom ( ThisLocation() );
-			}
-		}
-		else
-		{
-			//Mask as an optional attribute to identify subfields of a register
-			uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mask" , mMask );
-			//Permissions is an optional attribute for specifying read/write permissions
-			std::string lPermission;
+	// //Mode is an optional attribute for specifying whether a block is incremental, non-incremental or a single register
+	// std::string lMode;
 
-			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
-			{
-				try
-				{
-					boost::spirit::qi::phrase_parse (
-						lPermission.begin(),
-						lPermission.end(),
-						Node::mPermissionsLut,
-						boost::spirit::ascii::space,
-						mPermission
-					);
-				}
-				catch ( uhal::exception& aExc )
-				{
-					aExc.rethrowFrom ( ThisLocation() );
-				}
-				catch ( const std::exception& aExc )
-				{
-					StdException ( aExc ).throwFrom ( ThisLocation() );
-				}
-			}
+	// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
+	// {
+	// try
+	// {
+	// boost::spirit::qi::phrase_parse (
+	// lMode.begin(),
+	// lMode.end(),
+	// Node::mModeLut,
+	// boost::spirit::ascii::space,
+	// mMode
+	// );
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
 
-			//Mode is an optional attribute for specifying whether a block is incremental, non-incremental or a single register
-			std::string lMode;
+	// if ( mMode == defs::INCREMENTAL )
+	// {
+	// //If a block is incremental it requires a size attribute
+	// if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
+	// {
+	// log ( Error() , "Nodes " , Quote ( mUid ) , " has type " , Quote ( "INCREMENTAL" ) , " require a " , Quote ( "size" ) , " attribute" );
+	// IncrementalNodeRequiresSizeAttribute().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// else if ( mMode == defs::NON_INCREMENTAL )
+	// {
+	// //If a block is non-incremental, then a size attribute is recommended
+	// if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
+	// {
+	// log ( Notice() , "Node " , Quote ( mUid ) , " has type " , Quote ( "NON_INCREMENTAL" ) , " does not have a " , Quote ( "size" ) , " attribute. This is not necessarily a problem, but if there is a limit to the size of the read/write operation from this port, then please consider adding this attribute for the sake of safety." );
+	// }
+	// }
+	// }
 
-			if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "mode" , lMode ) )
-			{
-				try
-				{
-					boost::spirit::qi::phrase_parse (
-						lMode.begin(),
-						lMode.end(),
-						Node::mModeLut,
-						boost::spirit::ascii::space,
-						mMode
-					);
-				}
-				catch ( uhal::exception& aExc )
-				{
-					aExc.rethrowFrom ( ThisLocation() );
-				}
-				catch ( const std::exception& aExc )
-				{
-					StdException ( aExc ).throwFrom ( ThisLocation() );
-				}
+	// for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
+	// {
+	// mChildren.push_back ( NodeTreeBuilder::getInstance().create ( lXmlNode , aPath )->clone() );
+	// }
+	// }
 
-				if ( mMode == defs::INCREMENTAL )
-				{
-					//If a block is incremental it requires a size attribute
-					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
-					{
-						log ( Error() , "Nodes " , Quote ( mUid ) , " has type " , Quote ( "INCREMENTAL" ) , " require a " , Quote ( "size" ) , " attribute" );
-						IncrementalNodeRequiresSizeAttribute().throwFrom ( ThisLocation() );
-					}
-				}
-				else if ( mMode == defs::NON_INCREMENTAL )
-				{
-					//If a block is non-incremental, then a size attribute is recommended
-					if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , "size" , mSize ) )
-					{
-						log ( Notice() , "Node " , Quote ( mUid ) , " has type " , Quote ( "NON_INCREMENTAL" ) , " does not have a " , Quote ( "size" ) , " attribute. This is not necessarily a problem, but if there is a limit to the size of the read/write operation from this port, then please consider adding this attribute for the sake of safety." );
-					}
-				}
-			}
+	// for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+	// {
+	// mChildrenMap.insert ( std::make_pair ( lIt->mUid , & ( *lIt ) ) );
 
-			for ( pugi::xml_node lXmlNode = aXmlNode.child ( "node" ); lXmlNode; lXmlNode = lXmlNode.next_sibling ( "node" ) )
-			{
-				mChildren->push_back ( NodeTreeBuilder::getInstance().create ( lXmlNode , aPath )->clone() );
-			}
-		}
-
-		for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
-		{
-			mChildrenMap->insert ( std::make_pair ( lIt->mUid , & ( *lIt ) ) );
-
-			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap->begin() ; lSubMapIt != lIt->mChildrenMap->end() ; ++lSubMapIt )
-			{
-				mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-			}
-		}
-	}
-	catch ( uhal::exception& aExc )
-	{
-		aExc.rethrowFrom ( ThisLocation() );
-	}
-	catch ( const std::exception& aExc )
-	{
-		StdException ( aExc ).throwFrom ( ThisLocation() );
-	}
+	// for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap.begin() ; lSubMapIt != lIt->mChildrenMap.end() ; ++lSubMapIt )
+	// {
+	// mChildrenMap.insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+	// }
+	// }
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
 
 
 Node::Node ( ) try :
 		mHw ( NULL ),
 			mUid ( "" ),
+			mPartialAddr ( 0x00000000 ),
 			mAddr ( 0x00000000 ),
-			mAddrValid ( false ),
+			//			mAddrValid ( false ),
 			mMask ( defs::NOMASK ),
 			mPermission ( defs::READWRITE ),
 			mMode ( defs::SINGLE ),
 			mSize ( 0x00000001 ),
 			mTags ( "" ),
-			mChildren ( new std::deque< Node >() ),
-			mChildrenMap ( new std::hash_map< std::string , Node* >() )
+			mChildren ( ),
+			mChildrenMap ( )
 	{
 	}
 	catch ( uhal::exception& aExc )
@@ -285,16 +253,31 @@ Node::Node ( ) try :
 Node::Node ( const Node& aNode ) try :
 		mHw ( aNode.mHw ),
 			mUid ( aNode.mUid ),
+			mPartialAddr ( aNode.mPartialAddr ),
 			mAddr ( aNode.mAddr ),
-			mAddrValid ( aNode.mAddrValid ),
+			//			mAddrValid ( aNode.mAddrValid ),
 			mMask ( aNode.mMask ),
 			mPermission ( aNode.mPermission ),
 			mMode ( aNode.mMode ),
 			mSize ( aNode.mSize ),
 			mTags ( aNode.mTags ),
-			mChildren ( aNode.mChildren ),
-			mChildrenMap ( aNode.mChildrenMap )
+			mChildren ( ),
+			mChildrenMap ( )
 	{
+		for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
+		{
+			mChildren.push_back ( ( **lIt ).clone() );
+		}
+
+		for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+		{
+			mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
+
+			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+			{
+				mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			}
+		}
 	}
 	catch ( uhal::exception& aExc )
 	{
@@ -307,41 +290,72 @@ Node::Node ( const Node& aNode ) try :
 
 
 
-	Node Node::clone() const
+	Node& Node::operator= ( const Node& aNode )
 	{
-		Node lNode;
-		lNode.mHw = mHw;
-		lNode.mUid = mUid ;
-		lNode.mAddr = mAddr;
-		lNode.mAddrValid = mAddrValid;
-		lNode.mMask = mMask;
-		lNode.mPermission = mPermission;
-		lNode.mMode = mMode;
-		lNode.mSize = mSize;
-		lNode.mTags = mTags;
+		mHw = aNode.mHw;
+		mUid = aNode.mUid ;
+		mPartialAddr = aNode.mPartialAddr;
+		mAddr = aNode.mAddr;
+		//		mAddrValid = aNode.mAddrValid;
+		mMask = aNode.mMask;
+		mPermission = aNode.mPermission;
+		mMode = aNode.mMode;
+		mSize = aNode.mSize;
+		mTags = aNode.mTags;
 
-		for ( std::deque< Node >::const_iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
+		for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
 		{
-			lNode.mChildren->push_back ( lIt->clone() );
-		}
-
-		for ( std::deque< Node >::iterator lIt = lNode.mChildren->begin(); lIt != lNode.mChildren->end(); ++lIt )
-		{
-			lNode.mChildrenMap->insert ( std::make_pair ( lIt->mUid , & ( *lIt ) ) );
-
-			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = lIt->mChildrenMap->begin() ; lSubMapIt != lIt->mChildrenMap->end() ; ++lSubMapIt )
+			if ( *lIt )
 			{
-				lNode.mChildrenMap->insert ( std::make_pair ( ( lIt->mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+				delete ( *lIt );
+				( *lIt ) = NULL;
 			}
 		}
 
-		//std::cout << "Cloning " << mUid << " Children: " << mChildren->size() << "->" << lNode.mChildren->size() << " ChildrenMap: " << mChildrenMap->size() << "->" << lNode.mChildrenMap->size() << std::endl;
-		return lNode;
+		mChildren.clear();
+		mChildrenMap.clear();
+
+		for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
+		{
+			mChildren.push_back ( ( **lIt ).clone() );
+		}
+
+		for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+		{
+			mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
+
+			for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+			{
+				mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+			}
+		}
+
+		return *this;
 	}
 
 
+	Node* Node::clone ( ) const
+	{
+		return new Node ( *this );
+	}
+
+
+
+
 	Node::~Node()
-	{}
+	{
+		for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+		{
+			if ( *lIt )
+			{
+				delete ( *lIt );
+				( *lIt ) = NULL;
+			}
+		}
+
+		mChildren.clear();
+		mChildrenMap.clear();
+	}
 
 
 	bool Node::operator == ( const Node& aNode )
@@ -513,7 +527,7 @@ Node::Node ( const Node& aNode ) try :
 			}
 
 			aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
-			// for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			// for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
 			// {
 			// aStream << '\n' << std::string ( aIndent+2 , ' ' ) << "- Map entry " << (lIt->first);
 			// }
@@ -523,9 +537,9 @@ Node::Node ( const Node& aNode ) try :
 				aStream << ", Tags \"" << mTags << "\"";
 			}
 
-			for ( std::deque< Node >::const_iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
+			for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
 			{
-				lIt->stream ( aStream , aIndent+2 );
+				( **lIt ).stream ( aStream , aIndent+2 );
 			}
 		}
 		catch ( uhal::exception& aExc )
@@ -543,9 +557,9 @@ Node::Node ( const Node& aNode ) try :
 	{
 		try
 		{
-			std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->find ( aId );
+			std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.find ( aId );
 
-			if ( lIt==mChildrenMap->end() )
+			if ( lIt==mChildrenMap.end() )
 			{
 				log ( Error() , "No branch found with ID-path " ,  Quote ( aId ) );
 				std::size_t lPos ( std::string::npos );
@@ -560,9 +574,9 @@ Node::Node ( const Node& aNode ) try :
 						break;
 					}
 
-					std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->find ( aId.substr ( 0 , lPos ) );
+					std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
 
-					if ( lIt!=mChildrenMap->end() )
+					if ( lIt!=mChildrenMap.end() )
 					{
 						log ( Error() , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) );
 						log ( Error() , "Tree structure of partial match is:" , * ( lIt->second ) );
@@ -599,9 +613,9 @@ Node::Node ( const Node& aNode ) try :
 		try
 		{
 			std::vector<std::string> lNodes;
-			lNodes.reserve ( mChildrenMap->size() ); //prevent reallocations
+			lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
 
-			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
 			{
 				lNodes.push_back ( lIt->first );
 			}
@@ -623,10 +637,10 @@ Node::Node ( const Node& aNode ) try :
 		try
 		{
 			std::vector<std::string> lNodes;
-			lNodes.reserve ( mChildrenMap->size() ); //prevent reallocations
+			lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
 			log ( Info() , "Regular Expression : " , aRegex );
 
-			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap->begin(); lIt != mChildrenMap->end(); ++lIt )
+			for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
 			{
 				boost::cmatch lMatch;
 
@@ -659,11 +673,11 @@ Node::Node ( const Node& aNode ) try :
 			{
 				if ( mMask == defs::NOMASK )
 				{
-					return mHw->getClient()->write ( mAddr , aValue );
+					return mHw->getClient().write ( mAddr , aValue );
 				}
 				else
 				{
-					return mHw->getClient()->write ( mAddr , aValue , mMask );
+					return mHw->getClient().write ( mAddr , aValue , mMask );
 				}
 			}
 			else
@@ -703,7 +717,7 @@ Node::Node ( const Node& aNode ) try :
 
 				if ( mPermission & defs::WRITE )
 				{
-					return mHw->getClient()->writeBlock ( mAddr , aValues , mMode ); //aMode );
+					return mHw->getClient().writeBlock ( mAddr , aValues , mMode ); //aMode );
 				}
 				else
 				{
@@ -731,11 +745,11 @@ Node::Node ( const Node& aNode ) try :
 			{
 				if ( mMask == defs::NOMASK )
 				{
-					return mHw->getClient()->read ( mAddr );
+					return mHw->getClient().read ( mAddr );
 				}
 				else
 				{
-					return mHw->getClient()->read ( mAddr , mMask );
+					return mHw->getClient().read ( mAddr , mMask );
 				}
 			}
 			else
@@ -775,7 +789,7 @@ Node::Node ( const Node& aNode ) try :
 
 				if ( mPermission & defs::READ )
 				{
-					return mHw->getClient()->readBlock ( mAddr , aSize , mMode ); //aMode );
+					return mHw->getClient().readBlock ( mAddr , aSize , mMode ); //aMode );
 				}
 				else
 				{
@@ -802,11 +816,11 @@ Node::Node ( const Node& aNode ) try :
 	// {
 	// if ( mMask == defs::NOMASK )
 	// {
-	// return mHw->getClient()->readSigned ( mAddr );
+	// return mHw->getClient().readSigned ( mAddr );
 	// }
 	// else
 	// {
-	// return mHw->getClient()->readSigned ( mAddr , mMask );
+	// return mHw->getClient().readSigned ( mAddr , mMask );
 	// }
 	// }
 	// else
@@ -846,7 +860,7 @@ Node::Node ( const Node& aNode ) try :
 
 	// if ( mPermission & defs::READ )
 	// {
-	// return mHw->getClient()->readBlockSigned ( mAddr , aSize , mMode ); //aMode );
+	// return mHw->getClient().readBlockSigned ( mAddr , aSize , mMode ); //aMode );
 	// }
 	// else
 	// {
@@ -874,7 +888,7 @@ Node::Node ( const Node& aNode ) try :
 	// {
 	// if ( mPermission == defs::READWRITE )
 	// {
-	// return mHw->getClient()->rmw_bits ( mAddr , aANDterm , aORterm );
+	// return mHw->getClient().rmw_bits ( mAddr , aANDterm , aORterm );
 	// }
 	// else
 	// {
@@ -900,7 +914,7 @@ Node::Node ( const Node& aNode ) try :
 	// {
 	// if ( mPermission == defs::READWRITE )
 	// {
-	// return mHw->getClient()->rmw_sum ( mAddr , aAddend );
+	// return mHw->getClient().rmw_sum ( mAddr , aAddend );
 	// }
 	// else
 	// {
@@ -920,156 +934,156 @@ Node::Node ( const Node& aNode ) try :
 
 
 
-	void Node::calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode )
-	{
-		try
-		{
-			if ( mAddr )
-			{
-				if ( mMode == defs::INCREMENTAL )
-				{
-					uint64_t lCurrentTop ( ( uint64_t ) ( mAddr ) + ( uint64_t ) ( mSize-1 ) );
+	// void Node::calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode )
+	// {
+	// try
+	// {
+	// if ( mAddr )
+	// {
+	// if ( mMode == defs::INCREMENTAL )
+	// {
+	// uint64_t lCurrentTop ( ( uint64_t ) ( mAddr ) + ( uint64_t ) ( mSize-1 ) );
 
-					//Test for overlap with parent
-					if ( ( uint32_t ) ( lCurrentTop ) & aAddr ) //should set the most significant bit of the child address and then AND this with the parent address
-					{
-						log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( mUid ) , " , (" , Integer ( ( uint32_t ) ( lCurrentTop ) , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
-					}
+	// //Test for overlap with parent
+	// if ( ( uint32_t ) ( lCurrentTop ) & aAddr ) //should set the most significant bit of the child address and then AND this with the parent address
+	// {
+	// log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( mUid ) , " , (" , Integer ( ( uint32_t ) ( lCurrentTop ) , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+	// }
 
-					//Update the addresses with parent address
-					mAddr |= aAddr;
-					lCurrentTop = ( uint64_t ) ( mAddr ) + ( uint64_t ) ( mSize-1 );
-					// log ( Error() , Quote ( mUid ) ,
-					// " : Size " , Integer ( mSize , IntFmt<hex,fixed>() ) ,
-					// " : Base Address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
-					// " : lCurrentTop " ,  Integer ( lCurrentTop , IntFmt<hex,fixed>() )
-					// );
+	// //Update the addresses with parent address
+	// mAddr |= aAddr;
+	// lCurrentTop = ( uint64_t ) ( mAddr ) + ( uint64_t ) ( mSize-1 );
+	// // log ( Error() , Quote ( mUid ) ,
+	// // " : Size " , Integer ( mSize , IntFmt<hex,fixed>() ) ,
+	// // " : Base Address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
+	// // " : lCurrentTop " ,  Integer ( lCurrentTop , IntFmt<hex,fixed>() )
+	// // );
 
-					//Check that the requested block size does not extend outside register space
-					if ( lCurrentTop >> 32 )
-					{
-						log ( Error() , "A block size of " , Integer ( mSize ) , " and a base address of " , Integer ( mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
-						ArraySizeExceedsRegisterBound().throwFrom ( ThisLocation() );
-					}
+	// //Check that the requested block size does not extend outside register space
+	// if ( lCurrentTop >> 32 )
+	// {
+	// log ( Error() , "A block size of " , Integer ( mSize ) , " and a base address of " , Integer ( mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
+	// ArraySizeExceedsRegisterBound().throwFrom ( ThisLocation() );
+	// }
 
-					//Compare against all other branches
-					for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap->begin() ; lIt != aTopLevelNode.mChildrenMap->end() ; ++lIt )
-					{
-						const Node& lComparison ( *lIt->second );
+	// //Compare against all other branches
+	// for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap.begin() ; lIt != aTopLevelNode.mChildrenMap.end() ; ++lIt )
+	// {
+	// const Node& lComparison ( *lIt->second );
 
-						if ( lComparison.mAddrValid )
-						{
-							if ( lComparison.mMode == defs::INCREMENTAL )
-							{
-								// Current and comparison are both incremental
-								uint32_t lComparisonTop ( lComparison.mAddr + ( lComparison.mSize-1 ) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
+	// if ( lComparison.mAddrValid )
+	// {
+	// if ( lComparison.mMode == defs::INCREMENTAL )
+	// {
+	// // Current and comparison are both incremental
+	// uint32_t lComparisonTop ( lComparison.mAddr + ( lComparison.mSize-1 ) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
 
-								if ( ( ( lComparisonTop >= mAddr ) && ( lComparisonTop <= lCurrentTop ) ) || ( ( lCurrentTop >= lComparison.mAddr ) && ( lCurrentTop <= lComparisonTop ) ) )
-								{
-									log ( Error() , "Branch " , Quote ( mUid ) ,
-										  " has address range [" , Integer ( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) ,
-										  "] which overlaps with branch " , Quote ( lComparison.mUid ) ,
-										  " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
-										  "]."
-										);
-									AddressSpaceOverlap().throwFrom ( ThisLocation() );
-								}
-							}
-							else
-							{
-								// Current is incremental, comparison is static
-								if ( ( lComparison.mAddr >= mAddr ) && ( lComparison.mAddr <= lCurrentTop ) )
-								{
-									log ( Error() , "Branch " , Quote ( mUid ) ,
-										  " has address range [" , Integer ( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) ,
-										  "] which overlaps with branch " , Quote ( lComparison.mUid ) ,
-										  " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , "]."
-										);
-									AddressSpaceOverlap().throwFrom ( ThisLocation() );
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					//Test for overlap with parent
-					if ( mAddr & aAddr )
-					{
-						log ( Warning() , "The partial address of the current branch, " , Quote ( mUid ) , " , (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
-					}
+	// if ( ( ( lComparisonTop >= mAddr ) && ( lComparisonTop <= lCurrentTop ) ) || ( ( lCurrentTop >= lComparison.mAddr ) && ( lCurrentTop <= lComparisonTop ) ) )
+	// {
+	// log ( Error() , "Branch " , Quote ( mUid ) ,
+	// " has address range [" , Integer ( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) ,
+	// "] which overlaps with branch " , Quote ( lComparison.mUid ) ,
+	// " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
+	// "]."
+	// );
+	// AddressSpaceOverlap().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// else
+	// {
+	// // Current is incremental, comparison is static
+	// if ( ( lComparison.mAddr >= mAddr ) && ( lComparison.mAddr <= lCurrentTop ) )
+	// {
+	// log ( Error() , "Branch " , Quote ( mUid ) ,
+	// " has address range [" , Integer ( mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lCurrentTop , IntFmt<hex,fixed>() ) ,
+	// "] which overlaps with branch " , Quote ( lComparison.mUid ) ,
+	// " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , "]."
+	// );
+	// AddressSpaceOverlap().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// }
+	// }
+	// }
+	// else
+	// {
+	// //Test for overlap with parent
+	// if ( mAddr & aAddr )
+	// {
+	// log ( Warning() , "The partial address of the current branch, " , Quote ( mUid ) , " , (" , Integer ( mAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This is in violation of the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
+	// }
 
-					//Update the addresses with parent address
-					mAddr |= aAddr;
+	// //Update the addresses with parent address
+	// mAddr |= aAddr;
 
-					for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap->begin() ; lIt != aTopLevelNode.mChildrenMap->end() ; ++lIt )
-					{
-						const Node& lComparison ( *lIt->second );
+	// for ( std::hash_map< std::string , Node* >::const_iterator lIt = aTopLevelNode.mChildrenMap.begin() ; lIt != aTopLevelNode.mChildrenMap.end() ; ++lIt )
+	// {
+	// const Node& lComparison ( *lIt->second );
 
-						if ( lComparison.mAddrValid )
-						{
-							if ( lComparison.mMode == defs::INCREMENTAL )
-							{
-								// Current is static, comparison is incremental
-								uint32_t lComparisonTop ( lComparison.mAddr + ( lComparison.mSize-1 ) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
+	// if ( lComparison.mAddrValid )
+	// {
+	// if ( lComparison.mMode == defs::INCREMENTAL )
+	// {
+	// // Current is static, comparison is incremental
+	// uint32_t lComparisonTop ( lComparison.mAddr + ( lComparison.mSize-1 ) ); //Since the comparison is already marked as valid, we know that the top must be within the register space, or an exception would have been thrown
 
-								if ( ( mAddr >= lComparison.mAddr ) && ( mAddr <= lComparisonTop ) )
-								{
-									log ( Error() , "Branch " , Quote ( mUid ) ,
-										  " has address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
-										  " which overlaps with branch " , Quote ( lComparison.mUid ) ,
-										  " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
-										  "]."
-										);
-									AddressSpaceOverlap().throwFrom ( ThisLocation() );
-								}
-							}
-							else
-							{
-								// Current and comparison are both static
-								if ( mAddr == lComparison.mAddr )
-								{
-									if ( mMask & lComparison.mMask )
-									{
-										log ( Error() , "Branch " , Quote ( mUid ) ,
-											  " has address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
-											  " and mask " , Integer ( mMask , IntFmt<hex,fixed>() ) ,
-											  " which overlaps with branch " , Quote ( lComparison.mUid ) ,
-											  " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) ,
-											  " and mask " , Integer ( lComparison.mMask , IntFmt<hex,fixed>() )
-											);
-										AddressSpaceOverlap().throwFrom ( ThisLocation() );
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				mAddr = aAddr;
-			}
+	// if ( ( mAddr >= lComparison.mAddr ) && ( mAddr <= lComparisonTop ) )
+	// {
+	// log ( Error() , "Branch " , Quote ( mUid ) ,
+	// " has address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
+	// " which overlaps with branch " , Quote ( lComparison.mUid ) ,
+	// " which has address range [" , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) , " - " , Integer ( lComparisonTop , IntFmt<hex,fixed>() ) ,
+	// "]."
+	// );
+	// AddressSpaceOverlap().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// else
+	// {
+	// // Current and comparison are both static
+	// if ( mAddr == lComparison.mAddr )
+	// {
+	// if ( mMask & lComparison.mMask )
+	// {
+	// log ( Error() , "Branch " , Quote ( mUid ) ,
+	// " has address " , Integer ( mAddr , IntFmt<hex,fixed>() ) ,
+	// " and mask " , Integer ( mMask , IntFmt<hex,fixed>() ) ,
+	// " which overlaps with branch " , Quote ( lComparison.mUid ) ,
+	// " which has address " , Integer ( lComparison.mAddr , IntFmt<hex,fixed>() ) ,
+	// " and mask " , Integer ( lComparison.mMask , IntFmt<hex,fixed>() )
+	// );
+	// AddressSpaceOverlap().throwFrom ( ThisLocation() );
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
+	// else
+	// {
+	// mAddr = aAddr;
+	// }
 
-			for ( std::deque< Node >::iterator lIt = mChildren->begin(); lIt != mChildren->end(); ++lIt )
-			{
-				lIt->calculateHierarchicalAddresses ( mAddr , aTopLevelNode );
-			}
+	// for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+	// {
+	// (**lIt).calculateHierarchicalAddresses ( mAddr , aTopLevelNode );
+	// }
 
-			mAddrValid = true;
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// mAddrValid = true;
+	// }
+	// catch ( uhal::exception& aExc )
+	// {
+	// aExc.rethrowFrom ( ThisLocation() );
+	// }
+	// catch ( const std::exception& aExc )
+	// {
+	// StdException ( aExc ).throwFrom ( ThisLocation() );
+	// }
+	// }
 
 
-	boost::shared_ptr<ClientInterface> Node::getClient()
+	ClientInterface& Node::getClient()
 	{
 		try
 		{

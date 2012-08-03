@@ -31,15 +31,10 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		{
 			aNode.mHw = this;
 
-			for ( std::deque< Node >::iterator lIt = aNode.mChildren->begin(); lIt != aNode.mChildren->end(); ++lIt )
+			for ( std::deque< Node* >::iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
 			{
-				claimNode ( *lIt );
+				claimNode ( **lIt );
 			}
-
-			// for ( std::hash_map< std::string , Node >::iterator lIt = aNode.mChildrenMap->begin() ; lIt != aNode.mChildrenMap->end() ; ++lIt )
-			// {
-			// claimNode ( lIt->second );
-			// }
 		}
 		catch ( uhal::exception& aExc )
 		{
@@ -51,11 +46,11 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		}
 	}
 
-	boost::shared_ptr<ClientInterface> HwInterface::getClient()
+	ClientInterface& HwInterface::getClient()
 	{
 		try
 		{
-			return mClientInterface;
+			return *mClientInterface;
 		}
 		catch ( uhal::exception& aExc )
 		{
@@ -134,17 +129,54 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 	}
 
 
-	void HwInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
+	void HwInterface::setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod )
 	{
-		mClientInterface->setTimeoutPeriod ( aTimeoutPeriod );
+		try
+		{
+			mClientInterface->setTimeoutPeriod ( aTimeoutPeriod );
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
 	}
 
 
-	const uint32_t& HwInterface::getTimeoutPeriod()
+	const boost::posix_time::time_duration& HwInterface::getTimeoutPeriod()
 	{
-		return mClientInterface->getTimeoutPeriod();
+		try
+		{
+			return mClientInterface->getTimeoutPeriod();
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
 	}
 
+	Node& HwInterface::getNode ()
+	{
+		try
+		{
+			return *mNode;
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}
 
 
 	Node& HwInterface::getNode ( const std::string& aId )

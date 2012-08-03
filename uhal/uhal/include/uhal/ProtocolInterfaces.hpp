@@ -9,6 +9,7 @@
 
 #include <deque>
 #include "uhal/IPbusPacketInfo.hpp"
+#include "boost/date_time/posix_time/posix_time_types.hpp"
 
 namespace uhal
 {
@@ -180,7 +181,7 @@ namespace uhal
 			/**
 				Default constructor
 			*/
-			TransportProtocol ( const uint32_t& aTimeoutPeriod );
+			TransportProtocol ( const boost::posix_time::time_duration& aTimeoutPeriod );
 
 			/**
 				Destructor
@@ -200,22 +201,22 @@ namespace uhal
 
 			/**
 				Set the timeout period
-				@param aTimeoutPeriod a timeout period in seconds
+				@param aTimeoutPeriod a timeout period for the transport layer
 			*/
-			virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
+			virtual void setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod );
 
 			/**
 				Get the currently set timeout period
-				@return aTimeoutPeriod a timeout period in seconds
+				@return aTimeoutPeriod a timeout period for the transport layer
 			*/
-			virtual const uint32_t& getTimeoutPeriod();
+			virtual const boost::posix_time::time_duration& getTimeoutPeriod();
 
 		protected:
 			//! A pointer to an instance of a Packing Protocol which was used to pack the data
 			PackingProtocol* mPackingProtocol;
 
 			//! Timeout period for transactions
-			uint32_t mTimeoutPeriod;
+			boost::posix_time::time_duration mTimeoutPeriod;
 
 
 	};

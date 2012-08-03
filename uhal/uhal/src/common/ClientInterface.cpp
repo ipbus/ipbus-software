@@ -20,6 +20,53 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
+
+	ClientInterface::ClientInterface ( ) try
+	{
+	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
+	catch ( const std::exception& aExc )
+	{
+		StdException ( aExc ).throwFrom ( ThisLocation() );
+	}
+
+
+ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try :
+		mId ( aClientInterface.mId ),
+			mUri ( aClientInterface.mUri )
+	{
+	}
+	catch ( uhal::exception& aExc )
+	{
+		aExc.rethrowFrom ( ThisLocation() );
+	}
+	catch ( const std::exception& aExc )
+	{
+		StdException ( aExc ).throwFrom ( ThisLocation() );
+	}
+
+	ClientInterface::ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
+	{
+		try
+		{
+			mId  = aClientInterface.mId;
+			mUri = aClientInterface.mUri;
+			return *this;
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}
+
+
 	ClientInterface::~ClientInterface() {}
 
 	const std::string& ClientInterface::id()
@@ -372,12 +419,12 @@ ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try
 
 
 
-	void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
+	void ClientInterface::setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod )
 	{
 		getTransportProtocol().setTimeoutPeriod ( aTimeoutPeriod );
 	}
 
-	const uint32_t& ClientInterface::getTimeoutPeriod()
+	const boost::posix_time::time_duration& ClientInterface::getTimeoutPeriod()
 	{
 		return getTransportProtocol().getTimeoutPeriod();
 	}
