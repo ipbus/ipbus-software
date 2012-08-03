@@ -36,7 +36,7 @@ EXECUTABLE_SOURCES = \
 		src/common/test_dummy_metainfo.cxx \
 		src/common/test_dummy_navigation.cxx \
 		src/common/test_dummy_rawclient.cxx \
-		src/common/PerfTester.cxx
+		src/common/PerfTester.cxx 
 
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
@@ -62,9 +62,9 @@ LIBRARIES = 	\
 		-lcactus_extern_pugixml \
 		-lcactus_uhal_log \
 		-lcactus_uhal_grammars \
-		-lcactus_uhal_uhal	\
-		\
-		-lcactus_uhal_tests
+		-lcactus_uhal_uhal	
+
+EXECUTABLE_LIBRARIES = ${LIBRARIES} -lcactus_uhal_tests
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_LOG_INCLUDE_PREFIX} \
@@ -77,7 +77,7 @@ CPP_FLAGS = -g -Wall -O3 -fPIC ${INCLUDE_PATH}
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 ${LIBRARY_PATH} ${LIBRARIES}
 
-LINK_EXECUTABLE_FLAGS = -Wall -g -O3 ${LIBRARY_PATH} ${LIBRARIES}
+LINK_EXECUTABLE_FLAGS = -Wall -g -O3 ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} 
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
