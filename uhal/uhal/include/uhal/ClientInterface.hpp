@@ -199,15 +199,15 @@ namespace uhal
 
 			/**
 				A method to modify the timeout period for any pending or future transactions
-				@param aTimeoutPeriod the desired timeout period in seconds
+				@param aTimeoutPeriod the desired timeout period in milliseconds
 			*/
-			virtual void setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod );
+			virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
 
 			/**
 				A method to retrieve the timeout period currently being used
-				@return the timeout period currently being used
+				@return the timeout period currently being used in milliseconds
 			*/
-			virtual const boost::posix_time::time_duration& getTimeoutPeriod();
+			virtual uint32_t getTimeoutPeriod();
 
 		private:
 

@@ -129,7 +129,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 	}
 
 
-	void HwInterface::setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod )
+	void HwInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
 	{
 		try
 		{
@@ -146,7 +146,7 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 	}
 
 
-	const boost::posix_time::time_duration& HwInterface::getTimeoutPeriod()
+	uint32_t HwInterface::getTimeoutPeriod()
 	{
 		try
 		{

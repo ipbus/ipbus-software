@@ -80,7 +80,7 @@ namespace uhal
 
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	boost::posix_time::time_duration IPBusUDPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 10 );
+	boost::posix_time::time_duration IPBusUDPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::milliseconds ( 10 );
 
 }
 // ----------------------------------------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ namespace uhal
 	};
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	boost::posix_time::time_duration IPBusTCPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 10 );
+	boost::posix_time::time_duration IPBusTCPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::milliseconds ( 10 );
 
 }
 
@@ -217,7 +217,7 @@ namespace uhal
 	};
 
 	template< eIPbusProtocolVersion IPbusProtocolVersion >
-	boost::posix_time::time_duration ControlHubClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 10 );
+	boost::posix_time::time_duration ControlHubClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::milliseconds ( 10 );
 
 }
 

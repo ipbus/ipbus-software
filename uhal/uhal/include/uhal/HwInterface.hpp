@@ -57,15 +57,15 @@ namespace uhal
 
 			/**
 				A method to modify the timeout period for any pending or future transactions
-				@param aTimeoutPeriod the desired timeout period in seconds
+				@param aTimeoutPeriod the desired timeout period in milliseconds
 			*/
-			void setTimeoutPeriod ( const boost::posix_time::time_duration& aTimeoutPeriod );
+			void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
 
 			/**
 				A method to retrieve the timeout period currently being used
-				@return the timeout period currently being used
+				@return the timeout period currently being used in milliseconds
 			*/
-			const boost::posix_time::time_duration& getTimeoutPeriod();
+			uint32_t getTimeoutPeriod();
 
 			// /**
 			// Ping the target for this client
