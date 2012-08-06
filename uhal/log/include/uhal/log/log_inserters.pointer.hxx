@@ -18,7 +18,7 @@ namespace uhal
 		int lStatus ( 0 );
 		put ( abi::__cxa_demangle ( typeid ( T* ).name() , 0 , 0 , &lStatus ) );
 #else
-		put ( typeid ( *this ).name() );
+		put ( typeid ( T* ).name() );
 #endif
 		put ( ")(0x" );
 		static const char* lCharacterMapping ( "0123456789ABCDEF" );

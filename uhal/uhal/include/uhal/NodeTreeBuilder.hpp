@@ -14,9 +14,11 @@
 
 #include <boost/utility.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/spirit/include/qi.hpp>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include <boost/spirit/include/qi.hpp>
+#include "uhal/grammars/NodeTreeClassAttributeGrammar.hpp"
 
 
 #include "pugixml/pugixml.hpp"
@@ -25,15 +27,12 @@
 
 #include <map>
 
-// /**
-// EXPERIMENTAL! Method for adding methods to the factory
-// @param class the class to add to the factory
-// @warning EXPERIMENTAL!
-// */
-// #define REGISTER_NODE_TYPE( class ) NodeTreeBuilder::RegistrationHelper< class >( #class );
+#define REGISTER( class ) RegistrationHelper< class > class##RegistrationHelper( #class );
 
 namespace uhal
 {
+	//! Exception class to handle the case where creation of a node was attempted without it having a UID. Uses the base uhal::exception implementation of what()
+	class NodeMustHaveUID: public uhal::_exception< NodeMustHaveUID > {  };
 	//! Exception class to handle the case where too many or two few address files are specified. Uses the base uhal::exception implementation of what()
 	class IncorrectAddressTableFileCount: public uhal::_exception< IncorrectAddressTableFileCount > {  };
 	//! Exception class to handle the case where the address file failed to open. Uses the base uhal::exception implementation of what()
@@ -45,33 +44,23 @@ namespace uhal
 	//! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
 	class AddressSpaceOverlap: public uhal::_exception< AddressSpaceOverlap > {  };
 	//! Exception class to handle the case when someone tries to give a block access node a child. Uses the base uhal::exception implementation of what()
-	class BlockAccessNodeCannotHaveChild: public uhal::_exception< AddressSpaceOverlap > {  };
+	class BlockAccessNodeCannotHaveChild: public uhal::_exception< BlockAccessNodeCannotHaveChild > {  };
+	// //! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
+	// class ChildHasAddressOverlap: public uhal::_exception< ChildHasAddressOverlap > {  };
+	// //! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
+	// class ChildHasAddressMaskOverlap: public uhal::_exception< ChildHasAddressMaskOverlap > {  };
+	//! Exception class to handle the case where a class is requested which does not exist in the class factory. Uses the base uhal::exception implementation of what()
+	class LabelUnknownToClassFactory: public uhal::_exception< LabelUnknownToClassFactory > {  };
 
+	template< typename T > class RegistrationHelper;
 
 	//! A class to build a node tree from an Address table file
 	class NodeTreeBuilder: private boost::noncopyable
 	{
 		public:
-			// //! Give the node access to the private factory
-			// friend class Node;
 
-			// /**
-			// EXPERIMENTAL! A helper class whose constructor registers a class with the factory
-			// @warning EXPERIMENTAL!
-			// */
-			// template< typename T >
-			// struct RegistrationHelper
-			// {
-			// /**
-			// EXPERIMENTAL! Constructor
-			// @param aNodeTypeIdentifier the string used as the identifier by the factory
-			// @warning EXPERIMENTAL!
-			// */
-			// RegistrationHelper ( const std::string& aNodeTypeIdentifier );
-			// };
-
-			// //! EXPERIMENTAL! Give the RegistrationHelper access to the private factory
-			// template< typename T > friend class RegistrationHelper;
+			//! EXPERIMENTAL! Give the RegistrationHelper access to the private factory
+			template< typename T > friend class RegistrationHelper;
 
 		private:
 			/**
@@ -97,10 +86,9 @@ namespace uhal
 				Construct a node tree from file whose name is specified
 				@param aFilenameExpr a Filename Expression
 				@param aPath a path that will be prepended to relative filenames for local files. Ignored for http files.
-				@param aCalculateHierarchicalAddresses flag to indicate whether address tree should be calculated. For retrieving top-level trees, then this should be true, for sub-trees false.
 				@return a freshly cloned node tree
 			*/
-			Node* getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath , const bool& aCalculateHierarchicalAddresses = true );
+			Node* getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath );
 
 		private:
 			/**
@@ -122,7 +110,7 @@ namespace uhal
 
 			void checkForAddressCollisions ( Node* aNode );
 
-			
+
 			Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 			Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 			Node* moduleNodeCreator ( const pugi::xml_node& aXmlNode );
@@ -152,70 +140,56 @@ namespace uhal
 
 			std::deque< boost::filesystem::path > mFileCallStack;
 
-			// private:
+		private:
 
-			// /**
-			// Method to create an associate between a node type identifier and a Creator of that particular node type
-			// @param aNodeTypeIdentifier the node type identifier
-			// */
-			// template <class T>
-			// void add ( const std::string& aNodeTypeIdentifier );
+			/**
+			Method to create an associate between a node type identifier and a Creator of that particular node type
+			@param aNodeClassName the node type identifier
+			*/
+			template <class T>
+			void add ( const std::string& aNodeClassName );
 
-			// //! An abstract base class for defining the interface to the creators
-			// class CreatorInterface
-			// {
-			// public:
-			// /**
-			// Default constructor
-			// */
-			// CreatorInterface() {}
-			// /**
-			// Destructor
-			// */
-			// virtual ~CreatorInterface() {}
-			// /**
-			// Interface to a function which create a new IPbus client based on the protocol identifier specified
-			// @param aXmlNode a PugiXML node from which to construct a node
-			// @param aPath The fully qualified path to the XML file containing this node
-			// @param aRequireId specify whether an exception should be thrown if the id attribute is not set
-			// @return a shared pointer to a node tree which must be copied before it can be used
-			// */
-			// virtual const Node* create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true ) = 0;
-			// };
+			//! An abstract base class for defining the interface to the creators
+			class CreatorInterface
+			{
+				public:
+					/**
+					Default constructor
+					*/
+					CreatorInterface() {}
+					/**
+					Destructor
+					*/
+					virtual ~CreatorInterface() {}
+					/**
+					Interface to a function which create a new IPbus client based on the protocol identifier specified
+					@param aAttributes a vector containing a set of name value pairs which were passed as arguments
+					@return a new node tree
+					*/
+					virtual Node* create ( const std::vector< std::pair<std::string, std::string> >& aAttributes ) = 0;
+			};
 
-			// //! Templated concrete implementation with a CreatorInterface interface
-			// template <class T>
-			// class Creator: public CreatorInterface
-			// {
-			// public:
+			//! Templated concrete implementation with a CreatorInterface interface
+			template <class T>
+			class Creator: public CreatorInterface
+			{
+				public:
 
-			// /**
-			// Default constructor
-			// */
-			// Creator() {}
-			// /**
-			// Destructor
-			// */
-			// virtual ~Creator() {}
-			// /**
-			// Concrete function which creates a new IPbus client based on the protocol identifier specified
-			// @param aXmlNode a PugiXML node from which to construct a node
-			// @param aPath The fully qualified path to the XML file containing this node
-			// @param aRequireId specify whether an exception should be thrown if the id attribute is not set
-			// @return a node tree which must be copied before it can be used
-			// */
-			// const Node* create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true );
-			// };
-
-
-			// /**
-			// Helper function which reads the class type from the XML node and calls the appropriate creator
-			// @param aXmlNode a PugiXML node from which to construct a node
-			// @param aPath The fully qualified path to the XML file containing this node
-			// @param aRequireId specify whether an exception should be thrown if the id attribute is not set
-			// @return a node tree which must be copied before it can be used
-			// */
-			// const Node* create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId = true );
+					/**
+					Default constructor
+					*/
+					Creator() {}
+					/**
+					Destructor
+					*/
+					virtual ~Creator() {}
+					/**
+					Concrete function which creates a new IPbus client based on the protocol identifier specified
+					@param aAttributes a vector containing a set of name value pairs which were passed as arguments
+					@return a new node tree
+					*/
+					Node* create ( const std::vector< std::pair<std::string, std::string> >& aAttributes );
+			};
 
 
 		private:
@@ -225,8 +199,8 @@ namespace uhal
 			//! Hash map associating a Node tree with a file name so that we do not need to repeatedly parse the xml documents if someone asks for a second copy of a particular node tree
 			std::hash_map< std::string , const Node* > mNodes;
 
-			// //! Hash map associating a creator for a particular node type with a string identifier for that node type
-			// std::hash_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;
+			//! Hash map associating a creator for a particular node type with a string identifier for that node type
+			std::hash_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;
 
 			//! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
 			static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>
@@ -244,6 +218,14 @@ namespace uhal
 			} mModeLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
 
 
+			grammars::NodeTreeClassAttributeGrammar mNodeTreeClassAttributeGrammar;
+	};
+
+
+	template< typename T >
+	struct RegistrationHelper
+	{
+		RegistrationHelper ( const std::string& aDerivedClassName );
 	};
 
 }

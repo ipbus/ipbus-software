@@ -101,7 +101,7 @@ namespace uhal
 		}
 	}
 
-	Node* NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath , const bool& aCalculateHierarchicalAddresses )
+	Node* NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath )
 	{
 		try
 		{
@@ -129,10 +129,6 @@ namespace uhal
 			}
 
 			Node* lNode ( lNodes[0]->clone() );
-			// if ( aCalculateHierarchicalAddresses )
-			// {
-			// lNode->calculateHierarchicalAddresses ( 0x0 , *lNode );
-			// }
 			return lNode;
 		}
 		catch ( uhal::exception& aExc )
@@ -187,7 +183,6 @@ namespace uhal
 				mFileCallStack.pop_back( );
 				calculateHierarchicalAddresses ( lNode , 0x00000000 );
 				checkForAddressCollisions ( lNode );
-				
 				mNodes.insert ( std::make_pair ( lName , lNode ) );
 				aNodes.push_back ( lNode );
 				return;
@@ -267,7 +262,27 @@ namespace uhal
 	{
 		try
 		{
-			Node* lNode ( new Node() );
+			std::string lClassStr;
+			uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
+			std::string::const_iterator lBegin ( lClassStr.begin() );
+			std::string::const_iterator lEnd ( lClassStr.end() );
+			NodeTreeClassAttribute lClass;
+			boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
+			std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
+
+			if ( lIt == mCreators.end() )
+			{
+				log ( Error() , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory. Known types are:" );
+
+				for ( std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+				{
+					log ( Error() , " > " , lIt->first );
+				}
+
+				LabelUnknownToClassFactory().throwFrom ( ThisLocation() );
+			}
+
+			Node* lNode ( lIt->second->create ( lClass.mArguments ) );
 			setUid ( aRequireId , aXmlNode , lNode );
 			setAddr ( aXmlNode , lNode );
 			setTags ( aXmlNode , lNode );
@@ -390,8 +405,20 @@ namespace uhal
 	{
 		try
 		{
+			std::string lStr;
 			//Tags is an optional attribute to allow the user to add a description to a node
-			uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mTagsAttribute , aNode->mTags );
+			uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mTagsAttribute , lStr );
+
+			if ( lStr.size() && aNode->mTags.size() )
+			{
+				aNode->mTags += "[";
+				aNode->mTags += lStr;
+				aNode->mTags += "]";
+			}
+			else if ( lStr.size() && !aNode->mTags.size() )
+			{
+				aNode->mTags = lStr;
+			}
 		}
 		catch ( uhal::exception& aExc )
 		{
@@ -611,114 +638,110 @@ namespace uhal
 	}
 
 
-	
+
 	void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode )
 	{
 		try
 		{
 			std::hash_map< std::string , Node* >::iterator lIt, lIt2;
-			Node *lNode1, *lNode2;
-			
+			Node* lNode1, *lNode2;
+
 			for ( lIt = aNode->mChildrenMap.begin() ; lIt != aNode->mChildrenMap.end() ; ++lIt )
 			{
 				lNode1 = lIt->second;
 				lIt2 = lIt;
 				lIt2++;
 
-				if( lNode1->mMode == defs::INCREMENTAL )
+				if ( lNode1->mMode == defs::INCREMENTAL )
 				{
-					uint32_t lBottom1( lNode1->mAddr );
-					uint32_t lTop1( lNode1->mAddr + (lNode1->mSize - 1) );
-				
-					for (  ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
+					uint32_t lBottom1 ( lNode1->mAddr );
+					uint32_t lTop1 ( lNode1->mAddr + ( lNode1->mSize - 1 ) );
+
+					for ( ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
 					{
 						lNode2 = lIt2->second;
-						if( lNode2->mMode == defs::INCREMENTAL )
+
+						if ( lNode2->mMode == defs::INCREMENTAL )
 						{
 							//Node1 and Node2 are both incremental
-							uint32_t lBottom2( lNode2->mAddr );
-							uint32_t lTop2( lNode2->mAddr + (lNode2->mSize - 1) );
-							
+							uint32_t lBottom2 ( lNode2->mAddr );
+							uint32_t lTop2 ( lNode2->mAddr + ( lNode2->mSize - 1 ) );
+
 							if ( ( ( lTop2 >= lBottom1 ) && ( lTop2 <= lTop1 ) ) || ( ( lTop1 >= lBottom2 ) && ( lTop1 <= lTop2 ) ) )
 							{
-								log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
-									" has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
-									"] which overlaps with branch " , Quote ( lNode2->mUid ) ,
-									" which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) ,
-									"]."
-								);
+								log ( Error() , "Branch " , Quote ( lIt->first ) ,
+									  " has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
+									  "] which overlaps with branch " , Quote ( lIt2->first ) ,
+									  " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) ,
+									  "]."
+									);
 								AddressSpaceOverlap().throwFrom ( ThisLocation() );
 							}
-							
 						}
 						else
 						{
 							//Node1 is incremental and Node2 is single address
-							uint32_t lAddr2( lNode2->mAddr );
-						
+							uint32_t lAddr2 ( lNode2->mAddr );
+
 							if ( ( lAddr2 >= lBottom1 ) && ( lAddr2 <= lTop1 ) )
 							{
-								log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
-									" has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
-									"] which overlaps with branch " , Quote ( lNode2->mUid ) ,
-									" which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) , "]."
-								);
+								log ( Error() , "Branch " , Quote ( lIt->first ) ,
+									  " has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
+									  "] which overlaps with branch " , Quote ( lIt2->first ) ,
+									  " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) , "]."
+									);
 								AddressSpaceOverlap().throwFrom ( ThisLocation() );
 							}
-	
 						}
 					}
 				}
-				else	
+				else
 				{
-					uint32_t lAddr1( lNode1->mAddr );
-					
-					for (  ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
+					uint32_t lAddr1 ( lNode1->mAddr );
+
+					for ( ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
 					{
 						lNode2 = lIt2->second;
-						if( lNode2->mMode == defs::INCREMENTAL )
+
+						if ( lNode2->mMode == defs::INCREMENTAL )
 						{
 							//Node1 is single address and Node2 is incremental
-							uint32_t lBottom2( lNode2->mAddr );
-							uint32_t lTop2( lNode2->mAddr + (lNode2->mSize - 1) );
-													
+							uint32_t lBottom2 ( lNode2->mAddr );
+							uint32_t lTop2 ( lNode2->mAddr + ( lNode2->mSize - 1 ) );
+
 							if ( ( lAddr1 >= lBottom2 ) && ( lAddr1 <= lTop2 ) )
 							{
-								log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
-									" has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) , 
-									"] which overlaps with branch " , Quote ( lNode2->mUid ) ,
-									" which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) , "]."
-								);
+								log ( Error() , "Branch " , Quote ( lIt->first ) ,
+									  " has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
+									  "] which overlaps with branch " , Quote ( lIt2->first ) ,
+									  " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) , "]."
+									);
 								AddressSpaceOverlap().throwFrom ( ThisLocation() );
 							}
-							
 						}
 						else
 						{
 							//Node1 and Node2 are both single addresses
-							uint32_t lAddr2( lNode2->mAddr );
+							uint32_t lAddr2 ( lNode2->mAddr );
 
 							if ( lAddr1 == lAddr2 )
 							{
 								if ( lNode1->mMask & lNode2->mMask )
 								{
-									log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
-										" has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
-										" and mask " , Integer ( lNode1->mMask , IntFmt<hex,fixed>() ) ,
-										" which overlaps with branch " , Quote ( lNode2->mUid ) ,
-										" which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
-										" and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
+									log ( Error() , "Branch " , Quote ( lIt->first ) ,
+										  " has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
+										  " and mask " , Integer ( lNode1->mMask , IntFmt<hex,fixed>() ) ,
+										  " which overlaps with branch " , Quote ( lIt2->first ) ,
+										  " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
+										  " and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
 										);
 									AddressSpaceOverlap().throwFrom ( ThisLocation() );
 								}
 							}
-							
 						}
-					}				
+					}
 				}
-				
 			}
-		
 		}
 		catch ( uhal::exception& aExc )
 		{
@@ -731,43 +754,8 @@ namespace uhal
 	}
 
 
-	
-	
 
 
-	// const Node* NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId )
-	// {
-	// std::string lClass;
-	// boost::shared_ptr< const Node > lNode;
-
-	// if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClass ) )
-	// {
-	// std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass );
-
-	// if ( lIt != mCreators.end() )
-	// {
-	// lNode = lIt->second->create ( aXmlNode , aPath , aRequireId );
-	// }
-	// else
-	// {
-	// std::stringstream lStr;
-
-	// for ( std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt2 = mCreators.begin() ; lIt2 != mCreators.end() ; ++lIt2 )
-	// {
-	// lStr << "\n > " << lIt2->first ;
-	// }
-
-	// log ( Warning() , "Node subclass " , Quote ( lClass ) , " does not exists in map of creators. Options are:" , lStr.str() , "\nWill create a plain base node for now but be warned." );
-	// lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aRequireId ) );
-	// }
-	// }
-	// else
-	// {
-	// lNode = boost::shared_ptr< const Node > ( new Node ( aXmlNode , aPath , aRequireId ) );
-	// }
-
-	// return lNode;
-	// }
 
 
 	NodeTreeBuilder::permissions_lut::permissions_lut()

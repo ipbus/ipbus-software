@@ -22,11 +22,6 @@
 
 #include "pugixml/pugixml.hpp"
 
-// forward declaration so that we can declare friends
-namespace uhal
-{
-	class Node;
-}
 
 
 namespace uhal
@@ -38,14 +33,8 @@ namespace uhal
 	class WriteAccessDenied: public uhal::_exception< WriteAccessDenied > {  };
 	//! Exception class to handle the case where a read was performed on a register which does not allow read access. Uses the base uhal::exception implementation of what()
 	class ReadAccessDenied: public uhal::_exception< ReadAccessDenied > {  };
-	//! Exception class to handle the case where creation of a node was attempted without it having a UID. Uses the base uhal::exception implementation of what()
-	class NodeMustHaveUID: public uhal::_exception< NodeMustHaveUID > {  };
 	//! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
 	class NoBranchFoundWithGivenUID: public uhal::_exception< NoBranchFoundWithGivenUID > {  };
-	//! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
-	class ChildHasAddressOverlap: public uhal::_exception< ChildHasAddressOverlap > {  };
-	//! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
-	class ChildHasAddressMaskOverlap: public uhal::_exception< ChildHasAddressMaskOverlap > {  };
 	//! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
 	class BulkTransferOnSingleRegister: public uhal::_exception< BulkTransferOnSingleRegister > {  };
 	//! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
@@ -59,7 +48,7 @@ namespace uhal
 			friend class HwInterface;
 			friend class NodeTreeBuilder;
 
-		private:
+		protected:
 			/**
 				Empty node
 			*/
@@ -307,16 +296,9 @@ namespace uhal
 
 		private:
 
-			// /**
-			// Propagate the partial addresses down through the hierarchical structure and make a record of all used addresses for collision detection
-			// @param aAddr the full address of the current branch which will be applied to the current children
-			// @param aTopLevelNode the top-level node which contains the hash-map of all known children, against which we will check the address for overlaps
-			// */
-			// void calculateHierarchicalAddresses ( const uint32_t& aAddr , const Node& aTopLevelNode );
-
 			//! The parent hardware interface of which this node is a child (or rather decendent)
 			HwInterface* mHw;
-			// std::string mFullId;
+
 			//! The Unique ID of this node
 			std::string mUid;
 
@@ -324,8 +306,6 @@ namespace uhal
 			uint32_t mPartialAddr;
 			//! The register address with which this node is associated
 			uint32_t mAddr;
-			// Mark whether the address is fully formed
-			//bool mAddrValid;
 
 			//! The mask to be applied if this node is a sub-field, rather than an entire register
 			uint32_t mMask;
