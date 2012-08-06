@@ -421,7 +421,14 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
 
 	void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
 	{
-		getTransportProtocol().setTimeoutPeriod ( boost::posix_time::milliseconds ( aTimeoutPeriod ) );
+		if ( aTimeoutPeriod == 0 )
+		{
+			getTransportProtocol().setTimeoutPeriod ( boost::posix_time::pos_infin );
+		}
+		else
+		{
+			getTransportProtocol().setTimeoutPeriod ( boost::posix_time::milliseconds ( aTimeoutPeriod ) );
+		}
 	}
 
 	uint32_t ClientInterface::getTimeoutPeriod()
