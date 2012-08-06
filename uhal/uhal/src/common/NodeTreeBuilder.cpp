@@ -186,6 +186,8 @@ namespace uhal
 				Node* lNode ( mTopLevelNodeParser ( lXmlNode ) );
 				mFileCallStack.pop_back( );
 				calculateHierarchicalAddresses ( lNode , 0x00000000 );
+				checkForAddressCollisions ( lNode );
+				
 				mNodes.insert ( std::make_pair ( lName , lNode ) );
 				aNodes.push_back ( lNode );
 				return;
@@ -609,6 +611,128 @@ namespace uhal
 	}
 
 
+	
+	void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode )
+	{
+		try
+		{
+			std::hash_map< std::string , Node* >::iterator lIt, lIt2;
+			Node *lNode1, *lNode2;
+			
+			for ( lIt = aNode->mChildrenMap.begin() ; lIt != aNode->mChildrenMap.end() ; ++lIt )
+			{
+				lNode1 = lIt->second;
+				lIt2 = lIt;
+				lIt2++;
+
+				if( lNode1->mMode == defs::INCREMENTAL )
+				{
+					uint32_t lBottom1( lNode1->mAddr );
+					uint32_t lTop1( lNode1->mAddr + (lNode1->mSize - 1) );
+				
+					for (  ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
+					{
+						lNode2 = lIt2->second;
+						if( lNode2->mMode == defs::INCREMENTAL )
+						{
+							//Node1 and Node2 are both incremental
+							uint32_t lBottom2( lNode2->mAddr );
+							uint32_t lTop2( lNode2->mAddr + (lNode2->mSize - 1) );
+							
+							if ( ( ( lTop2 >= lBottom1 ) && ( lTop2 <= lTop1 ) ) || ( ( lTop1 >= lBottom2 ) && ( lTop1 <= lTop2 ) ) )
+							{
+								log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
+									" has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
+									"] which overlaps with branch " , Quote ( lNode2->mUid ) ,
+									" which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) ,
+									"]."
+								);
+								AddressSpaceOverlap().throwFrom ( ThisLocation() );
+							}
+							
+						}
+						else
+						{
+							//Node1 is incremental and Node2 is single address
+							uint32_t lAddr2( lNode2->mAddr );
+						
+							if ( ( lAddr2 >= lBottom1 ) && ( lAddr2 <= lTop1 ) )
+							{
+								log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
+									" has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
+									"] which overlaps with branch " , Quote ( lNode2->mUid ) ,
+									" which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) , "]."
+								);
+								AddressSpaceOverlap().throwFrom ( ThisLocation() );
+							}
+	
+						}
+					}
+				}
+				else	
+				{
+					uint32_t lAddr1( lNode1->mAddr );
+					
+					for (  ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
+					{
+						lNode2 = lIt2->second;
+						if( lNode2->mMode == defs::INCREMENTAL )
+						{
+							//Node1 is single address and Node2 is incremental
+							uint32_t lBottom2( lNode2->mAddr );
+							uint32_t lTop2( lNode2->mAddr + (lNode2->mSize - 1) );
+													
+							if ( ( lAddr1 >= lBottom2 ) && ( lAddr1 <= lTop2 ) )
+							{
+								log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
+									" has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) , 
+									"] which overlaps with branch " , Quote ( lNode2->mUid ) ,
+									" which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) , "]."
+								);
+								AddressSpaceOverlap().throwFrom ( ThisLocation() );
+							}
+							
+						}
+						else
+						{
+							//Node1 and Node2 are both single addresses
+							uint32_t lAddr2( lNode2->mAddr );
+
+							if ( lAddr1 == lAddr2 )
+							{
+								if ( lNode1->mMask & lNode2->mMask )
+								{
+									log ( Error() , "Branch " , Quote ( lNode1->mUid ) ,
+										" has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
+										" and mask " , Integer ( lNode1->mMask , IntFmt<hex,fixed>() ) ,
+										" which overlaps with branch " , Quote ( lNode2->mUid ) ,
+										" which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
+										" and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
+										);
+									AddressSpaceOverlap().throwFrom ( ThisLocation() );
+								}
+							}
+							
+						}
+					}				
+				}
+				
+			}
+		
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}
+
+
+	
+	
 
 
 	// const Node* NodeTreeBuilder::create ( const pugi::xml_node& aXmlNode , const boost::filesystem::path& aPath , const bool& aRequireId )

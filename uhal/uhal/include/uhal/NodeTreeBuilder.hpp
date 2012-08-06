@@ -120,7 +120,9 @@ namespace uhal
 			*/
 			void calculateHierarchicalAddresses ( Node* aNode , const uint32_t& aAddr );
 
+			void checkForAddressCollisions ( Node* aNode );
 
+			
 			Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 			Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 			Node* moduleNodeCreator ( const pugi::xml_node& aXmlNode );

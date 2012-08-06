@@ -18,7 +18,7 @@ void single_write_read ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  boost::shared_ptr<ClientInterface> c = hw.getClient();
+  ClientInterface* c = &hw.getClient();
 
   uint32_t x = static_cast<uint32_t> ( rand() );
   uint32_t addr = hw.getNode ( "REG" ).getAddress();
@@ -41,7 +41,7 @@ void mem_write_read ( const std::string& connection, const std::string& id )
 
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  boost::shared_ptr<ClientInterface> c = hw.getClient();
+ ClientInterface* c = &hw.getClient();
 
   std::vector<uint32_t> xx;
 
@@ -76,7 +76,7 @@ void mem_rmw_bits ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  boost::shared_ptr<ClientInterface> c = hw.getClient();
+  ClientInterface* c = &hw.getClient();
 	
   uint32_t addr = hw.getNode ( "REG_UPPER_MASK" ).getAddress();
   uint32_t x1 = static_cast<uint32_t> ( rand() );
@@ -100,7 +100,7 @@ void mem_rmw_sum ( const std::string& connection, const std::string& id )
 	
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  boost::shared_ptr<ClientInterface> c = hw.getClient();
+  ClientInterface* c = &hw.getClient();
   
   uint32_t total = 0;
   std::vector<uint32_t> xx;
