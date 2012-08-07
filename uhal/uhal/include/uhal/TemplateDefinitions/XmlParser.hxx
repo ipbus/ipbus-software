@@ -65,7 +65,7 @@ namespace uhal
 		if ( mForbidden.find ( aStr ) != mForbidden.end() )
 		{
 			log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
-			throw 0;
+			ContradictoryParserRule().throwFrom ( ThisLocation() );
 		}
 
 		mRequired.insert ( aStr );
@@ -78,7 +78,7 @@ namespace uhal
 		if ( mRequired.find ( aStr ) != mRequired.end() )
 		{
 			log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
-			throw 0;
+			ContradictoryParserRule().throwFrom ( ThisLocation() );
 		}
 
 		mForbidden.insert ( aStr );
@@ -174,7 +174,7 @@ namespace uhal
 		else
 		{
 			log ( Error() , "No action specified!" );
-			throw 0;
+			NoActionSpecified().throwFrom ( ThisLocation() );
 		}
 	}
 
@@ -207,7 +207,7 @@ namespace uhal
 				if ( mNextHash == 0x0000000000000000 )
 				{
 					log ( Error() , "Too many attributes" );
-					throw 0;
+					TooManyAttributes().throwFrom ( ThisLocation() );
 				}
 
 				lRule.mRequiredHash |= mNextHash;
@@ -229,7 +229,7 @@ namespace uhal
 				if ( mNextHash == 0x0000000000000000 )
 				{
 					log ( Error() , "Too many attributes" );
-					throw 0;
+					TooManyAttributes().throwFrom ( ThisLocation() );
 				}
 
 				lRule.mForbiddenHash |= mNextHash;
@@ -269,7 +269,7 @@ namespace uhal
 			if ( lIt2 == mHashes.end() )
 			{
 				log ( Error() , "Parser failed because of unknown attribute ", Quote ( lAttr.name() ) );
-				throw 0;
+				UnknownAttribute().throwFrom ( ThisLocation() );
 			}
 
 			lHash |= lIt2->second;
@@ -324,7 +324,7 @@ namespace uhal
 			if ( !lMostStringent )
 			{
 				log ( Error() , "Ambiguity remains! Multiple rules passed " , Integer ( lCounter ) , " requirements." );
-				throw 0;
+				AmbiguousParserRules().throwFrom ( ThisLocation() );
 			}
 
 			log ( Warning() , "In ambiguous case, selected " , lMostStringent->description() );
@@ -341,7 +341,7 @@ namespace uhal
 			log ( Error() , Integer ( lFailedForbidden.size() ) , " rules failed because of included forbidden attributes" );
 		}
 
-		throw 0;
+		NoRulesPassed().throwFrom ( ThisLocation() );
 	}
 
 }

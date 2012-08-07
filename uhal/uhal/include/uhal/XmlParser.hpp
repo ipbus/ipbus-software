@@ -14,10 +14,24 @@
 #include "pugixml/pugixml.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/Utilities.hpp"
-
+#include "uhal/exception.hpp"
 
 namespace uhal
 {
+
+	//! Exception class to handle the case where an attribute is both required and forbidden. Uses the base uhal::exception implementation of what()
+	class ContradictoryParserRule: public uhal::_exception< ContradictoryParserRule > {  };
+	//! Exception class to handle the case where a callback is requested without it being specified. Uses the base uhal::exception implementation of what()
+	class NoActionSpecified: public uhal::_exception< NoActionSpecified > {  };
+	//! Exception class to handle the case where the parser is asked to handle more than 64 attributes. Uses the base uhal::exception implementation of what()
+	class TooManyAttributes: public uhal::_exception< TooManyAttributes > {  };
+	//! Exception class to handle the case where an unknown attribute is parsed. Uses the base uhal::exception implementation of what()
+	class UnknownAttribute: public uhal::_exception< UnknownAttribute > {  };
+	//! Exception class to handle the case where two or more equally strict rules are passed. Uses the base uhal::exception implementation of what()
+	class AmbiguousParserRules: public uhal::_exception< AmbiguousParserRules > {  };
+	//! Exception class to handle the case where no rules were parsed. Uses the base uhal::exception implementation of what()
+	class NoRulesPassed: public uhal::_exception< NoRulesPassed > {  };
+
 
 	template < typename R >
 	class Parser;
