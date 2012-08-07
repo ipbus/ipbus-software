@@ -181,9 +181,11 @@ namespace uhal
 
 	template < typename R >
 	Parser<R>::Parser() :
-		mNextHash ( 0x1 ),
+		mNextHash ( 0x0000000000000001 ),
 		mRuleCounter ( 0 )
-	{}
+	{
+		mHashes.clear();
+	}
 
 	template < typename R >
 	Parser<R>::~Parser()
@@ -248,7 +250,14 @@ namespace uhal
 
 			if ( lIt2 == mHashes.end() )
 			{
-				mHashes.insert ( std::make_pair ( *lIt , 0x0000000000000000 ) );
+				if ( mNextHash == 0x0000000000000000 )
+				{
+					log ( Error() , "Too many attributes" );
+					TooManyAttributes().throwFrom ( ThisLocation() );
+				}
+
+				mHashes.insert ( std::make_pair ( *lIt , mNextHash ) );
+				mNextHash <<= 1;
 			}
 		}
 

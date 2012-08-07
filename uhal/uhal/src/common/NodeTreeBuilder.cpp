@@ -245,6 +245,7 @@ namespace uhal
 			//setMask( aXmlNode , lNode );
 			setModeAndSize ( aXmlNode , lNode );
 			addChildren ( aXmlNode , lNode );
+			log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
 			return lNode;
 		}
 		catch ( uhal::exception& aExc )
@@ -290,6 +291,7 @@ namespace uhal
 			//setMask( aXmlNode , lNode );
 			setModeAndSize ( aXmlNode , lNode );
 			addChildren ( aXmlNode , lNode );
+			log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
 			return lNode;
 		}
 		catch ( uhal::exception& aExc )
@@ -317,6 +319,7 @@ namespace uhal
 			//setMask( aXmlNode , lNode );
 			//setModeAndSize( aXmlNode , lNode );
 			//addChildren( aXmlNode , lNode );
+			log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
 			return lNode;
 		}
 		catch ( uhal::exception& aExc )
@@ -342,6 +345,7 @@ namespace uhal
 			setMask ( aXmlNode , lNode );
 			//setModeAndSize( aXmlNode , lNode );
 			//addChildren( aXmlNode , lNode );
+			log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
 			return lNode;
 		}
 		catch ( uhal::exception& aExc )
@@ -389,7 +393,9 @@ namespace uhal
 		try
 		{
 			//Address is an optional attribute for hierarchical addressing
-			uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mAddressAttribute , aNode->mPartialAddr );
+			uint32_t lAddr ( 0 );
+			uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mAddressAttribute , lAddr );
+			aNode->mPartialAddr |= lAddr;
 		}
 		catch ( uhal::exception& aExc )
 		{
