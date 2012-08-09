@@ -153,12 +153,12 @@ namespace uhal
 			*/
 			void valid ( bool aValid );
 
-			/**
-				Return a std::deque containing all the IPbus headers returned during the transaction
-				@return a std::deque containing all the IPbus headers returned during the transaction
-				@note This is a deque, since a block transaction may be chunked into many smaller block transactions
-			*/
-			const std::deque<uint32_t>& returnedHeaders();
+			// /**
+				// Return a std::deque containing all the IPbus headers returned during the transaction
+				// @return a std::deque containing all the IPbus headers returned during the transaction
+				// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			// */
+			// const std::deque<uint32_t>& returnedHeaders();
 
 		protected:
 			//! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory
@@ -237,12 +237,12 @@ namespace uhal
 			*/
 			void mask ( const uint32_t& aMask );
 
-			/**
-				Return a std::deque containing all the IPbus headers returned during the transaction
-				@return a std::deque containing all the IPbus headers returned during the transaction
-				@note This is a deque, since a block transaction may be chunked into many smaller block transactions
-			*/
-			const std::deque<uint32_t>& returnedHeaders();
+			// /**
+				// Return a std::deque containing all the IPbus headers returned during the transaction
+				// @return a std::deque containing all the IPbus headers returned during the transaction
+				// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			// */
+			// const std::deque<uint32_t>& returnedHeaders();
 
 		private:
 			//! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory
@@ -377,12 +377,12 @@ namespace uhal
 						reverse_iterator rend();
 			*/
 
-			/**
-				Return a std::deque containing all the IPbus headers returned during the transaction
-				@return a std::deque containing all the IPbus headers returned during the transaction
-				@note This is a deque, since a block transaction may be chunked into many smaller block transactions
-			*/
-			const std::deque<uint32_t>& returnedHeaders();
+			// /**
+				// Return a std::deque containing all the IPbus headers returned during the transaction
+				// @return a std::deque containing all the IPbus headers returned during the transaction
+				// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			// */
+			// const std::deque<uint32_t>& returnedHeaders();
 
 		private:
 			//! A shared pointer to a _ValVector_ struct, so that every copy of this ValVector points to the same underlying memory

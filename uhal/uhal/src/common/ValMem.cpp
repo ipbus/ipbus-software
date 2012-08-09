@@ -104,29 +104,29 @@ ValHeader::ValHeader() try :
 	}
 
 
-	const std::deque<uint32_t>& ValHeader::returnedHeaders()
-	{
-		try
-		{
-			if ( mMembers->valid )
-			{
-				return mMembers->IPbusHeaders ;
-			}
-			else
-			{
-				log ( Error() , "Access attempted on non-validated memory" );
-				NonValidatedMemory().throwFrom ( ThisLocation() );
-			}
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// const std::deque<uint32_t>& ValHeader::returnedHeaders()
+	// {
+		// try
+		// {
+			// if ( mMembers->valid )
+			// {
+				// return mMembers->IPbusHeaders ;
+			// }
+			// else
+			// {
+				// log ( Error() , "Access attempted on non-validated memory" );
+				// NonValidatedMemory().throwFrom ( ThisLocation() );
+			// }
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
 
 
@@ -350,30 +350,30 @@ ValWord< T >::ValWord() try :
 	}
 
 
-	template< typename T >
-	const std::deque<uint32_t>& ValWord< T >::returnedHeaders()
-	{
-		try
-		{
-			if ( mMembers->valid )
-			{
-				return mMembers->IPbusHeaders ;
-			}
-			else
-			{
-				log ( Error() , "Access attempted on non-validated memory" );
-				NonValidatedMemory().throwFrom ( ThisLocation() );
-			}
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// template< typename T >
+	// const std::deque<uint32_t>& ValWord< T >::returnedHeaders()
+	// {
+		// try
+		// {
+			// if ( mMembers->valid )
+			// {
+				// return mMembers->IPbusHeaders ;
+			// }
+			// else
+			// {
+				// log ( Error() , "Access attempted on non-validated memory" );
+				// NonValidatedMemory().throwFrom ( ThisLocation() );
+			// }
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
 
 
@@ -810,30 +810,30 @@ ValVector< T >::ValVector() try :
 	*/
 
 
-	template< typename T >
-	const std::deque<uint32_t>& ValVector< T >::returnedHeaders()
-	{
-		try
-		{
-			if ( mMembers->valid )
-			{
-				return mMembers->IPbusHeaders ;
-			}
-			else
-			{
-				log ( Error() , "Access attempted on non-validated memory" );
-				NonValidatedMemory().throwFrom ( ThisLocation() );
-			}
-		}
-		catch ( uhal::exception& aExc )
-		{
-			aExc.rethrowFrom ( ThisLocation() );
-		}
-		catch ( const std::exception& aExc )
-		{
-			StdException ( aExc ).throwFrom ( ThisLocation() );
-		}
-	}
+	// template< typename T >
+	// const std::deque<uint32_t>& ValVector< T >::returnedHeaders()
+	// {
+		// try
+		// {
+			// if ( mMembers->valid )
+			// {
+				// return mMembers->IPbusHeaders ;
+			// }
+			// else
+			// {
+				// log ( Error() , "Access attempted on non-validated memory" );
+				// NonValidatedMemory().throwFrom ( ThisLocation() );
+			// }
+		// }
+		// catch ( uhal::exception& aExc )
+		// {
+			// aExc.rethrowFrom ( ThisLocation() );
+		// }
+		// catch ( const std::exception& aExc )
+		// {
+			// StdException ( aExc ).throwFrom ( ThisLocation() );
+		// }
+	// }
 
 
 
