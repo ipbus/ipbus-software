@@ -154,9 +154,9 @@ namespace uhal
 			void valid ( bool aValid );
 
 			// /**
-				// Return a std::deque containing all the IPbus headers returned during the transaction
-				// @return a std::deque containing all the IPbus headers returned during the transaction
-				// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			// Return a std::deque containing all the IPbus headers returned during the transaction
+			// @return a std::deque containing all the IPbus headers returned during the transaction
+			// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
 			// */
 			// const std::deque<uint32_t>& returnedHeaders();
 
@@ -238,9 +238,9 @@ namespace uhal
 			void mask ( const uint32_t& aMask );
 
 			// /**
-				// Return a std::deque containing all the IPbus headers returned during the transaction
-				// @return a std::deque containing all the IPbus headers returned during the transaction
-				// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			// Return a std::deque containing all the IPbus headers returned during the transaction
+			// @return a std::deque containing all the IPbus headers returned during the transaction
+			// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
 			// */
 			// const std::deque<uint32_t>& returnedHeaders();
 
@@ -378,9 +378,9 @@ namespace uhal
 			*/
 
 			// /**
-				// Return a std::deque containing all the IPbus headers returned during the transaction
-				// @return a std::deque containing all the IPbus headers returned during the transaction
-				// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
+			// Return a std::deque containing all the IPbus headers returned during the transaction
+			// @return a std::deque containing all the IPbus headers returned during the transaction
+			// @note This is a deque, since a block transaction may be chunked into many smaller block transactions
 			// */
 			// const std::deque<uint32_t>& returnedHeaders();
 

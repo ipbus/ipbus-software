@@ -26,6 +26,7 @@ namespace uhal
 
 	NodeTreeBuilder::NodeTreeBuilder ()
 	{
+		//------------------------------------------------------------------------------------------------------------------------
 		Rule<Node*> lPlainNode;
 		lPlainNode.forbid ( NodeTreeBuilder::mClassAttribute )
 		.forbid ( NodeTreeBuilder::mModuleAttribute )
@@ -36,6 +37,7 @@ namespace uhal
 		.optional ( NodeTreeBuilder::mModeAttribute )
 		.optional ( NodeTreeBuilder::mSizeAttribute )
 		.optional ( NodeTreeBuilder::mTagsAttribute );
+		//------------------------------------------------------------------------------------------------------------------------
 		Rule<Node*> lClass;
 		lClass.require ( NodeTreeBuilder::mClassAttribute )
 		.forbid ( NodeTreeBuilder::mMaskAttribute )
@@ -46,20 +48,25 @@ namespace uhal
 		.optional ( NodeTreeBuilder::mSizeAttribute )
 		.optional ( NodeTreeBuilder::mPermissionsAttribute )
 		.optional ( NodeTreeBuilder::mTagsAttribute );
-		mTopLevelNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , _1 ) );
-		mTopLevelNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , false , _1 ) );
-		lPlainNode.require ( NodeTreeBuilder::mIdAttribute );
-		lClass.require ( NodeTreeBuilder::mIdAttribute );
+		//------------------------------------------------------------------------------------------------------------------------
 		Rule<Node*> lBitMask;
-		lBitMask.require ( NodeTreeBuilder::mIdAttribute )
-		.require ( NodeTreeBuilder::mMaskAttribute )
+		lBitMask.require ( NodeTreeBuilder::mMaskAttribute )
 		.forbid ( NodeTreeBuilder::mClassAttribute )
 		.forbid ( NodeTreeBuilder::mModuleAttribute )
-		.forbid ( NodeTreeBuilder::mAddressAttribute )
+		.optional ( NodeTreeBuilder::mAddressAttribute )		// .forbid ( NodeTreeBuilder::mAddressAttribute ) //see https://svnweb.cern.ch/trac/cactus/ticket/92
 		.forbid ( NodeTreeBuilder::mModeAttribute )
 		.forbid ( NodeTreeBuilder::mSizeAttribute )
 		.optional ( NodeTreeBuilder::mPermissionsAttribute )
 		.optional ( NodeTreeBuilder::mTagsAttribute );
+		//------------------------------------------------------------------------------------------------------------------------
+		mTopLevelNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , _1 ) );
+		mTopLevelNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , false , _1 ) );
+		mTopLevelNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , false , _1 ) );
+		//------------------------------------------------------------------------------------------------------------------------
+		lPlainNode.require ( NodeTreeBuilder::mIdAttribute );
+		lClass.require ( NodeTreeBuilder::mIdAttribute );
+		lBitMask.require ( NodeTreeBuilder::mIdAttribute );
+		//------------------------------------------------------------------------------------------------------------------------
 		Rule<Node*> lModule;
 		lModule.require ( NodeTreeBuilder::mIdAttribute )
 		.require ( NodeTreeBuilder::mModuleAttribute )
@@ -70,10 +77,12 @@ namespace uhal
 		.forbid ( NodeTreeBuilder::mPermissionsAttribute )
 		.optional ( NodeTreeBuilder::mAddressAttribute )
 		.optional ( NodeTreeBuilder::mTagsAttribute );
+		//------------------------------------------------------------------------------------------------------------------------
 		mNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , true , _1 ) );
 		mNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , true , _1 ) );
-		mNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , _1 ) );
+		mNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , true , _1 ) );
 		mNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , _1 ) );
+		//------------------------------------------------------------------------------------------------------------------------
 	}
 
 	NodeTreeBuilder::~NodeTreeBuilder () {}
@@ -333,13 +342,19 @@ namespace uhal
 	}
 
 
-	Node* NodeTreeBuilder::bitmaskNodeCreator ( const pugi::xml_node& aXmlNode )
+	Node* NodeTreeBuilder::bitmaskNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
 	{
 		try
 		{
+			if ( aXmlNode.child ( "node" ) )
+			{
+				log ( Error() , "Bit-masked nodes are not allowed to have child nodes" );
+				MaskedNodeCannotHaveChild().throwFrom ( ThisLocation() );
+			}
+
 			Node* lNode ( new Node() );
-			setUid ( true , aXmlNode , lNode );
-			// setAddr( aXmlNode , lNode );
+			setUid ( aRequireId , aXmlNode , lNode );
+			setAddr ( aXmlNode , lNode ); //was commented out, see https://svnweb.cern.ch/trac/cactus/ticket/92
 			setTags ( aXmlNode , lNode );
 			setPermissions ( aXmlNode , lNode );
 			setMask ( aXmlNode , lNode );

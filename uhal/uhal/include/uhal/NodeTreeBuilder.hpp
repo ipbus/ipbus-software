@@ -45,6 +45,10 @@ namespace uhal
 	class AddressSpaceOverlap: public uhal::_exception< AddressSpaceOverlap > {  };
 	//! Exception class to handle the case when someone tries to give a block access node a child. Uses the base uhal::exception implementation of what()
 	class BlockAccessNodeCannotHaveChild: public uhal::_exception< BlockAccessNodeCannotHaveChild > {  };
+
+	//! Exception class to handle the case when someone tries to give a bit-masked node a child. Uses the base uhal::exception implementation of what()
+	class MaskedNodeCannotHaveChild: public uhal::_exception< MaskedNodeCannotHaveChild > {  };
+
 	// //! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
 	// class ChildHasAddressOverlap: public uhal::_exception< ChildHasAddressOverlap > {  };
 	// //! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
@@ -114,7 +118,7 @@ namespace uhal
 			Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 			Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 			Node* moduleNodeCreator ( const pugi::xml_node& aXmlNode );
-			Node* bitmaskNodeCreator ( const pugi::xml_node& aXmlNode );
+			Node* bitmaskNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 
 			void setUid ( const bool& aRequireId , const pugi::xml_node& aXmlNode , Node* aNode );
 			void setAddr ( const pugi::xml_node& aXmlNode , Node* aNode );
