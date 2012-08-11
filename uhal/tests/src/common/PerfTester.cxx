@@ -208,7 +208,7 @@ void uhal::tests::PerfTester::buildClients()
 {
 	if ( m_verbose )
 	{
-		setLogLevelTo ( Info() );
+		setLogLevelTo ( Debug() );
 		cout << "Building device clients..." << endl;
 	}
 	else
