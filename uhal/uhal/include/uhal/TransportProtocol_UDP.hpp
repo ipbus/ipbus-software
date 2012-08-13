@@ -95,6 +95,8 @@ namespace uhal
 
 					const boost::posix_time::time_duration& mTimeoutPeriod;
 
+					std::vector<uint8_t> mReplyMemory;
+
 			};
 
 			//! Make the dispatch worker a friend so that it can access our private members

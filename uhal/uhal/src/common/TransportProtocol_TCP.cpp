@@ -24,7 +24,8 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 										  )
 										),
 							  mDeadlineTimer ( *mIOservice ),
-							  mTimeoutPeriod ( aTimeoutPeriod )
+							  mTimeoutPeriod ( aTimeoutPeriod ),
+							  mReplyMemory ( 65536 , 0x00000000 ) 
 	{
 		mDeadlineTimer.async_wait ( boost::bind ( &TcpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
 	}
@@ -141,13 +142,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 			// Read back replies
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-			std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
-			lAsioReplyBuffer.reserve ( lReplyBuffers.size() );
-
-			for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-			{
-				lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
-			}
+			lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &(mReplyMemory.at(0)) , aBuffers->replyCounter() ) );
 
 			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
 			mDeadlineTimer.expires_from_now ( mTimeoutPeriod );
@@ -166,6 +161,29 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 				mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
 				ErrorInTcpCallback().throwFrom ( ThisLocation() );
 			}
+
+			std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
+			uint8_t* lReplyBuf( &(mReplyMemory.at(0)) );
+
+			for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+			{
+				memcpy ( lIt->first, lReplyBuf, lIt->second );
+				lReplyBuf += lIt->second;
+			}
+
+/*
+			uint32_t lCounter(0);
+			for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
+			{
+				uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
+				uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
+
+				for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
+				{
+					log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );			
+				}
+			}
+*/
 
 			if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{

@@ -24,7 +24,8 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 																							  )
 										),
 							  mDeadlineTimer ( *mIOservice ),
-							  mTimeoutPeriod ( aTimeoutPeriod )
+							  mTimeoutPeriod ( aTimeoutPeriod ),
+							  mReplyMemory ( 65536 , 0x00000000 ) 
 	{
 		mDeadlineTimer.async_wait ( boost::bind ( &UdpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
 	}
@@ -133,28 +134,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 			// Read back replies
 			// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-			std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
-			lAsioReplyBuffer.reserve ( lReplyBuffers.size() );
-
-			for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-			{
-				lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
-			}
-
-
-/*
-			std::vector< std::vector<uint32_t> > lTemp( aBuffers->replyCounter()>>2 , std::vector<uint32_t>( 1 , 0x0 ) );
-			
-			for ( std::vector< std::vector<uint32_t> >::iterator lIt = lTemp.begin() ; lIt != lTemp.end() ; ++lIt )
-			{
-				lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &(lIt->at(0)) , lIt->size()<<2 ) );
-			}
-*/
-
-/*
-			std::vector<uint32_t> lTemp( aBuffers->replyCounter()>>2 , 0x0 );
-			lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &(lTemp.at(0)) , lTemp.size()<<2 ) );
-*/
+			lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &(mReplyMemory.at(0)) , aBuffers->replyCounter() ) );
 
 			log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
 			boost::asio::ip::udp::endpoint lEndpoint;
@@ -175,7 +155,16 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 				ErrorInUdpCallback().throwFrom ( ThisLocation() );
 			}
 
+			std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
+			uint8_t* lReplyBuf( &(mReplyMemory.at(0)) );
 
+			for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+			{
+				memcpy ( lIt->first, lReplyBuf, lIt->second );
+				lReplyBuf += lIt->second;
+			}
+
+/*
 			uint32_t lCounter(0);
 			for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
 			{
@@ -187,7 +176,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 					log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );			
 				}
 			}
-
+*/
 
 			if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
 			{
