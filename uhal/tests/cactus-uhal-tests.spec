@@ -30,7 +30,7 @@ cp -rp %{sources_dir}/* $RPM_BUILD_ROOT%{_prefix}/.
 
 #Change access rights
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
-chmod -R 555 $RPM_BUILD_ROOT%{_prefix}/bin
+chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/include
 
 #return to working directory
