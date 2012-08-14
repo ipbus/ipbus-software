@@ -103,6 +103,8 @@ def report_links(result):
         for (c, t, d, section) in incidences:
             if t == LIMIT:
                 html += "<a name='incidence_" + s + "'><h5>" + s + "</h5></a>"
+            elif t == TEST_PASSED:
+                pass
             else:
                 html += "<a style='text-decoration: none' href='%s'>" % os.path.join(CONF.WEB_URL, "nightly.log.html#log_" + str(c))
                 html += "<pre style='" + style(t) + "'> " + d + "</pre>"
