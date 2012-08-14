@@ -47,7 +47,7 @@ UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
                   "pkill -f \"DummyHardwareUdp.exe\" &> /dev/null",
                   "pkill -f \"cactus.*erlang\" &> /dev/null",
                   "pkill -f \"cactus.*controlhub\" &> /dev/null",
-                  "rm -rf %s" % BUILD_HOME,
+                  "sudo rm -rf %s" % BUILD_HOME,
                   "mkdir -p %s" % BUILD_HOME,
                   "sudo yum -y groupremove cactus",
                   "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null",
@@ -60,7 +60,7 @@ DEPENDENCIES_CMDS = ["sudo yum -y install bzip2-devel ncurses-devel python-devel
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
 
-CHECKOUT_CMDS = ["rm -rf %s" % BUILD_HOME,
+CHECKOUT_CMDS = ["sudo rm -rf %s" % BUILD_HOME,
                  "mkdir -p %s" % BUILD_HOME,
                  ";".join(CHECKOUT)]
 
