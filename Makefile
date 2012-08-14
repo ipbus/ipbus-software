@@ -6,7 +6,6 @@ PACKAGES = \
 	uhal/grammars \
 	uhal/uhal \
 	uhal/tests \
-	pycohal \
 	controlhub
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
