@@ -191,7 +191,7 @@ namespace uhal
 				Node* lNode ( mTopLevelNodeParser ( lXmlNode ) );
 				mFileCallStack.pop_back( );
 				calculateHierarchicalAddresses ( lNode , 0x00000000 );
-				checkForAddressCollisions ( lNode );
+				//checkForAddressCollisions ( lNode );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
 				mNodes.insert ( std::make_pair ( lName , lNode ) );
 				aNodes.push_back ( lNode );
 				return;
