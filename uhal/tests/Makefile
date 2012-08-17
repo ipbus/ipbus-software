@@ -28,6 +28,7 @@ EXECUTABLE_SOURCES = \
 		src/common/test_dummy_single.cxx \
 		src/common/test_dummy_masking.cxx \
 		src/common/test_dummy_check_permissions.cxx \
+		src/common/test_dummy_docu_examples.cxx \
 		src/common/test_dummy_block.cxx \
 		src/common/test_dummy_hierarchy.cxx \
 		src/common/test_dummy_multithreaded.cxx \

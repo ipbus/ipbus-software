@@ -2,16 +2,23 @@
 
 <connections>
 
-<!-- DUMMY UDP -->
-<connection id="dummy.udp" uri="ipbusudp-1.3://localhost:50001"	address_table="file://dummy_address.xml" />
-
-<!-- DUMMY UDP with ASCII Address table-->
-<connection id="dummy.udp.txt" uri="ipbusudp-1.3://localhost:50001"	address_table="file://dummy_address.txt" />
-
-<!-- DUMMY TCP -->
-<connection id="dummy.tcp" uri="ipbustcp-1.3://localhost:50002"	address_table="file://dummy_address.xml" />
+  <!-- DUMMY UDP -->
+  <connection id="dummy.udp" uri="ipbusudp-1.3://localhost:50001"	address_table="file://dummy_address.xml" />
+  <connection id="dummy.docu.udp" uri="ipbusudp-1.3://localhost:50001" address_table="file://docu_examples_address.xml" />
 
 
-<!-- DUMMY ControlHub to DUMMY UDP -->
-<connection id="dummy.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"	address_table="file://dummy_address.xml" />
+  <!-- DUMMY UDP with ASCII Address table-->
+  <connection id="dummy.udp.txt" uri="ipbusudp-1.3://localhost:50001"	address_table="file://dummy_address.txt" />
+
+
+  <!-- DUMMY TCP -->
+  <connection id="dummy.tcp" uri="ipbustcp-1.3://localhost:50002"	address_table="file://dummy_address.xml" />
+  <connection id="dummy.docu.tcp" uri="ipbustcp-1.3://localhost:50002" address_table="file://docu_examples_address.xml" />
+
+
+  <!-- DUMMY ControlHub to DUMMY UDP -->
+  <connection id="dummy.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"	address_table="file://dummy_address.xml" />
+  <connection id="dummy.docu.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"  address_table="file://docu_examples_address.xml" />
+
 </connections>
+
