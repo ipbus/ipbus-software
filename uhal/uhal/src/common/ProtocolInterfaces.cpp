@@ -23,7 +23,7 @@ Buffers::Buffers ( const uint32_t& aMaxSendSize ) try :
 	{
 		if ( mSendBuffer )
 		{
-			delete mSendBuffer;
+			delete[] mSendBuffer;
 			mSendBuffer = NULL;
 		}
 	}
