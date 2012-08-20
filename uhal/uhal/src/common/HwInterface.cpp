@@ -20,6 +20,21 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 		StdException ( aExc ).throwFrom ( ThisLocation() );
 	}
 
+HwInterface::HwInterface ( const HwInterface& otherHw ) try :
+		mClientInterface ( otherHw.mClientInterface ),
+						 mNode( otherHw.mNode->clone() )
+	{
+    claimNode ( *mNode );
+  }
+	catch ( uhal::exception& aExc )
+	{
+     aExc.rethrowFrom ( ThisLocation() );
+  }
+  catch ( const std::exception& aExc )
+  {
+    StdException ( aExc ).throwFrom ( ThisLocation() );
+  } 
+
 
 	HwInterface::~HwInterface()
 	{}
