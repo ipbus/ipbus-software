@@ -32,8 +32,8 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_LOG_INCLUDE_PREFIX}
 
 
-CPP_FLAGS = -O3 -Wall -fPIC
-LINK_FLAGS = -shared -fPIC -Wall -O3
+CPP_FLAGS = -g -O3 -Wall -fPIC
+LINK_FLAGS = -g -shared -fPIC -Wall -O3
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
