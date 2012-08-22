@@ -7,7 +7,7 @@ namespace uhal
 
 HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) try :
 		mClientInterface ( aClientInterface ),
-						 mNode ( aNode )
+			mNode ( aNode )
 	{
 		claimNode ( *mNode );
 	}
@@ -22,23 +22,21 @@ HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInte
 
 HwInterface::HwInterface ( const HwInterface& otherHw ) try :
 		mClientInterface ( otherHw.mClientInterface ),
-						 mNode( otherHw.mNode->clone() )
+			mNode( otherHw.mNode->clone() )
 	{
-    claimNode ( *mNode );
-  }
+		claimNode ( *mNode );
+	}
 	catch ( uhal::exception& aExc )
 	{
-     aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  } 
-
+		aExc.rethrowFrom ( ThisLocation() );
+	}
+	catch ( const std::exception& aExc )
+	{
+		StdException ( aExc ).throwFrom ( ThisLocation() );
+	} 
 
 	HwInterface::~HwInterface()
 	{}
-
 
 	void HwInterface::claimNode ( Node& aNode )
 	{

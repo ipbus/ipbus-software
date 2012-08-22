@@ -26,7 +26,10 @@ namespace uhal
 			*/
 			HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode );
 
-      HwInterface (const HwInterface& hwInterface);
+			/**
+				Copy Constrctor
+			*/
+			HwInterface (const HwInterface& hwInterface);
 
 			/**
 				Destructor
