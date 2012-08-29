@@ -6,9 +6,9 @@
 namespace uhal
 {
 
-	_Quote< const char* > Quote ( const char* aStr )
-	{
-		return _Quote< const char* > ( aStr );
-	}
+  _Quote< const char* > Quote ( const char* aStr )
+  {
+    return _Quote< const char* > ( aStr );
+  }
 
 }

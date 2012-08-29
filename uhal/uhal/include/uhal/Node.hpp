@@ -26,318 +26,318 @@
 
 namespace uhal
 {
-	class HwInterface;
-	class NodeTreeBuilder;
+  class HwInterface;
+  class NodeTreeBuilder;
 
-	//! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
-	class WriteAccessDenied: public uhal::_exception< WriteAccessDenied > {  };
-	//! Exception class to handle the case where a read was performed on a register which does not allow read access. Uses the base uhal::exception implementation of what()
-	class ReadAccessDenied: public uhal::_exception< ReadAccessDenied > {  };
-	//! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
-	class NoBranchFoundWithGivenUID: public uhal::_exception< NoBranchFoundWithGivenUID > {  };
-	//! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
-	class BulkTransferOnSingleRegister: public uhal::_exception< BulkTransferOnSingleRegister > {  };
-	//! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
-	class BulkTransferRequestedTooLarge: public uhal::_exception< BulkTransferRequestedTooLarge > {  };
-
-
-
-	//! A heirarchical node for navigating heirarchical firmwares
-	class Node
-	{
-			friend class HwInterface;
-			friend class NodeTreeBuilder;
-
-		protected:
-			/**
-				Empty node
-			*/
-			Node ( );
-
-			/**
-				Copy constructor
-				@param aNode a node to copy.
-			*/
-			Node ( const Node& aNode );
-
-			/**
-				Assignment operator
-				@param aNode a Node to copy
-				@return reference to this object for chained assignment
-			*/
-			virtual Node& operator= ( const Node& aNode );
-
-			/**
-				Function to produce a new copy of the current Node
-				@return a new copy of the current Node
-			*/
-			virtual Node* clone() const;
-
-		public:
-			/**
-				Destructor
-			*/
-			virtual ~Node();
-
-			/**
-				A function to determine whether two Nodes are identical
-				@param aNode a Node to compare
-				@return whether two Nodes are identical
-			*/
-			bool operator == ( const Node& aNode );
-
-
-			/**
-				Retrieve the Node given by a full-stop delimeted name path relative, to the current node
-				@param aId a full-stop delimeted name path to a node, relative to the current node
-				@return the Node given by the identifier
-			*/
-			Node& getNode ( const std::string& aId );
-
-
-			/**
-				Retrieve the Node given by a full-stop delimeted name path relative, to the current node and cast it to a particular node type
-				@param aId a full-stop delimeted name path to a node, relative to the current node
-				@return the Node given by the identifier
-			*/
-			template< typename T>
-			T& getNode ( const std::string& aId );
-
-
-			/**
-				Return all node IDs known to this HwInterface
-				@return all node IDs known to this HwInterface
-			*/
-			std::vector<std::string> getNodes();
-
-
-			/**
-				Return all node IDs known to this connection manager which match a (boost) regular expression
-				@param aRegex a string expression which is converted to a (boost) regular expression against which the node IDs are tested
-				@return all node IDs known to this connection manager
-			*/
-			std::vector<std::string> getNodes ( const std::string& aRegex );
-
-
-			/**
-				Return the unique ID of the current node
-				@return the unique ID of the current node
-			*/
-			const std::string& getId() const;
-
-			/**
-				Return the register address with which this node is associated
-				@return the register address with which this node is associated
-			*/
-			const uint32_t& getAddress() const;
-
-			/**
-				Return the mask to be applied if this node is a sub-field, rather than an entire register
-				@return the mask to be applied if this node is a sub-field, rather than an entire register
-			*/
-			const uint32_t& getMask() const;
-
-			/**
-				Return whether the node represents a single register, a block of registers or a block-read/write port
-				@return whether the node represents a single register, a block of registers or a block-read/write port
-			*/
-			const defs::BlockReadWriteMode& getMode() const;
-
-			/**
-				Return the maximum size available to a block read/write
-				@return the maximum size available to a block read/write
-			*/
-			const uint32_t& getSize() const;
-
-			/**
-				Return the read/write access permissions of this node
-				@return the read/write access permissions of this node
-			*/
-			const defs::NodePermission& getPermission() const;
-
-			/**
-				Return the optional tags string which the user can specify for the current node
-				@return the optional tags string which the user can specify for the current node
-			*/
-			const std::string& getTags() const;
-
-			/**
-				Return the optional description string which the user can specify for the current node
-				@return the optional description string which the user can specify for the current node
-			*/
-			const std::string& getDescription() const;
-
-			
-			/**
-				A streaming helper function to create pretty, indented tree diagrams
-				@param aStream a stream to write to
-				@param aIndent size of the indentation
-			*/
-			void stream ( std::ostream& aStream , std::size_t aIndent = 0 ) const;
-
-
-			/**
-				Write a single, unmasked word to a register
-				@param aValue the value to write to the register
-			*/
-			ValHeader write ( const uint32_t& aValue );
-
-			/**
-				Write a block of data to a block of registers or a block-write port
-				@param aValues the values to write to the registers or a block-write port
-			*/
-			ValHeader writeBlock ( const std::vector< uint32_t >& aValues );
-
-			/**
-				DEPRICATED! Write a block of data to a block of registers or a block-write port
-				@param aValues the values to write to the registers or a block-write port
-				@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
-				@warning DEPRICATED and will be removed in the next release!
-			*/
-			ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
-			{
-				log ( Error() , "THIS METHOD IS DEPRECATED! "
-					  "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-					  "AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
-					  "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-					  "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-				defs::BlockReadWriteMode lMode ( mMode );
-				mMode = aMode;
-				ValHeader lReply ( writeBlock ( aValues ) );
-				mMode = lMode;
-				return lReply;
-			}
-
-			/**
-				Read a single, unmasked, unsigned word
-				@return a Validated Memory which wraps the location to which the reply data is to be written
-			*/
-			ValWord< uint32_t > read ( );
-
-			/**
-				Read a block of unsigned data from a block of registers or a block-read port
-				@param aSize the number of words to read
-				@return a Validated Memory which wraps the location to which the reply data is to be written
-			*/
-			ValVector< uint32_t > readBlock ( const uint32_t& aSize );
-
-			/**
-				DEPRICATED! Read a block of unsigned data from a block of registers or a block-read port
-				@param aSize the number of words to read
-				@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-				@return a Validated Memory which wraps the location to which the reply data is to be written
-				@warning DEPRICATED and will be removed in the next release!
-			*/
-			ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
-			{
-				log ( Error() , "THIS METHOD IS DEPRECATED! "
-					  "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-					  "AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "
-					  "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-					  "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-				defs::BlockReadWriteMode lMode ( mMode );
-				mMode = aMode;
-				ValVector< uint32_t > lRet ( readBlock ( aSize ) );
-				mMode = lMode;
-				return lRet;
-			}
-
-			// /**
-			// Read a single, unmasked word and interpret it as being signed
-			// @return a Validated Memory which wraps the location to which the reply data is to be written
-			// */
-			// ValWord< int32_t > readSigned ( );
-
-			// /**
-			// Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-			// @param aSize the number of words to read
-			// @return a Validated Memory which wraps the location to which the reply data is to be written
-			// */
-			// ValVector< int32_t > readBlockSigned ( const uint32_t& aSize );
-
-
-			// /**
-			// DEPRICATED! Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-			// @param aSize the number of words to read
-			// @return a Validated Memory which wraps the location to which the reply data is to be written
-			// @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-			// @warning DEPRICATED and will be removed in the next release!
-			// */
-			// ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
-			// {
-			// log ( Error() , "THIS METHOD IS DEPRECATED! "
-			// "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-			// "AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
-			// "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-			// "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-			// defs::BlockReadWriteMode lMode ( mMode );
-			// mMode = aMode;
-			// ValVector< int32_t > lRet ( readBlockSigned ( aSize ) );
-			// mMode = lMode;
-			// return lRet;
-			// }
-
-
-			// /**
-			// Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
-			// @param aANDterm the AND-term to apply to existing value in the target register
-			// @param aORterm the OR-term to apply to existing value in the target register
-			// @return a Validated Memory which wraps the location to which the reply data is to be written
-			// */
-			// ValWord< uint32_t > rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm );
-
-			// /**
-			// Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
-			// @param aAddend the addend to add to the existing value in the target register
-			// @return a Validated Memory which wraps the location to which the reply data is to be written
-			// */
-			// ValWord< uint32_t > rmw_sum ( const int32_t& aAddend );
-
-
-			/**
-				Get the underlying IPbus client
-				@return the IPbus client that will be used to issue a dispatch
-			*/
-			ClientInterface& getClient();
-
-
-		private:
-
-			//! The parent hardware interface of which this node is a child (or rather decendent)
-			HwInterface* mHw;
-
-			//! The Unique ID of this node
-			std::string mUid;
-
-			//! The register address with which this node is associated
-			uint32_t mPartialAddr;
-			//! The register address with which this node is associated
-			uint32_t mAddr;
-
-			//! The mask to be applied if this node is a sub-field, rather than an entire register
-			uint32_t mMask;
-			//! The read/write access permissions of this node
-			defs::NodePermission mPermission;
-			//! Whether the node represents a single register, a block of registers or a block-read/write port
-			defs::BlockReadWriteMode mMode;
-			//! The maximum size available to a block read/write
-			uint32_t mSize;
-
-			//! Optional string which the user can specify
-			std::string mTags;
-			
-			//! Optional string which the user can specify
-			std::string mDescription;			
-
-			//! The direct children of the node
-			std::deque< Node* > mChildren;
-
-			//! Helper to assist look-up of a particular child node, given a name
-			std::hash_map< std::string , Node* > mChildrenMap;
+  //! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
+  class WriteAccessDenied: public uhal::_exception< WriteAccessDenied > {  };
+  //! Exception class to handle the case where a read was performed on a register which does not allow read access. Uses the base uhal::exception implementation of what()
+  class ReadAccessDenied: public uhal::_exception< ReadAccessDenied > {  };
+  //! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
+  class NoBranchFoundWithGivenUID: public uhal::_exception< NoBranchFoundWithGivenUID > {  };
+  //! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
+  class BulkTransferOnSingleRegister: public uhal::_exception< BulkTransferOnSingleRegister > {  };
+  //! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
+  class BulkTransferRequestedTooLarge: public uhal::_exception< BulkTransferRequestedTooLarge > {  };
 
 
 
-	};
+  //! A heirarchical node for navigating heirarchical firmwares
+  class Node
+  {
+      friend class HwInterface;
+      friend class NodeTreeBuilder;
+
+    protected:
+      /**
+      	Empty node
+      */
+      Node ( );
+
+      /**
+      	Copy constructor
+      	@param aNode a node to copy.
+      */
+      Node ( const Node& aNode );
+
+      /**
+      	Assignment operator
+      	@param aNode a Node to copy
+      	@return reference to this object for chained assignment
+      */
+      virtual Node& operator= ( const Node& aNode );
+
+      /**
+      	Function to produce a new copy of the current Node
+      	@return a new copy of the current Node
+      */
+      virtual Node* clone() const;
+
+    public:
+      /**
+      	Destructor
+      */
+      virtual ~Node();
+
+      /**
+      	A function to determine whether two Nodes are identical
+      	@param aNode a Node to compare
+      	@return whether two Nodes are identical
+      */
+      bool operator == ( const Node& aNode );
+
+
+      /**
+      	Retrieve the Node given by a full-stop delimeted name path relative, to the current node
+      	@param aId a full-stop delimeted name path to a node, relative to the current node
+      	@return the Node given by the identifier
+      */
+      Node& getNode ( const std::string& aId );
+
+
+      /**
+      	Retrieve the Node given by a full-stop delimeted name path relative, to the current node and cast it to a particular node type
+      	@param aId a full-stop delimeted name path to a node, relative to the current node
+      	@return the Node given by the identifier
+      */
+      template< typename T>
+      T& getNode ( const std::string& aId );
+
+
+      /**
+      	Return all node IDs known to this HwInterface
+      	@return all node IDs known to this HwInterface
+      */
+      std::vector<std::string> getNodes();
+
+
+      /**
+      	Return all node IDs known to this connection manager which match a (boost) regular expression
+      	@param aRegex a string expression which is converted to a (boost) regular expression against which the node IDs are tested
+      	@return all node IDs known to this connection manager
+      */
+      std::vector<std::string> getNodes ( const std::string& aRegex );
+
+
+      /**
+      	Return the unique ID of the current node
+      	@return the unique ID of the current node
+      */
+      const std::string& getId() const;
+
+      /**
+      	Return the register address with which this node is associated
+      	@return the register address with which this node is associated
+      */
+      const uint32_t& getAddress() const;
+
+      /**
+      	Return the mask to be applied if this node is a sub-field, rather than an entire register
+      	@return the mask to be applied if this node is a sub-field, rather than an entire register
+      */
+      const uint32_t& getMask() const;
+
+      /**
+      	Return whether the node represents a single register, a block of registers or a block-read/write port
+      	@return whether the node represents a single register, a block of registers or a block-read/write port
+      */
+      const defs::BlockReadWriteMode& getMode() const;
+
+      /**
+      	Return the maximum size available to a block read/write
+      	@return the maximum size available to a block read/write
+      */
+      const uint32_t& getSize() const;
+
+      /**
+      	Return the read/write access permissions of this node
+      	@return the read/write access permissions of this node
+      */
+      const defs::NodePermission& getPermission() const;
+
+      /**
+      	Return the optional tags string which the user can specify for the current node
+      	@return the optional tags string which the user can specify for the current node
+      */
+      const std::string& getTags() const;
+
+      /**
+      	Return the optional description string which the user can specify for the current node
+      	@return the optional description string which the user can specify for the current node
+      */
+      const std::string& getDescription() const;
+
+
+      /**
+      	A streaming helper function to create pretty, indented tree diagrams
+      	@param aStream a stream to write to
+      	@param aIndent size of the indentation
+      */
+      void stream ( std::ostream& aStream , std::size_t aIndent = 0 ) const;
+
+
+      /**
+      	Write a single, unmasked word to a register
+      	@param aValue the value to write to the register
+      */
+      ValHeader write ( const uint32_t& aValue );
+
+      /**
+      	Write a block of data to a block of registers or a block-write port
+      	@param aValues the values to write to the registers or a block-write port
+      */
+      ValHeader writeBlock ( const std::vector< uint32_t >& aValues );
+
+      /**
+      	DEPRICATED! Write a block of data to a block of registers or a block-write port
+      	@param aValues the values to write to the registers or a block-write port
+      	@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
+      	@warning DEPRICATED and will be removed in the next release!
+      */
+      ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
+      {
+        log ( Error() , "THIS METHOD IS DEPRECATED! "
+              "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+              "AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
+              "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+              "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+        defs::BlockReadWriteMode lMode ( mMode );
+        mMode = aMode;
+        ValHeader lReply ( writeBlock ( aValues ) );
+        mMode = lMode;
+        return lReply;
+      }
+
+      /**
+      	Read a single, unmasked, unsigned word
+      	@return a Validated Memory which wraps the location to which the reply data is to be written
+      */
+      ValWord< uint32_t > read ( );
+
+      /**
+      	Read a block of unsigned data from a block of registers or a block-read port
+      	@param aSize the number of words to read
+      	@return a Validated Memory which wraps the location to which the reply data is to be written
+      */
+      ValVector< uint32_t > readBlock ( const uint32_t& aSize );
+
+      /**
+      	DEPRICATED! Read a block of unsigned data from a block of registers or a block-read port
+      	@param aSize the number of words to read
+      	@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+      	@return a Validated Memory which wraps the location to which the reply data is to be written
+      	@warning DEPRICATED and will be removed in the next release!
+      */
+      ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
+      {
+        log ( Error() , "THIS METHOD IS DEPRECATED! "
+              "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+              "AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "
+              "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+              "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+        defs::BlockReadWriteMode lMode ( mMode );
+        mMode = aMode;
+        ValVector< uint32_t > lRet ( readBlock ( aSize ) );
+        mMode = lMode;
+        return lRet;
+      }
+
+      // /**
+      // Read a single, unmasked word and interpret it as being signed
+      // @return a Validated Memory which wraps the location to which the reply data is to be written
+      // */
+      // ValWord< int32_t > readSigned ( );
+
+      // /**
+      // Read a block of data from a block of registers or a block-read port and interpret it as being signed data
+      // @param aSize the number of words to read
+      // @return a Validated Memory which wraps the location to which the reply data is to be written
+      // */
+      // ValVector< int32_t > readBlockSigned ( const uint32_t& aSize );
+
+
+      // /**
+      // DEPRICATED! Read a block of data from a block of registers or a block-read port and interpret it as being signed data
+      // @param aSize the number of words to read
+      // @return a Validated Memory which wraps the location to which the reply data is to be written
+      // @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+      // @warning DEPRICATED and will be removed in the next release!
+      // */
+      // ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
+      // {
+      // log ( Error() , "THIS METHOD IS DEPRECATED! "
+      // "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
+      // "AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
+      // "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
+      // "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
+      // defs::BlockReadWriteMode lMode ( mMode );
+      // mMode = aMode;
+      // ValVector< int32_t > lRet ( readBlockSigned ( aSize ) );
+      // mMode = lMode;
+      // return lRet;
+      // }
+
+
+      // /**
+      // Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
+      // @param aANDterm the AND-term to apply to existing value in the target register
+      // @param aORterm the OR-term to apply to existing value in the target register
+      // @return a Validated Memory which wraps the location to which the reply data is to be written
+      // */
+      // ValWord< uint32_t > rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm );
+
+      // /**
+      // Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
+      // @param aAddend the addend to add to the existing value in the target register
+      // @return a Validated Memory which wraps the location to which the reply data is to be written
+      // */
+      // ValWord< uint32_t > rmw_sum ( const int32_t& aAddend );
+
+
+      /**
+      	Get the underlying IPbus client
+      	@return the IPbus client that will be used to issue a dispatch
+      */
+      ClientInterface& getClient();
+
+
+    private:
+
+      //! The parent hardware interface of which this node is a child (or rather decendent)
+      HwInterface* mHw;
+
+      //! The Unique ID of this node
+      std::string mUid;
+
+      //! The register address with which this node is associated
+      uint32_t mPartialAddr;
+      //! The register address with which this node is associated
+      uint32_t mAddr;
+
+      //! The mask to be applied if this node is a sub-field, rather than an entire register
+      uint32_t mMask;
+      //! The read/write access permissions of this node
+      defs::NodePermission mPermission;
+      //! Whether the node represents a single register, a block of registers or a block-read/write port
+      defs::BlockReadWriteMode mMode;
+      //! The maximum size available to a block read/write
+      uint32_t mSize;
+
+      //! Optional string which the user can specify
+      std::string mTags;
+
+      //! Optional string which the user can specify
+      std::string mDescription;
+
+      //! The direct children of the node
+      std::deque< Node* > mChildren;
+
+      //! Helper to assist look-up of a particular child node, given a name
+      std::hash_map< std::string , Node* > mChildrenMap;
+
+
+
+  };
 
 }
 

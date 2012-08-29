@@ -9,15 +9,15 @@
 
 namespace uhal
 {
-	namespace tests
-	{
+  namespace tests
+  {
 
-		//!timeval difference in micro seconds
-		long usdiff ( const timeval& end, const timeval& start );
+    //!timeval difference in micro seconds
+    long usdiff ( const timeval& end, const timeval& start );
 
-		//!Return the first argument
-		std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
-	}
+    //!Return the first argument
+    std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
+  }
 }
 
 //!Checks if the condition is fullfilled and it does not throw.

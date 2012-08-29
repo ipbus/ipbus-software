@@ -9,29 +9,29 @@
 namespace uhal
 {
 
-	enum boolean_format
-	{
-		alpha,
-		numeric
-	};
+  enum boolean_format
+  {
+    alpha,
+    numeric
+  };
 
-	static const boolean_format DefaultBooleanFormat ( alpha );
+  static const boolean_format DefaultBooleanFormat ( alpha );
 
-	template< typename T , typename FORMAT > struct BooleanFactory;
+  template< typename T , typename FORMAT > struct BooleanFactory;
 
-	template< boolean_format FORMAT = DefaultBooleanFormat > struct BoolFmt {};
+  template< boolean_format FORMAT = DefaultBooleanFormat > struct BoolFmt {};
 
-	template< typename T , typename FORMAT >
-	class _Boolean : public RefWrapper< T >
-	{
-			friend class BooleanFactory< T , FORMAT >;
-			_Boolean ( const T& aT ) : RefWrapper< T > ( aT ) {}
-	};
+  template< typename T , typename FORMAT >
+  class _Boolean : public RefWrapper< T >
+  {
+      friend class BooleanFactory< T , FORMAT >;
+      _Boolean ( const T& aT ) : RefWrapper< T > ( aT ) {}
+  };
 
 
-	template< typename T > _Boolean< T , BoolFmt<> > Boolean ( const T& aT );
+  template< typename T > _Boolean< T , BoolFmt<> > Boolean ( const T& aT );
 
-	template< typename T , typename FORMAT > _Boolean< T , FORMAT > Boolean ( const T& aT , const FORMAT& aFmt );
+  template< typename T , typename FORMAT > _Boolean< T , FORMAT > Boolean ( const T& aT , const FORMAT& aFmt );
 
 }
 

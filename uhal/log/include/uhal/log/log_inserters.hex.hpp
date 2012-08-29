@@ -9,16 +9,16 @@
 namespace uhal
 {
 
-	template< typename T > class _Hex;
+  template< typename T > class _Hex;
 
-	template< typename T > _Hex< T > Hex ( const T& aT );
+  template< typename T > _Hex< T > Hex ( const T& aT );
 
-	template< typename T >
-	class _Hex : public RefWrapper< T >
-	{
-			friend _Hex< T > Hex<> ( const T& aT );
-			_Hex ( const T& aT ) : RefWrapper< T > ( aT ) {}
-	};
+  template< typename T >
+  class _Hex : public RefWrapper< T >
+  {
+      friend _Hex< T > Hex<> ( const T& aT );
+      _Hex ( const T& aT ) : RefWrapper< T > ( aT ) {}
+  };
 
 
 

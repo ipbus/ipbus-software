@@ -24,41 +24,41 @@
 
 namespace uhal
 {
-	/**
-		The log_inserter function to add an HttpResponseType object to a log entry
-		@param aHttpResponse an HttpResponseType object to format and print to log
-	*/
-	template < >
-	void log_inserter< HttpResponseType > ( const HttpResponseType& aHttpResponse )
-	{
-		log_inserter ( " > method = " );
-		log_inserter ( aHttpResponse.method );
-		log_inserter ( "\n > version = " );
-		log_inserter ( Real ( aHttpResponse.version ) );
-		log_inserter ( "\n > status = " );
-		log_inserter ( Integer ( aHttpResponse.status ) );
-		log_inserter ( "\n > status_string = " );
-		log_inserter ( aHttpResponse.status_string );
-		log_inserter ( "\n > NameValuePairs =\n" );
-		log_inserter ( aHttpResponse.headers );
-		log_inserter ( "\n > Content =\n" );
-		put ( ( const char* ) ( & ( aHttpResponse.content[0] ) ) , aHttpResponse.content.size() );
-	}
+  /**
+  	The log_inserter function to add an HttpResponseType object to a log entry
+  	@param aHttpResponse an HttpResponseType object to format and print to log
+  */
+  template < >
+  void log_inserter< HttpResponseType > ( const HttpResponseType& aHttpResponse )
+  {
+    log_inserter ( " > method = " );
+    log_inserter ( aHttpResponse.method );
+    log_inserter ( "\n > version = " );
+    log_inserter ( Real ( aHttpResponse.version ) );
+    log_inserter ( "\n > status = " );
+    log_inserter ( Integer ( aHttpResponse.status ) );
+    log_inserter ( "\n > status_string = " );
+    log_inserter ( aHttpResponse.status_string );
+    log_inserter ( "\n > NameValuePairs =\n" );
+    log_inserter ( aHttpResponse.headers );
+    log_inserter ( "\n > Content =\n" );
+    put ( ( const char* ) ( & ( aHttpResponse.content[0] ) ) , aHttpResponse.content.size() );
+  }
 }
 
 
 namespace grammars
 {
 
-	HttpResponseGrammar::HttpResponseGrammar() :
-		HttpResponseGrammar::base_type ( response )
-	{
-		using namespace boost::spirit;
-		response = + ( qi::char_ - qi::lit ( "/" ) ) >> qi::lit ( "/" ) >> double_ >> int_ >> nonewline_sequence >> noblankline_sequence >> qi::lexeme[ * ( qi::char_ ) ] ;
-		nospace_sequence = qi::lexeme[ + ( qi::char_ - " " ) > " " ];
-		nonewline_sequence = qi::lexeme[ + ( qi::char_ - "\r\n" ) >> -qi::lit ( "\r\n" ) ];
-		noblankline_sequence = qi::lexeme[ + ( qi::char_ - "\r\n\r\n" ) >> -qi::lit ( "\r\n\r\n" ) ];
-	}
+  HttpResponseGrammar::HttpResponseGrammar() :
+    HttpResponseGrammar::base_type ( response )
+  {
+    using namespace boost::spirit;
+    response = + ( qi::char_ - qi::lit ( "/" ) ) >> qi::lit ( "/" ) >> double_ >> int_ >> nonewline_sequence >> noblankline_sequence >> qi::lexeme[ * ( qi::char_ ) ] ;
+    nospace_sequence = qi::lexeme[ + ( qi::char_ - " " ) > " " ];
+    nonewline_sequence = qi::lexeme[ + ( qi::char_ - "\r\n" ) >> -qi::lit ( "\r\n" ) ];
+    noblankline_sequence = qi::lexeme[ + ( qi::char_ - "\r\n\r\n" ) >> -qi::lit ( "\r\n\r\n" ) ];
+  }
 
 
 }

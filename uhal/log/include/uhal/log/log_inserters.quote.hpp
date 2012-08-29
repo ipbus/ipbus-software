@@ -9,26 +9,26 @@
 namespace uhal
 {
 
-	template< typename T > class _Quote;
+  template< typename T > class _Quote;
 
-	template< typename T > _Quote< T > Quote ( const T& aT );
+  template< typename T > _Quote< T > Quote ( const T& aT );
 
-	_Quote< const char* > Quote ( const char* aStr );
+  _Quote< const char* > Quote ( const char* aStr );
 
-	template< typename T >
-	class _Quote : public RefWrapper< T >
-	{
-			friend _Quote< T > Quote<> ( const T& aT );
-			_Quote ( const T& aT ) : RefWrapper< T > ( aT ) {}
-	};
+  template< typename T >
+  class _Quote : public RefWrapper< T >
+  {
+      friend _Quote< T > Quote<> ( const T& aT );
+      _Quote ( const T& aT ) : RefWrapper< T > ( aT ) {}
+  };
 
 
-	template<>
-	class _Quote< const char* > : public RefWrapper< const char* >
-	{
-			friend _Quote< const char* > Quote ( const char* aStr );
-			_Quote ( const char* aStr ) : RefWrapper< const char* > ( aStr ) {}
-	};
+  template<>
+  class _Quote< const char* > : public RefWrapper< const char* >
+  {
+      friend _Quote< const char* > Quote ( const char* aStr );
+      _Quote ( const char* aStr ) : RefWrapper< const char* > ( aStr ) {}
+  };
 
 }
 

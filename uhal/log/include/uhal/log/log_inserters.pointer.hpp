@@ -9,16 +9,16 @@
 namespace uhal
 {
 
-	template< typename T > class _Pointer;
+  template< typename T > class _Pointer;
 
-	template< typename T > _Pointer< T > Pointer ( const T* aT );
+  template< typename T > _Pointer< T > Pointer ( const T* aT );
 
-	template< typename T >
-	class _Pointer : public RefWrapper< T* >
-	{
-			friend _Pointer< T > Pointer<> ( const T* aT );
-			_Pointer ( const T* aT ) : RefWrapper< T* > ( aT ) {}
-	};
+  template< typename T >
+  class _Pointer : public RefWrapper< T* >
+  {
+      friend _Pointer< T > Pointer<> ( const T* aT );
+      _Pointer ( const T* aT ) : RefWrapper< T* > ( aT ) {}
+  };
 
 }
 
