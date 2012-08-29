@@ -788,29 +788,32 @@ namespace uhal
               {
                 if ( lNode1->mMask & lNode2->mMask )
                 {
-                  bool lShouldThrow( false );
+                  bool lShouldThrow( true );
                 
-                  if( (lNode1->mMask == 0xFFFFFFFF) && (lNode2->mMask == 0xFFFFFFFF) )
-                  {
-                    // both are full registers which have the same address, so throw
-                    lShouldThrow = true;
-                  }
-                  else if( (lNode1->mMask == 0xFFFFFFFF) && (lNode2->mMask != 0xFFFFFFFF) )
+                  if( (lNode1->mMask == 0xFFFFFFFF) && (lNode2->mMask != 0xFFFFFFFF) )
                   {
                     // Node 1 is a full register, Node 2 is a masked region. Check if Node 2 is a child of Node 1 and, if not, then throw
-                    if(lNode1->mChildrenMap.find( lNode2->mUid ) == lNode1->mChildrenMap.end() )
+                    for ( std::deque< Node* >::iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
                     {
-                      lShouldThrow = true;
+                      if( *lIt == lNode2 )
+                      {
+                        lShouldThrow = false;
+                        break;
+                      }
                     }
                   }
                   else if( (lNode1->mMask != 0xFFFFFFFF) && (lNode2->mMask == 0xFFFFFFFF) )
                   {
                     // Node 2 is a full register, Node 1 is a masked region. Check if Node 1 is a child of Node 2 and, if not, then throw
-                    if( lNode2->mChildrenMap.find( lNode1->mUid ) == lNode2->mChildrenMap.end() )
+                    for ( std::deque< Node* >::iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
                     {
-                      lShouldThrow = true;
+                      if( *lIt == lNode1 )
+                      {
+                        lShouldThrow = false;
+                        break;
+                      }
                     }
-                  }
+                  }       
                   
                   if( lShouldThrow )
                   {
