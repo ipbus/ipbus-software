@@ -196,7 +196,7 @@ namespace uhal
         Node* lNode ( mTopLevelNodeParser ( lXmlNode ) );
         mFileCallStack.pop_back( );
         calculateHierarchicalAddresses ( lNode , 0x00000000 );
-        //checkForAddressCollisions ( lNode );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
+        checkForAddressCollisions ( lNode );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
         mNodes.insert ( std::make_pair ( lName , lNode ) );
         aNodes.push_back ( lNode );
         return;
@@ -788,14 +788,42 @@ namespace uhal
               {
                 if ( lNode1->mMask & lNode2->mMask )
                 {
-                  log ( Error() , "Branch " , Quote ( lIt->first ) ,
-                        " has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
-                        " and mask " , Integer ( lNode1->mMask , IntFmt<hex,fixed>() ) ,
-                        " which overlaps with branch " , Quote ( lIt2->first ) ,
-                        " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
-                        " and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
-                      );
-                  AddressSpaceOverlap().throwFrom ( ThisLocation() );
+                  bool lShouldThrow( false );
+                
+                  if( (lNode1->mMask == 0xFFFFFFFF) && (lNode2->mMask == 0xFFFFFFFF) )
+                  {
+                    // both are full registers which have the same address, so throw
+                    lShouldThrow = true;
+                  }
+                  else if( (lNode1->mMask == 0xFFFFFFFF) && (lNode2->mMask != 0xFFFFFFFF) )
+                  {
+                    // Node 1 is a full register, Node 2 is a masked region. Check if Node 2 is a child of Node 1 and, if not, then throw
+                    if(lNode1->mChildrenMap.find( lNode2->mUid ) == lNode1->mChildrenMap.end() )
+                    {
+                      lShouldThrow = true;
+                    }
+                  }
+                  else if( (lNode1->mMask != 0xFFFFFFFF) && (lNode2->mMask == 0xFFFFFFFF) )
+                  {
+                    // Node 2 is a full register, Node 1 is a masked region. Check if Node 1 is a child of Node 2 and, if not, then throw
+                    if( lNode2->mChildrenMap.find( lNode1->mUid ) == lNode2->mChildrenMap.end() )
+                    {
+                      lShouldThrow = true;
+                    }
+                  }
+                  
+                  if( lShouldThrow )
+                  {
+                    log ( Error() , "Branch " , Quote ( lIt->first ) ,
+                          " has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
+                          " and mask " , Integer ( lNode1->mMask , IntFmt<hex,fixed>() ) ,
+                          " which overlaps with branch " , Quote ( lIt2->first ) ,
+                          " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
+                          " and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
+                        );
+                    AddressSpaceOverlap().throwFrom ( ThisLocation() );
+                  }
+                  
                 }
               }
             }
