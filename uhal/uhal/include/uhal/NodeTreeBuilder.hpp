@@ -123,6 +123,7 @@ namespace uhal
 			void setUid ( const bool& aRequireId , const pugi::xml_node& aXmlNode , Node* aNode );
 			void setAddr ( const pugi::xml_node& aXmlNode , Node* aNode );
 			void setTags ( const pugi::xml_node& aXmlNode , Node* aNode );
+			void setDescription ( const pugi::xml_node& aXmlNode , Node* aNode );
 			void setPermissions ( const pugi::xml_node& aXmlNode , Node* aNode );
 			void setMask ( const pugi::xml_node& aXmlNode , Node* aNode );
 			void setModeAndSize ( const pugi::xml_node& aXmlNode , Node* aNode );
@@ -131,6 +132,7 @@ namespace uhal
 			static const char* mIdAttribute;
 			static const char* mAddressAttribute;
 			static const char* mTagsAttribute;
+			static const char* mDescriptionAttribute;
 			static const char* mPermissionsAttribute;
 			static const char* mMaskAttribute;
 			static const char* mModeAttribute;

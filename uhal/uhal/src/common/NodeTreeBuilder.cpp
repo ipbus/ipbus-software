@@ -12,6 +12,7 @@ namespace uhal
 	const char* NodeTreeBuilder::mIdAttribute = "id";
 	const char* NodeTreeBuilder::mAddressAttribute = "address";
 	const char* NodeTreeBuilder::mTagsAttribute = "tags";
+	const char* NodeTreeBuilder::mDescriptionAttribute = "description";
 	const char* NodeTreeBuilder::mPermissionsAttribute = "permission";
 	const char* NodeTreeBuilder::mMaskAttribute = "mask";
 	const char* NodeTreeBuilder::mModeAttribute = "mode";
@@ -36,7 +37,8 @@ namespace uhal
 		.optional ( NodeTreeBuilder::mPermissionsAttribute )
 		.optional ( NodeTreeBuilder::mModeAttribute )
 		.optional ( NodeTreeBuilder::mSizeAttribute )
-		.optional ( NodeTreeBuilder::mTagsAttribute );
+		.optional ( NodeTreeBuilder::mTagsAttribute )
+		.optional ( NodeTreeBuilder::mDescriptionAttribute );
 		//------------------------------------------------------------------------------------------------------------------------
 		Rule<Node*> lClass;
 		lClass.require ( NodeTreeBuilder::mClassAttribute )
@@ -47,7 +49,8 @@ namespace uhal
 		.optional ( NodeTreeBuilder::mModeAttribute )
 		.optional ( NodeTreeBuilder::mSizeAttribute )
 		.optional ( NodeTreeBuilder::mPermissionsAttribute )
-		.optional ( NodeTreeBuilder::mTagsAttribute );
+		.optional ( NodeTreeBuilder::mTagsAttribute )
+		.optional ( NodeTreeBuilder::mDescriptionAttribute );
 		//------------------------------------------------------------------------------------------------------------------------
 		Rule<Node*> lBitMask;
 		lBitMask.require ( NodeTreeBuilder::mMaskAttribute )
@@ -57,7 +60,8 @@ namespace uhal
 		.forbid ( NodeTreeBuilder::mModeAttribute )
 		.forbid ( NodeTreeBuilder::mSizeAttribute )
 		.optional ( NodeTreeBuilder::mPermissionsAttribute )
-		.optional ( NodeTreeBuilder::mTagsAttribute );
+		.optional ( NodeTreeBuilder::mTagsAttribute )
+		.optional ( NodeTreeBuilder::mDescriptionAttribute );
 		//------------------------------------------------------------------------------------------------------------------------
 		mTopLevelNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , _1 ) );
 		mTopLevelNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , false , _1 ) );
@@ -76,7 +80,8 @@ namespace uhal
 		.forbid ( NodeTreeBuilder::mSizeAttribute )
 		.forbid ( NodeTreeBuilder::mPermissionsAttribute )
 		.optional ( NodeTreeBuilder::mAddressAttribute )
-		.optional ( NodeTreeBuilder::mTagsAttribute );
+		.optional ( NodeTreeBuilder::mTagsAttribute )
+		.optional ( NodeTreeBuilder::mDescriptionAttribute );
 		//------------------------------------------------------------------------------------------------------------------------
 		mNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , true , _1 ) );
 		mNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , true , _1 ) );
@@ -250,6 +255,7 @@ namespace uhal
 			setUid ( aRequireId , aXmlNode , lNode );
 			setAddr ( aXmlNode , lNode );
 			setTags ( aXmlNode , lNode );
+			setDescription ( aXmlNode , lNode );
 			setPermissions ( aXmlNode , lNode );
 			//setMask( aXmlNode , lNode );
 			setModeAndSize ( aXmlNode , lNode );
@@ -296,6 +302,7 @@ namespace uhal
 			setUid ( aRequireId , aXmlNode , lNode );
 			setAddr ( aXmlNode , lNode );
 			setTags ( aXmlNode , lNode );
+			setDescription ( aXmlNode , lNode );
 			setPermissions ( aXmlNode , lNode );
 			//setMask( aXmlNode , lNode );
 			setModeAndSize ( aXmlNode , lNode );
@@ -324,6 +331,7 @@ namespace uhal
 			setUid ( true , aXmlNode , lNode );
 			setAddr ( aXmlNode , lNode );
 			setTags ( aXmlNode , lNode );
+			setDescription ( aXmlNode , lNode );
 			//setPermissions( aXmlNode , lNode );
 			//setMask( aXmlNode , lNode );
 			//setModeAndSize( aXmlNode , lNode );
@@ -356,6 +364,7 @@ namespace uhal
 			setUid ( aRequireId , aXmlNode , lNode );
 			setAddr ( aXmlNode , lNode ); //was commented out, see https://svnweb.cern.ch/trac/cactus/ticket/92
 			setTags ( aXmlNode , lNode );
+			setDescription ( aXmlNode , lNode );
 			setPermissions ( aXmlNode , lNode );
 			setMask ( aXmlNode , lNode );
 			//setModeAndSize( aXmlNode , lNode );
@@ -450,6 +459,36 @@ namespace uhal
 			StdException ( aExc ).throwFrom ( ThisLocation() );
 		}
 	}
+	
+	
+	void NodeTreeBuilder::setDescription ( const pugi::xml_node& aXmlNode , Node* aNode )
+	{
+		try
+		{
+			std::string lStr;
+			//Tags is an optional attribute to allow the user to add a description to a node
+			uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mDescriptionAttribute , lStr );
+
+			if ( lStr.size() && aNode->mTags.size() )
+			{
+				aNode->mDescription += "[";
+				aNode->mDescription += lStr;
+				aNode->mDescription += "]";
+			}
+			else if ( lStr.size() && !aNode->mTags.size() )
+			{
+				aNode->mDescription = lStr;
+			}
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}	
 
 	void NodeTreeBuilder::setPermissions ( const pugi::xml_node& aXmlNode , Node* aNode )
 	{

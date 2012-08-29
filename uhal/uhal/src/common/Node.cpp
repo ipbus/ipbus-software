@@ -54,6 +54,7 @@ Node::Node ( ) try :
 			mMode ( defs::SINGLE ),
 			mSize ( 0x00000001 ),
 			mTags ( "" ),
+			mDescription ( "" ),
 			mChildren ( ),
 			mChildrenMap ( )
 	{
@@ -78,6 +79,7 @@ Node::Node ( const Node& aNode ) try :
 			mMode ( aNode.mMode ),
 			mSize ( aNode.mSize ),
 			mTags ( aNode.mTags ),
+			mDescription ( aNode.mDescription ),
 			mChildren ( ),
 			mChildrenMap ( )
 	{
@@ -118,6 +120,7 @@ Node::Node ( const Node& aNode ) try :
 		mMode = aNode.mMode;
 		mSize = aNode.mSize;
 		mTags = aNode.mTags;
+		mDescription = aNode.mDescription;
 
 		for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
 		{
@@ -307,7 +310,22 @@ Node::Node ( const Node& aNode ) try :
 		}
 	}
 
-
+	
+	const std::string& Node::getDescription() const
+	{
+		try
+		{
+			return mDescription;
+		}
+		catch ( uhal::exception& aExc )
+		{
+			aExc.rethrowFrom ( ThisLocation() );
+		}
+		catch ( const std::exception& aExc )
+		{
+			StdException ( aExc ).throwFrom ( ThisLocation() );
+		}
+	}
 
 
 	void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
@@ -352,6 +370,11 @@ Node::Node ( const Node& aNode ) try :
 			{
 				aStream << ", Tags \"" << mTags << "\"";
 			}
+			
+			if ( mDescription.size() )
+			{
+				aStream << ", Description \"" << mDescription << "\"";
+			}			
 
 			for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
 			{

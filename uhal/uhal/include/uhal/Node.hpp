@@ -156,11 +156,18 @@ namespace uhal
 			const defs::NodePermission& getPermission() const;
 
 			/**
-				Return the optional tags string which the user can specify the current node
-				@return the optional tags string which the user can specify the current node
+				Return the optional tags string which the user can specify for the current node
+				@return the optional tags string which the user can specify for the current node
 			*/
 			const std::string& getTags() const;
 
+			/**
+				Return the optional description string which the user can specify for the current node
+				@return the optional description string which the user can specify for the current node
+			*/
+			const std::string& getDescription() const;
+
+			
 			/**
 				A streaming helper function to create pretty, indented tree diagrams
 				@param aStream a stream to write to
@@ -318,6 +325,9 @@ namespace uhal
 
 			//! Optional string which the user can specify
 			std::string mTags;
+			
+			//! Optional string which the user can specify
+			std::string mDescription;			
 
 			//! The direct children of the node
 			std::deque< Node* > mChildren;
