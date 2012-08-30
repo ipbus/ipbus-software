@@ -8,7 +8,7 @@ namespace uhal
   {
     try
     {
-      return dynamic_cast< T > ( getNode ( aId ) );
+      return dynamic_cast< T& > ( getNode ( aId ) );
     }
     catch ( uhal::exception& aExc )
     {
