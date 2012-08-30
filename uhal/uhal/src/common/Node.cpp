@@ -51,7 +51,7 @@ Node::Node ( ) try :
         mAddr ( 0x00000000 ),
         mMask ( defs::NOMASK ),
         mPermission ( defs::READWRITE ),
-        mMode ( defs::SINGLE ),
+        mMode ( defs::HIERARCHICAL ),
         mSize ( 0x00000001 ),
         mTags ( "" ),
         mDescription ( "" ),
@@ -341,12 +341,14 @@ Node::Node ( const Node& aNode ) try :
         case defs::SINGLE:
           aStream << "SINGLE register, "
           << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
-          << std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", ";
+          << std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", "
+          << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
           break;
         case defs::INCREMENTAL:
           aStream << "INCREMENTAL block, "
           << std::dec << "Size " << mSize << ", "
-          << std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << ( mAddr+mSize-1 ) << "], ";
+          << std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << ( mAddr+mSize-1 ) << "], "
+          << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
           break;
         case defs::NON_INCREMENTAL:
           aStream << "NON-INCREMENTAL block, ";
@@ -356,15 +358,13 @@ Node::Node ( const Node& aNode ) try :
             aStream << std::dec << "Size " << mSize << ", ";
           }
 
-          aStream << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", ";
+          aStream << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", "
+          << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+          break;
+        case defs::HIERARCHICAL:
+          aStream << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr;
           break;
       }
-
-      aStream << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
-      // for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
-      // {
-      // aStream << '\n' << std::string ( aIndent+2 , ' ' ) << "- Map entry " << (lIt->first);
-      // }
 
       if ( mTags.size() )
       {

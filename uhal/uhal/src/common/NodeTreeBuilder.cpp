@@ -613,7 +613,7 @@ namespace uhal
     {
       pugi::xml_node lXmlNode = aXmlNode.child ( "node" );
 
-      if ( aNode->mMode != defs::SINGLE )
+      if ( aNode->mMode == defs::NON_INCREMENTAL )
       {
         if ( lXmlNode )
         {
@@ -654,6 +654,44 @@ namespace uhal
   {
     try
     {
+    
+      if ( aNode->mMode == defs::HIERARCHICAL )
+      {
+        if( aNode->mChildren.size() == 0 )
+        {
+          aNode->mMode = defs::SINGLE;
+        }
+        else
+        {
+          bool lAnyMasked( false );
+          bool lAllMasked( true );
+          
+          for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+          {
+            if( (**lIt).mMask == defs::NOMASK )
+            {
+              lAllMasked = false;
+            }
+            else
+            {
+              lAnyMasked = true;
+            } 
+          }
+          
+          if( lAnyMasked && !lAllMasked )
+          {
+            log ( Error() , "Both masked and unmasked children found in branch " , Quote ( aNode->mUid ) );
+            BothMaskedAndUnmaskedChildren().throwFrom ( ThisLocation() );
+          }
+          
+          if( lAllMasked )
+          {
+            aNode->mMode = defs::SINGLE;
+          }
+          
+        }
+      }
+    
       if ( aNode->mMode == defs::INCREMENTAL )
       {
         uint64_t lTopAddr ( ( uint64_t ) ( aNode->mPartialAddr ) + ( uint64_t ) ( aNode->mSize-1 ) );
@@ -738,7 +776,7 @@ namespace uhal
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
               }
             }
-            else
+            else if ( lNode2->mMode != defs::HIERARCHICAL )
             {
               //Node1 is incremental and Node2 is single address
               uint32_t lAddr2 ( lNode2->mAddr );
@@ -755,7 +793,7 @@ namespace uhal
             }
           }
         }
-        else
+        else if ( lNode1->mMode != defs::HIERARCHICAL )
         {
           uint32_t lAddr1 ( lNode1->mAddr );
 
@@ -779,7 +817,7 @@ namespace uhal
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
               }
             }
-            else
+            else if ( lNode2->mMode != defs::HIERARCHICAL )
             {
               //Node1 and Node2 are both single addresses
               uint32_t lAddr2 ( lNode2->mAddr );
@@ -790,7 +828,7 @@ namespace uhal
                 {
                   bool lShouldThrow( true );
                 
-                  if( (lNode1->mMask == 0xFFFFFFFF) && (lNode2->mMask != 0xFFFFFFFF) )
+                  if( lNode1->mMask == 0xFFFFFFFF )
                   {
                     // Node 1 is a full register, Node 2 is a masked region. Check if Node 2 is a child of Node 1 and, if not, then throw
                     for ( std::deque< Node* >::iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
@@ -802,7 +840,8 @@ namespace uhal
                       }
                     }
                   }
-                  else if( (lNode1->mMask != 0xFFFFFFFF) && (lNode2->mMask == 0xFFFFFFFF) )
+                  
+                  if( lShouldThrow && ( lNode2->mMask == 0xFFFFFFFF ) )
                   {
                     // Node 2 is a full register, Node 1 is a masked region. Check if Node 1 is a child of Node 2 and, if not, then throw
                     for ( std::deque< Node* >::iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
