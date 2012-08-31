@@ -663,7 +663,7 @@ namespace uhal
         }
         else
         {
-          bool lAnyMasked( false );
+          // bool lAnyMasked( false );
           bool lAllMasked( true );
           
           for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
@@ -672,17 +672,17 @@ namespace uhal
             {
               lAllMasked = false;
             }
-            else
-            {
-              lAnyMasked = true;
-            } 
+            // else
+            // {
+              // lAnyMasked = true;
+            // } 
           }
           
-          if( lAnyMasked && !lAllMasked )
-          {
-            log ( Error() , "Both masked and unmasked children found in branch " , Quote ( aNode->mUid ) );
-            BothMaskedAndUnmaskedChildren().throwFrom ( ThisLocation() );
-          }
+          // if( lAnyMasked && !lAllMasked )
+          // {
+            // log ( Error() , "Both masked and unmasked children found in branch " , Quote ( aNode->mUid ) );
+            // BothMaskedAndUnmaskedChildren().throwFrom ( ThisLocation() );
+          // }
           
           if( lAllMasked )
           {
