@@ -13,5 +13,6 @@
 #include <uhal/log/log_inserters.real.hpp>
 #include <uhal/log/log_inserters.string.hpp>
 #include <uhal/log/log_inserters.time.hpp>
+#include <uhal/log/log_inserters.type.hpp>
 
 #endif
