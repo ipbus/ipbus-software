@@ -294,16 +294,16 @@ namespace uhal
       if ( lIt->mForbiddenHash & lHash )
       {
         lFailedForbidden.push_back ( & ( *lIt ) );
-        continue;
       }
-
-      if ( lIt->mRequiredHash & ~lHash )
+      else if ( lIt->mRequiredHash & ~lHash )
       {
         lFailedRequired.push_back ( & ( *lIt ) );
         continue;
       }
-
-      lPassed.push_back ( & ( *lIt ) );
+      else
+      {
+        lPassed.push_back ( & ( *lIt ) );
+      }
     }
 
     if ( lPassed.size() == 1 )
@@ -340,15 +340,54 @@ namespace uhal
       return ( *lMostStringent ) ( aNode );
     }
 
-    if ( lFailedRequired.size() )
+    
+    std::stringstream lStr;
+    for ( pugi::xml_attribute lAttr = aNode.first_attribute(); lAttr; lAttr = lAttr.next_attribute() )
     {
-      log ( Error() , Integer ( lFailedRequired.size() ) , " rules failed because of missing required attributes" );
+      lStr << lAttr.name() << "=\"" << lAttr.value() << "\", ";
     }
+    std::string lString( lStr.str() );
+    lString.resize( lString.size() - 2 );
+    log ( Error() , "Node with attributes : " , lString , " failed all parser rules because : ");
 
-    if ( lFailedForbidden.size() )
+    for( typename std::deque< Rule<R>* >::iterator lIt = lFailedRequired.begin() ; lIt != lFailedRequired.end(); ++lIt )
     {
-      log ( Error() , Integer ( lFailedForbidden.size() ) , " rules failed because of included forbidden attributes" );
+      std::stringstream lStr;
+
+      uint64_t lTemp( (**lIt).mRequiredHash & ~lHash );
+      for ( std::hash_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
+      {
+        if( (lIt2->second) & lTemp )
+        {
+          lStr << "\"" << lIt2->first << "\", ";
+        }
+      }
+      
+      std::string lString( lStr.str() );
+      lString.resize( lString.size() - 2 );
+     
+      log ( Error() , " > Rule " ,  Integer((**lIt).mRuleId) , " requires attributes : " , lString );
+    }      
+
+    for( typename std::deque< Rule<R>* >::iterator lIt = lFailedForbidden.begin() ; lIt != lFailedForbidden.end(); ++lIt )
+    {
+      std::stringstream lStr;
+
+      uint64_t lTemp( (**lIt).mForbiddenHash & lHash );
+      for ( std::hash_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
+      {
+        if( (lIt2->second) & lTemp )
+        {
+          lStr << "\"" << lIt2->first << "\", ";
+        }
+      }
+      
+      std::string lString( lStr.str() );
+      lString.resize( lString.size() - 2 );
+     
+      log ( Error() , " > Rule " ,  Integer((**lIt).mRuleId) , " forbids attributes : " , lString );
     }
+    
 
     NoRulesPassed().throwFrom ( ThisLocation() );
   }
