@@ -27,7 +27,6 @@
 
 #include <map>
 
-#define REGISTER( class ) RegistrationHelper< class > class##RegistrationHelper( #class );
 
 namespace uhal
 {
@@ -229,13 +228,6 @@ namespace uhal
 
 
       grammars::NodeTreeClassAttributeGrammar mNodeTreeClassAttributeGrammar;
-  };
-
-
-  template< typename T >
-  struct RegistrationHelper
-  {
-    RegistrationHelper ( const std::string& aDerivedClassName );
   };
 
 }

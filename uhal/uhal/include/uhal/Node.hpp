@@ -40,6 +40,7 @@ namespace uhal
   //! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
   class BulkTransferRequestedTooLarge: public uhal::_exception< BulkTransferRequestedTooLarge > {  };
 
+  class BadNodeCast: public uhal::_exception< BadNodeCast > {  };
 
 
   //! A heirarchical node for navigating heirarchical firmwares

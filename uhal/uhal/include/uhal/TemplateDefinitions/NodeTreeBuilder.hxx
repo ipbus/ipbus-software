@@ -35,6 +35,7 @@ namespace uhal
   {
     try
     {
+      log ( Debug() , "Creator called for Node of type " , Quote( Type < T >() ) );
       return new T ( aAttributes );
     }
     catch ( uhal::exception& aExc )
@@ -45,13 +46,6 @@ namespace uhal
     {
       StdException ( aExc ).throwFrom ( ThisLocation() );
     }
-  }
-
-
-  template< typename T >
-  RegistrationHelper< T >::RegistrationHelper ( const std::string& aDerivedClassName )
-  {
-    NodeTreeBuilder::getInstance().add< T > ( aDerivedClassName );
   }
 
 
