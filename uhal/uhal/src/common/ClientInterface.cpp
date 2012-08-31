@@ -48,7 +48,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
     StdException ( aExc ).throwFrom ( ThisLocation() );
   }
 
-  ClientInterface::ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
+  ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
   {
     try
     {

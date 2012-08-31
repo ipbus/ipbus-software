@@ -51,8 +51,8 @@ namespace uhal
 
   //! Exception class to handle the case when a node has both masked and unmasked children. Uses the base uhal::exception implementation of what()
   class BothMaskedAndUnmaskedChildren: public uhal::_exception< BothMaskedAndUnmaskedChildren > {  };
-  
-  
+
+
   // //! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
   // class ChildHasAddressOverlap: public uhal::_exception< ChildHasAddressOverlap > {  };
   // //! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()

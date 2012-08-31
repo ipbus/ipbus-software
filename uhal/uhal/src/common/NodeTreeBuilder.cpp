@@ -654,44 +654,43 @@ namespace uhal
   {
     try
     {
-    
       if ( aNode->mMode == defs::HIERARCHICAL )
       {
-        if( aNode->mChildren.size() == 0 )
+        if ( aNode->mChildren.size() == 0 )
         {
           aNode->mMode = defs::SINGLE;
         }
         else
         {
           // bool lAnyMasked( false );
-          bool lAllMasked( true );
-          
+          bool lAllMasked ( true );
+
           for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
           {
-            if( (**lIt).mMask == defs::NOMASK )
+            if ( ( **lIt ).mMask == defs::NOMASK )
             {
               lAllMasked = false;
             }
+
             // else
             // {
-              // lAnyMasked = true;
-            // } 
+            // lAnyMasked = true;
+            // }
           }
-          
+
           // if( lAnyMasked && !lAllMasked )
           // {
-            // log ( Error() , "Both masked and unmasked children found in branch " , Quote ( aNode->mUid ) );
-            // BothMaskedAndUnmaskedChildren().throwFrom ( ThisLocation() );
+          // log ( Error() , "Both masked and unmasked children found in branch " , Quote ( aNode->mUid ) );
+          // BothMaskedAndUnmaskedChildren().throwFrom ( ThisLocation() );
           // }
-          
-          if( lAllMasked )
+
+          if ( lAllMasked )
           {
             aNode->mMode = defs::SINGLE;
           }
-          
         }
       }
-    
+
       if ( aNode->mMode == defs::INCREMENTAL )
       {
         uint64_t lTopAddr ( ( uint64_t ) ( aNode->mPartialAddr ) + ( uint64_t ) ( aNode->mSize-1 ) );
@@ -826,35 +825,35 @@ namespace uhal
               {
                 if ( lNode1->mMask & lNode2->mMask )
                 {
-                  bool lShouldThrow( true );
-                
-                  if( lNode1->mMask == 0xFFFFFFFF )
+                  bool lShouldThrow ( true );
+
+                  if ( lNode1->mMask == 0xFFFFFFFF )
                   {
                     // Node 1 is a full register, Node 2 is a masked region. Check if Node 2 is a child of Node 1 and, if not, then throw
                     for ( std::deque< Node* >::iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
                     {
-                      if( *lIt == lNode2 )
+                      if ( *lIt == lNode2 )
                       {
                         lShouldThrow = false;
                         break;
                       }
                     }
                   }
-                  
-                  if( lShouldThrow && ( lNode2->mMask == 0xFFFFFFFF ) )
+
+                  if ( lShouldThrow && ( lNode2->mMask == 0xFFFFFFFF ) )
                   {
                     // Node 2 is a full register, Node 1 is a masked region. Check if Node 1 is a child of Node 2 and, if not, then throw
                     for ( std::deque< Node* >::iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
                     {
-                      if( *lIt == lNode1 )
+                      if ( *lIt == lNode1 )
                       {
                         lShouldThrow = false;
                         break;
                       }
                     }
-                  }       
-                  
-                  if( lShouldThrow )
+                  }
+
+                  if ( lShouldThrow )
                   {
                     log ( Error() , "Branch " , Quote ( lIt->first ) ,
                           " has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
@@ -865,7 +864,6 @@ namespace uhal
                         );
                     AddressSpaceOverlap().throwFrom ( ThisLocation() );
                   }
-                  
                 }
               }
             }

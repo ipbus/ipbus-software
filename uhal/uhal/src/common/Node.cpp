@@ -111,51 +111,73 @@ Node::Node ( const Node& aNode ) try :
 
   Node& Node::operator= ( const Node& aNode )
   {
-    mHw = aNode.mHw;
-    mUid = aNode.mUid ;
-    mPartialAddr = aNode.mPartialAddr;
-    mAddr = aNode.mAddr;
-    mMask = aNode.mMask;
-    mPermission = aNode.mPermission;
-    mMode = aNode.mMode;
-    mSize = aNode.mSize;
-    mTags = aNode.mTags;
-    mDescription = aNode.mDescription;
-
-    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    try
     {
-      if ( *lIt )
+      mHw = aNode.mHw;
+      mUid = aNode.mUid ;
+      mPartialAddr = aNode.mPartialAddr;
+      mAddr = aNode.mAddr;
+      mMask = aNode.mMask;
+      mPermission = aNode.mPermission;
+      mMode = aNode.mMode;
+      mSize = aNode.mSize;
+      mTags = aNode.mTags;
+      mDescription = aNode.mDescription;
+
+      for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
       {
-        delete ( *lIt );
-        ( *lIt ) = NULL;
+        if ( *lIt )
+        {
+          delete ( *lIt );
+          ( *lIt ) = NULL;
+        }
       }
-    }
 
-    mChildren.clear();
-    mChildrenMap.clear();
+      mChildren.clear();
+      mChildrenMap.clear();
 
-    for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
-    {
-      mChildren.push_back ( ( **lIt ).clone() );
-    }
-
-    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
-    {
-      mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
-
-      for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+      for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
       {
-        mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+        mChildren.push_back ( ( **lIt ).clone() );
       }
-    }
 
-    return *this;
+      for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+      {
+        mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
+
+        for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+        {
+          mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+        }
+      }
+
+      return *this;
+    }
+    catch ( uhal::exception& aExc )
+    {
+      aExc.rethrowFrom ( ThisLocation() );
+    }
+    catch ( const std::exception& aExc )
+    {
+      StdException ( aExc ).throwFrom ( ThisLocation() );
+    }
   }
 
 
   Node* Node::clone ( ) const
   {
-    return new Node ( *this );
+    try
+    {
+      return new Node ( *this );
+    }
+    catch ( uhal::exception& aExc )
+    {
+      aExc.rethrowFrom ( ThisLocation() );
+    }
+    catch ( const std::exception& aExc )
+    {
+      StdException ( aExc ).throwFrom ( ThisLocation() );
+    }
   }
 
 
@@ -163,17 +185,28 @@ Node::Node ( const Node& aNode ) try :
 
   Node::~Node()
   {
-    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    try
     {
-      if ( *lIt )
+      for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
       {
-        delete ( *lIt );
-        ( *lIt ) = NULL;
+        if ( *lIt )
+        {
+          delete ( *lIt );
+          ( *lIt ) = NULL;
+        }
       }
-    }
 
-    mChildren.clear();
-    mChildrenMap.clear();
+      mChildren.clear();
+      mChildrenMap.clear();
+    }
+    catch ( uhal::exception& aExc )
+    {
+      aExc.rethrowFrom ( ThisLocation() );
+    }
+    catch ( const std::exception& aExc )
+    {
+      StdException ( aExc ).throwFrom ( ThisLocation() );
+    }
   }
 
 
