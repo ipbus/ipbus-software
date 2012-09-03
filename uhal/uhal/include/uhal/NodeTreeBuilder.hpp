@@ -40,16 +40,20 @@ namespace uhal
   class IncrementalNodeRequiresSizeAttribute: public uhal::_exception< IncrementalNodeRequiresSizeAttribute > {  };
   //! Exception class to handle the case where a memory block has a size which would exceed the available register space. Uses the base uhal::exception implementation of what()
   class ArraySizeExceedsRegisterBound: public uhal::_exception< ArraySizeExceedsRegisterBound > {  };
+
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
   //! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
   class AddressSpaceOverlap: public uhal::_exception< AddressSpaceOverlap > {  };
+#endif
+
   //! Exception class to handle the case when someone tries to give a block access node a child. Uses the base uhal::exception implementation of what()
   class BlockAccessNodeCannotHaveChild: public uhal::_exception< BlockAccessNodeCannotHaveChild > {  };
 
   //! Exception class to handle the case when someone tries to give a bit-masked node a child. Uses the base uhal::exception implementation of what()
   class MaskedNodeCannotHaveChild: public uhal::_exception< MaskedNodeCannotHaveChild > {  };
 
-  //! Exception class to handle the case when a node has both masked and unmasked children. Uses the base uhal::exception implementation of what()
-  class BothMaskedAndUnmaskedChildren: public uhal::_exception< BothMaskedAndUnmaskedChildren > {  };
+  // //! Exception class to handle the case when a node has both masked and unmasked children. Uses the base uhal::exception implementation of what()
+  // class BothMaskedAndUnmaskedChildren: public uhal::_exception< BothMaskedAndUnmaskedChildren > {  };
 
 
   // //! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()

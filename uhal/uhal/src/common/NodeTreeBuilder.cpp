@@ -772,7 +772,9 @@ namespace uhal
                       " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) ,
                       "]."
                     );
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
+#endif                
               }
             }
             else if ( lNode2->mMode != defs::HIERARCHICAL )
@@ -787,7 +789,9 @@ namespace uhal
                       "] which overlaps with branch " , Quote ( lIt2->first ) ,
                       " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) , "]."
                     );
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
+#endif    
               }
             }
           }
@@ -813,7 +817,9 @@ namespace uhal
                       "] which overlaps with branch " , Quote ( lIt2->first ) ,
                       " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) , "]."
                     );
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
+#endif    
               }
             }
             else if ( lNode2->mMode != defs::HIERARCHICAL )
@@ -862,7 +868,9 @@ namespace uhal
                           " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
                           " and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
                         );
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
                     AddressSpaceOverlap().throwFrom ( ThisLocation() );
+#endif    
                   }
                 }
               }
