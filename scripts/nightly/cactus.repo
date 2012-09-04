@@ -1,4 +1,4 @@
-[base]
+[cactus-base]
 name=CACTUS Project Software Repository
 baseurl=http://www.cern.ch/cactus/nightly/RPMS
 enabled=1
