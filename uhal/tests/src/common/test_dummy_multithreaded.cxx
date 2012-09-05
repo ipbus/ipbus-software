@@ -17,11 +17,6 @@ using namespace uhal;
 #define N_SIZE        1024*1024/4
 #define TIMEOUT_S     50
 
-boost::condition_variable cond;
-boost::mutex mut;
-int n_workers_ready=0;
-bool dispatcher_ready=false;
-
 void job_multiple ( const std::string& connection, const std::string& id )
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
@@ -82,19 +77,7 @@ void job_single ( HwInterface& hw )
   hw.getNode ( "MEM" ).writeBlock ( xx );
   ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
 
-  //notify dispatcher
-  {
-    boost::lock_guard<boost::mutex> lock(mut);
-    n_workers_ready++;
-  }
-  cond.notify_one();
-
-  //wait for dispatcher to be finished
-  boost::unique_lock<boost::mutex> lock(mut);
-  while(!dispatcher_ready)
-    {
-      cond.wait(lock);
-    }
+  CACTUS_TEST(hw.dispatch());
 
   CACTUS_CHECK ( reg.valid() );
   CACTUS_CHECK ( mem.valid() );
@@ -116,22 +99,6 @@ void single_hwinterface ( const std::string& connection_file,const std::string& 
 	jobs.push_back ( new boost::thread ( job_single,hw ) );
       }
     
-    //wait all jobs to be ready
-    boost::unique_lock<boost::mutex> lock(mut);
-    while(n_workers_ready != N_THREADS)
-    {
-        cond.wait(lock);
-    }
-
-    CACTUS_TEST(hw.dispatch());
-    
-    //notifyAll
-    {
-        boost::lock_guard<boost::mutex> lock(mut);
-        dispatcher_ready=true;
-    }
-    cond.notify_all();
-
     for ( size_t i=0; i!=N_THREADS; ++i )
       {
 	//boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
@@ -148,7 +115,7 @@ int main ( int argc,char* argv[] )
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
-  CACTUS_TEST ( multiple_hwinterfaces (connection_file,device_id ) );
+  //CACTUS_TEST ( multiple_hwinterfaces (connection_file,device_id ) );
   CACTUS_TEST ( single_hwinterface (connection_file,device_id ) );
   return 0;
 }
