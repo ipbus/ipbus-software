@@ -3,6 +3,8 @@
 
 #include <boost/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition_variable.hpp>
 
 #include <iostream>
 #include <cstdlib>
@@ -15,7 +17,12 @@ using namespace uhal;
 #define N_SIZE        1024*1024/4
 #define TIMEOUT_S     50
 
-void job ( const std::string& connection, const std::string& id )
+boost::condition_variable cond;
+boost::mutex mut;
+int n_workers_ready=0;
+bool dispatcher_ready=false;
+
+void job_multiple ( const std::string& connection, const std::string& id )
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
@@ -42,21 +49,96 @@ void job ( const std::string& connection, const std::string& id )
   }
 }
 
-void launch_threads ( size_t n_threads,const std::string& connection_file,const std::string& device_id )
+void multiple_hwinterfaces ( const std::string& connection_file,const std::string& device_id )
 {
   std::vector<boost::thread*> jobs;
 
-  for ( size_t i=0; i!=n_threads; ++i )
+  for ( size_t i=0; i!=N_THREADS; ++i )
   {
-    jobs.push_back ( new boost::thread ( job,connection_file,device_id ) );
+    jobs.push_back ( new boost::thread ( job_multiple,connection_file,device_id ) );
   }
 
-  for ( size_t i=0; i!=n_threads; ++i )
+  for ( size_t i=0; i!=N_THREADS; ++i )
   {
     //boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
     //CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
     CACTUS_TEST_NOTHROW ( jobs[i]->join() );
     delete jobs[i];
+  }
+}
+
+void job_single ( HwInterface& hw )
+{
+  uint32_t x = static_cast<uint32_t> ( rand() );
+  hw.getNode ( "REG" ).write ( x );
+  ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
+  std::vector<uint32_t> xx;
+
+  for ( size_t i=0; i!= N_SIZE; ++i )
+    {
+      xx.push_back ( static_cast<uint32_t> ( rand() ) );
+    }
+
+  hw.getNode ( "MEM" ).writeBlock ( xx );
+  ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+
+  //notify dispatcher
+  {
+    boost::lock_guard<boost::mutex> lock(mut);
+    n_workers_ready++;
+  }
+  cond.notify_one();
+
+  //wait for dispatcher to be finished
+  boost::unique_lock<boost::mutex> lock(mut);
+  while(!dispatcher_ready)
+    {
+      cond.wait(lock);
+    }
+
+  CACTUS_CHECK ( reg.valid() );
+  CACTUS_CHECK ( mem.valid() );
+  CACTUS_CHECK ( mem.size() == N_SIZE );
+  //can not check content in the mutlithreaded case
+}
+
+void single_hwinterface ( const std::string& connection_file,const std::string& device_id )
+{
+  for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
+  {
+    ConnectionManager manager ( connection_file );
+    HwInterface hw=manager.getDevice ( device_id );
+
+    std::vector<boost::thread*> jobs;
+    
+    for ( size_t i=0; i!=N_THREADS; ++i )
+      {
+	jobs.push_back ( new boost::thread ( job_single,hw ) );
+      }
+    
+    //wait all jobs to be ready
+    boost::unique_lock<boost::mutex> lock(mut);
+    while(n_workers_ready != N_THREADS)
+    {
+        cond.wait(lock);
+    }
+
+    CACTUS_TEST(hw.dispatch());
+    
+    //notifyAll
+    {
+        boost::lock_guard<boost::mutex> lock(mut);
+        dispatcher_ready=true;
+    }
+    cond.notify_all();
+
+    for ( size_t i=0; i!=N_THREADS; ++i )
+      {
+	//boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
+	//CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
+	CACTUS_TEST_NOTHROW ( jobs[i]->join() );
+	delete jobs[i];
+      }
   }
 }
 
@@ -66,6 +148,7 @@ int main ( int argc,char* argv[] )
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
-  CACTUS_TEST ( launch_threads ( N_THREADS,connection_file,device_id ) );
+  CACTUS_TEST ( multiple_hwinterfaces (connection_file,device_id ) );
+  CACTUS_TEST ( single_hwinterface (connection_file,device_id ) );
   return 0;
 }
