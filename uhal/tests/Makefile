@@ -32,10 +32,7 @@ EXECUTABLE_SOURCES = \
 		src/common/test_dummy_block.cxx \
 		src/common/test_dummy_hierarchy.cxx \
 		src/common/test_dummy_multithreaded.cxx \
-		src/common/test_dummy_multithreaded_copied_HwInterface.cxx \
-		src/common/test_dummy_multithreaded_shared_HwInterface.cxx \
 		src/common/test_dummy_timeout.cxx \
-		src/common/test_dummy_single_read_performance.cxx \
 		src/common/test_dummy_metainfo.cxx \
 		src/common/test_dummy_navigation.cxx \
 		src/common/test_dummy_rawclient.cxx \

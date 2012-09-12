@@ -44,7 +44,7 @@ cd $curdir
 %postun 
 
 %files 
-%defattr(-, root, root) 
+%defattr(-, root, root,-) 
 %{_prefix}/bin/*
 %{_prefix}/lib/*
 %{_prefix}/etc/*
