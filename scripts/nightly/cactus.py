@@ -56,7 +56,7 @@ UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
 
 ENVIRONMENT_CMDS = ["env"]
 
-DEPENDENCIES_CMDS = ["sudo yum -y install bzip2-devel ncurses-devel python-devel"]
+DEPENDENCIES_CMDS = ["sudo yum -y install bzip2-devel zlib-devel ncurses-devel python-devel"]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
