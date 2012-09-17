@@ -44,10 +44,6 @@ void write_read_hierarchy ( const std::string& connection, const std::string& id
   hw.getNode ( "SUBSYSTEM2.MEM" ).writeBlock ( xx2 );
   ValVector< uint32_t > mem2 = hw.getNode ( "SUBSYSTEM2.MEM" ).readBlock ( N_1MB );
 
-  //check some preconditions
-  // CACTUS_CHECK ( !reg1.valid() );                                                 // This precondition is false because of the pre-emptive dispatch
-  // CACTUS_CHECK ( !reg2.valid() );                                                 // This precondition is false because of the pre-emptive dispatch
-  // CACTUS_CHECK ( !mem1.valid() );                                                 // This precondition is false because of the pre-emptive dispatch
   CACTUS_CHECK ( !mem2.valid() );
   CACTUS_CHECK ( mem1.size() == N_1MB );
   CACTUS_CHECK ( mem2.size() == N_1MB );
