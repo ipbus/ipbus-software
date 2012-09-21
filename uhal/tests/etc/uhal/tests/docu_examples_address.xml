@@ -64,6 +64,15 @@
     <node id="G2" mask="0x04" />
     <node id="G3" mask="0x08" />
     <node id="G4" mask="0xF0" />
+  </node>
+  
+  <!-- Example 8 - "Documenting your address table" -->
+  <node id="TOP">
+     <node id="H" address="0x00000900" description="LED control register">
+        <node id="H0" mask="0x01" description="Turn LED1 on/off" />
+        <node id="H1" mask="0x02" description="Turn LED2 on/off" />
+     </node>
   </node>  
+  
 </node>
 
