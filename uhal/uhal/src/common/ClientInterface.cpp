@@ -69,7 +69,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
 
   ClientInterface::~ClientInterface() {}
 
-  const std::string& ClientInterface::id()
+  const std::string& ClientInterface::id() const
   {
     try
     {
@@ -112,7 +112,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   // }
 
 
-  std::string ClientInterface::uri()
+  std::string ClientInterface::uri() const
   {
     try
     {
@@ -169,6 +169,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       return getPackingProtocol().write ( aAddr , aSource );
     }
     catch ( uhal::exception& aExc )
@@ -185,6 +186,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
       uint32_t lBitShiftedSource ( aSource << lShiftSize );
 
@@ -221,6 +223,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       return getPackingProtocol().writeBlock ( aAddr, aSource, aMode );
     }
     catch ( uhal::exception& aExc )
@@ -241,6 +244,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       return getPackingProtocol().read ( aAddr );
     }
     catch ( uhal::exception& aExc )
@@ -257,6 +261,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       return getPackingProtocol().read ( aAddr, aMask );
     }
     catch ( uhal::exception& aExc )
@@ -273,6 +278,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       return getPackingProtocol().readBlock ( aAddr, aSize, aMode );
     }
     catch ( uhal::exception& aExc )
@@ -365,6 +371,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       return getPackingProtocol().rmw_bits ( aAddr , aANDterm , aORterm );
     }
     catch ( uhal::exception& aExc )
@@ -384,6 +391,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   {
     try
     {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       return getPackingProtocol().rmw_sum ( aAddr , aAddend );
     }
     catch ( uhal::exception& aExc )
@@ -404,6 +412,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
     try
     {
       log ( Debug() , "Manual dispatch" );
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       getPackingProtocol().Dispatch();
     }
     catch ( uhal::exception& aExc )
@@ -421,6 +430,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
 
   void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
   {
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
     if ( aTimeoutPeriod == 0 )
     {
       getTransportProtocol().setTimeoutPeriod ( boost::posix_time::pos_infin );
@@ -433,6 +443,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
 
   uint32_t ClientInterface::getTimeoutPeriod()
   {
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
     return getTransportProtocol().getTimeoutPeriod().total_milliseconds();
   }
 

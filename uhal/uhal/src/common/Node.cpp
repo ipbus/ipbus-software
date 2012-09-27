@@ -214,7 +214,7 @@ Node::Node ( const Node& aNode ) try :
   }
 
 
-  bool Node::operator == ( const Node& aNode )
+  bool Node::operator == ( const Node& aNode ) const
   {
     try
     {
@@ -444,11 +444,11 @@ Node::Node ( const Node& aNode ) try :
   }
 
 
-  Node& Node::getNode ( const std::string& aId )
+  Node& Node::getNode ( const std::string& aId ) const
   {
     try
     {
-      std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.find ( aId );
+      std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
 
       if ( lIt==mChildrenMap.end() )
       {
@@ -465,7 +465,7 @@ Node::Node ( const Node& aNode ) try :
             break;
           }
 
-          std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
+          std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
 
           if ( lIt!=mChildrenMap.end() )
           {
@@ -499,14 +499,14 @@ Node::Node ( const Node& aNode ) try :
   }
 
 
-  std::vector<std::string> Node::getNodes()
+  std::vector<std::string> Node::getNodes() const
   {
     try
     {
       std::vector<std::string> lNodes;
       lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
 
-      for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+      for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
       {
         lNodes.push_back ( lIt->first );
       }
@@ -523,7 +523,7 @@ Node::Node ( const Node& aNode ) try :
     }
   }
 
-  std::vector<std::string> Node::getNodes ( const std::string& aRegex )
+  std::vector<std::string> Node::getNodes ( const std::string& aRegex ) const
   {
     try
     {
@@ -531,7 +531,7 @@ Node::Node ( const Node& aNode ) try :
       lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
       log ( Info() , "Regular Expression : " , aRegex );
 
-      for ( std::hash_map< std::string , Node* >::iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+      for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
       {
         boost::cmatch lMatch;
 
@@ -556,7 +556,7 @@ Node::Node ( const Node& aNode ) try :
     }
   }
 
-  ValHeader  Node::write ( const uint32_t& aValue )
+  ValHeader  Node::write ( const uint32_t& aValue ) const
   {
     try
     {
@@ -588,7 +588,7 @@ Node::Node ( const Node& aNode ) try :
   }
 
 
-  ValHeader  Node::writeBlock ( const std::vector< uint32_t >& aValues ) // , const defs::BlockReadWriteMode& aMode )
+  ValHeader  Node::writeBlock ( const std::vector< uint32_t >& aValues ) const // , const defs::BlockReadWriteMode& aMode )
   {
     try
     {
@@ -628,7 +628,7 @@ Node::Node ( const Node& aNode ) try :
   }
 
 
-  ValWord< uint32_t > Node::read()
+  ValWord< uint32_t > Node::read() const
   {
     try
     {
@@ -660,7 +660,7 @@ Node::Node ( const Node& aNode ) try :
   }
 
 
-  ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize ) //, const defs::BlockReadWriteMode& aMode )
+  ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize ) const //, const defs::BlockReadWriteMode& aMode )
   {
     try
     {
@@ -823,7 +823,7 @@ Node::Node ( const Node& aNode ) try :
   // }
   // }
 
-  ClientInterface& Node::getClient()
+  ClientInterface& Node::getClient() const
   {
     try
     {

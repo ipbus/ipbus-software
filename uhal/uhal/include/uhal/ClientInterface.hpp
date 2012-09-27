@@ -24,6 +24,7 @@
 
 #include <map>
 
+#include <boost/thread/thread.hpp>
 // #include <uhal/performance.hpp>
 
 
@@ -79,7 +80,7 @@ namespace uhal
       	Return the identifier of the target for this client
       	@return the identifier of the target for this client
       */
-      const std::string& id();
+      const std::string& id() const;
 
       // /**
       // Ping the target for this client
@@ -90,7 +91,7 @@ namespace uhal
       	Return the url of the target for this client
       	@return the url of the target for this client
       */
-      std::string uri();
+      std::string uri() const;
 
       /*
       	Return a description of the behaviour this client
@@ -201,7 +202,7 @@ namespace uhal
       	A method to modify the timeout period for any pending or future transactions
       	@param aTimeoutPeriod the desired timeout period in milliseconds
       */
-      virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod );
+      virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod  = 0 );
 
       /**
       	A method to retrieve the timeout period currently being used
@@ -228,6 +229,9 @@ namespace uhal
       std::string mId;
       //! a struct containing the full URI of the target for this client
       URI mUri;
+
+      //! A MutEx lock used to make sure the access functions are thread safe
+      boost::mutex mMutex;
 
   };
 

@@ -85,7 +85,7 @@ namespace uhal
       	@param aNode a Node to compare
       	@return whether two Nodes are identical
       */
-      bool operator == ( const Node& aNode );
+      bool operator == ( const Node& aNode ) const;
 
 
       /**
@@ -93,7 +93,7 @@ namespace uhal
       	@param aId a full-stop delimeted name path to a node, relative to the current node
       	@return the Node given by the identifier
       */
-      Node& getNode ( const std::string& aId );
+      Node& getNode ( const std::string& aId ) const;
 
 
       /**
@@ -102,14 +102,14 @@ namespace uhal
       	@return the Node given by the identifier
       */
       template< typename T>
-      T& getNode ( const std::string& aId );
+      T& getNode ( const std::string& aId ) const;
 
 
       /**
       	Return all node IDs known to this HwInterface
       	@return all node IDs known to this HwInterface
       */
-      std::vector<std::string> getNodes();
+      std::vector<std::string> getNodes() const;
 
 
       /**
@@ -117,7 +117,7 @@ namespace uhal
       	@param aRegex a string expression which is converted to a (boost) regular expression against which the node IDs are tested
       	@return all node IDs known to this connection manager
       */
-      std::vector<std::string> getNodes ( const std::string& aRegex );
+      std::vector<std::string> getNodes ( const std::string& aRegex ) const;
 
 
       /**
@@ -181,13 +181,13 @@ namespace uhal
       	Write a single, unmasked word to a register
       	@param aValue the value to write to the register
       */
-      ValHeader write ( const uint32_t& aValue );
+      ValHeader write ( const uint32_t& aValue ) const;
 
       /**
       	Write a block of data to a block of registers or a block-write port
       	@param aValues the values to write to the registers or a block-write port
       */
-      ValHeader writeBlock ( const std::vector< uint32_t >& aValues );
+      ValHeader writeBlock ( const std::vector< uint32_t >& aValues ) const;
 
       /**
       	DEPRICATED! Write a block of data to a block of registers or a block-write port
@@ -213,14 +213,14 @@ namespace uhal
       	Read a single, unmasked, unsigned word
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      ValWord< uint32_t > read ( );
+      ValWord< uint32_t > read ( ) const;
 
       /**
       	Read a block of unsigned data from a block of registers or a block-read port
       	@param aSize the number of words to read
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      ValVector< uint32_t > readBlock ( const uint32_t& aSize );
+      ValVector< uint32_t > readBlock ( const uint32_t& aSize ) const;
 
       /**
       	DEPRICATED! Read a block of unsigned data from a block of registers or a block-read port
@@ -299,7 +299,7 @@ namespace uhal
       	Get the underlying IPbus client
       	@return the IPbus client that will be used to issue a dispatch
       */
-      ClientInterface& getClient();
+      ClientInterface& getClient() const;
 
 
     private:

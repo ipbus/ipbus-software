@@ -56,28 +56,38 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     // Device IP address (4 bytes)
     // Device Port number (2 bytes)
     // Error code (2 bytes)
-    mMutex.lock();
-    mPreambles.push_back ( tPreamble() );
-    tPreamble& lPreamble ( mPreambles.back() );
-    mMutex.unlock();
-    lPreamble.mSendByteCountPtr = ( uint32_t* ) ( mCurrentBuffers->send ( ( uint32_t ) ( 0 ) ) );
+
+	tPreamble* lPreamble;
+
+    {
+	  boost::lock_guard<boost::mutex> lLock ( mMutex );
+   	  mPreambles.push_back ( tPreamble() );
+      lPreamble = & mPreambles.back();
+    }
+
+    lPreamble->mSendByteCountPtr = ( uint32_t* ) ( mCurrentBuffers->send ( ( uint32_t ) ( 0 ) ) );
     mCurrentBuffers->send ( mDeviceIPaddress );
     mCurrentBuffers->send ( mDevicePort );
-    lPreamble.mSendWordCountPtr = ( uint16_t* ) ( mCurrentBuffers->send ( ( uint16_t ) ( 0 ) ) );
-    mCurrentBuffers->receive ( lPreamble.mReplyTotalByteCounter );
-    mCurrentBuffers->receive ( lPreamble.mReplyChunkByteCounter );
-    mCurrentBuffers->receive ( lPreamble.mReplyDeviceIPaddress );
-    mCurrentBuffers->receive ( lPreamble.mReplyDevicePort );
-    mCurrentBuffers->receive ( lPreamble.mReplyErrorCode );
+    lPreamble->mSendWordCountPtr = ( uint16_t* ) ( mCurrentBuffers->send ( ( uint16_t ) ( 0 ) ) );
+    mCurrentBuffers->receive ( lPreamble->mReplyTotalByteCounter );
+    mCurrentBuffers->receive ( lPreamble->mReplyChunkByteCounter );
+    mCurrentBuffers->receive ( lPreamble->mReplyDeviceIPaddress );
+    mCurrentBuffers->receive ( lPreamble->mReplyDevicePort );
+    mCurrentBuffers->receive ( lPreamble->mReplyErrorCode );
     PackingProtocol::Preamble();
   }
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   void ControlHubHostPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
   {
-    mMutex.lock();
-    tPreamble& lPreamble ( mPreambles.back() );
-    mMutex.unlock();
+
+	tPreamble* lPreamble;
+
+    {
+	  boost::lock_guard<boost::mutex> lLock ( mMutex );
+      lPreamble = & mPreambles.back();
+    }
+
     uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
 
     if ( lWords < 11 ) // 8 words of data + 3 words of preamble
@@ -91,8 +101,8 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     }
 
     uint32_t lByteCount ( mCurrentBuffers->sendCounter() );
-    *lPreamble.mSendByteCountPtr = htonl ( lByteCount-4 );
-    *lPreamble.mSendWordCountPtr = htons ( ( lByteCount-12 ) >>2 );
+    *lPreamble->mSendByteCountPtr = htonl ( lByteCount-4 );
+    *lPreamble->mSendWordCountPtr = htons ( ( lByteCount-12 ) >>2 );
   }
 
 
@@ -110,23 +120,28 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     lSendBuffer += 12;
     std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyIt ( aBuffers->getReplyBuffer().begin() );
     std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyEnd ( aBuffers->getReplyBuffer().end() );
-    mMutex.lock();
-    tPreamble& lPreamble ( mPreambles.front() );
-    mMutex.unlock();
+
+	tPreamble* lPreamble;
+
+    {
+	  boost::lock_guard<boost::mutex> lLock ( mMutex );
+      lPreamble = & mPreambles.front();
+    }
+
     /*		log ( Info() , "Byte Count 1 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) ) ,
-    								" : Memory : " , Integer ( lPreamble.mReplyTotalByteCounter ) ,
+    								" : Memory : " , Integer ( lPreamble->mReplyTotalByteCounter ) ,
     								" : Reply counter : " , Integer ( aBuffers->replyCounter() )
     		);*/
     lReplyIt++;
     /*		log ( Info() , "Byte Count 2 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
-    								" : Memory : " , Integer ( lPreamble.mReplyChunkByteCounter ) );*/
+    								" : Memory : " , Integer ( lPreamble->mReplyChunkByteCounter ) );*/
     lReplyIt++;
 
     /*		log ( Info() , "IP : " , Integer ( *(( uint32_t* )( lReplyIt->first )) )  ,
-    								" : Memory : " , Integer ( lPreamble.mReplyDeviceIPaddress ) );*/
-    if ( lPreamble.mReplyDeviceIPaddress != mDeviceIPaddress )
+    								" : Memory : " , Integer ( lPreamble->mReplyDeviceIPaddress ) );*/
+    if ( lPreamble->mReplyDeviceIPaddress != mDeviceIPaddress )
     {
-      log ( Error() , "Returned IP address " , Integer ( lPreamble.mReplyDeviceIPaddress , IntFmt< hex , fixed >() ) ,
+      log ( Error() , "Returned IP address " , Integer ( lPreamble->mReplyDeviceIPaddress , IntFmt< hex , fixed >() ) ,
             " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) );
       return false;
     }
@@ -134,10 +149,10 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     lReplyIt++;
 
     /*		log ( Info() , "PORT : " , Integer  ( *(( uint16_t* )( lReplyIt->first )), IntFmt< hex , fixed >() )  ,
-    								" : Memory : " , Integer  ( lPreamble.mReplyDevicePort, IntFmt< hex , fixed >() ) );*/
-    if ( lPreamble.mReplyDevicePort != mDevicePort )
+    								" : Memory : " , Integer  ( lPreamble->mReplyDevicePort, IntFmt< hex , fixed >() ) );*/
+    if ( lPreamble->mReplyDevicePort != mDevicePort )
     {
-      log ( Error() , "Returned Port number " , Integer ( lPreamble.mReplyDevicePort ) ,
+      log ( Error() , "Returned Port number " , Integer ( lPreamble->mReplyDevicePort ) ,
             " does not match that sent " , Integer ( mDevicePort ) );
       return false;
     }
@@ -145,17 +160,20 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     lReplyIt++;
 
     /*		log ( Info() , "Error code : " , Integer ( *(( uint16_t* )( lReplyIt->first )) )  ,
-    								" : Memory : " , Integer ( lPreamble.mReplyErrorCode ) );*/
-    if ( lPreamble.mReplyErrorCode != 0 )
+    								" : Memory : " , Integer ( lPreamble->mReplyErrorCode ) );*/
+    if ( lPreamble->mReplyErrorCode != 0 )
     {
-      log ( Error() , "Control Hub reported error code " , Integer ( lPreamble.mReplyErrorCode, IntFmt< hex , fixed >() ) );
+      log ( Error() , "Control Hub reported error code " , Integer ( lPreamble->mReplyErrorCode, IntFmt< hex , fixed >() ) );
       return false;
     }
 
     lReplyIt++;
-    mMutex.lock();
-    mPreambles.pop_front();
-    mMutex.unlock();
+
+    {
+	  boost::lock_guard<boost::mutex> lLock ( mMutex );
+      mPreambles.pop_front();
+    }
+
     bool lRet =  PackingProtocol::Validate ( lSendBuffer ,
                  lSendBufferEnd ,
                  lReplyIt ,
