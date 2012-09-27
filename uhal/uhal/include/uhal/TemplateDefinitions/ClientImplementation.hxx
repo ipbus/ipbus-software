@@ -7,7 +7,6 @@ namespace uhal
 
   //! A class to directly access locally-connected devices via IPbus over UDP
   template< eIPbusProtocolVersion IPbusProtocolVersion >
-
 IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId , const URI& aUri ) try :
     ClientInterface ( aId , aUri ),
                     mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
@@ -23,6 +22,26 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
   {
     StdException ( aExc ).throwFrom ( ThisLocation() );
   }
+
+
+
+  template< eIPbusProtocolVersion IPbusProtocolVersion >
+IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const IPBusUDPClient< IPbusProtocolVersion >& aIPBusUDPClient ) try :
+    ClientInterface ( aIPBusUDPClient ),
+                    mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
+                    mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
+  {
+    Link ( mTransportProtocol , mPackingProtocol );
+  }
+  catch ( uhal::exception& aExc )
+  {
+    aExc.rethrowFrom ( ThisLocation() );
+  }
+  catch ( const std::exception& aExc )
+  {
+    StdException ( aExc ).throwFrom ( ThisLocation() );
+  }
+
 
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
@@ -105,6 +124,25 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
+
+IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const IPBusTCPClient< IPbusProtocolVersion > &aIPBusTCPClient ) try :
+    ClientInterface ( aIPBusTCPClient ),
+                    mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
+                    mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
+  {
+    Link ( mTransportProtocol , mPackingProtocol );
+  }
+  catch ( uhal::exception& aExc )
+  {
+    aExc.rethrowFrom ( ThisLocation() );
+  }
+  catch ( const std::exception& aExc )
+  {
+    StdException ( aExc ).throwFrom ( ThisLocation() );
+  }
+
+
+  template< eIPbusProtocolVersion IPbusProtocolVersion >
   std::string IPBusTCPClient< IPbusProtocolVersion >::description()
   {
     return "Direct access to hardware via TCP, using " + toString ( IPbusProtocolVersion );
@@ -169,6 +207,27 @@ IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId 
 ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& aId , const URI& aUri ) try :
     ClientInterface ( aId , aUri ),
                     mTargetId ( ExtractTargetID ( aUri ) ),
+                    mPackingProtocol ( mTargetId.first , mTargetId.second , mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
+                    mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
+  {
+    Link ( mTransportProtocol , mPackingProtocol );
+  }
+  catch ( uhal::exception& aExc )
+  {
+    aExc.rethrowFrom ( ThisLocation() );
+  }
+  catch ( const std::exception& aExc )
+  {
+    StdException ( aExc ).throwFrom ( ThisLocation() );
+  }
+
+
+
+  template< eIPbusProtocolVersion IPbusProtocolVersion >
+
+ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const ControlHubClient< IPbusProtocolVersion > &aControlHubClient  ) try :
+    ClientInterface ( aControlHubClient ),
+                    mTargetId ( aControlHubClient.mTargetId ),
                     mPackingProtocol ( mTargetId.first , mTargetId.second , mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
                     mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
   {

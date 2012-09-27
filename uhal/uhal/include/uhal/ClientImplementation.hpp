@@ -52,6 +52,8 @@ namespace uhal
       */
       IPBusUDPClient ( const std::string& aId , const URI& aUri );
 
+      IPBusUDPClient ( const IPBusUDPClient& aIPBusUDPClient );
+
       /**
       Return a description of the behaviour this client
       @return a description of the behaviour this client
@@ -113,6 +115,8 @@ namespace uhal
       @param aUri a struct containing the full URI of the target.
       */
       IPBusTCPClient ( const std::string& aId , const URI& aUri );
+
+      IPBusTCPClient ( const IPBusTCPClient& aIPBusTCPClient );
 
       /**
       Return a description of the behaviour this client
@@ -185,6 +189,8 @@ namespace uhal
       	@param aUri a struct containing the full URI of the target.
       */
       ControlHubClient ( const std::string& aId , const URI& aUri );
+
+      ControlHubClient ( const ControlHubClient& aControlHubClient );
 
       /**
       	Return a description of the behaviour this client

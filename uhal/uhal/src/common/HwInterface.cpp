@@ -108,7 +108,7 @@ HwInterface::HwInterface ( const HwInterface& otherHw ) try :
   }
 
 
-  const std::string& HwInterface::id()
+  const std::string& HwInterface::id() const
   {
     try
     {
@@ -125,7 +125,7 @@ HwInterface::HwInterface ( const HwInterface& otherHw ) try :
   }
 
 
-  std::string HwInterface::uri()
+  std::string HwInterface::uri() const
   {
     try
     {
@@ -175,7 +175,7 @@ HwInterface::HwInterface ( const HwInterface& otherHw ) try :
     }
   }
 
-  Node& HwInterface::getNode ()
+  Node& HwInterface::getNode () const
   {
     try
     {
@@ -192,7 +192,7 @@ HwInterface::HwInterface ( const HwInterface& otherHw ) try :
   }
 
 
-  Node& HwInterface::getNode ( const std::string& aId )
+  Node& HwInterface::getNode ( const std::string& aId ) const
   {
     try
     {
@@ -208,7 +208,7 @@ HwInterface::HwInterface ( const HwInterface& otherHw ) try :
     }
   }
 
-  std::vector<std::string> HwInterface::getNodes()
+  std::vector<std::string> HwInterface::getNodes() const
   {
     try
     {
@@ -224,7 +224,7 @@ HwInterface::HwInterface ( const HwInterface& otherHw ) try :
     }
   }
 
-  std::vector<std::string> HwInterface::getNodes ( const std::string& aRegex )
+  std::vector<std::string> HwInterface::getNodes ( const std::string& aRegex ) const
   {
     try
     {

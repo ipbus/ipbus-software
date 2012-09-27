@@ -46,13 +46,13 @@ namespace uhal
       	Return the url of the target for this client
       	@return the url of the target for this client
       */
-      std::string uri();
+      std::string uri() const;
 
       /**
       	Return the identifier of the target for this client
       	@return the identifier of the target for this client
       */
-      const std::string& id();
+      const std::string& id() const;
 
 
       /**
@@ -81,14 +81,14 @@ namespace uhal
       	Retrieve the top-level node
       	@return the top-level node
       */
-      Node& getNode ();
+      Node& getNode () const;
 
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the top-level node
       	@param aId a full-stop delimeted name path to a node, relative to the top-level node
       	@return the Node given by the identifier
       */
-      Node& getNode ( const std::string& aId );
+      Node& getNode ( const std::string& aId ) const;
 
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the current node and cast it to a particular node type
@@ -96,21 +96,21 @@ namespace uhal
       	@return the Node given by the identifier
       */
       template< typename T>
-      T& getNode ( const std::string& aId );
+      T& getNode ( const std::string& aId ) const;
 
 
       /**
       	Return all node IDs known to this HwInterface
       	@return all node IDs known to this HwInterface
       */
-      std::vector<std::string> getNodes();
+      std::vector<std::string> getNodes() const;
 
       /**
       	Return all node IDs known to this connection manager which match a (boost) regular expression
       	@param aRegex a string expression which is converted to a (boost) regular expression against which the node IDs are tested
       	@return all node IDs known to this connection manager
       */
-      std::vector<std::string> getNodes ( const std::string& aRegex );
+      std::vector<std::string> getNodes ( const std::string& aRegex ) const;
 
       // /**
       // Get the target device's reserved address information

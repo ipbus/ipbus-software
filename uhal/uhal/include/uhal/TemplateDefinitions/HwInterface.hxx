@@ -4,7 +4,7 @@ namespace uhal
 {
 
   template< typename T>
-  T& HwInterface::getNode ( const std::string& aId )
+  T& HwInterface::getNode ( const std::string& aId ) const
   {
     try
     {
