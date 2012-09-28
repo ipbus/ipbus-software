@@ -4,6 +4,8 @@
 #include <uhal/log/log_inserters.time.hpp>
 #include <uhal/log/log_backend.colour_terminal.hpp>
 
+#include <uhal/log/log_inserters.threadID.hpp>
+
 namespace uhal
 {
 
@@ -11,6 +13,8 @@ namespace uhal
   void log_head_template_specialization_helper< Fatal >::print ( )
   {
     put ( "\033[0;31m[" ); //standard red
+	log_insert_threadID();	
+	put ( ' ' );
     log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
     put ( " CRITICAL] " );
   }
@@ -19,6 +23,8 @@ namespace uhal
   void log_head_template_specialization_helper< Error >::print ( )
   {
     put ( "\033[0;31m[" ); //standard red
+	log_insert_threadID();	
+	put ( ' ' );
     log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
     put ( " ERROR] " );
   }
@@ -27,6 +33,8 @@ namespace uhal
   void log_head_template_specialization_helper< Warning >::print ( )
   {
     put ( "\033[0;33m[" ); //standard yellow
+	log_insert_threadID();	
+	put ( ' ' );
     log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
     put ( " WARNING] " );
   }
@@ -35,6 +43,8 @@ namespace uhal
   void log_head_template_specialization_helper< Notice >::print ( )
   {
     put ( "\033[0;32m[" ); //standard green
+	log_insert_threadID();	
+	put ( ' ' );
     log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
     put ( " NOTICE] " );
   }
@@ -43,6 +53,8 @@ namespace uhal
   void log_head_template_specialization_helper< Info >::print ( )
   {
     put ( "\033[0;36m[" ); //standard cyan
+	log_insert_threadID();	
+	put ( ' ' );
     log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
     put ( " INFO] " );
   }
@@ -51,6 +63,8 @@ namespace uhal
   void log_head_template_specialization_helper< Debug >::print ( )
   {
     put ( "\033[1;34m[" ); //standard blue
+	log_insert_threadID();	
+	put ( ' ' );
     log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
     put ( " DEBUG] " );
   }
