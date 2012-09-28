@@ -296,9 +296,9 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
 
 void fileFooters ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
-  aHppFile	<< "}\n"
+  aHppFile	<< "}\n\n"
             << "#include <uhal/log/log.hxx>\n"
-            << "#endif\n";
+            << "#endif\n\n";
   aHxxFile	<< "}\n"
             << "\n";
   aCppFile	<< "}\n"

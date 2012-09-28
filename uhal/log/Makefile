@@ -19,8 +19,12 @@ PACKAGE_RELEASE = 1
 
 INCLUDES = $(wildcard include/uhal/log/*.hpp)
 LIBRARY = lib/libcactus_uhal_log.so
-LIBRARY_SOURCES = $(wildcard src/common/log_*.cpp)
-LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
+
+FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp)
+BACKEND_SOURCES = $(wildcard src/common/log_backend.files.cpp)
+#BACKEND_SOURCES = $(wildcard src/common/log_backend.colour_terminal.cpp)
+
+LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${FRONTEND_SOURCES} ${BACKEND_SOURCES})
 
 EXECUTABLE_SOURCES = 	src/common/generator.cxx
 
