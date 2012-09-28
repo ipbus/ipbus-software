@@ -27,9 +27,11 @@ EXECUTABLE_SOURCES = 	src/common/generator.cxx
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
-LIBRARY_PATH = 	
+LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}
 
-LIBRARIES =  
+LIBRARIES =  -lpthread \
+				-lboost_thread 
+
 
 INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} 

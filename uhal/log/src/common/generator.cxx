@@ -30,6 +30,7 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "\n"
             << "#include <uhal/log/log_backend.hpp>\n"
             << "#include <uhal/log/log_inserters.hpp>\n"
+            << "#include <boost/thread/thread.hpp>\n"
             << "\n"
             << "namespace uhal{\n"
             << "\n"
@@ -104,6 +105,20 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\n";
   aCppFile	<< gDivider
             << "\n";
+
+
+  // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  aHppFile << "/**\n"
+           << "\tFunction to retrieve the mutex lock used by the logger\n"
+           << "*/\n"
+           << "\tboost::mutex& GetLoggingMutex();\n";
+
+  aCppFile << "\tboost::mutex& GetLoggingMutex()\n"
+           << "\t{\n"
+           << "\t\treturn log_configuration::mMutex;\n"
+           << "\t}\n";
+
   // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   std::stringstream lIfDefs, lIfDefs2, lEndIfs;
 
@@ -191,11 +206,18 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\tstatic const bool mTrue;\n"
            << "\t//!Define a static const member variable to have a value of false so that we can safely return a const reference to false\n"
            << "\tstatic const bool mFalse;\n"
+           << "\n"
+           << "\t//!Make GetLoggingMutex function a friend so it can access our private members\n"
+           << "\tfriend boost::mutex& GetLoggingMutex();\n"
+           << "\t//!Define a static Mutex lock for thread safe logging\n"
+           << "\tstatic boost::mutex mMutex;\n"
            << "};\n"
            << "\n";
   aCppFile << "\n"
            << "const bool log_configuration::mTrue = true;\n"
            << "const bool log_configuration::mFalse = false;\n"
+           << "\n"
+           << "boost::mutex log_configuration::mMutex;\n"
            << "\n";
   aHppFile	<< gDivider
             << "\n";
@@ -254,6 +276,7 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << "{\n"
                << lIfDefs.str()
                << "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
+               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
                << "\t\t\tlog_head< " << *lIt << " >();\n"
                << lInstructions.str()
                << "\t\t\tlog_tail< " << *lIt << " >();\n"
