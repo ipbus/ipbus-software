@@ -30,7 +30,4 @@ namespace uhal
 	};
 }
 
-
-#include <uhal/log/log_backend.files.hxx>
-
 #endif

@@ -53,7 +53,7 @@ namespace uhal
 	boost::thread_specific_ptr< log_file::log_file_helper > log_file::mLogFileHelper;
 
 
-
+/*
   template<>
   void log_head_template_specialization_helper< Fatal >::print ( )
   {
@@ -101,7 +101,74 @@ namespace uhal
     log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
     put ( " DEBUG] " );
   }
+*/
 
+  
+  void log_head_Fatal( )
+  {
+    put ( '[' ); 
+    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
+    put ( " CRITICAL] " );
+  }
+
+  
+  void log_head_Error( )
+  {
+    put ( '[' ); 
+    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
+    put ( " ERROR] " );
+  }
+
+  
+  void log_head_Warning( )
+  {
+    put ( '[' ); 
+    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
+    put ( " WARNING] " );
+  }
+
+  
+  void log_head_Notice( )
+  {
+    put ( '[' ); 
+    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
+    put ( " NOTICE] " );
+  }
+
+  
+  void log_head_Info( )
+  {
+    put ( '[' ); 
+    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
+    put ( " INFO] " );
+  }
+
+  
+  void log_head_Debug( )
+  {
+    put ( '[' ); 
+    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
+    put ( " DEBUG] " );
+  }
+
+
+  void log_tail_Fatal( )
+  {}
+
+  void log_tail_Error( )
+  {}
+
+  void log_tail_Warning( )
+  {}
+
+  void log_tail_Notice( )
+  {}
+
+  void log_tail_Info( )
+  {}
+
+  void log_tail_Debug( )
+  {}
 
 
 

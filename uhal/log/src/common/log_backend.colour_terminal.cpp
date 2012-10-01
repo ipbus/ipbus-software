@@ -1,17 +1,14 @@
 
-#include <uhal/log/log.hpp>
+#include <uhal/log/log_backend.hpp>
 
 #include <uhal/log/log_inserters.time.hpp>
-#include <uhal/log/log_backend.hpp>
-#include <uhal/log/log_backend.colour_terminal.hpp>
-
 #include <uhal/log/log_inserters.threadID.hpp>
 
 namespace uhal
 {
 
-  template<>
-  void log_head_template_specialization_helper< Fatal >::print ( )
+  
+  void log_head_Fatal( )
   {
     put ( "\033[0;31m[" ); //standard red
 	log_insert_threadID();	
@@ -20,8 +17,8 @@ namespace uhal
     put ( " CRITICAL] " );
   }
 
-  template<>
-  void log_head_template_specialization_helper< Error >::print ( )
+  
+  void log_head_Error( )
   {
     put ( "\033[0;31m[" ); //standard red
 	log_insert_threadID();	
@@ -30,8 +27,8 @@ namespace uhal
     put ( " ERROR] " );
   }
 
-  template<>
-  void log_head_template_specialization_helper< Warning >::print ( )
+  
+  void log_head_Warning( )
   {
     put ( "\033[0;33m[" ); //standard yellow
 	log_insert_threadID();	
@@ -40,8 +37,8 @@ namespace uhal
     put ( " WARNING] " );
   }
 
-  template<>
-  void log_head_template_specialization_helper< Notice >::print ( )
+  
+  void log_head_Notice( )
   {
     put ( "\033[0;32m[" ); //standard green
 	log_insert_threadID();	
@@ -50,8 +47,8 @@ namespace uhal
     put ( " NOTICE] " );
   }
 
-  template<>
-  void log_head_template_specialization_helper< Info >::print ( )
+  
+  void log_head_Info( )
   {
     put ( "\033[0;36m[" ); //standard cyan
 	log_insert_threadID();	
@@ -60,8 +57,8 @@ namespace uhal
     put ( " INFO] " );
   }
 
-  template<>
-  void log_head_template_specialization_helper< Debug >::print ( )
+  
+  void log_head_Debug( )
   {
     put ( "\033[1;34m[" ); //standard blue
 	log_insert_threadID();	
@@ -70,6 +67,36 @@ namespace uhal
     put ( " DEBUG] " );
   }
 
+
+  void log_tail_Fatal( )
+  {
+    put ( "\033[0m\n" );
+  }
+
+  void log_tail_Error( )
+  {
+    put ( "\033[0m\n" );
+  }
+
+  void log_tail_Warning( )
+  {
+    put ( "\033[0m\n" );
+  }
+
+  void log_tail_Notice( )
+  {
+    put ( "\033[0m\n" );
+  }
+
+  void log_tail_Info( )
+  {
+    put ( "\033[0m\n" );
+  }
+
+  void log_tail_Debug( )
+  {
+    put ( "\033[0m\n" );
+  }
 
 
 

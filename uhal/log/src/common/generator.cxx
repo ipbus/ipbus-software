@@ -112,7 +112,7 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
   aHppFile << "/**\n"
            << "\tFunction to retrieve the mutex lock used by the logger\n"
            << "*/\n"
-           << "\tboost::mutex& GetLoggingMutex();\n";
+           << "boost::mutex& GetLoggingMutex();\n";
 
   aCppFile << "\tboost::mutex& GetLoggingMutex()\n"
            << "\t{\n"
@@ -277,9 +277,11 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << lIfDefs.str()
                << "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
                << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
-               << "\t\t\tlog_head< " << *lIt << " >();\n"
+//               << "\t\t\tlog_head< " << *lIt << " >();\n"
+               << "\t\t\tlog_head_" << *lIt << "();\n"
                << lInstructions.str()
-               << "\t\t\tlog_tail< " << *lIt << " >();\n"
+//               << "\t\t\tlog_tail< " << *lIt << " >();\n"
+               << "\t\t\tlog_tail_" << *lIt << "();\n"
                << "\t\t}\n"
                << lEndIfs.str()
                << "}\n"
