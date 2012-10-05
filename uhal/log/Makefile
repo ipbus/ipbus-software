@@ -33,8 +33,8 @@ EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
 LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}
 
-LIBRARIES =  -lpthread \
-				-lboost_thread 
+LIBRARIES =  	-lpthread \
+		-lboost_thread 
 
 
 INCLUDE_PATH = 	-Iinclude  \
@@ -44,7 +44,7 @@ CPP_FLAGS = -g -Wall -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH}
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 
-LINK_EXECUTABLE_FLAGS = -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
+LINK_EXECUTABLE_FLAGS = -Wall -g 
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
