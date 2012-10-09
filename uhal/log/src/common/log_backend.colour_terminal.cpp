@@ -7,95 +7,90 @@
 namespace uhal
 {
 
+
+	namespace colour_terminal
+	{
+		void log_header( const char* aStartHeader , const char* aEndHeader )
+		{
+			put ( aStartHeader ); 
+			log_inserter ( Time ( Now() , TimeFmt< day,'-',mth,'-',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
+			put ( " [" );
+			log_insert_threadID();	
+			put ( "] " );
+			put ( aEndHeader );
+		}
+
+		void log_tail()
+		{
+			put ( "\033[0m\n" );
+		}
+	}
+
   
   void log_head_Fatal( )
   {
-    put ( "\033[0;31m[" ); //standard red
-	log_insert_threadID();	
-	put ( ' ' );
-    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-    put ( " CRITICAL] " );
+	colour_terminal::log_header( "\033[0;31m" , "FATAL - " ); //standard red
   }
 
   
   void log_head_Error( )
   {
-    put ( "\033[0;31m[" ); //standard red
-	log_insert_threadID();	
-	put ( ' ' );
-    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-    put ( " ERROR] " );
+	colour_terminal::log_header( "\033[0;31m" , "ERROR - " ); //standard red
   }
 
   
   void log_head_Warning( )
   {
-    put ( "\033[0;33m[" ); //standard yellow
-	log_insert_threadID();	
-	put ( ' ' );
-    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-    put ( " WARNING] " );
+    colour_terminal::log_header( "\033[0;33m" , "WARNING - " ); //standard yellow
   }
 
   
   void log_head_Notice( )
   {
-    put ( "\033[0;32m[" ); //standard green
-	log_insert_threadID();	
-	put ( ' ' );
-    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-    put ( " NOTICE] " );
+    colour_terminal::log_header( "\033[0;32m" , "NOTICE - " ); //standard green
   }
 
   
   void log_head_Info( )
   {
-    put ( "\033[0;36m[" ); //standard cyan
-	log_insert_threadID();	
-	put ( ' ' );
-    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-    put ( " INFO] " );
+    colour_terminal::log_header( "\033[0;36m" , "INFO - "); //standard cyan
   }
 
   
   void log_head_Debug( )
   {
-    put ( "\033[1;34m[" ); //standard blue
-	log_insert_threadID();	
-	put ( ' ' );
-    log_inserter ( Time ( Now() , TimeFmt< day,'/',mth,'/',yr,' ',hr,':',min,':',sec,'.',usec >() ) );
-    put ( " DEBUG] " );
+    colour_terminal::log_header( "\033[1;34m" , "DEBUG - " ); //standard blue
   }
 
 
   void log_tail_Fatal( )
   {
-    put ( "\033[0m\n" );
+    colour_terminal::log_tail();
   }
 
   void log_tail_Error( )
   {
-    put ( "\033[0m\n" );
+    colour_terminal::log_tail();
   }
 
   void log_tail_Warning( )
   {
-    put ( "\033[0m\n" );
+    colour_terminal::log_tail();
   }
 
   void log_tail_Notice( )
   {
-    put ( "\033[0m\n" );
+    colour_terminal::log_tail();
   }
 
   void log_tail_Info( )
   {
-    put ( "\033[0m\n" );
+    colour_terminal::log_tail();
   }
 
   void log_tail_Debug( )
   {
-    put ( "\033[0m\n" );
+    colour_terminal::log_tail();
   }
 
 
