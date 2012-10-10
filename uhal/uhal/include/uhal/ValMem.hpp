@@ -353,6 +353,16 @@ namespace uhal
       	@return a const reverse iterator to the reverse end (one before the zero'th entry) of the underlying memory
       */
       const_reverse_iterator rend() const;
+      /**
+      	Return the value of the validated memory with check on validity
+      	@return the value of the validated memory
+      */
+      std::vector<T> value() const;
+      /**
+      	If the memory has not previously been marked as valid, set the value
+      	@param aValue the value of the validated memory
+      */
+      void value ( const std::vector<T>& aValue );
 
       /*
       			/ **

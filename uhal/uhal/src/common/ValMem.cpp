@@ -699,6 +699,56 @@ ValVector< T >::ValVector() try :
   }
 
 
+  template< typename T >
+  std::vector<T> ValVector< T >::value() const
+  {
+    try
+    {
+      if ( mMembers->valid )
+      {
+        return mMembers->value;
+      }
+      else
+      {
+        log ( Error() , "Access attempted on non-validated memory" );
+        NonValidatedMemory().throwFrom ( ThisLocation() );
+      }
+    }
+    catch ( uhal::exception& aExc )
+    {
+      aExc.rethrowFrom ( ThisLocation() );
+    }
+    catch ( const std::exception& aExc )
+    {
+      StdException ( aExc ).throwFrom ( ThisLocation() );
+    }
+  }
+
+  template< typename T >
+  void ValVector< T >::value ( const std::vector<T>& aValue )
+  {
+    try
+    {
+      if ( !mMembers->valid )
+      {
+        mMembers->value = aValue;
+      }
+      else
+      {
+        log ( Error() , "Attempted  to modify validated memory" );
+        ValMemImutabilityViolation().throwFrom ( ThisLocation() );
+      }
+    }
+    catch ( uhal::exception& aExc )
+    {
+      aExc.rethrowFrom ( ThisLocation() );
+    }
+    catch ( const std::exception& aExc )
+    {
+      StdException ( aExc ).throwFrom ( ThisLocation() );
+    }
+  }
+
   /*
   	template< typename T >
   	typename ValVector< T >::iterator ValVector< T >::begin()
