@@ -1,9 +1,11 @@
 #ifndef _uhal_HttpResponseGrammar_hpp_
 #define _uhal_HttpResponseGrammar_hpp_
 
-#include <boost/fusion/include/adapt_struct.hpp>
+//#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_pair.hpp>
-#include <boost/spirit/include/qi.hpp>
+//#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_grammar.hpp>
+
 
 #include <vector>
 #include <string>

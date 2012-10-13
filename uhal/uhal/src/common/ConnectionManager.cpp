@@ -8,6 +8,8 @@
 
 #include "uhal/log/log.hpp"
 
+#include <boost/regex.hpp>
+
 
 namespace uhal
 {

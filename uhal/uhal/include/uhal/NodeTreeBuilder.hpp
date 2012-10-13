@@ -12,9 +12,10 @@
 #include "uhal/definitions.hpp"
 #include "uhal/Node.hpp"
 
-#include <boost/utility.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
+//#include <boost/utility.hpp>
+//#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+//#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <boost/spirit/include/qi.hpp>

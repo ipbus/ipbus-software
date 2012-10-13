@@ -9,7 +9,8 @@
 
 #include "uhal/ProtocolInterfaces.hpp"
 
-#include <boost/thread/thread.hpp>
+//#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace uhal
 {

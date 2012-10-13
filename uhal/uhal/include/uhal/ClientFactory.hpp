@@ -13,7 +13,8 @@
 #include "uhal/Utilities.hpp"
 #include "uhal/log/log.hpp"
 
-#include "boost/utility.hpp"
+//#include "boost/utility.hpp"
+#include <boost/shared_ptr.hpp>
 
 #include <map>
 

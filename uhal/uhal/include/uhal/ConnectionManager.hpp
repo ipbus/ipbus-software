@@ -12,8 +12,9 @@
 #include "uhal/HwInterface.hpp"
 #include "uhal/Utilities.hpp"
 
-#include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
+//#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+//#include <boost/regex.hpp>
 
 #include "pugixml/pugixml.hpp"
 

@@ -2,7 +2,11 @@
 #include "uhal/TransportProtocol_TCP.hpp"
 
 // #include <boost/lambda/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/asio/read.hpp>
 
 
 #include <sys/time.h>

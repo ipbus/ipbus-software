@@ -7,6 +7,8 @@
 
 #include "uhal/log/log.hpp"
 
+#include <boost/regex.hpp>
+
 #include <iomanip>
 
 #ifdef __GNUG__

@@ -2,7 +2,8 @@
 #define _uhal_NodeTreeClassAttributeGrammar_hpp_
 
 #include <boost/fusion/adapted/std_pair.hpp>
-#include <boost/spirit/include/qi.hpp>
+//#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_grammar.hpp>
 
 #include <string>
 #include <vector>

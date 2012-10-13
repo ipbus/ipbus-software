@@ -2,6 +2,8 @@
 
 #include "uhal/log/log.hpp"
 
+#include <boost/spirit/include/qi.hpp>
+
 // std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse )
 // {
 // aStream << " > method = " << aHttpResponse.method << "\n";

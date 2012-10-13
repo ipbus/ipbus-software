@@ -3,7 +3,8 @@
 #define _log_backend_files_hxx_
 
 #include <stdio.h>
-#include "boost/thread.hpp" 
+//#include "boost/thread.hpp"
+#include "boost/thread/tss.hpp"
 
 namespace uhal
 {

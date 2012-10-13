@@ -1,5 +1,6 @@
 #include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
 
+#include <boost/spirit/include/qi.hpp>
 
 namespace grammars
 {

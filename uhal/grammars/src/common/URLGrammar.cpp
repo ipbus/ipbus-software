@@ -1,5 +1,7 @@
 #include "uhal/grammars/URLGrammar.hpp"
 
+#include <boost/spirit/include/qi.hpp>
+
 #include "uhal/log/log.hpp"
 
 std::ostream& operator<< ( std::ostream& aStream , const uhal::URI& aURI )

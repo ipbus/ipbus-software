@@ -14,9 +14,20 @@
 
 #include <wordexp.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/asio.hpp>
-#include <boost/spirit/include/qi.hpp>
+//#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+//#include <boost/asio.hpp>
+#include <boost/asio/error.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/streambuf.hpp>
+#include <boost/asio/read.hpp>
+#include <boost/asio/write.hpp>
+//#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/home/qi/parse.hpp>
+#include <boost/spirit/include/qi_char_.hpp>
 #include <boost/bind/bind.hpp>
 
 #include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
