@@ -41,7 +41,7 @@ TEST_PASSED_LIST  = ["TEST PASSED",
 
 ####ENVIRONMENT
 environ["LD_LIBRARY_PATH"] = join(INSTALL_PREFIX,"lib") + ":" + environ.get("LD_LIBARY_PATH","")
-environ["PATH"]            = join(INSTALL_PREFIX,"bin/uhal/tests") + ":" + environ.get("PATH","")
+environ["PATH"]            = join(INSTALL_PREFIX,"bin/uhal/tests") + ":" + join(INSTALL_PREFIX,"bin/pycohal/tests") + ":" + environ.get("PATH","")
 
 ####COMMANDS
 UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
@@ -153,7 +153,11 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "test_dummy_metainfo.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_navigation.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
              "test_dummy_rawclient.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
-             "pkill -f \"DummyHardwareTcp.exe\""
+             "pkill -f \"DummyHardwareTcp.exe\"",
+             #PYCOHAL TESTS
+             "DummyHardwareUdp.exe 50001 &> /dev/null &",
+             "test_pycohal -v",
+             "pkill -f \"DummyHardwareUdp.exe\""
              ]
 
 REPORT_CMDS = ["python $HOME/nightly/nanalyzer.py cactus.py"]

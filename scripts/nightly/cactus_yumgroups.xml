@@ -17,6 +17,7 @@
 <packagereq type="mandatory">cactus-uhal-uhal</packagereq>
 <packagereq type="mandatory">cactus-uhal-tests</packagereq>
 <packagereq type="mandatory">cactus-controlhub</packagereq>
+<packagereq type="mandatory">cactus-pycohal</packagereq>
 </packagelist>
 </group>
 
