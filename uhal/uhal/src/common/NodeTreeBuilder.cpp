@@ -5,6 +5,7 @@
 #include "uhal/log/log.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 namespace uhal
 {

@@ -9,7 +9,7 @@
 #include "uhal/log/log.hpp"
 
 #include <boost/regex.hpp>
-
+#include <boost/spirit/include/qi.hpp>
 
 namespace uhal
 {

@@ -17,8 +17,9 @@
 #include <boost/filesystem/path.hpp>
 //#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
+//#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_symbols.hpp>
 
-#include <boost/spirit/include/qi.hpp>
 #include "uhal/grammars/NodeTreeClassAttributeGrammar.hpp"
 
 
