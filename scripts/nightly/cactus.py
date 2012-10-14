@@ -156,7 +156,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "pkill -f \"DummyHardwareTcp.exe\"",
              #PYCOHAL TESTS
              "DummyHardwareUdp.exe 50001 &> /dev/null &",
-             "test_pycohal -v",
+             "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\""
              ]
 
