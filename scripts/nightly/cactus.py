@@ -27,6 +27,7 @@ ERROR_LIST        = ['TEST FAILED, ',
                      ' ERROR ',
                      ' Error ',
                      'FAILED',
+                     'FAIL: test', 'ERROR: test', #pycohal
                      'terminate called']
 
 IGNORE_ERROR_LIST = []
@@ -35,6 +36,7 @@ TEST_PASSED_LIST  = ["TEST PASSED",
                      "CHECK PASSED",
                      "TEST_THROW PASSED",
                      "TEST_NOTHROW PASSED",
+                     " ... ok", #pycohal
                      "Average read bandwidth",
                      "Average write bandwidth"]
 
