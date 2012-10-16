@@ -25,7 +25,7 @@ namespace uhal
   {
     return _Type< T > ( );
   }
-  
+
   template< typename T >
   _Type< T > Type ( const T& aT )
   {

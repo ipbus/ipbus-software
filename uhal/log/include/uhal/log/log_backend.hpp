@@ -8,15 +8,15 @@
 
 // namespace uhal
 // {
-// 
+//
 //   //! Function called by the log functions to add the line start to a log entry
 //   template< typename T >
 //   void log_head();
-// 
+//
 //   //! Function called by the log functions to add the line ending to a log entry
 //   template< typename T >
 //   void log_tail();
-// 
+//
 //   //! Helper function object to allow template specialization of the log_head function
 //   template< typename T >
 //   struct log_head_template_specialization_helper
@@ -27,7 +27,7 @@
 //       //! Static function to do the actual work
 //       static void print();
 //   };
-// 
+//
 //   /**
 //   	Function to copy a single character to the output buffer
 //   	@param aChar a reference to a single character to copy to the output buffer
@@ -44,7 +44,7 @@
 //   	@param aSize the number of characters to copy to the output buffer
 //   */
 //   void put ( const char* aStart , const uint32_t& aSize );
-// 
+//
 // }
 
 

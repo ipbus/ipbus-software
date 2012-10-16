@@ -340,54 +340,52 @@ namespace uhal
       return ( *lMostStringent ) ( aNode );
     }
 
-    
     std::stringstream lStr;
+
     for ( pugi::xml_attribute lAttr = aNode.first_attribute(); lAttr; lAttr = lAttr.next_attribute() )
     {
       lStr << lAttr.name() << "=\"" << lAttr.value() << "\", ";
     }
-    std::string lString( lStr.str() );
-    lString.resize( lString.size() - 2 );
-    log ( Error() , "Node with attributes : " , lString , " failed all parser rules because : ");
 
-    for( typename std::deque< Rule<R>* >::iterator lIt = lFailedRequired.begin() ; lIt != lFailedRequired.end(); ++lIt )
+    std::string lString ( lStr.str() );
+    lString.resize ( lString.size() - 2 );
+    log ( Error() , "Node with attributes : " , lString , " failed all parser rules because : " );
+
+    for ( typename std::deque< Rule<R>* >::iterator lIt = lFailedRequired.begin() ; lIt != lFailedRequired.end(); ++lIt )
     {
       std::stringstream lStr;
+      uint64_t lTemp ( ( **lIt ).mRequiredHash & ~lHash );
 
-      uint64_t lTemp( (**lIt).mRequiredHash & ~lHash );
       for ( std::hash_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
       {
-        if( (lIt2->second) & lTemp )
+        if ( ( lIt2->second ) & lTemp )
         {
           lStr << "\"" << lIt2->first << "\", ";
         }
       }
-      
-      std::string lString( lStr.str() );
-      lString.resize( lString.size() - 2 );
-     
-      log ( Error() , " > Rule " ,  Integer((**lIt).mRuleId) , " requires attributes : " , lString );
-    }      
 
-    for( typename std::deque< Rule<R>* >::iterator lIt = lFailedForbidden.begin() ; lIt != lFailedForbidden.end(); ++lIt )
-    {
-      std::stringstream lStr;
-
-      uint64_t lTemp( (**lIt).mForbiddenHash & lHash );
-      for ( std::hash_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
-      {
-        if( (lIt2->second) & lTemp )
-        {
-          lStr << "\"" << lIt2->first << "\", ";
-        }
-      }
-      
-      std::string lString( lStr.str() );
-      lString.resize( lString.size() - 2 );
-     
-      log ( Error() , " > Rule " ,  Integer((**lIt).mRuleId) , " forbids attributes : " , lString );
+      std::string lString ( lStr.str() );
+      lString.resize ( lString.size() - 2 );
+      log ( Error() , " > Rule " ,  Integer ( ( **lIt ).mRuleId ) , " requires attributes : " , lString );
     }
-    
+
+    for ( typename std::deque< Rule<R>* >::iterator lIt = lFailedForbidden.begin() ; lIt != lFailedForbidden.end(); ++lIt )
+    {
+      std::stringstream lStr;
+      uint64_t lTemp ( ( **lIt ).mForbiddenHash & lHash );
+
+      for ( std::hash_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
+      {
+        if ( ( lIt2->second ) & lTemp )
+        {
+          lStr << "\"" << lIt2->first << "\", ";
+        }
+      }
+
+      std::string lString ( lStr.str() );
+      lString.resize ( lString.size() - 2 );
+      log ( Error() , " > Rule " ,  Integer ( ( **lIt ).mRuleId ) , " forbids attributes : " , lString );
+    }
 
     NoRulesPassed().throwFrom ( ThisLocation() );
   }

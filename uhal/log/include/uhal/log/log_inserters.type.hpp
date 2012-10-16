@@ -15,7 +15,7 @@ namespace uhal
   template< typename T > _Type< T > Type ( const T& aT );
 
   template< typename T >
-  class _Type 
+  class _Type
   {
       friend _Type< T > Type<> ();
       friend _Type< T > Type<> ( const T& aT );

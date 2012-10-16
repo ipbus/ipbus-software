@@ -6,11 +6,11 @@
 
 namespace uhal
 {
-	namespace colour_terminal
-	{
-		inline void log_header( const char* aStartHeader , const char* aEndHeader );
-		inline void log_tail();
-	}
+  namespace colour_terminal
+  {
+    inline void log_header ( const char* aStartHeader , const char* aEndHeader );
+    inline void log_tail();
+  }
 }
 
 #endif

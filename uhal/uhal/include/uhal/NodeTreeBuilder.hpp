@@ -43,7 +43,7 @@ namespace uhal
   //! Exception class to handle the case where a memory block has a size which would exceed the available register space. Uses the base uhal::exception implementation of what()
   class ArraySizeExceedsRegisterBound: public uhal::_exception< ArraySizeExceedsRegisterBound > {  };
 
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
   //! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
   class AddressSpaceOverlap: public uhal::_exception< AddressSpaceOverlap > {  };
 #endif

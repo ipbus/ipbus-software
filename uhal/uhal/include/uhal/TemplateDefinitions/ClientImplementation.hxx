@@ -7,6 +7,7 @@ namespace uhal
 
   //! A class to directly access locally-connected devices via IPbus over UDP
   template< eIPbusProtocolVersion IPbusProtocolVersion >
+
 IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId , const URI& aUri ) try :
     ClientInterface ( aId , aUri ),
                     mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
@@ -26,6 +27,7 @@ IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId 
 
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
+
 IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const IPBusUDPClient< IPbusProtocolVersion >& aIPBusUDPClient ) try :
     ClientInterface ( aIPBusUDPClient ),
                     mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
@@ -225,7 +227,7 @@ ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& 
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
 
-ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const ControlHubClient< IPbusProtocolVersion > &aControlHubClient  ) try :
+ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const ControlHubClient< IPbusProtocolVersion > &aControlHubClient ) try :
     ClientInterface ( aControlHubClient ),
                     mTargetId ( aControlHubClient.mTargetId ),
                     mPackingProtocol ( mTargetId.first , mTargetId.second , mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),

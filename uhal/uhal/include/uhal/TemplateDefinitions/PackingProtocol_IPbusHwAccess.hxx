@@ -44,11 +44,11 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
   void IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
   {
     uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
-    log ( Info() , "Predispatch size : " , Integer ( lWords ) , " words " );
+    log ( Debug() , "Predispatch size : " , Integer ( lWords ) , " words " );
 
     if ( lWords < 8 )
     {
-      log ( Info() , "Adding " , Integer ( 8 - lWords ) , " words of padding." );
+      log ( Debug() , "Adding " , Integer ( 8 - lWords ) , " words of padding." );
 
       for ( ; lWords != 8 ; ++lWords )
       {

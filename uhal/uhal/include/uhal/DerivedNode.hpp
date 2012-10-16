@@ -24,7 +24,7 @@ namespace uhal
         @return a new copy of the current Node
       */
       virtual Node* clone() const;
-      
+
   };
 
   template< typename T >
@@ -32,7 +32,7 @@ namespace uhal
   {
     RegistrationHelper ( const std::string& aDerivedClassName );
   };
-  
+
 }
 
 #include "uhal/TemplateDefinitions/DerivedNode.hxx"

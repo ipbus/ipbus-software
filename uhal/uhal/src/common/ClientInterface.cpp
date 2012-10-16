@@ -431,6 +431,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
   {
     boost::lock_guard<boost::mutex> lLock ( mMutex );
+
     if ( aTimeoutPeriod == 0 )
     {
       getTransportProtocol().setTimeoutPeriod ( boost::posix_time::pos_infin );

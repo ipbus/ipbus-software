@@ -56,15 +56,12 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     // Device IP address (4 bytes)
     // Device Port number (2 bytes)
     // Error code (2 bytes)
-
-	tPreamble* lPreamble;
-
+    tPreamble* lPreamble;
     {
-	  boost::lock_guard<boost::mutex> lLock ( mMutex );
-   	  mPreambles.push_back ( tPreamble() );
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+      mPreambles.push_back ( tPreamble() );
       lPreamble = & mPreambles.back();
     }
-
     lPreamble->mSendByteCountPtr = ( uint32_t* ) ( mCurrentBuffers->send ( ( uint32_t ) ( 0 ) ) );
     mCurrentBuffers->send ( mDeviceIPaddress );
     mCurrentBuffers->send ( mDevicePort );
@@ -80,14 +77,11 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   void ControlHubHostPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
   {
-
-	tPreamble* lPreamble;
-
+    tPreamble* lPreamble;
     {
-	  boost::lock_guard<boost::mutex> lLock ( mMutex );
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       lPreamble = & mPreambles.back();
     }
-
     uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
 
     if ( lWords < 11 ) // 8 words of data + 3 words of preamble
@@ -120,14 +114,11 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     lSendBuffer += 12;
     std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyIt ( aBuffers->getReplyBuffer().begin() );
     std::deque< std::pair< uint8_t* , uint32_t > >::iterator lReplyEnd ( aBuffers->getReplyBuffer().end() );
-
-	tPreamble* lPreamble;
-
+    tPreamble* lPreamble;
     {
-	  boost::lock_guard<boost::mutex> lLock ( mMutex );
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       lPreamble = & mPreambles.front();
     }
-
     /*		log ( Info() , "Byte Count 1 : " , Integer ( *(( uint32_t* )( lReplyIt->first )) ) ,
     								" : Memory : " , Integer ( lPreamble->mReplyTotalByteCounter ) ,
     								" : Reply counter : " , Integer ( aBuffers->replyCounter() )
@@ -168,12 +159,10 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     }
 
     lReplyIt++;
-
     {
-	  boost::lock_guard<boost::mutex> lLock ( mMutex );
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       mPreambles.pop_front();
     }
-
     bool lRet =  PackingProtocol::Validate ( lSendBuffer ,
                  lSendBufferEnd ,
                  lReplyIt ,

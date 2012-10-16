@@ -280,11 +280,14 @@ namespace uhal
     try
     {
       std::string lClassStr;
+      //get attribute from xml file as string
       uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
+      //parse the string into a NodeTreeClassAttribute object
       std::string::const_iterator lBegin ( lClassStr.begin() );
       std::string::const_iterator lEnd ( lClassStr.end() );
       NodeTreeClassAttribute lClass;
       boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
+      //create an object of the class type returned by the parsed string
       std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
 
       if ( lIt == mCreators.end() )
@@ -773,9 +776,9 @@ namespace uhal
                       " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) ,
                       "]."
                     );
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
-#endif                
+#endif
               }
             }
             else if ( lNode2->mMode != defs::HIERARCHICAL )
@@ -790,9 +793,9 @@ namespace uhal
                       "] which overlaps with branch " , Quote ( lIt2->first ) ,
                       " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) , "]."
                     );
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
-#endif    
+#endif
               }
             }
           }
@@ -818,9 +821,9 @@ namespace uhal
                       "] which overlaps with branch " , Quote ( lIt2->first ) ,
                       " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) , "]."
                     );
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
                 AddressSpaceOverlap().throwFrom ( ThisLocation() );
-#endif    
+#endif
               }
             }
             else if ( lNode2->mMode != defs::HIERARCHICAL )
@@ -869,9 +872,9 @@ namespace uhal
                           " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
                           " and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
                         );
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP                    
+#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
                     AddressSpaceOverlap().throwFrom ( ThisLocation() );
-#endif    
+#endif
                   }
                 }
               }

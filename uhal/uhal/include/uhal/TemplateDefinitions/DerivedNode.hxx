@@ -8,7 +8,7 @@ namespace uhal
   {
     try
     {
-      return new DerivedType( static_cast<const DerivedType&>(*this) ); // call the copy ctor. 
+      return new DerivedType ( static_cast<const DerivedType&> ( *this ) ); // call the copy ctor.
     }
     catch ( uhal::exception& aExc )
     {
@@ -16,15 +16,15 @@ namespace uhal
     }
     catch ( const std::exception& aExc )
     {
-      StdException( aExc ).throwFrom ( ThisLocation() );
+      StdException ( aExc ).throwFrom ( ThisLocation() );
     }
   }
 
-  
+
   template< typename T >
   RegistrationHelper< T >::RegistrationHelper ( const std::string& aDerivedClassName )
   {
     NodeTreeBuilder::getInstance().add< T > ( aDerivedClassName );
-  }  
+  }
 }
 

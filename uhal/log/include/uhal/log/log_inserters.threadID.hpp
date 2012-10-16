@@ -7,7 +7,7 @@
 namespace uhal
 {
 
-	void log_insert_threadID();
+  void log_insert_threadID();
 
 
 }

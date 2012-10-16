@@ -8,33 +8,33 @@
 
 namespace uhal
 {
-	namespace log_files
-	{
+  namespace log_files
+  {
 
-		class log_file
-		{
-			private:
-				log_file();
-				~log_file();
-	
-				class log_file_helper
-				{
-					public:
-						log_file_helper();
-			
-						~log_file_helper();
-			
-						FILE* mFile;
-				};
-	
-				static boost::thread_specific_ptr< log_file_helper > mLogFileHelper;
-	
-			public:
-				static FILE* get();
-		};
+    class log_file
+    {
+      private:
+        log_file();
+        ~log_file();
 
-		inline void log_header( const char* aEndHeader );
-	}
+        class log_file_helper
+        {
+          public:
+            log_file_helper();
+
+            ~log_file_helper();
+
+            FILE* mFile;
+        };
+
+        static boost::thread_specific_ptr< log_file_helper > mLogFileHelper;
+
+      public:
+        static FILE* get();
+    };
+
+    inline void log_header ( const char* aEndHeader );
+  }
 
 }
 

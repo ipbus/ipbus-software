@@ -374,19 +374,17 @@ Node::Node ( const Node& aNode ) try :
       aStream << std::setfill ( '0' ) << std::uppercase;
       aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
       aStream << "Node \"" << mUid << "\", ";
-      
-      if( &typeid( *this ) != &typeid( Node ) )
+
+      if ( &typeid ( *this ) != &typeid ( Node ) )
       {
         aStream << "of type \"";
-
 #ifdef __GNUG__
         // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
         int lStatus ( 0 );
         aStream << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
 #else
         aStream << typeid ( *this ).name();
-#endif   
-
+#endif
         aStream << "\", ";
       }
 
