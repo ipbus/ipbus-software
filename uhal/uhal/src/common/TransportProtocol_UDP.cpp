@@ -109,6 +109,13 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
   {
     try
     {
+      if ( ! mSocket->is_open() )
+      {
+        log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
+        mSocket = boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) );
+        log ( Info() , "UDP socket created successfully." );
+      }
+
       // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
       // Send data
       // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
