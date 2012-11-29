@@ -97,6 +97,8 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              #TIMEOUT TESTS
              "DummyHardwareUdp.exe 50001 20 &> /dev/null &",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             "DummyHardwareUdp.exe 50001 20 &> /dev/null &",
              "sudo /opt/cactus/bin/controlhub_start",
              "sudo /opt/cactus/bin/controlhub_status",
              "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub",

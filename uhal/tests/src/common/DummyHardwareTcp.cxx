@@ -155,6 +155,8 @@ class TCPdummyHardware
           while ( lReceivePtr!=lReceiveEnd );
 
           sleep ( mReplyDelay );
+          mReplyDelay = 0;
+
           boost::asio::write ( mSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
         }
       }
@@ -198,7 +200,7 @@ int main ( int argc, char* argv[] )
   {
     if ( argc < 2 || argc > 3 )
     {
-      log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay in seconds>" );
+      log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay for first packet in seconds>" );
       return 1;
     }
 
