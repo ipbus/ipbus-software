@@ -5,7 +5,7 @@
 using boost::asio::ip::tcp;
 using namespace uhal;
 
-#define ADDRESSMASK 0xFFFFF
+static const uint32_t ADDRESSMASK = 0x000FFFFF;
 
 
 class TCPdummyHardware
@@ -16,9 +16,10 @@ class TCPdummyHardware
       mIOservice(),
                  mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) ),
                  mSocket ( mIOservice ),
-                 mMemory ( ADDRESSMASK+1 , 0x00000000 ),
+                 mMemory ( uint32_t ( ADDRESSMASK+1 ) , 0x00000000 ),
                  mReplyDelay ( aReplyDelay )
     {
+      log ( Info() , "Assigned " , Integer ( uint32_t ( ADDRESSMASK+1 ) ) , " words of memory" );
       mAcceptor.accept ( mSocket );
     }
     catch ( uhal::exception& aExc )
@@ -40,9 +41,14 @@ class TCPdummyHardware
         {
           boost::system::error_code lError;
           uint32_t lTCPreceiveCounter = mSocket.read_some ( boost::asio::buffer ( mTCPreceiveBuffer, 500<<2 ) , lError );
+          //log( Info() , "Read " , Integer ( lTCPreceiveCounter ) );
 
           if ( lError == boost::asio::error::eof )
           {
+            //log( Info() , "Got error code eof" );
+            //mSocket.close();
+            //mAcceptor.accept ( mSocket );
+            //continue;
             break; // Connection closed cleanly by peer.
           }
 
@@ -52,6 +58,8 @@ class TCPdummyHardware
 
           do
           {
+            log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
+
             if ( ! IPbusHeaderHelper< IPbus_1_3 >::extract (
                    *lReceivePtr ,
                    mType ,
@@ -65,6 +73,9 @@ class TCPdummyHardware
             }
 
             lReceivePtr++;
+            log ( Info() , " - mType = " , Integer ( uint32_t ( mType ) ) );
+            log ( Info() , " - mWordCounter = " , Integer ( uint32_t ( mWordCounter ) ) );
+            log ( Info() , " - mTransactionId = " , Integer ( uint32_t ( mTransactionId ) ) );
 
             switch ( mType )
             {
@@ -156,7 +167,6 @@ class TCPdummyHardware
 
           sleep ( mReplyDelay );
           mReplyDelay = 0;
-
           boost::asio::write ( mSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
         }
       }
@@ -211,11 +221,10 @@ int main ( int argc, char* argv[] )
       lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
     }
 
-    for ( ;; )
+    while ( true )
     {
       TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
       lDummyHardware.run();
-      //if the connection is closed, open a new one
     }
   }
   catch ( uhal::exception& aExc )

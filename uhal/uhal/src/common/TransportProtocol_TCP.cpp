@@ -115,7 +115,21 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
       if ( ! mSocket->is_open() )
       {
         log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
-        boost::asio::connect ( *mSocket , *mEndpoint );
+        mErrorCode = boost::asio::error::would_block;
+        boost::asio::async_connect ( *mSocket , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+        do
+        {
+          mIOservice->run_one();
+        }
+        while ( mErrorCode == boost::asio::error::would_block );
+
+        if ( mErrorCode )
+        {
+          log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+          ErrorInTcpCallback().throwFrom ( ThisLocation() );
+        }
+
         mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
         log ( Info() , "TCP connection succeeded" );
       }
@@ -201,6 +215,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
         mSocket->close();
       }
 
+      mTcpTransportProtocol.mPackingProtocol->DeleteBuffer();
       aExc.rethrowFrom ( ThisLocation() );
     }
     catch ( const std::exception& aExc )
@@ -210,6 +225,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
         mSocket->close();
       }
 
+      mTcpTransportProtocol.mPackingProtocol->DeleteBuffer();
       StdException ( aExc ).throwFrom ( ThisLocation() );
     }
   }

@@ -176,13 +176,18 @@ PackingProtocol::PackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t
 
   PackingProtocol::~PackingProtocol()
   {
+    DeleteBuffer();
+  }
+
+
+  void PackingProtocol::DeleteBuffer()
+  {
     if ( mCurrentBuffers )
     {
       delete mCurrentBuffers;
       mCurrentBuffers = NULL;
     }
   }
-
 
   void PackingProtocol::Preamble( )
   {

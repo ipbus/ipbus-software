@@ -90,6 +90,8 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
   ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr ) try
   {
+    //Mutex lock here to be on the safe side
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles;	//protocol, filename
     uhal::utilities::ParseSemicolonDelimitedUriList<true> ( aFilenameExpr , lConnectionFiles );
 
@@ -118,6 +120,9 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
   {
     try
     {
+      //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+
       if ( mConnectionDescriptors.size() == 0 )
       {
         log ( Error() , "Connection map contains no entries" );
@@ -153,6 +158,8 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
   {
     try
     {
+      //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
       boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
       log ( Info() , "ConnectionManager created node tree: " , *lNode );
       boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
@@ -170,14 +177,14 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
 
   //Given a regex return the ids that match the
-  std::vector<std::string> ConnectionManager::getDevices ( )
+  std::vector<std::string> ConnectionManager::getDevices ( ) const
   {
     try
     {
       std::vector<std::string> lDevices;
       lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
-      for ( std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
+      for ( std::map< std::string, ConnectionDescriptor >::const_iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
       {
         lDevices.push_back ( lIt->first );
       }
@@ -195,14 +202,14 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
   }
 
 
-  std::vector<std::string> ConnectionManager::getDevices ( const std::string& aRegex )
+  std::vector<std::string> ConnectionManager::getDevices ( const std::string& aRegex ) const
   {
     try
     {
       std::vector<std::string> lDevices;
       lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
-      for ( std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
+      for ( std::map< std::string, ConnectionDescriptor >::const_iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
       {
         boost::cmatch lMatch;
 
@@ -294,7 +301,7 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
   }
 
 
-
+  boost::mutex ConnectionManager::mMutex;
 
 }
 

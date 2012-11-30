@@ -144,8 +144,7 @@ class UDPdummyHardware
           while ( lReceivePtr!=lReceiveEnd );
 
           sleep ( mReplyDelay );
-           mReplyDelay = 0;
-
+          mReplyDelay = 0;
           mSocket.send_to ( boost::asio::buffer ( mUDPreplyBuffer , ( lReplyPtr-mUDPreplyBuffer ) <<2 ) , mSenderEndpoint );
         }
       }

@@ -193,10 +193,22 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
     }
     catch ( uhal::exception& aExc )
     {
+      if ( mSocket.unique() )
+      {
+        mSocket->close();
+      }
+
+      mUdpTransportProtocol.mPackingProtocol->DeleteBuffer();
       aExc.rethrowFrom ( ThisLocation() );
     }
     catch ( const std::exception& aExc )
     {
+      if ( mSocket.unique() )
+      {
+        mSocket->close();
+      }
+
+      mUdpTransportProtocol.mPackingProtocol->DeleteBuffer();
       StdException ( aExc ).throwFrom ( ThisLocation() );
     }
   }

@@ -23,7 +23,8 @@ void job_multiple ( const std::string& connection, const std::string& id )
 
     for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
 {
-  ConnectionManager manager ( connection );
+  log ( Info() , "Iteration " , Integer ( iter ) );
+    ConnectionManager manager ( connection );
     HwInterface hw=manager.getDevice ( id );
     uint32_t x = static_cast<uint32_t> ( rand() );
     hw.getNode ( "REG" ).write ( x );

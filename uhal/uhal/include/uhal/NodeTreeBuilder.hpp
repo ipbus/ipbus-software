@@ -67,7 +67,10 @@ namespace uhal
 
   template< typename T > class RegistrationHelper;
 
-  //! A class to build a node tree from an Address table file
+  /**
+    A class to build a node tree from an Address table file
+    NOTE! This is a factory method and must be Mutex protected if it is used in multithreaded environments!
+  */
   class NodeTreeBuilder: private boost::noncopyable
   {
     public:

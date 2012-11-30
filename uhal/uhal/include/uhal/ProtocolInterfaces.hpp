@@ -339,6 +339,9 @@ namespace uhal
       */
       virtual bool Validate ( Buffers* aBuffers );
 
+
+      virtual void DeleteBuffer();
+
     protected:
 
       /**

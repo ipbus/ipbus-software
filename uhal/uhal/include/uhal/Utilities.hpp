@@ -28,6 +28,7 @@
 //#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/home/qi/parse.hpp>
 #include <boost/spirit/include/qi_char_.hpp>
+//#include <boost/thread/mutex.hpp>
 #include <boost/bind/bind.hpp>
 
 #include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
@@ -133,6 +134,8 @@ namespace uhal
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace uhal
 {
+  // boost::mutex gUtilityMutex;
+
   namespace utilities
   {
     /**
@@ -154,6 +157,7 @@ namespace uhal
 
       try
       {
+        //	boost::lock_guard<boost::mutex> lLock ( gUtilityMutex );
         //struct which will store the shell expansions of the expression
         wordexp_t lShellExpansion;
         wordexp ( aFilenameExpr , &lShellExpansion , 0 );

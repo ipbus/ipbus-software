@@ -15,6 +15,7 @@
 //#include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 //#include <boost/regex.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "pugixml/pugixml.hpp"
 
@@ -90,7 +91,7 @@ namespace uhal
       	Return all device IDs known to this connection manager
       	@return all device IDs known to this connection manager
       */
-      std::vector<std::string> getDevices ( );
+      std::vector<std::string> getDevices ( ) const;
 
 
       /**
@@ -98,7 +99,7 @@ namespace uhal
       	@param aRegex a string expression which is converted to a (boost) regular expression against which the device IDs are tested
       	@return all device IDs known to this connection manager
       */
-      std::vector<std::string> getDevices ( const std::string& aRegex );
+      std::vector<std::string> getDevices ( const std::string& aRegex ) const;
 
 
       /**
@@ -111,6 +112,9 @@ namespace uhal
       	@return a HwInterface which encapsulates the Node tree and the IPbus Client
        */
       static HwInterface getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr );
+
+      //! A mutex lock to protect access to the factory methods in multithreaded environments
+      static boost::mutex mMutex;
 
     private:
       /**
