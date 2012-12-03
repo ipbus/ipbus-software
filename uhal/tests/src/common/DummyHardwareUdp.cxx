@@ -5,7 +5,7 @@
 using boost::asio::ip::udp;
 using namespace uhal;
 
-#define ADDRESSMASK 0xFFFFF
+static const uint32_t ADDRESSMASK = 0x000FFFFF;
 
 class UDPdummyHardware
 {
