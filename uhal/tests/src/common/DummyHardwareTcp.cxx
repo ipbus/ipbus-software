@@ -58,7 +58,7 @@ class TCPdummyHardware
 
           do
           {
-            log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
+            //log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
 
             if ( ! IPbusHeaderHelper< IPbus_1_3 >::extract (
                    *lReceivePtr ,
@@ -73,9 +73,9 @@ class TCPdummyHardware
             }
 
             lReceivePtr++;
-            log ( Info() , " - mType = " , Integer ( uint32_t ( mType ) ) );
-            log ( Info() , " - mWordCounter = " , Integer ( uint32_t ( mWordCounter ) ) );
-            log ( Info() , " - mTransactionId = " , Integer ( uint32_t ( mTransactionId ) ) );
+            //log ( Info() , " - mType = " , Integer ( uint32_t ( mType ) ) );
+            //log ( Info() , " - mWordCounter = " , Integer ( uint32_t ( mWordCounter ) ) );
+            //log ( Info() , " - mTransactionId = " , Integer ( uint32_t ( mTransactionId ) ) );
 
             switch ( mType )
             {
