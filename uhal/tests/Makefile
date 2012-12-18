@@ -24,7 +24,6 @@ LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 EXECUTABLE_SOURCES = \
 		src/common/DummyHardwareUdp.cxx \
 		src/common/DummyHardwareTcp.cxx \
-		src/common/DummyHardwareTcp_MultiConnection.cxx \
 		src/common/test_log.cxx \
 		src/common/test_dummy_single.cxx \
 		src/common/test_dummy_masking.cxx \
