@@ -209,7 +209,7 @@ namespace uhal
       	A method to retrieve the timeout period currently being used
       	@return the timeout period currently being used in milliseconds
       */
-      virtual uint32_t getTimeoutPeriod();
+      virtual uint64_t getTimeoutPeriod();
 
     private:
 

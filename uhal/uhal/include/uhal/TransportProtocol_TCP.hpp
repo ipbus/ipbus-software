@@ -54,7 +54,7 @@ namespace uhal
           	@param aServiceOrPort the target port
           	@param aTimeoutPeriod the default timeout period (can be changed later)
           */
-          DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod );
+          DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort );
 
           /**
           	Destructor
@@ -96,8 +96,6 @@ namespace uhal
           boost::system::error_code mErrorCode;
 
           boost::asio::deadline_timer mDeadlineTimer;
-
-          const boost::posix_time::time_duration& mTimeoutPeriod;
 
           std::vector<uint8_t> mReplyMemory;
 

@@ -442,7 +442,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
     }
   }
 
-  uint32_t ClientInterface::getTimeoutPeriod()
+  uint64_t ClientInterface::getTimeoutPeriod()
   {
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     return getTransportProtocol().getTimeoutPeriod().total_milliseconds();

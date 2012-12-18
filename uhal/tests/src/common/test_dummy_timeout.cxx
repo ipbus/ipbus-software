@@ -24,6 +24,33 @@ void check_timeout ( const std::string& connection, const std::string& id, int s
 }
 
 
+void check_timeout_setting ( const std::string& connection, const std::string& id, int sleepAfterFirstDispatch )
+{
+  ConnectionManager manager ( connection );
+  HwInterface hw = manager.getDevice ( id );
+
+  std::cout << "Checking timeout set correctly : Default value" << std::endl;
+
+  hw.getNode ( "REG" ).read();
+  log( Info() , ThisLocation() , " : mTimeOut = " , Integer ( hw.getClient().getTimeoutPeriod() ) );
+  hw.dispatch();
+
+  std::cout << "Checking timeout set correctly : Set to 10ms" << std::endl;
+
+  hw.getClient().setTimeoutPeriod ( 10 );
+  hw.getNode ( "REG" ).read();
+  log( Info() , ThisLocation() , " : mTimeOut = " , Integer ( hw.getClient().getTimeoutPeriod() ) );
+  hw.dispatch();
+
+  std::cout << "Checking timeout set correctly : Set to pos_infinity" << std::endl;
+
+  hw.getClient().setTimeoutPeriod ( 0 );
+  hw.getNode ( "REG" ).read();
+  log( Info() , ThisLocation() , " : mTimeOut = " , Integer ( hw.getClient().getTimeoutPeriod() ) );
+  hw.dispatch();
+}
+
+
 int main ( int argc,char* argv[] )
 {
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
@@ -31,5 +58,7 @@ int main ( int argc,char* argv[] )
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   CACTUS_TEST ( check_timeout ( connection_file, device_id, 3 ) );
+
+  //check_timeout_setting ( connection_file, device_id, 3 );
   return 0;
 }
