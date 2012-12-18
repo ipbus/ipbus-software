@@ -26,8 +26,8 @@ void job_multiple ( const std::string& connection, const std::string& id )
   log ( Info() , "Iteration " , Integer ( iter ) );
     ConnectionManager manager ( connection );
     HwInterface hw=manager.getDevice ( id );
-    hw.setTimeoutPeriod(TIMEOUT_S*1000);
-      uint32_t x = static_cast<uint32_t> ( rand() );
+    hw.setTimeoutPeriod ( TIMEOUT_S*1000 );
+    uint32_t x = static_cast<uint32_t> ( rand() );
     hw.getNode ( "REG" ).write ( x );
     ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
     std::vector<uint32_t> xx;
@@ -45,7 +45,7 @@ void job_multiple ( const std::string& connection, const std::string& id )
     CACTUS_CHECK ( mem.size() == N_SIZE );
     //can not check content in the mutlithreaded case
   }
-      );
+  );
 }
 
 void multiple_hwinterfaces ( const std::string& connection_file,const std::string& device_id )
