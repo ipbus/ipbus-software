@@ -10,195 +10,205 @@ static const uint32_t ADDRESSMASK = 0x000FFFFF;
 
 class TCPdummyHardware
 {
-  public:
+public:
 
   TCPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay ) try :
-      mIOservice(),
-                 mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) ),
-                 mSocket ( mIOservice ),
-                 mMemory ( uint32_t ( ADDRESSMASK+1 ) , 0x00000000 ),
-                 mReplyDelay ( aReplyDelay )
-    {
-      log ( Info() , "Assigned " , Integer ( uint32_t ( ADDRESSMASK+1 ) ) , " words of memory" );
-      mAcceptor.accept ( mSocket );
-    }
-    catch ( uhal::exception& aExc )
+    mIOservice(),
+      mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) ),
+      mMemory ( uint32_t ( ADDRESSMASK+1 ) , 0x00000000 ),
+      mReplyDelay ( aReplyDelay )
+      {
+	log ( Info() , "Assigned " , Integer ( uint32_t ( ADDRESSMASK+1 ) ) , " words of memory" );
+	mAcceptor.listen();
+      }
+  catch ( uhal::exception& aExc )
     {
       aExc.rethrowFrom ( ThisLocation() );
     }
-    catch ( const std::exception& aExc )
+  catch ( const std::exception& aExc )
     {
       StdException ( aExc ).throwFrom ( ThisLocation() );
     }
 
-    ~TCPdummyHardware() {}
+  ~TCPdummyHardware() {}
 
-    void run()
-    {
-      try
+  void run()
+  {
+    try
       {
-        for ( ;; )
-        {
-          boost::system::error_code lError;
-          uint32_t lTCPreceiveCounter = mSocket.read_some ( boost::asio::buffer ( mTCPreceiveBuffer, 500<<2 ) , lError );
-          //log( Info() , "Read " , Integer ( lTCPreceiveCounter ) );
 
-          if ( lError == boost::asio::error::eof )
-          {
-            //log( Info() , "Got error code eof" );
-            //mSocket.close();
-            //mAcceptor.accept ( mSocket );
-            //continue;
-            break; // Connection closed cleanly by peer.
-          }
+	for(;;) {
+	  tcp::socket mSocket(mIOservice);
+	  
+	  mAcceptor.accept ( mSocket );
 
-          uint32_t* lReceivePtr ( mTCPreceiveBuffer );
-          uint32_t* lReceiveEnd ( lReceivePtr+ ( lTCPreceiveCounter>>2 ) );
-          uint32_t* lReplyPtr ( mTCPreplyBuffer );
+	  for ( ;; )
+	    {
+	      boost::system::error_code lError;
+	      uint32_t lTCPreceiveCounter = mSocket.read_some ( boost::asio::buffer ( mTCPreceiveBuffer, 500<<2 ) , lError );
+	      //log( Info() , "Read " , Integer ( lTCPreceiveCounter ) );
 
-          do
-          {
-            //log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
+	      if ( lError == boost::asio::error::eof )
+		{
+		  //log( Info() , "Got error code eof" );
+		  //mSocket.close();
+		  //mAcceptor.accept ( mSocket );
+		  //continue;
+		  break; // Connection closed cleanly by peer.
+		} 
+	      else if (lError) {
+		log(Error(), "Error while reading socket: ",lError.message() );
+		break;
+	      }
 
-            if ( ! IPbusHeaderHelper< IPbus_1_3 >::extract (
-                   *lReceivePtr ,
-                   mType ,
-                   mWordCounter ,
-                   mTransactionId ,
-                   mResponseGood )
-               )
-            {
-              log ( Error() , "Unable to parse send header " ,  Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
-              return;
-            }
+	      uint32_t* lReceivePtr ( mTCPreceiveBuffer );
+	      uint32_t* lReceiveEnd ( lReceivePtr+ ( lTCPreceiveCounter>>2 ) );
+	      uint32_t* lReplyPtr ( mTCPreplyBuffer );
 
-            lReceivePtr++;
-            //log ( Info() , " - mType = " , Integer ( uint32_t ( mType ) ) );
-            //log ( Info() , " - mWordCounter = " , Integer ( uint32_t ( mWordCounter ) ) );
-            //log ( Info() , " - mTransactionId = " , Integer ( uint32_t ( mTransactionId ) ) );
+	      do
+		{
+		  log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
 
-            switch ( mType )
-            {
-              case B_O_T:
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
-                lReplyPtr++;
-                break;
-              case R_A_I:
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 2 , mTransactionId ) | 0x4;
-                lReplyPtr+=3;
-                break;
-              case NI_READ:
-                mAddress = *lReceivePtr;
-                lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
-                lReplyPtr++;
+		  if ( ! IPbusHeaderHelper< IPbus_1_3 >::extract (
+								  *lReceivePtr ,
+								  mType ,
+								  mWordCounter ,
+								  mTransactionId ,
+								  mResponseGood )
+		       )
+		    {
+		      log ( Error() , "Unable to parse send header " ,  Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
+		      return;
+		    }
 
-                for ( ; mWordCounter!=0 ; --mWordCounter )
-                {
-                  *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
-                  lReplyPtr++;
-                }
+		  lReceivePtr++;
+		  //log ( Info() , " - mType = " , Integer ( uint32_t ( mType ) ) );
+		  //log ( Info() , " - mWordCounter = " , Integer ( uint32_t ( mWordCounter ) ) );
+		  //log ( Info() , " - mTransactionId = " , Integer ( uint32_t ( mTransactionId ) ) );
 
-                break;
-              case READ:
-                mAddress = *lReceivePtr;
-                lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
-                lReplyPtr++;
+		  switch ( mType )
+		    {
+		    case B_O_T:
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
+		      lReplyPtr++;
+		      break;
+		    case R_A_I:
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 2 , mTransactionId ) | 0x4;
+		      lReplyPtr+=3;
+		      break;
+		    case NI_READ:
+		      mAddress = *lReceivePtr;
+		      lReceivePtr++;
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
+		      lReplyPtr++;
 
-                for ( ; mWordCounter!=0 ; --mWordCounter )
-                {
-                  *lReplyPtr = mMemory.at ( mAddress++ & ADDRESSMASK );
-                  lReplyPtr++;
-                }
+		      for ( ; mWordCounter!=0 ; --mWordCounter )
+			{
+			  *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
+			  lReplyPtr++;
+			}
 
-                break;
-              case NI_WRITE:
-                mAddress = *lReceivePtr;
-                lReceivePtr++;
+		      break;
+		    case READ:
+		      mAddress = *lReceivePtr;
+		      lReceivePtr++;
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
+		      lReplyPtr++;
 
-                for ( ; mWordCounter!=0 ; --mWordCounter )
-                {
-                  mMemory.at ( mAddress & ADDRESSMASK ) = *lReceivePtr;
-                  lReceivePtr++;
-                }
+		      for ( ; mWordCounter!=0 ; --mWordCounter )
+			{
+			  *lReplyPtr = mMemory.at ( mAddress++ & ADDRESSMASK );
+			  lReplyPtr++;
+			}
 
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
-                lReplyPtr++;
-                break;
-              case WRITE:
-                mAddress = *lReceivePtr;
-                lReceivePtr++;
+		      break;
+		    case NI_WRITE:
+		      mAddress = *lReceivePtr;
+		      lReceivePtr++;
 
-                for ( ; mWordCounter!=0 ; --mWordCounter )
-                {
-                  mMemory.at ( mAddress++ & ADDRESSMASK ) = *lReceivePtr;
-                  lReceivePtr++;
-                }
+		      for ( ; mWordCounter!=0 ; --mWordCounter )
+			{
+			  mMemory.at ( mAddress & ADDRESSMASK ) = *lReceivePtr;
+			  lReceivePtr++;
+			}
 
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
-                lReplyPtr++;
-                break;
-              case RMW_SUM:
-                mAddress = *lReceivePtr;
-                lReceivePtr++;
-                mMemory.at ( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
-                lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
-                lReplyPtr++;
-                *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
-                lReplyPtr++;
-                break;
-              case RMW_BITS:
-                mAddress = *lReceivePtr;
-                lReceivePtr++;
-                mMemory.at ( mAddress & ADDRESSMASK ) &= ( int32_t ) ( *lReceivePtr );
-                lReceivePtr++;
-                mMemory.at ( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
-                lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
-                lReplyPtr++;
-                *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
-                lReplyPtr++;
-                break;
-            }
-          }
-          while ( lReceivePtr!=lReceiveEnd );
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
+		      lReplyPtr++;
+		      break;
+		    case WRITE:
+		      mAddress = *lReceivePtr;
+		      lReceivePtr++;
 
-          sleep ( mReplyDelay );
-          mReplyDelay = 0;
-          boost::asio::write ( mSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
-        }
+		      for ( ; mWordCounter!=0 ; --mWordCounter )
+			{
+			  mMemory.at ( mAddress++ & ADDRESSMASK ) = *lReceivePtr;
+			  lReceivePtr++;
+			}
+
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
+		      lReplyPtr++;
+		      break;
+		    case RMW_SUM:
+		      mAddress = *lReceivePtr;
+		      lReceivePtr++;
+		      mMemory.at ( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
+		      lReceivePtr++;
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
+		      lReplyPtr++;
+		      *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
+		      lReplyPtr++;
+		      break;
+		    case RMW_BITS:
+		      mAddress = *lReceivePtr;
+		      lReceivePtr++;
+		      mMemory.at ( mAddress & ADDRESSMASK ) &= ( int32_t ) ( *lReceivePtr );
+		      lReceivePtr++;
+		      mMemory.at ( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
+		      lReceivePtr++;
+		      *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
+		      lReplyPtr++;
+		      *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
+		      lReplyPtr++;
+		      break;
+		    }
+		}
+	      while ( lReceivePtr!=lReceiveEnd );
+
+	      sleep ( mReplyDelay );
+	      mReplyDelay = 0;
+	      boost::asio::write ( mSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
+	    }
+	}
       }
-      catch ( uhal::exception& aExc )
+    catch ( uhal::exception& aExc )
       {
         aExc.rethrowFrom ( ThisLocation() );
       }
-      catch ( const std::exception& aExc )
+    catch ( const std::exception& aExc )
       {
         StdException ( aExc ).throwFrom ( ThisLocation() );
       }
-    }
+  }
 
-  private:
-    boost::asio::io_service mIOservice;
-    tcp::acceptor mAcceptor;
-    tcp::socket mSocket;
-    tcp::endpoint mSenderEndpoint;
+private:
+  boost::asio::io_service mIOservice;
+  tcp::acceptor mAcceptor;
+  //tcp::socket mSocket;
+  tcp::endpoint mSenderEndpoint;
 
-    std::vector< uint32_t > mMemory;
+  std::vector< uint32_t > mMemory;
 
-    uint32_t mTCPreceiveBuffer[500];
-    uint32_t mTCPreplyBuffer[500];
+  uint32_t mTCPreceiveBuffer[500];
+  uint32_t mTCPreplyBuffer[500];
 
-    eIPbusTransactionType mType;
-    uint32_t mWordCounter;
-    uint32_t mTransactionId;
-    uint8_t mResponseGood;
+  eIPbusTransactionType mType;
+  uint32_t mWordCounter;
+  uint32_t mTransactionId;
+  uint8_t mResponseGood;
 
-    uint32_t mAddress;
+  uint32_t mAddress;
 
-    uint32_t mReplyDelay;
+  uint32_t mReplyDelay;
 
 };
 
@@ -207,34 +217,34 @@ class TCPdummyHardware
 int main ( int argc, char* argv[] )
 {
   try
-  {
-    if ( argc < 2 || argc > 3 )
     {
-      log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay for first packet in seconds>" );
-      return 1;
-    }
+      if ( argc < 2 || argc > 3 )
+	{
+	  log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay for first packet in seconds>" );
+	  return 1;
+	}
 
-    uint32_t lReplyDelay ( 0 );
+      uint32_t lReplyDelay ( 0 );
 
-    if ( argc == 3 )
-    {
-      lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
-    }
+      if ( argc == 3 )
+	{
+	  lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
+	}
 
-    while ( true )
-    {
-      TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
-      lDummyHardware.run();
+      while ( true )
+	{
+	  TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
+	  lDummyHardware.run();
+	}
     }
-  }
   catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
+    {
+      aExc.rethrowFrom ( ThisLocation() );
+    }
   catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+    {
+      StdException ( aExc ).throwFrom ( ThisLocation() );
+    }
 
   return 0;
 }

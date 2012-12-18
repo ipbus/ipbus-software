@@ -12,8 +12,8 @@
 
 using namespace uhal;
 
-#define N_THREADS     10
-#define N_ITERATIONS  100
+#define N_THREADS     100
+#define N_ITERATIONS  10
 #define N_SIZE        1024*1024/4
 #define TIMEOUT_S     50
 
@@ -26,7 +26,8 @@ void job_multiple ( const std::string& connection, const std::string& id )
   log ( Info() , "Iteration " , Integer ( iter ) );
     ConnectionManager manager ( connection );
     HwInterface hw=manager.getDevice ( id );
-    uint32_t x = static_cast<uint32_t> ( rand() );
+    hw.setTimeoutPeriod(TIMEOUT_S*1000);
+      uint32_t x = static_cast<uint32_t> ( rand() );
     hw.getNode ( "REG" ).write ( x );
     ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
     std::vector<uint32_t> xx;
@@ -44,7 +45,7 @@ void job_multiple ( const std::string& connection, const std::string& id )
     CACTUS_CHECK ( mem.size() == N_SIZE );
     //can not check content in the mutlithreaded case
   }
-  );
+      );
 }
 
 void multiple_hwinterfaces ( const std::string& connection_file,const std::string& device_id )
@@ -157,7 +158,7 @@ int main ( int argc,char* argv[] )
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   CACTUS_TEST ( multiple_hwinterfaces ( connection_file,device_id ) );
-  CACTUS_TEST ( single_hwinterface ( connection_file,device_id ) );
-  CACTUS_TEST ( single_copied_hwinterface ( connection_file,device_id ) );
+  //CACTUS_TEST ( single_hwinterface ( connection_file,device_id ) );
+  //CACTUS_TEST ( single_copied_hwinterface ( connection_file,device_id ) );
   return 0;
 }

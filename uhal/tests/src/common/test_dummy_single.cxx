@@ -26,6 +26,8 @@ void connect_write_read ( const std::string& connection, const std::string& id )
   CACTUS_TEST ( hw.dispatch() );
   CACTUS_CHECK ( mem.valid() );
   CACTUS_CHECK ( mem.value() == x );
+  sleep(100);
+  std::cout << "out of scope connect_write_read" << std::endl;
 }
 
 void on_the_fly_connect_write_read ( const std::string& connection, const std::string& id )
