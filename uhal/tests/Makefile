@@ -33,6 +33,7 @@ EXECUTABLE_SOURCES = \
 		src/common/test_dummy_hierarchy.cxx \
 		src/common/test_dummy_multithreaded.cxx \
 		src/common/test_dummy_timeout.cxx \
+		src/common/test_dummy_nonreachable.cxx \
 		src/common/test_dummy_metainfo.cxx \
 		src/common/test_dummy_navigation.cxx \
 		src/common/test_dummy_rawclient.cxx \
