@@ -23,7 +23,7 @@ void check_timeout ( const std::string& connection, const std::string& id, int s
   CACTUS_TEST_NOTHROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } );
 }
 
-
+/*
 void check_timeout_setting ( const std::string& connection, const std::string& id, int sleepAfterFirstDispatch )
 {
   ConnectionManager manager ( connection );
@@ -43,7 +43,7 @@ void check_timeout_setting ( const std::string& connection, const std::string& i
   log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( hw.getClient().getTimeoutPeriod() ) );
   hw.dispatch();
 }
-
+*/
 
 int main ( int argc,char* argv[] )
 {

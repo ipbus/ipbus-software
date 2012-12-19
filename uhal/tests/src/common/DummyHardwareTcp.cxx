@@ -18,8 +18,7 @@ class TCPdummyHardware
                  mMemory ( uint32_t ( ADDRESSMASK+1 ) , 0x00000000 ),
                  mReplyDelay ( aReplyDelay )
     {
-      log ( Info() , "Assigned " , Integer ( uint32_t ( ADDRESSMASK+1 ) ) , " words of memory" );
-      mAcceptor.listen();
+       mAcceptor.listen();
     }
     catch ( uhal::exception& aExc )
     {
