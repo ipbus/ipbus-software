@@ -143,13 +143,14 @@ class UDPdummyHardware
           }
           while ( lReceivePtr!=lReceiveEnd );
 
-          if( mReplyDelay )
+          if ( mReplyDelay )
           {
-            log( Info() , "Sleeping for " , Integer ( mReplyDelay ) , "s" );
+            log ( Info() , "Sleeping for " , Integer ( mReplyDelay ) , "s" );
             sleep ( mReplyDelay );
             mReplyDelay = 0;
-            log( Info() , "Now replying " );
+            log ( Info() , "Now replying " );
           }
+
           mSocket.send_to ( boost::asio::buffer ( mUDPreplyBuffer , ( lReplyPtr-mUDPreplyBuffer ) <<2 ) , mSenderEndpoint );
         }
       }

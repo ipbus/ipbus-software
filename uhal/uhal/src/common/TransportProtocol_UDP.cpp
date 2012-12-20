@@ -136,7 +136,6 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
         log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
         ErrorInUdpCallback().throwFrom ( ThisLocation() );
       }*/
-
       // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
       // Read back replies
       // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,8 +153,14 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
       }
       while ( mErrorCode == boost::asio::error::would_block );
 
-      if ( mErrorCode && (mErrorCode != boost::asio::error::eof) )
+      if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
       {
+        if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+        {
+          log ( Error() , "ASIO reported a Timeout in UDP callback" );
+          ErrorInUdpCallback().throwFrom ( ThisLocation() );
+        }
+
         log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
         mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
         ErrorInUdpCallback().throwFrom ( ThisLocation() );
@@ -221,14 +226,15 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
     // deadline before this actor had a chance to run.
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
-	  //set the error code correctly
-	  mErrorCode = boost::asio::error::timed_out;
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket->close();
       // There is no longer an active deadline. The expiry is set to positive
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
+      //set the error code correctly
+      //20/12/2012 - awr - wherever this is in the function, this appears to cause a race condition which results in the timeout recovery failing.
+      //mErrorCode = boost::asio::error::timed_out;
     }
 
     // Put the actor back to sleep.
