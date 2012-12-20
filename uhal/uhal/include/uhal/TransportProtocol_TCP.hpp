@@ -111,7 +111,7 @@ namespace uhal
       	@param aServiceOrPort the target port
       	@param aTimeoutPeriod the default timeout period (can be changed later)
       */
-      TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod = boost::posix_time::seconds ( 10 ) );
+      TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod = boost::posix_time::seconds ( 1 ) );
       /**
       	Destructor
       */
