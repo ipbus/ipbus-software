@@ -66,7 +66,7 @@ class TCPdummyHardware
 
             do
             {
-              log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
+              //log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
 
               if ( ! IPbusHeaderHelper< IPbus_1_3 >::extract (
                      *lReceivePtr ,
@@ -173,8 +173,13 @@ class TCPdummyHardware
             }
             while ( lReceivePtr!=lReceiveEnd );
 
-            sleep ( mReplyDelay );
-            mReplyDelay = 0;
+            if( mReplyDelay )
+            {
+              log( Info() , "Sleeping for " , Integer ( mReplyDelay ) , "s" );
+              sleep ( mReplyDelay );
+              mReplyDelay = 0;
+              log( Info() , "Now replying " );
+            }
             boost::asio::write ( lSocket , boost::asio::buffer ( mTCPreplyBuffer , ( lReplyPtr-mTCPreplyBuffer ) <<2 ) );
           }
         }
@@ -229,10 +234,10 @@ int main ( int argc, char* argv[] )
       lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
     }
 
-    while ( true )
+   TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
+   while ( true )
     {
-      TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
-      lDummyHardware.run();
+       lDummyHardware.run();
     }
   }
   catch ( uhal::exception& aExc )
