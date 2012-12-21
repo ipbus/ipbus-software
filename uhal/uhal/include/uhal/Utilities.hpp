@@ -62,19 +62,8 @@ namespace __gnu_cxx
     size_t operator() ( const std::string& x ) const
     {
       using namespace uhal;
-
-      try
-      {
-        return hash< const char* >() ( x.c_str() );
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
-      }
+      logging();
+      return hash< const char* >() ( x.c_str() );
     }
   };
 }
@@ -95,6 +84,8 @@ namespace uhal
     template < bool DebugInfo >
     bool ParseSemicolonDelimitedUriList ( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
     {
+      logging();
+
       try
       {
         grammars::SemicolonDelimitedUriListGrammar lGrammar;
@@ -149,6 +140,8 @@ namespace uhal
     template < bool DebugInfo >
     bool ShellExpandFilenameExpr ( const char* aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
     {
+      logging();
+
       if ( !aFiles && !aDirectories )
       {
         // We have nowhere to write the data so don't bother expanding the expression
@@ -260,18 +253,8 @@ namespace uhal
     template < bool DebugInfo >
     bool ShellExpandFilenameExpr ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
     {
-      try
-      {
-        return ShellExpandFilenameExpr< DebugInfo > ( aFilenameExpr.c_str() , aParentPath.c_str() , aFiles , aDirectories );
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
-      }
+      logging();
+      return ShellExpandFilenameExpr< DebugInfo > ( aFilenameExpr.c_str() , aParentPath.c_str() , aFiles , aDirectories );
     }
 
   }
@@ -294,163 +277,150 @@ namespace uhal
     template < bool DebugInfo >
     bool HttpGet ( const std::string& aURL , HttpResponseType& aResponse )
     {
+      logging();
+
+      if ( DebugInfo )
+      {
+        try
+        {
+          log ( Info() , "Retrieving URL http://" , aURL );
+        }
+        catch ( const std::exception& aExc )
+        {
+          log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );						// Just debugging so although exception	is worrying, it is not critical
+        }
+      }
+
+      std::pair<std::string, std::string> lURLPair;
+
       try
       {
-        if ( DebugInfo )
-        {
-          try
-          {
-            log ( Info() , "Retrieving URL http://" , aURL );
-          }
-          catch ( const std::exception& aExc )
-          {
-            log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );						// Just debugging so although exception	is worrying, it is not critical
-          }
-        }
-
-        std::pair<std::string, std::string> lURLPair;
-
-        try
-        {
-          //split at the first slash
-          boost::spirit::qi::phrase_parse ( aURL.begin() ,
-                                            aURL.end() ,
-                                            + ( boost::spirit::qi::char_ - "/" ) >> -boost::spirit::qi::lit ( "/" ) >> + ( boost::spirit::qi::char_ ) ,
-                                            boost::spirit::ascii::space ,
-                                            lURLPair );
-        }
-        catch ( const std::exception& aExc )
-        {
-          // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-          return false;
-        }
-
-        boost::system::error_code lErrorCode ( boost::asio::error::host_not_found );
-        // The IO service everything will go through
-        boost::asio::io_service io_service;
-        // Get a list of endpoints corresponding to the server name.
-        boost::asio::ip::tcp::resolver resolver ( io_service );
-        boost::asio::ip::tcp::resolver::query query ( lURLPair.first , "http" );
-        boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve ( query );
-        boost::asio::ip::tcp::resolver::iterator end;
-        // Try each endpoint until we successfully establish a connection.
-        boost::asio::ip::tcp::socket socket ( io_service );
-
-        try
-        {
-          while ( lErrorCode && endpoint_iterator != end )
-          {
-            socket.close();
-            socket.connect ( *endpoint_iterator++, lErrorCode );
-          }
-
-          if ( lErrorCode )
-          {
-            throw boost::system::system_error ( lErrorCode );
-          }
-        }
-        catch ( const std::exception& aExc )
-        {
-          // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-          return false;
-        }
-
-        // Form the request. We specify the "Connection: close" header so that the server will close the socket after transmitting the response. This will allow us to treat all data up until the EOF as the content.
-        boost::asio::streambuf request;
-        std::ostream request_stream ( &request );
-        request_stream << "GET /" << lURLPair.second << " HTTP/1.0\r\n";
-        request_stream << "Host: " << lURLPair.first << "\r\n";
-        request_stream << "Accept: */*\r\n";
-        request_stream << "Connection: close\r\n\r\n";
-
-        try
-        {
-          // Send the request...
-          boost::asio::write ( socket , request , lErrorCode );
-
-          if ( lErrorCode )
-          {
-            throw boost::system::system_error ( lErrorCode );
-          }
-        }
-        catch ( const std::exception& aExc )
-        {
-          // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-          return false;
-        }
-
-        // ... and get the reply. First we need a buffer to write the reply in to...
-        static const int mDefaultBufferSize ( 65536 );
-        typedef std::vector<uint8_t> BufferType;
-        typedef BufferType::iterator BufferTypeIterator;
-        BufferType mBuffer ( mDefaultBufferSize , uint8_t ( 0 ) );
-        std::size_t lSize ( 0 );
-
-        // Just keep reading and, if we have not reached the EOF, extend the buffer and read some more.
-        try
-        {
-          while ( true )
-          {
-            lSize += boost::asio::read ( socket, boost::asio::buffer ( &mBuffer[lSize] , mDefaultBufferSize ) , lErrorCode );
-
-            if ( lErrorCode )
-            {
-              if ( lErrorCode == boost::asio::error::eof )
-              {
-                break;
-              }
-              else
-              {
-                throw boost::system::system_error ( lErrorCode );
-              }
-            }
-
-            mBuffer.insert ( mBuffer.end() , mDefaultBufferSize , uint8_t ( 0 ) );
-          }
-        }
-        catch ( const std::exception& aExc )
-        {
-          // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-          return false;
-        }
-
-        mBuffer.resize ( lSize );
-        //Parse the recieved data into an HttpResponseType object
-        grammars::HttpResponseGrammar lGrammar2;
-        boost::spirit::qi::phrase_parse ( mBuffer.begin() , mBuffer.end() , lGrammar2 , boost::spirit::ascii::space , aResponse );
-
-        if ( DebugInfo )
-        {
-          try
-          {
-            log ( Info() , "HTTP response parsed as:\n" , aResponse );
-          }
-          catch ( uhal::exception& aExc )
-          {
-            aExc.rethrowFrom ( ThisLocation() );
-          }
-          catch ( const std::exception& aExc )
-          {
-            log ( Error() , "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
-            // Just debugging so although exception	is worrying, it is not critical
-          }
-        }
-
-        if ( aResponse.method != "HTTP" || aResponse.status != 200 )
-        {
-          return false;
-        }
-
-        return true;
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
+        //split at the first slash
+        boost::spirit::qi::phrase_parse ( aURL.begin() ,
+                                          aURL.end() ,
+                                          + ( boost::spirit::qi::char_ - "/" ) >> -boost::spirit::qi::lit ( "/" ) >> + ( boost::spirit::qi::char_ ) ,
+                                          boost::spirit::ascii::space ,
+                                          lURLPair );
       }
       catch ( const std::exception& aExc )
       {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+        return false;
       }
+
+      boost::system::error_code lErrorCode ( boost::asio::error::host_not_found );
+      // The IO service everything will go through
+      boost::asio::io_service io_service;
+      // Get a list of endpoints corresponding to the server name.
+      boost::asio::ip::tcp::resolver resolver ( io_service );
+      boost::asio::ip::tcp::resolver::query query ( lURLPair.first , "http" );
+      boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve ( query );
+      boost::asio::ip::tcp::resolver::iterator end;
+      // Try each endpoint until we successfully establish a connection.
+      boost::asio::ip::tcp::socket socket ( io_service );
+
+      try
+      {
+        while ( lErrorCode && endpoint_iterator != end )
+        {
+          socket.close();
+          socket.connect ( *endpoint_iterator++, lErrorCode );
+        }
+
+        if ( lErrorCode )
+        {
+          throw boost::system::system_error ( lErrorCode );
+        }
+      }
+      catch ( const std::exception& aExc )
+      {
+        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+        return false;
+      }
+
+      // Form the request. We specify the "Connection: close" header so that the server will close the socket after transmitting the response. This will allow us to treat all data up until the EOF as the content.
+      boost::asio::streambuf request;
+      std::ostream request_stream ( &request );
+      request_stream << "GET /" << lURLPair.second << " HTTP/1.0\r\n";
+      request_stream << "Host: " << lURLPair.first << "\r\n";
+      request_stream << "Accept: */*\r\n";
+      request_stream << "Connection: close\r\n\r\n";
+
+      try
+      {
+        // Send the request...
+        boost::asio::write ( socket , request , lErrorCode );
+
+        if ( lErrorCode )
+        {
+          throw boost::system::system_error ( lErrorCode );
+        }
+      }
+      catch ( const std::exception& aExc )
+      {
+        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+        return false;
+      }
+
+      // ... and get the reply. First we need a buffer to write the reply in to...
+      static const int mDefaultBufferSize ( 65536 );
+      typedef std::vector<uint8_t> BufferType;
+      typedef BufferType::iterator BufferTypeIterator;
+      BufferType mBuffer ( mDefaultBufferSize , uint8_t ( 0 ) );
+      std::size_t lSize ( 0 );
+
+      // Just keep reading and, if we have not reached the EOF, extend the buffer and read some more.
+      try
+      {
+        while ( true )
+        {
+          lSize += boost::asio::read ( socket, boost::asio::buffer ( &mBuffer[lSize] , mDefaultBufferSize ) , lErrorCode );
+
+          if ( lErrorCode )
+          {
+            if ( lErrorCode == boost::asio::error::eof )
+            {
+              break;
+            }
+            else
+            {
+              throw boost::system::system_error ( lErrorCode );
+            }
+          }
+
+          mBuffer.insert ( mBuffer.end() , mDefaultBufferSize , uint8_t ( 0 ) );
+        }
+      }
+      catch ( const std::exception& aExc )
+      {
+        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+        return false;
+      }
+
+      mBuffer.resize ( lSize );
+      //Parse the recieved data into an HttpResponseType object
+      grammars::HttpResponseGrammar lGrammar2;
+      boost::spirit::qi::phrase_parse ( mBuffer.begin() , mBuffer.end() , lGrammar2 , boost::spirit::ascii::space , aResponse );
+
+      if ( DebugInfo )
+      {
+        try
+        {
+          log ( Info() , "HTTP response parsed as:\n" , aResponse );
+        }
+        catch ( const std::exception& aExc )
+        {
+          log ( Error() , "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
+          // Just debugging so although exception	is worrying, it is not critical
+        }
+      }
+
+      if ( aResponse.method != "HTTP" || aResponse.status != 200 )
+      {
+        return false;
+      }
+
+      return true;
     }
   }
 }
@@ -473,56 +443,35 @@ namespace uhal
     template < typename R , typename F , typename L>
     bool OpenFileLocal ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
     {
-      try
-      {
-        std::vector< boost::filesystem::path > lFilePaths;
+      logging();
+      std::vector< boost::filesystem::path > lFilePaths;
 
-        if ( !uhal::utilities::ShellExpandFilenameExpr<true> ( aFilenameExpr , aParentPath , &lFilePaths ) )
+      if ( !uhal::utilities::ShellExpandFilenameExpr<true> ( aFilenameExpr , aParentPath , &lFilePaths ) )
+      {
+        return false;
+      }
+
+      for ( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 )
+      {
+        std::ifstream lStr ( lIt2->c_str() );
+
+        if ( !lStr.is_open() )
         {
-          return false;
+          log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
+        }
+        else
+        {
+          lStr.seekg ( 0, std::ios::end );
+          std::vector<uint8_t> lFile ( lStr.tellg() , 0 );
+          lStr.seekg ( 0, std::ios::beg );
+          lStr.read ( ( char* ) & ( lFile[0] ) , lFile.size() );
+          aBinder ( std::string ( "file" ) , *lIt2 , boost::ref ( lFile ) );
         }
 
-        for ( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 )
-        {
-          std::ifstream lStr ( lIt2->c_str() );
-
-          if ( !lStr.is_open() )
-          {
-            log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
-          }
-          else
-          {
-            try
-            {
-              lStr.seekg ( 0, std::ios::end );
-              std::vector<uint8_t> lFile ( lStr.tellg() , 0 );
-              lStr.seekg ( 0, std::ios::beg );
-              lStr.read ( ( char* ) & ( lFile[0] ) , lFile.size() );
-              aBinder ( std::string ( "file" ) , *lIt2 , boost::ref ( lFile ) );
-            }
-            catch ( uhal::exception& aExc )
-            {
-              aExc.rethrowFrom ( ThisLocation() );
-            }
-            catch ( const std::exception& aExc )
-            {
-              StdException ( aExc ).throwFrom ( ThisLocation() );
-            }
-          }
-
-          lStr.close();
-        }
-
-        return true;
+        lStr.close();
       }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
-      }
+
+      return true;
     }
 
     /**
@@ -534,40 +483,18 @@ namespace uhal
     template < typename R , typename F , typename L>
     bool OpenFileHttp ( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder )
     {
-      try
-      {
-        HttpResponseType lHttpResponse;
+      logging();
+      HttpResponseType lHttpResponse;
 
-        if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
-        {
-          log ( Error() , "Failed to download file " , aURL , ". Continuing for now but be aware!" );
-          return false;
-        }
-
-        try
-        {
-          boost::filesystem::path lFilePath = boost::filesystem::path ( aURL );
-          aBinder ( std::string ( "http" ) , lFilePath , boost::ref ( lHttpResponse.content ) );
-        }
-        catch ( uhal::exception& aExc )
-        {
-          aExc.rethrowFrom ( ThisLocation() );
-        }
-        catch ( const std::exception& aExc )
-        {
-          StdException ( aExc ).throwFrom ( ThisLocation() );
-        }
-
-        return true;
-      }
-      catch ( uhal::exception& aExc )
+      if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
       {
-        aExc.rethrowFrom ( ThisLocation() );
+        log ( Error() , "Failed to download file " , aURL , ". Continuing for now but be aware!" );
+        return false;
       }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
-      }
+
+      boost::filesystem::path lFilePath = boost::filesystem::path ( aURL );
+      aBinder ( std::string ( "http" ) , lFilePath , boost::ref ( lHttpResponse.content ) );
+      return true;
     }
 
     /**
@@ -581,29 +508,20 @@ namespace uhal
     template < typename R , typename F , typename L>
     bool OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
     {
-      try
+      logging();
+
+      if ( aProtocol == "file" )
       {
-        if ( aProtocol == "file" )
-        {
-          return uhal::utilities::OpenFileLocal ( aFilenameExpr , aParentPath , aBinder );
-        }
-        else if ( aProtocol == "http" )
-        {
-          return uhal::utilities::OpenFileHttp ( aFilenameExpr , aBinder );
-        }
-        else
-        {
-          log ( Error() , "Protocol " , Quote ( aProtocol ) , " is unknown and I am, thus, ignoring file " , Quote ( aFilenameExpr ) , ". Continuing for now but be aware!" );
-          return false;
-        }
+        return uhal::utilities::OpenFileLocal ( aFilenameExpr , aParentPath , aBinder );
       }
-      catch ( uhal::exception& aExc )
+      else if ( aProtocol == "http" )
       {
-        aExc.rethrowFrom ( ThisLocation() );
+        return uhal::utilities::OpenFileHttp ( aFilenameExpr , aBinder );
       }
-      catch ( const std::exception& aExc )
+      else
       {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        log ( Error() , "Protocol " , Quote ( aProtocol ) , " is unknown and I am, thus, ignoring file " , Quote ( aFilenameExpr ) , ". Continuing for now but be aware!" );
+        return false;
       }
     }
 
@@ -663,32 +581,22 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget )
     {
-      try
-      {
-        pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      logging();
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
-        if ( ! lAttr.empty() )
+      if ( ! lAttr.empty() )
+      {
+        aTarget = lAttr.value();
+        return true;
+      }
+      else
+      {
+        if ( DebugInfo )
         {
-          aTarget = lAttr.value();
-          return true;
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
         }
-        else
-        {
-          if ( DebugInfo )
-          {
-            log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-          }
 
-          return false;
-        }
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        return false;
       }
     }
 
@@ -703,38 +611,28 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget )
     {
-      try
-      {
-        pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      logging();
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
-        if ( ! lAttr.empty() )
+      if ( ! lAttr.empty() )
+      {
+        aTarget = lAttr.value();
+        return true;
+      }
+      else
+      {
+        if ( DebugInfo )
         {
-          aTarget = lAttr.value();
-          return true;
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
         }
-        else
-        {
-          if ( DebugInfo )
-          {
-            log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-          }
 
-          return false;
-        }
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        return false;
       }
     }
 
 
     //! Exception class to handle the case where the string will not fit into a 32-bit number. Uses the base uhal::exception implementation of what()
-    class StringNumberWillNotFitInto32BitNumber: public uhal::_exception< StdException > {  };
+    class StringNumberWillNotFitInto32BitNumber : public uhal::exception {};
 
 
     /**
@@ -747,81 +645,71 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget )
     {
-      try
+      logging();
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+
+      if ( ! lAttr.empty() )
       {
-        pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+        std::string lAttrStr ( lAttr.value() );
+        std::stringstream ss;
 
-        if ( ! lAttr.empty() )
+        //if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
+        if ( lAttrStr.size() > 2 )
         {
-          std::string lAttrStr ( lAttr.value() );
-          std::stringstream ss;
-
-          //if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
-          if ( lAttrStr.size() > 2 )
+          if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
           {
-            if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
-            {
-              ss << std::hex << lAttrStr.substr ( 2 );
-            }
-            else
-            {
-              ss << lAttrStr;
-            }
-          }
-          else if ( lAttrStr.size() > 1 )
-          {
-            if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
-            {
-              ss << std::hex << lAttrStr.substr ( 1 );
-            }
-            else
-            {
-              ss << lAttrStr;
-            }
+            ss << std::hex << lAttrStr.substr ( 2 );
           }
           else
           {
             ss << lAttrStr;
           }
-
-          // ss >> aTarget;
-          // aTarget = lAttr.as_int();
-
-          if ( ss.str().size() > 10 )
+        }
+        else if ( lAttrStr.size() > 1 )
+        {
+          if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
           {
-            log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-            StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
+            ss << std::hex << lAttrStr.substr ( 1 );
           }
-
-          int64_t lTarget;
-          ss >> lTarget;
-
-          if ( lTarget>>32 )
+          else
           {
-            log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-            StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
+            ss << lAttrStr;
           }
-
-          aTarget = ( int32_t ) ( lTarget );
-          return true;
         }
         else
         {
-          if ( DebugInfo )
-          {
-            log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-          }
-
-          return false;
+          ss << lAttrStr;
         }
+
+        // ss >> aTarget;
+        // aTarget = lAttr.as_int();
+
+        if ( ss.str().size() > 10 )
+        {
+          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw StringNumberWillNotFitInto32BitNumber();
+        }
+
+        int64_t lTarget;
+        ss >> lTarget;
+
+        if ( lTarget>>32 )
+        {
+          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw StringNumberWillNotFitInto32BitNumber();
+        }
+
+        aTarget = ( int32_t ) ( lTarget );
+        return true;
       }
-      catch ( uhal::exception& aExc )
+      else
       {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        if ( DebugInfo )
+        {
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
+        }
+
+        return false;
       }
     }
 
@@ -835,81 +723,71 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget )
     {
-      try
+      logging();
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+
+      if ( ! lAttr.empty() )
       {
-        pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+        std::string lAttrStr ( lAttr.value() );
+        std::stringstream ss;
 
-        if ( ! lAttr.empty() )
+        //if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
+        if ( lAttrStr.size() > 2 )
         {
-          std::string lAttrStr ( lAttr.value() );
-          std::stringstream ss;
-
-          //if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
-          if ( lAttrStr.size() > 2 )
+          if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
           {
-            if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
-            {
-              ss << std::hex << lAttrStr.substr ( 2 );
-            }
-            else
-            {
-              ss << lAttrStr;
-            }
-          }
-          else if ( lAttrStr.size() > 1 )
-          {
-            if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
-            {
-              ss << std::hex << lAttrStr.substr ( 1 );
-            }
-            else
-            {
-              ss << lAttrStr;
-            }
+            ss << std::hex << lAttrStr.substr ( 2 );
           }
           else
           {
             ss << lAttrStr;
           }
-
-          // ss >> aTarget;
-          // aTarget = lAttr.as_uint();
-
-          if ( ss.str().size() > 10 )
+        }
+        else if ( lAttrStr.size() > 1 )
+        {
+          if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
           {
-            log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-            StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
+            ss << std::hex << lAttrStr.substr ( 1 );
           }
-
-          uint64_t lTarget;
-          ss >> lTarget;
-
-          if ( lTarget>>32 )
+          else
           {
-            log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-            StringNumberWillNotFitInto32BitNumber().throwFrom ( ThisLocation() );
+            ss << lAttrStr;
           }
-
-          aTarget = ( uint32_t ) ( lTarget );
-          return true;
         }
         else
         {
-          if ( DebugInfo )
-          {
-            log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-          }
-
-          return false;
+          ss << lAttrStr;
         }
+
+        // ss >> aTarget;
+        // aTarget = lAttr.as_uint();
+
+        if ( ss.str().size() > 10 )
+        {
+          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw StringNumberWillNotFitInto32BitNumber();
+        }
+
+        uint64_t lTarget;
+        ss >> lTarget;
+
+        if ( lTarget>>32 )
+        {
+          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw StringNumberWillNotFitInto32BitNumber();
+        }
+
+        aTarget = ( uint32_t ) ( lTarget );
+        return true;
       }
-      catch ( uhal::exception& aExc )
+      else
       {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        if ( DebugInfo )
+        {
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
+        }
+
+        return false;
       }
     }
 
@@ -923,32 +801,22 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget )
     {
-      try
-      {
-        pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      logging();
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
-        if ( ! lAttr.empty() )
+      if ( ! lAttr.empty() )
+      {
+        aTarget = lAttr.as_double();
+        return true;
+      }
+      else
+      {
+        if ( DebugInfo )
         {
-          aTarget = lAttr.as_double();
-          return true;
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
         }
-        else
-        {
-          if ( DebugInfo )
-          {
-            log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-          }
 
-          return false;
-        }
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        return false;
       }
     }
 
@@ -962,32 +830,22 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget )
     {
-      try
-      {
-        pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      logging();
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
-        if ( ! lAttr.empty() )
+      if ( ! lAttr.empty() )
+      {
+        aTarget = lAttr.as_float();
+        return true;
+      }
+      else
+      {
+        if ( DebugInfo )
         {
-          aTarget = lAttr.as_float();
-          return true;
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
         }
-        else
-        {
-          if ( DebugInfo )
-          {
-            log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-          }
 
-          return false;
-        }
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        return false;
       }
     }
 
@@ -1001,32 +859,22 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , bool& aTarget )
     {
-      try
-      {
-        pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      logging();
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
-        if ( ! lAttr.empty() )
+      if ( ! lAttr.empty() )
+      {
+        aTarget = lAttr.as_bool();
+        return true;
+      }
+      else
+      {
+        if ( DebugInfo )
         {
-          aTarget = lAttr.as_bool();
-          return true;
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
         }
-        else
-        {
-          if ( DebugInfo )
-          {
-            log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-          }
 
-          return false;
-        }
-      }
-      catch ( uhal::exception& aExc )
-      {
-        aExc.rethrowFrom ( ThisLocation() );
-      }
-      catch ( const std::exception& aExc )
-      {
-        StdException ( aExc ).throwFrom ( ThisLocation() );
+        return false;
       }
     }
 

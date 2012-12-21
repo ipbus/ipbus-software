@@ -13,6 +13,7 @@ namespace uhal
 
   std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri )
   {
+    logging();
     NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin();
 
     for ( ; lIt != aUri.mArguments.end() ; ++lIt )
@@ -26,7 +27,7 @@ namespace uhal
     if ( lIt == aUri.mArguments.end() )
     {
       log ( Error() , "This function expects arguments of the form " , Quote ( "target=192.168.200.200:50001" ) ,". It appears that this is missing." );
-      XMLfileMissingRequiredParameters().throwFrom ( ThisLocation() );
+      throw XMLfileMissingRequiredParameters();
     }
 
     /*
@@ -49,7 +50,7 @@ namespace uhal
     		catch ( const std::exception& aExc )
     		{
     			log ( Error() , "Expected a string of the form " , Quote ( "aaa.bbb.ccc.ddd:eeeee" ) , " but received " , Quote ( lIt->second ) , "." );
-    			StdException ( aExc ).throwFrom ( ThisLocation() );
+    throw 			StdException ( aExc );
     		}
 
     		uint32_t lIPaddress = ( lIPAddr[0] <<24 ) | ( lIPAddr[1] <<16 ) | ( lIPAddr[2] <<8 ) | ( lIPAddr[3] );
@@ -76,7 +77,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       log ( Error() , "Expected a string of the form " , Quote ( "hostIP:port" ) , " or " , Quote ( "hostname:port" ) , " but received " , Quote ( lIt->second ) , "." );
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      throw aExc;
     }
 
     std::string lAddr;
@@ -98,7 +99,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       log ( Error() , "Look up failed for hostname=" , lIP.first , ", port=" , lIP.second );
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      throw aExc;
     }
 
     std::vector< uint32_t > lIPAddr;
@@ -119,7 +120,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       log ( Error() , "Boost::ASIO returned address " , Quote ( lAddr ) , " which could not be parsed as " , Quote ( "aaa.bbb.ccc.ddd" ) );
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      throw aExc;
     }
 
     uint32_t lIPaddress = ( lIPAddr[0] <<24 ) | ( lIPAddr[1] <<16 ) | ( lIPAddr[2] <<8 ) | ( lIPAddr[3] );

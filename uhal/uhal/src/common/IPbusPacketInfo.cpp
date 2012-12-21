@@ -9,6 +9,7 @@
 // Using the uhal namespace
 namespace uhal
 {
+  logging();
   std::string toString ( const eIPbusProtocolVersion& aIPbusProtocolVersion )
   {
     switch ( aIPbusProtocolVersion )

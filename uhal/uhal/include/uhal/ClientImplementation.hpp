@@ -154,7 +154,7 @@ namespace uhal
 namespace uhal
 {
   //! Exception class to handle the case where the received header does not match the expected header. Uses the base uhal::exception implementation of what()
-  class XMLfileMissingRequiredParameters: public uhal::_exception< XMLfileMissingRequiredParameters > {};
+  class XMLfileMissingRequiredParameters : public uhal::exception {};
 
   /**
   	Extract an IP-address and port number from a URI object

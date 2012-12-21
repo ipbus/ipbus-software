@@ -15,35 +15,31 @@ namespace uhal
 {
 
 
-TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort ) try :
+  TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort ) :
     mTcpTransportProtocol ( aTcpTransportProtocol ),
-                          mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
-                          mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) ),
-                          mEndpoint ( boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > (
-                                        new boost::asio::ip::tcp::resolver::iterator (
-                                          boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
-                                            boost::asio::ip::tcp::resolver::query ( aHostname , aServiceOrPort )
-                                          )
-                                        )
-                                      )
-                                    ),
-                          mDeadlineTimer ( *mIOservice ),
-                          mReplyMemory ( 65536 , 0x00000000 )
+    mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
+    mSocket ( boost::shared_ptr< boost::asio::ip::tcp::socket > ( new boost::asio::ip::tcp::socket ( *mIOservice ) ) ),
+    mEndpoint ( boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > (
+                  new boost::asio::ip::tcp::resolver::iterator (
+                    boost::asio::ip::tcp::resolver ( *mIOservice ).resolve (
+                      boost::asio::ip::tcp::resolver::query ( aHostname , aServiceOrPort )
+                    )
+                  )
+                )
+              ),
+    mDeadlineTimer ( *mIOservice ),
+    mReplyMemory ( 65536 , 0x00000000 )
   {
+    logging();
     mDeadlineTimer.async_wait ( boost::bind ( &TcpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
 
   TcpTransportProtocol::DispatchWorker::~DispatchWorker()
   {
+    logging();
+
     try
     {
       if ( mSocket.unique() )
@@ -61,6 +57,7 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
   void TcpTransportProtocol::DispatchWorker::operator() ()
   {
 #ifdef USE_TCP_MULTITHREADED
+    logging();
 
     try
     {
@@ -109,48 +106,15 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
 
   void TcpTransportProtocol::DispatchWorker::Dispatch ( Buffers* aBuffers )
   {
-    try
+    logging();
+    log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTcpTransportProtocol.getTimeoutPeriod().total_milliseconds() ) );
+
+    if ( ! mSocket->is_open() )
     {
-      log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTcpTransportProtocol.getTimeoutPeriod().total_milliseconds() ) );
-
-      if ( ! mSocket->is_open() )
-      {
-        log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
-        mDeadlineTimer.expires_from_now ( mTcpTransportProtocol.getTimeoutPeriod() );
-        mErrorCode = boost::asio::error::would_block;
-        boost::asio::async_connect ( *mSocket , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-
-        do
-        {
-          mIOservice->run_one();
-        }
-        while ( mErrorCode == boost::asio::error::would_block );
-
-        if ( mErrorCode )
-        {
-          if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
-          {
-            log ( Error() , "ASIO reported a Timeout in TCP callback" );
-            ErrorInTcpCallback().throwFrom ( ThisLocation() );
-          }
-
-          log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-          ErrorInTcpCallback().throwFrom ( ThisLocation() );
-        }
-
-        mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-        log ( Info() , "TCP connection succeeded" );
-      }
-
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      // Send data
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      std::vector< boost::asio::const_buffer > lAsioSendBuffer;
-      lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-      log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+      log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
       mDeadlineTimer.expires_from_now ( mTcpTransportProtocol.getTimeoutPeriod() );
       mErrorCode = boost::asio::error::would_block;
-      boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+      boost::asio::async_connect ( *mSocket , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
 
       do
       {
@@ -158,70 +122,67 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
       }
       while ( mErrorCode == boost::asio::error::would_block );
 
-      /*if ( mErrorCode )
+      if ( mErrorCode )
+      {
+        if ( mSocket.unique() )
         {
-          log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-          ErrorInTcpCallback().throwFrom ( ThisLocation() );
-        }*/
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      // Read back replies
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-      lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
-      log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
-      mDeadlineTimer.expires_from_now ( mTcpTransportProtocol.getTimeoutPeriod() );
-      mErrorCode = boost::asio::error::would_block;
-      boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+          mSocket->close();
+        }
 
-      do
-      {
-        mIOservice->run_one();
-      }
-      while ( mErrorCode == boost::asio::error::would_block );
+        mTcpTransportProtocol.mPackingProtocol->DeleteBuffer();
 
-      if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
-      {
         if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
         {
           log ( Error() , "ASIO reported a Timeout in TCP callback" );
-          ErrorInTcpCallback().throwFrom ( ThisLocation() );
+          throw ErrorInTcpCallback();
         }
 
-        log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
-        mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
-        ErrorInTcpCallback().throwFrom ( ThisLocation() );
+        log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+        throw ErrorInTcpCallback();
       }
 
-      std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
-      uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
-
-      for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-      {
-        memcpy ( lIt->first, lReplyBuf, lIt->second );
-        lReplyBuf += lIt->second;
-      }
-
-      /*
-      			uint32_t lCounter(0);
-      			for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
-      			{
-      				uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
-      				uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
-
-      				for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
-      				{
-      					log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
-      				}
-      			}
-      */
-
-      if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
-      {
-        log ( Error() , "Validation function reported an error!" );
-        IPbusValidationError ().throwFrom ( ThisLocation() );
-      }
+      mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
+      log ( Info() , "TCP connection succeeded" );
     }
-    catch ( uhal::exception& aExc )
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // Send data
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    std::vector< boost::asio::const_buffer > lAsioSendBuffer;
+    lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
+    log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+    mDeadlineTimer.expires_from_now ( mTcpTransportProtocol.getTimeoutPeriod() );
+    mErrorCode = boost::asio::error::would_block;
+    boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+    do
+    {
+      mIOservice->run_one();
+    }
+    while ( mErrorCode == boost::asio::error::would_block );
+
+    /*if ( mErrorCode )
+      {
+        log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+        throw ErrorInTcpCallback();
+      }*/
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // Read back replies
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
+    lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
+    log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
+    mDeadlineTimer.expires_from_now ( mTcpTransportProtocol.getTimeoutPeriod() );
+    mErrorCode = boost::asio::error::would_block;
+    boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+    do
+    {
+      mIOservice->run_one();
+    }
+    while ( mErrorCode == boost::asio::error::would_block );
+
+    if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
     {
       if ( mSocket.unique() )
       {
@@ -229,24 +190,52 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
       }
 
       mTcpTransportProtocol.mPackingProtocol->DeleteBuffer();
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      if ( mSocket.unique() )
+
+      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        mSocket->close();
+        log ( Error() , "ASIO reported a Timeout in TCP callback" );
+        throw ErrorInTcpCallback();
       }
 
-      mTcpTransportProtocol.mPackingProtocol->DeleteBuffer();
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
+      mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
+      throw ErrorInTcpCallback();
+    }
+
+    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
+    uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
+
+    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    {
+      memcpy ( lIt->first, lReplyBuf, lIt->second );
+      lReplyBuf += lIt->second;
+    }
+
+    /*
+    			uint32_t lCounter(0);
+    			for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
+    			{
+    				uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
+    				uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
+
+    				for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
+    				{
+    					log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
+    				}
+    			}
+    */
+
+    if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
+    {
+      log ( Error() , "Validation function reported an error!" );
+      throw IPbusValidationError ();
     }
   }
 
-
-
   void TcpTransportProtocol::DispatchWorker::CheckDeadline()
   {
+    logging();
+
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
@@ -266,29 +255,20 @@ TcpTransportProtocol::DispatchWorker::DispatchWorker ( TcpTransportProtocol& aTc
     // Put the actor back to sleep.
     mDeadlineTimer.async_wait ( boost::bind ( &TcpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
   }
-
-
-
-TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) try :
+  TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) :
     TransportProtocol ( aTimeoutPeriod ),
-                      mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort ) ) )
+    mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort ) ) )
 #ifdef USE_TCP_MULTITHREADED
-                      , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
-                      mAsynchronousException ( NULL )
+    , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
+    mAsynchronousException ( NULL )
 #endif
-    {}
-  catch ( uhal::exception& aExc )
   {
-    aExc.rethrowFrom ( ThisLocation() );
+    logging();
   }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
-
-
   TcpTransportProtocol::~TcpTransportProtocol()
   {
+    logging();
+
     try
     {
 #ifdef USE_TCP_MULTITHREADED
@@ -317,77 +297,45 @@ TcpTransportProtocol::TcpTransportProtocol ( const std::string& aHostname , cons
       log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
     }
   }
-
-
-
-
   void TcpTransportProtocol::Dispatch ( Buffers* aBuffers )
   {
-    try
-    {
+    logging();
 #ifdef USE_TCP_MULTITHREADED
+    {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+
+      if ( mAsynchronousException )
       {
-        boost::lock_guard<boost::mutex> lLock ( mMutex );
-
-        if ( mAsynchronousException )
-        {
-          mAsynchronousException->throwFrom ( ThisLocation() );
-        }
-
-        mPendingSendBuffers.push_back ( aBuffers );
-
+        throw mAsynchronousException-;
       }
+
+      mPendingSendBuffers.push_back ( aBuffers );
+    }
 #else
-      mDispatchWorker->Dispatch ( aBuffers );
+    mDispatchWorker->Dispatch ( aBuffers );
 #endif
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
   }
-
-
-
   void TcpTransportProtocol::Flush( )
   {
-    try
-    {
+    logging();
 #ifdef USE_TCP_MULTITHREADED
-      bool lContinue ( true );
+    bool lContinue ( true );
 
-      do
+    do
+    {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+
+      // kill time while pending buffers are emptied and check for exceptions on the thread...
+      if ( mAsynchronousException )
       {
-        boost::lock_guard<boost::mutex> lLock ( mMutex );
-
-        // kill time while pending buffers are emptied and check for exceptions on the thread...
-        if ( mAsynchronousException )
-        {
-          mAsynchronousException->throwFrom ( ThisLocation() );
-        }
-
-        lContinue = ( mPendingSendBuffers.size() );
+        throw mAsynchronousException-;
       }
-      while ( lContinue );
+
+      lContinue = ( mPendingSendBuffers.size() );
+    }
+    while ( lContinue );
 
 #endif
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
   }
-
-
-
-
 }
 

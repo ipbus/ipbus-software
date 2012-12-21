@@ -5,25 +5,24 @@ namespace uhal
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
 
-IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) try :
+  IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) :
     PackingProtocol ( aMaxSendSize<<2 , aMaxReplySize<<2 ),
-                    mTransactionCounter ( 0 )
-    {}
-  catch ( uhal::exception& aExc )
+    mTransactionCounter ( 0 )
   {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
+
   template< eIPbusProtocolVersion IPbusProtocolVersion >
-  IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::~IPbusHwAccessPackingProtocol() {}
+  IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::~IPbusHwAccessPackingProtocol()
+  {
+    logging();
+  }
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   uint32_t IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
   {
+    logging();
     return IPbusHeaderHelper<IPbusProtocolVersion>::calculate ( aType , aWordCount , mTransactionCounter++ );
   }
 
@@ -36,6 +35,7 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
     uint32_t& aTransactionId ,
     uint8_t& aResponseGood )
   {
+    logging();
     return IPbusHeaderHelper<IPbusProtocolVersion>::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
   }
 
@@ -43,6 +43,7 @@ IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProto
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   void IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
   {
+    logging();
     uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
     log ( Debug() , "Predispatch size : " , Integer ( lWords ) , " words " );
 

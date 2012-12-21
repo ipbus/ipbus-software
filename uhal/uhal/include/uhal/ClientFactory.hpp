@@ -21,9 +21,9 @@
 namespace uhal
 {
   // //! Exception class to handle the case where a protocol already exists in the creator map. Uses the base uhal::exception implementation of what()
-  // class ProtocolAlreadyExist: public uhal::_exception< ProtocolAlreadyExist > { };
+  // class ProtocolAlreadyExist : public uhal::exception {};
   //! Exception class to handle the case where the protocol requested does not exists in the creator map. Uses the base uhal::exception implementation of what()
-  class ProtocolDoesNotExist: public uhal::_exception< ProtocolDoesNotExist > { };
+  class ProtocolDoesNotExist : public uhal::exception {};
 
   /**
   A class to construct an IPbus client based on the protocol identifier specified
@@ -76,11 +76,17 @@ namespace uhal
           /**
           	Default constructor
           */
-          CreatorInterface() {}
+          CreatorInterface()
+          {
+            logging();
+          }
           /**
           	Destructor
           */
-          virtual ~CreatorInterface() {}
+          virtual ~CreatorInterface()
+          {
+            logging();
+          }
           /**
           	Interface to a function which create a new IPbus client based on the protocol identifier specified
           	@param aId the uinique identifier that the client will be given.
@@ -99,11 +105,17 @@ namespace uhal
           /**
           	Default constructor
           */
-          Creator() {}
+          Creator()
+          {
+            logging();
+          }
           /**
           	Destructor
           */
-          virtual ~Creator() {}
+          virtual ~Creator()
+          {
+            logging();
+          }
           /**
           	Concrete function which creates a new IPbus client based on the protocol identifier specified
           	@param aId the uinique identifier that the client will be given.

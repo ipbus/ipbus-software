@@ -5,27 +5,26 @@ namespace uhal
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
 
-ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingProtocol ( const uint32_t& aDeviceIPaddr , const uint16_t& aDevicePort , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) try :
+  ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingProtocol ( const uint32_t& aDeviceIPaddr , const uint16_t& aDevicePort , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) :
     PackingProtocol ( aMaxSendSize<<2 , aMaxReplySize<<2 ),
-                    mDeviceIPaddress ( htonl ( aDeviceIPaddr ) ),
-                    mDevicePort ( htons ( aDevicePort ) ),
-                    mTransactionCounter ( 0 )
-    {}
-  catch ( uhal::exception& aExc )
+    mDeviceIPaddress ( htonl ( aDeviceIPaddr ) ),
+    mDevicePort ( htons ( aDevicePort ) ),
+    mTransactionCounter ( 0 )
   {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
+
   template< eIPbusProtocolVersion IPbusProtocolVersion >
-  ControlHubHostPackingProtocol<  IPbusProtocolVersion >::~ControlHubHostPackingProtocol() {}
+  ControlHubHostPackingProtocol<  IPbusProtocolVersion >::~ControlHubHostPackingProtocol()
+  {
+    logging();
+  }
 
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   uint32_t ControlHubHostPackingProtocol<  IPbusProtocolVersion >::calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
   {
+    logging();
     return IPbusHeaderHelper<IPbusProtocolVersion>::calculate ( aType , aWordCount , mTransactionCounter++ );
   }
 
@@ -38,6 +37,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
     uint32_t& aTransactionId ,
     uint8_t& aResponseGood )
   {
+    logging();
     return IPbusHeaderHelper<IPbusProtocolVersion>::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
   }
 
@@ -45,6 +45,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   void ControlHubHostPackingProtocol<  IPbusProtocolVersion >::Preamble( )
   {
+    logging();
     // 12 bytes form the preamble:
     // Byte-count (4 bytes) will be updated before transmission in Predispatch
     // Device IP address (4 bytes)
@@ -77,6 +78,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   void ControlHubHostPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
   {
+    logging();
     tPreamble* lPreamble;
     {
       boost::lock_guard<boost::mutex> lLock ( mMutex );
@@ -109,6 +111,7 @@ ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingPro
   template< eIPbusProtocolVersion IPbusProtocolVersion >
   bool ControlHubHostPackingProtocol< IPbusProtocolVersion >::Validate ( Buffers* aBuffers )
   {
+    logging();
     uint8_t* lSendBuffer ( aBuffers->getSendBuffer() );
     uint8_t* lSendBufferEnd ( lSendBuffer+aBuffers->sendCounter() );
     lSendBuffer += 12;

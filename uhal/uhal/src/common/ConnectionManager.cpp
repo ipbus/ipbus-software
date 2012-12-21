@@ -15,9 +15,10 @@ namespace uhal
 {
 
 
-ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess ) try :
+  ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess ) :
     connection_file ( aConnectionFile )
   {
+    logging();
     aSuccess=false;
 
     if ( ! uhal::utilities::GetXMLattribute<true> ( aNode , "id" , id ) )
@@ -37,49 +38,32 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
     aSuccess=true;
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
 
   bool ConnectionManager::ConnectionDescriptor::operator== ( const ConnectionDescriptor& aConnectionDescriptor ) const
   {
-    try
+    logging();
+
+    if ( id != aConnectionDescriptor.id )
     {
-      if ( id != aConnectionDescriptor.id )
-      {
-        return false;
-      }
-
-      if ( uri != aConnectionDescriptor.uri )
-      {
-        return false;
-      }
-
-      if ( address_table != aConnectionDescriptor.address_table )
-      {
-        return false;
-      }
-
-      if ( connection_file != aConnectionDescriptor.connection_file )
-      {
-        return false;
-      }
-
-      return true;
+      return false;
     }
-    catch ( uhal::exception& aExc )
+
+    if ( uri != aConnectionDescriptor.uri )
     {
-      aExc.rethrowFrom ( ThisLocation() );
+      return false;
     }
-    catch ( const std::exception& aExc )
+
+    if ( address_table != aConnectionDescriptor.address_table )
     {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      return false;
     }
+
+    if ( connection_file != aConnectionDescriptor.connection_file )
+    {
+      return false;
+    }
+
+    return true;
   }
 
 
@@ -88,8 +72,9 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
   // Given a glob expression, parse all the files matching it (e.g. $BUILD/config/*.xml). If one parsing fails throw an exception and return filename and line number
 
-  ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr ) try
+  ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr )
   {
+    logging();
     //Mutex lock here to be on the safe side
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles;	//protocol, filename
@@ -100,16 +85,12 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
       uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , boost::bind ( &ConnectionManager::CallBack, boost::ref ( *this ) , _1 , _2 , _3 ) );
     }
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
 
-  ConnectionManager::~ConnectionManager () {}
+
+  ConnectionManager::~ConnectionManager ()
+  {
+    logging();
+  }
 
 
   /*
@@ -118,117 +99,77 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
   */
   HwInterface ConnectionManager::getDevice ( const std::string& aId )
   {
-    try
+    logging();
+    //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+
+    if ( mConnectionDescriptors.size() == 0 )
     {
-      //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-
-      if ( mConnectionDescriptors.size() == 0 )
-      {
-        log ( Error() , "Connection map contains no entries" );
-        ConnectionUIDDoesNotExist().throwFrom ( ThisLocation() );
-      }
-
-      std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.find ( aId );
-
-      if ( lIt == mConnectionDescriptors.end() )
-      {
-        log ( Error() , aId , " does not exist in connection map" );
-        ConnectionUIDDoesNotExist().throwFrom ( ThisLocation() );
-      }
-
-      //The node tree builder returns a newly created Node which we can safely wrap as a shared_ptr
-      boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
-      log ( Info() , "ConnectionManager created node tree: " , *lNode );
-      boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );
-      return HwInterface ( lClientInterface , lNode );
+      log ( Error() , "Connection map contains no entries" );
+      throw ConnectionUIDDoesNotExist();
     }
-    catch ( uhal::exception& aExc )
+
+    std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.find ( aId );
+
+    if ( lIt == mConnectionDescriptors.end() )
     {
-      aExc.rethrowFrom ( ThisLocation() );
+      log ( Error() , aId , " does not exist in connection map" );
+      throw ConnectionUIDDoesNotExist();
     }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+
+    //The node tree builder returns a newly created Node which we can safely wrap as a shared_ptr
+    boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
+    log ( Info() , "ConnectionManager created node tree: " , *lNode );
+    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );
+    return HwInterface ( lClientInterface , lNode );
   }
 
   //Static method for building device on the fly
   HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr )
   {
-    try
-    {
-      //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
-      log ( Info() , "ConnectionManager created node tree: " , *lNode );
-      boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
-      return HwInterface ( lClientInterface , lNode );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
+    log ( Info() , "ConnectionManager created node tree: " , *lNode );
+    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
+    return HwInterface ( lClientInterface , lNode );
   }
 
 
   //Given a regex return the ids that match the
   std::vector<std::string> ConnectionManager::getDevices ( ) const
   {
-    try
-    {
-      std::vector<std::string> lDevices;
-      lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
+    logging();
+    std::vector<std::string> lDevices;
+    lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
-      for ( std::map< std::string, ConnectionDescriptor >::const_iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
-      {
-        lDevices.push_back ( lIt->first );
-      }
+    for ( std::map< std::string, ConnectionDescriptor >::const_iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
+    {
+      lDevices.push_back ( lIt->first );
+    }
 
-      return lDevices;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    return lDevices;
   }
 
 
   std::vector<std::string> ConnectionManager::getDevices ( const std::string& aRegex ) const
   {
-    try
-    {
-      std::vector<std::string> lDevices;
-      lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
+    logging();
+    std::vector<std::string> lDevices;
+    lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
-      for ( std::map< std::string, ConnectionDescriptor >::const_iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
+    for ( std::map< std::string, ConnectionDescriptor >::const_iterator lIt = mConnectionDescriptors.begin() ; lIt != mConnectionDescriptors.end() ; ++lIt )
+    {
+      boost::cmatch lMatch;
+
+      if ( boost::regex_match ( lIt->first.c_str() , lMatch ,  boost::regex ( aRegex ) ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
       {
-        boost::cmatch lMatch;
-
-        if ( boost::regex_match ( lIt->first.c_str() , lMatch ,  boost::regex ( aRegex ) ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
-        {
-          lDevices.push_back ( lIt->first );
-        }
+        lDevices.push_back ( lIt->first );
       }
+    }
 
-      return lDevices;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    return lDevices;
   }
 
 
@@ -236,67 +177,57 @@ ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_
 
   void ConnectionManager::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile )
   {
-    try
+    logging();
+    std::pair< std::set< std::string >::iterator , bool > lInsert = mPreviouslyOpenedFiles.insert ( aProtocol+ ( aPath.string() ) );
+
+    if ( ! lInsert.second )
     {
-      std::pair< std::set< std::string >::iterator , bool > lInsert = mPreviouslyOpenedFiles.insert ( aProtocol+ ( aPath.string() ) );
+      log ( Info() , "File " ,  Quote ( aProtocol+ ( aPath.string() ) ) , " has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
+      return;
+    }
 
-      if ( ! lInsert.second )
+    pugi::xml_document lXmlDocument;
+    pugi::xml_parse_result lLoadResult = lXmlDocument.load_buffer_inplace ( & ( aFile[0] ) , aFile.size() );
+
+    if ( !lLoadResult )
+    {
+      //Mark says to throw on this condition, I will leave it continuing for now...
+      uhal::utilities::PugiXMLParseResultPrettifier ( lLoadResult , aPath , aFile );
+      return;
+    }
+
+    pugi::xpath_node_set lConnections = lXmlDocument.select_nodes ( "/connections/connection" );
+
+    for ( pugi::xpath_node_set::const_iterator lConnectionIt = lConnections.begin(); lConnectionIt != lConnections.end(); ++lConnectionIt )
+    {
+      bool lSuccess;
+      ConnectionDescriptor lDescriptor ( lConnectionIt->node() , aPath , lSuccess );
+
+      if ( lSuccess )
       {
-        log ( Info() , "File " ,  Quote ( aProtocol+ ( aPath.string() ) ) , " has already been parsed. I am not reparsing and will continue with next document for now but be aware!" );
-        return;
-      }
+        std::pair< std::map< std::string, ConnectionDescriptor >::iterator , bool > lInsert = mConnectionDescriptors.insert ( std::make_pair ( lDescriptor.id , lDescriptor ) );
 
-      pugi::xml_document lXmlDocument;
-      pugi::xml_parse_result lLoadResult = lXmlDocument.load_buffer_inplace ( & ( aFile[0] ) , aFile.size() );
-
-      if ( !lLoadResult )
-      {
-        //Mark says to throw on this condition, I will leave it continuing for now...
-        uhal::utilities::PugiXMLParseResultPrettifier ( lLoadResult , aPath , aFile );
-        return;
-      }
-
-      pugi::xpath_node_set lConnections = lXmlDocument.select_nodes ( "/connections/connection" );
-
-      for ( pugi::xpath_node_set::const_iterator lConnectionIt = lConnections.begin(); lConnectionIt != lConnections.end(); ++lConnectionIt )
-      {
-        bool lSuccess;
-        ConnectionDescriptor lDescriptor ( lConnectionIt->node() , aPath , lSuccess );
-
-        if ( lSuccess )
+        if ( !lInsert.second )
         {
-          std::pair< std::map< std::string, ConnectionDescriptor >::iterator , bool > lInsert = mConnectionDescriptors.insert ( std::make_pair ( lDescriptor.id , lDescriptor ) );
-
-          if ( !lInsert.second )
+          if ( lInsert.first->second == lDescriptor )
           {
-            if ( lInsert.first->second == lDescriptor )
-            {
-              log ( Info() , "Duplicate connection entry found:"
-                    "\n > id = " , lDescriptor.id ,
-                    "\n > uri = " , lDescriptor.uri ,
-                    "\n > address_table = " , lDescriptor.address_table ,
-                    "\n Continuing for now but be aware!" );
-            }
-            else
-            {
-              log ( Error() , "Duplicate connection ID found but parameters do not match! Bailing!" );
-              DuplicatedUID().throwFrom ( ThisLocation() );
-            }
+            log ( Info() , "Duplicate connection entry found:"
+                  "\n > id = " , lDescriptor.id ,
+                  "\n > uri = " , lDescriptor.uri ,
+                  "\n > address_table = " , lDescriptor.address_table ,
+                  "\n Continuing for now but be aware!" );
+          }
+          else
+          {
+            log ( Error() , "Duplicate connection ID found but parameters do not match! Bailing!" );
+            throw DuplicatedUID();
           }
         }
-        else
-        {
-          log ( Error() , "Construction of Connection Descriptor failed. Continuing with next Connection Descriptor for now but be aware!" );
-        }
       }
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      else
+      {
+        log ( Error() , "Construction of Connection Descriptor failed. Continuing with next Connection Descriptor for now but be aware!" );
+      }
     }
   }
 

@@ -4,33 +4,20 @@ namespace uhal
 
   template< typename T >
 
-ValHeader::ValHeader ( const ValWord<T>& aValWord ) try :
+  ValHeader::ValHeader ( const ValWord<T>& aValWord ) :
     mMembers ( aValWord.mMembers )
   {
+    logging();
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
 
   template< typename T >
 
-ValHeader::ValHeader ( const ValVector<T>& aValVector ) try :
+  ValHeader::ValHeader ( const ValVector<T>& aValVector ) :
     mMembers ( aValVector.mMembers )
   {
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
 
@@ -38,24 +25,15 @@ ValHeader::ValHeader ( const ValVector<T>& aValVector ) try :
   template <class InputIterator>
   void ValVector<T>::assign ( InputIterator aBegin , InputIterator aEnd )
   {
-    try
+    logging();
+
+    if ( !/* *mValid */ mMembers->valid )
     {
-      if ( !/* *mValid */ mMembers->valid )
-      {
-        /* mValues-> */ mMembers->value.assign ( aBegin , aEnd );
-      }
-      else
-      {
-        ValMemImutabilityViolation().throwFrom ( ThisLocation() );
-      }
+      /* mValues-> */ mMembers->value.assign ( aBegin , aEnd );
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      throw ValMemImutabilityViolation();
     }
   }
 

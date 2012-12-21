@@ -35,7 +35,7 @@ namespace uhal
         PerfTester();
 
         /// Destructor
-        ~PerfTester() { }
+        ~PerfTester() {}
 
         /// Pass in the two command-line parameter variables, this will define the test that then gets run.
         /*!

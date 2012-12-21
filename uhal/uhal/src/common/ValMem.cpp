@@ -7,100 +7,56 @@
 namespace uhal
 {
 
-_ValHeader_::_ValHeader_ ( const bool& aValid ) try :
+  _ValHeader_::_ValHeader_ ( const bool& aValid ) :
     valid ( aValid )
-    {}
-  catch ( uhal::exception& aExc )
   {
-    aExc.rethrowFrom ( ThisLocation() );
+    logging();
   }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
-
 
 
   template< typename T >
 
-_ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask ) try :
+  _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask ) :
     _ValHeader_ ( aValid ) ,
-                value ( aValue ) ,
-                mask ( aMask )
-    {}
-  catch ( uhal::exception& aExc )
+    value ( aValue ) ,
+    mask ( aMask )
   {
-    aExc.rethrowFrom ( ThisLocation() );
+    logging();
   }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
 
   template< typename T >
 
-_ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid ) try :
+  _ValVector_<T>::_ValVector_ ( const std::vector<T>& aValue , const bool& aValid ) :
     _ValHeader_ ( aValid ),
-                value ( aValue )
-    {}
-  catch ( uhal::exception& aExc )
+    value ( aValue )
   {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
 
 
 
 
-ValHeader::ValHeader() try :
+
+  ValHeader::ValHeader() :
     mMembers ( new _ValHeader_ ( false ) )
   {
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
 
   bool ValHeader::valid()
   {
-    try
-    {
-      return mMembers->valid;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mMembers->valid;
   }
 
   void ValHeader::valid ( bool aValid )
   {
-    try
-    {
-      mMembers->valid = aValid;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mMembers->valid = aValid;
   }
 
 
@@ -115,16 +71,16 @@ ValHeader::ValHeader() try :
   // else
   // {
   // log ( Error() , "Access attempted on non-validated memory" );
-  // NonValidatedMemory().throwFrom ( ThisLocation() );
+  // throw // NonValidatedMemory();
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
@@ -133,99 +89,49 @@ ValHeader::ValHeader() try :
 
   template< typename T >
 
-ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) try :
+  ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) :
     mMembers ( new _ValWord_<T> ( aValue , false , aMask ) )
   {
+    logging();
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
   template< typename T >
 
-ValWord< T >::ValWord ( const ValWord<T>& aVal ) try :
+  ValWord< T >::ValWord ( const ValWord<T>& aVal ) :
     mMembers ( aVal.mMembers )
   {
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
   template< typename T >
 
-ValWord< T >::ValWord() try :
+  ValWord< T >::ValWord() :
     mMembers ( new _ValWord_<T> ( T() , false , 0xFFFFFFFF ) )
   {
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
   template< typename T >
   bool ValWord< T >::valid()
   {
-    try
-    {
-      return mMembers->valid;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mMembers->valid;
   }
 
   template< typename T >
   void ValWord< T >::valid ( bool aValid )
   {
-    try
-    {
-      mMembers->valid = aValid;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mMembers->valid = aValid;
   }
 
   template< typename T >
   ValWord< T >& ValWord< T >::operator = ( const T& aValue )
   {
-    try
-    {
-      mMembers->value = aValue ;
-      return *this;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mMembers->value = aValue ;
+    return *this;
   }
 
   // template< typename T >
@@ -251,102 +157,54 @@ ValWord< T >::ValWord() try :
   template< typename T >
   ValWord< T >::operator T()
   {
-    try
-    {
-      return value();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return value();
   }
 
   template< typename T >
   T ValWord< T >::value() const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return ( mMembers->value & mMembers->mask ) >> utilities::TrailingRightBits ( mMembers->mask ) ;
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return ( mMembers->value & mMembers->mask ) >> utilities::TrailingRightBits ( mMembers->mask ) ;
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
   template< typename T >
   void ValWord< T >::value ( const T& aValue )
   {
-    try
+    logging();
+
+    if ( !mMembers->valid )
     {
-      if ( !mMembers->valid )
-      {
-        mMembers->value = aValue;
-      }
-      else
-      {
-        log ( Error() , "Attempted  to modify validated memory" );
-        ValMemImutabilityViolation().throwFrom ( ThisLocation() );
-      }
+      mMembers->value = aValue;
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Attempted  to modify validated memory" );
+      throw ValMemImutabilityViolation();
     }
   }
 
   template< typename T >
   const uint32_t& ValWord< T >::mask() const
   {
-    try
-    {
-      return mMembers->mask;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mMembers->mask;
   }
 
   template< typename T >
   void ValWord< T >::mask ( const uint32_t& aMask )
   {
-    try
-    {
-      mMembers->mask = aMask ;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mMembers->mask = aMask ;
   }
 
 
@@ -362,16 +220,16 @@ ValWord< T >::ValWord() try :
   // else
   // {
   // log ( Error() , "Access attempted on non-validated memory" );
-  // NonValidatedMemory().throwFrom ( ThisLocation() );
+  // throw // NonValidatedMemory();
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
@@ -382,96 +240,52 @@ ValWord< T >::ValWord() try :
 
   template< typename T >
 
-ValVector< T >::ValVector ( const std::vector<T>& aValues ) try :
+  ValVector< T >::ValVector ( const std::vector<T>& aValues ) :
     mMembers ( new _ValVector_<T> ( aValues , false ) )
   {
+    logging();
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
   template< typename T >
 
-ValVector< T >::ValVector ( const ValVector& aValues ) try :
+  ValVector< T >::ValVector ( const ValVector& aValues ) :
     mMembers ( aValues.mMembers )
   {
+    logging();
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
   template< typename T >
 
-ValVector< T >::ValVector ( uint32_t aSize ) try :
+  ValVector< T >::ValVector ( uint32_t aSize )  :
     mMembers ( new _ValVector_<T> ( std::vector<T> ( aSize , T() ) , false ) )
   {
+    logging();
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
   template< typename T >
 
-ValVector< T >::ValVector() try :
+  ValVector< T >::ValVector() :
     mMembers ( new _ValVector_<T> ( std::vector<T>() , false ) )
   {
+    logging();
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
   template< typename T >
   bool ValVector< T >::valid()
   {
-    try
-    {
-      return mMembers->valid;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mMembers->valid;
   }
 
   template< typename T >
   void ValVector< T >::valid ( bool aValid )
   {
-    try
-    {
-      mMembers->valid = aValid;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mMembers->valid = aValid;
   }
 
 
@@ -479,222 +293,139 @@ ValVector< T >::ValVector() try :
   template< typename T >
   void ValVector< T >::push_back ( const T& aValue )
   {
-    try
+    logging();
+
+    if ( !mMembers->valid )
     {
-      if ( !mMembers->valid )
-      {
-        mMembers->value.push_back ( aValue );
-      }
-      else
-      {
-        log ( Error() , "Attempted  to modify validated memory" );
-        ValMemImutabilityViolation().throwFrom ( ThisLocation() );
-      }
+      mMembers->value.push_back ( aValue );
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Attempted  to modify validated memory" );
+      throw ValMemImutabilityViolation();
     }
   }
 
   template< typename T >
   const T& ValVector< T >::operator[] ( std::size_t aIndex ) const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return ( mMembers->value ) [aIndex];
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return ( mMembers->value ) [aIndex];
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
   template< typename T >
   const T& ValVector< T >::at ( std::size_t aIndex ) const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return  mMembers->value.at ( aIndex );
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return  mMembers->value.at ( aIndex );
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
   template< typename T >
   std::size_t ValVector< T >::size() const
   {
-    try
+    logging();
+    return mMembers->value.size();
+    /*
+    if ( mMembers->valid )
     {
-      return mMembers->value.size();
-      /*
-      if ( mMembers->valid )
-      {
-      	return  mMembers->value.size();
-      }
-      else
-      {
-      	log ( Error() , "Access attempted on non-validated memory" );
+    	return  mMembers->value.size();
+    }
+    else
+    {
+    	log ( Error() , "Access attempted on non-validated memory" );
 
-      	NonValidatedMemory().throwFrom( ThisLocation() );
-      }
-      */
+    	NonValidatedMemory().throwFrom( ThisLocation() );
     }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    */
   }
 
   template< typename T >
   void ValVector< T >::clear()
   {
-    try
-    {
-      mMembers->valid = false;
-      mMembers->value.clear();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mMembers->valid = false;
+    mMembers->value.clear();
   }
 
   template< typename T >
   typename ValVector< T >::const_iterator ValVector< T >::begin() const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return  mMembers->value.begin();
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return  mMembers->value.begin();
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
   template< typename T >
   typename ValVector< T >::const_iterator ValVector< T >::end() const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return  mMembers->value.end();
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return  mMembers->value.end();
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
   template< typename T >
   typename ValVector< T >::const_reverse_iterator ValVector< T >::rbegin() const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return  mMembers->value.rbegin();
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return  mMembers->value.rbegin();
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
   template< typename T >
   typename ValVector< T >::const_reverse_iterator ValVector< T >::rend() const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return  mMembers->value.rend();
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return  mMembers->value.rend();
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
@@ -702,50 +433,32 @@ ValVector< T >::ValVector() try :
   template< typename T >
   std::vector<T> ValVector< T >::value() const
   {
-    try
+    logging();
+
+    if ( mMembers->valid )
     {
-      if ( mMembers->valid )
-      {
-        return mMembers->value;
-      }
-      else
-      {
-        log ( Error() , "Access attempted on non-validated memory" );
-        NonValidatedMemory().throwFrom ( ThisLocation() );
-      }
+      return mMembers->value;
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Access attempted on non-validated memory" );
+      throw NonValidatedMemory();
     }
   }
 
   template< typename T >
   void ValVector< T >::value ( const std::vector<T>& aValue )
   {
-    try
+    logging();
+
+    if ( !mMembers->valid )
     {
-      if ( !mMembers->valid )
-      {
-        mMembers->value = aValue;
-      }
-      else
-      {
-        log ( Error() , "Attempted  to modify validated memory" );
-        ValMemImutabilityViolation().throwFrom ( ThisLocation() );
-      }
+      mMembers->value = aValue;
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Attempted  to modify validated memory" );
+      throw ValMemImutabilityViolation();
     }
   }
 
@@ -872,16 +585,16 @@ ValVector< T >::ValVector() try :
   // else
   // {
   // log ( Error() , "Access attempted on non-validated memory" );
-  // NonValidatedMemory().throwFrom ( ThisLocation() );
+  // throw // NonValidatedMemory();
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 

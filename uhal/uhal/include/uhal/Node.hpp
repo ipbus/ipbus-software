@@ -30,17 +30,17 @@ namespace uhal
   class NodeTreeBuilder;
 
   //! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
-  class WriteAccessDenied: public uhal::_exception< WriteAccessDenied > {  };
+  class WriteAccessDenied : public uhal::exception {};
   //! Exception class to handle the case where a read was performed on a register which does not allow read access. Uses the base uhal::exception implementation of what()
-  class ReadAccessDenied: public uhal::_exception< ReadAccessDenied > {  };
+  class ReadAccessDenied : public uhal::exception {};
   //! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
-  class NoBranchFoundWithGivenUID: public uhal::_exception< NoBranchFoundWithGivenUID > {  };
+  class NoBranchFoundWithGivenUID : public uhal::exception {};
   //! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
-  class BulkTransferOnSingleRegister: public uhal::_exception< BulkTransferOnSingleRegister > {  };
+  class BulkTransferOnSingleRegister : public uhal::exception {};
   //! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
-  class BulkTransferRequestedTooLarge: public uhal::_exception< BulkTransferRequestedTooLarge > {  };
+  class BulkTransferRequestedTooLarge : public uhal::exception {};
 
-  class BadNodeCast: public uhal::_exception< BadNodeCast > {  };
+  class BadNodeCast : public uhal::exception {};
 
 
   //! A heirarchical node for navigating heirarchical firmwares
@@ -197,6 +197,7 @@ namespace uhal
       */
       ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
       {
+        logging();
         log ( Error() , "THIS METHOD IS DEPRECATED! "
               "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
               "AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
@@ -231,6 +232,7 @@ namespace uhal
       */
       ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
       {
+        logging();
         log ( Error() , "THIS METHOD IS DEPRECATED! "
               "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
               "AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "

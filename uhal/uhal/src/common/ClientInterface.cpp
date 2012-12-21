@@ -6,83 +6,48 @@
 namespace uhal
 {
 
-ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) try :
+  ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) :
     mId ( aId ),
-        mUri ( aUri )
+    mUri ( aUri )
   {
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
 
-  ClientInterface::ClientInterface ( ) try
+
+  ClientInterface::ClientInterface ( )
   {
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
 
-ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try :
+
+  ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) :
     mId ( aClientInterface.mId ),
-        mUri ( aClientInterface.mUri )
+    mUri ( aClientInterface.mUri )
   {
+    logging();
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
   ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
   {
-    try
-    {
-      mId  = aClientInterface.mId;
-      mUri = aClientInterface.mUri;
-      return *this;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mId  = aClientInterface.mId;
+    mUri = aClientInterface.mUri;
+    return *this;
   }
 
 
-  ClientInterface::~ClientInterface() {}
+  ClientInterface::~ClientInterface()
+  {
+    logging();
+  }
 
   const std::string& ClientInterface::id() const
   {
-    try
-    {
-      return mId;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mId;
   }
 
 
@@ -98,142 +63,102 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   // if ( WEXITSTATUS ( lPingStatus ) )
   // {
   // log ( Error() , "Pinging " , Quote ( mId ) , " at address " , Quote( mUri.mHostname ) , " returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
-  // PingFailed().throwFrom ( ThisLocation() );
+  // throw // PingFailed();
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
 
   std::string ClientInterface::uri() const
   {
-    try
+    logging();
+    std::stringstream lReturn;
+    // url is always of the form "protocol://hostname:port"
+    lReturn << mUri.mProtocol << "://" << mUri.mHostname << ":" << mUri.mPort;
+
+    // there is sometimes a path
+    if ( mUri.mPath != "" )
     {
-      std::stringstream lReturn;
-      // url is always of the form "protocol://hostname:port"
-      lReturn << mUri.mProtocol << "://" << mUri.mHostname << ":" << mUri.mPort;
+      lReturn << "/" << mUri.mPath;
+    }
 
-      // there is sometimes a path
-      if ( mUri.mPath != "" )
+    // there is sometimes a filename extension
+    if ( mUri.mExtension != "" )
+    {
+      lReturn << "." << mUri.mExtension;
+    }
+
+    // there are sometimes arguments
+    if ( mUri.mArguments.size() )
+    {
+      lReturn << "?";
+      uhal::NameValuePairVectorType::const_iterator lIt = mUri.mArguments.begin();
+
+      while ( true )
       {
-        lReturn << "/" << mUri.mPath;
-      }
+        lReturn << lIt->first << "=" << lIt->second;
 
-      // there is sometimes a filename extension
-      if ( mUri.mExtension != "" )
-      {
-        lReturn << "." << mUri.mExtension;
-      }
-
-      // there are sometimes arguments
-      if ( mUri.mArguments.size() )
-      {
-        lReturn << "?";
-        uhal::NameValuePairVectorType::const_iterator lIt = mUri.mArguments.begin();
-
-        while ( true )
+        if ( ++lIt == mUri.mArguments.end() )
         {
-          lReturn << lIt->first << "=" << lIt->second;
-
-          if ( ++lIt == mUri.mArguments.end() )
-          {
-            break;
-          }
-
-          lReturn << "&";
+          break;
         }
-      }
 
-      return lReturn.str();
+        lReturn << "&";
+      }
     }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+
+    return lReturn.str();
   }
 
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
   {
-    try
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      return getPackingProtocol().write ( aAddr , aSource );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    return getPackingProtocol().write ( aAddr , aSource );
   }
 
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
   {
-    try
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
+    uint32_t lBitShiftedSource ( aSource << lShiftSize );
+
+    if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
     {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
-      uint32_t lBitShiftedSource ( aSource << lShiftSize );
-
-      if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
-      {
-        log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
-        BitsSetWhichAreForbiddenByBitMask().throwFrom ( ThisLocation() );
-      }
-
-      uint32_t lOverlap ( lBitShiftedSource & ~aMask );
-
-      if ( lOverlap )
-      {
-        log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ")"
-              " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
-              Integer ( lOverlap , IntFmt<hex,fixed>() )
-            );
-        BitsSetWhichAreForbiddenByBitMask().throwFrom ( ThisLocation() );
-      }
-
-      return ( ValHeader ) ( getPackingProtocol().rmw_bits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
+      log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
+      throw BitsSetWhichAreForbiddenByBitMask();
     }
-    catch ( uhal::exception& aExc )
+
+    uint32_t lOverlap ( lBitShiftedSource & ~aMask );
+
+    if ( lOverlap )
     {
-      aExc.rethrowFrom ( ThisLocation() );
+      log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ")"
+            " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
+            Integer ( lOverlap , IntFmt<hex,fixed>() )
+          );
+      throw BitsSetWhichAreForbiddenByBitMask();
     }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+
+    return ( ValHeader ) ( getPackingProtocol().rmw_bits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
   }
 
   ValHeader ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
-    try
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      return getPackingProtocol().writeBlock ( aAddr, aSource, aMode );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    return getPackingProtocol().writeBlock ( aAddr, aSource, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -242,53 +167,23 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr )
   {
-    try
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      return getPackingProtocol().read ( aAddr );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    return getPackingProtocol().read ( aAddr );
   }
 
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr, const uint32_t& aMask )
   {
-    try
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      return getPackingProtocol().read ( aAddr, aMask );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    return getPackingProtocol().read ( aAddr, aMask );
   }
 
   ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
-    try
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      return getPackingProtocol().readBlock ( aAddr, aSize, aMode );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    return getPackingProtocol().readBlock ( aAddr, aSize, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -303,11 +198,11 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
@@ -319,11 +214,11 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
@@ -335,11 +230,11 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
   // //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -369,19 +264,9 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
-    try
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      return getPackingProtocol().rmw_bits ( aAddr , aANDterm , aORterm );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    return getPackingProtocol().rmw_bits ( aAddr , aANDterm , aORterm );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -389,19 +274,9 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
   {
-    try
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      return getPackingProtocol().rmw_sum ( aAddr , aAddend );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    return getPackingProtocol().rmw_sum ( aAddr , aAddend );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -409,20 +284,10 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   void ClientInterface::dispatch ()
   {
-    try
-    {
-      log ( Debug() , "Manual dispatch" );
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      getPackingProtocol().Dispatch();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    log ( Debug() , "Manual dispatch" );
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    getPackingProtocol().Dispatch();
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -430,6 +295,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
 
   void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
   {
+    logging();
     boost::lock_guard<boost::mutex> lLock ( mMutex );
 
     if ( aTimeoutPeriod == 0 )
@@ -444,6 +310,7 @@ ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) try
 
   uint64_t ClientInterface::getTimeoutPeriod()
   {
+    logging();
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     return getTransportProtocol().getTimeoutPeriod().total_milliseconds();
   }

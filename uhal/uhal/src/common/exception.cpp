@@ -37,8 +37,5 @@ namespace uhal
   }
 
 
-  StdException::StdException ( const std::exception& aExc ) :
-    uhal::_exception< StdException > ( aExc.what() )
-  {}
 
 }

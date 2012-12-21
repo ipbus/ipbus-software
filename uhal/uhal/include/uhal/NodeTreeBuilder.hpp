@@ -33,37 +33,37 @@
 namespace uhal
 {
   //! Exception class to handle the case where creation of a node was attempted without it having a UID. Uses the base uhal::exception implementation of what()
-  class NodeMustHaveUID: public uhal::_exception< NodeMustHaveUID > {  };
+  class NodeMustHaveUID : public uhal::exception {};
   //! Exception class to handle the case where too many or two few address files are specified. Uses the base uhal::exception implementation of what()
-  class IncorrectAddressTableFileCount: public uhal::_exception< IncorrectAddressTableFileCount > {  };
+  class IncorrectAddressTableFileCount : public uhal::exception {};
   //! Exception class to handle the case where the address file failed to open. Uses the base uhal::exception implementation of what()
-  class FailedToOpenAddressTableFile: public uhal::_exception< FailedToOpenAddressTableFile > {  };
+  class FailedToOpenAddressTableFile : public uhal::exception {};
   //! Exception class to handle the case where an incremental node is specified without a size attribute. Uses the base uhal::exception implementation of what()
-  class IncrementalNodeRequiresSizeAttribute: public uhal::_exception< IncrementalNodeRequiresSizeAttribute > {  };
+  class IncrementalNodeRequiresSizeAttribute : public uhal::exception {};
   //! Exception class to handle the case where a memory block has a size which would exceed the available register space. Uses the base uhal::exception implementation of what()
-  class ArraySizeExceedsRegisterBound: public uhal::_exception< ArraySizeExceedsRegisterBound > {  };
+  class ArraySizeExceedsRegisterBound : public uhal::exception {};
 
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
   //! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
-  class AddressSpaceOverlap: public uhal::_exception< AddressSpaceOverlap > {  };
+  class AddressSpaceOverlap : public uhal::exception {};
 #endif
 
   //! Exception class to handle the case when someone tries to give a block access node a child. Uses the base uhal::exception implementation of what()
-  class BlockAccessNodeCannotHaveChild: public uhal::_exception< BlockAccessNodeCannotHaveChild > {  };
+  class BlockAccessNodeCannotHaveChild : public uhal::exception {};
 
   //! Exception class to handle the case when someone tries to give a bit-masked node a child. Uses the base uhal::exception implementation of what()
-  class MaskedNodeCannotHaveChild: public uhal::_exception< MaskedNodeCannotHaveChild > {  };
+  class MaskedNodeCannotHaveChild : public uhal::exception {};
 
   // //! Exception class to handle the case when a node has both masked and unmasked children. Uses the base uhal::exception implementation of what()
-  // class BothMaskedAndUnmaskedChildren: public uhal::_exception< BothMaskedAndUnmaskedChildren > {  };
+  // class BothMaskedAndUnmaskedChildren : public uhal::exception {};
 
 
   // //! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
-  // class ChildHasAddressOverlap: public uhal::_exception< ChildHasAddressOverlap > {  };
+  // class ChildHasAddressOverlap : public uhal::exception {};
   // //! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
-  // class ChildHasAddressMaskOverlap: public uhal::_exception< ChildHasAddressMaskOverlap > {  };
+  // class ChildHasAddressMaskOverlap : public uhal::exception {};
   //! Exception class to handle the case where a class is requested which does not exist in the class factory. Uses the base uhal::exception implementation of what()
-  class LabelUnknownToClassFactory: public uhal::_exception< LabelUnknownToClassFactory > {  };
+  class LabelUnknownToClassFactory : public uhal::exception {};
 
   template< typename T > class RegistrationHelper;
 
@@ -174,11 +174,17 @@ namespace uhal
           /**
           Default constructor
           */
-          CreatorInterface() {}
+          CreatorInterface()
+          {
+            logging();
+          }
           /**
           Destructor
           */
-          virtual ~CreatorInterface() {}
+          virtual ~CreatorInterface()
+          {
+            logging();
+          }
           /**
           Interface to a function which create a new IPbus client based on the protocol identifier specified
           @param aAttributes a vector containing a set of name value pairs which were passed as arguments
@@ -196,11 +202,17 @@ namespace uhal
           /**
           Default constructor
           */
-          Creator() {}
+          Creator()
+          {
+            logging();
+          }
           /**
           Destructor
           */
-          virtual ~Creator() {}
+          virtual ~Creator()
+          {
+            logging();
+          }
           /**
           Concrete function which creates a new IPbus client based on the protocol identifier specified
           @param aAttributes a vector containing a set of name value pairs which were passed as arguments

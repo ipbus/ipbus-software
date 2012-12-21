@@ -20,17 +20,17 @@ namespace uhal
 {
 
   //! Exception class to handle the case where an attribute is both required and forbidden. Uses the base uhal::exception implementation of what()
-  class ContradictoryParserRule: public uhal::_exception< ContradictoryParserRule > {  };
+  class ContradictoryParserRule : public uhal::exception {};
   //! Exception class to handle the case where a callback is requested without it being specified. Uses the base uhal::exception implementation of what()
-  class NoActionSpecified: public uhal::_exception< NoActionSpecified > {  };
+  class NoActionSpecified : public uhal::exception {};
   //! Exception class to handle the case where the parser is asked to handle more than 64 attributes. Uses the base uhal::exception implementation of what()
-  class TooManyAttributes: public uhal::_exception< TooManyAttributes > {  };
+  class TooManyAttributes : public uhal::exception {};
   //! Exception class to handle the case where an unknown attribute is parsed. Uses the base uhal::exception implementation of what()
-  class UnknownAttribute: public uhal::_exception< UnknownAttribute > {  };
+  class UnknownAttribute : public uhal::exception {};
   //! Exception class to handle the case where two or more equally strict rules are passed. Uses the base uhal::exception implementation of what()
-  class AmbiguousParserRules: public uhal::_exception< AmbiguousParserRules > {  };
+  class AmbiguousParserRules : public uhal::exception {};
   //! Exception class to handle the case where no rules were parsed. Uses the base uhal::exception implementation of what()
-  class NoRulesPassed: public uhal::_exception< NoRulesPassed > {  };
+  class NoRulesPassed : public uhal::exception {};
 
 
   template < typename R >

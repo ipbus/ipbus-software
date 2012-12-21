@@ -50,45 +50,40 @@ namespace uhal
 
 
 
-Node::Node ( ) try :
+  Node::Node ( )  :
     mHw ( NULL ),
-        mUid ( "" ),
-        mPartialAddr ( 0x00000000 ),
-        mAddr ( 0x00000000 ),
-        mMask ( defs::NOMASK ),
-        mPermission ( defs::READWRITE ),
-        mMode ( defs::HIERARCHICAL ),
-        mSize ( 0x00000001 ),
-        mTags ( "" ),
-        mDescription ( "" ),
-        mChildren ( ),
-        mChildrenMap ( )
+    mUid ( "" ),
+    mPartialAddr ( 0x00000000 ),
+    mAddr ( 0x00000000 ),
+    mMask ( defs::NOMASK ),
+    mPermission ( defs::READWRITE ),
+    mMode ( defs::HIERARCHICAL ),
+    mSize ( 0x00000001 ),
+    mTags ( "" ),
+    mDescription ( "" ),
+    mChildren ( ),
+    mChildrenMap ( )
   {
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
+    logging();
   }
 
 
-Node::Node ( const Node& aNode ) try :
+  Node::Node ( const Node& aNode )  :
     mHw ( aNode.mHw ),
-        mUid ( aNode.mUid ),
-        mPartialAddr ( aNode.mPartialAddr ),
-        mAddr ( aNode.mAddr ),
-        mMask ( aNode.mMask ),
-        mPermission ( aNode.mPermission ),
-        mMode ( aNode.mMode ),
-        mSize ( aNode.mSize ),
-        mTags ( aNode.mTags ),
-        mDescription ( aNode.mDescription ),
-        mChildren ( ),
-        mChildrenMap ( )
+    mUid ( aNode.mUid ),
+    mPartialAddr ( aNode.mPartialAddr ),
+    mAddr ( aNode.mAddr ),
+    mMask ( aNode.mMask ),
+    mPermission ( aNode.mPermission ),
+    mMode ( aNode.mMode ),
+    mSize ( aNode.mSize ),
+    mTags ( aNode.mTags ),
+    mDescription ( aNode.mDescription ),
+    mChildren ( ),
+    mChildrenMap ( )
   {
+    logging();
+
     for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
       mChildren.push_back ( ( **lIt ).clone() );
@@ -104,86 +99,59 @@ Node::Node ( const Node& aNode ) try :
       }
     }
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
 
 
   Node& Node::operator= ( const Node& aNode )
   {
-    try
+    logging();
+    mHw = aNode.mHw;
+    mUid = aNode.mUid ;
+    mPartialAddr = aNode.mPartialAddr;
+    mAddr = aNode.mAddr;
+    mMask = aNode.mMask;
+    mPermission = aNode.mPermission;
+    mMode = aNode.mMode;
+    mSize = aNode.mSize;
+    mTags = aNode.mTags;
+    mDescription = aNode.mDescription;
+
+    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
-      mHw = aNode.mHw;
-      mUid = aNode.mUid ;
-      mPartialAddr = aNode.mPartialAddr;
-      mAddr = aNode.mAddr;
-      mMask = aNode.mMask;
-      mPermission = aNode.mPermission;
-      mMode = aNode.mMode;
-      mSize = aNode.mSize;
-      mTags = aNode.mTags;
-      mDescription = aNode.mDescription;
-
-      for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+      if ( *lIt )
       {
-        if ( *lIt )
-        {
-          delete ( *lIt );
-          ( *lIt ) = NULL;
-        }
+        delete ( *lIt );
+        ( *lIt ) = NULL;
       }
-
-      mChildren.clear();
-      mChildrenMap.clear();
-
-      for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
-      {
-        mChildren.push_back ( ( **lIt ).clone() );
-      }
-
-      for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
-      {
-        mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
-
-        for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
-        {
-          mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-        }
-      }
-
-      return *this;
     }
-    catch ( uhal::exception& aExc )
+
+    mChildren.clear();
+    mChildrenMap.clear();
+
+    for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
-      aExc.rethrowFrom ( ThisLocation() );
+      mChildren.push_back ( ( **lIt ).clone() );
     }
-    catch ( const std::exception& aExc )
+
+    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
+
+      for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+      {
+        mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
+      }
     }
+
+    return *this;
   }
 
 
   Node* Node::clone ( ) const
   {
-    try
-    {
-      return new Node ( *this );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return new Node ( *this );
   }
 
 
@@ -191,511 +159,336 @@ Node::Node ( const Node& aNode ) try :
 
   Node::~Node()
   {
-    try
-    {
-      for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
-      {
-        if ( *lIt )
-        {
-          delete ( *lIt );
-          ( *lIt ) = NULL;
-        }
-      }
+    logging();
 
-      mChildren.clear();
-      mChildrenMap.clear();
-    }
-    catch ( uhal::exception& aExc )
+    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
-      aExc.rethrowFrom ( ThisLocation() );
+      if ( *lIt )
+      {
+        delete ( *lIt );
+        ( *lIt ) = NULL;
+      }
     }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+
+    mChildren.clear();
+    mChildrenMap.clear();
   }
 
 
   bool Node::operator == ( const Node& aNode ) const
   {
-    try
-    {
-      return this->getAddress() == aNode.getAddress() &&
-             this->getMask() == aNode.getMask() &&
-             this->getPermission() == aNode.getPermission() &&
-             this->getId() == aNode.getId();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return this->getAddress() == aNode.getAddress() &&
+           this->getMask() == aNode.getMask() &&
+           this->getPermission() == aNode.getPermission() &&
+           this->getId() == aNode.getId();
   }
 
 
   const std::string& Node::getId() const
   {
-    try
-    {
-      return mUid;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mUid;
   }
 
   const uint32_t& Node::getAddress() const
   {
-    try
-    {
-      return mAddr;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mAddr;
   }
 
   const uint32_t& Node::getMask() const
   {
-    try
-    {
-      return mMask;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mMask;
   }
 
   const defs::BlockReadWriteMode& Node::getMode() const
   {
-    try
-    {
-      return mMode;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mMode;
   }
 
   const uint32_t& Node::getSize() const
   {
-    try
-    {
-      return mSize;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mSize;
   }
 
   const defs::NodePermission& Node::getPermission() const
   {
-    try
-    {
-      return mPermission;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mPermission;
   }
 
 
   const std::string& Node::getTags() const
   {
-    try
-    {
-      return mTags;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mTags;
   }
 
 
   const std::string& Node::getDescription() const
   {
-    try
-    {
-      return mDescription;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mDescription;
   }
 
 
   void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
   {
-    try
-    {
-      aStream << std::setfill ( '0' ) << std::uppercase;
-      aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
-      aStream << "Node \"" << mUid << "\", ";
+    logging();
+    aStream << std::setfill ( '0' ) << std::uppercase;
+    aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
+    aStream << "Node \"" << mUid << "\", ";
 
-      if ( &typeid ( *this ) != &typeid ( Node ) )
-      {
-        aStream << "of type \"";
+    if ( &typeid ( *this ) != &typeid ( Node ) )
+    {
+      aStream << "of type \"";
 #ifdef __GNUG__
-        // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
-        int lStatus ( 0 );
-        aStream << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
+      // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
+      int lStatus ( 0 );
+      aStream << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
 #else
-        aStream << typeid ( *this ).name();
+      aStream << typeid ( *this ).name();
 #endif
-        aStream << "\", ";
-      }
-
-      switch ( mMode )
-      {
-        case defs::SINGLE:
-          aStream << "SINGLE register, "
-          << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
-          << std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", "
-          << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
-          break;
-        case defs::INCREMENTAL:
-          aStream << "INCREMENTAL block, "
-          << std::dec << "Size " << mSize << ", "
-          << std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << ( mAddr+mSize-1 ) << "], "
-          << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
-          break;
-        case defs::NON_INCREMENTAL:
-          aStream << "NON-INCREMENTAL block, ";
-
-          if ( mSize != 1 )
-          {
-            aStream << std::dec << "Size " << mSize << ", ";
-          }
-
-          aStream << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", "
-          << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
-          break;
-        case defs::HIERARCHICAL:
-          aStream << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr;
-          break;
-      }
-
-      if ( mTags.size() )
-      {
-        aStream << ", Tags \"" << mTags << "\"";
-      }
-
-      if ( mDescription.size() )
-      {
-        aStream << ", Description \"" << mDescription << "\"";
-      }
-
-      for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
-      {
-        ( **lIt ).stream ( aStream , aIndent+2 );
-      }
+      aStream << "\", ";
     }
-    catch ( uhal::exception& aExc )
+
+    switch ( mMode )
     {
-      aExc.rethrowFrom ( ThisLocation() );
+      case defs::SINGLE:
+        aStream << "SINGLE register, "
+                << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
+                << std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", "
+                << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+        break;
+      case defs::INCREMENTAL:
+        aStream << "INCREMENTAL block, "
+                << std::dec << "Size " << mSize << ", "
+                << std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << ( mAddr+mSize-1 ) << "], "
+                << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+        break;
+      case defs::NON_INCREMENTAL:
+        aStream << "NON-INCREMENTAL block, ";
+
+        if ( mSize != 1 )
+        {
+          aStream << std::dec << "Size " << mSize << ", ";
+        }
+
+        aStream << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", "
+                << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+        break;
+      case defs::HIERARCHICAL:
+        aStream << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr;
+        break;
     }
-    catch ( const std::exception& aExc )
+
+    if ( mTags.size() )
     {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      aStream << ", Tags \"" << mTags << "\"";
+    }
+
+    if ( mDescription.size() )
+    {
+      aStream << ", Description \"" << mDescription << "\"";
+    }
+
+    for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    {
+      ( **lIt ).stream ( aStream , aIndent+2 );
     }
   }
 
 
   Node& Node::getNode ( const std::string& aId ) const
   {
-    try
+    logging();
+    std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
+
+    if ( lIt==mChildrenMap.end() )
     {
-      std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
+      log ( Error() , "No branch found with ID-path " ,  Quote ( aId ) );
+      std::size_t lPos ( std::string::npos );
+      bool lPartialMatch ( false );
 
-      if ( lIt==mChildrenMap.end() )
+      while ( true )
       {
-        log ( Error() , "No branch found with ID-path " ,  Quote ( aId ) );
-        std::size_t lPos ( std::string::npos );
-        bool lPartialMatch ( false );
+        lPos = aId.rfind ( '.' , lPos );
 
-        while ( true )
+        if ( lPos == std::string::npos )
         {
-          lPos = aId.rfind ( '.' , lPos );
-
-          if ( lPos == std::string::npos )
-          {
-            break;
-          }
-
-          std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
-
-          if ( lIt!=mChildrenMap.end() )
-          {
-            log ( Error() , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) );
-            log ( Error() , "Tree structure of partial match is:" , * ( lIt->second ) );
-            lPartialMatch = true;
-            break;
-          }
-
-          lPos--;
+          break;
         }
 
-        if ( !lPartialMatch )
+        std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
+
+        if ( lIt!=mChildrenMap.end() )
         {
-          log ( Error() , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
+          log ( Error() , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) );
+          log ( Error() , "Tree structure of partial match is:" , * ( lIt->second ) );
+          lPartialMatch = true;
+          break;
         }
 
-        NoBranchFoundWithGivenUID().throwFrom ( ThisLocation() );
+        lPos--;
       }
 
-      return * ( lIt->second );
+      if ( !lPartialMatch )
+      {
+        log ( Error() , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
+      }
+
+      throw NoBranchFoundWithGivenUID();
     }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+
+    return * ( lIt->second );
   }
 
 
   std::vector<std::string> Node::getNodes() const
   {
-    try
-    {
-      std::vector<std::string> lNodes;
-      lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
+    logging();
+    std::vector<std::string> lNodes;
+    lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
 
-      for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
-      {
-        lNodes.push_back ( lIt->first );
-      }
+    for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+    {
+      lNodes.push_back ( lIt->first );
+    }
 
-      return lNodes;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    return lNodes;
   }
 
   std::vector<std::string> Node::getNodes ( const std::string& aRegex ) const
   {
-    try
-    {
-      std::vector<std::string> lNodes;
-      lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
-      log ( Info() , "Regular Expression : " , aRegex );
+    logging();
+    std::vector<std::string> lNodes;
+    lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
+    log ( Info() , "Regular Expression : " , aRegex );
 
-      for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+    for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+    {
+      boost::cmatch lMatch;
+
+      if ( boost::regex_match ( lIt->first.c_str() , lMatch , boost::regex ( aRegex ) ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
       {
-        boost::cmatch lMatch;
-
-        if ( boost::regex_match ( lIt->first.c_str() , lMatch , boost::regex ( aRegex ) ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
-        {
-          log ( Info() , lIt->first , " matches" );
-          lNodes.push_back ( lIt->first );
-        }
+        log ( Info() , lIt->first , " matches" );
+        lNodes.push_back ( lIt->first );
       }
+    }
 
-      //bit dirty but since the hash map sorts them by the hash, not the value, they are completely scrambled here making it very hard to use.
-      std::sort ( lNodes.begin(), lNodes.end() );
-      return lNodes;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    //bit dirty but since the hash map sorts them by the hash, not the value, they are completely scrambled here making it very hard to use.
+    std::sort ( lNodes.begin(), lNodes.end() );
+    return lNodes;
   }
 
   ValHeader  Node::write ( const uint32_t& aValue ) const
   {
-    try
+    logging();
+
+    if ( mPermission & defs::WRITE )
     {
-      if ( mPermission & defs::WRITE )
+      if ( mMask == defs::NOMASK )
       {
-        if ( mMask == defs::NOMASK )
-        {
-          return mHw->getClient().write ( mAddr , aValue );
-        }
-        else
-        {
-          return mHw->getClient().write ( mAddr , aValue , mMask );
-        }
+        return mHw->getClient().write ( mAddr , aValue );
       }
       else
       {
-        log ( Error() , "Node permissions denied write access" );
-        WriteAccessDenied().throwFrom ( ThisLocation() );
+        return mHw->getClient().write ( mAddr , aValue , mMask );
       }
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Node permissions denied write access" );
+      throw WriteAccessDenied();
     }
   }
 
 
   ValHeader  Node::writeBlock ( const std::vector< uint32_t >& aValues ) const // , const defs::BlockReadWriteMode& aMode )
   {
-    try
+    logging();
+
+    if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
-      if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
+      log ( Error() , "Bulk Transfer requested on single register node" );
+      log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
+      throw BulkTransferOnSingleRegister();
+    }
+    else
+    {
+      if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
       {
-        log ( Error() , "Bulk Transfer requested on single register node" );
-        log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-        BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
+        log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
+        throw BulkTransferRequestedTooLarge();
+      }
+
+      if ( mPermission & defs::WRITE )
+      {
+        return mHw->getClient().writeBlock ( mAddr , aValues , mMode ); //aMode );
       }
       else
       {
-        if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
-        {
-          log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
-          BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
-        }
-
-        if ( mPermission & defs::WRITE )
-        {
-          return mHw->getClient().writeBlock ( mAddr , aValues , mMode ); //aMode );
-        }
-        else
-        {
-          log ( Error() , "Node permissions denied write access" );
-          WriteAccessDenied().throwFrom ( ThisLocation() );
-        }
+        log ( Error() , "Node permissions denied write access" );
+        throw WriteAccessDenied();
       }
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
     }
   }
 
 
   ValWord< uint32_t > Node::read() const
   {
-    try
+    logging();
+
+    if ( mPermission & defs::READ )
     {
-      if ( mPermission & defs::READ )
+      if ( mMask == defs::NOMASK )
       {
-        if ( mMask == defs::NOMASK )
-        {
-          return mHw->getClient().read ( mAddr );
-        }
-        else
-        {
-          return mHw->getClient().read ( mAddr , mMask );
-        }
+        return mHw->getClient().read ( mAddr );
       }
       else
       {
-        log ( Error() , "Node permissions denied read access" );
-        ReadAccessDenied().throwFrom ( ThisLocation() );
+        return mHw->getClient().read ( mAddr , mMask );
       }
     }
-    catch ( uhal::exception& aExc )
+    else
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "Node permissions denied read access" );
+      throw ReadAccessDenied();
     }
   }
 
 
   ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize ) const //, const defs::BlockReadWriteMode& aMode )
   {
-    try
+    logging();
+
+    if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
-      if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
+      log ( Error() , "Bulk Transfer requested on single register node" );
+      log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
+      throw BulkTransferOnSingleRegister();
+    }
+    else
+    {
+      if ( ( mSize != 1 ) && ( aSize>mSize ) )
       {
-        log ( Error() , "Bulk Transfer requested on single register node" );
-        log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-        BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
+        log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
+        throw BulkTransferRequestedTooLarge();
+      }
+
+      if ( mPermission & defs::READ )
+      {
+        return mHw->getClient().readBlock ( mAddr , aSize , mMode ); //aMode );
       }
       else
       {
-        if ( ( mSize != 1 ) && ( aSize>mSize ) )
-        {
-          log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-          BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
-        }
-
-        if ( mPermission & defs::READ )
-        {
-          return mHw->getClient().readBlock ( mAddr , aSize , mMode ); //aMode );
-        }
-        else
-        {
-          log ( Error() , "Node permissions denied read access" );
-          ReadAccessDenied().throwFrom ( ThisLocation() );
-        }
+        log ( Error() , "Node permissions denied read access" );
+        throw ReadAccessDenied();
       }
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
     }
   }
 
@@ -717,16 +510,16 @@ Node::Node ( const Node& aNode ) try :
   // else
   // {
   // log ( Error() , "Node permissions denied read access" );
-  // ReadAccessDenied().throwFrom ( ThisLocation() );
+  // throw // ReadAccessDenied();
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
@@ -739,14 +532,14 @@ Node::Node ( const Node& aNode ) try :
   // {
   // log ( Error() , "Bulk Transfer requested on single register node" );
   // log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-  // BulkTransferOnSingleRegister().throwFrom ( ThisLocation() );
+  // throw // BulkTransferOnSingleRegister();
   // }
   // else
   // {
   // if ( ( mSize != 1 ) && ( aSize>mSize ) )
   // {
   // log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-  // BulkTransferRequestedTooLarge().throwFrom ( ThisLocation() );
+  // throw // BulkTransferRequestedTooLarge();
   // }
 
   // if ( mPermission & defs::READ )
@@ -756,17 +549,17 @@ Node::Node ( const Node& aNode ) try :
   // else
   // {
   // log ( Error() , "Node permissions denied read access" );
-  // ReadAccessDenied().throwFrom ( ThisLocation() );
+  // throw // ReadAccessDenied();
   // }
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
@@ -784,16 +577,16 @@ Node::Node ( const Node& aNode ) try :
   // else
   // {
   // log ( Error() , "Node permissions denied read/write access" );
-  // ReadAccessDenied().throwFrom ( ThisLocation() );
+  // throw // ReadAccessDenied();
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
@@ -810,33 +603,23 @@ Node::Node ( const Node& aNode ) try :
   // else
   // {
   // log ( Error() , "Node permissions denied read/write access" );
-  // ReadAccessDenied().throwFrom ( ThisLocation() );
+  // throw // ReadAccessDenied();
   // }
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
   ClientInterface& Node::getClient() const
   {
-    try
-    {
-      return mHw->getClient();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mHw->getClient();
   }
 
 }

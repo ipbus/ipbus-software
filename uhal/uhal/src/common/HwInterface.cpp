@@ -5,74 +5,44 @@
 namespace uhal
 {
 
-HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) try :
+  HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) :
     mClientInterface ( aClientInterface ),
-                     mNode ( aNode )
+    mNode ( aNode )
   {
+    logging();
     claimNode ( *mNode );
-  }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
   }
 
-HwInterface::HwInterface ( const HwInterface& otherHw ) try :
+
+  HwInterface::HwInterface ( const HwInterface& otherHw ) :
     mClientInterface ( otherHw.mClientInterface ),
-                     mNode ( otherHw.mNode->clone() )
+    mNode ( otherHw.mNode->clone() )
   {
+    logging();
     claimNode ( *mNode );
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
   HwInterface::~HwInterface()
-  {}
+  {
+    logging();
+  }
 
   void HwInterface::claimNode ( Node& aNode )
   {
-    try
-    {
-      aNode.mHw = this;
+    logging();
+    aNode.mHw = this;
 
-      for ( std::deque< Node* >::iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
-      {
-        claimNode ( **lIt );
-      }
-    }
-    catch ( uhal::exception& aExc )
+    for ( std::deque< Node* >::iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      claimNode ( **lIt );
     }
   }
 
   ClientInterface& HwInterface::getClient()
   {
-    try
-    {
-      return *mClientInterface;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return *mClientInterface;
   }
 
   // void HwInterface::ping()
@@ -83,161 +53,71 @@ HwInterface::HwInterface ( const HwInterface& otherHw ) try :
   // }
   // catch ( uhal::exception& aExc )
   // {
-  // aExc.rethrowFrom ( ThisLocation() );
+  // aExc.throw r;
   // }
   // catch ( const std::exception& aExc )
   // {
-  // StdException ( aExc ).throwFrom ( ThisLocation() );
+  // throw // StdException ( aExc );
   // }
   // }
 
   void HwInterface::dispatch ()
   {
-    try
-    {
-      mClientInterface->dispatch ();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mClientInterface->dispatch ();
   }
 
 
   const std::string& HwInterface::id() const
   {
-    try
-    {
-      return mClientInterface->id();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mClientInterface->id();
   }
 
 
   std::string HwInterface::uri() const
   {
-    try
-    {
-      return mClientInterface->uri();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mClientInterface->uri();
   }
 
 
   void HwInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
   {
-    try
-    {
-      mClientInterface->setTimeoutPeriod ( aTimeoutPeriod );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    mClientInterface->setTimeoutPeriod ( aTimeoutPeriod );
   }
 
 
   uint32_t HwInterface::getTimeoutPeriod()
   {
-    try
-    {
-      return mClientInterface->getTimeoutPeriod();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mClientInterface->getTimeoutPeriod();
   }
 
   Node& HwInterface::getNode () const
   {
-    try
-    {
-      return *mNode;
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return *mNode;
   }
 
 
   Node& HwInterface::getNode ( const std::string& aId ) const
   {
-    try
-    {
-      return mNode->getNode ( aId );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mNode->getNode ( aId );
   }
 
   std::vector<std::string> HwInterface::getNodes() const
   {
-    try
-    {
-      return mNode->getNodes();
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mNode->getNodes();
   }
 
   std::vector<std::string> HwInterface::getNodes ( const std::string& aRegex ) const
   {
-    try
-    {
-      return mNode->getNodes ( aRegex );
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
+    logging();
+    return mNode->getNodes ( aRegex );
   }
 
   // ValVector< uint32_t > HwInterface::readReservedAddressInfo ()

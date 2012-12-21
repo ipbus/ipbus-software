@@ -11,36 +11,32 @@ namespace uhal
 {
 
 
-UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort ) try :
+  UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort ) :
     mUdpTransportProtocol ( aUdpTransportProtocol ),
-                          mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
-                          mSocket ( boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) ) ),
-                          mEndpoint ( boost::shared_ptr< boost::asio::ip::udp::endpoint > ( new boost::asio::ip::udp::endpoint (
-                                        * boost::asio::ip::udp::resolver::iterator (
-                                          boost::asio::ip::udp::resolver ( *mIOservice ).resolve (
-                                            boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aHostname , aServiceOrPort )
-                                          )
-                                        )
-                                      )
-                                                                                          )
-                                    ),
-                          mDeadlineTimer ( *mIOservice ),
-                          mReplyMemory ( 65536 , 0x00000000 )
+    mIOservice ( boost::shared_ptr< boost::asio::io_service > ( new boost::asio::io_service() ) ),
+    mSocket ( boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) ) ),
+    mEndpoint ( boost::shared_ptr< boost::asio::ip::udp::endpoint > ( new boost::asio::ip::udp::endpoint (
+                  * boost::asio::ip::udp::resolver::iterator (
+                    boost::asio::ip::udp::resolver ( *mIOservice ).resolve (
+                      boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aHostname , aServiceOrPort )
+                    )
+                  )
+                )
+                                                                    )
+              ),
+    mDeadlineTimer ( *mIOservice ),
+    mReplyMemory ( 65536 , 0x00000000 )
   {
+    logging();
     mDeadlineTimer.async_wait ( boost::bind ( &UdpTransportProtocol::DispatchWorker::CheckDeadline, this ) );
   }
-  catch ( uhal::exception& aExc )
-  {
-    aExc.rethrowFrom ( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
 
   UdpTransportProtocol::DispatchWorker::~DispatchWorker()
   {
+    logging();
+
     try
     {
       if ( mSocket.unique() )
@@ -58,6 +54,7 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
   void UdpTransportProtocol::DispatchWorker::operator() ()
   {
 #ifdef USE_UDP_MULTITHREADED
+    logging();
 
     try
     {
@@ -106,96 +103,54 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
   void UdpTransportProtocol::DispatchWorker::Dispatch ( Buffers* aBuffers )
   {
-    try
+    logging();
+
+    if ( ! mSocket->is_open() )
     {
-      if ( ! mSocket->is_open() )
-      {
-        log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
-        mSocket = boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) );
-        log ( Info() , "UDP socket created successfully." );
-      }
-
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      // Send data
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      std::vector< boost::asio::const_buffer > lAsioSendBuffer;
-      lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-      log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-      mDeadlineTimer.expires_from_now ( mUdpTransportProtocol.getTimeoutPeriod() );
-      mErrorCode = boost::asio::error::would_block;
-      mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-
-      do
-      {
-        mIOservice->run_one();
-      }
-      while ( mErrorCode == boost::asio::error::would_block );
-
-      /*if ( mErrorCode )
-      {
-        log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-        ErrorInUdpCallback().throwFrom ( ThisLocation() );
-      }*/
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      // Read back replies
-      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-      lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
-      log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
-      boost::asio::ip::udp::endpoint lEndpoint;
-      mDeadlineTimer.expires_from_now ( mUdpTransportProtocol.getTimeoutPeriod() );
-      mErrorCode = boost::asio::error::would_block;
-      mSocket->async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-
-      do
-      {
-        mIOservice->run_one();
-      }
-      while ( mErrorCode == boost::asio::error::would_block );
-
-      if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
-      {
-        if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
-        {
-          log ( Error() , "ASIO reported a Timeout in UDP callback" );
-          ErrorInUdpCallback().throwFrom ( ThisLocation() );
-        }
-
-        log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
-        mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
-        ErrorInUdpCallback().throwFrom ( ThisLocation() );
-      }
-
-      std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
-      uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
-
-      for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-      {
-        memcpy ( lIt->first, lReplyBuf, lIt->second );
-        lReplyBuf += lIt->second;
-      }
-
-      /*
-      			uint32_t lCounter(0);
-      			for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
-      			{
-      				uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
-      				uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
-
-      				for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
-      				{
-      					log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
-      				}
-      			}
-      */
-
-      if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
-      {
-        log ( Error() , "Validation function reported an error!" );
-        IPbusValidationError ().throwFrom ( ThisLocation() );
-      }
+      log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
+      mSocket = boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) );
+      log ( Info() , "UDP socket created successfully." );
     }
-    catch ( uhal::exception& aExc )
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // Send data
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    std::vector< boost::asio::const_buffer > lAsioSendBuffer;
+    lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
+    log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+    mDeadlineTimer.expires_from_now ( mUdpTransportProtocol.getTimeoutPeriod() );
+    mErrorCode = boost::asio::error::would_block;
+    mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+    do
+    {
+      mIOservice->run_one();
+    }
+    while ( mErrorCode == boost::asio::error::would_block );
+
+    /*if ( mErrorCode )
+    {
+      log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+      throw ErrorInUdpCallback();
+    }*/
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // Read back replies
+    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
+    lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
+    log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
+    boost::asio::ip::udp::endpoint lEndpoint;
+    mDeadlineTimer.expires_from_now ( mUdpTransportProtocol.getTimeoutPeriod() );
+    mErrorCode = boost::asio::error::would_block;
+    mSocket->async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+    do
+    {
+      mIOservice->run_one();
+    }
+    while ( mErrorCode == boost::asio::error::would_block );
+
+    if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
     {
       if ( mSocket.unique() )
       {
@@ -203,17 +158,45 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
       }
 
       mUdpTransportProtocol.mPackingProtocol->DeleteBuffer();
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      if ( mSocket.unique() )
+
+      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        mSocket->close();
+        log ( Error() , "ASIO reported a Timeout in UDP callback" );
+        throw ErrorInUdpCallback();
       }
 
-      mUdpTransportProtocol.mPackingProtocol->DeleteBuffer();
-      StdException ( aExc ).throwFrom ( ThisLocation() );
+      log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
+      mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
+      throw ErrorInUdpCallback();
+    }
+
+    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
+    uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
+
+    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    {
+      memcpy ( lIt->first, lReplyBuf, lIt->second );
+      lReplyBuf += lIt->second;
+    }
+
+    /*
+    			uint32_t lCounter(0);
+    			for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
+    			{
+    				uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
+    				uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
+
+    				for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
+    				{
+    					log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
+    				}
+    			}
+    */
+
+    if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
+    {
+      log ( Error() , "Validation function reported an error!" );
+      throw IPbusValidationError ();
     }
   }
 
@@ -221,6 +204,8 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
   void UdpTransportProtocol::DispatchWorker::CheckDeadline()
   {
+    logging();
+
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
@@ -244,26 +229,23 @@ UdpTransportProtocol::DispatchWorker::DispatchWorker ( UdpTransportProtocol& aUd
 
 
 
-UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) try :
+  UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , const std::string& aServiceOrPort , const boost::posix_time::time_duration& aTimeoutPeriod ) :
     TransportProtocol ( aTimeoutPeriod ),
-                      mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort ) ) )
+    mDispatchWorker ( boost::shared_ptr< DispatchWorker > ( new DispatchWorker ( *this , aHostname , aServiceOrPort ) ) )
 #ifdef USE_UDP_MULTITHREADED
-                      , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
-                      mAsynchronousException ( NULL )
+    , mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( *mDispatchWorker ) ) ),
+    mAsynchronousException ( NULL )
 #endif
-    {}
-  catch ( uhal::exception& aExc )
   {
-    aExc.rethrowFrom ( ThisLocation() );
+    logging();
   }
-  catch ( const std::exception& aExc )
-  {
-    StdException ( aExc ).throwFrom ( ThisLocation() );
-  }
+
 
 
   UdpTransportProtocol::~UdpTransportProtocol()
   {
+    logging();
+
     try
     {
 #ifdef USE_UDP_MULTITHREADED
@@ -298,66 +280,46 @@ UdpTransportProtocol::UdpTransportProtocol ( const std::string& aHostname , cons
 
   void UdpTransportProtocol::Dispatch ( Buffers* aBuffers )
   {
-    try
-    {
+    logging();
 #ifdef USE_UDP_MULTITHREADED
+    {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+
+      if ( mAsynchronousException )
       {
-        boost::lock_guard<boost::mutex> lLock ( mMutex );
-
-        if ( mAsynchronousException )
-        {
-          mAsynchronousException->throwFrom ( ThisLocation() );
-        }
-
-        mPendingSendBuffers.push_back ( aBuffers );
+        throw mAsynchronousException-;
       }
+
+      mPendingSendBuffers.push_back ( aBuffers );
+    }
 #else
-      mDispatchWorker->Dispatch ( aBuffers );
+    mDispatchWorker->Dispatch ( aBuffers );
 #endif
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
   }
 
 
 
   void UdpTransportProtocol::Flush( )
   {
-    try
-    {
+    logging();
 #ifdef USE_UDP_MULTITHREADED
-      bool lContinue ( true );
+    bool lContinue ( true );
 
-      do
+    do
+    {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+
+      // kill time while pending buffers are emptied and check for exceptions on the thread...
+      if ( mAsynchronousException )
       {
-        boost::lock_guard<boost::mutex> lLock ( mMutex );
-
-        // kill time while pending buffers are emptied and check for exceptions on the thread...
-        if ( mAsynchronousException )
-        {
-          mAsynchronousException->throwFrom ( ThisLocation() );
-        }
-
-        lContinue = ( bool ) ( mPendingSendBuffers.size() );
+        throw mAsynchronousException-;
       }
-      while ( lContinue );
+
+      lContinue = ( bool ) ( mPendingSendBuffers.size() );
+    }
+    while ( lContinue );
 
 #endif
-    }
-    catch ( uhal::exception& aExc )
-    {
-      aExc.rethrowFrom ( ThisLocation() );
-    }
-    catch ( const std::exception& aExc )
-    {
-      StdException ( aExc ).throwFrom ( ThisLocation() );
-    }
   }
 
 
