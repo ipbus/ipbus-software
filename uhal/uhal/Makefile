@@ -14,7 +14,7 @@ Packager = Andrew Rose
 
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 0
-PACKAGE_VER_PATCH = 5
+PACKAGE_VER_PATCH = 6
 PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_uhal.so
