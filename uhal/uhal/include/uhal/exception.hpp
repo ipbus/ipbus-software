@@ -50,6 +50,4 @@ namespace uhal
 }
 
 
-#include "uhal/TemplateDefinitions/exception.hxx"
-
 #endif
