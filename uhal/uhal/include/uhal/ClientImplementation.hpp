@@ -52,7 +52,11 @@ namespace uhal
       */
       IPBusUDPClient ( const std::string& aId , const URI& aUri );
 
-      IPBusUDPClient ( const IPBusUDPClient& aIPBusUDPClient );
+      /**
+      Copy constructor
+      @param aIPBusUDPClient a UDP client to clone
+      */
+      IPBusUDPClient ( const IPBusUDPClient< IPbusProtocolVersion >& aIPBusUDPClient );
 
       /**
       Return a description of the behaviour this client
@@ -116,7 +120,11 @@ namespace uhal
       */
       IPBusTCPClient ( const std::string& aId , const URI& aUri );
 
-      IPBusTCPClient ( const IPBusTCPClient& aIPBusTCPClient );
+      /**
+      Copy constructor
+      @param aIPBusTCPClient a TCP client to clone
+      */
+      IPBusTCPClient ( const IPBusTCPClient< IPbusProtocolVersion >& aIPBusTCPClient );
 
       /**
       Return a description of the behaviour this client
@@ -190,7 +198,11 @@ namespace uhal
       */
       ControlHubClient ( const std::string& aId , const URI& aUri );
 
-      ControlHubClient ( const ControlHubClient& aControlHubClient );
+      /**
+      Copy constructor
+      @param aControlHubClient a Control-Hub client to clone
+      */
+      ControlHubClient ( const ControlHubClient< IPbusProtocolVersion >& aControlHubClient );
 
       /**
       	Return a description of the behaviour this client

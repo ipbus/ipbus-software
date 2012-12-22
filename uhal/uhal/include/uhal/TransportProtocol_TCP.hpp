@@ -52,7 +52,6 @@ namespace uhal
           	@param aTcpTransportProtocol a link to the parent
           	@param aHostname the target hostname or IP address
           	@param aServiceOrPort the target port
-          	@param aTimeoutPeriod the default timeout period (can be changed later)
           */
           DispatchWorker ( TcpTransportProtocol& aTcpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort );
 

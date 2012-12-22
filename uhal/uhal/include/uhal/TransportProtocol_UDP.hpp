@@ -51,7 +51,6 @@ namespace uhal
           	@param aUdpTransportProtocol a link to the parent
           	@param aHostname the target hostname or IP address
           	@param aServiceOrPort the target port
-          	@param aTimeoutPeriod the default timeout period (can be changed later)
           */
           DispatchWorker ( UdpTransportProtocol& aUdpTransportProtocol , const std::string& aHostname , const std::string& aServiceOrPort );
 

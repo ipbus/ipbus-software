@@ -134,7 +134,7 @@ namespace uhal
     	@param aFilenameExpr a c-style string containing a linux shell expression to be expanded
     	@param aParentPath a path which will be prepended to relative file names
     	@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
-    	@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
+    	@param aDirectories a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
     	@return success/failure status
     */
     template < bool DebugInfo >
