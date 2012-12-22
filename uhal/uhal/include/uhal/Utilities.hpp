@@ -105,6 +105,12 @@ namespace __gnu_cxx
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace uhal
 {
+  namespace exception
+  {
+    //! Exception class to handle the case where the string will not fit into a 32-bit number. Uses the base uhal::exception implementation of what()
+    class StringNumberWillNotFitInto32BitNumber : public exception {};
+  }
+
   namespace utilities
   {
     /**
@@ -663,10 +669,6 @@ namespace uhal
     }
 
 
-    //! Exception class to handle the case where the string will not fit into a 32-bit number. Uses the base uhal::exception implementation of what()
-    class StringNumberWillNotFitInto32BitNumber : public uhal::exception {};
-
-
     /**
     	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
     	@param aNode a node from which the attribute is to be extracted
@@ -719,7 +721,7 @@ namespace uhal
         if ( ss.str().size() > 10 )
         {
           log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw StringNumberWillNotFitInto32BitNumber();
+          throw exception::StringNumberWillNotFitInto32BitNumber();
         }
 
         int64_t lTarget;
@@ -728,7 +730,7 @@ namespace uhal
         if ( lTarget>>32 )
         {
           log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw StringNumberWillNotFitInto32BitNumber();
+          throw exception::StringNumberWillNotFitInto32BitNumber();
         }
 
         aTarget = ( int32_t ) ( lTarget );
@@ -797,7 +799,7 @@ namespace uhal
         if ( ss.str().size() > 10 )
         {
           log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw StringNumberWillNotFitInto32BitNumber();
+          throw exception::StringNumberWillNotFitInto32BitNumber();
         }
 
         uint64_t lTarget;
@@ -806,7 +808,7 @@ namespace uhal
         if ( lTarget>>32 )
         {
           log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw StringNumberWillNotFitInto32BitNumber();
+          throw exception::StringNumberWillNotFitInto32BitNumber();
         }
 
         aTarget = ( uint32_t ) ( lTarget );

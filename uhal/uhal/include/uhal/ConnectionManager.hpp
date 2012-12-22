@@ -57,10 +57,13 @@
 
 namespace uhal
 {
-  //! Exception class to handle the case where the supposedly unique ID is duplicated. Uses the base uhal::exception implementation of what()
-  class DuplicatedUID : public uhal::exception {};
-  //! Exception class to handle the case where the UID requested does not exists in the map of connections. Uses the base uhal::exception implementation of what()
-  class ConnectionUIDDoesNotExist : public uhal::exception {};
+  namespace exception
+  {
+    //! Exception class to handle the case where the supposedly unique ID is duplicated. Uses the base uhal::exception implementation of what()
+    class DuplicatedUID : public exception {};
+    //! Exception class to handle the case where the UID requested does not exists in the map of connections. Uses the base uhal::exception implementation of what()
+    class ConnectionUIDDoesNotExist : public exception {};
+  }
 
   //! A class to open and manage XML connection files and wrap up the interfaces to the NodeTreeBuilder and the ClientFactory
   class ConnectionManager: private boost::noncopyable

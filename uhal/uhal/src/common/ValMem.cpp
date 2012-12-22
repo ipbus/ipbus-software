@@ -103,7 +103,7 @@ namespace uhal
   // else
   // {
   // log ( Error() , "Access attempted on non-validated memory" );
-  // throw // NonValidatedMemory();
+  // throw exception::// NonValidatedMemory();
   // }
   // }
   // catch ( uhal::exception& aExc )
@@ -205,7 +205,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -221,7 +221,7 @@ namespace uhal
     else
     {
       log ( Error() , "Attempted  to modify validated memory" );
-      throw ValMemImutabilityViolation();
+      throw exception::ValMemImutabilityViolation();
     }
   }
 
@@ -252,7 +252,7 @@ namespace uhal
   // else
   // {
   // log ( Error() , "Access attempted on non-validated memory" );
-  // throw // NonValidatedMemory();
+  // throw exception::// NonValidatedMemory();
   // }
   // }
   // catch ( uhal::exception& aExc )
@@ -334,7 +334,7 @@ namespace uhal
     else
     {
       log ( Error() , "Attempted  to modify validated memory" );
-      throw ValMemImutabilityViolation();
+      throw exception::ValMemImutabilityViolation();
     }
   }
 
@@ -350,7 +350,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -366,7 +366,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -409,7 +409,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -425,7 +425,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -441,7 +441,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -457,7 +457,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -474,7 +474,7 @@ namespace uhal
     else
     {
       log ( Error() , "Access attempted on non-validated memory" );
-      throw NonValidatedMemory();
+      throw exception::NonValidatedMemory();
     }
   }
 
@@ -490,7 +490,7 @@ namespace uhal
     else
     {
       log ( Error() , "Attempted  to modify validated memory" );
-      throw ValMemImutabilityViolation();
+      throw exception::ValMemImutabilityViolation();
     }
   }
 
@@ -617,7 +617,7 @@ namespace uhal
   // else
   // {
   // log ( Error() , "Access attempted on non-validated memory" );
-  // throw // NonValidatedMemory();
+  // throw exception::// NonValidatedMemory();
   // }
   // }
   // catch ( uhal::exception& aExc )

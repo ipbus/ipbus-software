@@ -61,18 +61,21 @@ namespace uhal
   class HwInterface;
   class NodeTreeBuilder;
 
-  //! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
-  class WriteAccessDenied : public uhal::exception {};
-  //! Exception class to handle the case where a read was performed on a register which does not allow read access. Uses the base uhal::exception implementation of what()
-  class ReadAccessDenied : public uhal::exception {};
-  //! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
-  class NoBranchFoundWithGivenUID : public uhal::exception {};
-  //! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
-  class BulkTransferOnSingleRegister : public uhal::exception {};
-  //! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
-  class BulkTransferRequestedTooLarge : public uhal::exception {};
-
-  class BadNodeCast : public uhal::exception {};
+  namespace exception
+  {
+    //! Exception class to handle the case where a write was performed on a register which does not allow write access. Uses the base uhal::exception implementation of what()
+    class WriteAccessDenied : public exception {};
+    //! Exception class to handle the case where a read was performed on a register which does not allow read access. Uses the base uhal::exception implementation of what()
+    class ReadAccessDenied : public exception {};
+    //! Exception class to handle the case where a child ID was requested which does not exist. Uses the base uhal::exception implementation of what()
+    class NoBranchFoundWithGivenUID : public exception {};
+    //! Exception class to handle the case where a bulk read or write was performed on a single register. Uses the base uhal::exception implementation of what()
+    class BulkTransferOnSingleRegister : public exception {};
+    //! Exception class to handle the case where requested bulk read or write was too large. Uses the base uhal::exception implementation of what()
+    class BulkTransferRequestedTooLarge : public exception {};
+    //! Exception class to handle the case of an attempt to cast a node to the wrong type. Uses the base uhal::exception implementation of what()
+    class BadNodeCast : public exception {};
+  }
 
 
   //! A heirarchical node for navigating heirarchical firmwares

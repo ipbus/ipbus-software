@@ -65,7 +65,7 @@ namespace uhal
     }
     else
     {
-      throw ValMemImutabilityViolation();
+      throw exception::ValMemImutabilityViolation();
     }
   }
 

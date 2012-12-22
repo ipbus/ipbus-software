@@ -52,10 +52,13 @@
 
 namespace uhal
 {
-  // //! Exception class to handle the case where a protocol already exists in the creator map. Uses the base uhal::exception implementation of what()
-  // class ProtocolAlreadyExist : public uhal::exception {};
-  //! Exception class to handle the case where the protocol requested does not exists in the creator map. Uses the base uhal::exception implementation of what()
-  class ProtocolDoesNotExist : public uhal::exception {};
+  namespace exception
+  {
+    // //! Exception class to handle the case where a protocol already exists in the creator map. Uses the base uhal::exception implementation of what()
+    // class ProtocolAlreadyExist : public exception {};
+    //! Exception class to handle the case where the protocol requested does not exists in the creator map. Uses the base uhal::exception implementation of what()
+    class ProtocolDoesNotExist : public exception {};
+  }
 
   /**
   A class to construct an IPbus client based on the protocol identifier specified

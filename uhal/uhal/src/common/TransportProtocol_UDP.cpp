@@ -163,7 +163,7 @@ namespace uhal
     /*if ( mErrorCode )
     {
       log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-      throw ErrorInUdpCallback();
+      throw exception::ErrorInUdpCallback();
     }*/
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Read back replies
@@ -194,12 +194,12 @@ namespace uhal
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         log ( Error() , "ASIO reported a Timeout in UDP callback" );
-        throw ErrorInUdpCallback();
+        throw exception::ErrorInUdpCallback();
       }
 
       log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
       mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
-      throw ErrorInUdpCallback();
+      throw exception::ErrorInUdpCallback();
     }
 
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
@@ -228,7 +228,7 @@ namespace uhal
     if ( !mUdpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
     {
       log ( Error() , "Validation function reported an error!" );
-      throw IPbusValidationError ();
+      throw exception::IPbusValidationError ();
     }
   }
 

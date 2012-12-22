@@ -113,7 +113,7 @@ namespace uhal
     if ( mForbidden.find ( aStr ) != mForbidden.end() )
     {
       log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
-      throw ContradictoryParserRule();
+      throw exception::ContradictoryParserRule();
     }
 
     mRequired.insert ( aStr );
@@ -128,7 +128,7 @@ namespace uhal
     if ( mRequired.find ( aStr ) != mRequired.end() )
     {
       log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
-      throw ContradictoryParserRule();
+      throw exception::ContradictoryParserRule();
     }
 
     mForbidden.insert ( aStr );
@@ -228,7 +228,7 @@ namespace uhal
     else
     {
       log ( Error() , "No action specified!" );
-      throw NoActionSpecified();
+      throw exception::NoActionSpecified();
     }
   }
 
@@ -267,7 +267,7 @@ namespace uhal
         if ( mNextHash == 0x0000000000000000 )
         {
           log ( Error() , "Too many attributes" );
-          throw TooManyAttributes();
+          throw exception::TooManyAttributes();
         }
 
         lRule.mRequiredHash |= mNextHash;
@@ -289,7 +289,7 @@ namespace uhal
         if ( mNextHash == 0x0000000000000000 )
         {
           log ( Error() , "Too many attributes" );
-          throw TooManyAttributes();
+          throw exception::TooManyAttributes();
         }
 
         lRule.mForbiddenHash |= mNextHash;
@@ -311,7 +311,7 @@ namespace uhal
         if ( mNextHash == 0x0000000000000000 )
         {
           log ( Error() , "Too many attributes" );
-          throw TooManyAttributes();
+          throw exception::TooManyAttributes();
         }
 
         mHashes.insert ( std::make_pair ( *lIt , mNextHash ) );
@@ -337,7 +337,7 @@ namespace uhal
       if ( lIt2 == mHashes.end() )
       {
         log ( Error() , "Parser failed because of unknown attribute ", Quote ( lAttr.name() ) );
-        throw UnknownAttribute();
+        throw exception::UnknownAttribute();
       }
 
       lHash |= lIt2->second;
@@ -392,7 +392,7 @@ namespace uhal
       if ( !lMostStringent )
       {
         log ( Error() , "Ambiguity remains! Multiple rules passed " , Integer ( lCounter ) , " requirements." );
-        throw AmbiguousParserRules();
+        throw exception::AmbiguousParserRules();
       }
 
       log ( Warning() , "In ambiguous case, selected " , lMostStringent->description() );
@@ -446,7 +446,7 @@ namespace uhal
       log ( Error() , " > Rule " ,  Integer ( ( **lIt ).mRuleId ) , " forbids attributes : " , lString );
     }
 
-    throw NoRulesPassed();
+    throw exception::NoRulesPassed();
   }
 
 }

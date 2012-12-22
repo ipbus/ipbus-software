@@ -95,7 +95,7 @@ namespace uhal
   // if ( WEXITSTATUS ( lPingStatus ) )
   // {
   // log ( Error() , "Pinging " , Quote ( mId ) , " at address " , Quote( mUri.mHostname ) , " returned exit status ", Integer ( WEXITSTATUS ( lPingStatus ) ) );
-  // throw // PingFailed();
+  // throw exception::// PingFailed();
   // }
   // }
   // catch ( uhal::exception& aExc )
@@ -169,7 +169,7 @@ namespace uhal
     if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
     {
       log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
-      throw BitsSetWhichAreForbiddenByBitMask();
+      throw exception::BitsSetWhichAreForbiddenByBitMask();
     }
 
     uint32_t lOverlap ( lBitShiftedSource & ~aMask );
@@ -180,7 +180,7 @@ namespace uhal
             " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
             Integer ( lOverlap , IntFmt<hex,fixed>() )
           );
-      throw BitsSetWhichAreForbiddenByBitMask();
+      throw exception::BitsSetWhichAreForbiddenByBitMask();
     }
 
     return ( ValHeader ) ( getPackingProtocol().rmw_bits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );

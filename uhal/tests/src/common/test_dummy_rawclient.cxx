@@ -55,7 +55,7 @@ void single_write_read ( const std::string& connection, const std::string& id )
   c->write ( addr,x );
   ValWord< uint32_t > reg = c->read ( addr );
   CACTUS_CHECK ( !reg.valid() );
-  CACTUS_TEST_THROW ( reg.value(),uhal::NonValidatedMemory );
+  CACTUS_TEST_THROW ( reg.value(),uhal::exception::NonValidatedMemory );
   c->dispatch();
   CACTUS_CHECK ( reg.valid() );
   CACTUS_CHECK ( reg.value() == x );
@@ -79,7 +79,7 @@ void mem_write_read ( const std::string& connection, const std::string& id )
   ValVector< uint32_t > mem = c->readBlock ( addr, N );
   CACTUS_CHECK ( !mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
-  CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::NonValidatedMemory );
+  CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
   c->dispatch();
   CACTUS_CHECK ( mem.valid() );
   CACTUS_CHECK ( mem.size() == N );

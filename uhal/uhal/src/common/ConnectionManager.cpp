@@ -138,7 +138,7 @@ namespace uhal
     if ( mConnectionDescriptors.size() == 0 )
     {
       log ( Error() , "Connection map contains no entries" );
-      throw ConnectionUIDDoesNotExist();
+      throw exception::ConnectionUIDDoesNotExist();
     }
 
     std::map< std::string, ConnectionDescriptor >::iterator lIt = mConnectionDescriptors.find ( aId );
@@ -146,7 +146,7 @@ namespace uhal
     if ( lIt == mConnectionDescriptors.end() )
     {
       log ( Error() , aId , " does not exist in connection map" );
-      throw ConnectionUIDDoesNotExist();
+      throw exception::ConnectionUIDDoesNotExist();
     }
 
     //The node tree builder returns a newly created Node which we can safely wrap as a shared_ptr
@@ -252,7 +252,7 @@ namespace uhal
           else
           {
             log ( Error() , "Duplicate connection ID found but parameters do not match! Bailing!" );
-            throw DuplicatedUID();
+            throw exception::DuplicatedUID();
           }
         }
       }

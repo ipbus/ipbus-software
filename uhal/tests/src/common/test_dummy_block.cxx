@@ -59,7 +59,7 @@ void block_write_read ( size_t N,const std::string& connection, const std::strin
   ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N );
   CACTUS_CHECK ( !mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
-  CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::NonValidatedMemory );
+  CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
   CACTUS_TEST ( hw.dispatch() );
   CACTUS_CHECK ( mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
@@ -90,7 +90,7 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
   ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlock ( N );
   CACTUS_CHECK ( !mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
-  CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::NonValidatedMemory );
+  CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
   CACTUS_TEST ( hw.dispatch() );
   CACTUS_CHECK ( mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
@@ -108,8 +108,8 @@ void block_transfer_too_big ( const std::string& connection, const std::string& 
     xx.push_back ( 0x0 );
   }
 
-  CACTUS_TEST_THROW ( hw.getNode ( "LARGE_MEM" ).writeBlock ( xx ) , uhal::BulkTransferRequestedTooLarge );
-  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock ( 100*1024*1024 ) , uhal::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( hw.getNode ( "LARGE_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock ( 100*1024*1024 ) , uhal::exception::BulkTransferRequestedTooLarge );
 }
 
 void block_bigger_than_size_attribute ( const std::string& connection, const std::string& id )
@@ -123,8 +123,8 @@ void block_bigger_than_size_attribute ( const std::string& connection, const std
     xx.push_back ( 0x0 );
   }
 
-  CACTUS_TEST_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock ( xx ) , uhal::BulkTransferRequestedTooLarge );
-  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlock ( 100*1024*1024 ) , uhal::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlock ( 100*1024*1024 ) , uhal::exception::BulkTransferRequestedTooLarge );
 }
 
 int main ( int argc,char* argv[] )
@@ -142,7 +142,7 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
   CACTUS_TEST ( fifo_write_read ( N_1MB,connection_file,device_id ) );
   //Block to big
-  //CACTUS_TEST_THROW(block_bigger_than_size_attribute(connection_file,device_id ),uhal::BulkTransferRequestedTooLarge);
+  //CACTUS_TEST_THROW(block_bigger_than_size_attribute(connection_file,device_id ),uhal::exception::BulkTransferRequestedTooLarge);
   block_transfer_too_big ( connection_file,device_id );
   block_bigger_than_size_attribute ( connection_file,device_id );
   return 0;

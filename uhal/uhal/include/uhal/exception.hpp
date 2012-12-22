@@ -47,38 +47,42 @@
 namespace uhal
 {
 
-  //! An abstract base exception class providing an interface to a throw/rethrow mechanism which will allow us to catch the base type and rethrow the derived type
-  class exception : public std::exception
+  //! A namespace for all exceptions to live in - this will hopefully make documentation a bit clearer
+  namespace exception
   {
-    public:
-      /**
-      	Destructor
-      */
-      virtual ~exception() throw();
 
-      /**
-      	Function which returns the error message associated with an exception
-      	If no error message has previously been defined, then it makes the typename readable (where appropriate) and returns this instead.
-      	@return the error message associated with an exception
-      */
-      virtual const char* what() const throw();
+    //! An abstract base exception class providing an interface to a throw/rethrow mechanism which will allow us to catch the base type and rethrow the derived type
+    class exception : public std::exception
+    {
+      public:
+        /**
+        	Destructor
+        */
+        virtual ~exception() throw();
 
-    protected:
-      /**
-      	Constructor
-      	@param aExc a standard string to be used as a message
-      */
-      exception ( const std::string& aExc = "" );
+        /**
+        	Function which returns the error message associated with an exception
+        	If no error message has previously been defined, then it makes the typename readable (where appropriate) and returns this instead.
+        	@return the error message associated with an exception
+        */
+        virtual const char* what() const throw();
 
-    private:
+      protected:
+        /**
+        	Constructor
+        	@param aExc a standard string to be used as a message
+        */
+        exception ( const std::string& aExc = "" );
 
-      //! The message given to the exception at the time of construction
-      std::string mMessage;
+      private:
 
-  };
+        //! The message given to the exception at the time of construction
+        std::string mMessage;
+
+    };
 
 
-
+  }
 }
 
 

@@ -373,7 +373,7 @@ namespace uhal
         log ( Error() , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
       }
 
-      throw NoBranchFoundWithGivenUID();
+      throw exception::NoBranchFoundWithGivenUID();
     }
 
     return * ( lIt->second );
@@ -435,7 +435,7 @@ namespace uhal
     else
     {
       log ( Error() , "Node permissions denied write access" );
-      throw WriteAccessDenied();
+      throw exception::WriteAccessDenied();
     }
   }
 
@@ -448,14 +448,14 @@ namespace uhal
     {
       log ( Error() , "Bulk Transfer requested on single register node" );
       log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-      throw BulkTransferOnSingleRegister();
+      throw exception::BulkTransferOnSingleRegister();
     }
     else
     {
       if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
       {
         log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
-        throw BulkTransferRequestedTooLarge();
+        throw exception::BulkTransferRequestedTooLarge();
       }
 
       if ( mPermission & defs::WRITE )
@@ -465,7 +465,7 @@ namespace uhal
       else
       {
         log ( Error() , "Node permissions denied write access" );
-        throw WriteAccessDenied();
+        throw exception::WriteAccessDenied();
       }
     }
   }
@@ -489,7 +489,7 @@ namespace uhal
     else
     {
       log ( Error() , "Node permissions denied read access" );
-      throw ReadAccessDenied();
+      throw exception::ReadAccessDenied();
     }
   }
 
@@ -502,14 +502,14 @@ namespace uhal
     {
       log ( Error() , "Bulk Transfer requested on single register node" );
       log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-      throw BulkTransferOnSingleRegister();
+      throw exception::BulkTransferOnSingleRegister();
     }
     else
     {
       if ( ( mSize != 1 ) && ( aSize>mSize ) )
       {
         log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-        throw BulkTransferRequestedTooLarge();
+        throw exception::BulkTransferRequestedTooLarge();
       }
 
       if ( mPermission & defs::READ )
@@ -519,7 +519,7 @@ namespace uhal
       else
       {
         log ( Error() , "Node permissions denied read access" );
-        throw ReadAccessDenied();
+        throw exception::ReadAccessDenied();
       }
     }
   }
@@ -542,7 +542,7 @@ namespace uhal
   // else
   // {
   // log ( Error() , "Node permissions denied read access" );
-  // throw // ReadAccessDenied();
+  // throw exception::// ReadAccessDenied();
   // }
   // }
   // catch ( uhal::exception& aExc )
@@ -564,14 +564,14 @@ namespace uhal
   // {
   // log ( Error() , "Bulk Transfer requested on single register node" );
   // log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-  // throw // BulkTransferOnSingleRegister();
+  // throw exception::// BulkTransferOnSingleRegister();
   // }
   // else
   // {
   // if ( ( mSize != 1 ) && ( aSize>mSize ) )
   // {
   // log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-  // throw // BulkTransferRequestedTooLarge();
+  // throw exception::// BulkTransferRequestedTooLarge();
   // }
 
   // if ( mPermission & defs::READ )
@@ -581,7 +581,7 @@ namespace uhal
   // else
   // {
   // log ( Error() , "Node permissions denied read access" );
-  // throw // ReadAccessDenied();
+  // throw exception::// ReadAccessDenied();
   // }
   // }
   // }
@@ -609,7 +609,7 @@ namespace uhal
   // else
   // {
   // log ( Error() , "Node permissions denied read/write access" );
-  // throw // ReadAccessDenied();
+  // throw exception::// ReadAccessDenied();
   // }
   // }
   // catch ( uhal::exception& aExc )
@@ -635,7 +635,7 @@ namespace uhal
   // else
   // {
   // log ( Error() , "Node permissions denied read/write access" );
-  // throw // ReadAccessDenied();
+  // throw exception::// ReadAccessDenied();
   // }
   // }
   // catch ( uhal::exception& aExc )

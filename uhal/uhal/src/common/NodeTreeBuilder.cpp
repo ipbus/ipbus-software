@@ -152,7 +152,7 @@ namespace uhal
     if ( lAddressFiles.size() != 1 )
     {
       log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( aFilenameExpr ) , " contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
-      throw IncorrectAddressTableFileCount();
+      throw exception::IncorrectAddressTableFileCount();
     }
 
     std::vector< const Node* > lNodes;
@@ -160,13 +160,13 @@ namespace uhal
     if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , boost::ref ( lNodes ) ) ) )
     {
       log ( Error() , "Failed to open address table file " , Quote ( lAddressFiles[0].second ) );
-      throw FailedToOpenAddressTableFile();
+      throw exception::FailedToOpenAddressTableFile();
     }
 
     if ( lNodes.size() != 1 )
     {
       log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( lAddressFiles[0].second ) , " refers to " , Integer ( lNodes.size() ) , " valid files." );
-      throw IncorrectAddressTableFileCount();
+      throw exception::IncorrectAddressTableFileCount();
     }
 
     Node* lNode ( lNodes[0]->clone() );
@@ -295,7 +295,7 @@ namespace uhal
         log ( Error() , " > " , lIt->first );
       }
 
-      throw LabelUnknownToClassFactory();
+      throw exception::LabelUnknownToClassFactory();
     }
 
     Node* lNode ( lIt->second->create ( lClass.mArguments ) );
@@ -338,7 +338,7 @@ namespace uhal
     if ( aXmlNode.child ( "node" ) )
     {
       log ( Error() , "Bit-masked nodes are not allowed to have child nodes" );
-      throw MaskedNodeCannotHaveChild();
+      throw exception::MaskedNodeCannotHaveChild();
     }
 
     Node* lNode ( new Node() );
@@ -366,7 +366,7 @@ namespace uhal
       if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , NodeTreeBuilder::mIdAttribute , aNode->mUid ) )
       {
         //error description is given in the function itself so no more elaboration required
-        throw NodeMustHaveUID();
+        throw exception::NodeMustHaveUID();
       }
     }
     else
@@ -472,7 +472,7 @@ namespace uhal
         if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mSizeAttribute , aNode->mSize ) )
         {
           log ( Error() , "Node " , Quote ( aNode->mUid ) , " has type " , Quote ( "INCREMENTAL" ) , ", which requires a " , Quote ( NodeTreeBuilder::mSizeAttribute ) , " attribute" );
-          throw IncrementalNodeRequiresSizeAttribute();
+          throw exception::IncrementalNodeRequiresSizeAttribute();
         }
       }
       else if ( aNode->mMode == defs::NON_INCREMENTAL )
@@ -498,7 +498,7 @@ namespace uhal
       if ( lXmlNode )
       {
         log ( Error() , "Block access nodes are not allowed to have child nodes" );
-        throw BlockAccessNodeCannotHaveChild();
+        throw exception::BlockAccessNodeCannotHaveChild();
       }
     }
     else
@@ -552,7 +552,7 @@ namespace uhal
         // if( lAnyMasked && !lAllMasked )
         // {
         // log ( Error() , "Both masked and unmasked children found in branch " , Quote ( aNode->mUid ) );
-        // throw // BothMaskedAndUnmaskedChildren();
+        // throw exception::// BothMaskedAndUnmaskedChildren();
         // }
 
         if ( lAllMasked )
@@ -570,7 +570,7 @@ namespace uhal
       if ( lTopAddr >> 32 )
       {
         log ( Error() , "A block size of " , Integer ( aNode->mSize ) , " and a base address of " , Integer ( aNode->mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
-        throw ArraySizeExceedsRegisterBound();
+        throw exception::ArraySizeExceedsRegisterBound();
       }
 
       //Test for overlap with parent
@@ -634,7 +634,7 @@ namespace uhal
                     "]."
                   );
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-              throw AddressSpaceOverlap();
+              throw exception::AddressSpaceOverlap();
 #endif
             }
           }
@@ -651,7 +651,7 @@ namespace uhal
                     " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) , "]."
                   );
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-              throw AddressSpaceOverlap();
+              throw exception::AddressSpaceOverlap();
 #endif
             }
           }
@@ -679,7 +679,7 @@ namespace uhal
                     " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) , "]."
                   );
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-              throw AddressSpaceOverlap();
+              throw exception::AddressSpaceOverlap();
 #endif
             }
           }
@@ -730,7 +730,7 @@ namespace uhal
                         " and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
                       );
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-                  throw AddressSpaceOverlap();
+                  throw exception::AddressSpaceOverlap();
 #endif
                 }
               }

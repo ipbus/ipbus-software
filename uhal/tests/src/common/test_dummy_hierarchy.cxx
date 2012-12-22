@@ -77,8 +77,8 @@ void write_read_hierarchy ( const std::string& connection, const std::string& id
   CACTUS_CHECK ( !mem2.valid() );
   CACTUS_CHECK ( mem1.size() == N_1MB );
   CACTUS_CHECK ( mem2.size() == N_1MB );
-  // CACTUS_TEST_THROW ( mem1.at ( rand() % N_1MB ),uhal::NonValidatedMemory );      // This precondition is false because of the pre-emptive dispatch
-  CACTUS_TEST_THROW ( mem2.at ( rand() % N_1MB ),uhal::NonValidatedMemory );
+  // CACTUS_TEST_THROW ( mem1.at ( rand() % N_1MB ),uhal::exception::NonValidatedMemory );      // This precondition is false because of the pre-emptive dispatch
+  CACTUS_TEST_THROW ( mem2.at ( rand() % N_1MB ),uhal::exception::NonValidatedMemory );
   //send packet
   CACTUS_TEST ( hw.dispatch() );
   //check results

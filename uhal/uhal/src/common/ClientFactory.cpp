@@ -126,7 +126,7 @@ namespace uhal
       }
 
       log ( Error() , "Protocol " , Quote ( lUri.mProtocol ) , " does not exists in map of creators. Options are:" , lStr.str() );
-      throw ProtocolDoesNotExist();
+      throw exception::ProtocolDoesNotExist();
     }
 
     return lIt->second->create ( aId , lUri );

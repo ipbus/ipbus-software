@@ -51,19 +51,21 @@
 namespace uhal
 {
 
-  //! Exception class to handle the case where an attribute is both required and forbidden. Uses the base uhal::exception implementation of what()
-  class ContradictoryParserRule : public uhal::exception {};
-  //! Exception class to handle the case where a callback is requested without it being specified. Uses the base uhal::exception implementation of what()
-  class NoActionSpecified : public uhal::exception {};
-  //! Exception class to handle the case where the parser is asked to handle more than 64 attributes. Uses the base uhal::exception implementation of what()
-  class TooManyAttributes : public uhal::exception {};
-  //! Exception class to handle the case where an unknown attribute is parsed. Uses the base uhal::exception implementation of what()
-  class UnknownAttribute : public uhal::exception {};
-  //! Exception class to handle the case where two or more equally strict rules are passed. Uses the base uhal::exception implementation of what()
-  class AmbiguousParserRules : public uhal::exception {};
-  //! Exception class to handle the case where no rules were parsed. Uses the base uhal::exception implementation of what()
-  class NoRulesPassed : public uhal::exception {};
-
+  namespace exception
+  {
+    //! Exception class to handle the case where an attribute is both required and forbidden. Uses the base uhal::exception implementation of what()
+    class ContradictoryParserRule : public exception {};
+    //! Exception class to handle the case where a callback is requested without it being specified. Uses the base uhal::exception implementation of what()
+    class NoActionSpecified : public exception {};
+    //! Exception class to handle the case where the parser is asked to handle more than 64 attributes. Uses the base uhal::exception implementation of what()
+    class TooManyAttributes : public exception {};
+    //! Exception class to handle the case where an unknown attribute is parsed. Uses the base uhal::exception implementation of what()
+    class UnknownAttribute : public exception {};
+    //! Exception class to handle the case where two or more equally strict rules are passed. Uses the base uhal::exception implementation of what()
+    class AmbiguousParserRules : public exception {};
+    //! Exception class to handle the case where no rules were parsed. Uses the base uhal::exception implementation of what()
+    class NoRulesPassed : public exception {};
+  }
 
   template < typename R >
   class Parser;

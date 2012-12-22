@@ -166,11 +166,11 @@ namespace uhal
         if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
         {
           log ( Error() , "ASIO reported a Timeout in TCP callback" );
-          throw ErrorInTcpCallback();
+          throw exception::ErrorInTcpCallback();
         }
 
         log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-        throw ErrorInTcpCallback();
+        throw exception::ErrorInTcpCallback();
       }
 
       mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
@@ -196,7 +196,7 @@ namespace uhal
     /*if ( mErrorCode )
       {
         log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-        throw ErrorInTcpCallback();
+        throw exception::ErrorInTcpCallback();
       }*/
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Read back replies
@@ -226,12 +226,12 @@ namespace uhal
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         log ( Error() , "ASIO reported a Timeout in TCP callback" );
-        throw ErrorInTcpCallback();
+        throw exception::ErrorInTcpCallback();
       }
 
       log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
       mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers );
-      throw ErrorInTcpCallback();
+      throw exception::ErrorInTcpCallback();
     }
 
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
@@ -260,7 +260,7 @@ namespace uhal
     if ( !mTcpTransportProtocol.mPackingProtocol->Validate ( aBuffers ) )
     {
       log ( Error() , "Validation function reported an error!" );
-      throw IPbusValidationError ();
+      throw exception::IPbusValidationError ();
     }
   }
 
