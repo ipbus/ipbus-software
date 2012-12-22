@@ -147,10 +147,13 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\tFunction to retrieve the mutex lock used by the logger\n"
            << "*/\n"
            << "boost::mutex& GetLoggingMutex();\n";
-  aCppFile << "\tboost::mutex& GetLoggingMutex()\n"
-           << "\t{\n"
-           << "\t\treturn log_configuration::mMutex;\n"
-           << "\t}\n";
+  aCppFile << "boost::mutex& GetLoggingMutex()\n"
+           << "{\n"
+           << "\treturn log_configuration::mMutex;\n"
+           << "}\n"
+           << "\n"
+           << gDivider
+           << "\n";
   // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   std::stringstream lIfDefs, lIfDefs2, lEndIfs;
 
@@ -164,10 +167,9 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
              << "struct " << *lIt << " {};\n";
     aHppFile << "/**\n"
              << "\tFunction to specify, at runtime, that only messages with a severity level above " << *lIt << " should be logged\n"
-             << "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n"
              << "*/\n"
-             << "void setLogLevelTo ( const " << *lIt << "& a" << *lIt << " );\n";
-    aCppFile << "void setLogLevelTo ( const " << *lIt << "& a" << *lIt << " )\n"
+             << "void setLogLevelTo ( const " << *lIt << "& /**< a dummy parameter to choose the specialization of the function for the " << *lIt << " level */ );\n";
+    aCppFile << "void setLogLevelTo ( const " << *lIt << "& )\n"
              << "{\n"
              << lIfDefs2.str();
 
@@ -181,12 +183,11 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
              << "\n";
     aHppFile << "/**\n"
              << "\tFunction to check at runtime whether the level " << *lIt << " is to be included in the log output\n"
-             << "\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n"
              << "\t@return whether the level " << *lIt << " is to be included in the log output\n"
              << "*/\n"
-             << "const bool& LoggingIncludes ( const " << *lIt << "& a" << *lIt << " );\n"
+             << "const bool& LoggingIncludes ( const " << *lIt << "& /**< a dummy parameter to choose the specialization of the function for the " << *lIt << " level */ );\n"
              << "\n";
-    aCppFile << "const bool& LoggingIncludes ( const " << *lIt << "& a" << *lIt << " )\n"
+    aCppFile << "const bool& LoggingIncludes ( const " << *lIt << "& )\n"
              << "{\n"
              << lIfDefs.str()
              << "\t\treturn log_configuration::mLoggingIncludes" << *lIt << ";\n"
@@ -302,7 +303,7 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
     std::stringstream lInstructions;
     std::stringstream lDoxygen;
     lDoxygen << "\t\tFunction to add a log entry at " << *lIt << " level\n"
-             << "\t\t@param a" << *lIt << " a dummy parameter to chose the specialization of the function for the " << *lIt << " level\n";
+             << "\t\t@param a" << *lIt << " a dummy parameter to choose the specialization of the function for the " << *lIt << " level\n";
 
     for ( uint32_t i = 0 ; i!=MAX_NUM_ARGS ; ++i )
     {
