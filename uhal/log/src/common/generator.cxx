@@ -268,7 +268,7 @@ std::string suffix ( uint32_t i )
     return "th";
   }
 
-  char* lIndices[] = { "th" , "st" , "nd" , "rd" , "th" , "th" , "th" , "th" , "th" , "th" };
+  std::string lIndices[] = { "th" , "st" , "nd" , "rd" , "th" , "th" , "th" , "th" , "th" , "th" };
   return lIndices[ i%10 ];
 }
 

@@ -30,7 +30,6 @@
 ---------------------------------------------------------------------------
 */
 
-
 #ifndef _log_inserters_threadID_hpp_
 #define _log_inserters_threadID_hpp_
 
