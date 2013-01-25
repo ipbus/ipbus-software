@@ -25,8 +25,6 @@ systems.
 %build
 
 %install 
-curdir=`pwd` 
-rm -rf $RPM_BUILD_ROOT 
 
 # copy binaries to RPM_BUILD_ROOT and set aliases
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/bin
@@ -45,9 +43,6 @@ cd $curdir
 #Change access rights
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
-
-#return to working directory
-cd $curdir 
 
 %clean 
 

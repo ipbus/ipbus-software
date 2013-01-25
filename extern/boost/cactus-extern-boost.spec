@@ -22,8 +22,7 @@ Boost Library packaged for the CACTUS project
 
 
 %install 
-curdir=`pwd` 
-rm -rf $RPM_BUILD_ROOT 
+#cd $RPM_BUILD_ROOT 
 
 # copy includes to RPM_BUILD_ROOT and set aliases
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/include
@@ -36,10 +35,6 @@ cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 #Change access rights
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/include
-
-#return to working directory
-cd $curdir 
-
 
 %clean 
 

@@ -22,7 +22,6 @@ uHAL Library Tests
 
 
 %install 
-curdir=`pwd` 
 
 # copy includes to RPM_BUILD_ROOT and set aliases
 mkdir -p $RPM_BUILD_ROOT%{_prefix}
@@ -32,9 +31,6 @@ cp -rp %{sources_dir}/* $RPM_BUILD_ROOT%{_prefix}/.
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/bin
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/include
-
-#return to working directory
-cd $curdir 
 
 
 %clean 

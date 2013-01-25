@@ -21,9 +21,6 @@ IPbus packet-router
 %build
 
 %install
-curdir=`pwd`
-rm -rf $RPM_BUILD_ROOT
-
 # copy bin content to RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/bin
 cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
@@ -43,8 +40,6 @@ chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_stats
 chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_status
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 
-#return to working directory
-cd $curdir
 
 %clean
 

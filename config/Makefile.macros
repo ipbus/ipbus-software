@@ -39,3 +39,8 @@ UHAL_TESTS_LIB_PREFIX = ${UHAL_TESTS_PREFIX}/lib
 CONTROLHUB_PREFIX = $(CACTUS_BUILD_ROOT)/controlhub/RPMBUILD/SOURCES
 CONTROLHUB_BIN_PREFIX = ${CONTROLHUB_PREFIX}/bin
 CONTROLHUB_LIB_PREFIX = ${CONTROLHUB_PREFIX}/lib
+
+#Python include path ("python-config --includes" does not exist in all the SLC distributions). 
+PYTHON_INCLUDE_PREFIX ?= /usr/include/python2.4 
+#SLC6
+#PYTHON_INCLUDE_PREFIX ?= /usr/include/python2.6 

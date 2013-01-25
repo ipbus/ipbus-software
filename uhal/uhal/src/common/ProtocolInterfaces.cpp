@@ -33,6 +33,10 @@
 #include "uhal/ProtocolInterfaces.hpp"
 // #include "uhal/performance.hpp"
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <cstring>
+
 namespace uhal
 {
 
@@ -192,6 +196,8 @@ namespace uhal
   {
     logging();
     mTimeoutPeriod = aTimeoutPeriod;
+    log(Info(), "timeout = ", boost::posix_time::to_simple_string(mTimeoutPeriod));
+
   }
 
   const boost::posix_time::time_duration& TransportProtocol::getTimeoutPeriod()
