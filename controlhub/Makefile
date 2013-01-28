@@ -86,7 +86,7 @@ all: _all
 build: _all
 buildall: _all
 
-_all: $(RPMBUILD_DIR) $(OBJECTS) $(CONTROLHUB_RELEASE_FILES) ${RPMBUILD_SOURCES_DIR}/lib/controlhub ${RPMBUILD_SOURCES_DIR}/bin
+_all: $(RPMBUILD_DIR) $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) $(CONTROLHUB_RELEASE_FILES) ${RPMBUILD_SOURCES_DIR}/lib/controlhub ${RPMBUILD_SOURCES_DIR}/bin
 
 
 dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
@@ -168,6 +168,7 @@ controlhub.rel: ebin/controlhub.app Makefile
 ${RPMBUILD_SOURCES_DIR}/lib/controlhub: $(TARBALL_FILE)
 	mkdir -p $@
 	tar -xvzf ${TARBALL_FILE} -C $@
+	cp -r ebin/unittest $@/lib/controlhub-$(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR).$(PACKAGE_VER_PATCH)/ebin/
 	touch $@
 
 
