@@ -8,6 +8,7 @@ XDAQ_REPO_FILE      = "/afs/cern.ch/user/c/cactus/nightly/cactus_xdaq.repo"
 YUMGROUP_FILE       = "/afs/cern.ch/user/c/cactus/nightly/cactus_yumgroups.xml"
 CACTUS_REPO_FILE    = "/afs/cern.ch/user/c/cactus/nightly/cactus.repo"
 INSTALL_PREFIX      = "/opt/cactus"
+CONTROLHUB_EBIN_DIR = join(INSTALL_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 
 ####VARIABLES: analysis of logs
 TITLE             = "CACTUS Nightlies"
@@ -28,6 +29,7 @@ ERROR_LIST        = ['TEST FAILED, ',
                      ' Error ',
                      'FAILED',
                      'FAIL: test', 'ERROR: test', #pycohal
+                     '*failed*', #controlhub
                      'terminate called']
 
 IGNORE_ERROR_LIST = []
@@ -37,6 +39,7 @@ TEST_PASSED_LIST  = ["TEST PASSED",
                      "TEST_THROW PASSED",
                      "TEST_NOTHROW PASSED",
                      " ... ok", #pycohal
+                     "...ok", #controlhub
                      "Average read bandwidth",
                      "Average write bandwidth"]
 
@@ -86,6 +89,8 @@ INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
                 "cd /build/cactus;rm -rf %s;mv html %s" % (join(WEB_DIR,"api/html"), join(WEB_DIR, "api/."))]
 
 TEST_CMDS = ["sudo chmod +w /var/log",
+             #CONTROLHUB STANDALONE TESTS
+             "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(INSTALL_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR),
              #SERVER NOT REACHABLE TESTS
              "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
