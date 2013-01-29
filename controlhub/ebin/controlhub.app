@@ -23,7 +23,7 @@
                  ch_stats,
                  ch_sup,
                  ch_tcp_listener]},
-   {applications, [kernel, sasl, stdlib]},
+   {applications, [appmon, kernel, sasl, stdlib]},
    {mod, {controlhub_app, []}}
  ]
 }.
