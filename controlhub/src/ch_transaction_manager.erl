@@ -124,11 +124,16 @@ unpack_target_request(RequestBin) ->
         % Test that received at least 3 words
         NrBytes when (NrBytes < 12) -> 
             throw({malformed, 'less than 3 words'});
-        _ ->
-            <<TargetIPaddr:32,
-              TargetPort:16, _NumInstructions:16,
-              Remainder/binary>> = RequestBin,
-              {TargetIPaddr, TargetPort, Remainder}
+        _ -> void
+    end,
+    <<TargetIPaddr:32,
+      TargetPort:16, _NumInstructions:16,
+      Remainder/binary>> = RequestBin,
+    case byte_size(Remainder) =:= _NumInstructions*4 of
+        false ->
+            throw({malformed, 'Number of instructions in packet does not match header'});
+        true ->
+            {TargetIPaddr, TargetPort, Remainder}
     end.
 
 
