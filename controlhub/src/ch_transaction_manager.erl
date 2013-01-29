@@ -101,11 +101,11 @@ tcp_receive_handler_loop(ClientSocket) ->
 
 %% Top-level function for actually dealing with the client request and returning a response.
 process_request(ClientSocket, RequestBin) ->
-    try unpack_target_requests(RequestBin) of
-       TargetRequestList ->
-           TargetResponseOrder = dispatch_to_device_clients(TargetRequestList),
-           FullResponseBin = gather_device_client_responses(TargetResponseOrder),
-           reply_to_client(ClientSocket, FullResponseBin)
+    try unpack_target_request(RequestBin) of
+        {TargetIPaddr, TargetPort, IPbusRequest} ->
+            ch_device_client:enqueue_requests(TargetIPaddr, TargetPort, IPbusRequest),
+            ResponseBin = wait_for_device_response(TargetIPaddr, TargetPort),
+            reply_to_client(ClientSocket, ResponseBin)
     catch
         throw:{malformed, _WhyMalformed} ->
           ?DEBUG_TRACE("WARNING! Malformed (~w) client request received; will ignore.", [_WhyMalformed]),
@@ -114,86 +114,40 @@ process_request(ClientSocket, RequestBin) ->
     end.
 
 
-%% Top-level function for breaking down the request into its various 
-%% sections (i.e. the sets of IPbus instructions for specific targets)
-unpack_target_requests(RequestBin) ->
+%% Breaks down received request into board IP address, port number and the IPbus request packet
+unpack_target_request(RequestBin) ->
     % Test if there are an integer number of 32-bit words before proceeding
-    case ((byte_size(RequestBin) rem 4) /= 0) of 
-        false -> 
-            target_request_accumulator(RequestBin);
-        true ->
-            throw({malformed, 'non-integer number of 32-bit words'})
+    case byte_size(RequestBin) of
+        % Test for integer number of 32-bit words
+        NrBytes when (NrBytes rem 4) /= 0 ->
+            throw({malformed, 'non-integer number of 32-bit words'});
+        % Test that received at least 3 words
+        NrBytes when (NrBytes < 12) -> 
+            throw({malformed, 'less than 3 words'});
+        _ ->
+            <<TargetIPaddr:32,
+              TargetPort:16, _NumInstructions:16,
+              Remainder/binary>> = RequestBin,
+              {TargetIPaddr, TargetPort, Remainder}
     end.
 
-%% Accumulate a list of the target requests
-%% @spec target_request_accumulator(RequestBin::binary()) -> TargetRequestList
-%%       TargetRequestList = [TargetRequest, ..]
-%%       TargetRequest = {IPaddrU32::integer(), PortU16::integer, Instructions::binary()}
-target_request_accumulator(RequestBin) ->
-  target_request_accumulator([], RequestBin).
 
-%% Implements target_request_accumulator/1
-target_request_accumulator(TargetRequestList,  <<TargetIPaddr:32,
-                                                 TargetPort:16,
-                                                 NumInstructions:16,
-                                                 Remainder/binary>>) ->
-    NumBitsForInstructions = 32 * NumInstructions,
-    case Remainder of
-        <<Instructions:NumBitsForInstructions/bits, Remainder2/binary>> ->
-            _TargetIPaddrTuple = ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr),
-            ?PACKET_TRACE(Instructions, "~n  Unpacked the following instructions "
-                                        "for target IP addr=~w, port=~p:", [_TargetIPaddrTuple, TargetPort]),
-            ?DEBUG_TRACE("Unpacked ~p instruction words for target IP addr=~w, port=~p:", [NumInstructions, _TargetIPaddrTuple, TargetPort]),
-            target_request_accumulator([{TargetIPaddr, TargetPort, Instructions} | TargetRequestList], Remainder2);
-        _ ->
-            throw({malformed, {'bad match on target request body', length(TargetRequestList)}})
-    end;
+%% Waits for response message from the device_client process 
+wait_for_device_response(TargetIPaddr, TargetPort) ->
+    receive
+        {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
+            ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
+                         "Port=~p", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
+            <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>
+        after (?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT) ->
+            ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~w,"
+                         "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
+            <<TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>
+    end.
 
-target_request_accumulator(TargetRequestList, <<>>) ->
-    lists:reverse(TargetRequestList);
-
-target_request_accumulator(TargetRequestList, _Else) ->
-    throw({malformed, {'bad match on target request header', length(TargetRequestList)}}).
-
-
-%% Sends each target request to the relevant device client
-%% @spec dispatch_to_device_clients(TargetRequestList)) -> TargetResponseOrder
-%%       TargetRequestList = [TargetRequest, ..]
-%%       TargetRequest = {IPaddrU32::integer(), PortU16::integer(), Instructions::binary()}
-%%       TargetResponseOrder = [ {IPaddrU32::integer(), PortU16::integer()}, .. ]
-dispatch_to_device_clients(TargetRequestList) ->
-    lists:foreach(fun dispatch_to_device_client/1, TargetRequestList),
-    lists:map(fun({IPaddrU32, PortU16, _Instructions}) -> {IPaddrU32, PortU16} end, TargetRequestList).  
-
-dispatch_to_device_client({IPaddrU32, PortU16, Instructions}) ->
-    ch_device_client:enqueue_requests(IPaddrU32, PortU16, Instructions).
-
-
-gather_device_client_responses(TargetResponseOrder) ->
-    device_client_response_accumulator(TargetResponseOrder, []).
-
-
-device_client_response_accumulator([{IPaddrU32, PortU16}| Tail], ResponsesList) ->
-    ResponseBin = receive
-                      {device_client_response, IPaddrU32, PortU16, ErrorCode, TargetResponseBin} ->
-                          ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
-                                       "Port=~p", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),
-                          <<(byte_size(TargetResponseBin) + 8):32, IPaddrU32:32, PortU16:16, ErrorCode:16, TargetResponseBin/binary>>
-                  after (?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT) -> 
-                      ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~w,"
-                                   "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32), PortU16]),            
-                          <<IPaddrU32:32, PortU16:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>
-                  end,
-    device_client_response_accumulator(Tail, [ResponseBin | ResponsesList]);
-
-device_client_response_accumulator([], ResponsesList) ->
-    ?DEBUG_TRACE("Finished gathering client responses."),
-    ReversedResponsesList = lists:reverse(ResponsesList),
-    list_to_binary(ReversedResponsesList).
-
-
-reply_to_client(ClientSocket, FullResponseBin) ->
+%% Sends reply back to TCP client
+reply_to_client(ClientSocket, ResponseBin) ->
     ?DEBUG_TRACE("Sending response to TCP client"),
     ?PACKET_TRACE(FullResponseBin, "~n  Sending the following response to the TCP client:"),
-    gen_tcp:send(ClientSocket, FullResponseBin),
+    gen_tcp:send(ClientSocket, ResponseBin),
     ch_stats:client_response_sent().
