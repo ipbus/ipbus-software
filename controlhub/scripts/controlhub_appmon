@@ -1,4 +1,4 @@
-#!/opt/cactus/bin/escript
+#!/bin/env escript
 %% -*- erlang -*-
 %%! -sname tempshellappmon -setcookie ch_cookie
 
