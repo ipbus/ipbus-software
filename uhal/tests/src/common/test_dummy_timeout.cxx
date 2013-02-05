@@ -51,15 +51,14 @@ void check_timeout ( const std::string& connection, const std::string& id, int s
   std::cout << "Sleeping for " << sleepAfterFirstDispatch << " seconds to allow DummyHardware to clear itself" << std::endl;
   sleep ( sleepAfterFirstDispatch );
   // Check we can continue as normal without further exceptions.
-  
-  uint32_t x = static_cast<uint32_t>(rand());
+  uint32_t x = static_cast<uint32_t> ( rand() );
   ValWord<uint32_t> y;
   CACTUS_TEST_NOTHROW (
-		       hw.getNode("REG").write(x); 
-		       y = hw.getNode ( "REG" ).read();  
-		       hw.dispatch();
-		       );
-  CACTUS_CHECK(x==y);
+    hw.getNode ( "REG" ).write ( x );
+    y = hw.getNode ( "REG" ).read();
+    hw.dispatch();
+  );
+  CACTUS_CHECK ( x==y );
 }
 
 int main ( int argc,char* argv[] )
@@ -69,6 +68,5 @@ int main ( int argc,char* argv[] )
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   CACTUS_TEST ( check_timeout ( connection_file, device_id, 3 ) );
-
   return 0;
 }
