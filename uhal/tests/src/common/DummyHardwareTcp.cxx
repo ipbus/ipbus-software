@@ -95,7 +95,7 @@ class TCPdummyHardware
           do
           {
             //log ( Info() , "Header = " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
-            if ( ! IPbusHeaderHelper< IPbus_1_3 >::extract (
+            if ( ! IPbusHeaderHelper< 1,3 >::extract (
                    *lReceivePtr ,
                    mType ,
                    mWordCounter ,
@@ -115,17 +115,17 @@ class TCPdummyHardware
             switch ( mType )
             {
               case B_O_T:
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
                 lReplyPtr++;
                 break;
               case R_A_I:
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 2 , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 2 , mTransactionId ) | 0x4;
                 lReplyPtr+=3;
                 break;
               case NI_READ:
                 mAddress = *lReceivePtr;
                 lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
                 lReplyPtr++;
 
                 for ( ; mWordCounter!=0 ; --mWordCounter )
@@ -138,7 +138,7 @@ class TCPdummyHardware
               case READ:
                 mAddress = *lReceivePtr;
                 lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
                 lReplyPtr++;
 
                 for ( ; mWordCounter!=0 ; --mWordCounter )
@@ -158,7 +158,7 @@ class TCPdummyHardware
                   lReceivePtr++;
                 }
 
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
                 lReplyPtr++;
                 break;
               case WRITE:
@@ -171,7 +171,7 @@ class TCPdummyHardware
                   lReceivePtr++;
                 }
 
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
                 lReplyPtr++;
                 break;
               case RMW_SUM:
@@ -179,7 +179,7 @@ class TCPdummyHardware
                 lReceivePtr++;
                 mMemory.at ( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
                 lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
                 lReplyPtr++;
                 *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
                 lReplyPtr++;
@@ -191,7 +191,7 @@ class TCPdummyHardware
                 lReceivePtr++;
                 mMemory.at ( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
                 lReceivePtr++;
-                *lReplyPtr = IPbusHeaderHelper< IPbus_1_3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
+                *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
                 lReplyPtr++;
                 *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
                 lReplyPtr++;
