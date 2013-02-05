@@ -38,9 +38,9 @@ namespace uhal
   // ----------------------------------------------------------------------------------------------------------------
 
   //! A class to directly access locally-connected devices via IPbus over UDP
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const std::string& aId , const URI& aUri ) :
+  IPBusUDPClient< IPbus_major , IPbus_minor >::IPBusUDPClient ( const std::string& aId , const URI& aUri ) :
     ClientInterface ( aId , aUri ),
     mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
     mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
@@ -52,9 +52,9 @@ namespace uhal
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  IPBusUDPClient< IPbusProtocolVersion >::IPBusUDPClient ( const IPBusUDPClient< IPbusProtocolVersion >& aIPBusUDPClient ) :
+  IPBusUDPClient< IPbus_major , IPbus_minor >::IPBusUDPClient ( const IPBusUDPClient< IPbus_major , IPbus_minor >& aIPBusUDPClient ) :
     ClientInterface ( aIPBusUDPClient ),
     mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
     mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
@@ -66,24 +66,26 @@ namespace uhal
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  std::string IPBusUDPClient< IPbusProtocolVersion >::description()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  std::string IPBusUDPClient< IPbus_major , IPbus_minor >::description()
   {
     logging();
-    return "Direct access to hardware via UDP, using " + toString ( IPbusProtocolVersion );
+    std::stringstream lStr;
+    lStr << "Direct access to hardware via UDP, using IPbus version "<<IPbus_major<<"."<<IPbus_minor;
+    return lStr.str();
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  PackingProtocol& IPBusUDPClient< IPbusProtocolVersion >::getPackingProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  PackingProtocol& IPBusUDPClient< IPbus_major , IPbus_minor >::getPackingProtocol()
   {
     logging();
     return mPackingProtocol;
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  TransportProtocol& IPBusUDPClient< IPbusProtocolVersion >::getTransportProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  TransportProtocol& IPBusUDPClient< IPbus_major , IPbus_minor >::getTransportProtocol()
   {
     return mTransportProtocol;
     logging();
@@ -96,9 +98,9 @@ namespace uhal
 
 
   //! A class to directly access locally-connected devices via IPbus over TCP
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const std::string& aId , const URI& aUri ) :
+  IPBusTCPClient< IPbus_major , IPbus_minor >::IPBusTCPClient ( const std::string& aId , const URI& aUri ) :
     ClientInterface ( aId , aUri ),
     mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
     mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
@@ -109,9 +111,9 @@ namespace uhal
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  IPBusTCPClient< IPbusProtocolVersion >::IPBusTCPClient ( const IPBusTCPClient< IPbusProtocolVersion > &aIPBusTCPClient ) :
+  IPBusTCPClient< IPbus_major , IPbus_minor >::IPBusTCPClient ( const IPBusTCPClient< IPbus_major , IPbus_minor > &aIPBusTCPClient ) :
     ClientInterface ( aIPBusTCPClient ),
     mPackingProtocol ( mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
     mTransportProtocol ( mUri.mHostname , mUri.mPort , mDefaultTimeoutPeriod )
@@ -122,24 +124,26 @@ namespace uhal
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  std::string IPBusTCPClient< IPbusProtocolVersion >::description()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  std::string IPBusTCPClient< IPbus_major , IPbus_minor >::description()
   {
     logging();
-    return "Direct access to hardware via TCP, using " + toString ( IPbusProtocolVersion );
+    std::stringstream lStr;
+    lStr << "Direct access to hardware via TCP, using IPbus version "<<IPbus_major<<"."<<IPbus_minor;
+    return lStr.str();
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  PackingProtocol& IPBusTCPClient< IPbusProtocolVersion >::getPackingProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  PackingProtocol& IPBusTCPClient< IPbus_major , IPbus_minor >::getPackingProtocol()
   {
     logging();
     return mPackingProtocol;
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  TransportProtocol& IPBusTCPClient< IPbusProtocolVersion >::getTransportProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  TransportProtocol& IPBusTCPClient< IPbus_major , IPbus_minor >::getTransportProtocol()
   {
     logging();
     return mTransportProtocol;
@@ -163,9 +167,9 @@ namespace uhal
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const std::string& aId , const URI& aUri ) :
+  ControlHubClient< IPbus_major , IPbus_minor >::ControlHubClient ( const std::string& aId , const URI& aUri ) :
     ClientInterface ( aId , aUri ),
     mTargetId ( ExtractTargetID ( aUri ) ),
     mPackingProtocol ( mTargetId.first , mTargetId.second , mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
@@ -178,9 +182,9 @@ namespace uhal
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  ControlHubClient< IPbusProtocolVersion >::ControlHubClient ( const ControlHubClient< IPbusProtocolVersion > &aControlHubClient ) :
+  ControlHubClient< IPbus_major , IPbus_minor >::ControlHubClient ( const ControlHubClient< IPbus_major , IPbus_minor > &aControlHubClient ) :
     ClientInterface ( aControlHubClient ),
     mTargetId ( aControlHubClient.mTargetId ),
     mPackingProtocol ( mTargetId.first , mTargetId.second , mMaxPacketLength , mMaxPacketLength - ThisIsAHackToPatchFirmwareUndersizedPacketHandlingProblemAndShouldNotBeNeccessary ),
@@ -193,25 +197,27 @@ namespace uhal
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  std::string ControlHubClient< IPbusProtocolVersion >::description()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  std::string ControlHubClient< IPbus_major , IPbus_minor >::description()
   {
     logging();
-    return "Hardware access via the Control Hub, using " + toString ( IPbusProtocolVersion );
+    std::stringstream lStr;
+    lStr << "Hardware access via the Control Hub, using IPbus version "<<IPbus_major<<"."<<IPbus_minor;
+    return lStr.str();
   }
 
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  PackingProtocol& ControlHubClient< IPbusProtocolVersion >::getPackingProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  PackingProtocol& ControlHubClient< IPbus_major , IPbus_minor >::getPackingProtocol()
   {
     logging();
     return mPackingProtocol;
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  TransportProtocol& ControlHubClient< IPbusProtocolVersion >::getTransportProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  TransportProtocol& ControlHubClient< IPbus_major , IPbus_minor >::getTransportProtocol()
   {
     logging();
     return mTransportProtocol;

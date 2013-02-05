@@ -69,37 +69,23 @@ namespace uhal
   */
   enum eIPbusTransactionType
   {
-    B_O_T = 0xF8,
-    READ = 0x18,
-    WRITE = 0x20,
-    RMW_BITS = 0x28,
-    RMW_SUM = 0x30,
-    R_A_I = 0xF0,
-    NI_READ = 0x40,
-    NI_WRITE = 0x48
+    B_O_T,
+    READ,
+    WRITE,
+    RMW_BITS,
+    RMW_SUM,
+    R_A_I,
+    NI_READ,
+    NI_WRITE
   };
-
-  /**
-  	Enumerated type to define the IPbus protocol version.
-  */
-  enum eIPbusProtocolVersion
-  {
-    IPbus_1_2,
-    IPbus_1_3,
-    IPbus_1_4,
-    IPbus_2_0
-  };
-
-  /**
-  	Helper function to convert an enumerated type into a formatted string
-  	@param aIPbusProtocolVersion The IPbus protocol version we wish to be formatted
-  	@return a formatted string representing the enumerated type
-  */
-  std::string toString ( const eIPbusProtocolVersion& aIPbusProtocolVersion );
 
   //! A helper struct to allow us to use template specialization rather than if/else statements for types which are known at compile time
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  struct IPbusHeaderHelper
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  struct IPbusHeaderHelper;
+
+  //! A helper struct to allow us to use template specialization rather than if/else statements for types which are known at compile time
+  template< uint8_t IPbus_minor >
+  struct IPbusHeaderHelper< 1 , IPbus_minor >
   {
     /**
     	Calculate an IPbus transaction header from individual fields
@@ -121,6 +107,34 @@ namespace uhal
     */
     static bool extract ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aResponseGood );
   };
+
+
+  //! A helper struct to allow us to use template specialization rather than if/else statements for types which are known at compile time
+  template< uint8_t IPbus_minor >
+  struct IPbusHeaderHelper< 2 , IPbus_minor >
+  {
+    /**
+      Calculate an IPbus transaction header from individual fields
+      @param aType an enumerated IPbus instruction type
+      @param aWordCount the word count for the IPbus instruction
+      @param aTransactionId the transaction ID field
+      @return an IPbus transaction header
+    */
+    static uint32_t calculate ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+
+    /**
+      Extract individual fields from an IPbus header
+      @param aHeader an IPbus transaction header to decode
+      @param aType the enumerated IPbus instruction type of the decoded transaction header
+      @param aWordCount the word count of the decoded transaction header
+      @param aTransactionId the transaction ID of the decoded transaction header
+      @param aInfoCode the response field of the decoded transaction header
+      @return whether extraction succeeded or not
+    */
+    static bool extract ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+  };
+
+
 
 }
 

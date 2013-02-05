@@ -48,7 +48,7 @@ namespace uhal
 {
 
   //! A concrete class implementing the packing necessary for connection to IPbus hardware via a Control Hub PC
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class ControlHubHostPackingProtocol : public PackingProtocol
   {
     public:

@@ -35,9 +35,9 @@
 namespace uhal
 {
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::IPbusHwAccessPackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) :
+  IPbusHwAccessPackingProtocol< IPbus_major , IPbus_minor >::IPbusHwAccessPackingProtocol ( const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) :
     PackingProtocol ( aMaxSendSize<<2 , aMaxReplySize<<2 ),
     mTransactionCounter ( 0 )
   {
@@ -45,22 +45,22 @@ namespace uhal
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::~IPbusHwAccessPackingProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  IPbusHwAccessPackingProtocol< IPbus_major , IPbus_minor >::~IPbusHwAccessPackingProtocol()
   {
     logging();
   }
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  uint32_t IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  uint32_t IPbusHwAccessPackingProtocol< IPbus_major , IPbus_minor >::calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
   {
     logging();
-    return IPbusHeaderHelper<IPbusProtocolVersion>::calculate ( aType , aWordCount , mTransactionCounter++ );
+    return IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( aType , aWordCount , mTransactionCounter++ );
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  bool IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::extractIPbusHeader (
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  bool IPbusHwAccessPackingProtocol< IPbus_major , IPbus_minor >::extractIPbusHeader (
     const uint32_t& aHeader ,
     eIPbusTransactionType& aType ,
     uint32_t& aWordCount ,
@@ -68,12 +68,12 @@ namespace uhal
     uint8_t& aResponseGood )
   {
     logging();
-    return IPbusHeaderHelper<IPbusProtocolVersion>::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
+    return IPbusHeaderHelper< IPbus_major , IPbus_minor >::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  void IPbusHwAccessPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  void IPbusHwAccessPackingProtocol< IPbus_major , IPbus_minor >::Predispatch( )
   {
     logging();
     uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );

@@ -58,7 +58,7 @@ namespace uhal
   // ----------------------------------------------------------------------------------------------------------------
 
   //! A class to directly access locally-connected devices via IPbus over UDP
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class IPBusUDPClient : public ClientInterface
   {
 
@@ -71,7 +71,7 @@ namespace uhal
       static const int mMaxPacketLength = 350;
 
       //! Typedef the packing protocol which will be used by this IPbus Client
-      typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+      typedef IPbusHwAccessPackingProtocol< IPbus_major , IPbus_minor > tPackingProtocol;
       //! Typedef the transport protocol which will be used by this IPbus Client
       typedef UdpTransportProtocol tTransportProtocol;
 
@@ -88,7 +88,7 @@ namespace uhal
       Copy constructor
       @param aIPBusUDPClient a UDP client to clone
       */
-      IPBusUDPClient ( const IPBusUDPClient< IPbusProtocolVersion >& aIPBusUDPClient );
+      IPBusUDPClient ( const IPBusUDPClient< IPbus_major , IPbus_minor >& aIPBusUDPClient );
 
       /**
       Return a description of the behaviour this client
@@ -117,8 +117,8 @@ namespace uhal
   };
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  boost::posix_time::time_duration IPBusUDPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 1 );
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  boost::posix_time::time_duration IPBusUDPClient< IPbus_major , IPbus_minor >::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 1 );
 
 }
 // ----------------------------------------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ namespace uhal
 namespace uhal
 {
   //! A class to directly access locally-connected devices via IPbus over TCP
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class IPBusTCPClient : public ClientInterface
   {
 
@@ -139,7 +139,7 @@ namespace uhal
       static const int mMaxPacketLength = 350;
 
       //! Typedef the packing protocol which will be used by this IPbus Client
-      typedef IPbusHwAccessPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+      typedef IPbusHwAccessPackingProtocol< IPbus_major , IPbus_minor > tPackingProtocol;
       //! Typedef the transport protocol which will be used by this IPbus Client
       typedef TcpTransportProtocol tTransportProtocol;
 
@@ -156,7 +156,7 @@ namespace uhal
       Copy constructor
       @param aIPBusTCPClient a TCP client to clone
       */
-      IPBusTCPClient ( const IPBusTCPClient< IPbusProtocolVersion >& aIPBusTCPClient );
+      IPBusTCPClient ( const IPBusTCPClient< IPbus_major , IPbus_minor >& aIPBusTCPClient );
 
       /**
       Return a description of the behaviour this client
@@ -184,8 +184,8 @@ namespace uhal
 
   };
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  boost::posix_time::time_duration IPBusTCPClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 1 );
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  boost::posix_time::time_duration IPBusTCPClient< IPbus_major , IPbus_minor >::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 1 );
 
 }
 
@@ -207,7 +207,7 @@ namespace uhal
   std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri );
 
   //! A class to indirectly access (via a Control Hub Host) devices via IPbus over UDP
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class ControlHubClient : public ClientInterface
   {
 
@@ -221,7 +221,7 @@ namespace uhal
 
 
       //! Typedef the packing protocol which will be used by this IPbus Client
-      typedef ControlHubHostPackingProtocol< IPbusProtocolVersion > tPackingProtocol;
+      typedef ControlHubHostPackingProtocol< IPbus_major , IPbus_minor > tPackingProtocol;
       //! Typedef the transport protocol which will be used by this IPbus Client
       typedef TcpTransportProtocol tTransportProtocol;
 
@@ -237,7 +237,7 @@ namespace uhal
       Copy constructor
       @param aControlHubClient a Control-Hub client to clone
       */
-      ControlHubClient ( const ControlHubClient< IPbusProtocolVersion >& aControlHubClient );
+      ControlHubClient ( const ControlHubClient< IPbus_major , IPbus_minor >& aControlHubClient );
 
       /**
       	Return a description of the behaviour this client
@@ -269,8 +269,8 @@ namespace uhal
 
   };
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  boost::posix_time::time_duration ControlHubClient<IPbusProtocolVersion>::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 1 );
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  boost::posix_time::time_duration ControlHubClient< IPbus_major , IPbus_minor >::mDefaultTimeoutPeriod = boost::posix_time::seconds ( 1 );
 
 }
 

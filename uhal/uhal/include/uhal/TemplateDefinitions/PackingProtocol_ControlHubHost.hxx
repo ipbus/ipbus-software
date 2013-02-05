@@ -35,9 +35,9 @@
 namespace uhal
 {
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
-  ControlHubHostPackingProtocol<  IPbusProtocolVersion >::ControlHubHostPackingProtocol ( const uint32_t& aDeviceIPaddr , const uint16_t& aDevicePort , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) :
+  ControlHubHostPackingProtocol< IPbus_major , IPbus_minor >::ControlHubHostPackingProtocol ( const uint32_t& aDeviceIPaddr , const uint16_t& aDevicePort , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize ) :
     PackingProtocol ( aMaxSendSize<<2 , aMaxReplySize<<2 ),
     mDeviceIPaddress ( htonl ( aDeviceIPaddr ) ),
     mDevicePort ( htons ( aDevicePort ) ),
@@ -47,22 +47,22 @@ namespace uhal
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  ControlHubHostPackingProtocol<  IPbusProtocolVersion >::~ControlHubHostPackingProtocol()
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  ControlHubHostPackingProtocol< IPbus_major , IPbus_minor >::~ControlHubHostPackingProtocol()
   {
     logging();
   }
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  uint32_t ControlHubHostPackingProtocol<  IPbusProtocolVersion >::calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  uint32_t ControlHubHostPackingProtocol< IPbus_major , IPbus_minor >::calculateIPbusHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount )
   {
     logging();
-    return IPbusHeaderHelper<IPbusProtocolVersion>::calculate ( aType , aWordCount , mTransactionCounter++ );
+    return IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( aType , aWordCount , mTransactionCounter++ );
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  bool ControlHubHostPackingProtocol<  IPbusProtocolVersion >::extractIPbusHeader (
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  bool ControlHubHostPackingProtocol< IPbus_major , IPbus_minor >::extractIPbusHeader (
     const uint32_t& aHeader ,
     eIPbusTransactionType& aType ,
     uint32_t& aWordCount ,
@@ -70,25 +70,28 @@ namespace uhal
     uint8_t& aResponseGood )
   {
     logging();
-    return IPbusHeaderHelper<IPbusProtocolVersion>::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
+    return IPbusHeaderHelper< IPbus_major , IPbus_minor >::extract ( aHeader , aType , aWordCount , aTransactionId , aResponseGood );
   }
 
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  void ControlHubHostPackingProtocol<  IPbusProtocolVersion >::Preamble( )
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  void ControlHubHostPackingProtocol< IPbus_major , IPbus_minor >::Preamble( )
   {
     logging();
+    // -------------------------------------------------------------------------------------------------------------
     // 12 bytes form the preamble:
     // Byte-count (4 bytes) will be updated before transmission in Predispatch
     // Device IP address (4 bytes)
     // Device Port number (2 bytes)
     // Word-count (2 bytes) will be updated before transmission in Predispatch
+    // -------------------------------------------------------------------------------------------------------------
     // 16 bytes form the preamble reply:
     // Total Byte-count (4 bytes)
     // Chunk Byte-count (4 bytes)
     // Device IP address (4 bytes)
     // Device Port number (2 bytes)
     // Error code (2 bytes)
+    // -------------------------------------------------------------------------------------------------------------
     tPreamble* lPreamble;
     {
       boost::lock_guard<boost::mutex> lLock ( mMutex );
@@ -107,8 +110,8 @@ namespace uhal
     PackingProtocol::Preamble();
   }
 
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  void ControlHubHostPackingProtocol<  IPbusProtocolVersion >::Predispatch( )
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  void ControlHubHostPackingProtocol< IPbus_major , IPbus_minor >::Predispatch( )
   {
     logging();
     tPreamble* lPreamble;
@@ -140,8 +143,8 @@ namespace uhal
   //            --- OR ---
   // IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
   // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
-  bool ControlHubHostPackingProtocol< IPbusProtocolVersion >::Validate ( Buffers* aBuffers )
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  bool ControlHubHostPackingProtocol< IPbus_major , IPbus_minor >::Validate ( Buffers* aBuffers )
   {
     logging();
     uint8_t* lSendBuffer ( aBuffers->getSendBuffer() );

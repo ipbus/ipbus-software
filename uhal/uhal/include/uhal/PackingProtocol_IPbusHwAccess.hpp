@@ -45,7 +45,7 @@ namespace uhal
 {
 
   //! A concrete class implementing the packing necessary for a direct connection to IPbus hardware
-  template< eIPbusProtocolVersion IPbusProtocolVersion >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class IPbusHwAccessPackingProtocol : public PackingProtocol
   {
     public:
