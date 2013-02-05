@@ -196,8 +196,7 @@ namespace uhal
   {
     logging();
     mTimeoutPeriod = aTimeoutPeriod;
-    log(Info(), "timeout = ", boost::posix_time::to_simple_string(mTimeoutPeriod));
-
+    log ( Info(), "timeout = ", boost::posix_time::to_simple_string ( mTimeoutPeriod ) );
   }
 
   const boost::posix_time::time_duration& TransportProtocol::getTimeoutPeriod()

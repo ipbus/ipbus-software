@@ -33,20 +33,22 @@
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include "uhal/tests/DummyHardware.hpp"
+
 using boost::asio::ip::udp;
 using namespace uhal;
 
 static const uint32_t ADDRESSMASK = 0x000FFFFF;
 
-class UDPdummyHardware
+class UDPdummyHardware : public DummyHardware< 1 , 3 >
 {
   public:
 
     UDPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay ) :
+      DummyHardware< 1 , 3 > ( aReplyDelay ) ,
       mIOservice(),
-      mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) ),
-      mMemory ( ADDRESSMASK+1 , 0x00000000 ),
-      mReplyDelay ( aReplyDelay )
+      mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) )
+
     {
       logging();
     }
@@ -61,126 +63,11 @@ class UDPdummyHardware
     {
       logging();
 
-      for ( ;; )
+      while ( true )
       {
-        uint32_t lUDPreceiveCounter = mSocket.receive_from ( boost::asio::buffer ( mUDPreceiveBuffer, 500<<2 ) , mSenderEndpoint );
-        uint32_t* lReceivePtr ( mUDPreceiveBuffer );
-        uint32_t* lReceiveEnd ( lReceivePtr+ ( lUDPreceiveCounter>>2 ) );
-        uint32_t* lReplyPtr ( mUDPreplyBuffer );
-
-        do
-        {
-          if ( ! IPbusHeaderHelper< 1,3 >::extract (
-                 *lReceivePtr ,
-                 mType ,
-                 mWordCounter ,
-                 mTransactionId ,
-                 mResponseGood )
-             )
-          {
-            log ( Error() , "Unable to parse send header " , Integer ( *lReceivePtr, IntFmt<hex,fixed>() ) );
-            return;
-          }
-
-          lReceivePtr++;
-
-          switch ( mType )
-          {
-            case B_O_T:
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
-              lReplyPtr++;
-              break;
-            case R_A_I:
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 2 , mTransactionId ) | 0x4;
-              lReplyPtr+=3;
-              break;
-            case NI_READ:
-              mAddress = *lReceivePtr;
-              lReceivePtr++;
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
-              lReplyPtr++;
-
-              for ( ; mWordCounter!=0 ; --mWordCounter )
-              {
-                *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
-                lReplyPtr++;
-              }
-
-              break;
-            case READ:
-              mAddress = *lReceivePtr;
-              lReceivePtr++;
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , mWordCounter , mTransactionId ) | 0x4;
-              lReplyPtr++;
-
-              for ( ; mWordCounter!=0 ; --mWordCounter )
-              {
-                *lReplyPtr = mMemory.at ( mAddress++ & ADDRESSMASK );
-                lReplyPtr++;
-              }
-
-              break;
-            case NI_WRITE:
-              mAddress = *lReceivePtr;
-              lReceivePtr++;
-
-              for ( ; mWordCounter!=0 ; --mWordCounter )
-              {
-                mMemory.at ( mAddress & ADDRESSMASK ) = *lReceivePtr;
-                lReceivePtr++;
-              }
-
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
-              lReplyPtr++;
-              break;
-            case WRITE:
-              mAddress = *lReceivePtr;
-              lReceivePtr++;
-
-              for ( ; mWordCounter!=0 ; --mWordCounter )
-              {
-                mMemory.at ( mAddress++ & ADDRESSMASK ) = *lReceivePtr;
-                lReceivePtr++;
-              }
-
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 0 , mTransactionId ) | 0x4;
-              lReplyPtr++;
-              break;
-            case RMW_SUM:
-              mAddress = *lReceivePtr;
-              lReceivePtr++;
-              mMemory.at ( mAddress & ADDRESSMASK ) += ( int32_t ) ( *lReceivePtr );
-              lReceivePtr++;
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
-              lReplyPtr++;
-              *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
-              lReplyPtr++;
-              break;
-            case RMW_BITS:
-              mAddress = *lReceivePtr;
-              lReceivePtr++;
-              mMemory.at ( mAddress & ADDRESSMASK ) &= ( int32_t ) ( *lReceivePtr );
-              lReceivePtr++;
-              mMemory.at ( mAddress & ADDRESSMASK ) |= ( int32_t ) ( *lReceivePtr );
-              lReceivePtr++;
-              *lReplyPtr = IPbusHeaderHelper< 1 , 3 >::calculate ( mType , 1 , mTransactionId ) | 0x4;
-              lReplyPtr++;
-              *lReplyPtr = mMemory.at ( mAddress & ADDRESSMASK );
-              lReplyPtr++;
-              break;
-          }
-        }
-        while ( lReceivePtr!=lReceiveEnd );
-
-        if ( mReplyDelay )
-        {
-          log ( Info() , "Sleeping for " , Integer ( mReplyDelay ) , "s" );
-          sleep ( mReplyDelay );
-          mReplyDelay = 0;
-          log ( Info() , "Now replying " );
-        }
-
-        mSocket.send_to ( boost::asio::buffer ( mUDPreplyBuffer , ( lReplyPtr-mUDPreplyBuffer ) <<2 ) , mSenderEndpoint );
+        uint32_t lBytes = mSocket.receive_from ( boost::asio::buffer ( & ( mReceive[0] ), mReceive.size() <<2 ) , mSenderEndpoint );
+        AnalyzeReceivedAndCreateReply ( lBytes );
+        mSocket.send_to ( boost::asio::buffer ( & ( mReply[0] ) , mReply.size() <<2 ) , mSenderEndpoint );
       }
     }
 
@@ -189,19 +76,6 @@ class UDPdummyHardware
     udp::socket mSocket;
     udp::endpoint mSenderEndpoint;
 
-    std::vector< uint32_t > mMemory;
-
-    uint32_t mUDPreceiveBuffer[500];
-    uint32_t mUDPreplyBuffer[500];
-
-    eIPbusTransactionType mType;
-    uint32_t mWordCounter;
-    uint32_t mTransactionId;
-    uint8_t mResponseGood;
-
-    uint32_t mAddress;
-
-    uint32_t mReplyDelay;
 
 };
 
@@ -210,6 +84,7 @@ class UDPdummyHardware
 int main ( int argc, char* argv[] )
 {
   logging();
+  setLogLevelTo ( Debug() );
 
   if ( argc < 2 || argc > 3 )
   {

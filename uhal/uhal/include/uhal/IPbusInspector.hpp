@@ -131,16 +131,74 @@ namespace uhal
         while ( aIt!=aEnd );
       }
 
+    protected:
+      virtual void bot()
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | BOT, transaction ID " , Integer ( mTransactionId ) );
+      }
 
-      virtual void bot() = 0;
-      virtual void ni_read ( const uint32_t& aAddress ) = 0;
-      virtual void read ( const uint32_t& aAddress ) = 0;
-      virtual void ni_write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd ) = 0;
-      virtual void write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd ) = 0;
-      virtual void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend ) = 0;
-      virtual void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm ) = 0;
+      virtual void ni_read ( const uint32_t& aAddress )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+      }
 
-      virtual void unknown_type() = 0;
+      virtual void read ( const uint32_t& aAddress )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+      }
+
+      virtual void ni_write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+
+        while ( aIt != aEnd )
+        {
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+        }
+      }
+
+      virtual void write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+
+        while ( aIt != aEnd )
+        {
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+        }
+      }
+
+      virtual void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write sum, transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+        log ( Notice() , Integer ( aAddend, IntFmt<hex,fixed>() ) , " |  > Addend" );
+      }
+
+      virtual void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write bits, transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+        log ( Notice() , Integer ( aAndTerm, IntFmt<hex,fixed>() ) , " |  > And-term" );
+        log ( Notice() , Integer ( aOrTerm, IntFmt<hex,fixed>() ) , " |  > Or-term" );
+      }
+
+      virtual void unknown_type()
+      {
+        logging();
+        log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
+        throw 0;
+      }
 
   };
 
@@ -226,16 +284,66 @@ namespace uhal
       }
 
 
-      virtual void bot() = 0;
-      virtual void ni_read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd ) = 0;
-      virtual void read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd ) = 0;
-      virtual void ni_write( ) = 0;
-      virtual void write( ) = 0;
-      virtual void rmw_sum ( const uint32_t& aNewValue ) = 0;
-      virtual void rmw_bits ( const uint32_t& aNewValue ) = 0;
+      virtual void bot()
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | BOT, transaction ID " , Integer ( mTransactionId ) );
+      }
 
-      virtual void unknown_type() = 0;
+      virtual void ni_read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
 
+        while ( aIt != aEnd )
+        {
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+        }
+      }
+
+      virtual void read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+
+        while ( aIt != aEnd )
+        {
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+        }
+      }
+
+      virtual void ni_write ( )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+      }
+
+      virtual void write ( )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+      }
+
+      virtual void rmw_sum ( const uint32_t& aNewValue )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write sum, transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
+      }
+
+      virtual void rmw_bits ( const uint32_t& aNewValue )
+      {
+        logging();
+        log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write bits, transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
+      }
+
+      virtual void unknown_type()
+      {
+        logging();
+        log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
+        throw 0;
+      }
   };
 
 }
