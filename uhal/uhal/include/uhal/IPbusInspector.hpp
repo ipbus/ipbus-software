@@ -66,11 +66,15 @@ namespace uhal
       void analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
         logging();
-        uint32_t lAddress;
-        uint32_t lAddend , lAndTerm , lOrTerm ;
-        std::vector<uint32_t>::const_iterator lPayloadBegin;
-        std::vector<uint32_t>::const_iterator lPayloadEnd;
+        uint32_t lAddress , lPacketHeader, lAddend , lAndTerm , lOrTerm ;
+        std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
+		if( IPbus_major > 1 )
+		{
+			lPacketHeader = *aIt++;
+			packet_header( lPacketHeader );
+		}
+		
         do
         {
           mHeader = *aIt++;
@@ -199,7 +203,14 @@ namespace uhal
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
         throw 0;
       }
-
+	  
+      virtual void packet_header( const uint32_t& aPacketHeader )
+      {
+        logging();
+		uint32_t lTransactionId( (aPacketHeader>>8)&0xFFFF );
+        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );		
+      }
+	  
   };
 
 
@@ -226,10 +237,15 @@ namespace uhal
       void analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
         logging();
-        uint32_t lNewValue;
-        std::vector<uint32_t>::const_iterator lPayloadBegin;
-        std::vector<uint32_t>::const_iterator lPayloadEnd;
+        uint32_t lNewValue , lPacketHeader;
+        std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
+		if( IPbus_major > 1 )
+		{
+			lPacketHeader = *aIt++;
+			packet_header( lPacketHeader );
+		}
+		
         do
         {
           mHeader = *aIt++;
@@ -283,7 +299,7 @@ namespace uhal
         while ( aIt!=aEnd );
       }
 
-
+    protected:
       virtual void bot()
       {
         logging();
@@ -344,6 +360,14 @@ namespace uhal
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
         throw 0;
       }
+	  
+      virtual void packet_header( const uint32_t& aPacketHeader )
+      {
+        logging();
+		uint32_t lTransactionId( (aPacketHeader>>8)&0xFFFF );
+        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );		
+      }
+	  
   };
 
 }

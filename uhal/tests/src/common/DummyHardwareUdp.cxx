@@ -31,7 +31,6 @@
 
 #include "uhal/IPbusPacketInfo.hpp"
 #include <boost/asio.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "uhal/tests/DummyHardware.hpp"
 
@@ -40,12 +39,14 @@ using namespace uhal;
 
 static const uint32_t ADDRESSMASK = 0x000FFFFF;
 
-class UDPdummyHardware : public DummyHardware< 1 , 3 >
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+class UDPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
 {
   public:
+    typedef DummyHardware< IPbus_major , IPbus_minor > base_type;
 
     UDPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay ) :
-      DummyHardware< 1 , 3 > ( aReplyDelay ) ,
+      DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay ) ,
       mIOservice(),
       mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) )
 
@@ -65,9 +66,9 @@ class UDPdummyHardware : public DummyHardware< 1 , 3 >
 
       while ( true )
       {
-        uint32_t lBytes = mSocket.receive_from ( boost::asio::buffer ( & ( mReceive[0] ), mReceive.size() <<2 ) , mSenderEndpoint );
-        AnalyzeReceivedAndCreateReply ( lBytes );
-        mSocket.send_to ( boost::asio::buffer ( & ( mReply[0] ) , mReply.size() <<2 ) , mSenderEndpoint );
+        uint32_t lBytes = mSocket.receive_from ( boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ) , mSenderEndpoint );
+        base_type::AnalyzeReceivedAndCreateReply ( lBytes );
+        mSocket.send_to ( boost::asio::buffer ( & ( base_type::mReply[0] ) , base_type::mReply.size() <<2 ) , mSenderEndpoint );
       }
     }
 
@@ -84,22 +85,23 @@ class UDPdummyHardware : public DummyHardware< 1 , 3 >
 int main ( int argc, char* argv[] )
 {
   logging();
-  setLogLevelTo ( Debug() );
+  CommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
 
-  if ( argc < 2 || argc > 3 )
+  if ( lOptions.version == 1 )
   {
-    log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay for first packet in seconds>" );
+    UDPdummyHardware<1,3> lDummyHardware ( lOptions.port , lOptions.delay );
+    lDummyHardware.run();
+  }
+  else if ( lOptions.version == 2 )
+  {
+    UDPdummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay );
+    lDummyHardware.run();
+  }
+  else
+  {
+    log ( Error() , "Unknown IPbus version, " , Integer ( lOptions.version ) );
     return 1;
   }
 
-  uint32_t lReplyDelay ( 0 );
-
-  if ( argc == 3 )
-  {
-    lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
-  }
-
-  UDPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
-  lDummyHardware.run();
   return 0;
 }

@@ -40,6 +40,8 @@
 #define DummyHardware_hpp
 
 #include "uhal/IPbusInspector.hpp"
+#include <boost/program_options.hpp>
+#include <boost/lexical_cast.hpp>
 
 // Using the uhal namespace
 namespace uhal
@@ -61,6 +63,8 @@ namespace uhal
       {}
 
       virtual ~DummyHardware() {}
+
+      virtual void run() = 0;
 
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
@@ -193,6 +197,16 @@ namespace uhal
       }
 
 
+      void packet_header ( const uint32_t& aPacketHeader )
+      {
+        if ( LoggingIncludes ( Debug() ) )
+        {
+          base_type::packet_header ( aPacketHeader );
+        }
+
+        mReply.push_back ( aPacketHeader );
+      }
+
     private:
       std::vector< uint32_t > mMemory;
       uint32_t mReplyDelay;
@@ -201,6 +215,71 @@ namespace uhal
       std::vector< uint32_t > mReceive;
       std::vector< uint32_t > mReply;
   };
+
+
+
+
+
+
+
+  struct CommandLineOptions
+  {
+    uint32_t delay;
+    uint16_t port;
+    uint32_t version;
+  };
+
+  CommandLineOptions ParseCommandLineOptions ( int argc,char* argv[] )
+  {
+    // Declare the supported options.
+    boost::program_options::options_description desc ( "Allowed options" );
+    desc.add_options()
+    ( "help,h", "Produce this help message" )
+    ( "delay,d", boost::program_options::value<uint32_t>()->default_value ( 0 ) , "Reply delay for first packet (in seconds) - optional" )
+    ( "port,p", boost::program_options::value<uint16_t>() , "Port number to listen on - required" )
+    ( "version,v", boost::program_options::value<uint32_t>() , "IPbus Major version (1 or 2) - required" )
+    ( "verbose,V", "Produce verbose output" )
+    ;
+    boost::program_options::variables_map vm;
+
+    try
+    {
+      boost::program_options::store ( boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+      boost::program_options::notify ( vm );
+
+      if ( vm.count ( "help" ) )
+      {
+        std::cout << "Usage: " << argv[0] << " [OPTIONS]" << std::endl;
+        std::cout << desc << std::endl;
+        exit ( 0 );
+      }
+
+      CommandLineOptions lResult;
+      lResult.delay = vm["delay"].as<uint32_t>();
+      lResult.port = vm["port"].as<uint16_t>();
+      lResult.version = vm["version"].as<uint32_t>();
+
+      if ( vm.count ( "verbose" ) )
+      {
+        setLogLevelTo ( Debug() );
+      }
+      else
+      {
+        setLogLevelTo ( Notice() );
+      }
+
+      return lResult;
+    }
+    catch ( std::exception& e )
+    {
+      std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+      std::cout << "Usage: " << argv[0] << " [OPTIONS]" << std::endl;
+      std::cout << desc << std::endl;
+      exit ( 1 );
+    }
+  }
+
+
 }
 
 #endif

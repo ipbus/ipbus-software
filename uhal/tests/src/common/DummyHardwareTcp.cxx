@@ -31,7 +31,6 @@
 
 #include "uhal/IPbusPacketInfo.hpp"
 #include <boost/asio.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "uhal/tests/DummyHardware.hpp"
 
@@ -39,12 +38,14 @@ using boost::asio::ip::tcp;
 using namespace uhal;
 
 
-class TCPdummyHardware : public DummyHardware< 1 , 3 >
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
 {
   public:
+    typedef DummyHardware< IPbus_major , IPbus_minor > base_type;
 
     TCPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay ) :
-      DummyHardware< 1 , 3 > ( aReplyDelay ) ,
+      DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay ) ,
       mIOservice(),
       mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) )
     {
@@ -70,14 +71,10 @@ class TCPdummyHardware : public DummyHardware< 1 , 3 >
         while ( true )
         {
           boost::system::error_code lError;
-          uint32_t lBytes = lSocket.read_some ( boost::asio::buffer ( & ( mReceive[0] ), mReceive.size() <<2 ) , lError );
+          uint32_t lBytes = lSocket.read_some ( boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ) , lError );
 
           if ( lError == boost::asio::error::eof )
           {
-            //log( Info() , "Got error code eof" );
-            //lSocket.close();
-            //mAcceptor.accept ( lSocket );
-            //continue;
             break; // Connection closed cleanly by peer.
           }
           else if ( lError )
@@ -86,8 +83,8 @@ class TCPdummyHardware : public DummyHardware< 1 , 3 >
             break;
           }
 
-          AnalyzeReceivedAndCreateReply ( lBytes );
-          boost::asio::write ( lSocket , boost::asio::buffer ( & ( mReply[0] ) , mReply.size() <<2 ) );
+          base_type::AnalyzeReceivedAndCreateReply ( lBytes );
+          boost::asio::write ( lSocket , boost::asio::buffer ( & ( base_type::mReply[0] ) , base_type::mReply.size() <<2 ) );
         }
       }
     }
@@ -96,9 +93,6 @@ class TCPdummyHardware : public DummyHardware< 1 , 3 >
     boost::asio::io_service mIOservice;
     tcp::acceptor mAcceptor;
     tcp::endpoint mSenderEndpoint;
-
-    uint32_t mReplyDelay;
-
 };
 
 
@@ -106,26 +100,30 @@ class TCPdummyHardware : public DummyHardware< 1 , 3 >
 int main ( int argc, char* argv[] )
 {
   logging();
-  setLogLevelTo ( Debug() );
+  CommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
 
-  if ( argc < 2 || argc > 3 )
+  if ( lOptions.version == 1 )
   {
-    log ( Error() , "Usage: " , ( const char* ) ( argv[0] ) , " <port> <optional reply delay for first packet in seconds>" );
+    TCPdummyHardware<1,3> lDummyHardware ( lOptions.port , lOptions.delay );
+
+    while ( true )
+    {
+      lDummyHardware.run();
+    }
+  }
+  else if ( lOptions.version == 2 )
+  {
+    TCPdummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay );
+
+    while ( true )
+    {
+      lDummyHardware.run();
+    }
+  }
+  else
+  {
+    log ( Error() , "Unknown IPbus version, " , Integer ( lOptions.version ) );
     return 1;
-  }
-
-  uint32_t lReplyDelay ( 0 );
-
-  if ( argc == 3 )
-  {
-    lReplyDelay = boost::lexical_cast<uint16_t> ( argv[2] );
-  }
-
-  TCPdummyHardware lDummyHardware ( boost::lexical_cast<uint16_t> ( argv[1] ) , lReplyDelay );
-
-  while ( true )
-  {
-    lDummyHardware.run();
   }
 
   return 0;
