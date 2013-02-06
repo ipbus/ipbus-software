@@ -69,7 +69,7 @@ namespace uhal
         uint32_t lAddress , lPacketHeader, lAddend , lAndTerm , lOrTerm ;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
-		if( IPbus_major > 1 )
+		if( IPbus_major != 1 )
 		{
 			lPacketHeader = *aIt++;
 			packet_header( lPacketHeader );

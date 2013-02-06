@@ -170,9 +170,20 @@ namespace uhal
         }
 
         uint32_t lAddress ( aAddress );
-        mMemory.at ( lAddress & ADDRESSMASK ) += aAddend;
         mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , 1 , base_type::mTransactionId ) | 0x4 );
-        mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+
+        if ( IPbus_major == 1 )
+        {
+          //IPbus 1.x returns modified value
+          mMemory.at ( lAddress & ADDRESSMASK ) += aAddend;
+          mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+        }
+        else
+        {
+          //IPbus 2.x returns pre-modified value
+          mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+          mMemory.at ( lAddress & ADDRESSMASK ) += aAddend;
+        }
       }
 
       void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
@@ -183,10 +194,22 @@ namespace uhal
         }
 
         uint32_t lAddress ( aAddress );
-        mMemory.at ( lAddress & ADDRESSMASK ) &= aAndTerm;
-        mMemory.at ( lAddress & ADDRESSMASK ) |= aOrTerm;
         mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , 1 , base_type::mTransactionId ) | 0x4 );
-        mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+
+        if ( IPbus_major == 1 )
+        {
+          //IPbus 1.x returns modified value
+          mMemory.at ( lAddress & ADDRESSMASK ) &= aAndTerm;
+          mMemory.at ( lAddress & ADDRESSMASK ) |= aOrTerm;
+          mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+        }
+        else
+        {
+          //IPbus 2.x returns pre-modified value
+          mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+          mMemory.at ( lAddress & ADDRESSMASK ) &= aAndTerm;
+          mMemory.at ( lAddress & ADDRESSMASK ) |= aOrTerm;
+        }
       }
 
       void unknown_type()
