@@ -67,7 +67,7 @@ UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
 
 ENVIRONMENT_CMDS = ["env"]
 
-DEPENDENCIES_CMDS = ["sudo yum -y arc-server createrepo install bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel e2fsprogs-devel graphviz graphviz-devel"]
+DEPENDENCIES_CMDS = ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel e2fsprogs-devel graphviz graphviz-devel"]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]

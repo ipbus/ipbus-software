@@ -131,7 +131,7 @@ def render_log(result):
         
     html += html_footer()
         
-    fn = os.path.join(CONF.WEB_DIR, "nightly.log.html")
+    fn = os.path.join(CONF.RELEASE_BASE, "nightly.log.html")
     tmp = open(fn, "w")
     tmp.write(html)
     tmp.close()
@@ -182,11 +182,11 @@ def render_main(result):
     html += report_links(result)
     html += html_footer()
 
-    fn = os.path.join(CONF.WEB_DIR,"index.html")
+    fn = os.path.join(CONF.RELEASE_BASE,"index.html")
     open(fn,"w").write(html)
 
 def send_mail():
-    fn = os.path.join(CONF.WEB_DIR,"index.html")
+    fn = os.path.join(CONF.RELEASE_BASE,"index.html")
     content = open(fn).read()
 
     msg = MIMEText(content,'html')

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Nightly bootstrap script to update the nightly script automatically
+
 #Update nightly scripts
 cd $HOME/nightly
 svn up
@@ -11,4 +13,4 @@ mkdir -p $LOG_DIR
 
 #execute nightly
 echo $LOG_DIR/nightly.log
-python nightly.py -s cactus.py &> $LOG_DIR/nightly.log
+python nightly.py cactus.py &> $LOG_DIR/nightly.log
