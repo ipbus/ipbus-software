@@ -12,5 +12,4 @@ LOG_DIR=$HOME/www/nightly/$PLATFORM/logs
 mkdir -p $LOG_DIR
 
 #execute nightly
-echo $LOG_DIR/nightly.log
 python nightly.py cactus.py &> $LOG_DIR/nightly.log
