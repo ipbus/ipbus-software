@@ -1,17 +1,14 @@
 #!/bin/bash
-cd $HOME
+
+#Update nightly scripts
+cd $HOME/nightly
+svn up
 
 #Create directory to store logs
 PLATFORM=`python -c "import platform;print platform.platform()"`
 LOG_DIR=www/nightly/$(PLATFORM)/logs
-mkdir -p www/nightly/$(PLATFORM)/logs
-
-#checkout nightly scripts
-rm -rf nightly
-svn co svn+ssh://svn.cern.ch/reps/cactus/trunk/scripts/nightly
+mkdir -p $(LOG_DIR)
 
 #execute nightly
 cd nightly
-python nightly.py --log=$(LOG_DIR)/nightly.log
-
-cactus.py 
+python nightly.py -s cactus.py &> &> $(LOG_DIR)/nightly.log

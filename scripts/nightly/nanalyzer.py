@@ -42,7 +42,7 @@ def analyze_log():
 
     r_limit = re.compile(r'----\+\+\+\+(.*?)\+\+\+\+----')
 
-    fn = CONF.LOG_FILE
+    fn = CONF.RELEASE_LOG_FILE
     current_section = "BEGIN"
     for (i, l) in enumerate(open(fn)):
         if r_limit.search(l):
@@ -118,7 +118,7 @@ def render_log(result):
     
     html += "<a href='%s'>back...</a><br/><br/>" % os.path.join(CONF.WEB_URL,"index.html")
 
-    fn = CONF.LOG_FILE
+    fn = CONF.RELEASE_LOG_FILE
     keys = [i[0] for i in result]
     types = [i[1] for i in result]
     for (i, l) in enumerate(open(fn)):
