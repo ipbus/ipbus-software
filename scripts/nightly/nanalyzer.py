@@ -114,7 +114,7 @@ def report_links(result):
 
 def render_log(result):
     
-    html = html_header("L1 Nightlies: Log details %s" % time.asctime())
+    html = html_header("CACTUS Nightlies: Log details")
     
     html += "<a href='%s'>back...</a><br/><br/>" % os.path.join(CONF.WEB_URL,"index.html")
 
@@ -155,10 +155,11 @@ def html_header(title):
     <body>
     """
     html += "<a href='https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds'><img src='static/question_mark.png' height='60' width='60' style='border-style: none' align='right'/></a>"
-    html += "<h1>" + title + "</h1>\n"
-
-    html += "<p>Platform: %s</p>" % platform.platform()
-    html += "<p>Node: %s</p>" % platform.node()
+    html += "<h2>" + title + "</h2>\n"
+    
+    html += "<p><b>Date:</b> %s</p>" % time.asctime()
+    html += "<p><b>Platform:</b> %s</p>" % platform.platform()
+    html += "<p><b>Node:</b> %s</p>" % platform.node()
 
     return html
 
@@ -177,7 +178,7 @@ def html_footer():
     return html
 
 def render_main(result):
-    html = html_header("%s %s" % (CONF.TITLE,time.asctime()))
+    html = html_header(CONF.TITLE)
     html += report_summary(result)
     html += report_links(result)
     html += html_footer()
@@ -192,7 +193,7 @@ def send_mail():
     msg = MIMEText(content,'html')
 
     if re.search("\d+\s+ERRORS",content):
-        msg['Subject'] = CONF.TITLE + ": ERRORs"
+        msg['Subject'] = "ERROR: " + CONF.TITLE 
     else:
         msg['Subject'] = CONF.TITLE
 
