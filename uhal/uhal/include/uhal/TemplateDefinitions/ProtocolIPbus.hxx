@@ -40,9 +40,9 @@ namespace uhal
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   IPbus< 1 , IPbus_minor , buffer_size >::IPbus ( const std::string& aId, const URI& aUri ) :
-    IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) ),
-    mSendPadding ( 8 , implementCalculateHeader ( B_O_T , 0 , 0 ) ),
-    mReplyPadding ( 8 , 0x00000000 )
+    IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) )
+    // , mSendPadding ( 8 , implementCalculateHeader ( B_O_T , 0 , 0 ) ),
+    // mReplyPadding ( 8 , 0x00000000 )
   {}
 
 
@@ -61,25 +61,23 @@ namespace uhal
   void IPbus< 1 , IPbus_minor , buffer_size >::predispatch( )
   {
     logging();
-    uint32_t lWords ( mCurrentFillingBuffers->sendCounter()  >> 2 );
+    uint32_t lWords ( mCurrentDispatchBuffers->sendCounter()  >> 2 );
 
     if ( lWords < 8 )
     {
-      uint32_t lPaddingWords ( 8 - lWords );
-      log ( Debug() , "Adding " , Integer ( lPaddingWords ) , " words of padding." );
-      mCurrentFillingBuffers->send ( ( uint8_t* ) ( & ( mSendPadding[0] ) ) , lPaddingWords<<2 );
-      mCurrentFillingBuffers->receive ( ( uint8_t* ) ( & ( mReplyPadding[0] ) ) , lPaddingWords<<2 );
-      /*
-            for ( ; lWords != 8 ; ++lWords )
-            {
-      		// We do not need to check for space here as this condition is only met when the current filling buffer is severely underfull
-              mCurrentFillingBuffers->send ( CalculateHeader ( B_O_T , 0 ) );
-      		std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
-      		lReply.second->IPbusHeaders.push_back ( 0 );
-      		mCurrentFillingBuffers->add ( lReply.first );
-      		mCurrentFillingBuffers->receive ( lReply.second->IPbusHeaders.back() );
-            }
-      */
+      // uint32_t lPaddingWords ( 8 - lWords );
+      // mCurrentFillingBuffers->send ( ( uint8_t* ) ( & ( mSendPadding[0] ) ) , lPaddingWords<<2 );
+      // mCurrentFillingBuffers->receive ( ( uint8_t* ) ( & ( mReplyPadding[0] ) ) , lPaddingWords<<2 );
+      for ( ; lWords != 8 ; ++lWords )
+      {
+        log ( Debug() , "Adding padding word." );
+        // We do not need to check for space here as this condition is only met when the current filling buffer is severely underfull
+        mCurrentDispatchBuffers->send ( CalculateHeader ( B_O_T , 0 , 0 ) );
+        std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
+        lReply.second->IPbusHeaders.push_back ( 0 );
+        mCurrentDispatchBuffers->add ( lReply.first );
+        mCurrentDispatchBuffers->receive ( lReply.second->IPbusHeaders.back() );
+      }
     }
   }
 

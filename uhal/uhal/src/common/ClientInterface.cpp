@@ -156,13 +156,10 @@ namespace uhal
   void ClientInterface::dispatch ()
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    //Create a new filling buffer so that dispatch knows we are ready to send a buffer
     PushBackBuffers ();
-    //log ( Debug() , ThisLocation() );
     this->predispatch( );
-    //log ( Debug() , ThisLocation() );
     this->implementDispatch();
-    //log ( Debug() , ThisLocation() );
   }
 
 
@@ -195,7 +192,7 @@ namespace uhal
   void ClientInterface::PushBackBuffers ( )
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    log ( Debug() , "Creating new Buffer" );
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     Buffers lBuffers ( this->getMaxSendSize() );
     mBuffers.push_back ( lBuffers );

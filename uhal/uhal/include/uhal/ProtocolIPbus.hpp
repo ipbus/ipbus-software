@@ -128,8 +128,8 @@ namespace uhal
       */
       bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
-      std::vector< uint32_t > mSendPadding;
-      std::vector< uint32_t > mReplyPadding;
+      // std::vector< uint32_t > mSendPadding;
+      // std::vector< uint32_t > mReplyPadding;
 
   };
 

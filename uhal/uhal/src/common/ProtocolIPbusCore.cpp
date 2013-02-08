@@ -42,6 +42,7 @@ namespace uhal
 
   IPbusCore::IPbusCore ( const std::string& aId, const URI& aUri , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize , const boost::posix_time::time_duration& aTimeoutPeriod ) :
     ClientInterface ( aId , aUri ),
+    mTransactionCounter ( 0x00000000 ),
     mMaxSendSize ( aMaxSendSize<<2 ),
     mMaxReplySize ( aMaxReplySize<<2 ),
     mTimeoutPeriod ( aTimeoutPeriod )

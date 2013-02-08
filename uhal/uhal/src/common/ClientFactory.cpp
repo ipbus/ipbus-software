@@ -31,7 +31,8 @@
 */
 
 #include "uhal/Utilities.hpp"
-//#include "uhal/ClientImplementation.hpp"
+
+#include "uhal/ProtocolUDP.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 
@@ -52,7 +53,7 @@ namespace uhal
       // // ---------------------------------------------------------------------
       // mInstance->add< uhal::IPBusUDPClient< 1 , 3 > > ( "ipbusudp" , "Direct access to hardware via UDP, using the default IPbus version which is currently IPbus 1.3" );
       // // mInstance->add< uhal::IPBusUDPClient< 1 , 2 > > ( "ipbusudp-1.2" );
-      // mInstance->add< uhal::IPBusUDPClient< 1 , 3 > > ( "ipbusudp-1.3" );
+      mInstance->add< UDP< IPbus< 1 , 3 > > > ( "ipbusudp-1.3" );
       // // mInstance->add< uhal::IPBusUDPClient< 1 , 4 > > ( "ipbusudp-1.4" );
       // mInstance->add< uhal::IPBusUDPClient< 2 , 0 > > ( "ipbusudp-2.0" );
       // // ---------------------------------------------------------------------
