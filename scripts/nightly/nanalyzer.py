@@ -166,8 +166,7 @@ def html_header(title):
 def html_footer():
     html = """<center>
     <span>
-    <a href=\"http://savannah.cern.ch/projects/l1ts/\">Support</a> |
-    <a href=\"https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds\">Documentation</a>
+    <a href=\"https://svnweb.cern.ch/trac/cactus/newticket\">Contact us</a> |
     </span>
     </center>
     """
