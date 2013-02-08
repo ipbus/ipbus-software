@@ -19,7 +19,6 @@ PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_grammars.so
 
-INCLUDES = $(wildcard include/uhal/grammars/*.hpp)
 SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
@@ -32,7 +31,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_LOG_INCLUDE_PREFIX}
 
 
-CPP_FLAGS = -g -O3 -Wall -fPIC
+CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC
 LINK_FLAGS = -g -shared -fPIC -Wall -O3
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
@@ -64,6 +63,8 @@ ${LIBRARY}: ${OBJECT_FILES}
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES} 
 	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
 
+-include $(SOURCES:.cpp=.d)
+	
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/grammars/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/grammars/.

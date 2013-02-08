@@ -17,7 +17,6 @@ PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
-INCLUDES = $(wildcard include/uhal/log/*.hpp)
 LIBRARY = lib/libcactus_uhal_log.so
 
 FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp)
@@ -25,7 +24,9 @@ FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp)
 #BACKEND_SOURCES = $(wildcard src/common/log_backend.files.cpp)
 BACKEND_SOURCES = $(wildcard src/common/log_backend.colour_terminal.cpp)
 
-LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${FRONTEND_SOURCES} ${BACKEND_SOURCES})
+LIBRARY_SOURCES = ${FRONTEND_SOURCES} ${BACKEND_SOURCES}
+
+LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 
 EXECUTABLE_SOURCES = 	src/common/generator.cxx
 
@@ -41,7 +42,7 @@ LIBRARIES =  	-lpthread \
 INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -g -Wall -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH}
+CPP_FLAGS = -g -Wall -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH}
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 
@@ -81,6 +82,8 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
+-include $(EXECUTABLE_SOURCES:.cxx=.d)
+	
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 #Make evaluates the list of files before it starts and does not pick up the existence of the file created during the ${EXECUTABLES} stage. We must, therefore, explicitly specify that it is built.
 	g++ -c ${CPP_FLAGS} src/common/log.cpp -o obj/log.o
@@ -90,6 +93,8 @@ ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}  
 	g++ -c ${CPP_FLAGS} $< -o $@
 
+-include $(LIBRARY_SOURCES:.cpp=.d)
+	
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/log/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/uhal/log/.

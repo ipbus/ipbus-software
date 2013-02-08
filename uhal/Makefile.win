@@ -1,12 +1,12 @@
 PACKAGES = \
-	extern/boost \
-	extern/erlang \
-	extern/pugixml \
+	log \
+	grammars \
 	uhal \
-	pycohal \
-	controlhub
+	tests 
 
-VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
+
+
+VIRTUAL_PACKAGES = $(addsuffix \.virtual.Makefile,${PACKAGES})
 
 FLAGS = $(ifeq $(MAKEFLAGS) "","",-$(MAKEFLAGS))
 
@@ -18,4 +18,4 @@ default: build
 $(TARGETS): ${VIRTUAL_PACKAGES}
 
 ${VIRTUAL_PACKAGES}:
-	${MAKE} ${FLAGS} -C $(@D) $(MAKECMDGOALS)
+	${MAKE} -f Makefile.win ${FLAGS} -C $(@D) $(MAKECMDGOALS)

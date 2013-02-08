@@ -74,7 +74,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		-I${UHAL_UHAL_INCLUDE_PREFIX}
 
-CPP_FLAGS = -g -Wall -O3 -fPIC ${INCLUDE_PATH}
+CPP_FLAGS = -g -Wall -O3 -MMD -MP -fPIC ${INCLUDE_PATH}
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 ${LIBRARY_PATH} ${LIBRARIES}
 
@@ -109,12 +109,16 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
+-include $(EXECUTABLE_SOURCES:.cxx=.d)	
+	
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	g++ -c ${CPP_FLAGS} $< -o $@
 
+-include $(LIBRARY_SOURCES:.cpp=.d)	
+	
 copy_to_build:
 	cp -p include\uhal\tests\*.hpp ${MSBUILD_DIR}\SOURCES\include\uhal\tests\.
 	cp -p exe\*.exe ${MSBUILD_DIR}\SOURCES\exe\uhal\tests\.

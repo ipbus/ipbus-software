@@ -19,7 +19,6 @@ PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_uhal.so
 
-INCLUDES = $(wildcard include/uhal/*.hpp include/uhal/TemplateDefinitions/*.hxx)
 SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
@@ -47,7 +46,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -g -O3 -Wall -fPIC ${INCLUDE_PATH}
+CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
 #-D USE_TCP_MULTITHREADED -D USE_UDP_MULTITHREADED  
 #-D THROW_ON_ADDRESS_SPACE_OVERLAP 
 
@@ -78,9 +77,11 @@ make_dirs:
 ${LIBRARY}: ${OBJECT_FILES}
 	g++ ${LINK_FLAGS} ${OBJECT_FILES} -o $@
 
-${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
+${OBJECT_FILES}: obj/%.o : src/common/%.cpp
 	g++ ${CPP_FLAGS} -c $< -o $@
 
+-include $(SOURCES:.cpp=.d)
+	
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/.
