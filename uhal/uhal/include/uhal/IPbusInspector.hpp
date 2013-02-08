@@ -41,7 +41,7 @@
 
 //#include "uhal/uhal.hpp"
 #include "uhal/log/log.hpp"
-#include "uhal/IPbusPacketInfo.hpp"
+#include "uhal/ProtocolIPbus.hpp"
 
 // Using the uhal namespace
 namespace uhal
@@ -69,17 +69,17 @@ namespace uhal
         uint32_t lAddress , lPacketHeader, lAddend , lAndTerm , lOrTerm ;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
-		if( IPbus_major != 1 )
-		{
-			lPacketHeader = *aIt++;
-			packet_header( lPacketHeader );
-		}
-		
+        if ( IPbus_major != 1 )
+        {
+          lPacketHeader = *aIt++;
+          packet_header ( lPacketHeader );
+        }
+
         do
         {
           mHeader = *aIt++;
 
-          if ( ! IPbusHeaderHelper< IPbus_major , IPbus_minor >::extract (
+          if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
                  mHeader ,
                  mType ,
                  mWordCounter ,
@@ -203,14 +203,14 @@ namespace uhal
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
         throw 0;
       }
-	  
-      virtual void packet_header( const uint32_t& aPacketHeader )
+
+      virtual void packet_header ( const uint32_t& aPacketHeader )
       {
         logging();
-		uint32_t lTransactionId( (aPacketHeader>>8)&0xFFFF );
-        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );		
+        uint32_t lTransactionId ( ( aPacketHeader>>8 ) &0xFFFF );
+        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );
       }
-	  
+
   };
 
 
@@ -240,17 +240,17 @@ namespace uhal
         uint32_t lNewValue , lPacketHeader;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
-		if( IPbus_major > 1 )
-		{
-			lPacketHeader = *aIt++;
-			packet_header( lPacketHeader );
-		}
-		
+        if ( IPbus_major > 1 )
+        {
+          lPacketHeader = *aIt++;
+          packet_header ( lPacketHeader );
+        }
+
         do
         {
           mHeader = *aIt++;
 
-          if ( ! IPbusHeaderHelper< IPbus_major , IPbus_minor >::extract (
+          if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
                  mHeader ,
                  mType ,
                  mWordCounter ,
@@ -360,14 +360,14 @@ namespace uhal
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
         throw 0;
       }
-	  
-      virtual void packet_header( const uint32_t& aPacketHeader )
+
+      virtual void packet_header ( const uint32_t& aPacketHeader )
       {
         logging();
-		uint32_t lTransactionId( (aPacketHeader>>8)&0xFFFF );
-        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );		
+        uint32_t lTransactionId ( ( aPacketHeader>>8 ) &0xFFFF );
+        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );
       }
-	  
+
   };
 
 }

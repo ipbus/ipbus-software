@@ -30,7 +30,7 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/ClientImplementation.hpp"
+//#include "uhal/ClientInterface.hpp"
 
 #include "uhal/NodeTreeBuilder.hpp"
 #include "uhal/Utilities.hpp"

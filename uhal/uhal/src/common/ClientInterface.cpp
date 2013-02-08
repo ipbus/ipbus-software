@@ -39,6 +39,8 @@ namespace uhal
 {
 
   ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) :
+    mCurrentFillingBuffers ( NULL ),
+    mCurrentDispatchBuffers ( NULL ),
     mId ( aId ),
     mUri ( aUri )
   {
@@ -151,18 +153,106 @@ namespace uhal
   }
 
 
+  void ClientInterface::dispatch ()
+  {
+    logging();
+    //log ( Debug() , ThisLocation() );
+    PushBackBuffers ();
+    //log ( Debug() , ThisLocation() );
+    this->predispatch( );
+    //log ( Debug() , ThisLocation() );
+    this->implementDispatch();
+    //log ( Debug() , ThisLocation() );
+  }
+
+
+
+  bool ClientInterface::validate ( )
+  {
+    logging();
+    //log ( Debug() , ThisLocation() );
+    //check that the results are valid
+    bool lRet = this->validate ( mCurrentDispatchBuffers->getSendBuffer() ,
+                                 mCurrentDispatchBuffers->getSendBuffer() + mCurrentDispatchBuffers->sendCounter() ,
+                                 mCurrentDispatchBuffers->getReplyBuffer().begin() ,
+                                 mCurrentDispatchBuffers->getReplyBuffer().end() );
+
+    //results are valid, so mark returned data as valid
+    if ( lRet )
+    {
+      mCurrentDispatchBuffers->validate();
+    }
+
+    PopFrontBuffers();
+    return lRet;
+  }
+
+
+
+  // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+  void ClientInterface::PushBackBuffers ( )
+  {
+    logging();
+    //log ( Debug() , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    Buffers lBuffers ( this->getMaxSendSize() );
+    mBuffers.push_back ( lBuffers );
+    mCurrentFillingBuffers = & mBuffers.back();
+    mCurrentDispatchBuffers = & mBuffers.front();
+    preamble();
+  }
+
+  void ClientInterface::PopFrontBuffers()
+  {
+    logging();
+    //log ( Debug() , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    mBuffers.pop_front();
+
+    if ( mBuffers.size() == 0 )
+    {
+      mCurrentFillingBuffers = NULL;
+      mCurrentDispatchBuffers = NULL;
+    }
+    else
+    {
+      mCurrentFillingBuffers = & mBuffers.back();
+      mCurrentDispatchBuffers = & mBuffers.front();
+    }
+  }
+
+
+  std::pair < ValHeader , _ValHeader_* > ClientInterface::CreateValHeader()
+  {
+    ValHeader lReply;
+    return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
+  }
+
+  std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > ClientInterface::CreateValWord ( const uint32_t& aValue , const uint32_t& aMask )
+  {
+    ValWord<uint32_t> lReply ( aValue , aMask );
+    return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
+  }
+
+  std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > ClientInterface::CreateValVector ( const uint32_t& aSize )
+  {
+    ValVector<uint32_t> lReply ( aSize );
+    return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
+  }
+
+
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getPackingProtocol().write ( aAddr , aSource );
+    return implementWrite ( aAddr , aSource );
   }
 
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
     uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
     uint32_t lBitShiftedSource ( aSource << lShiftSize );
 
@@ -183,14 +273,13 @@ namespace uhal
       throw exception::BitsSetWhichAreForbiddenByBitMask();
     }
 
-    return ( ValHeader ) ( getPackingProtocol().rmw_bits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
+    return ( ValHeader ) ( implementRMWbits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
   }
 
   ValHeader ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getPackingProtocol().writeBlock ( aAddr, aSource, aMode );
+    return implementWriteBlock ( aAddr, aSource, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -200,105 +289,27 @@ namespace uhal
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getPackingProtocol().read ( aAddr );
+    return implementRead ( aAddr );
   }
 
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr, const uint32_t& aMask )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getPackingProtocol().read ( aAddr, aMask );
+    return implementRead ( aAddr, aMask );
   }
 
   ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getPackingProtocol().readBlock ( aAddr, aSize, aMode );
+    return implementReadBlock ( aAddr, aSize, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-  // //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  // ValWord< int32_t > ClientInterface::readSigned ( const uint32_t& aAddr )
-  // {
-  // try
-  // {
-  // return getPackingProtocol().readSigned ( aAddr );
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
-
-  // ValWord< int32_t > ClientInterface::readSigned ( const uint32_t& aAddr, const uint32_t& aMask )
-  // {
-  // try
-  // {
-  // return getPackingProtocol().readSigned ( aAddr , aMask );
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
-
-  // ValVector< int32_t > ClientInterface::readBlockSigned ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
-  // {
-  // try
-  // {
-  // return getPackingProtocol().readBlockSigned ( aAddr, aSize, aMode );
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
-  // //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-  // //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  // ValVector< uint32_t > ClientInterface::readReservedAddressInfo ()
-  // {
-  // try
-  // {
-  // return getPackingProtocol().readReservedAddressInfo ();
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.rethrowFrom( ThisLocation() );
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );	// uhal::StdException lExc( aExc );
-  // lExc.throwFrom( ThisLocation() );
-  // }
-  // }
-  // //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getPackingProtocol().rmw_bits ( aAddr , aANDterm , aORterm );
+    return implementRMWbits ( aAddr , aANDterm , aORterm );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -307,44 +318,9 @@ namespace uhal
   ValWord< uint32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
   {
     logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getPackingProtocol().rmw_sum ( aAddr , aAddend );
+    return implementRMWsum ( aAddr , aAddend );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  void ClientInterface::dispatch ()
-  {
-    logging();
-    log ( Debug() , "Manual dispatch" );
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    getPackingProtocol().Dispatch();
-  }
-  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-  void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
-  {
-    logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-
-    if ( aTimeoutPeriod == 0 )
-    {
-      getTransportProtocol().setTimeoutPeriod ( boost::posix_time::pos_infin );
-    }
-    else
-    {
-      getTransportProtocol().setTimeoutPeriod ( boost::posix_time::milliseconds ( aTimeoutPeriod ) );
-    }
-  }
-
-  uint64_t ClientInterface::getTimeoutPeriod()
-  {
-    logging();
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    return getTransportProtocol().getTimeoutPeriod().total_milliseconds();
-  }
 
 }

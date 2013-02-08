@@ -33,6 +33,7 @@
 
 // C++ headers
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <cstdlib>
 #include <unistd.h>

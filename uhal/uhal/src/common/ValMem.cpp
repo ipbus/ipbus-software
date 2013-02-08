@@ -290,7 +290,7 @@ namespace uhal
 
   template< typename T >
 
-  ValVector< T >::ValVector ( uint32_t aSize )  :
+  ValVector< T >::ValVector ( const uint32_t& aSize )  :
     mMembers ( new _ValVector_<T> ( std::vector<T> ( aSize , T() ) , false ) )
   {
     logging();

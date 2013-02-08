@@ -62,8 +62,8 @@ namespace uhal
     class ValMemImutabilityViolation : public exception {};
   }
 
-  // Forward declare PackingProtocol so it can be our friend
-  class PackingProtocol;
+  // Forward declare ClientInterface so it can be our friend
+  class ClientInterface;
 
 
   // Forward declaration so we can define friends
@@ -153,8 +153,8 @@ namespace uhal
   //! A class which wraps a single word of data and marks whether or not it is valid
   class ValHeader
   {
-      //! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
-      friend class PackingProtocol;
+      //! Make ClientInterface a friend so that it can access the members to get the info associated with the raw data space
+      friend class ClientInterface;
 
     public:
       /**
@@ -206,8 +206,8 @@ namespace uhal
   class ValWord
   {
 
-      //! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
-      friend class PackingProtocol;
+      //! Make ClientInterface a friend so that it can access the members to get the info associated with the raw data space
+      friend class ClientInterface;
 
       //! Make the ValHeader class a friend so we can downcast the members
       friend class ValHeader;
@@ -290,8 +290,8 @@ namespace uhal
   template< typename T >
   class ValVector : public ValHeader
   {
-      //! Make PackingProtocol a friend so that it can access the members to get the info associated with the raw data space
-      friend class PackingProtocol;
+      //! Make ClientInterface a friend so that it can access the members to get the info associated with the raw data space
+      friend class ClientInterface;
 
       //! Make the ValHeader class a friend so we can downcast the members
       friend class ValHeader;
@@ -321,7 +321,7 @@ namespace uhal
       	Constructor
       	@param aSize the initial size of the validated memory
       */
-      ValVector ( uint32_t aSize );
+      ValVector ( const uint32_t& aSize );
       /**
       	Default constructor
       */

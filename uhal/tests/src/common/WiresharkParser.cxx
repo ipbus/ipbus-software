@@ -1,7 +1,6 @@
 
 #include "uhal/uhal.hpp"
 #include "uhal/log/log.hpp"
-#include "uhal/IPbusPacketInfo.hpp"
 
 #include "uhal/IPbusInspector.hpp"
 

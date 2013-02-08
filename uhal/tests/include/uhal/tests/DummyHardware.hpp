@@ -91,7 +91,7 @@ namespace uhal
           base_type::bot();
         }
 
-        mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , 0 , base_type::mTransactionId ) | 0x4 );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::CalculateHeader ( base_type::mType , 0 , base_type::mTransactionId ) | 0x4 );
       }
 
       void ni_read ( const uint32_t& aAddress )
@@ -102,7 +102,7 @@ namespace uhal
         }
 
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) | 0x4 );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::CalculateHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) | 0x4 );
 
         for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
         {
@@ -118,7 +118,7 @@ namespace uhal
         }
 
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) | 0x4 );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::CalculateHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) | 0x4 );
 
         for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
         {
@@ -141,7 +141,7 @@ namespace uhal
           mMemory.at ( lAddress & ADDRESSMASK ) = *aIt++;
         }
 
-        mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , 0 , base_type::mTransactionId ) | 0x4 );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::CalculateHeader ( base_type::mType , 0 , base_type::mTransactionId ) | 0x4 );
       }
 
       void write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
@@ -159,7 +159,7 @@ namespace uhal
           mMemory.at ( lAddress++ & ADDRESSMASK ) = *aIt++;
         }
 
-        mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , 0 , base_type::mTransactionId ) | 0x4 );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::CalculateHeader ( base_type::mType , 0 , base_type::mTransactionId ) | 0x4 );
       }
 
       void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
@@ -170,7 +170,7 @@ namespace uhal
         }
 
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , 1 , base_type::mTransactionId ) | 0x4 );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::CalculateHeader ( base_type::mType , 1 , base_type::mTransactionId ) | 0x4 );
 
         if ( IPbus_major == 1 )
         {
@@ -194,7 +194,7 @@ namespace uhal
         }
 
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbusHeaderHelper< IPbus_major , IPbus_minor >::calculate ( base_type::mType , 1 , base_type::mTransactionId ) | 0x4 );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::CalculateHeader ( base_type::mType , 1 , base_type::mTransactionId ) | 0x4 );
 
         if ( IPbus_major == 1 )
         {

@@ -29,7 +29,6 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/IPbusPacketInfo.hpp"
 #include <boost/asio.hpp>
 
 #include "uhal/tests/DummyHardware.hpp"

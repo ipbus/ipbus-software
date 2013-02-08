@@ -77,9 +77,9 @@ namespace uhal
   template< > void SignHelper< int32_t > ( const int32_t& aInt );
   template< > void SignHelper< int64_t > ( const int64_t& aInt );
 
-  
-  
-  
+
+
+
   template< typename T > _Integer< T , IntFmt<> > Integer ( const T& aT );
 
   template< typename T , typename FORMAT > _Integer< T , FORMAT >Integer ( const T& aT , const FORMAT& aFmt );

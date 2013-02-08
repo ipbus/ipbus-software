@@ -39,7 +39,7 @@ namespace uhal
   {
     logging();
     uint32_t lSize ( sizeof ( T ) );
-    uint8_t* lStartPtr ( mSendBuffer+mSendCounter );
+    uint8_t* lStartPtr ( &mSendBuffer[0]+mSendCounter );
     memcpy ( lStartPtr , aPtr , lSize );
     mSendCounter += lSize;
     return lStartPtr;
@@ -50,7 +50,7 @@ namespace uhal
   {
     logging();
     uint32_t lSize ( sizeof ( T ) );
-    uint8_t* lStartPtr ( mSendBuffer+mSendCounter );
+    uint8_t* lStartPtr ( &mSendBuffer[0]+mSendCounter );
     memcpy ( lStartPtr , &aRef , lSize );
     mSendCounter += lSize;
     return lStartPtr;
