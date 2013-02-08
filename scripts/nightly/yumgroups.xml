@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE comps PUBLIC "-//Red Hat, Inc.//DTD Comps info//EN" "comps.dtd">
+<comps>
+<group>
+<id>cactus</id>
+<name>cactus</name>
+<default>true</default>
+<description>YUM repository for the CACTUS Project</description>
+<uservisible>true</uservisible>
+<grouplist></grouplist>
+<packagelist>
+<packagereq type="mandatory">cactus-extern-boost</packagereq>
+<packagereq type="mandatory">cactus-extern-erlang</packagereq>
+<packagereq type="mandatory">cactus-extern-pugixml</packagereq>
+<packagereq type="mandatory">cactus-uhal-grammars</packagereq>
+<packagereq type="mandatory">cactus-uhal-log</packagereq>
+<packagereq type="mandatory">cactus-uhal-uhal</packagereq>
+<packagereq type="mandatory">cactus-uhal-tests</packagereq>
+<packagereq type="mandatory">cactus-controlhub</packagereq>
+<packagereq type="mandatory">cactus-pycohal</packagereq>
+</packagelist>
+</group>
+
+</comps>
