@@ -79,8 +79,10 @@ CHECKOUT_CMDS = [";".join(CHECKOUT)]
 BUILD_CMDS = ["cd %s;make -k" % join(BUILD_HOME,"trunk"),
               "cd %s;make -k rpm" % join(BUILD_HOME,"trunk")]
 
-RELEASE_CMDS = ["rm -rf %s" % RELEASE_BASE,
-                "mkdir -p %s" % RELEASE_BASE,
+RELEASE_CMDS = ["rm -rf %s" % RELEASE_RPM_DIR,
+                "mkdir -p %s" % RELEASE_RPM_DIR,
+                "mkdir -p %s" % RELEASE_LOG_DIR,
+                "mkdir -p %s" % RELEASE_API_DIR,
                 "cp %s %s" % (join(BUILD_HOME,"trunk/scripts/nightly/yumgroups.xml"),RELEASE_RPM_DIR),
                 "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_RPM_DIR),
                 "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_RPM_DIR]
