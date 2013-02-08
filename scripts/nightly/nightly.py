@@ -14,7 +14,6 @@ options:
 from clone_setup import clone_setup
 from nutils import logger, log_setup, system
 import os
-import time
 import sys
 import getopt
 
@@ -73,13 +72,6 @@ def report():
     for cmd in CONF.REPORT_CMDS:
         system(cmd,exception=False)
         
-def processLogs():
-    logger.info("----++++PROCESSING LOGS++++----")
-    ### Copy all log files to LOG_DIR.
-    src = "/var/log/*.{log,out,stderr,stdout}"
-    dest = CONF.LOG_DIR
-    system("mkdir -p %s" % dest, exception=False)
-    system("sudo cp %s %s" % (src, dest), exception=False)
 
 if __name__== "__main__":
     try:
@@ -132,7 +124,6 @@ if __name__== "__main__":
     try:
         if not silent:
             report()
-            processLogs()
         else:
             logger.info("Final reporting and email notifications were disabled")
 

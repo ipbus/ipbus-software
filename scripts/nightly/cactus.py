@@ -1,24 +1,24 @@
 from os import environ
 from os.path import join
+from platform import platform,node
 
 ####VARIABLES
-BUILD_HOME          = '/build/cactus'
-RELEASE_DIR         = "/afs/cern.ch/user/c/cactus/www/nightly/RPMS"
-XDAQ_REPO_FILE      = "/afs/cern.ch/user/c/cactus/nightly/cactus_xdaq.repo"
-YUMGROUP_FILE       = "/afs/cern.ch/user/c/cactus/nightly/cactus_yumgroups.xml"
-CACTUS_REPO_FILE    = "/afs/cern.ch/user/c/cactus/nightly/cactus.repo"
-INSTALL_PREFIX      = "/opt/cactus"
-CONTROLHUB_EBIN_DIR = join(INSTALL_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
+BUILD_HOME          = "/build/cactus"
+RELEASE_BASE        = join("/afs/cern.ch/user/c/cactus/www/nightly",platform())
+RELEASE_RPM_DIR     = join(RELEASE_BASE,"RPMS")
+RELEASE_LOG_DIR     = join(RELEASE_BASE,"logs")
+RELEASE_API_DIR     = join(RELEASE_BASE,"api")
+#The log file name and path should be the same than in the one in the acrontab
+RELEASE_LOG_FILE    = join(RELEASE_LOG_DIR,"nightly.log")
+CACTUS_PREFIX       = "/opt/cactus"
+XDAQ_PREFIX         = "/opt/xdaq"
+CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 
 ####VARIABLES: analysis of logs
-TITLE             = "CACTUS Nightlies"
+TITLE             = "CACTUS Nightlies for %s @%s" % (platform(),node())
 FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
-WEB_URL           = "http://cern.ch/cactus/nightly/"
-WEB_DIR           = "/afs/cern.ch/user/c/cactus/www/nightly"
-LOG_DIR           = join(WEB_DIR,"logs")
-#The log file name and path should be the same than in the one in the acrontab
-LOG_FILE          = join(LOG_DIR,"nightly.log")
+WEB_URL           = join("http://cern.ch/cactus/nightly/",platform())
 
 #nanalyzer.py variables
 ERROR_LIST        = ['TEST FAILED, ',
@@ -45,8 +45,13 @@ TEST_PASSED_LIST  = ["TEST PASSED",
 
 
 ####ENVIRONMENT
-environ["LD_LIBRARY_PATH"] = join(INSTALL_PREFIX,"lib") + ":" + environ.get("LD_LIBARY_PATH","")
-environ["PATH"]            = join(INSTALL_PREFIX,"bin/uhal/tests") + ":" + join(INSTALL_PREFIX,"bin/pycohal/tests") + ":" + environ.get("PATH","")
+environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
+                                       join(XDAQ_PREFIX,"lib"),
+                                       environ.get("LD_LIBARY_PATH","")])
+
+environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),
+                                       join(CACTUS_PREFIX,"bin/pycohal/tests"),
+                                       environ.get("PATH","")])
 
 ####COMMANDS
 UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
@@ -54,43 +59,43 @@ UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
                   "pkill -f \"cactus.*erlang\" &> /dev/null",
                   "pkill -f \"cactus.*controlhub\" &> /dev/null",
                   "sudo rm -rf %s" % BUILD_HOME,
-                  "mkdir -p %s" % BUILD_HOME,
+                  "sudo mkdir -p %s" % BUILD_HOME,
+                  "sudo chmod -R 777 %s" % BUILD_HOME,
                   "sudo yum -y groupremove cactus",
                   "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null",
                   ]
 
 ENVIRONMENT_CMDS = ["env"]
 
-DEPENDENCIES_CMDS = ["sudo yum -y install bzip2-devel zlib-devel ncurses-devel python-devel"]
+DEPENDENCIES_CMDS = ["sudo yum -y arc-server createrepo install bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel e2fsprogs-devel graphviz graphviz-devel"]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
 #            "svn co svn+ssh://svn.cern.ch/reps/cactus/branches/cactus_1_0_x ./trunk"]
 
-CHECKOUT_CMDS = ["sudo rm -rf %s" % BUILD_HOME,
-                 "mkdir -p %s" % BUILD_HOME,
-                 ";".join(CHECKOUT)]
+CHECKOUT_CMDS = [";".join(CHECKOUT)]
 
 
 BUILD_CMDS = ["cd %s;make -k" % join(BUILD_HOME,"trunk"),
               "cd %s;make -k rpm" % join(BUILD_HOME,"trunk")]
 
-RELEASE_CMDS = ["rm -rf %s" % RELEASE_DIR,
-                "mkdir -p %s" % RELEASE_DIR,
-                "cp %s %s" % (YUMGROUP_FILE,join(RELEASE_DIR,"yumgroups.xml")),
-                "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_DIR),
-                "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_DIR]
+RELEASE_CMDS = ["rm -rf %s" % RELEASE_BASE,
+                "mkdir -p %s" % RELEASE_BASE,
+                "cp %s %s" % (join(BUILD_HOME,"trunk/scripts/nightly/yumgroups.xml"),RELEASE_RPM_DIR),
+                "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_RPM_DIR),
+                "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_RPM_DIR]
 
-INSTALL_CMDS = ["sudo cp %s %s" % (CACTUS_REPO_FILE,"/etc/yum.repos.d/."),
+INSTALL_CMDS = ["sudo cp %s %s" % (join(BUILD_HOME,"trunk/scripts/nightly/cactus.repo"),"/etc/yum.repos.d/."),
                 "sudo yum clean all",
                 "sudo yum -y groupinstall cactus",
-                "cd /build/cactus; doxygen %s" % join(BUILD_HOME,"trunk/scripts/nightly/cactus_Doxyfile"),
-                "mkdir -p %s" % join(WEB_DIR,"api"),
-                "cd /build/cactus;rm -rf %s;mv html %s" % (join(WEB_DIR,"api/html"), join(WEB_DIR, "api/."))]
+                "cd %s; doxygen %s" % (BUILD_HOME,join(BUILD_HOME,"trunk/scripts/nightly/Doxyfile")),
+                "rm -rf %s" % RELEASE_API_DIR,
+                "mkdir -p %s" % RELEASE_API_DIR,
+                "mv %s %s" % (join(BUILD_HOME,"html"),RELEASE_API_DIR)]
 
 TEST_CMDS = ["sudo chmod +w /var/log",
              #CONTROLHUB STANDALONE TESTS
-             "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(INSTALL_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR),
+             "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(CACTUS_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR),
              #SERVER NOT REACHABLE TESTS
              "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
@@ -169,5 +174,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "pkill -f \"DummyHardwareUdp.exe\""
              ]
 
-REPORT_CMDS = ["python $HOME/nightly/nanalyzer.py cactus.py"]
+REPORT_CMDS = ["python %s %s" % (join(BUILD_HOME,"trunk/scripts/nightly/nanalyzer.py"),join(BUILD_HOME,"trunk/scripts/nightly/cactus.py")),
+               "mkdir -p %s" % RELEASE_LOG_DIR,
+               "sudo cp -r %s %s" % ("/var/log/*",RELEASE_LOG_DIR)]
 

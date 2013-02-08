@@ -15,7 +15,7 @@ import re
 import time
 import os
 import smtplib
-import nutils
+import platform
 from email.MIMEText import MIMEText
 
 LIMIT, ERROR, TEST_PASSED = range(3)
@@ -157,7 +157,8 @@ def html_header(title):
     html += "<a href='https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds'><img src='static/question_mark.png' height='60' width='60' style='border-style: none' align='right'/></a>"
     html += "<h1>" + title + "</h1>\n"
 
-    html += "<p>" + nutils.system("uname -a",exception=False)[0] + "</p>"
+    html += "<p>Platform: %s</p>" % platform.platform()
+    html += "<p>Node: %s</p>" % platform.node()
 
     return html
 
