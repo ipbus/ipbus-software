@@ -16,13 +16,13 @@ XDAQ_PREFIX         = "/opt/xdaq"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 #xdaq.repo file name as a function of platform
 XDAQ_REPO_FILENAME = ""
-if PLAFROM.find("i686-with-redhat-6") != -1:
+if PLATFORM.find("i686-with-redhat-6") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc5.i686.repo"
-elif PLAFROM.find("x86_64-with-redhat-5") != -1:
+elif PLATFORM.find("x86_64-with-redhat-5") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc5.x86_64.repo"
-elif PLAFROM.find("i686-with-redhat-6") != -1:
+elif PLATFORM.find("i686-with-redhat-6") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc6.i686.repo"
-elif PLAFROM.find("x86_64-with-redhat-6") != -1:
+elif PLATFORM.find("x86_64-with-redhat-6") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc6.x86_64.repo"
         
 ####VARIABLES: analysis of logs
