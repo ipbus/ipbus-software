@@ -11,7 +11,6 @@ options:
    -s, --silent      Do not create the final report and notifications (just logging)
 """
 
-from clone_setup import clone_setup
 from nutils import logger, log_setup, system
 import os
 import sys
