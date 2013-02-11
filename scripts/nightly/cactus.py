@@ -15,7 +15,7 @@ XDAQ_PREFIX         = "/opt/xdaq"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 
 ####VARIABLES: analysis of logs
-TITLE             = "CACTUS Nightlies: %s" % (platform(),node())
+TITLE             = "CACTUS Nightlies: %s " % platform()
 FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
 WEB_URL           = join("http://cern.ch/cactus/nightly/",platform())
