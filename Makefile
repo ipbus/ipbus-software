@@ -1,10 +1,18 @@
-PACKAGES = \
+UHAL_PACKAGES = \
 	extern/boost \
 	extern/erlang \
 	extern/pugixml \
 	uhal \
 	pycohal \
 	controlhub
+
+PACKAGES = $(UHAL_PACKAGES) \
+        extern/boost \
+        extern/erlang \
+        extern/pugixml \
+        uhal \
+        pycohal \
+        controlhub
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
 
