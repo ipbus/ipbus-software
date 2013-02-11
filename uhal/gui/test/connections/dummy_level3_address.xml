@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+
+<node >
+    <node id="REG" address="0x0001" permission="rw" tags="test"/>
+
+    <node id="MEM" address="0x0002" permission="rw" mode="incremental" size="256" tags="test" />
+
+</node>
