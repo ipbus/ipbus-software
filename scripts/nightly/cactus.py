@@ -4,7 +4,8 @@ from platform import platform,node
 
 ####VARIABLES
 BUILD_HOME          = "/build/cactus"
-RELEASE_BASE        = join("/afs/cern.ch/user/c/cactus/www/nightly",platform())
+PLATFORM            = platform()
+RELEASE_BASE        = join("/afs/cern.ch/user/c/cactus/www/nightly",PLATFORM)
 RELEASE_RPM_DIR     = join(RELEASE_BASE,"RPMS")
 RELEASE_LOG_DIR     = join(RELEASE_BASE,"logs")
 RELEASE_API_DIR     = join(RELEASE_BASE,"api")
@@ -13,12 +14,22 @@ RELEASE_LOG_FILE    = join(RELEASE_LOG_DIR,"nightly.log")
 CACTUS_PREFIX       = "/opt/cactus"
 XDAQ_PREFIX         = "/opt/xdaq"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
-
+#xdaq.repo file name as a function of platform
+XDAQ_REPO_FILENAME = ""
+if PLAFROM.find("i686-with-redhat-6") != -1:
+    XDAQ_REPO_FILE_NAME = "xdaq.slc5.i686.repo"
+elif PLAFROM.find("x86_64-with-redhat-5") != -1:
+    XDAQ_REPO_FILE_NAME = "xdaq.slc5.x86_64.repo"
+elif PLAFROM.find("i686-with-redhat-6") != -1:
+    XDAQ_REPO_FILE_NAME = "xdaq.slc6.i686.repo"
+elif PLAFROM.find("x86_64-with-redhat-6") != -1:
+    XDAQ_REPO_FILE_NAME = "xdaq.slc6.x86_64.repo"
+        
 ####VARIABLES: analysis of logs
-TITLE             = "CACTUS Nightlies: %s " % platform()
+TITLE             = "CACTUS Nightlies: %s " % PLATFORM
 FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
-WEB_URL           = join("http://cern.ch/cactus/nightly/",platform())
+WEB_URL           = join("http://cern.ch/cactus/nightly/",PLATFORM)
 
 #nanalyzer.py variables
 ERROR_LIST        = ['TEST FAILED, ',
