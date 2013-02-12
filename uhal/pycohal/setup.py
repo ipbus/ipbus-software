@@ -1,6 +1,6 @@
 
 import os, sys
-from distutils.core import setup, Extension
+from distutils.core import setup
 from os.path import join
 
 CACTUS_ROOT    = os.environ['CACTUS_ROOT']
@@ -9,34 +9,17 @@ VERSION_STRING = (os.environ['PACKAGE_VER_MAJOR']+'.'+os.environ['PACKAGE_VER_MI
                    '_python'+str(sys.version_info[0])+'.'+str(sys.version_info[1]) )
 
 
-INCLUDE_DIRS = [join(CACTUS_ROOT,'extern/boost/RPMBUILD/SOURCES/include'),
-                join(CACTUS_ROOT,'extern/pugixml/RPMBUILD/SOURCES/include'),
-                join(CACTUS_ROOT,'uhal/uhal/RPMBUILD/SOURCES/include'),
-                join(CACTUS_ROOT,'uhal/log/RPMBUILD/SOURCES/include'),
-                join(CACTUS_ROOT,'uhal/grammars/RPMBUILD/SOURCES/include'),
-                join(CACTUS_ROOT,'uhal/pycohal/include') ]
-LIB_DIRS_LINKING = [join(CACTUS_ROOT,'extern/boost/RPMBUILD/SOURCES/lib'),
-                    join(CACTUS_ROOT,'extern/pugixml/RPMBUILD/SOURCES/lib'),
-                    join(CACTUS_ROOT,'uhal/uhal/RPMBUILD/SOURCES/lib'),
-                    join(CACTUS_ROOT,'uhal/log/RPMBUILD/SOURCES/lib'),
-                    join(CACTUS_ROOT,'uhal/grammars/RPMBUILD/SOURCES/lib') ]
+setup(name='cactuscore-uhal-pycohal',
+      version = VERSION_STRING,
+      description = 'Python bindings for the CACTUS uhal libraries.',
+      author = 'Tom Williams', 
+      author_email = 'T.Williams@cern.ch',
+      url = 'http://cactus.web.cern.ch/cactus',
 
-SRC_DIR = 'src/common'
-SRC_FILES = [ join(SRC_DIR, fname) for fname in os.listdir(SRC_DIR) if fname.endswith('.cpp') ]
-
-
-setup(name='cactus-pycohal',
-      version=VERSION_STRING,
-      description='Python bindings for the CACTUS uhal libraries.',
-      author='Tom Williams', author_email='T.Williams@cern.ch',
-      url='http://cactus.web.cern.ch/cactus',
-      ext_modules=[Extension('pycohal', SRC_FILES,
-                             include_dirs = INCLUDE_DIRS, library_dirs = LIB_DIRS_LINKING, runtime_library_dirs=[join(INSTALL_PREFIX,'lib')],
-                             #extra_compile_args=['-g -Wall -fPIC'], 
-                             #extra_link_args=['-fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic'], 
-                             libraries=['boost_python','pthread','dl','util','cactus_uhal_uhal','cactus_uhal_log']
-                             )
-                  ],
-      scripts=['test_pycohal']
+      packages = ['pycohal'], 
+      package_dir = {'' : 'pkg'},
+      package_data = {'pycohal':['*.so']}, # Need matching line in MANIFEST.in for python 2.4 (distutils bug)
+ 
+      scripts=['test_pycohal'] # Need corresponding line in MANIFEST.in for python 2.4 (distutils bug)
  )
 

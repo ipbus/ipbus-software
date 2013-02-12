@@ -179,7 +179,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_readBlock_overload
 //          then would have to put
 //                BOOST_PYTHON_MODULE(my_py_binds_module)
 //          Otherwise, will get the error message "ImportError: dynamic module does not define init function (initmy_py_binds_module)
-BOOST_PYTHON_MODULE ( pycohal )
+BOOST_PYTHON_MODULE ( _pycohal )
 {
   def ( "NOMASK", pycohal::defs_NOMASK );
   // Wrap vector of uint32_t

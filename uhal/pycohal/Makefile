@@ -3,10 +3,8 @@
 #
 
 CACTUS_ROOT = $(shell pwd)/../..
-export CACTUS_ROOT
 
 include $(CACTUS_ROOT)/config/Makefile.macros
-export INSTALL_PREFIX
 
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 0
@@ -19,7 +17,7 @@ export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
 
 BINDINGS_SOURCES = $(wildcard src/common/*.cpp)
 BINDINGS_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${BINDINGS_SOURCES})
-BINDINGS = lib/pycohal.so
+BINDINGS_LIB = pkg/pycohal/_pycohal.so
 
 LIBRARY_PATH = -L${EXTERN_BOOST_LIB_PREFIX} \
 				-L${EXTERN_PUGIXML_LIB_PREFIX} \
@@ -55,7 +53,7 @@ INCLUDE_PATH = 	-Iinclude  \
 
 CPP_FLAGS = -g -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
 
-LINK_BINDINGS_FLAGS = -shared -fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic ${LIBRARY_PATH} ${BINDING_LIBRARIES}
+LINK_BINDINGS_FLAGS = -shared -fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic ${LIBRARY_PATH} -Wl,-R${INSTALL_PREFIX}/lib  ${BINDING_LIBRARIES}
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update generator
 
@@ -65,17 +63,16 @@ clean: _cleanall
 _cleanall:
 	rm -rf ${RPMBUILD_DIR}
 	rm -rf obj
-	rm -rf lib
+	rm -rf ${BINDINGS_LIB}
 	rm -rf build dist MANIFEST
 
 all: _all
 build: _all
 buildall: _all
-_all: ${BINDINGS}	
+_all: ${BINDINGS_LIB}	
 
 #Library will be compiled and will be packaged
-${BINDINGS}: ${BINDINGS_OBJECT_FILES}
-	mkdir -p lib
+${BINDINGS_LIB}: ${BINDINGS_OBJECT_FILES}
 	g++ ${LINK_BINDINGS_FLAGS} ${BINDINGS_OBJECT_FILES} -o $@
 
 ${BINDINGS_OBJECT_FILES}: obj/%.o : src/common/%.cpp
@@ -85,7 +82,7 @@ ${BINDINGS_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 -include $(BINDINGS_SOURCES:.cpp=.d)	
 
 rpm: _rpmall
-_rpmall:
+_rpmall: ${BINDINGS_LIB}
 	rm -rf /var/tmp/cactus*
-	python setup.py bdist_rpm --release ${PACKAGE_RELEASE} --binary-only
+	python setup.py bdist_rpm --release ${PACKAGE_RELEASE}
 
