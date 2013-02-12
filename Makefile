@@ -11,7 +11,6 @@ PACKAGES = \
         extern/erlang \
         extern/pugixml \
         uhal \
-        pycohal \
         controlhub \
 	\
         cactuscore/extern/icons \
