@@ -12,7 +12,7 @@ RELEASE_API_DIR     = join(RELEASE_BASE,"api")
 #The log file name and path should be the same than in the one in the acrontab
 RELEASE_LOG_FILE    = join(RELEASE_LOG_DIR,"nightly.log")
 CACTUS_PREFIX       = "/opt/cactus"
-XDAQ_PREFIX         = "/opt/xdaq"
+XDAQ_ROOT           = "/opt/xdaq"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 #xdaq.repo file name as a function of platform
 XDAQ_REPO_FILE_NAME = "unknown"
@@ -56,8 +56,9 @@ TEST_PASSED_LIST  = ["TEST PASSED",
 
 
 ####ENVIRONMENT
+environ["XDAQ_ROOT"]       = XDAQ_ROOT
 environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
-                                       join(XDAQ_PREFIX,"lib"),
+                                       join(XDAQ_ROOT,"lib"),
                                        environ.get("LD_LIBARY_PATH","")])
 
 environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),
