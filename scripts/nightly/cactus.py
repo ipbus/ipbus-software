@@ -15,8 +15,8 @@ CACTUS_PREFIX       = "/opt/cactus"
 XDAQ_PREFIX         = "/opt/xdaq"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 #xdaq.repo file name as a function of platform
-XDAQ_REPO_FILENAME = ""
-if PLATFORM.find("i686-with-redhat-6") != -1:
+XDAQ_REPO_FILE_NAME = "unknown"
+if PLATFORM.find("i686-with-redhat-5") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc5.i686.repo"
 elif PLATFORM.find("x86_64-with-redhat-5") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc5.x86_64.repo"
@@ -24,7 +24,7 @@ elif PLATFORM.find("i686-with-redhat-6") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc6.i686.repo"
 elif PLATFORM.find("x86_64-with-redhat-6") != -1:
     XDAQ_REPO_FILE_NAME = "xdaq.slc6.x86_64.repo"
-        
+
 ####VARIABLES: analysis of logs
 TITLE             = "CACTUS Nightlies: %s " % PLATFORM
 FROM_EMAIL        = "cactus.service@cern.ch"
@@ -65,20 +65,29 @@ environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),
                                        environ.get("PATH","")])
 
 ####COMMANDS
-UNINSTALL_CMDS = ["pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
+UNINSTALL_CMDS = ["sudo yum -y groupremove cactus",
+                  "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null",
+                  "sudo yum -y groupremove triggersupervisor uhal",
+                  "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite",
+                  "sudo killall -q xdaq.exe",
+                  "rpm -qa| grep cactuscore- | xargs rpm -ev &> /dev/null",
+                  "rpm -qa| grep cactusprojects- | xargs rpm -ev &> /dev/null",
+                  "pkill -f \"DummyHardwareTcp.exe\" &> /dev/null",
                   "pkill -f \"DummyHardwareUdp.exe\" &> /dev/null",
                   "pkill -f \"cactus.*erlang\" &> /dev/null",
                   "pkill -f \"cactus.*controlhub\" &> /dev/null",
                   "sudo rm -rf %s" % BUILD_HOME,
                   "sudo mkdir -p %s" % BUILD_HOME,
-                  "sudo chmod -R 777 %s" % BUILD_HOME,
-                  "sudo yum -y groupremove cactus",
-                  "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null",
+                  "sudo chmod -R 777 %s" % BUILD_HOME
+
                   ]
 
 ENVIRONMENT_CMDS = ["env"]
 
-DEPENDENCIES_CMDS = ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel e2fsprogs-devel graphviz graphviz-devel"]
+DEPENDENCIES_CMDS = ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel e2fsprogs-devel graphviz graphviz-devel",
+                     "sudo cp %s %s" % (XDAQ_REPO_FILE_NAME,"/etc/yum.repos.d/xdaq.repo"),
+                     "sudo yum -y groupinstall extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite"
+                     ]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
             "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
@@ -94,13 +103,13 @@ RELEASE_CMDS = ["rm -rf %s" % RELEASE_RPM_DIR,
                 "mkdir -p %s" % RELEASE_RPM_DIR,
                 "mkdir -p %s" % RELEASE_LOG_DIR,
                 "mkdir -p %s" % RELEASE_API_DIR,
-                "cp %s %s" % (join(BUILD_HOME,"trunk/scripts/nightly/yumgroups.xml"),RELEASE_RPM_DIR),
+                "cp %s %s" % ("yumgroups.xml",RELEASE_RPM_DIR),
                 "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_RPM_DIR),
                 "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_RPM_DIR]
 
-INSTALL_CMDS = ["sudo cp %s %s" % (join(BUILD_HOME,"trunk/scripts/nightly/cactus.repo"),"/etc/yum.repos.d/."),
+INSTALL_CMDS = ["sed \"s/<platform>/%s/\" cactus.repo  | sudo tee /etc/yum.repos.d/cactus.repo > /dev/null" % PLATFORM,
                 "sudo yum clean all",
-                "sudo yum -y groupinstall cactus",
+                "sudo yum -y groupinstall triggersupervisor uhal",
                 "cd %s; doxygen %s" % (BUILD_HOME,join(BUILD_HOME,"trunk/scripts/nightly/Doxyfile")),
                 "rm -rf %s" % RELEASE_API_DIR,
                 "mkdir -p %s" % RELEASE_API_DIR,
@@ -187,7 +196,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "pkill -f \"DummyHardwareUdp.exe\""
              ]
 
-REPORT_CMDS = ["python %s %s" % (join(BUILD_HOME,"trunk/scripts/nightly/nanalyzer.py"),join(BUILD_HOME,"trunk/scripts/nightly/cactus.py")),
+REPORT_CMDS = ["python %s %s" % ("nanalyzer.py","cactus.py"),
                "mkdir -p %s" % RELEASE_LOG_DIR,
                "sudo cp -r %s %s" % ("/var/log/*",RELEASE_LOG_DIR)]
 

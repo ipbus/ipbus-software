@@ -1,6 +1,6 @@
 [cactus-base]
 name=CACTUS Project Software Repository
-baseurl=http://www.cern.ch/cactus/nightly/RPMS
+baseurl=http://www.cern.ch/cactus/nightly/<platform>/RPMS
 enabled=1
 gpgcheck=0
 
