@@ -84,7 +84,7 @@ UNINSTALL_CMDS = ["sudo yum -y groupremove cactus",
 
 ENVIRONMENT_CMDS = ["env"]
 
-DEPENDENCIES_CMDS = ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel e2fsprogs-devel graphviz graphviz-devel",
+DEPENDENCIES_CMDS = ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel e2fsprogs-devel graphviz graphviz-devel boost boost-devel",
                      "sudo cp %s %s" % (XDAQ_REPO_FILE_NAME,"/etc/yum.repos.d/xdaq.repo"),
                      "sudo yum -y groupinstall extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite"
                      ]

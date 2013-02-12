@@ -31,7 +31,7 @@ def dependencies():
     logger.info("----++++DEPENDENCIES++++----")
     
     for cmd in CONF.DEPENDENCIES_CMDS:
-        system(cmd)
+        system(cmd, exception=False)
 
 def build():
     logger.info("----++++BUILD++++----")
