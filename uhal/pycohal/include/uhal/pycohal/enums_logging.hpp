@@ -1,5 +1,5 @@
-#ifndef _pycohal_enums_logging_hpp_
-#define _pycohal_enums_logging_hpp_
+#ifndef _uhal_pycohal_enums_logging_hpp_
+#define _uhal_pycohal_enums_logging_hpp_
 
 namespace pycohal
 {

@@ -18,8 +18,8 @@ setup(name='cactuscore-uhal-pycohal',
 
       packages = ['pycohal'], 
       package_dir = {'' : 'pkg'},
-      package_data = {'pycohal':['*.so']}, # Need matching line in MANIFEST.in for python 2.4 (distutils bug)
+      package_data = {'pycohal':['*.so']},
  
-      scripts=['test_pycohal'] # Need corresponding line in MANIFEST.in for python 2.4 (distutils bug)
+      scripts=['test_pycohal']
  )
 
