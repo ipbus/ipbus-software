@@ -108,14 +108,11 @@ RELEASE_CMDS = ["rm -rf %s" % RELEASE_RPM_DIR,
                 "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_RPM_DIR),
                 "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_RPM_DIR]
 
+
 INSTALL_CMDS = ["sed \"s/<platform>/%s/\" cactus.repo  | sudo tee /etc/yum.repos.d/cactus.repo > /dev/null" % PLATFORM,
                 "sudo yum clean all",
-                "sudo yum -y groupinstall triggersupervisor uhal",
-                "cd %s; doxygen %s" % (BUILD_HOME,join(BUILD_HOME,"trunk/scripts/nightly/Doxyfile")),
-                "rm -rf %s" % RELEASE_API_DIR,
-                "mkdir -p %s" % RELEASE_API_DIR,
-                "mv %s %s" % (join(BUILD_HOME,"html"),RELEASE_API_DIR)]
-
+                "sudo yum -y groupinstall triggersupervisor uhal"]
+ 
 TEST_CMDS = ["sudo chmod +w /var/log",
              #CONTROLHUB STANDALONE TESTS
              "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(CACTUS_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR),
