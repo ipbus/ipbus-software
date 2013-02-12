@@ -8,7 +8,7 @@ include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = extern/pugixml
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
-PackageName = cactus-extern-pugixml
+PackageName = cactuscore-extern-pugixml
 
 Packager = Andrew Rose, Marc Magrans de Abril
 
@@ -58,5 +58,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}"	\
 			--define "release ${PACKAGE_RELEASE}"				\
 			--define "packager ${Packager}"					\
-			cactus-extern-pugixml.spec
+			cactuscore-extern-pugixml.spec
 

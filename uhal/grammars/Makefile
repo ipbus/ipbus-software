@@ -8,7 +8,7 @@ include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/grammars
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
-PackageName = cactus-uhal-grammars
+PackageName = cactuscore-uhal-grammars
 
 Packager = Andrew Rose
 
@@ -64,7 +64,7 @@ ${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
 	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
 
 -include $(SOURCES:.cpp=.d)
-	
+
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/grammars/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/grammars/.
@@ -80,5 +80,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-grammars.spec
+			cactuscore-uhal-grammars.spec
 

@@ -8,7 +8,7 @@ include $(CACTUS_ROOT)\config\Makefile.win.macros
 
 Package = uhal\grammars
 PackagePath = $(CACTUS_BUILD_ROOT)\${Package}
-PackageName = cactus-uhal-grammars
+PackageName = cactuscore-uhal-grammars
 
 Packager = Andrew Rose
 
@@ -80,5 +80,5 @@ copy_to_build:
 #			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 #			--define "release ${PACKAGE_RELEASE}"							\
 #			--define "packager ${Packager}"								\
-#			cactus-uhal-grammars.spec
+#			cactuscore-uhal-grammars.spec
 

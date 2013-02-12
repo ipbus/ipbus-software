@@ -8,7 +8,7 @@ include $(CACTUS_ROOT)\config\Makefile.win.macros
 
 Package = uhal\uhal
 PackagePath = $(CACTUS_BUILD_ROOT)\${Package}
-PackageName = cactus-uhal-uhal
+PackageName = cactuscore-uhal-uhal
 
 Packager = Andrew Rose
 
@@ -99,5 +99,5 @@ copy_to_build:
 #			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 #			--define "release ${PACKAGE_RELEASE}"							\
 #			--define "packager ${Packager}"								\
-#			cactus-uhal-uhal.spec
+#			cactuscore-uhal-uhal.spec
 

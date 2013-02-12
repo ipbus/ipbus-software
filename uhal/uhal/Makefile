@@ -8,7 +8,7 @@ include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/uhal
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
-PackageName = cactus-uhal-uhal
+PackageName = cactuscore-uhal-uhal
 
 Packager = Andrew Rose
 
@@ -81,7 +81,7 @@ ${OBJECT_FILES}: obj/%.o : src/common/%.cpp
 	g++ ${CPP_FLAGS} -c $< -o $@
 
 -include $(SOURCES:.cpp=.d)
-	
+
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/.
@@ -99,5 +99,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-uhal.spec
+			cactuscore-uhal-uhal.spec
 

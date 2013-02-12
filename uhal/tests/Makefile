@@ -8,7 +8,7 @@ include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/tests
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
-PackageName = cactus-uhal-tests
+PackageName = cactuscore-uhal-tests
 
 Packager = Andrew Rose, Marc Magrans de Arbil
 
@@ -110,7 +110,7 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
 -include $(EXECUTABLE_SOURCES:.cxx=.d)
-	
+
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
 
@@ -134,5 +134,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-tests.spec
+			cactuscore-uhal-tests.spec
 

@@ -8,7 +8,7 @@ include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/log
 PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
-PackageName = cactus-uhal-log
+PackageName = cactuscore-uhal-log
 
 Packager = Andrew Rose
 
@@ -83,7 +83,7 @@ ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
 -include $(EXECUTABLE_SOURCES:.cxx=.d)
-	
+
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 #Make evaluates the list of files before it starts and does not pick up the existence of the file created during the ${EXECUTABLES} stage. We must, therefore, explicitly specify that it is built.
 	g++ -c ${CPP_FLAGS} src/common/log.cpp -o obj/log.o
@@ -94,7 +94,7 @@ ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
 	g++ -c ${CPP_FLAGS} $< -o $@
 
 -include $(LIBRARY_SOURCES:.cpp=.d)
-	
+
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/log/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/uhal/log/.
@@ -109,5 +109,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactus-uhal-log.spec
+			cactuscore-uhal-log.spec
 
