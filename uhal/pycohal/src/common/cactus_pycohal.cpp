@@ -15,8 +15,8 @@
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/Node.hpp"
 
-#include "pycohal/converters_exceptions.hpp"
-#include "pycohal/enums_logging.hpp"
+#include "uhal/pycohal/converters_exceptions.hpp"
+#include "uhal/pycohal/enums_logging.hpp"
 
 using namespace boost::python;
 

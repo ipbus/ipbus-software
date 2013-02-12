@@ -1,11 +1,11 @@
 
-#include "pycohal/enums_logging.hpp"
+#include "uhal/pycohal/enums_logging.hpp"
 
 #include "boost/python.hpp"
 
 #include "uhal/definitions.hpp"
 #include "uhal/log/log.hpp"
-#include "pycohal/converters_exceptions.hpp"
+#include "uhal/pycohal/converters_exceptions.hpp"
 
 
 namespace bpy = boost::python ;

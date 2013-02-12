@@ -14,7 +14,7 @@ INCLUDE_DIRS = [join(CACTUS_ROOT,'extern/boost/RPMBUILD/SOURCES/include'),
                 join(CACTUS_ROOT,'uhal/uhal/RPMBUILD/SOURCES/include'),
                 join(CACTUS_ROOT,'uhal/log/RPMBUILD/SOURCES/include'),
                 join(CACTUS_ROOT,'uhal/grammars/RPMBUILD/SOURCES/include'),
-                join(CACTUS_ROOT,'pycohal/include') ]
+                join(CACTUS_ROOT,'uhal/pycohal/include') ]
 LIB_DIRS_LINKING = [join(CACTUS_ROOT,'extern/boost/RPMBUILD/SOURCES/lib'),
                     join(CACTUS_ROOT,'extern/pugixml/RPMBUILD/SOURCES/lib'),
                     join(CACTUS_ROOT,'uhal/uhal/RPMBUILD/SOURCES/lib'),
