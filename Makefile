@@ -4,7 +4,6 @@ PACKAGES = \
         extern/erlang \
         extern/pugixml \
         uhal \
-        pycohal \
         controlhub
 else
 PACKAGES = \

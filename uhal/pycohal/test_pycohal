@@ -1,0 +1,608 @@
+#!/usr/bin/python
+
+"""
+Usage: test_pycohal -c <connections xml file> [-v] [other options for unittest module]
+Executes the CACTUS pycohal tests.
+
+Mandatory option:
+   -c, --connections-file    Connections xml file used in tests 
+   -v                        Verbose reporting (one line per test)
+"""
+
+from random import randint
+import sys, os, getopt
+import unittest
+import pycohal as uhal
+
+# USEFUL FUNCTIONS
+
+def randuint32():
+    return randint(0, 0xffffffff)
+
+def list_randuint32s(length):
+    randInts = []
+    for i in range(length):
+        randInts.append( randuint32() )
+    return randInts
+
+
+##################################################################################
+# SECTION 1: 
+#    Tests specific to python bindings - e.g. conversion of objects across C/python boundary.
+#    (Doesn't involve any actual interaction with H/W)
+
+class TestEnums(unittest.TestCase):
+    """TestCase sub-class checking that behaviour of wrapped enums (i.e equality & inequality) is correct. """
+
+    def gen_enum_list_BlockMode(self):
+        theList = []
+        theList.append(uhal.BlockReadWriteMode.SINGLE)
+        theList.append(uhal.BlockReadWriteMode.INCREMENTAL)
+        theList.append(uhal.BlockReadWriteMode.NON_INCREMENTAL)
+        theList.append(uhal.BlockReadWriteMode.HIERARCHICAL)
+        return theList
+
+    def gen_enum_list_NodePerm(self):
+        theList = []
+        theList.append(uhal.NodePermission.READ)
+        theList.append(uhal.NodePermission.WRITE)
+        theList.append(uhal.NodePermission.READWRITE)
+        return theList
+
+    def gen_enum_list_LogLevel(self):
+        theList = []
+        theList.append( uhal.LogLevel.DEBUG )
+        theList.append( uhal.LogLevel.INFO )
+        theList.append( uhal.LogLevel.NOTICE )
+        theList.append( uhal.LogLevel.WARNING )
+        theList.append( uhal.LogLevel.ERROR )
+        theList.append( uhal.LogLevel.FATAL )
+        return theList
+
+    def exe_equality_test(self, func_gen_enum_list):
+        enumList1 = func_gen_enum_list()
+        enumList2 = func_gen_enum_list()
+        for i1 in range(len(enumList1)):
+            for i2 in range(len(enumList2)):
+                item1 = enumList1[i1]
+                item2 = enumList2[i2]
+                if i1 == i2:
+                    self.assertEqual(item1, item2)
+                else:
+                    self.assertTrue(item1 != item2)
+
+    def test_NodePermission_equality(self):
+        self.exe_equality_test( self.gen_enum_list_NodePerm ) 
+
+    def test_BlockReadWriteMode_equality(self):
+        self.exe_equality_test( self.gen_enum_list_BlockMode )
+
+    def test_LogLevel_equality(self):
+        self.exe_equality_test( self.gen_enum_list_LogLevel )
+
+
+class TestUInt32s(unittest.TestCase):
+    """
+    TestCase sub-class checking that:
+              1) uint32 arguments and return values remain unchanged when crossing the C-python boundary
+              2) Exception is raised when invalid values are given for uint32 arguments 
+    (This behaviour is not always assured in certain flavours of python bindings on 32-bit machines.)
+    """
+
+    def gen_list_invalid_numbers(self):
+        """Return list of negative numbers, and numbers too large for uint32."""
+        # Negative numbers
+        l = [-1, -2, -3, -5]
+        for i in range(10):
+            l.append( randint(-10000, -5) )
+        # Too large 
+        l += [0x100000000, 4294967296 ]  # 2^32
+        l += [0x100000001, 4294967297 ]  # 2^32 +1 
+        l += [0x100000002, 4294967298 ]  # 2^32 +2 
+        return l
+
+    def gen_list_valid_numbers(self):
+        """Return list of uint32s, including values around relevant boundaries for this TestCase."""
+        l = [0, 1, 2, 3, 10, 49]
+        for i in range(10):
+            l.append( randint(50, 0x7fffffff) )  # < 2^31-1
+        l += [0x7fffffff, 2147483647]  # 2^31 -1 (Max value of 32-bit signed int)
+        l += [0x80000000, 2147483648]  # 2^31    (Above max value of 32-bit signed int)
+        l += [0x80000001, 2147483649]  # 2^31 +1
+        for i in range(10):
+            l.append( randint(0x80000002, 0xfffffffe) ) #  2^31+2 <= value < 2^32-2
+        l += [0xfffffffe, 4294967294]  # 2^32 -2
+        l += [0xffffffff, 4294967295]  # 2^32 -1 (Max value of uint32)
+        return l
+
+    def test_uint32_as_argument(self):
+        #print "Invalid numbers ..."
+        for i in self.gen_list_invalid_numbers():
+            #print "  ", i, " ", type(i)
+            self.assertRaises(OverflowError, uhal.tests.check_uint32_argument, i, str(i).rstrip("L") )
+        #print "Valid numbers ... "
+        for i in self.gen_list_valid_numbers():
+            #print "  ", i, " ", type(i)
+            self.assertTrue( uhal.tests.check_uint32_argument(i, str(i).rstrip("L") ) )
+
+    def test_uint32_as_return_value(self):
+        for i in self.gen_list_valid_numbers():
+            self.assertEqual( i, uhal.tests.convert_str_to_uint32(str(i).rstrip("L")) )
+
+
+class TestConverters(unittest.TestCase):
+    """
+    TestCase sub-class checking behaviour of to-/from-python converters 
+    To-python converters (e.g. used for C++ return values):
+        - vector<string> to list
+    From-python converters (e.g. used for converting from python objects to C++ arguments): 
+        - vector<uint32_t> from list
+    """
+
+    def test_vec_uint32_from_list(self):
+        # Firstly check valid conversions
+        self.exe_test_vec_uint32_from_uint32_list( [] )
+        self.exe_test_vec_uint32_from_uint32_list( [42, 56, 74] )
+        self.exe_test_vec_uint32_from_uint32_list( list_randuint32s(100) )
+        self.exe_test_vec_uint32_from_uint32_list( list_randuint32s( randint(1000,10000) ) )
+
+        # Now check conversion that should fail
+        self.assertRaises( OverflowError, uhal.vec_uint32, ([42, -1, 76]) )
+        self.assertRaises( OverflowError, uhal.vec_uint32, ([3, 6, 22222222222222222222222222222222222222223]) )
+        self.assertRaises( TypeError, uhal.vec_uint32, ([1,2.1,3]) )
+        self.assertRaises( TypeError, uhal.vec_uint32, ([[], []]) )
+        self.assertRaises( TypeError, uhal.vec_uint32, (['bob']) )
+
+    def exe_test_vec_uint32_from_uint32_list(self, list_of_uint32s):
+        vec = uhal.vec_uint32( list_of_uint32s )
+        self.assertEqual( len(vec), len(list_of_uint32s) )
+        for i in range( len(vec) ):
+            self.assertEqual( vec[i], list_of_uint32s[i] )
+
+    def test_vec_string_to_list(self):
+        """Test conversion of C++ vector<string> return values to python list."""
+        self.exe_test_vec_string_to_list( [] )
+        self.exe_test_vec_string_to_list( ['alpha'] )
+        self.exe_test_vec_string_to_list( ['a', 'b'] )
+        self.exe_test_vec_string_to_list( ['', ' ', 'test'] )
+        self.exe_test_vec_string_to_list( ['alphabet', 'b', 'c', 'd', 'e'] )
+
+    def exe_test_vec_string_to_list(self, list_of_strings):
+        if len(list_of_strings)==0:
+            list_from_vector = uhal.tests.make_empty_vec_of_strings()
+        else:
+           test_func_arg = ""
+           for x in list_of_strings:
+               self.assertTrue( isinstance(x, str) )
+               test_func_arg += x+":"
+           test_func_arg = test_func_arg[0:-1]
+           list_from_vector = uhal.tests.make_vec_of_strings(test_func_arg)
+        self.assertEqual( list_of_strings, list_from_vector )
+     
+
+class TestLogLevels(unittest.TestCase):
+    """TestCase sub-class checking that log-levels are set correctly."""
+    def setUp(self):
+        self.allLevels = [uhal.LogLevel.FATAL, uhal.LogLevel.ERROR, uhal.LogLevel.WARNING, uhal.LogLevel.NOTICE, uhal.LogLevel.INFO, uhal.LogLevel.DEBUG ]
+
+    def exe_test(self, logLevelSetTo, logLevelsIncluded):
+        logLevelsExcluded = list( set(self.allLevels) - set(logLevelsIncluded) )
+        uhal.setLogLevelTo( logLevelSetTo )
+        for level in logLevelsIncluded:
+           self.assertTrue( uhal.LoggingIncludes(level) )
+        for level in logLevelsExcluded:
+           self.assertEqual( uhal.LoggingIncludes(level), False )
+
+    def test_LogLevels(self):
+        uhal.disableLogging()
+
+        includedLevels = []
+        for level in self.allLevels:
+           includedLevels.append(level)
+           self.exe_test( level , includedLevels)
+        
+        # Reset log-level to FATAL so that logging lines don't clutter up tests
+        uhal.setLogLevelTo( uhal.LogLevel.FATAL )
+
+
+##################################################################################
+# SECTION 2: 
+#    Tests of normal use cases, involving actual interaction with (dummy) hardware
+#    (There is usually an equivalent C++ executable in uhal/tests.)
+
+class TestSingle(unittest.TestCase):
+    """
+    TestCase sub-class checking write & read behaviour for a single register.
+    Analogous to C++ test_dummy_single exe.
+    """
+
+    def test_connect_write_read(self):
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        hw = manager.getDevice( DEVICE_ID )
+        # Queue IPBus transactions
+        x = randuint32()
+        hw.getNode("REG").write(x)
+        mem = hw.getNode("REG").read()
+        # Pre-dispatch tests
+        self.assertEqual( mem.valid(), False )
+        self.assertRaises( uhal.NonValidatedMemory, mem.value )
+        self.assertRaises( uhal.NonValidatedMemory, int, (mem) )
+        self.assertRaises( uhal.NonValidatedMemory, hex, (mem) )
+        # Dispatch & check value
+        hw.dispatch()
+        self.assertTrue( mem.valid() )
+        self.assertEqual( mem.value(), x )
+        self.assertEqual( int(mem)   , x )
+        self.assertEqual( hex(mem)   , hex(x).lower().rstrip("l") ) # lower() and rstrip("l") needed for running on 32-bit machines
+
+    def test_on_the_fly_connect_write_read(self):
+        hw = uhal.getDevice("test_device_id", "ipbusudp-1.3://localhost:50001", ADDRESS_FILE)
+        # Queue IPBus transactions
+        x = randuint32()
+        hw.getNode("REG").write(x)
+        mem = hw.getNode("REG").read()
+        # Pre-dispatch tests
+        self.assertEqual( mem.valid(), False)
+        self.assertRaises( uhal.NonValidatedMemory, mem.value )
+        self.assertRaises( uhal.NonValidatedMemory, int, (mem) )
+        # Dispatch & check value
+        hw.dispatch()
+        self.assertTrue( mem.valid() )
+        self.assertEqual( mem.value(), x )
+        self.assertEqual( int(mem)   , x )
+
+    def test_search_device_id(self):
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        ids = manager.getDevices( "^"+DEVICE_ID+"$" )
+        self.assertEqual( len(ids), 1 )
+        self.assertTrue( DEVICE_ID in ids )
+
+        ids = manager.getDevices( ".+\.udp" )
+        self.assertEqual( len(ids), 2 )
+        self.assertTrue( "dummy.udp" in ids )
+        self.assertTrue( "dummy.docu.udp" in ids )
+
+
+class TestBlock(unittest.TestCase):
+    """
+    TestCase sub-class checking behaviour of block reads & writes.
+    Also includes tests of all of ValVector_uint32 API - incl. indexing & iteration.
+    """
+
+    def setUp(self):
+        manager = uhal.ConnectionManager(CONNECTIONS_FILE)
+        self.hw = manager.getDevice(DEVICE_ID)
+
+    def exe_test_block_write_read(self, N):
+        # Queue IPBus transactions
+        xx = list_randuint32s(N)
+        self.hw.getNode("MEM").writeBlock( xx )
+        memVals = self.hw.getNode("MEM").readBlock(N)
+        # Pre-dispatch tests
+        self.assertEqual( memVals.valid(), False )
+        self.assertEqual( memVals.size(), N )
+        self.assertEqual( len(memVals), N )
+        for i in range(N):
+           self.assertRaises( uhal.NonValidatedMemory, memVals.at, (i) )
+           self.assertRaises( uhal.NonValidatedMemory, memVals.__getitem__ , (i) )
+        self.assertRaises( uhal.NonValidatedMemory, memVals.__iter__ )
+        self.assertRaises( IndexError , memVals.__getitem__ , (-N-1) )
+        self.assertRaises( IndexError , memVals.__getitem__ , (N) )
+        # Dispatch & check values
+        self.hw.dispatch()
+        self.assertTrue( memVals.valid() )
+        self.assertEqual( memVals.size(), N )
+        self.assertEqual( len(memVals), N )
+        # Test ValVector_uint32 indexing
+        for i in range(N):
+            self.assertEqual( xx[i], memVals[i] )
+            self.assertEqual( xx[i], memVals.at(i) )
+            self.assertEqual( xx[i], memVals[i-N] )
+        # Test ValVector_uint32 iteration
+        self.assertEqual( xx, [x for x in memVals] )
+
+    def test_block_write_read(self):
+        self.exe_test_block_write_read(1)           #4kB
+        self.exe_test_block_write_read(1024/4)      #1kB
+        self.exe_test_block_write_read(1024*1024/4) #1MB
+
+    def test_block_bigger_than_size(self):
+        xx = []
+        for i in range(1024*1024):
+            xx.append(0)
+        self.assertRaises( uhal.BulkTransferRequestedTooLarge, self.hw.getNode("SMALL_MEM").writeBlock, (xx) )
+        self.assertRaises( uhal.BulkTransferRequestedTooLarge, self.hw.getNode("SMALL_MEM").readBlock, (1024*1024) )
+
+
+class TestRawClient(unittest.TestCase):
+    """
+    TestCase sub-class checking writes & reads directly via ClientInterface.
+    Analogous to C++ test_dummy_rawclient exe.
+    """
+
+    def setUp(self):
+        manager = uhal.ConnectionManager(CONNECTIONS_FILE)
+        self.hw = manager.getDevice(DEVICE_ID)
+
+    def test_single_write_read_rawclient(self):
+        client = self.hw.getClient()
+        # Queue IPBus transactions
+        x = 1
+        addr = self.hw.getNode("REG").getAddress()
+        client.write(addr, x)
+        reg = client.read(addr)
+        # Pre-dispatch tests
+        self.assertEqual( reg.valid(), False)
+        self.assertRaises( uhal.NonValidatedMemory, reg.value )
+        self.assertRaises( uhal.NonValidatedMemory, int, (reg) )
+        try:
+            reg.value()
+        except uhal.NonValidatedMemory, e:
+            self.assertEqual( e.what, "uhal::exception::NonValidatedMemory")
+        try:
+            reg.value()
+        except uhal.exception, e:
+            self.assertEqual( e.what, "uhal::exception::NonValidatedMemory")
+        self.assertRaises( uhal.exception, reg.value )
+        # Dispatch & check value
+        client.dispatch()
+        self.assertTrue( reg.valid() )
+        self.assertEqual( reg.value(), x )
+        self.assertEqual( int(reg)   , x )
+
+    def test_mem_write_read_rawclient(self):
+        N = 1024*1024/4
+        client = self.hw.getClient()
+        # Queue IPBus transactions
+        xx = list_randuint32s(N)
+        addr = self.hw.getNode("MEM").getAddress()
+        client.writeBlock(addr, xx)
+        mem = client.readBlock(addr, N)
+        # Pre-dispatch tests
+        self.assertEqual(mem.valid(), False)
+        self.assertEqual(mem.size(), N)
+        self.assertRaises( uhal.NonValidatedMemory, mem.at, (0) )
+        # Dispatch & check values
+        client.dispatch()
+        self.assertTrue( mem.valid() )
+        self.assertEqual( mem.size(), N )
+        for i in range(N):
+            self.assertEqual( xx[i], mem.at(i) )
+
+    def test_mem_rmw_bits(self):
+        client = self.hw.getClient()
+
+        addr = self.hw.getNode( "REG_UPPER_MASK" ).getAddress()
+        x1 = randuint32()
+        x2 = randuint32()
+        x3 = randuint32()
+        client.write(addr, x1)
+        reg1 = client.rmw_bits(addr, x2, x3)
+        reg2 = client.read(addr)
+
+        client.dispatch()
+        self.assertEqual( reg1.value(), reg2.value() )
+        self.assertEqual( reg1.value(), ( (x1 & x2) | x3 ) )
+
+    def test_mem_rmw_sum(self):
+        N = 1024
+        client = self.hw.getClient()
+
+        total = 0
+        xx = uhal.vec_uint32()
+        for i in range(N):
+            xx.append( randint(0,0xffffffff/1024) )
+            total += xx[i]
+        addr = self.hw.getNode( "SUBSYSTEM1.REG" ).getAddress()
+        client.write( addr, xx[0] )
+
+        for i in range(N):
+            if i==0:
+               client.write( addr, xx[0] )
+            else:
+               reg = client.rmw_sum( addr, xx[i] )
+               client.dispatch()
+        self.assertEqual(total, reg.value())
+
+
+class TestCheckPermissions(unittest.TestCase):
+    """
+    TestCase sub-class checking that node permissions defined in xml file are enforced correctly.
+    Analogous to C++ test_dummy_check_permissions exe.
+    """
+
+    def test_check_permissions(self):
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        hw = manager.getDevice( DEVICE_ID )
+
+        self.assertRaises(uhal.WriteAccessDenied, hw.getNode("REG_READ_ONLY").write, (1) )
+        self.assertRaises(uhal.ReadAccessDenied, hw.getNode("REG_WRITE_ONLY").read )
+
+        x = randuint32()
+        hw.getNode("REG_WRITE_ONLY").write(x)
+        hw.getNode("REG_READ_ONLY").read()
+        hw.dispatch()
+
+
+class TestMasking(unittest.TestCase):
+    """
+    TestCase sub-class checking behaviour of writes & read of masked registers. 
+    Analogous to C++ test_dummy_masking exe.
+    """
+
+    def test_write_read_masked(self):
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        hw = manager.getDevice( DEVICE_ID )
+        # Check masks correct
+        self.assertEqual( hw.getNode("REG_LOWER_MASK").getMask(), 0xffff )
+        self.assertEqual( hw.getNode("REG_UPPER_MASK").getMask(), 0xffff0000 )
+
+        # Check that exception raised when attempt write inconsistent with mask
+        self.assertRaises( uhal.BitsSetWhichAreForbiddenByBitMask, hw.getNode("REG_LOWER_MASK").write, (0x1ffff) )
+        self.assertRaises( uhal.BitsSetWhichAreForbiddenByBitMask, hw.getNode("REG_UPPER_MASK").write, (0xffff1000) )
+
+        # Write reasonable values and check that values read back are consistent with mask
+        x = randuint32()
+        hw.getNode( "REG_LOWER_MASK" ).write( x & 0xffff )
+        hw.getNode( "REG_UPPER_MASK" ).write( x >> 16 )
+        reg_l = hw.getNode("REG_LOWER_MASK").read()
+        reg_u = hw.getNode("REG_UPPER_MASK").read()
+        ### Pre-dispatch tests
+        self.assertEqual( reg_l.valid(), False )
+        self.assertEqual( reg_u.valid(), False )
+        self.assertRaises( uhal.exception, reg_l.value )
+        self.assertRaises( uhal.exception, reg_u.value )
+        ### Dispatch & check values
+        hw.dispatch()
+        self.assertTrue( reg_l.valid() and reg_u.valid() )
+        self.assertTrue( reg_l.value()<=0xffff )
+        self.assertTrue( reg_u.value()<=0xffff )
+        self.assertEqual( reg_l.value(), (x & 0xffff) )
+        self.assertEqual( reg_u.value(), (x >> 16) )
+
+
+class TestMetaInfo(unittest.TestCase):
+    """
+    TestCase sub-class checking meta info (i.e. id, uri, node address, node permission, etc) of uhal classes.
+    Analogous to C++ test_dummy_metainfo exe.
+    """
+
+    def setUp(self):
+        self.manager = uhal.ConnectionManager(CONNECTIONS_FILE)
+
+    def test_ConnectionManager_metainfo(self):
+        """Run meta-info tests for ConnectionManager class."""
+        devices_list = self.manager.getDevices()
+        self.assertTrue( isinstance(devices_list, list) )
+        self.assertEqual( len(devices_list), 6 )
+        self.assertEqual( devices_list, sorted(['dummy.udp','dummy.docu.udp','dummy.tcp','dummy.docu.tcp','dummy.controlhub','dummy.docu.controlhub']) )
+        self.assertEqual( len(self.manager.getDevices(".*udp.*")), 2 )
+
+    def exe_test_Interfaces_metainfo(self, hwId, hwUri):
+        """Execute meta-info tests for a particular hw device & associated client interface."""
+        hw = self.manager.getDevice(hwId)
+        self.assertEqual(hw.id(),      hwId)
+        self.assertEqual(hw.__str__(), hwId)
+        self.assertEqual(hw.uri(),     hwUri)
+        self.exe_test_ClientInterface_metainfo(hw, hwId, hwUri)
+        nodeId = {True: "A", False: "REG"}[ hwId.startswith("dummy.docu") ]
+        self.exe_test_ClientInterface_metainfo( hw.getNode(nodeId), hwId, hwUri )
+
+    def exe_test_ClientInterface_metainfo(self, hwOrNode, id, uri):
+        """Execute meta-info test for a particular client interface instance."""
+        client = hwOrNode.getClient()
+        self.assertEqual(client.id(),      id )
+        self.assertEqual(client.__str__(), id )
+        self.assertEqual(client.uri(),     uri)
+        for i in list_randuint32s(20):
+            hwOrNode.getClient().setTimeoutPeriod(i)
+            self.assertEqual(i, client.getTimeoutPeriod() )
+
+    def test_HwInterface_metainfo(self):
+        """Run meta-info tests for HwInterface and ClientInterface classes."""
+        self.exe_test_Interfaces_metainfo("dummy.udp",             "ipbusudp-1.3://localhost:50001")
+        self.exe_test_Interfaces_metainfo("dummy.docu.udp",        "ipbusudp-1.3://localhost:50001")
+        #self.exe_test_Interfaces_metainfo("dummy.udp.txt",         "ipbusudp-1.3://localhost:50001")
+        self.exe_test_Interfaces_metainfo("dummy.tcp",             "ipbustcp-1.3://localhost:50002")
+        self.exe_test_Interfaces_metainfo("dummy.docu.tcp",        "ipbustcp-1.3://localhost:50002")
+        self.exe_test_Interfaces_metainfo("dummy.controlhub",      "chtcp-1.3://localhost:10203?target=localhost:50001")
+        self.exe_test_Interfaces_metainfo("dummy.docu.controlhub", "chtcp-1.3://localhost:10203?target=localhost:50001")
+
+    def exe_test_node_metainfo(self, deviceId, longId, address, ownId, permission, description, size, mask, mode, tags):
+        """Execute meta-info tests for a particular node."""
+        hw = self.manager.getDevice( deviceId )
+        self.assertEqual( hw.getNode(longId).getAddress()   , address )
+        self.assertEqual( hw.getNode(longId).getId()        , ownId )
+        self.assertEqual( hw.getNode(longId).__str__()      , ownId )
+        self.assertEqual( hw.getNode(longId).getPermission(), permission)
+        self.assertEqual( hw.getNode(longId).getDescription(), description)
+        self.assertEqual( hw.getNode(longId).getSize(),       size )
+        self.assertEqual( hw.getNode(longId).getMask(),       mask )
+        self.assertEqual( hw.getNode(longId).getMode(),       mode )
+        self.assertEqual( hw.getNode(longId).getTags(),       tags )
+
+    def test_node_metainfo(self):
+        """Run meta-info tests for Node class."""
+        self.exe_test_node_metainfo(DEVICE_ID, "REG", ownId="REG", address=0x000001, permission=uhal.NodePermission.READWRITE, description="",
+                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="test")
+        self.exe_test_node_metainfo(DEVICE_ID, "REG_READ_ONLY", ownId="REG_READ_ONLY", address=0x0002, permission=uhal.NodePermission.READ, description="",
+                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="")
+        self.exe_test_node_metainfo(DEVICE_ID, "REG_WRITE_ONLY", ownId="REG_WRITE_ONLY", address=0x0003, permission=uhal.NodePermission.WRITE, description="",
+                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="")
+        self.exe_test_node_metainfo(DEVICE_ID, "MEM", ownId="MEM", address=0x100000, permission=uhal.NodePermission.READWRITE, description="A block memory in an example XML file",
+                                           size=262144, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.INCREMENTAL, tags="")
+
+        upperNode = self.manager.getDevice( DEVICE_ID ).getNode()
+        self.assertEqual(len(upperNode.getNodes()), 21)
+        self.assertEqual(len(upperNode.getNodes(r".*_MEM")), 2)
+
+
+
+class TestPrintValMem( unittest.TestCase ):
+    """TestCase sub-class checking __str__ method (used by 'print') for ValWord_uint32 and ValVector_uint32."""
+
+    def test_ValWord(self):
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        hw = manager.getDevice( DEVICE_ID )
+        for i in range(5):
+            x = randuint32()
+            hw.getNode("REG").write(x)
+            mem = hw.getNode("REG").read()
+            self.assertRaises( uhal.NonValidatedMemory, mem.__str__ )
+            hw.dispatch()
+            self.assertEqual( mem.__str__() , str(x) )
+
+    def exe_ValVector_test(self, xx):
+        # Construct string from list, removing trailling "L"s in case working on 32-bit computer
+        xx_string = "[" 
+        for x in xx:
+          xx_string += str(x).rstrip("L")+", "
+        xx_string = xx_string.rstrip(", ")
+        xx_string += "]"
+        # Execute the test
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        hw = manager.getDevice( DEVICE_ID )
+        hw.getNode("MEM").writeBlock( xx )
+        mem = hw.getNode("MEM").readBlock( len(xx) )
+        self.assertRaises( uhal.NonValidatedMemory, mem.__str__ )
+        hw.dispatch()
+        self.assertEqual( mem.__str__() , xx_string )
+
+    def test_ValVector(self):
+        self.exe_ValVector_test( [0, 42, 56, 75] )
+        self.exe_ValVector_test( list_randuint32s(1024*1024/4) )
+
+
+# Run the tests
+if __name__ == '__main__':
+
+    # Grabbing connections xml file from args, and leaving rest of args for unittest
+    if len(sys.argv)<3:
+        sys.stderr.write("ERROR: Connections file not specified\n")
+        print __doc__
+        sys.exit(2)
+
+    try:
+        opts, args = getopt.getopt([sys.argv.pop(1),sys.argv.pop(1)], "c:", ["connections-file="])
+    except getopt.GetoptError, err:
+        print err
+        print __doc__
+        sys.exit(2)
+
+    CONNECTIONS_FILE = opts[0][1]
+    ADDRESS_FILE = os.path.join(os.path.split(CONNECTIONS_FILE)[0], "dummy_address.xml")
+    DEVICE_ID = "dummy.udp"
+
+    # Check that '-v' is first remaining option if present - otherwise unittest module fails, with incomprehensible stack trace
+    if ( sys.argv.count('-v')==1 and sys.argv[1]!='-v' ) or sys.argv.count('-v')>1 :
+       print "Invalid usage of '-v' option - if used it should only come directly after connection file"
+       print "E.g: To run only the unit tests under TestPrintValMem try ..."
+       print "     python test_pycohal -c file::///dir/to/connections_file.xml  -v  TestPrintValMem"
+       print __doc__
+       sys.exit(2)
+
+    # Now run tests ...
+    print 'Running tests using connections file "'+CONNECTIONS_FILE+'"\n'
+    uhal.setLogLevelTo( uhal.LogLevel.FATAL )
+    unittest.main()
+
