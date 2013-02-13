@@ -84,5 +84,5 @@ ${BINDINGS_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 rpm: _rpmall
 _rpmall: ${BINDINGS_LIB}
 	rm -rf /var/tmp/cactus*
-	python setup.py bdist_rpm --release ${PACKAGE_RELEASE}
+	python setup.py bdist_rpm --release ${PACKAGE_RELEASE} --binary-only
 
