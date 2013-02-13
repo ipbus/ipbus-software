@@ -15,5 +15,5 @@ setup(name = 'cactus-uhal-gui',
       py_modules = ['uHalGui'],
       packages = ['guis','modules','test'],
       package_data = {'test' : ['connections/*.xml']},      
-      scripts = ['uHalGui.py']
+      scripts = ['uHalGui']
       )
