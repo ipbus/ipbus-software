@@ -3,9 +3,8 @@ import os, sys
 from distutils.core import setup
 from os.path import join
 
-CACTUS_ROOT    = os.environ['CACTUS_ROOT']
-INSTALL_PREFIX = os.environ['INSTALL_PREFIX']
 PYCOHAL_VERSION = (os.environ['PACKAGE_VER_MAJOR']+'.'+os.environ['PACKAGE_VER_MINOR']+'.'+os.environ['PACKAGE_VER_PATCH'])
+
 PYTHON_VERSION = str(sys.version_info[0])+'.'+str(sys.version_info[1])+'.'+str(sys.version_info[2])
 
 
@@ -18,7 +17,7 @@ setup(name='cactuscore-uhal-pycohal',
 
       packages = ['pycohal'], 
       package_dir = {'' : 'pkg'},
-      package_data = {'pycohal':['*.so']},
+      package_data = {'pycohal' : ['*.so']},
  
       scripts=['test_pycohal']
  )
