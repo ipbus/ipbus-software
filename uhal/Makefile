@@ -3,7 +3,8 @@ PACKAGES = \
 	grammars \
 	uhal \
 	tests \
-	pycohal
+	pycohal \
+	gui
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
 
