@@ -6,8 +6,7 @@ VERSION_STRING = ( os.environ['PACKAGE_VER_MAJOR'] + '.' + os.environ['PACKAGE_V
 '_python' + str(sys.version_info[0]) + '.' + str(sys.version_info[1]) )
 
 
-
-setup(name = 'cactus-uHalGui',
+setup(name = 'cactus-uhal-gui',
       version = VERSION_STRING,
       description = 'Python GUI for uTCA HW access based on uHAL',
       author = 'Carlos Ghabrous Larrea',
@@ -15,5 +14,6 @@ setup(name = 'cactus-uHalGui',
       url = 'http://cactus.web.cern.ch/cactus',
       py_modules = ['uHalGui'],
       packages = ['guis','modules','test'],
-      package_data = {'test' : ['connections/*.xml']}
+      package_data = {'test' : ['connections/*.xml']},      
+      scripts = ['uHalGui.py']
       )

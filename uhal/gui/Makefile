@@ -2,11 +2,9 @@
 # Makefile for boost
 #
 
-CACTUS_ROOT = $(shell pwd)/..
-export CACTUS_ROOT
+CACTUS_ROOT = $(shell pwd)/../..
 
 include $(CACTUS_ROOT)/config/Makefile.macros
-export INSTALL_PREFIX
 
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 0
@@ -16,11 +14,9 @@ PACKAGE_RELEASE = 0
 export CACTUS_ROOT INSTALL_PREFIX 
 export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
 
-BINDINGS = $(CACTUS_ROOT)/pycohal/lib/pycohal.so
 
 
-
-.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update generator
+.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall 
 
 default: build
 

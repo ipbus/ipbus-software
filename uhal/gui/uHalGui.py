@@ -1,6 +1,3 @@
-#!/usr/bin/python
-
-
 import wx
 import os, sys
 
@@ -20,7 +17,7 @@ class MainApplication(wx.App):
 
         """ Method to initiate the main frame"""
         
-        self.frame = guis.defaultGUI.uHalGuiFrame(parent=None, id=-1, title="MainGUI")
+        self.frame = guis.defaultGUI.uHalGuiFrame(parent=None, id=-1, title="uHAL")
         self.frame.Show()
         self.SetTopWindow(self.frame)
         

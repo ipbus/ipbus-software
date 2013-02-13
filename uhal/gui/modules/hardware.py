@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import os
 
 import pycohal
@@ -41,16 +39,16 @@ class RegisterNode(AbstractNode):
 
 class IPEndPoint(AbstractNode):
 
-    def __init__(self_):
+    def __init__(self, device, status = "Undefined"):
 
+        print "Instantiating end point ", device.id()
+        self.uri = device.uri()
+        self.id = device.id()
+        self.nodeList = device.getNodes()
         self.status = status
-        self.uri = uri
-        self.id = id
-        self.address_table = address_table
-        self.nodeList = []
-
+    
     def update(self):
-        pass
+        print "update in IP end point ", self.id, " ", self.uri, " was called"
 
 
         
@@ -63,19 +61,26 @@ class Hardware(IPEndPoint):
         self.ip_end_points_dict = {}
         self.hw_manager = pycohal.ConnectionManager(str("file://" + connection_file))
 
-        #how to know whether hw_manager was correctly instantiated?
-        _load_hardware(self.hw_manager)
+        self._load_hardware(self.hw_manager)
+        
+        # start thread to update ???
         
 
     def _load_hardware(self, hw_man):
 
-        
-
+        for dev_name in hw_man.getDevices():
+            
+            device = hw_man.getDevice(dev_name)
+           
+            if dev_name not in self.ip_end_points_dict:
+                self.ip_end_points_dict[dev_name] = IPEndPoint(device)
+            
         
 
     def update(self):
 
         for name in self.ip_end_points_dict.keys():
+            print "Updating ip end point ", name
             self.ip_end_points_dict[name].update()
 
             
