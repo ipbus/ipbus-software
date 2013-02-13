@@ -30,8 +30,8 @@
 <grouplist></grouplist>
 <packagelist>
 
-<packagereq type="mandatory">cactuscore-externdojo</packagereq>
-<packagereq type="mandatory">cactuscore-externicons</packagereq>
+<packagereq type="mandatory">cactuscore-extern-dojo</packagereq>
+<packagereq type="mandatory">cactuscore-extern-icons</packagereq>
 
 <packagereq type="mandatory">cactuscore-tsxdaqclient</packagereq>
 
