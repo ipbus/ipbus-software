@@ -25,7 +25,7 @@ include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = controlhub
 PackagePath = $(CACTUS_ROOT)/${Package}
-PackageName = cactus-controlhub
+PackageName = cactuscore-controlhub
 
 Packager = Robert Frazier
 
@@ -50,7 +50,7 @@ ifeq ($(UNAME), Darwin)
 ERL=erl
 ERLC=erlc
 else
-#If we're on Linux, use the cactus-extern-erlang RPM sources or RPM installation
+#If we're on Linux, use the cactuscore-extern-erlang RPM sources or RPM installation
 ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
 ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
 ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc

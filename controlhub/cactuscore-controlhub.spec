@@ -10,7 +10,7 @@ License: BSD License
 URL: http://www.erlang.org/
 Group: CACTUS
 Source: %{tarball_file}
-Requires: cactus-extern-erlang
+Requires: cactuscore-extern-erlang
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
