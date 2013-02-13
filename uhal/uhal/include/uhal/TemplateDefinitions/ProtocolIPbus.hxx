@@ -57,7 +57,7 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 1 , IPbus_minor , buffer_size >::getPreambleSize()
+  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::getPreambleSize()
   {
 	return 1;
   }  
@@ -210,7 +210,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 2 , IPbus_minor , buffer_size >::getPreambleSize()
+  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::getPreambleSize()
   {
 	return 1;
   }

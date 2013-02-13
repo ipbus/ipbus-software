@@ -65,7 +65,11 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "//#include <boost/thread/thread.hpp>\n"
             << "#include <boost/thread/mutex.hpp>\n"
             << "\n"
-            << "#define logging() logger log( ThisLocation() );\n"
+//            << "#define logging() logger log( ThisLocation() );\n"
+			<< "#define logging() uhal::logger log;\\\n"
+			<< "                  class logging{ public: ~logging(){ uhal::logger log; if ( std::uncaught_exception() ) log ( Error() , \"Exception spotted at \" , ThisLocation() ); } } temp_logging_object;\\\n"
+			<< "                  (void)temp_logging_object;\n"
+
             << "\n"
             << "namespace uhal{\n"
             << "\n"
@@ -279,19 +283,21 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
   aHppFile << "class logger\n"
            << "{\n"
            << "public:\n"
-           << "\tlogger( const Location& aLocation );\n"
+ //          << "\tlogger( const Location& aLocation );\n"
+           << "\tlogger();\n"
            << "\tvirtual ~logger();\n"
-           << "private:\n"
-           << "\tLocation mLocation;\n"
+//           << "private:\n"
+//           << "\tLocation mLocation;\n"
            << "public:\n";
-  aCppFile << "logger::logger( const Location& aLocation ) : mLocation( aLocation ) {}\n"
+  aCppFile //<< "logger::logger( const Location& aLocation ) : mLocation( aLocation ) {}\n"
+			<< "logger::logger( ) {}\n"
            << "\n"
            << "logger::~logger()\n"
            << "{\n"
-           << "\tif (std::uncaught_exception())\n"
+ /*          << "\tif (std::uncaught_exception())\n"
            << "\t{\n"
            << "\t\tthis->operator()( Error() , \"Exception spotted at \" , mLocation );\n"
-           << "\t}\n"
+           << "\t}\n"*/
            << "}\n";
 
   for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
