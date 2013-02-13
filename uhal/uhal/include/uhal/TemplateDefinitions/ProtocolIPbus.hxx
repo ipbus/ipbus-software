@@ -50,25 +50,31 @@ namespace uhal
   IPbus< 1 , IPbus_minor , buffer_size >::~IPbus()
   {}
 
-
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 1 , IPbus_minor , buffer_size >::preamble( )
   {
-    implementBOT();
+    implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
 
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
+  bool IPbus< 1 , IPbus_minor , buffer_size >::getPreambleSize()
+  {
+	return 1;
+  }  
+  
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 1 , IPbus_minor , buffer_size >::predispatch( )
   {
     logging();
     uint32_t lWords ( mCurrentDispatchBuffers->sendCounter()  >> 2 );
 
-    if ( lWords < 8 )
+	//IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
+	uint32_t lPaddingWords ( ( 7 + this->getPreambleSize() ) - lWords  );
+    if ( lPaddingWords >  0 )
     {
-      // uint32_t lPaddingWords ( 8 - lWords );
       // mCurrentFillingBuffers->send ( ( uint8_t* ) ( & ( mSendPadding[0] ) ) , lPaddingWords<<2 );
       // mCurrentFillingBuffers->receive ( ( uint8_t* ) ( & ( mReplyPadding[0] ) ) , lPaddingWords<<2 );
-      for ( ; lWords != 8 ; ++lWords )
+      for ( uint32_t lWords = 0 ; lWords != lPaddingWords ; ++lWords )
       {
         log ( Debug() , "Adding padding word." );
         // We do not need to check for space here as this condition is only met when the current filling buffer is severely underfull
@@ -202,6 +208,14 @@ namespace uhal
     mCurrentFillingBuffers->receive ( mReceivePacketHeader.back() );
   }
 
+
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
+  bool IPbus< 2 , IPbus_minor , buffer_size >::getPreambleSize()
+  {
+	return 1;
+  }
+  
+  
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 2 , IPbus_minor , buffer_size >::validate ( uint8_t* aSendBufferStart ,

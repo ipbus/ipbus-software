@@ -185,7 +185,16 @@ namespace uhal
   }
 
 
+  uint32_t ClientInterface::getPreambleSize()
+  {
+	return 0;
+  }	 
 
+
+  void ClientInterface::preamble( ) {}
+
+  void ClientInterface::predispatch( ) {}  
+  
   // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 

@@ -78,6 +78,11 @@ namespace uhal
       */
       void preamble( );
 
+	  /**
+      	Return the size of the preamble
+      */
+      virtual uint32_t getPreambleSize();  
+	  
       /**
       	Finalize the buffer before it is transmitted
       */
@@ -158,6 +163,11 @@ namespace uhal
       */
       void preamble( );
 
+	  /**
+      	Return the size of the preamble
+      */
+      virtual uint32_t getPreambleSize();  
+	  
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version
       @param aType the type of the IPbus transaction

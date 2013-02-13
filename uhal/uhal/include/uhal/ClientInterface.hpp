@@ -285,12 +285,17 @@ namespace uhal
       /**
       	Add a preamble to an IPbus buffer
       */
-      virtual void preamble( ) {}
+      virtual void preamble( );
 
+	  /**
+      	Return the size of the preamble
+      */
+      virtual uint32_t getPreambleSize();  
+	  
       /**
       	Finalize the buffer before it is transmitted
       */
-      virtual void predispatch( ) {}
+      virtual void predispatch( );
 
 
       std::pair < ValHeader , _ValHeader_* > CreateValHeader();
