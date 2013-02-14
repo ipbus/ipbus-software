@@ -69,9 +69,9 @@ namespace uhal
     uint32_t lWords ( mCurrentDispatchBuffers->sendCounter()  >> 2 );
 
 	//IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
-	uint32_t lPaddingWords ( ( 7 + this->getPreambleSize() ) - lWords  );
+	int32_t lPaddingWords ( ( 7 + this->getPreambleSize() ) - lWords  );
     if ( lPaddingWords >  0 )
-    {
+    {	
       // mCurrentFillingBuffers->send ( ( uint8_t* ) ( & ( mSendPadding[0] ) ) , lPaddingWords<<2 );
       // mCurrentFillingBuffers->receive ( ( uint8_t* ) ( & ( mReplyPadding[0] ) ) , lPaddingWords<<2 );
       for ( uint32_t lWords = 0 ; lWords != lPaddingWords ; ++lWords )
