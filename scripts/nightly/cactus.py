@@ -91,7 +91,8 @@ DEPENDENCIES_CMDS = ["sudo yum -y install arc-server createrepo bzip2-devel zlib
                      ]
 
 CHECKOUT = ["cd %s" % BUILD_HOME,
-            "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk"]
+            "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk",
+            "svn co svn+ssh://svn.cern.ch/reps/cmsos/branches/l1_xaas daq/xaas"]
 #            "svn co svn+ssh://svn.cern.ch/reps/cactus/branches/cactus_1_0_x ./trunk"]
 
 CHECKOUT_CMDS = [";".join(CHECKOUT)]
@@ -192,6 +193,19 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\""
+             #TRIGGER SUPERVISOR TESTS
+             "sed -i 's/\(SLIM_SERVICE_HOST=\).*$/\1%s/' %s" % (node(),
+                                                                join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
+             "cd %s;make;make rpm;make install" % join(BUILD_HOME,"daq/xaas/slim/l1test"),
+             "sudo killall -q xdaq.exe",
+             "sudo /sbin/service xdaqd start",
+             "sudo /sbin/service xdaqd status",
+             "cd %s;python multicell.py;multicell_fault.py;multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
+             "cd %s;pyhton central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests"),
+             "cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests"),
+             "cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
+             "sudo /sbin/service xdaqd stop",
+             "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"
              ]
 
 REPORT_CMDS = ["python %s %s" % ("nanalyzer.py","cactus.py"),
