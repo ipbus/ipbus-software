@@ -104,7 +104,8 @@ namespace uhal
         */
       virtual bool validate ();
 
-    private:
+
+    protected:
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected
       	@param aSendBufferStart a pointer to the start of the first word of IPbus data which was sent (i.e. with no preamble)
@@ -119,6 +120,7 @@ namespace uhal
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
 							  
 	
+    private:
       //! The IP address of the target device that is connected to the Control Hub
       uint32_t mDeviceIPaddress;
 

@@ -30,6 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/Utilities.hpp"
+
 #include "uhal/ProtocolControlHub.hpp"
 
 #include <boost/spirit/include/qi.hpp>
@@ -64,16 +66,16 @@ namespace uhal
     }
 
     std::pair< std::string , std::string > lIP;
-
-/*	
+	
     try
     {
       boost::spirit::qi::phrase_parse (	lIt->second.begin() ,
-                                        lIt->second.end() ,
-                                        ( boost::spirit::qi::eps >
-                                          * ( boost::spirit::qi::char_ - boost::spirit::qi::lit ( ":" ) ) >
-                                          boost::spirit::qi::lit ( ":" ) >
-                                          *boost::spirit::qi::char_ ) ,
+                                        lIt->second.end(),
+                                        ( boost::spirit::qi::eps >  
+											* ( boost::spirit::qi::char_ - boost::spirit::qi::lit ( ":" ) ) >
+											boost::spirit::qi::lit ( ":" ) >
+											*boost::spirit::qi::char_
+										) ,
                                         boost::spirit::ascii::space ,
                                         lIP
                                       );
@@ -83,7 +85,7 @@ namespace uhal
       log ( Error() , "Expected a string of the form " , Quote ( "hostIP:port" ) , " or " , Quote ( "hostname:port" ) , " but received " , Quote ( lIt->second ) , "." );
       throw aExc;
     }
-*/
+
 
     std::string lAddr;
     uint16_t lPort;
@@ -108,8 +110,7 @@ namespace uhal
     }
 
     std::vector< uint32_t > lIPAddr;
-
-/*	
+	
     try
     {
       boost::spirit::qi::phrase_parse (	lAddr.begin() ,
@@ -128,7 +129,6 @@ namespace uhal
       log ( Error() , "Boost::ASIO returned address " , Quote ( lAddr ) , " which could not be parsed as " , Quote ( "aaa.bbb.ccc.ddd" ) );
       throw aExc;
     }
-*/
 
     uint32_t lIPaddress = ( lIPAddr[0] <<24 ) | ( lIPAddr[1] <<16 ) | ( lIPAddr[2] <<8 ) | ( lIPAddr[3] );
     log ( Info() , "Converted IP address string " ,  Quote ( lIt->second ) , " to " ,

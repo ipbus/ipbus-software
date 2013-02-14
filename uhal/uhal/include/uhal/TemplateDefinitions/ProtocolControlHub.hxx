@@ -121,8 +121,8 @@ namespace uhal
 	tpreamble& lPreambles = mPreambles.back();
 
     uint32_t lByteCount ( this->mCurrentDispatchBuffers->sendCounter() );
-    lPreambles.mSendByteCountPtr = htonl ( lByteCount-4 );
-    lPreambles.mSendWordCountPtr = htons ( ( lByteCount-12 ) >>2 );
+    *(lPreambles.mSendByteCountPtr) = htonl ( lByteCount-4 );
+    *(lPreambles.mSendByteCountPtr) = htons ( ( lByteCount-12 ) >>2 );
   }
   
   

@@ -110,8 +110,7 @@ namespace uhal
       static bool ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
 
-    private:
-
+    protected:
 
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version
@@ -189,7 +188,8 @@ namespace uhal
       static bool ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
 
-    private:
+
+    protected:
 
       /**
       	Function which the transport protocol calls when the IPbus reply is received to check that the headers are as expected
@@ -224,6 +224,7 @@ namespace uhal
       */
       bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
+	private:
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint16_t mPacketCounter;
 

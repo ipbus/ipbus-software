@@ -158,6 +158,8 @@ namespace uhal
       */
       void implementDispatch ();
 
+
+    private:	  
       // /**
       // Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       // If multithreaded, block until all buffers have been sent, recieved and validated.
@@ -170,8 +172,6 @@ namespace uhal
         	@return whether the returned packet is valid
         */
       virtual bool validate ();
-
-    private:
 
       //! A shared pointer to the DispatchWorker which performs the actual transport
       boost::shared_ptr< DispatchWorker > mDispatchWorker;

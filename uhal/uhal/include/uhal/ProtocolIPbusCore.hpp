@@ -155,7 +155,8 @@ namespace uhal
       */
       virtual ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend );
 
-    private:
+
+    protected:
       /**
       	Function which the transport protocol calls when the IPbus reply is received to check that the headers are as expected
       	@param aSendBufferStart a pointer to the start of the first word of IPbus data which was sent (i.e. with no preamble)
@@ -189,7 +190,6 @@ namespace uhal
       */
       virtual bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode ) = 0;
 
-    protected:
 
       /**
       	Function which checks the available space in the currently filling buffer against requested send and receive sizes and, if there is insufficient space in the currently filling buffer, then dispatch it and create a new buffer

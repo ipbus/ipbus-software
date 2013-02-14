@@ -308,7 +308,8 @@ namespace uhal
         */
       virtual bool validate ();
 
-    private:
+
+    protected:
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected
       	@param aSendBufferStart a pointer to the start of the first word of IPbus data which was sent (i.e. with no preamble)

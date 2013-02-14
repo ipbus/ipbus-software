@@ -35,6 +35,7 @@
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolIPbus.hpp"
+#include "uhal/ProtocolControlHub.hpp"
 
 #include "uhal/grammars/URLGrammar.hpp"
 
@@ -50,38 +51,13 @@ namespace uhal
     if ( mInstance == NULL )
     {
       mInstance = new ClientFactory();
-      // // ---------------------------------------------------------------------
-      // mInstance->add< uhal::IPBusUDPClient< 1 , 3 > > ( "ipbusudp" , "Direct access to hardware via UDP, using the default IPbus version which is currently IPbus 1.3" );
-      // // mInstance->add< uhal::IPBusUDPClient< 1 , 2 > > ( "ipbusudp-1.2" );
-      mInstance->add< UDP< IPbus< 1 , 3 > > > ( "ipbusudp-1.3" );
-      // // mInstance->add< uhal::IPBusUDPClient< 1 , 4 > > ( "ipbusudp-1.4" );
-      // mInstance->add< uhal::IPBusUDPClient< 2 , 0 > > ( "ipbusudp-2.0" );
-      // // ---------------------------------------------------------------------
-      // mInstance->add< uhal::IPBusTCPClient< 1 , 3 > > ( "ipbustcp" , "Direct access to hardware via TCP, using the default IPbus version which is currently IPbus 1.3" );
-      mInstance->add< TCP< IPbus< 1 , 3 > > > ( "ipbustcp-1.3" );
-      // // mInstance->add< uhal::IPBusTCPClient< 1 , 4 > > ( "ipbustcp-1.4" );
-      // // mInstance->add< uhal::IPBusTCPClient< 2 , 0 > > ( "ipbustcp-2.0" );
-      // // ---------------------------------------------------------------------
-      // /*
-      // mInstance->add< uhal::ControlHubClient<CHH_1 , 1 , 3> > ( "chtcp" , "Hardware access via the Control Hub, using Control Hub Protocol 1 (Multi target packets with 32-bit identifier) and the default IPbus version which is currently IPbus 1.3" );
-      // mInstance->add< uhal::ControlHubClient<CHH_1 , 1 , 2> > ( "chtcp-1.2" );
-      // mInstance->add< uhal::ControlHubClient<CHH_1 , 1 , 3> > ( "chtcp-1.3" );
-      // // mInstance->add< uhal::ControlHubClient<CHH_1 , 1 , 4> > ( "chtcp-1.4" );
-      // // mInstance->add< uhal::ControlHubClient<CHH_1 , 2 , 0> > ( "chtcp-2.0" );
-      // // ---------------------------------------------------------------------
-      // mInstance->add< uhal::ControlHubClient<CHH_2 , 1 , 3> > ( "chtcp2" , "Hardware access via the Control Hub, using Control Hub Protocol 2 (Multi target packets with 48-bit IP+port as identifier) and the default IPbus version which is currently IPbus 1.3" );
-      // mInstance->add< uhal::ControlHubClient<CHH_2 , 1 , 3> > ( "chtcp2-1.3" );
-      // // mInstance->add< uhal::ControlHubClient<CHH_2 , 1 , 4> > ( "chtcp2-1.4" );
-      // // mInstance->add< uhal::ControlHubClient<CHH_2 , 2 , 0> > ( "chtcp2-2.0" );
-      // */
-      // // ---------------------------------------------------------------------
-      // mInstance->add< uhal::ControlHubClient< 1 , 3 > > ( "chtcp" , "Hardware access via the Control Hub, using the default IPbus version which is currently IPbus 1.3" );
-      // mInstance->add< uhal::ControlHubClient< 1 , 3 > > ( "chtcp-1.3" );
-      // // mInstance->add< uhal::ControlHubClient<CHH_3 , 1 , 4> > ( "chtcp2-1.4" );
-      // // mInstance->add< uhal::ControlHubClient<CHH_3 , 2 , 0> > ( "chtcp2-2.0" );
-      // // ---------------------------------------------------------------------
-      // // mInstance->add< uhal::DummyClient >( "dummy" );
-      // // ---------------------------------------------------------------------
+      // ---------------------------------------------------------------------
+      mInstance->add< UDP< IPbus< 1 , 3 > > > ( "ipbusudp-1.3" , "Direct access to hardware via UDP, using IPbus version 1.3" );
+      // ---------------------------------------------------------------------
+      mInstance->add< TCP< IPbus< 1 , 3 > > > ( "ipbustcp-1.3" , "Direct access to hardware via TCDP, using IPbus version 1.3" );
+      // ---------------------------------------------------------------------
+      mInstance->add< TCP< ControlHub < IPbus< 1 , 3 > > > > ( "chtcp-1.3", "Hardware access via the Control Hub, using IPbus version 1.3" );
+      // ---------------------------------------------------------------------
     }
 
     return *mInstance;
