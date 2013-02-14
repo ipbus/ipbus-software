@@ -36,8 +36,8 @@ all: _all
 build: _all
 buildall: _all
 _all:
-	if [ ! -d  ${ZIP_NAME}/.build_done ]; then											\
-	unzip -u ${ZIP_FILE} -d ${ZIP_NAME};												\
+	if [ ! -f  ${ZIP_NAME}/.build_done ]; then \
+	unzip -q -u ${ZIP_FILE} -d ${ZIP_NAME};												\
 	cd ${ZIP_NAME};																		\
 	g++ -fPIC -O3 -shared -o ${LIBRARY} src/pugixml.cpp;								\
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};	\
@@ -45,8 +45,7 @@ _all:
 	cp ${LIBRARY} ${RPMBUILD_DIR}/SOURCES/lib;											\
 	cp src/*.hpp ${RPMBUILD_DIR}/SOURCES/include/pugixml;								\
 	date > .build_done;																	\
-	fi; 
-
+	fi;	
 rpm: _rpmall
 _rpmall: 
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD				\
