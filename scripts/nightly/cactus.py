@@ -192,7 +192,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              #PYCOHAL TESTS
              "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
-             "pkill -f \"DummyHardwareUdp.exe\""
+             "pkill -f \"DummyHardwareUdp.exe\"",
              #TRIGGER SUPERVISOR TESTS
              "sed -i 's/\(SLIM_SERVICE_HOST=\).*$/\1%s/' %s" % (node(),
                                                                 join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
