@@ -77,10 +77,10 @@ make_dirs:
 ${LIBRARY}: ${OBJECT_FILES}
 	g++ ${LINK_FLAGS} ${OBJECT_FILES} -o $@
 
-${OBJECT_FILES}: obj/%.o : src/common/%.cpp
+${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	g++ ${CPP_FLAGS} -c $< -o $@
 
--include $(SOURCES:.cpp=.d)
+-include $(OBJECT_FILES:.o=.d)
 
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.

@@ -82,7 +82,7 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
--include $(EXECUTABLE_SOURCES:.cxx=.d)
+-include $(EXECUTABLE_OBJECT_FILES:.o=.d)
 
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 #Make evaluates the list of files before it starts and does not pick up the existence of the file created during the ${EXECUTABLES} stage. We must, therefore, explicitly specify that it is built.
@@ -93,7 +93,7 @@ ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}  
 	g++ -c ${CPP_FLAGS} $< -o $@
 
--include $(LIBRARY_SOURCES:.cpp=.d)
+-include $(LIBRARY_OBJECT_FILES:.o=.d)
 
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.

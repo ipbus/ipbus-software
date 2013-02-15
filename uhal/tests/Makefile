@@ -109,14 +109,15 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	g++ -c ${CPP_FLAGS}  $< -o $@
--include $(EXECUTABLE_SOURCES:.cxx=.d)
+-include $(EXECUTABLE_OBJECT_FILES:.o=.d)
 
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	g++ -c ${CPP_FLAGS} $< -o $@
--include $(LIBRARY_SOURCES:.cpp=.d)
+
+-include $(LIBRARY_OBJECT_FILES:.o=.d)
 
 copy_to_build:
 	cp -p include/uhal/tests/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/tests/.

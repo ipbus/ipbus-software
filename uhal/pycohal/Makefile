@@ -79,7 +79,7 @@ ${BINDINGS_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 	mkdir -p obj
 	g++ -c ${CPP_FLAGS} -ftemplate-depth-128 -O3 -finline-functions -Wno-inline -DNDEBUG  $< -o $@	
 
--include $(BINDINGS_SOURCES:.cpp=.d)	
+-include $(BINDINGS_OBJECT_FILES:.o=.d)	
 
 rpm: _rpmall
 _rpmall: ${BINDINGS_LIB}

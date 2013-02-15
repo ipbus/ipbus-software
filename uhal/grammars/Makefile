@@ -63,7 +63,7 @@ ${LIBRARY}: ${OBJECT_FILES}
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES} 
 	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
 
--include $(SOURCES:.cpp=.d)
+-include $(OBJECT_FILES:.o=.d)
 
 copy_to_build:
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
