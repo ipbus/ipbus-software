@@ -28,8 +28,7 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: rpm 	
-
+_all: 
 
 rpm: _rpmall
 _rpmall:
