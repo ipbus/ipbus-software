@@ -67,12 +67,8 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: make_dirs ${EXECUTABLES} ${LIBRARY} copy_to_build
+_all: ${EXECUTABLES} ${LIBRARY} 
 
-make_dirs:
-	mkdir -p {bin,obj,lib}
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/log}
 
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES} 
 	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
@@ -80,6 +76,7 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	rm -rf obj/log.o
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
+	mkdir -p {bin,obj,lib}
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
 -include $(EXECUTABLE_OBJECT_FILES:.o=.d)
@@ -91,16 +88,17 @@ ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} obj/log.o -o $@
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}  
+	mkdir -p {bin,obj,lib}
 	g++ -c ${CPP_FLAGS} $< -o $@
 
 -include $(LIBRARY_OBJECT_FILES:.o=.d)
 
-copy_to_build:
-	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
-	cp -p include/uhal/log/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/uhal/log/.
-
 rpm: _rpmall
 _rpmall: 
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/log}
+	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
+	cp -p include/uhal/log/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/uhal/log/.
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\

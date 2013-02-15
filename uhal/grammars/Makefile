@@ -49,29 +49,23 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: make_dirs ${LIBRARY} copy_to_build
-
-make_dirs:
-	mkdir -p {lib,obj}
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/grammars}
-
+_all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
 	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES} 
+	mkdir -p {lib,obj}
 	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
 
 -include $(OBJECT_FILES:.o=.d)
 
-copy_to_build:
+rpm: _rpmall
+_rpmall: copy_build
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/grammars}
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/uhal/grammars/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/grammars/.
-
-
-rpm: _rpmall
-_rpmall: 
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\

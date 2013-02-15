@@ -97,36 +97,35 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: make_dirs ${LIBRARY} ${EXECUTABLES} copy_to_build
+_all: ${LIBRARY} ${EXECUTABLES}
 
-make_dirs:
-	mkdir -p {bin,obj,lib}
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin/uhal/tests,lib,include/uhal/tests,etc/uhal/tests}
 
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
+	mkdir -p {bin,obj,lib}
 	g++ -c ${CPP_FLAGS}  $< -o $@
+
 -include $(EXECUTABLE_OBJECT_FILES:.o=.d)
 
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
+	mkdir -p {bin,obj,lib}
 	g++ -c ${CPP_FLAGS} $< -o $@
 
 -include $(LIBRARY_OBJECT_FILES:.o=.d)
 
-copy_to_build:
+rpm: _rpmall
+_rpmall: 
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin/uhal/tests,lib,include/uhal/tests,etc/uhal/tests}
 	cp -p include/uhal/tests/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/tests/.
 	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/uhal/tests/.
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p etc/uhal/tests/*.xml ${RPMBUILD_DIR}/SOURCES/etc/uhal/tests
-
-rpm: _rpmall
-_rpmall: 
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\
