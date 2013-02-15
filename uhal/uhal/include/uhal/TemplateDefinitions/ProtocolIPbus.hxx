@@ -130,6 +130,14 @@ namespace uhal
     return ( 0x10000000 | ( ( aTransactionId&0x7ff ) <<17 ) | ( ( aWordCount&0x1ff ) <<8 ) | lType );
   }
 
+
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
+  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  {
+    logging();
+    return ( IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId ) | 0x00000004 );
+  }
+
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
@@ -237,16 +245,18 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
     logging();
+    //log ( Debug() , ThisLocation() );
+    log ( Notice() , "Memory location = " , Integer ( ( uint32_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( uint32_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
 
-    if ( *aSendBufferStart != * ( uint32_t* ) ( aReplyStartIt ->first ) )
+    if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
     {
-      log ( Error() , "Returned PacketHeader " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) ) ,
-            " does not match that sent " , Integer ( *aSendBufferStart ) );
+      log ( Error() , "Returned Packet Header " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) , IntFmt<hex,fixed>() ) ,
+            " does not match that sent " , Integer ( * ( uint32_t* ) ( aSendBufferStart ) , IntFmt<hex,fixed>() ) );
       return false;
     }
 
     // log ( Info() , "IPbus 2.0 has validated the packet header" );
-    return IPbus::validate ( ( ++aSendBufferStart ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
+    return IPbusCore::validate ( ( aSendBufferStart+=4 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
   }
 
 
@@ -286,6 +296,15 @@ namespace uhal
 
     return ( 0x2000000F | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType );
   }
+
+
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
+  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  {
+    logging();
+    return ( IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId ) & 0xFFFFFFF0 );
+  }
+
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 2 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )

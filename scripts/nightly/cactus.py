@@ -116,8 +116,14 @@ INSTALL_CMDS = ["sed \"s/<platform>/%s/\" cactus.repo  | sudo tee /etc/yum.repos
                 "sudo yum -y groupinstall triggersupervisor uhal"]
  
 TEST_CMDS = ["sudo chmod +w /var/log",
+             #-----------------------------------------------------------------------------------------------------------------------
              #CONTROLHUB STANDALONE TESTS
              "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(CACTUS_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR),
+             #-----------------------------------------------------------------------------------------------------------------------
+
+             #-----------------------------------------------------------------------------------------------------------------------
+             # IPbus 1.3
+             #-----------------------------------------------------------------------------------------------------------------------             
              #SERVER NOT REACHABLE TESTS
              "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp",
              "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp",
@@ -194,6 +200,90 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\"",
+             #-----------------------------------------------------------------------------------------------------------------------
+
+             #-----------------------------------------------------------------------------------------------------------------------
+             # IPbus 2.0
+             #-----------------------------------------------------------------------------------------------------------------------             
+             #SERVER NOT REACHABLE TESTS
+             "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "sudo /opt/cactus/bin/controlhub_start",
+             "sudo /opt/cactus/bin/controlhub_status",
+             "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "sudo /opt/cactus/bin/controlhub_stop",
+             #TIMEOUT TESTS
+             "DummyHardwareUdp.exe --version 2 --port 50001 --delay 2 &> /dev/null &",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             "DummyHardwareUdp.exe --version 2 --port 50001 --delay 2 &> /dev/null &",
+             "sudo /opt/cactus/bin/controlhub_start",
+             "sudo /opt/cactus/bin/controlhub_status",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             "sudo /opt/cactus/bin/controlhub_stop",
+             "DummyHardwareTcp.exe --version 2 --port 50002 --delay 2 &> /dev/null &",
+             "test_dummy_timeout.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "pkill -f \"DummyHardwareTcp.exe\"",
+             #UDP TESTS
+             "DummyHardwareUdp.exe --version 2 --port 50001 &> /dev/null &",
+             "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+             "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+             "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+             "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+             "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_docu_examples.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.docu.udp",
+             "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_metainfo.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_navigation.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "test_dummy_rawclient.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             #CONTROL HUB TESTS
+             "DummyHardwareUdp.exe --version 2 --port 50001 &> /dev/null &",
+             "sudo /opt/cactus/bin/controlhub_start",
+             "sudo /opt/cactus/bin/controlhub_status",
+             "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+             "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+             "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+             "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+             "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "test_dummy_docu_examples.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.docu.controlhub",
+             "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "test_dummy_metainfo.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "test_dummy_navigation.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "test_dummy_rawclient.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.controlhub2",
+             "pkill -f \"DummyHardwareUdp.exe\"",
+             "sudo /opt/cactus/bin/controlhub_stop",
+             #TCP TESTS
+             "DummyHardwareTcp.exe --version 2 --port 50002 &> /dev/null &",
+             "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+             "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+             "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+             "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+             "test_dummy_single.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_block.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_docu_examples.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.docu.tcp",
+             "test_dummy_check_permissions.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_hierarchy.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_multithreaded.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_metainfo.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_navigation.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "test_dummy_rawclient.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
+             "pkill -f \"DummyHardwareTcp.exe\"",
+             #PYCOHAL TESTS
+             "DummyHardwareUdp.exe --version 2 --port 50001 &> /dev/null &",
+             "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
+             "pkill -f \"DummyHardwareUdp.exe\"",             
+             #-----------------------------------------------------------------------------------------------------------------------
+             
+             #-----------------------------------------------------------------------------------------------------------------------
              #TRIGGER SUPERVISOR TESTS
              "sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
              "sed -i 's/\(PWD_PATH=\).*$/\\1%s/' %s" % ("/afs/cern.ch/user/c/cactus/secure",
@@ -210,6 +300,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
              "sudo /sbin/service xdaqd stop",
              "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"
+             #-----------------------------------------------------------------------------------------------------------------------
              ]
 
 REPORT_CMDS = ["python %s %s" % ("nanalyzer.py","cactus.py"),

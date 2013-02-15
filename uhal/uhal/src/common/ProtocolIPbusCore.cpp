@@ -80,19 +80,19 @@ namespace uhal
   // }
   // }
 
-
   bool IPbusCore::validate ( uint8_t* aSendBufferStart ,
                              uint8_t* aSendBufferEnd ,
                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
     logging();
-    log ( Debug() , "Underlying Validation" );
+    log ( Debug() , "IPbusCore Validation" );
     eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
     uint8_t lSendResponseGood , lReplyResponseGood;
 
+    //log ( Debug() , ThisLocation() );
     do
     {
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )

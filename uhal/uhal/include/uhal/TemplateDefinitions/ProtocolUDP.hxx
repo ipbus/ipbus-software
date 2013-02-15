@@ -38,7 +38,7 @@
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
 
-//#include "uhal/IPbusInspector.hpp"
+#include "uhal/IPbusInspector.hpp"
 
 #include <sys/time.h>
 
@@ -151,13 +151,11 @@ namespace uhal
     mDeadlineTimer.expires_from_now ( mUDP.getRawTimeoutPeriod() );
     mErrorCode = boost::asio::error::would_block;
     mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+    HostToTargetInspector< 2 , 0 > lH2TInspector;
+    std::vector<uint32_t>::const_iterator lBegin ( ( uint32_t* ) ( aBuffers->getSendBuffer() ) );
+    std::vector<uint32_t>::const_iterator lEnd ( ( uint32_t* ) ( aBuffers->getSendBuffer() +aBuffers->sendCounter() ) );
+    lH2TInspector.analyze ( lBegin , lEnd );
 
-    /*
-    	HostToTargetInspector< 1 , 3 > lH2TInspector;
-    	std::vector<uint32_t>::const_iterator lBegin( (uint32_t*)(aBuffers->getSendBuffer()) );
-    	std::vector<uint32_t>::const_iterator lEnd( (uint32_t*)(aBuffers->getSendBuffer()+aBuffers->sendCounter()) );
-    	lH2TInspector.analyze ( lBegin , lEnd );
-    */
     do
     {
       mIOservice->run_one();
@@ -204,18 +202,17 @@ namespace uhal
       throw exception::ErrorInUdpCallback();
     }
 
-    /*
-    	TargetToHostInspector< 1 , 3 > lT2HInspector;
-    	std::vector<uint32_t>::const_iterator lBegin2( (uint32_t*)(& mReplyMemory[0]) );
-    	std::vector<uint32_t>::const_iterator lEnd2((uint32_t*)(& mReplyMemory[aBuffers->replyCounter()]) );
-    	lT2HInspector.analyze ( lBegin2 , lEnd2 );
-    */
+    TargetToHostInspector< 2 , 0 > lT2HInspector;
+    std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
+    std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
+    lT2HInspector.analyze ( lBegin2 , lEnd2 );
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
     {
       memcpy ( lIt->first, lReplyBuf, lIt->second );
+      log ( Notice() , "Memory location = " , Integer ( ( uint32_t ) ( lIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( uint32_t* ) ( lIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( lIt->second ) );
       lReplyBuf += lIt->second;
     }
 
@@ -232,7 +229,7 @@ namespace uhal
     }
     }
     */
-    log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
 
     if ( !mUDP.validate() )
     {
@@ -240,7 +237,7 @@ namespace uhal
       throw exception::ValidationError ();
     }
 
-    log ( Debug() , ThisLocation() );
+    ////log ( Debug() , ThisLocation() );
   }
 
 
@@ -249,7 +246,7 @@ namespace uhal
   void UDP< InnerProtocol >::DispatchWorker::CheckDeadline()
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    //////log ( Debug() , ThisLocation() );
 
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
@@ -285,7 +282,7 @@ namespace uhal
 #endif
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    //////log ( Debug() , ThisLocation() );
   }
 
 
@@ -293,7 +290,7 @@ namespace uhal
   UDP< InnerProtocol >::~UDP()
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    //////log ( Debug() , ThisLocation() );
 
     try
     {
@@ -328,7 +325,7 @@ namespace uhal
     logging();
 #ifndef USE_UDP_MULTITHREADED
     mDispatchWorker->dispatch ( & ( * ( this->mCurrentBuffers ) ) );
-    log ( Debug() , ThisLocation() );
+    ////log ( Debug() , ThisLocation() );
 #endif
   }
 

@@ -56,7 +56,7 @@ namespace uhal
     std::pair< uint32_t , uint16_t > lPair ( ExtractTargetID ( aUri ) );
     mDeviceIPaddress = htonl ( lPair.first );
     mDevicePort = htons ( lPair.second );
-    ////log ( Debug() , ThisLocation() );
+    //////log ( Debug() , ThisLocation() );
   }
 
 
@@ -64,7 +64,7 @@ namespace uhal
   ControlHub< InnerProtocol >::~ControlHub()
   {
     logging();
-    ////log ( Debug() , ThisLocation() );
+    //////log ( Debug() , ThisLocation() );
   }
 
 
@@ -72,7 +72,7 @@ namespace uhal
   void ControlHub< InnerProtocol >::preamble( )
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    ////log ( Debug() , ThisLocation() );
     // -------------------------------------------------------------------------------------------------------------
     // 12 bytes form the preamble:
     // Byte-count (4 bytes) will be updated before transmission in predispatch
@@ -115,10 +115,8 @@ namespace uhal
   void ControlHub< InnerProtocol >::predispatch( )
   {
     logging();
-    //log ( Debug() , ThisLocation() );
-
+    ////log ( Debug() , ThisLocation() );
     tpreamble& lPreambles = mPreambles.back();
-
     uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
     * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
     * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-12 ) >>2 );

@@ -51,7 +51,7 @@ namespace uhal
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 350 >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 0 >
   class IPbus;
 
 
@@ -89,7 +89,7 @@ namespace uhal
       */
       virtual void predispatch( );
 
-
+    public:
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version
       @param aType the type of the IPbus transaction
@@ -98,6 +98,15 @@ namespace uhal
       @return an IPbus header
       */
       static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+
+      /**
+      Abstract interface of function to calculate the IPbus header for a particular protocol version
+      @param aType the type of the IPbus transaction
+      @param aWordCount the word count field of the IPbus header
+      @param aTransactionId the TransactionId of the IPbus header
+      @return an IPbus header
+      */
+      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -169,6 +178,7 @@ namespace uhal
         */
       virtual uint32_t getPreambleSize();
 
+    public:
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version
       @param aType the type of the IPbus transaction
@@ -177,6 +187,15 @@ namespace uhal
       @return an IPbus header
       */
       static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+
+      /**
+      Abstract interface of function to calculate the IPbus header for a particular protocol version
+      @param aType the type of the IPbus transaction
+      @param aWordCount the word count field of the IPbus header
+      @param aTransactionId the TransactionId of the IPbus header
+      @return an IPbus header
+      */
+      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version

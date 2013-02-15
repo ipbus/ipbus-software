@@ -49,14 +49,7 @@ namespace uhal
     }
 
     mCreators[aProtocol] =  boost::shared_ptr<CreatorInterface> ( new Creator<T>() );
-    // if ( aDescription.size() == 0 )
-    // {
-    // mProductDescriptions.insert ( std::make_pair ( aProtocol , T::description() ) );
-    // }
-    // else
-    // {
     mProductDescriptions.insert ( std::make_pair ( aProtocol , aDescription ) );
-    // }
   }
 
 

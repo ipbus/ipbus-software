@@ -131,12 +131,6 @@ namespace uhal
       */
       std::string uri() const;
 
-      /*
-      	Return a description of the behaviour this client
-      	@return a description of the behaviour this client
-      */
-      //static std::string description();
-
       /**
       	Method to dispatch all IPbus packets which are in the queue of IPbusPacketInfo's
       */
