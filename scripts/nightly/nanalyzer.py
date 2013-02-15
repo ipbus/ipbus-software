@@ -16,6 +16,7 @@ import time
 import os
 import smtplib
 import platform
+from socket import getfqdn
 from email.MIMEText import MIMEText
 
 LIMIT, ERROR, TEST_PASSED = range(3)
@@ -159,7 +160,7 @@ def html_header(title):
     
     html += "<p><b>Date:</b> %s</p>" % time.asctime()
     html += "<p><b>Platform:</b> %s</p>" % platform.platform()
-    html += "<p><b>Node:</b> %s</p>" % platform.node()
+    html += "<p><b>Node:</b> %s</p>" % getfqdn()
 
     return html
 

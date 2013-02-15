@@ -1,6 +1,7 @@
 from os import environ
 from os.path import join
-from platform import platform,node
+from platform import platform
+from socket import getfqdn
 
 ####VARIABLES
 BUILD_HOME          = "/build/cactus"
@@ -197,7 +198,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
              "sed -i 's/\(PWD_PATH=\).*$/\\1%s/' %s" % ("/afs/cern.ch/user/c/cactus/secure",
                                                         join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
-             "sed -i 's/\(SLIM_SERVICE_HOST=\).*$/\\1%s/' %s" % (node(),
+             "sed -i 's/\(SLIM_SERVICE_HOST=\).*$/\\1%s/' %s" % (getfqdn(),
                                                               join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
              "cd %s;make;make rpm;make install" % join(BUILD_HOME,"daq/xaas/slim/l1test"),
              "sudo killall -q xdaq.exe",
