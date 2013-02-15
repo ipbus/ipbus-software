@@ -17,7 +17,7 @@
 <packagereq type="mandatory">cactuscore-uhal-uhal</packagereq>
 <packagereq type="mandatory">cactuscore-uhal-tests</packagereq>
 <packagereq type="mandatory">cactuscore-controlhub</packagereq>
-<packagereq type="mandatory">cactuscore-pycohal</packagereq>
+<packagereq type="mandatory">cactuscore-uhal-pycohal</packagereq>
 </packagelist>
 </group>
 
