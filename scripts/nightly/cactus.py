@@ -194,7 +194,7 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\"",
              #TRIGGER SUPERVISOR TESTS
-             "sudo cp % /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora")
+             "sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
              "sed -i 's/\(PWD_PATH=\).*$/\\1%s/' %s" % (node(),
                                                         "/afs/cern.ch/user/c/cactus/secure"),
              "cd %s;make;make rpm;make install" % join(BUILD_HOME,"daq/xaas/slim/l1test"),
