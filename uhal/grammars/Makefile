@@ -61,7 +61,7 @@ ${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
 -include $(OBJECT_FILES:.o=.d)
 
 rpm: _rpmall
-_rpmall: copy_build
+_rpmall: 
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/grammars}
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
