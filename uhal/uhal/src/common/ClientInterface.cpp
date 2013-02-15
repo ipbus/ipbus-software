@@ -39,8 +39,6 @@ namespace uhal
 {
 
   ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) :
-    mCurrentFillingBuffers ( NULL ),
-    mCurrentDispatchBuffers ( NULL ),
     mId ( aId ),
     mUri ( aUri )
   {
@@ -156,10 +154,10 @@ namespace uhal
   void ClientInterface::dispatch ()
   {
     logging();
-    //Create a new filling buffer so that dispatch knows we are ready to send a buffer
-    PushBackBuffers ();
     this->predispatch( );
-    this->implementDispatch();
+    mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) );
+    this->implementDispatch( );
+    NextFillingBuffer ();
   }
 
 
@@ -167,66 +165,98 @@ namespace uhal
   bool ClientInterface::validate ( )
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    ////log ( Debug() , ThisLocation() );
     //check that the results are valid
-    bool lRet = this->validate ( mCurrentDispatchBuffers->getSendBuffer() ,
-                                 mCurrentDispatchBuffers->getSendBuffer() + mCurrentDispatchBuffers->sendCounter() ,
-                                 mCurrentDispatchBuffers->getReplyBuffer().begin() ,
-                                 mCurrentDispatchBuffers->getReplyBuffer().end() );
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    //std::cout << mDispatchedBuffers.size() << std::endl;
+    Buffers* lBuffer ( mDispatchedBuffers.front() );
+    bool lRet = this->validate ( lBuffer->getSendBuffer() ,
+                                 lBuffer->getSendBuffer() + lBuffer->sendCounter() ,
+                                 lBuffer->getReplyBuffer().begin() ,
+                                 lBuffer->getReplyBuffer().end() );
 
     //results are valid, so mark returned data as valid
     if ( lRet )
     {
-      mCurrentDispatchBuffers->validate();
+      lBuffer->validate();
     }
 
-    PopFrontBuffers();
+    //log ( Debug() , ThisLocation() );
+    mDispatchedBuffers.pop_front();
+    //log ( Debug() , ThisLocation() );
     return lRet;
   }
 
 
   uint32_t ClientInterface::getPreambleSize()
   {
-	return 0;
-  }	 
-
-
-  void ClientInterface::preamble( ) {}
-
-  void ClientInterface::predispatch( ) {}  
-  
-  // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-  void ClientInterface::PushBackBuffers ( )
-  {
-    logging();
-    log ( Debug() , "Creating new Buffer" );
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    Buffers lBuffers ( this->getMaxSendSize() );
-    mBuffers.push_back ( lBuffers );
-    mCurrentFillingBuffers = & mBuffers.back();
-    mCurrentDispatchBuffers = & mBuffers.front();
-    preamble();
+    return 0;
   }
 
-  void ClientInterface::PopFrontBuffers()
+
+  void ClientInterface::preamble()
   {
     logging();
     //log ( Debug() , ThisLocation() );
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
-    mBuffers.pop_front();
+  }
 
-    if ( mBuffers.size() == 0 )
+  void ClientInterface::predispatch( )
+  {
+    logging();
+    //log ( Debug() , ThisLocation() );
+  }
+
+  // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  void ClientInterface::CreateFillingBuffer ( )
+  {
+    logging();
+    //log ( Debug() , ThisLocation() );
+
+    if ( mBuffers.size() )
     {
-      mCurrentFillingBuffers = NULL;
-      mCurrentDispatchBuffers = NULL;
+      return;
     }
-    else
+
+    log ( Debug() , "Adding new Buffers to the memory pool" );
+    Buffers lBuffers ( this->getMaxSendSize() );
+    mBuffers.insert ( mBuffers.end() , 10 , lBuffers );
+    mCurrentBuffers = mBuffers.begin();
+    mCurrentBuffers->clear();
+    this->preamble();
+  }
+
+  void ClientInterface::NextFillingBuffer ( )
+  {
+    logging();
+    //log ( Debug() , ThisLocation() );
+    //if there are no existing buffers in the pool, create them
+    CreateFillingBuffer ( );
+    mCurrentBuffers++;
+
+    if ( mCurrentBuffers == mBuffers.end() )
     {
-      mCurrentFillingBuffers = & mBuffers.back();
-      mCurrentDispatchBuffers = & mBuffers.front();
+      mCurrentBuffers = mBuffers.begin();
     }
+
+    //we will wait if the buffer that we are expecting to fill is still waiting for dispatch and validation
+    while ( true )
+    {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+
+      if ( & ( *mCurrentBuffers ) != mDispatchedBuffers.front() )
+      {
+        break;
+      }
+      else
+      {
+        log ( Warning() , "The fill queue has caught up with the dispatch queue - should implement a mechanism for expanding the memory pool to handle this case, but for now just wait for the dispatch queue to clear a bit" );
+        sleep ( 1 );
+      }
+    }
+
+    mCurrentBuffers->clear();
+    this->preamble();
   }
 
 

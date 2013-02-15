@@ -47,6 +47,12 @@
 namespace uhal
 {
 
+  namespace exception
+  {
+    class UnableToParseHeader : public exception {};
+  }
+
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class HostToTargetInspector
   {
@@ -88,7 +94,7 @@ namespace uhal
              )
           {
             log ( Error() , "Unable to parse send header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
-            throw 0;
+            throw exception::UnableToParseHeader();
           }
 
           switch ( mType )
@@ -201,7 +207,7 @@ namespace uhal
       {
         logging();
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
-        throw 0;
+        throw exception::UnableToParseHeader();
       }
 
       virtual void packet_header ( const uint32_t& aPacketHeader )
@@ -258,8 +264,8 @@ namespace uhal
                  mResponseGood )
              )
           {
-            log ( Error() , "Unable to parse send header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
-            throw 0;
+            log ( Error() , "Unable to parse reply header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
+            throw exception::UnableToParseHeader();
           }
 
           switch ( mType )
@@ -358,7 +364,7 @@ namespace uhal
       {
         logging();
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
-        throw 0;
+        throw exception::UnableToParseHeader();
       }
 
       virtual void packet_header ( const uint32_t& aPacketHeader )

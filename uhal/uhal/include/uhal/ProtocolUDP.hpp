@@ -159,7 +159,7 @@ namespace uhal
       void implementDispatch ();
 
 
-    private:	  
+    private:
       // /**
       // Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       // If multithreaded, block until all buffers have been sent, recieved and validated.

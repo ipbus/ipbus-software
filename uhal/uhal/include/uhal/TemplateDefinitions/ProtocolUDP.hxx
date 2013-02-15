@@ -38,6 +38,7 @@
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
 
+//#include "uhal/IPbusInspector.hpp"
 
 #include <sys/time.h>
 
@@ -151,6 +152,12 @@ namespace uhal
     mErrorCode = boost::asio::error::would_block;
     mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
 
+    /*
+    	HostToTargetInspector< 1 , 3 > lH2TInspector;
+    	std::vector<uint32_t>::const_iterator lBegin( (uint32_t*)(aBuffers->getSendBuffer()) );
+    	std::vector<uint32_t>::const_iterator lEnd( (uint32_t*)(aBuffers->getSendBuffer()+aBuffers->sendCounter()) );
+    	lH2TInspector.analyze ( lBegin , lEnd );
+    */
     do
     {
       mIOservice->run_one();
@@ -197,6 +204,12 @@ namespace uhal
       throw exception::ErrorInUdpCallback();
     }
 
+    /*
+    	TargetToHostInspector< 1 , 3 > lT2HInspector;
+    	std::vector<uint32_t>::const_iterator lBegin2( (uint32_t*)(& mReplyMemory[0]) );
+    	std::vector<uint32_t>::const_iterator lEnd2((uint32_t*)(& mReplyMemory[aBuffers->replyCounter()]) );
+    	lT2HInspector.analyze ( lBegin2 , lEnd2 );
+    */
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
@@ -219,12 +232,15 @@ namespace uhal
     }
     }
     */
+    log ( Debug() , ThisLocation() );
 
     if ( !mUDP.validate() )
     {
       log ( Error() , "Validation function reported an error!" );
       throw exception::ValidationError ();
     }
+
+    log ( Debug() , ThisLocation() );
   }
 
 
@@ -310,19 +326,9 @@ namespace uhal
   void UDP< InnerProtocol >::implementDispatch()
   {
     logging();
-    //log ( Debug() , ThisLocation() );
 #ifndef USE_UDP_MULTITHREADED
-    //log ( Debug() , ThisLocation() );
-    Buffers* lBuffers ( getCurrentDispatchBuffers() );
-    //log ( Debug() , ThisLocation() );
-
-    if ( lBuffers )
-    {
-      //log ( Debug() , ThisLocation() );
-      mDispatchWorker->dispatch ( lBuffers );
-    }
-
-    //log ( Debug() , ThisLocation() );
+    mDispatchWorker->dispatch ( & ( * ( this->mCurrentBuffers ) ) );
+    log ( Debug() , ThisLocation() );
 #endif
   }
 
@@ -330,17 +336,17 @@ namespace uhal
   template < typename InnerProtocol >
   Buffers* UDP< InnerProtocol >::getCurrentDispatchBuffers()
   {
+#ifdef USE_UDP_MULTITHREADED
     logging();
-    //log ( Debug() , ThisLocation() );
+    log ( Warning() , "This code is untested - " , ThisLocation() );
 
-    if ( this->mCurrentDispatchBuffers == this->mCurrentFillingBuffers )
+    if ( this->mDispatchedBuffers.size() )
     {
-      return NULL;
+      return & ( this->mDispatchedBuffers.front() );
     }
-    else
-    {
-      return this->mCurrentDispatchBuffers;
-    }
+
+#endif
+    return NULL;
   }
 
   template < typename InnerProtocol >

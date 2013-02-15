@@ -169,6 +169,7 @@ namespace uhal
       */
       void validate();
 
+      void clear();
 
     private:
       //! The number of bytes that are currently in the send buffer

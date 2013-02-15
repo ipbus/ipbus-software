@@ -97,6 +97,8 @@ namespace uhal
       */
       virtual uint64_t getTimeoutPeriod();
 
+    protected:
+
       virtual uint32_t getMaxSendSize();
       virtual uint32_t getMaxReplySize();
 

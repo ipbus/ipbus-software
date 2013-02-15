@@ -129,7 +129,7 @@ namespace uhal
   void TCP< InnerProtocol >::DispatchWorker::dispatch ( Buffers* aBuffers )
   {
     logging();
-    log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTCP.getTimeoutPeriod() ) );
+    // log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTCP.getTimeoutPeriod() ) );
 
     if ( ! mSocket->is_open() )
     {
@@ -335,17 +335,7 @@ namespace uhal
     logging();
     //log ( Debug() , ThisLocation() );
 #ifndef USE_TCP_MULTITHREADED
-    //log ( Debug() , ThisLocation() );
-    Buffers* lBuffers ( getCurrentDispatchBuffers() );
-    //log ( Debug() , ThisLocation() );
-
-    if ( lBuffers )
-    {
-      //log ( Debug() , ThisLocation() );
-      mDispatchWorker->dispatch ( lBuffers );
-    }
-
-    //log ( Debug() , ThisLocation() );
+    mDispatchWorker->dispatch ( & ( * ( this->mCurrentBuffers ) ) );
 #endif
   }
 
@@ -353,17 +343,17 @@ namespace uhal
   template < typename InnerProtocol >
   Buffers* TCP< InnerProtocol >::getCurrentDispatchBuffers()
   {
+#ifdef USE_TCP_MULTITHREADED
     logging();
-    //log ( Debug() , ThisLocation() );
+    log ( Warning() , "This code is untested - " , ThisLocation() );
 
-    if ( this->mCurrentDispatchBuffers == this->mCurrentFillingBuffers )
+    if ( this->mDispatchedBuffers.size() )
     {
-      return NULL;
+      return & ( this->mDispatchedBuffers.front() );
     }
-    else
-    {
-      return this->mCurrentDispatchBuffers;
-    }
+
+#endif
+    return NULL;
   }
 
   template < typename InnerProtocol >

@@ -287,11 +287,11 @@ namespace uhal
       */
       virtual void preamble( );
 
-	  /**
-      	Return the size of the preamble
-      */
-      virtual uint32_t getPreambleSize();  
-	  
+      /**
+        	Return the size of the preamble
+        */
+      virtual uint32_t getPreambleSize();
+
       /**
       	Finalize the buffer before it is transmitted
       */
@@ -327,24 +327,24 @@ namespace uhal
       //! A MutEx lock used to make sure the access functions are thread safe
       boost::mutex mMutex;
 
-      //! A queue of buffers for dispatch - buffers are pushed back and filled there and popped and dispatched from the front
+      //! A memory pool of buffers which will be dispatched
       std::deque < Buffers > mBuffers;
-
 
     protected:
       //! A pointer to a buffer-wrapper object
-      Buffers* mCurrentFillingBuffers;
+      std::deque < Buffers >::iterator mCurrentBuffers;
 
-      //! A pointer to a buffer-wrapper object
-      Buffers* mCurrentDispatchBuffers;
+      //! A queue of buffers that that have been dispatched and for which we are waiting for the transportation to complete and for them to be validated
+      std::deque < Buffers* > mDispatchedBuffers;
 
+    protected:
       //! the identifier of the target for this client
       std::string mId;
       //! a struct containing the full URI of the target for this client
       URI mUri;
 
-      void PushBackBuffers ();
-      void PopFrontBuffers();
+      void NextFillingBuffer ();
+      void CreateFillingBuffer ();
 
       virtual uint32_t getMaxSendSize() = 0;
       virtual uint32_t getMaxReplySize() = 0;

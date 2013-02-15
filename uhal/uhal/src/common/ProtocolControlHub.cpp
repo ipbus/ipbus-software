@@ -66,16 +66,16 @@ namespace uhal
     }
 
     std::pair< std::string , std::string > lIP;
-	
+
     try
     {
       boost::spirit::qi::phrase_parse (	lIt->second.begin() ,
                                         lIt->second.end(),
-                                        ( boost::spirit::qi::eps >  
-											* ( boost::spirit::qi::char_ - boost::spirit::qi::lit ( ":" ) ) >
-											boost::spirit::qi::lit ( ":" ) >
-											*boost::spirit::qi::char_
-										) ,
+                                        ( boost::spirit::qi::eps >
+                                          * ( boost::spirit::qi::char_ - boost::spirit::qi::lit ( ":" ) ) >
+                                          boost::spirit::qi::lit ( ":" ) >
+                                          *boost::spirit::qi::char_
+                                        ) ,
                                         boost::spirit::ascii::space ,
                                         lIP
                                       );
@@ -85,7 +85,6 @@ namespace uhal
       log ( Error() , "Expected a string of the form " , Quote ( "hostIP:port" ) , " or " , Quote ( "hostname:port" ) , " but received " , Quote ( lIt->second ) , "." );
       throw aExc;
     }
-
 
     std::string lAddr;
     uint16_t lPort;
@@ -110,7 +109,7 @@ namespace uhal
     }
 
     std::vector< uint32_t > lIPAddr;
-	
+
     try
     {
       boost::spirit::qi::phrase_parse (	lAddr.begin() ,

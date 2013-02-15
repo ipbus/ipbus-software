@@ -53,11 +53,10 @@ namespace uhal
     mTransactionCounter ( 0 )
   {
     logging();
-	std::pair< uint32_t , uint16_t > lPair( ExtractTargetID ( aUri ) );
-	mDeviceIPaddress = htonl ( lPair.first );
+    std::pair< uint32_t , uint16_t > lPair ( ExtractTargetID ( aUri ) );
+    mDeviceIPaddress = htonl ( lPair.first );
     mDevicePort = htons ( lPair.second );
-	
-    //log ( Debug() , ThisLocation() );
+    ////log ( Debug() , ThisLocation() );
   }
 
 
@@ -65,8 +64,7 @@ namespace uhal
   ControlHub< InnerProtocol >::~ControlHub()
   {
     logging();
-    //log ( Debug() , ThisLocation() );
-
+    ////log ( Debug() , ThisLocation() );
   }
 
 
@@ -74,6 +72,7 @@ namespace uhal
   void ControlHub< InnerProtocol >::preamble( )
   {
     logging();
+    //log ( Debug() , ThisLocation() );
     // -------------------------------------------------------------------------------------------------------------
     // 12 bytes form the preamble:
     // Byte-count (4 bytes) will be updated before transmission in predispatch
@@ -90,9 +89,7 @@ namespace uhal
     // -------------------------------------------------------------------------------------------------------------
     mPreambles.push_back ( tpreamble() );
     tpreamble* lPreambles = & mPreambles.back();
-
-	Buffers* lCurrentFillingBuffers( this->mCurrentFillingBuffers );
-	
+    std::deque < Buffers >::iterator lCurrentFillingBuffers ( this->mCurrentBuffers );
     lPreambles->mSendByteCountPtr = ( uint32_t* ) ( lCurrentFillingBuffers->send ( ( uint32_t ) ( 0 ) ) );
     lCurrentFillingBuffers->send ( mDeviceIPaddress );
     lCurrentFillingBuffers->send ( mDevicePort );
@@ -105,75 +102,77 @@ namespace uhal
     InnerProtocol::preamble();
   }
 
-  
-  
- template < typename InnerProtocol >
- 	uint32_t ControlHub< InnerProtocol >::getPreambleSize()
-	{
-		return InnerProtocol::getPreambleSize()+3;
-	}
 
-  
+
+  template < typename InnerProtocol >
+  uint32_t ControlHub< InnerProtocol >::getPreambleSize()
+  {
+    return InnerProtocol::getPreambleSize() +3;
+  }
+
+
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::predispatch( )
   {
     logging();
-	tpreamble& lPreambles = mPreambles.back();
+    //log ( Debug() , ThisLocation() );
 
-    uint32_t lByteCount ( this->mCurrentDispatchBuffers->sendCounter() );
-    *(lPreambles.mSendByteCountPtr) = htonl ( lByteCount-4 );
-    *(lPreambles.mSendByteCountPtr) = htons ( ( lByteCount-12 ) >>2 );
+    tpreamble& lPreambles = mPreambles.back();
+
+    uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
+    * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
+    * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-12 ) >>2 );
   }
-  
-  
-   template < typename InnerProtocol >
+
+
+  template < typename InnerProtocol >
   bool ControlHub< InnerProtocol >::validate ( uint8_t* aSendBufferStart ,
       uint8_t* aSendBufferEnd ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
     logging();
-
-	aReplyStartIt++;
     aReplyStartIt++;
+    aReplyStartIt++;
+    uint32_t lReplyIPaddress ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) );
 
-	uint32_t lReplyIPaddress( *(( uint32_t* )( aReplyStartIt->first )) );
-	
     if ( lReplyIPaddress != mDeviceIPaddress )
     {
       log ( Error() , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
             " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) );
+      mPreambles.pop_front();
       return false;
     }
 
     aReplyStartIt++;
-	uint16_t lReplyPort( *(( uint16_t* )( aReplyStartIt->first )) );
-	
+    uint16_t lReplyPort ( * ( ( uint16_t* ) ( aReplyStartIt->first ) ) );
+
     if ( lReplyPort != mDevicePort )
     {
       log ( Error() , "Returned Port number " , Integer ( lReplyPort ) ,
             " does not match that sent " , Integer ( mDevicePort ) );
+      mPreambles.pop_front();
       return false;
     }
 
     aReplyStartIt++;
-	uint16_t lErrorCode( *(( uint16_t* )( aReplyStartIt->first )) );
+    uint16_t lErrorCode ( * ( ( uint16_t* ) ( aReplyStartIt->first ) ) );
 
     if ( lErrorCode != 0 )
     {
       log ( Error() , "Control Hub reported error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ) );
+      mPreambles.pop_front();
       return false;
     }
 
-    aReplyStartIt++;
-
+    //aReplyStartIt++;
     mPreambles.pop_front();
-	
-    return InnerProtocol::validate ( ( ++aSendBufferStart ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
+    // log ( Info() , "Control Hub has validated the packet headers" );
+    return InnerProtocol::validate ( ( aSendBufferStart+=12 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
   }
-  
-  
-  
+
+
+
 
 
   template < typename InnerProtocol >

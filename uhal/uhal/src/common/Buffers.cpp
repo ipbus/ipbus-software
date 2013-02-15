@@ -159,6 +159,20 @@ namespace uhal
       lIt->valid ( true );
     }
   }
+
+  void Buffers::clear()
+  {
+    logging();
+    mSendCounter = 0 ;
+    mReplyCounter = 0 ;
+    mReplyBuffer.clear();
+    mValHeaders.clear();
+    mUnsignedValWords.clear();
+    mSignedValWords.clear();
+    mUnsignedValVectors.clear();
+    mSignedValVectors.clear();
+  }
+
 }
 
 

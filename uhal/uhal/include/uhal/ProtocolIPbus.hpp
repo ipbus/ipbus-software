@@ -73,20 +73,21 @@ namespace uhal
       */
       virtual ~IPbus();
 
+    protected:
       /**
-      	Add a preamble to an IPbus buffer
-      */
-      void preamble( );
+       	Add a preamble to an IPbus buffer
+       */
+      virtual void preamble( );
 
-	  /**
-      	Return the size of the preamble
-      */
-      virtual uint32_t getPreambleSize();  
-	  
+      /**
+        	Return the size of the preamble
+        */
+      virtual uint32_t getPreambleSize();
+
       /**
       	Finalize the buffer before it is transmitted
       */
-      void predispatch( );
+      virtual void predispatch( );
 
 
       /**
@@ -157,16 +158,17 @@ namespace uhal
       */
       virtual ~IPbus();
 
+    protected:
       /**
       	Add a preamble to an IPbus buffer
       */
-      void preamble( );
+      virtual void preamble( );
 
-	  /**
-      	Return the size of the preamble
-      */
-      virtual uint32_t getPreambleSize();  
-	  
+      /**
+        	Return the size of the preamble
+        */
+      virtual uint32_t getPreambleSize();
+
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version
       @param aType the type of the IPbus transaction
@@ -224,7 +226,7 @@ namespace uhal
       */
       bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
-	private:
+    private:
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint16_t mPacketCounter;
 

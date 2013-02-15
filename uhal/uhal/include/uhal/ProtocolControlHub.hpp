@@ -53,31 +53,31 @@
 namespace uhal
 {
 
- namespace exception
+  namespace exception
   {
     //! Exception class to handle the case where the received header does not match the expected header. Uses the base uhal::exception implementation of what()
     class XMLfileMissingRequiredParameters : public exception {};
   }
 
- /**
-        Extract an IP-address and port number from a URI object
-        @param aUri a URI object to be parsed
-        @return a pair containing an IP-address (first) and port number (second)
- */
+  /**
+         Extract an IP-address and port number from a URI object
+         @param aUri a URI object to be parsed
+         @return a pair containing an IP-address (first) and port number (second)
+  */
   std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri );
 
-  
+
   //! Transport protocol to transfer an IPbus buffer via ControlHub
   template < typename InnerProtocol >
   class ControlHub : public InnerProtocol
   {
 
     public:
-       /**
-      	Constructor
-      	@param aId the uinique identifier that the client will be given.
-      	@param aUri a struct containing the full URI of the target.
-      */
+      /**
+      Constructor
+      @param aId the uinique identifier that the client will be given.
+      @param aUri a struct containing the full URI of the target.
+            */
       ControlHub ( const std::string& aId, const URI& aUri );
 
       /**
@@ -85,14 +85,15 @@ namespace uhal
       */
       virtual ~ControlHub();
 
+    protected:
 
       /**
       	Add a preamble to an IPbus buffer
       */
       virtual void preamble( );
 
-      virtual uint32_t getPreambleSize(); 
-	  
+      virtual uint32_t getPreambleSize();
+
       /**
       	Finalize an IPbus buffer before it is transmitted
       */
@@ -104,8 +105,6 @@ namespace uhal
         */
       virtual bool validate ();
 
-
-    protected:
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected
       	@param aSendBufferStart a pointer to the start of the first word of IPbus data which was sent (i.e. with no preamble)
@@ -118,8 +117,8 @@ namespace uhal
                               uint8_t* aSendBufferEnd ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
-							  
-	
+
+
     private:
       //! The IP address of the target device that is connected to the Control Hub
       uint32_t mDeviceIPaddress;
