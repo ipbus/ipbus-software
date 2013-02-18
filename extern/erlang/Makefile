@@ -2,9 +2,9 @@
 # Makefile for ErlangOTP
 #
 
-CACTUS_ROOT = $(shell pwd)/../..
+BUILD_HOME = $(shell pwd)/../..
 
-include $(CACTUS_ROOT)/config/Makefile.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 Package = extern/erlang
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
@@ -44,7 +44,7 @@ _all:
 	if [ ! -f ${TARBALL_DIR}/.build_done ]; then                                                     \
 		mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};     \
 		echo "Extracting: ${TARBALL_FILE}";												 \
-		source $(CACTUS_ROOT)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvzf ${TARBALL_FILE}'; \
+		source $(BUILD_HOME)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvzf ${TARBALL_FILE}'; \
 		cd ${TARBALL_DIR};																\
 		./configure                                                         \
 			--prefix=${RPMBUILD_DIR}/SOURCES                                               \
@@ -59,7 +59,7 @@ rpm: _rpmall
 _rpmall: 
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
-		--define "_prefix ${INSTALL_PREFIX}" \
+		--define "_prefix ${CACTUS_ROOT}" \
 		--define "tarball_file ${TARBALL_FILE}" \
 		--define "sources_dir ${RPMBUILD_DIR}/SOURCES" \
 		--define "name ${PackageName}" \

@@ -2,9 +2,9 @@
 # Makefile for boost
 #
 
-CACTUS_ROOT = $(shell pwd)/../..
+BUILD_HOME = $(shell pwd)/../..
 
-include $(CACTUS_ROOT)/config/Makefile.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 Package = uhal/grammars
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
@@ -66,10 +66,10 @@ _rpmall:
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/${Package}}
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p include/${Package}/*.hpp ${RPMBUILD_DIR}/SOURCES/include/${Package}/.
-	
+
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
-			--define "_prefix ${INSTALL_PREFIX}"							\
+			--define "_prefix ${CACTUS_ROOT}"							\
 			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
 			--define "name ${PackageName}"								\
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\

@@ -2,9 +2,9 @@
 # Makefile for boost
 #
 
-CACTUS_ROOT = $(shell cd)\..\..
+BUILD_HOME = $(shell cd)\..\..
 
-include $(CACTUS_ROOT)\config\Makefile.win.macros
+include $(BUILD_HOME)\config\Makefile.win.macros
 
 Package = uhal\grammars
 PackagePath = $(CACTUS_RPM_ROOT)\${Package}
@@ -53,8 +53,6 @@ _all: make_dirs ${LIBRARY} copy_to_build
 
 make_dirs:
 	for %%a in (obj lib) do if not exist %%a mkdir %%a
-#	mkdir -p ${MSBUILD_DIR}\{RPMS\{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-#	mkdir -p ${MSBUILD_DIR}\SOURCES\{lib,include\uhal\grammars}
 
 
 ${LIBRARY}: ${OBJECT_FILES}
@@ -70,15 +68,4 @@ copy_to_build:
 	cp -p include\uhal\grammars\*.hpp ${MSBUILD_DIR}\SOURCES\include\uhal\grammars\.
 
 
-#rpm: _rpmall
-#_rpmall: 
-#	rpmbuild -bb -bl --buildroot=${MSBUILD_DIR}\BUILD						\
-#			--define  "_topdir ${MSBUILD_DIR}"						\
-#			--define "_prefix ${INSTALL_PREFIX}"							\
-#			--define "sources_dir ${MSBUILD_DIR}\SOURCES"					\
-#			--define "name ${PackageName}"								\
-#			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
-#			--define "release ${PACKAGE_RELEASE}"							\
-#			--define "packager ${Packager}"								\
-#			cactuscore-uhal-grammars.spec
 

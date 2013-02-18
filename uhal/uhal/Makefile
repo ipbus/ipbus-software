@@ -1,10 +1,6 @@
-# 
-# Makefile for uhal 
-#
+BUILD_HOME = $(shell pwd)/../..
 
-CACTUS_ROOT = $(shell pwd)/../..
-
-include $(CACTUS_ROOT)/config/Makefile.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 Package = uhal/uhal
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
@@ -88,7 +84,7 @@ _rpmall:
 	cp -p include/uhal/TemplateDefinitions/*.hxx ${RPMBUILD_DIR}/SOURCES/include/uhal/TemplateDefinitions/.
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
-			--define "_prefix ${INSTALL_PREFIX}"							\
+			--define "_prefix ${CACTUS_ROOT}"							\
 			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
 			--define "name ${PackageName}"								\
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\

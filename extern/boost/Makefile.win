@@ -2,9 +2,9 @@
 # Makefile for boost
 #
 
-CACTUS_ROOT = $(shell cd)\..\..
+BUILD_HOME = $(shell cd)\..\..
 
-include $(CACTUS_ROOT)\config\Makefile.win.macros
+include $(BUILD_HOME)\config\Makefile.win.macros
 
 Package = extern\boost
 PackagePath = $(CACTUS_RPM_ROOT)\${Package}
@@ -37,7 +37,6 @@ build: _all
 buildall: _all
 _all:
 
-#		mkdir -p ${MSBUILD_DIR}\{RPMS\{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}; 
 
 	if not exist ${TARBALL_NAME}\.windows_build_done ( \
 		echo "Extracting: ${TARBALL_FILE}" & \
@@ -58,17 +57,4 @@ _all:
 			install & \
 		echo %DATE% %TIME% > .windows_build_done \
 	)
-
-#rpm: _rpmall
-#_rpmall: 
-#	RPMBUILD -bb -bl --buildroot=${MSBUILD_DIR}\BUILD						\
-#			--define  "_topdir ${MSBUILD_DIR}"						\
-#			--define "_prefix ${INSTALL_PREFIX}"							\
-#			--define "tarball_file ${TARBALL_NAME}.tar.bz2"							\
-#			--define "sources_dir ${MSBUILD_DIR}\SOURCES"					\
-#			--define "name ${PackageName}"								\
-#			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
-#			--define "release ${PACKAGE_RELEASE}"							\
-#			--define "packager ${Packager}"								\
-#			cactuscore-extern-boost.spec
 

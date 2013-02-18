@@ -2,9 +2,9 @@
 # Makefile for pugixml
 #
 
-CACTUS_ROOT = $(shell pwd)/../..
+BUILD_HOME = $(shell pwd)/../..
 
-include $(CACTUS_ROOT)/config/Makefile.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 Package = extern/pugixml
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
@@ -50,7 +50,7 @@ rpm: _rpmall
 _rpmall: 
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD				\
 			--define  "_topdir ${RPMBUILD_DIR}"				\
-			--define "_prefix ${INSTALL_PREFIX}"				\
+			--define "_prefix ${CACTUS_ROOT}"				\
 			--define "zip_file ${ZIP_FILE}"					\
 			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"			\
 			--define "name ${PackageName}"					\

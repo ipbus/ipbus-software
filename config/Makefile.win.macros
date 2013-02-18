@@ -1,5 +1,6 @@
-INSTALL_PREFIX ?= \opt\cactus
-CACTUS_RPM_ROOT ?= $(CACTUS_ROOT)
+CACTUS_ROOT ?= \opt\cactus
+XDAQ_ROOT ?= \opt\xdaq
+CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
 #extern\erlang
 EXTERN_ERLANG_PREFIX = $(CACTUS_RPM_ROOT)\extern\erlang\MSBUILD\SOURCES

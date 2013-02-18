@@ -2,9 +2,9 @@
 # Makefile for uhal tests
 #
 
-CACTUS_ROOT = $(shell pwd)/../..
+BUILD_HOME = $(shell pwd)/../..
 
-include $(CACTUS_ROOT)/config/Makefile.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 Package = uhal/tests
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
@@ -128,7 +128,7 @@ _rpmall:
 	cp -p etc/${Package}/*.xml ${RPMBUILD_DIR}/SOURCES/etc/${Package}
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
-			--define "_prefix ${INSTALL_PREFIX}"							\
+			--define "_prefix ${CACTUS_ROOT}"							\
 			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
 			--define "name ${PackageName}"								\
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\

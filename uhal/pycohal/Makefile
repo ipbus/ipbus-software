@@ -1,17 +1,13 @@
-#
-# Makefile for pycohal
-#
+BUILD_HOME = $(shell pwd)/../..
 
-CACTUS_ROOT = $(shell pwd)/../..
-
-include $(CACTUS_ROOT)/config/Makefile.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 1
 
-export INSTALL_PREFIX
+export CACTUS_ROOT
 export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
 
 
@@ -53,7 +49,7 @@ INCLUDE_PATH = 	-Iinclude  \
 
 CPP_FLAGS = -g -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
 
-LINK_BINDINGS_FLAGS = -shared -fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic ${LIBRARY_PATH} -Wl,-R${INSTALL_PREFIX}/lib  ${BINDING_LIBRARIES}
+LINK_BINDINGS_FLAGS = -shared -fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic ${LIBRARY_PATH} -Wl,-R${CACTUS_ROOT}/lib  ${BINDING_LIBRARIES}
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update generator
 

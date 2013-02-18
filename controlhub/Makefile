@@ -19,9 +19,9 @@
 #########################################################################################
 
 
-CACTUS_ROOT = $(shell pwd)/..
+BUILD_HOME = $(shell pwd)/..
 
-include $(CACTUS_ROOT)/config/Makefile.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 Package = controlhub
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
@@ -55,8 +55,8 @@ ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
 ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
 ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
 else
-ERL=$(INSTALL_PREFIX)/bin/erl
-ERLC=$(INSTALL_PREFIX)/bin/erlc
+ERL=$(CACTUS_ROOT)/bin/erl
+ERLC=$(CACTUS_ROOT)/bin/erlc
 endif
 endif
 ######################################################################################
@@ -95,7 +95,7 @@ rpm: _rpmall
 _rpmall:
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
-		--define "_prefix ${INSTALL_PREFIX}" \
+		--define "_prefix ${CACTUS_ROOT}" \
 		--define "tarball_file ${TARBALL_FILE}" \
 		--define "sources_dir ${RPMBUILD_SOURCES_DIR}" \
 		--define "name ${PackageName}" \
@@ -175,6 +175,6 @@ ${RPMBUILD_SOURCES_DIR}/lib/controlhub: $(TARBALL_FILE)
 ${RPMBUILD_SOURCES_DIR}/bin: $(CONTROLHUB_BIN_SCRIPTS) ${RPMBUILD_SOURCES_DIR}/lib/controlhub
 	mkdir -p $@
 	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
-	sed s:%FINAL_ROOTDIR%:${INSTALL_PREFIX}/lib/controlhub: ${RPMBUILD_SOURCES_DIR}/lib/controlhub/erts*/bin/erl.src > $@/erl_controlhub 
+	sed s:%FINAL_ROOTDIR%:${CACTUS_ROOT}/lib/controlhub: ${RPMBUILD_SOURCES_DIR}/lib/controlhub/erts*/bin/erl.src > $@/erl_controlhub 
 	touch $@
 	 
