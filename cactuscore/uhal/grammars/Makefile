@@ -1,8 +1,4 @@
-#
-# Makefile for boost
-#
-
-BUILD_HOME = $(shell pwd)/../..
+BUILD_HOME = $(shell pwd)/../../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 

@@ -1,7 +1,7 @@
 PACKAGES = \
-	extern\boost \
-	extern\pugixml \
-	uhal 
+	cactuscore\extern\boost \
+	cactuscore\extern\pugixml \
+	cactuscore\uhal 
 
 VIRTUAL_PACKAGES = $(addsuffix \.virtual.Makefile,${PACKAGES})
 

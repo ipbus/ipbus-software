@@ -1,17 +1,17 @@
 ifeq ($(Set), uhal)
 PACKAGES = \
-        extern/boost \
-        extern/erlang \
-        extern/pugixml \
-        uhal \
-        controlhub
+        cactuscore/extern/boost \
+        cactuscore/extern/erlang \
+        cactuscore/extern/pugixml \
+        cactuscore/uhal \
+        cactuscore/controlhub
 else
 PACKAGES = \
-        extern/boost \
-        extern/erlang \
-        extern/pugixml \
-        uhal \
-        controlhub \
+        cactuscore/extern/boost \
+        cactuscore/extern/erlang \
+        cactuscore/extern/pugixml \
+        cactuscore/uhal \
+        cactuscore/controlhub \
 	\
         cactuscore/extern/icons \
         cactuscore/extern/dojo \

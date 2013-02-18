@@ -1,8 +1,4 @@
-#
-# Makefile for boost
-#
-
-BUILD_HOME = $(shell cd)\..\..
+BUILD_HOME = $(shell cd)\..\..\..
 
 include $(BUILD_HOME)\config\Makefile.win.macros
 

@@ -1,9 +1,9 @@
-BUILD_HOME = $(shell cd)\..\..
+BUILD_HOME = $(shell pwd)/../../..
 
-include $(BUILD_HOME)/config/Makefile.win.macros
+include $(BUILD_HOME)/config/Makefile.macros
 
 Package = uhal/tests
-PackagePath = $(CACTUS_RPM_ROOT)\${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-tests
 
 Packager = Andrew Rose, Marc Magrans de Arbil
@@ -13,13 +13,14 @@ PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 4
 PACKAGE_RELEASE = 1
 
-LIBRARY = lib\libcactus_uhal_tests.dll
+LIBRARY = lib/libcactus_uhal_tests.so
 LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 
 EXECUTABLE_SOURCES = \
 		src/common/DummyHardwareUdp.cxx \
 		src/common/DummyHardwareTcp.cxx \
+		src/common/WiresharkParser.cxx \
 		src/common/test_log.cxx \
 		src/common/test_dummy_single.cxx \
 		src/common/test_dummy_masking.cxx \
@@ -36,7 +37,7 @@ EXECUTABLE_SOURCES = \
 		src/common/PerfTester.cxx
 
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
-EXECUTABLES = $(patsubst src/common/%.cxx,exe/%.exe,${EXECUTABLE_SOURCES})
+EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
 
 LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
@@ -76,7 +77,7 @@ LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 ${LIBRARY_PATH} ${LIBRARIES}
 
 LINK_EXECUTABLE_FLAGS = -Wall -g -O3 ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} 
 
-MSBUILD_DIR = ${PackagePath}\MSBUILD
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
@@ -84,7 +85,7 @@ default: build
 
 clean: _cleanall
 _cleanall:
-	rm -rf ${MSBUILD_DIR}
+	rm -rf ${RPMBUILD_DIR}
 	rm -rf obj
 	rm -rf bin
 	rm -rf lib
@@ -92,31 +93,42 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: make_dirs ${LIBRARY} ${EXECUTABLES} copy_to_build
+_all: ${LIBRARY} ${EXECUTABLES}
 
-make_dirs:
-	for %%a in (exe obj lib) do if not exist %%a mkdir %%a
 
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
+	mkdir -p {bin,obj,lib}
 	g++ -c ${CPP_FLAGS}  $< -o $@
 
--include $(EXECUTABLE_SOURCES:.cxx=.d)	
-	
+-include $(EXECUTABLE_OBJECT_FILES:.o=.d)
+
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} -o $@
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
+	mkdir -p {bin,obj,lib}
 	g++ -c ${CPP_FLAGS} $< -o $@
 
--include $(LIBRARY_SOURCES:.cpp=.d)	
-	
-copy_to_build:
-	cp -p include\uhal\tests\*.hpp ${MSBUILD_DIR}\SOURCES\include\uhal\tests\.
-	cp -p exe\*.exe ${MSBUILD_DIR}\SOURCES\exe\uhal\tests\.
-	cp -p lib\*.so ${MSBUILD_DIR}\SOURCES\lib\.
-	cp -p etc\uhal\tests\*.xml ${MSBUILD_DIR}\SOURCES\etc\uhal\tests
+-include $(LIBRARY_OBJECT_FILES:.o=.d)
 
+rpm: _rpmall
+_rpmall: 
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin/${Package},lib,include/${Package},etc/${Package}}
+	cp -p include/${Package}/*.hpp ${RPMBUILD_DIR}/SOURCES/include/${Package}/.
+	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
+	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
+	cp -p etc/${Package}/*.xml ${RPMBUILD_DIR}/SOURCES/etc/${Package}
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
+			--define  "_topdir ${RPMBUILD_DIR}"						\
+			--define "_prefix ${CACTUS_ROOT}"							\
+			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
+			--define "name ${PackageName}"								\
+			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
+			--define "release ${PACKAGE_RELEASE}"							\
+			--define "packager ${Packager}"								\
+			${PackageName}.spec
 
