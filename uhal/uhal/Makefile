@@ -7,7 +7,7 @@ CACTUS_ROOT = $(shell pwd)/../..
 include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/uhal
-PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-uhal
 
 Packager = Andrew Rose
@@ -94,5 +94,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactuscore-uhal-uhal.spec
+			${PackageName}.spec
 

@@ -7,7 +7,7 @@ CACTUS_ROOT = $(shell pwd)/../..
 include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/tests
-PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-tests
 
 Packager = Andrew Rose, Marc Magrans de Arbil
@@ -121,11 +121,11 @@ ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 rpm: _rpmall
 _rpmall: 
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin/uhal/tests,lib,include/uhal/tests,etc/uhal/tests}
-	cp -p include/uhal/tests/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/tests/.
-	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/uhal/tests/.
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin/${Package},lib,include/${Package},etc/${Package}}
+	cp -p include/${Package}/*.hpp ${RPMBUILD_DIR}/SOURCES/include/${Package}/.
+	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
-	cp -p etc/uhal/tests/*.xml ${RPMBUILD_DIR}/SOURCES/etc/uhal/tests
+	cp -p etc/${Package}/*.xml ${RPMBUILD_DIR}/SOURCES/etc/${Package}
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\
@@ -134,5 +134,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactuscore-uhal-tests.spec
+			${PackageName}.spec
 

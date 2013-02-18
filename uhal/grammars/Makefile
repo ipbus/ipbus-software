@@ -7,7 +7,7 @@ CACTUS_ROOT = $(shell pwd)/../..
 include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = uhal/grammars
-PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-grammars
 
 Packager = Andrew Rose
@@ -63,9 +63,10 @@ ${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}
 rpm: _rpmall
 _rpmall: 
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/uhal/grammars}
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/${Package}}
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
-	cp -p include/uhal/grammars/*.hpp ${RPMBUILD_DIR}/SOURCES/include/uhal/grammars/.
+	cp -p include/${Package}/*.hpp ${RPMBUILD_DIR}/SOURCES/include/${Package}/.
+	
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${INSTALL_PREFIX}"							\
@@ -74,5 +75,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactuscore-uhal-grammars.spec
+			${PackageName}.spec
 

@@ -7,7 +7,7 @@ CACTUS_ROOT = $(shell pwd)/../..
 include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = extern/erlang
-PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-extern-erlang
 
 Packager = Robert Frazier

@@ -7,7 +7,7 @@ CACTUS_ROOT = $(shell cd)\..\..
 include $(CACTUS_ROOT)/config/Makefile.win.macros
 
 Package = uhal/tests
-PackagePath = $(CACTUS_BUILD_ROOT)\${Package}
+PackagePath = $(CACTUS_RPM_ROOT)\${Package}
 PackageName = cactuscore-uhal-tests
 
 Packager = Andrew Rose, Marc Magrans de Arbil

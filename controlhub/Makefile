@@ -24,7 +24,7 @@ CACTUS_ROOT = $(shell pwd)/..
 include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = controlhub
-PackagePath = $(CACTUS_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-controlhub
 
 Packager = Robert Frazier

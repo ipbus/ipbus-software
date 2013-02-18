@@ -7,7 +7,7 @@ CACTUS_ROOT = $(shell pwd)/../..
 include $(CACTUS_ROOT)/config/Makefile.macros
 
 Package = extern/boost
-PackagePath = $(CACTUS_BUILD_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-extern-boost
 
 Packager = Andrew Rose, Marc Magrans de Abril
@@ -63,5 +63,5 @@ _rpmall:
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
 			--define "release ${PACKAGE_RELEASE}"							\
 			--define "packager ${Packager}"								\
-			cactuscore-extern-boost.spec
+			${PackageName}.spec
 
