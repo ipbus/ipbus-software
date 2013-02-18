@@ -14,6 +14,7 @@ RELEASE_API_DIR     = join(RELEASE_BASE,"api")
 RELEASE_LOG_FILE    = join(RELEASE_LOG_DIR,"nightly.log")
 CACTUS_PREFIX       = "/opt/cactus"
 XDAQ_ROOT           = "/opt/xdaq"
+L1PAGE_ROOT	    = "/opt/l1page/tomcat/webapps/ROOT"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 #xdaq.repo file name as a function of platform
 XDAQ_REPO_FILE_NAME = "unknown"
@@ -42,7 +43,8 @@ ERROR_LIST        = ['TEST FAILED, ',
                      'FAILED',
                      'FAIL: test', 'ERROR: test', #pycohal
                      '*failed*', #controlhub
-                     'terminate called']
+                     'terminate called',
+		     'L1Page ERROR']
 
 IGNORE_ERROR_LIST = []
 
@@ -53,7 +55,8 @@ TEST_PASSED_LIST  = ["TEST PASSED",
                      " ... ok", #pycohal
                      "...ok", #controlhub
                      "Average read bandwidth",
-                     "Average write bandwidth"]
+                     "Average write bandwidth",
+                     "L1Page OK"]
 
 
 ####ENVIRONMENT
@@ -64,6 +67,7 @@ environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
 
 environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),
                                        join(CACTUS_PREFIX,"bin/pycohal/tests"),
+				       join(L1PAGE_ROOT,"test"),
                                        environ.get("PATH","")])
 
 ####COMMANDS
@@ -299,8 +303,10 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests"),
              "cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
              "sudo /sbin/service xdaqd stop",
-             "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"
+             "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev",
              #-----------------------------------------------------------------------------------------------------------------------
+	     #L1PAGE TESTS
+	     "l1pageTest.py"
              ]
 
 REPORT_CMDS = ["python %s %s" % ("nanalyzer.py","cactus.py"),
