@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE comps PUBLIC "-//Red Hat, Inc.//DTD Comps info//EN" "comps.dtd">
+<comps>
+<group>
+<id>cactus</id>
+<name>uhal</name>
+<default>true</default>
+<description>uHAL packages of the CACTUS YUM repository</description>
+<uservisible>true</uservisible>
+<grouplist></grouplist>
+<packagelist>
+<packagereq type="mandatory">cactuscore-extern-boost</packagereq>
+<packagereq type="mandatory">cactuscore-extern-erlang</packagereq>
+<packagereq type="mandatory">cactuscore-extern-pugixml</packagereq>
+<packagereq type="mandatory">cactuscore-uhal-grammars</packagereq>
+<packagereq type="mandatory">cactuscore-uhal-log</packagereq>
+<packagereq type="mandatory">cactuscore-uhal-uhal</packagereq>
+<packagereq type="mandatory">cactuscore-uhal-tests</packagereq>
+<packagereq type="mandatory">cactuscore-controlhub</packagereq>
+<packagereq type="mandatory">cactuscore-uhal-pycohal</packagereq>
+</packagelist>
+</group>
+
+<group>
+<id>triggersupervisor</id>
+<name>triggersupervisor</name>
+<default>true</default>
+<description>Trigger Supervisor Framework Packages of the CACTUS YUM repository</description>
+<uservisible>true</uservisible>
+<grouplist></grouplist>
+<packagelist>
+
+<packagereq type="mandatory">cactuscore-extern-dojo</packagereq>
+<packagereq type="mandatory">cactuscore-extern-icons</packagereq>
+
+<packagereq type="mandatory">cactuscore-tsxdaqclient</packagereq>
+
+<packagereq type="mandatory">cactuscore-tsajaxell</packagereq>
+<packagereq type="mandatory">cactuscore-tsajaxell-devel</packagereq>
+
+<packagereq type="mandatory">cactuscore-tsframework</packagereq>
+<packagereq type="mandatory">cactuscore-tsframework-devel</packagereq>
+
+<packagereq type="mandatory">cactuscore-tsitf</packagereq>
+<packagereq type="mandatory">cactuscore-tsitf-devel</packagereq>
+
+<packagereq type="mandatory">cactuscore-tstoolbox</packagereq>
+<packagereq type="mandatory">cactuscore-tstoolbox-devel</packagereq>
+
+<packagereq type="mandatory">cactuscore-tsl1ce</packagereq>
+<packagereq type="mandatory">cactuscore-tsl1ce-devel</packagereq>
+
+<packagereq type="mandatory">cactusprojects-subsystemxdaq</packagereq>
+<packagereq type="mandatory">cactusprojects-subsystemxdaq-devel</packagereq>
+<packagereq type="mandatory">cactusprojects-subsystemsupervisor</packagereq>
+<packagereq type="mandatory">cactusprojects-subsystemsupervisor-devel</packagereq>
+<packagereq type="mandatory">cactusprojects-subsystemworker</packagereq>
+<packagereq type="mandatory">cactusprojects-subsystemworker-devel</packagereq>
+
+<packagereq type="mandatory">cactusprojects-retriexternICUtils</packagereq>
+<packagereq type="mandatory">cactusprojects-retriexternICUtils-devel</packagereq>
+<packagereq type="mandatory">cactusprojects-retriReTRICell</packagereq>
+<packagereq type="mandatory">cactusprojects-retriReTRICell-devel</packagereq>
+
+<packagereq type="mandatory">cactusprojects-centralcell</packagereq>
+<packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
+
+<packagereq type="mandatory">cactusprojects-ttctsttccicell</packagereq>
+<packagereq type="mandatory">cactusprojects-ttctsttccicell-devel</packagereq>
+
+<packagereq type="mandatory">cactusprojects-ttctsttcmicell</packagereq>
+<packagereq type="mandatory">cactusprojects-ttctsttcmicell-devel</packagereq>
+
+<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell</packagereq>
+<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell-devel</packagereq>
+
+<packagereq type="mandatory">cactusprojects-ttctsttcutils</packagereq>
+<packagereq type="mandatory">cactusprojects-ttctsttcutils-devel</packagereq>
+
+</packagelist>
+</group>
+</comps>

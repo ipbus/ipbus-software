@@ -1,0 +1,14 @@
+[cactus-base]
+name=CACTUS Project Software Repository
+baseurl=http://www.cern.ch/cactus/release/2.0/slc6_i686/base/RPMS
+enabled=1
+gpgcheck=0
+
+
+[cactus-updates]
+name=CACTUS Project Software Repository Updates
+baseurl=http://www.cern.ch/cactus/release/2.0/slc6_i686/updates/RPMS
+enabled=1
+gpgcheck=0
+
+
