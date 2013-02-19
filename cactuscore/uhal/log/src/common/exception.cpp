@@ -36,7 +36,7 @@
 	@date 2012
 */
 
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 
 #ifdef __GNUG__
 #include <cxxabi.h>

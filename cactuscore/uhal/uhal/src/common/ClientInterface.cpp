@@ -165,7 +165,7 @@ namespace uhal
   bool ClientInterface::validate ( )
   {
     logging();
-    //log ( Debug() , ThisLocation() );
+    log ( Debug() , ThisLocation() );
     //check that the results are valid
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     //std::cout << mDispatchedBuffers.size() << std::endl;
@@ -181,9 +181,9 @@ namespace uhal
       lBuffer->validate();
     }
 
-    //////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
     mDispatchedBuffers.pop_front();
-    //////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
     return lRet;
   }
 
@@ -197,13 +197,13 @@ namespace uhal
   void ClientInterface::preamble()
   {
     logging();
-    //////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
   }
 
   void ClientInterface::predispatch( )
   {
     logging();
-    //////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
   }
 
   // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ namespace uhal
   void ClientInterface::CreateFillingBuffer ( )
   {
     logging();
-    //////log ( Debug() , ThisLocation() );
+    log ( Debug() , ThisLocation() );
 
     if ( mBuffers.size() )
     {
@@ -229,7 +229,7 @@ namespace uhal
   void ClientInterface::NextFillingBuffer ( )
   {
     logging();
-    //////log ( Debug() , ThisLocation() );
+    log ( Debug() , ThisLocation() );
     //if there are no existing buffers in the pool, create them
     CreateFillingBuffer ( );
     mCurrentBuffers++;
@@ -244,6 +244,11 @@ namespace uhal
     {
       boost::lock_guard<boost::mutex> lLock ( mMutex );
 
+	  if( !mDispatchedBuffers.size() )
+	  {
+		break;
+	  }
+	  
       if ( & ( *mCurrentBuffers ) != mDispatchedBuffers.front() )
       {
         break;
@@ -251,7 +256,6 @@ namespace uhal
       else
       {
         log ( Warning() , "The fill queue has caught up with the dispatch queue - should implement a mechanism for expanding the memory pool to handle this case, but for now just wait for the dispatch queue to clear a bit" );
-        sleep ( 1 );
       }
     }
 

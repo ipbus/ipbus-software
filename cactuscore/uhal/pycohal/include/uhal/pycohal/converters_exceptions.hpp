@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 
 #include "boost/python.hpp"
 #include "boost/python/converter/rvalue_from_python_data.hpp"

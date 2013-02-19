@@ -40,7 +40,7 @@
 #ifndef _uhal_Node_hpp_
 #define _uhal_Node_hpp_
 
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
 #include "uhal/Utilities.hpp"

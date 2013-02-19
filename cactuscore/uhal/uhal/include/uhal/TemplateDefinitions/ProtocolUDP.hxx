@@ -237,7 +237,7 @@ namespace uhal
       throw exception::ValidationError ();
     }
 
-    ////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
   }
 
 
@@ -246,7 +246,7 @@ namespace uhal
   void UDP< InnerProtocol >::DispatchWorker::CheckDeadline()
   {
     logging();
-    //////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
 
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
@@ -282,7 +282,7 @@ namespace uhal
 #endif
   {
     logging();
-    //////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
   }
 
 
@@ -290,7 +290,7 @@ namespace uhal
   UDP< InnerProtocol >::~UDP()
   {
     logging();
-    //////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
 
     try
     {
@@ -325,7 +325,7 @@ namespace uhal
     logging();
 #ifndef USE_UDP_MULTITHREADED
     mDispatchWorker->dispatch ( & ( * ( this->mCurrentBuffers ) ) );
-    ////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
 #endif
   }
 

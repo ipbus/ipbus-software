@@ -40,7 +40,7 @@
 #ifndef _uhal_ConnectionManager_hpp_
 #define _uhal_ConnectionManager_hpp_
 
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 #include "uhal/HwInterface.hpp"
 #include "uhal/Utilities.hpp"
 

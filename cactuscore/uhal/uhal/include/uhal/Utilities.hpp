@@ -70,7 +70,7 @@
 #include "pugixml/pugixml.hpp"
 
 #include "uhal/log/log.hpp"
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 
 #ifdef __GNUC__
 #include <ext/hash_map>

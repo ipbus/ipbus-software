@@ -40,7 +40,7 @@
 #ifndef _uhal_ValMem_hpp_
 #define _uhal_ValMem_hpp_
 
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
 #include <boost/shared_ptr.hpp>
 

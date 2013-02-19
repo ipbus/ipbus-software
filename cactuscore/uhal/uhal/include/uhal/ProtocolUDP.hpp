@@ -40,7 +40,7 @@
 #define _uhal_ProtocolUDP_hpp_
 
 #include "uhal/ClientInterface.hpp"
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 #include "uhal/log/log.hpp"
 
 #include <iostream>

@@ -256,7 +256,7 @@ namespace uhal
   void TCP< InnerProtocol >::DispatchWorker::CheckDeadline()
   {
     logging();
-    ////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
 
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
@@ -292,7 +292,7 @@ namespace uhal
 #endif
   {
     logging();
-    ////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
   }
 
 
@@ -300,7 +300,7 @@ namespace uhal
   TCP< InnerProtocol >::~TCP()
   {
     logging();
-    ////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
 
     try
     {
@@ -333,7 +333,7 @@ namespace uhal
   void TCP< InnerProtocol >::implementDispatch()
   {
     logging();
-    ////log ( Debug() , ThisLocation() );
+    //log ( Debug() , ThisLocation() );
 #ifndef USE_TCP_MULTITHREADED
     mDispatchWorker->dispatch ( & ( * ( this->mCurrentBuffers ) ) );
 #endif

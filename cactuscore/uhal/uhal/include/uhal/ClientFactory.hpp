@@ -40,7 +40,7 @@
 #ifndef _uhal_ClientFactory_hpp_
 #define _uhal_ClientFactory_hpp_
 
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/Utilities.hpp"
 #include "uhal/log/log.hpp"

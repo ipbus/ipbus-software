@@ -15,7 +15,7 @@ PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_log.so
 
-FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp)
+FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp) src/common/exception.cpp
 
 #BACKEND_SOURCES = $(wildcard src/common/log_backend.files.cpp)
 BACKEND_SOURCES = $(wildcard src/common/log_backend.colour_terminal.cpp)

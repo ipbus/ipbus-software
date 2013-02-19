@@ -40,7 +40,7 @@
 #ifndef _uhal_NodeTreeBuilder_hpp_
 #define _uhal_NodeTreeBuilder_hpp_
 
-#include "uhal/exception.hpp"
+#include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/Node.hpp"
 
