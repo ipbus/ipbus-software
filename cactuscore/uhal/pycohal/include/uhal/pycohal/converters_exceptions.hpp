@@ -39,7 +39,7 @@ namespace pycohal
 
   // EXCEPTIONS //
 
-  class PycohalLogLevelEnumError : public uhal::exception::exception {  };
+  ExceptionClass ( PycohalLogLevelEnumError , "Exception class to handle errors in translating logging levels" );
 
   PyObject* create_exception_class ( const std::string& excName, PyObject* baseTypeObj = PyExc_Exception );
 

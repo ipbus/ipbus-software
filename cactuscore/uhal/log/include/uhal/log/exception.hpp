@@ -41,7 +41,6 @@
 
 #include <exception>
 #include <string>
-#include <sstream>
 #include <map>
 #include <list>
 #include "uhal/log/log_inserters.location.hpp"
@@ -49,7 +48,7 @@
 
 
 #define ExceptionClass( ClassName , ClassDescription )\
- class ClassName : public exception {\
+ class ClassName : public uhal::exception::exception {\
  public:\
  ClassName() : exception() { create(); }\
  std::string description() const throw() { return std::string( ClassDescription ); } \
@@ -58,22 +57,38 @@
 namespace uhal
 {
 
-  class exception_helper;
-
   //! A namespace for all exceptions to live in - this will hopefully make documentation a bit clearer
   namespace exception
   {
-  
+
+    class exception;
+
+    class exception_helper
+    {
+        friend class exception;
+
+      private:
+        exception_helper ( exception* aExc );
+
+      public:
+        ~exception_helper();
+
+      private:
+        exception* mExc;
+        std::list< Location > mHistory;
+        std::string mMessages;
+    };
+
     //! An abstract base exception class providing an interface to a throw/rethrow mechanism which will allow us to catch the base type and rethrow the derived type
     class exception : public std::exception
     {
-	  
-      public:  
+
+      public:
         /**
         	Constructor
         */
         exception ();
-		
+
         /**
         	Destructor
         */
@@ -85,35 +100,22 @@ namespace uhal
         	@return the error message associated with an exception
         */
         virtual const char* what() const throw();
-		
-	    virtual std::string description() const throw() = 0;	
-		
-      protected:
-		void create() throw();
-		
-      private:
-		static std::string mMessage;
 
-		static std::map< boost::thread::id , std::list<exception_helper> > mExceptions;
+        virtual std::string description() const throw() = 0;
+
+      protected:
+        void create() throw();
+
+      private:
+        typedef std::map< boost::thread::id , std::list<exception_helper> > map_type;
+
+        static std::string mMessage;
+        static map_type mExceptions;
     };
 
 
-	class exception_helper
-	{
-		friend class exception;
-		
-	  private:
-	    exception_helper( exception* aExc );
 
-  	  public:
-  	    ~exception_helper();
-		
-	  private:	
-		exception* mExc;
-		std::list< Location > mHistory;
-		std::stringstream mMessages;
-	};
-	
+
   }
 }
 

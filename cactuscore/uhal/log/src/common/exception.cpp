@@ -37,6 +37,7 @@
 */
 
 #include "uhal/log/exception.hpp"
+#include "boost/lexical_cast.hpp"
 
 #ifdef __GNUG__
 #include <cxxabi.h>
@@ -55,16 +56,35 @@ namespace uhal
 
     const char* exception::what() const throw()
     {
-		return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
+      for ( map_type::iterator lIt = mExceptions.begin(); lIt != mExceptions.end(); ++lIt )
+      {
+        mMessage += "Thread ";
+        mMessage += boost::lexical_cast<std::string> ( lIt->first );
+        mMessage += ":\n";
+
+        uint32_t i(0);
+        for ( std::list<exception_helper>::iterator lIt2 = lIt->second.begin() ; lIt2 != lIt->second.end() ; ++ lIt2, ++i )
+        {
+          mMessage += " - Exception ";
+          mMessage += boost::lexical_cast<std::string> ( i );
+          mMessage += ":\n";
+
+          mMessage += lIt2->mMessages;
+        }
+      }
+
+      return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
     }
 
-	void exception::create() throw()
-	{
-		exception_helper( this );
-	}
-	
+    void exception::create() throw()
+    {
+      exception_helper lExcHlpr ( this );
+      mExceptions[ boost::this_thread::get_id() ].push_back ( lExcHlpr );
+    }
 
-	std::string exception::mMessage = std::string();
+
+    std::string exception::mMessage = std::string();
+    exception::map_type exception::mExceptions = exception::map_type();
   }
 }
 
@@ -74,21 +94,26 @@ namespace uhal
   namespace exception
   {
 
-    exception_helper::exception_helper( exception* aExc ) :
-		mExc(aExc)
+    exception_helper::exception_helper ( exception* aExc ) :
+      mExc ( aExc )
     {
+      mMessages += "   - Exception of type: ";
 #ifdef __GNUG__
       // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
       int lStatus ( 0 );
-      mMessages << " - Exception of type: " << abi::__cxa_demangle ( typeid ( *mExc ).name() , 0 , 0 , &lStatus ) << "\n";
+      mMessages += abi::__cxa_demangle ( typeid ( *mExc ).name() , 0 , 0 , &lStatus );
 #else
-       mMessages << " - Exception of type: " << typeid ( *mExc ).name() << "\n";
-#endif	
-       mMessages << " - Description: " << mExc->description() << "\n";
-	}
+      mMessages += typeid ( *mExc ).name();
+#endif
+      mMessages += '\n';
+      mMessages += "   - Description: ";
+      mMessages += mExc->description();
+      mMessages += '\n';
+    }
 
     exception_helper::~exception_helper()
-	{}
-	
+    {}
+
   }
 }
+
