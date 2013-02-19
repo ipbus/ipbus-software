@@ -25,7 +25,7 @@ def system(cmd, exception = True, log=True):
             sys.stdout.write(nextline)
             sys.stdout.flush()
 
-        if p.poll() != None:
+        if p.poll()!= None and not nextline:
             break
 
     if p.poll():
