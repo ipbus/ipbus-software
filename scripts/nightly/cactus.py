@@ -82,7 +82,7 @@ UNINSTALL_CMDS = ["sudo yum -y groupremove cactus",
                   "sudo pkill -f \"DummyHardwareUdp.exe\" &> /dev/null",
                   "sudo pkill -f \"cactus.*erlang\" &> /dev/null",
                   "sudo pkill -f \"cactus.*controlhub\" &> /dev/null",
-                  "sudo pkill -f \"java\" &> /dev/null",
+                  "sudo pkill -f \"jsvc\" &> /dev/null",
                   "sudo rm -rf %s" % BUILD_HOME,
                   "sudo mkdir -p %s" % BUILD_HOME,
                   "sudo chmod -R 777 %s" % BUILD_HOME
