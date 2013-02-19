@@ -1,6 +1,8 @@
+import time
 import logging
 import subprocess
 
+TIMEOUT_S = 10*60
 
 def system(cmd, exception = True, log=True):
     '''Execute shell commands
@@ -12,26 +14,37 @@ def system(cmd, exception = True, log=True):
     '''
 
     p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
-    content, err = p.communicate()
-    error = p.wait()
+    content = p.communicate()[0]
 
-    if error:
+    start = time.time()
+    current=start
+    global TIMEOUT_S
+    while ((current-start)<TIMEOUT_S and p.poll() != None):
+        time.sleep(1)
+        current = time.time()
+
+    if p.poll() == None:
+        tmp = "%s (error=timeout)" % cmd
         if exception:
-            tmp = "%s (error=%s)" % (cmd, error)
-            if len(content):
-                tmp = "%s:\n %s" % (tmp, content)
-            raise Exception(tmp)
+            raise Exception("%s (error=timeout)" % cmd)
         else:
-            if len(content):
-                tmp = "%s (error=%s): \n%s" % (cmd, error, content)
-                logger.error(tmp)
+            logger.error("%s (error=timeout)" % cmd)
+
+    if p.poll():
+        tmp = "%s (error=%s)" % (cmd, p.poll())
+        if len(content):
+            tmp = "%s:\n%s" % (tmp, content)
+        if exception:
+            raise Exception(tmp)
+        elif log:
+            logger.error(tmp)
     elif log:
-        if content:
-            logger.info(cmd + "\n" + content)
+        if len(content):
+            logger.info("%s\n%s" % (cmd,content))
         else:
             logger.info(cmd)
 
-    return (content, error)
+    return (content, p.poll())
 
 def log_setup():
     global logger
