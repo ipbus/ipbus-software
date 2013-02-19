@@ -56,10 +56,10 @@ namespace uhal
 {
   namespace exception
   {
-    //! Exception class to handle the case of attempted access on unvalidated memory. Uses the base uhal::exception implementation of what()
-    class NonValidatedMemory : public exception {};
-    //! Exception class to handle the case of attempted modification of validated memory. Uses the base uhal::exception implementation of what()
-    class ValMemImutabilityViolation : public exception {};
+    //! Exception class to handle the case of attempted access on unvalidated memory.
+    ExceptionClass ( NonValidatedMemory , "Exception class to handle the case of attempted access on unvalidated memory." );
+    //! Exception class to handle the case of attempted modification of validated memory.
+    ExceptionClass ( ValMemImutabilityViolation , "Exception class to handle the case of attempted modification of validated memory." );
   }
 
   // Forward declare ClientInterface so it can be our friend

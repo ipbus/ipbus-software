@@ -68,14 +68,14 @@ namespace uhal
   {
     // //! Exception class to handle the case where an Atomic Transaction was requested but could not be performed. Uses the base uhal::exception implementation of what()
     // class AtomicTransactionSize : public exception {};
-    //! Exception class to handle the case where pinging of a client failed. Uses the base uhal::exception implementation of what()
-    class PingFailed : public exception {};
+    //! Exception class to handle the case where pinging of a client failed.
+    ExceptionClass ( PingFailed , "Exception class to handle the case where pinging of a client failed." );
 
-    //! Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds. Uses the base uhal::exception implementation of what()
-    class BitsSetWhichAreForbiddenByBitMask : public exception {};
+    //! Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds.
+    ExceptionClass ( BitsSetWhichAreForbiddenByBitMask , "Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds." );
 
-    //! Exception class to handle the case where we were unable to validate the packet. Uses the base uhal::exception implementation of what()
-    class ValidationError : public exception {};
+    //! Exception class to handle the case where we were unable to validate the packet.
+    ExceptionClass ( ValidationError , "Exception class to handle the case where we were unable to validate the packet." );
   }
 
   //! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing funcationality

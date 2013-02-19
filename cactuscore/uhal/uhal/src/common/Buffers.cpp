@@ -101,8 +101,8 @@ namespace uhal
 
   // void Buffers::add ( const ValWord< int32_t >& aValMem )
   // {
-    // logging();
-    // mSignedValWords.push_back ( aValMem );
+  // logging();
+  // mSignedValWords.push_back ( aValMem );
   // }
 
   void Buffers::add ( const ValVector< uint32_t >& aValMem )
@@ -113,8 +113,8 @@ namespace uhal
 
   // void Buffers::add ( const ValVector< int32_t >& aValMem )
   // {
-    // logging();
-    // mSignedValVectors.push_back ( aValMem );
+  // logging();
+  // mSignedValVectors.push_back ( aValMem );
   // }
 
   uint8_t* Buffers::getSendBuffer()
@@ -146,7 +146,7 @@ namespace uhal
 
     // for ( std::deque< ValWord< int32_t > >::iterator lIt = mSignedValWords.begin() ; lIt != mSignedValWords.end() ; ++lIt )
     // {
-      // lIt->valid ( true );
+    // lIt->valid ( true );
     // }
 
     for ( std::deque< ValVector< uint32_t > >::iterator lIt = mUnsignedValVectors.begin() ; lIt != mUnsignedValVectors.end() ; ++lIt )
@@ -156,7 +156,7 @@ namespace uhal
 
     // for ( std::deque< ValVector< int32_t > >::iterator lIt = mSignedValVectors.begin() ; lIt != mSignedValVectors.end() ; ++lIt )
     // {
-      // lIt->valid ( true );
+    // lIt->valid ( true );
     // }
   }
 

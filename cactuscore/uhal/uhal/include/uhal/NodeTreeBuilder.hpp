@@ -66,27 +66,27 @@ namespace uhal
 {
   namespace exception
   {
-    //! Exception class to handle the case where creation of a node was attempted without it having a UID. Uses the base uhal::exception implementation of what()
-    class NodeMustHaveUID : public exception {};
-    //! Exception class to handle the case where too many or two few address files are specified. Uses the base uhal::exception implementation of what()
-    class IncorrectAddressTableFileCount : public exception {};
-    //! Exception class to handle the case where the address file failed to open. Uses the base uhal::exception implementation of what()
-    class FailedToOpenAddressTableFile : public exception {};
-    //! Exception class to handle the case where an incremental node is specified without a size attribute. Uses the base uhal::exception implementation of what()
-    class IncrementalNodeRequiresSizeAttribute : public exception {};
-    //! Exception class to handle the case where a memory block has a size which would exceed the available register space. Uses the base uhal::exception implementation of what()
-    class ArraySizeExceedsRegisterBound : public exception {};
+    //! Exception class to handle the case where creation of a node was attempted without it having a UID.
+    ExceptionClass ( NodeMustHaveUID , "Exception class to handle the case where creation of a node was attempted without it having a UID." );
+    //! Exception class to handle the case where too many or two few address files are specified.
+    ExceptionClass ( IncorrectAddressTableFileCount , "Exception class to handle the case where too many or two few address files are specified." );
+    //! Exception class to handle the case where the address file failed to open.
+    ExceptionClass ( FailedToOpenAddressTableFile , "Exception class to handle the case where the address file failed to open." );
+    //! Exception class to handle the case where an incremental node is specified without a size attribute.
+    ExceptionClass ( IncrementalNodeRequiresSizeAttribute , "Exception class to handle the case where an incremental node is specified without a size attribute." );
+    //! Exception class to handle the case where a memory block has a size which would exceed the available register space.
+    ExceptionClass ( ArraySizeExceedsRegisterBound , "Exception class to handle the case where a memory block has a size which would exceed the available register space." );
 
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-    //! Exception class to handle the case where two addresses overlap. Uses the base uhal::exception implementation of what()
-    class AddressSpaceOverlap : public exception {};
+    //! Exception class to handle the case where two addresses overlap.
+    ExceptionClass ( AddressSpaceOverlap , "Exception class to handle the case where two addresses overlap." );
 #endif
 
-    //! Exception class to handle the case when someone tries to give a block access node a child. Uses the base uhal::exception implementation of what()
-    class BlockAccessNodeCannotHaveChild : public exception {};
+    //! Exception class to handle the case when someone tries to give a block access node a child.
+    ExceptionClass ( BlockAccessNodeCannotHaveChild , "Exception class to handle the case when someone tries to give a block access node a child." );
 
-    //! Exception class to handle the case when someone tries to give a bit-masked node a child. Uses the base uhal::exception implementation of what()
-    class MaskedNodeCannotHaveChild : public exception {};
+    //! Exception class to handle the case when someone tries to give a bit-masked node a child.
+    ExceptionClass ( MaskedNodeCannotHaveChild , "Exception class to handle the case when someone tries to give a bit-masked node a child." );
 
     // //! Exception class to handle the case when a node has both masked and unmasked children. Uses the base uhal::exception implementation of what()
     // class BothMaskedAndUnmaskedChildren : public exception {};
@@ -96,8 +96,8 @@ namespace uhal
     // class ChildHasAddressOverlap : public exception {};
     // //! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
     // class ChildHasAddressMaskOverlap : public exception {};
-    //! Exception class to handle the case where a class is requested which does not exist in the class factory. Uses the base uhal::exception implementation of what()
-    class LabelUnknownToClassFactory : public exception {};
+    //! Exception class to handle the case where a class is requested which does not exist in the class factory.
+    ExceptionClass ( LabelUnknownToClassFactory , "Exception class to handle the case where a class is requested which does not exist in the class factory." );
   }
 
   template< typename T > class RegistrationHelper;

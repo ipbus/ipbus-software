@@ -65,12 +65,12 @@ namespace uhal
 
   namespace exception
   {
-    //! Exception class to handle the case where the TCP connection timed out. Uses the base uhal::exception implementation of what()
-    class TcpTimeout : public exception {};
-    //! Exception class to handle the case where the error flag was raised in the asynchronous callback system. Uses the base uhal::exception implementation of what()
-    class ErrorInTcpCallback : public exception {};
-    //! Exception class to handle a failure to create a TCP socket. Uses the base uhal::exception implementation of what()
-    class ErrorAtTcpSocketCreation : public exception {};
+    //! Exception class to handle the case where the TCP connection timed out.
+    ExceptionClass ( TcpTimeout , "Exception class to handle the case where the TCP connection timed out." );
+    //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
+    ExceptionClass ( ErrorInTcpCallback , "Exception class to handle the case where the error flag was raised in the asynchronous callback system." );
+    //! Exception class to handle a failure to create a TCP socket.
+    ExceptionClass ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." );
   }
 
   //! Transport protocol to transfer an IPbus buffer via TCP

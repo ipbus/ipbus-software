@@ -244,11 +244,11 @@ namespace uhal
     {
       boost::lock_guard<boost::mutex> lLock ( mMutex );
 
-	  if( !mDispatchedBuffers.size() )
-	  {
-		break;
-	  }
-	  
+      if ( !mDispatchedBuffers.size() )
+      {
+        break;
+      }
+
       if ( & ( *mCurrentBuffers ) != mDispatchedBuffers.front() )
       {
         break;

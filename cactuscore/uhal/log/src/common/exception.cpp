@@ -47,29 +47,48 @@ namespace uhal
   namespace exception
   {
 
-    exception::exception ( const std::string& aExc ) :
-      std::exception () ,
-      mMessage ( aExc )
+    exception::exception ( ) :
+      std::exception ()
     {}
 
     exception::~exception() throw() {}
 
     const char* exception::what() const throw()
     {
-      if ( mMessage.size() )
-      {
-        return mMessage.c_str();
-      }
+		return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
+    }
 
+	void exception::create() throw()
+	{
+		exception_helper( this );
+	}
+	
+
+	std::string exception::mMessage = std::string();
+  }
+}
+
+
+namespace uhal
+{
+  namespace exception
+  {
+
+    exception_helper::exception_helper( exception* aExc ) :
+		mExc(aExc)
+    {
 #ifdef __GNUG__
       // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
       int lStatus ( 0 );
-      return abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
+      mMessages << " - Exception of type: " << abi::__cxa_demangle ( typeid ( *mExc ).name() , 0 , 0 , &lStatus ) << "\n";
 #else
-      return typeid ( *this ).name();
-#endif
-    }
+       mMessages << " - Exception of type: " << typeid ( *mExc ).name() << "\n";
+#endif	
+       mMessages << " - Description: " << mExc->description() << "\n";
+	}
 
-
+    exception_helper::~exception_helper()
+	{}
+	
   }
 }

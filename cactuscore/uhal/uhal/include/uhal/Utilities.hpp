@@ -107,8 +107,8 @@ namespace uhal
 {
   namespace exception
   {
-    //! Exception class to handle the case where the string will not fit into a 32-bit number. Uses the base uhal::exception implementation of what()
-    class StringNumberWillNotFitInto32BitNumber : public exception {};
+    //! Exception class to handle the case where the string will not fit into a 32-bit number.
+    ExceptionClass ( StringNumberWillNotFitInto32BitNumber , "Exception class to handle the case where the string will not fit into a 32-bit number." );
   }
 
   namespace utilities

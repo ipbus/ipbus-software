@@ -49,7 +49,8 @@ namespace uhal
 
   namespace exception
   {
-    class UnableToParseHeader : public exception {};
+    //! Exception class to handle the case where we are unable to parse a badly formed IPbus header.
+    ExceptionClass ( UnableToParseHeader , "Exception class to handle the case where we are unable to parse a badly formed IPbus header." );
   }
 
 
