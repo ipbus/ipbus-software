@@ -1,3 +1,4 @@
+import string
 import sys
 import logging
 import subprocess
@@ -18,7 +19,7 @@ def system(cmd, exception = True, log=True):
     p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
     content = ""
     while True:
-        nextline = p.stdout.readline()
+        nextline = filter(lambda x: x in string.printable,p.stdout.readline())
         if nextline:
             content = content + nextline
             sys.stdout.write(nextline)
