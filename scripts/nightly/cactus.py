@@ -307,7 +307,12 @@ TEST_CMDS = ["sudo chmod +w /var/log",
              "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev",
              #-----------------------------------------------------------------------------------------------------------------------
 	     #L1PAGE TESTS
-	     "l1pageTest.py"
+             "mkdir -p %s" % join(environ["HOME"], "triggerpro/l1page/data"),
+             "sed -i 's/%s/%s/g' %s" % ("\/centraltspro","", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
+             "sed -i 's/%s/%s/g' %s" % ("nfshome0",environ["HOME"],join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
+             "sed -i 's/%s/%s/g' %s" % ("log4j.appender","\#log4j.appender", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/WEB-INF/classes/log4j.properties")),
+	     "l1pageTest.py",
+             "rm -rf %s" % join(environ["HOME"], "triggerpro/l1page/data")
              ]
 
 REPORT_CMDS = ["python %s %s" % ("nanalyzer.py","cactus.py"),
