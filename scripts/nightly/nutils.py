@@ -19,11 +19,13 @@ def system(cmd, exception = True, log=True):
     content = ""
     while True:
         nextline = p.stdout.readline()
-        content = content + nextline
-        if nextline == '' and p.poll() != None:
+        if nextline:
+            content = content + nextline
+            sys.stdout.write(nextline)
+            sys.stdout.flush()
+
+        if p.poll() != None:
             break
-        sys.stdout.write(nextline)
-        sys.stdout.flush()
 
     if p.poll():
         tmp = "%s (error=%s)" % (cmd, p.poll())
@@ -31,7 +33,7 @@ def system(cmd, exception = True, log=True):
             raise Exception(tmp)
         elif log:
             logger.error(tmp)
-
+        
     return (content, p.poll())
 
 def log_setup():
