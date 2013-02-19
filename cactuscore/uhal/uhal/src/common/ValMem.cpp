@@ -631,9 +631,13 @@ namespace uhal
   // }
 
 
-
+  template class ValWord< uint8_t >;
+  template class ValWord< int8_t >;
   template class ValWord< uint32_t >;
   template class ValWord< int32_t >;
+
+  template class ValVector< uint8_t >;
+  template class ValVector< int8_t >;  
   template class ValVector< uint32_t >;
   template class ValVector< int32_t >;
 
