@@ -16,76 +16,28 @@ import os
 import sys
 import getopt
 
-def environment():
-    logger.info("----++++ENVIRONMENT++++----")
-    for cmd in CONF.ENVIRONMENT_CMDS:
-        system(cmd,log=True, exception=False)
-    
-def checkout():
-    logger.info("----++++CHECKOUT++++----")
-
-    for cmd in CONF.CHECKOUT_CMDS:
-        system(cmd)
-
-def dependencies():
-    logger.info("----++++DEPENDENCIES++++----")
-    
-    for cmd in CONF.DEPENDENCIES_CMDS:
-        system(cmd, exception=False)
-
-def build():
-    logger.info("----++++BUILD++++----")
-
-    for cmd in CONF.BUILD_CMDS:
-        system(cmd, log=True, exception=False)
-
-def release():
-    logger.info("----++++RELEASE RPMS++++----")
-
-    for cmd in CONF.RELEASE_CMDS:
-        system(cmd)
-
-def install():
-    logger.info("----++++INSTALL++++----")
-
-    for cmd in CONF.INSTALL_CMDS:
-        system(cmd)
-
-
-def test():
-    logger.info("----++++TEST++++----")
-
-    for cmd in CONF.TEST_CMDS:
-        system(cmd,exception=False)
+def execute(silent):
+    logger.info("The following sections will be executed: %s" % ",".join([s for s,c in CONF.COMMANDS]))
+    for section,cmds in CONF.COMMANDS:
+        if section.find("+REPORTING+") != -1 and silent:
+             logger.info("Final reporting and email notifications were disabled")
+             continue
         
-
-def uninstall():
-    logger.info("----++++UNINSTALLING++++----")
-
-    for cmd in CONF.UNINSTALL_CMDS:
-        system(cmd, log=False, exception=False)
-
-def report():
-    logger.info("----++++REPORTING++++----")
-
-    for cmd in CONF.REPORT_CMDS:
-        system(cmd,exception=False)
-        
+        logger.info("----++++%s++++----" % section)
+        for cmd in cmds:
+            system(cmd,log=True, exception=False)
 
 if __name__== "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "skh", ["silent", "keep","help"])
+        opts, args = getopt.getopt(sys.argv[1:], "sh", ["silent", "help"])
     except getopt.GetoptError, err:
         print __doc__
         sys.exit(2)
 
     silent = False
-    keep = False
     for o, a in opts:
         if o in ("-s", "--silent"):
             silent=True
-        if o in ("-k", "--keep"):
-            keep=True
         if o in ("-h", "--help"):
             print __doc__
             sys.exit(0)
@@ -105,29 +57,10 @@ if __name__== "__main__":
         
     # Execute build/test/etc.
     try:
-        uninstall()
-        environment()
-        checkout()
-        dependencies()
-        build()
-        release()
-        install()
-        test()
+        execute(silent)
     except KeyboardInterrupt,e:
         logger.warning('Aborting after CTRL-C...\n')
         sys.exit(1)
     except Exception,e:
         logger.error(e)
 
-    # Reporting.
-    try:
-        if not silent:
-            report()
-        else:
-            logger.info("Final reporting and email notifications were disabled")
-
-    except KeyboardInterrupt, e:
-        logger.warning('Aborting after CTRL-C...\n')
-        sys.exit(1)
-    except Exception, e:
-        logger.error(e)
