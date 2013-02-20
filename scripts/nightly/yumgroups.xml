@@ -57,10 +57,10 @@
 <packagereq type="mandatory">cactusprojects-subsystemworker</packagereq>
 <packagereq type="mandatory">cactusprojects-subsystemworker-devel</packagereq>
 
-<packagereq type="mandatory">cactusprojects-retriexternICUtils</packagereq>
-<packagereq type="mandatory">cactusprojects-retriexternICUtils-devel</packagereq>
-<packagereq type="mandatory">cactusprojects-retriReTRICell</packagereq>
-<packagereq type="mandatory">cactusprojects-retriReTRICell-devel</packagereq>
+<packagereq type="mandatory">cactusprojects-retriexternicutils</packagereq>
+<packagereq type="mandatory">cactusprojects-retriexternicutils-devel</packagereq>
+<packagereq type="mandatory">cactusprojects-retriretricell</packagereq>
+<packagereq type="mandatory">cactusprojects-retriretricell-devel</packagereq>
 
 <packagereq type="mandatory">cactusprojects-centralcell</packagereq>
 <packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
