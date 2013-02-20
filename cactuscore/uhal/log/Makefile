@@ -29,16 +29,24 @@ EXECUTABLE_SOURCES = 	src/common/generator.cxx
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
-LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}
+LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}\
+#								-L$(BUILD_HOME)/cactuscore/extern/binutils-2.23/bfd\
+#								-L$(BUILD_HOME)/cactuscore/extern/binutils-2.23/libiberty 
 
-LIBRARIES =  	-lpthread \
-		-lboost_thread 
+
+LIBRARIES = -lpthread \
+		-lboost_thread \
+#    -Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive\
+
 
 
 INCLUDE_PATH = 	-Iinclude  \
-		-I${EXTERN_BOOST_INCLUDE_PREFIX} 
+		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
+#		-I$(BUILD_HOME)/cactuscore/extern/binutils-2.23/include/\
+#		-I$(BUILD_HOME)/cactuscore/extern/binutils-2.23/binutils/\
+#		-I$(BUILD_HOME)/cactuscore/extern/binutils-2.23/bfd/
 
-CPP_FLAGS = -g -Wall -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH}
+CPP_FLAGS = -g  -Wall -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 

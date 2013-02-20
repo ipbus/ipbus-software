@@ -75,7 +75,6 @@ namespace uhal
 
       private:
         exception* mExc;
-        std::list< Location > mHistory;
         std::string mMessages;
     };
 
@@ -111,6 +110,9 @@ namespace uhal
 
         static std::string mMessage;
         static map_type mExceptions;
+
+        //!Define a static Mutex lock for thread safe logging
+        static boost::mutex mMutex;
     };
 
 
