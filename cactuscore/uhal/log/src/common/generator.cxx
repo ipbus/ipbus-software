@@ -66,7 +66,7 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "#include <boost/thread/mutex.hpp>\n"
             << "\n"
             //            << "#define logging() logger log( ThisLocation() );\n"
-            << "#define logging() logger log;\n"
+            << "#define logging()\n"
             << "\n"
             << "namespace uhal{\n"
             << "\n"
@@ -99,7 +99,7 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\tchar * lEnvVar = getenv ( aEnvVar );\n"
            << "\tif( !lEnvVar )\n"
            << "\t{\n"
-           << "\t\tlogging();\n"
+//           << "\t\tlogging();\n"
            << "\t\tlog( Warning() , \"No environment variable \" , Quote( aEnvVar ) , \" set. Using level \" , Quote( \"Info\" ) , \" instead.\" );\n"
            << "\t\tsetLogLevelTo ( " << gDefaultLevel << "() );\n"
            << "\t\treturn;\n"
@@ -277,25 +277,25 @@ std::string suffix ( uint32_t i )
 void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
   std::stringstream lIfDefs , lEndIfs;
-  aHppFile << "class logger\n"
-           << "{\n"
-           << "public:\n"
-           //          << "\tlogger( const Location& aLocation );\n"
-           << "\tlogger();\n"
-           << "\tvirtual ~logger();\n"
-           //           << "private:\n"
-           //           << "\tLocation mLocation;\n"
-           << "public:\n";
-  aCppFile //<< "logger::logger( const Location& aLocation ) : mLocation( aLocation ) {}\n"
-      << "logger::logger( ) {}\n"
-      << "\n"
-      << "logger::~logger()\n"
-      << "{\n"
-      /*          << "\tif (std::uncaught_exception())\n"
-                << "\t{\n"
-                << "\t\tthis->operator()( Error() , \"Exception spotted at \" , mLocation );\n"
-                << "\t}\n"*/
-      << "}\n";
+//   aHppFile << "class logger\n"
+//            << "{\n"
+//            << "public:\n"
+//            //          << "\tlogger( const Location& aLocation );\n"
+//            << "\tlogger();\n"
+//            << "\tvirtual ~logger();\n"
+//            //           << "private:\n"
+//            //           << "\tLocation mLocation;\n"
+//            << "public:\n";
+//   aCppFile //<< "logger::logger( const Location& aLocation ) : mLocation( aLocation ) {}\n"
+//       << "logger::logger( ) {}\n"
+//       << "\n"
+//       << "logger::~logger()\n"
+//       << "{\n"
+//       /*          << "\tif (std::uncaught_exception())\n"
+//                 << "\t{\n"
+//                 << "\t\tthis->operator()( Error() , \"Exception spotted at \" , mLocation );\n"
+//                 << "\t}\n"*/
+//       << "}\n";
 
   for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
   {
@@ -322,10 +322,12 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << lDoxygen.str()
                << "\t*/\n"
                << "\ttemplate<" << lTemplatesStr << ">\n"
-               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
+//               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
+               << "\tvoid log ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
                << "\n";
       aHxxFile << "template<" << lTemplatesStr << ">\n"
-               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
+//               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
+               << "void log ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
                << "{\n"
                << lIfDefs.str()
                << "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
@@ -347,8 +349,8 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
               << "\n";
   }
 
-  aHppFile << "};\n"
-           << "\n";
+  //aHppFile << "};\n"
+  //         << "\n";
 }
 
 
