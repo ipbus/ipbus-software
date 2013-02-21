@@ -17,7 +17,7 @@ CACTUS_PREFIX       = "/opt/cactus"
 XDAQ_ROOT           = "/opt/xdaq"
 L1PAGE_ROOT	    = "/opt/l1page/tomcat/webapps/ROOT"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
-#xdaq.repo file name as a function of platform
+#xdaq.repo file name as a function of the platform, and alias dirs for the nightlies results
 pseudo_platform= "unknown"
 if PLATFORM.find("i686-with-redhat-5") != -1:
     pseudo_platform="slc5_i686"
