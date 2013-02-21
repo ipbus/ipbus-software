@@ -300,8 +300,12 @@ COMMANDS += [["TEST TRIGGER SUPERVISOR",
                "sed -i 's|\(SLIM_SERVICE_HOST=\).*$|\\1%s|' %s" % (getfqdn(),
                                                                    join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
                "cd %s;make;make rpm;make install" % join(BUILD_HOME,"daq/xaas/slim/l1test"),
+               "sudo cp %s /etc/slp.conf" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/slp.localhost.conf"),
+               "sudo /sbin/service slp restart",
+               "/bin/slptool findsrvs service:directory-agennt",
                "sudo /sbin/service xdaqd start",
                "sudo /sbin/service xdaqd status",
+               "sleep 240",
                "cd %s;python multicell.py;python multicell_fault.py;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
 
 COMMANDS += [["TEST CENTRAL CELL",
