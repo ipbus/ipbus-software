@@ -1,3 +1,4 @@
+from nutils import system
 from os import environ
 from os.path import join
 from platform import platform
@@ -6,7 +7,8 @@ from socket import getfqdn
 ####VARIABLES
 BUILD_HOME          = "/build/cactus"
 PLATFORM            = platform()
-RELEASE_BASE        = join("/afs/cern.ch/user/c/cactus/www/nightly",PLATFORM)
+NIGHTLY_BASE        = "/afs/cern.ch/user/c/cactus/www/nightly"
+RELEASE_BASE        = join(NIGHTLY_BASE,PLATFORM)
 RELEASE_RPM_DIR     = join(RELEASE_BASE,"RPMS")
 RELEASE_LOG_DIR     = join(RELEASE_BASE,"logs")
 RELEASE_API_DIR     = join(RELEASE_BASE,"api")
@@ -16,15 +18,20 @@ XDAQ_ROOT           = "/opt/xdaq"
 L1PAGE_ROOT	    = "/opt/l1page/tomcat/webapps/ROOT"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 #xdaq.repo file name as a function of platform
-XDAQ_REPO_FILE_NAME = "unknown"
+pseudo_platform= "unknown"
 if PLATFORM.find("i686-with-redhat-5") != -1:
-    XDAQ_REPO_FILE_NAME = "xdaq.slc5.i686.repo"
+    pseudo_platform="slc5_i686"
 elif PLATFORM.find("x86_64-with-redhat-5") != -1:
-    XDAQ_REPO_FILE_NAME = "xdaq.slc5.x86_64.repo"
+    pseudo_platform="slc5_x86_64"
 elif PLATFORM.find("i686-with-redhat-6") != -1:
-    XDAQ_REPO_FILE_NAME = "xdaq.slc6.i686.repo"
+    pseudo_platform="slc6_i686"
 elif PLATFORM.find("x86_64-with-redhat-6") != -1:
-    XDAQ_REPO_FILE_NAME = "xdaq.slc6.x86_64.repo"
+    pseudo_platform="slc6_x86_64"
+
+XDAQ_REPO_FILE_NAME = "xdaq.%s.repo" % pseudo_platform
+system("cd %s;rm -f %s" % (NIGHTLY_BASE,pseudo_platform),exception=False)
+system("cd %s;ln -s %s %s" % (NIGHTLY_BASE,PLATFORM,pseudo_platform),exception=False)
+  
 
 ####VARIABLES: analysis of logs
 TITLE             = "CACTUS Nightlies: %s " % PLATFORM
