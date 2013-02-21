@@ -19,7 +19,7 @@ import getopt
 def execute(silent):
     logger.info("The following sections will be executed: %s" % ",".join([s for s,c in CONF.COMMANDS]))
     for section,cmds in CONF.COMMANDS:
-        if section.find("+REPORTING+") != -1 and silent:
+        if section.find("REPORTING") != -1 and silent:
              logger.info("Final reporting and email notifications were disabled")
              continue
         
