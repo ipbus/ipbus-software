@@ -151,5 +151,5 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST ( mem_write_read ( connection_file,device_id ) );
   CACTUS_TEST ( mem_rmw_bits ( connection_file,device_id ) );
   CACTUS_TEST ( mem_rmw_sum ( connection_file,device_id ) );
-  return 0;
+  return !AllTestsPassed; /*Invert since zero means passed and one means failed*/
 }

@@ -51,19 +51,26 @@ namespace uhal
   }
 }
 
+
+bool AllTestsPassed = true;
+
+
 //!Checks if the condition is fullfilled and it does not throw.
 #define CACTUS_CHECK(cond) \
   do {	\
     try {								\
       if (cond) { \
-	std::cout << "CHECK PASSED: " << #cond << std::endl; \
+	      std::cout << "CHECK PASSED: " << #cond << std::endl; \
       }  else  {							\
-	std::cerr << "CHECK FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
+				std::cerr << "CHECK FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
+  			AllTestsPassed = false; \
       }									\
     } catch(std::exception& e) {						\
-      std::cerr << "CHECK FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
+ 			AllTestsPassed = false; \
     } catch(...) {							\
-      std::cerr << "CHECK FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
+ 			AllTestsPassed = false; \
     }									\
   } while(0)
 
@@ -77,9 +84,11 @@ namespace uhal
       gettimeofday ( &end, NULL );					\
       std::cout << "TEST PASSED in " << uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
     } catch(std::exception& e) {					\
-      std::cerr << "TEST FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
+			AllTestsPassed = false; \
     } catch(...) {							\
-      std::cerr << "TEST FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
+			AllTestsPassed = false; \
     }									\
   } while(0)
 
@@ -89,9 +98,11 @@ namespace uhal
       expr;					\
       std::cout << "TEST_NOTHROW PASSED: "  << #expr << std::endl; \
     } catch(std::exception& e) {					\
-      std::cerr << "TEST_NOTHROW FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << ": " << std::endl; \
+      std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << ": " << std::endl; \
+			AllTestsPassed = false; \
     } catch(...) {							\
-      std::cerr << "TEST_NOTHROW FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << ": " << std::endl; \
+      std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << ": " << std::endl; \
+			AllTestsPassed = false; \
     }									\
   } while(0)
 
@@ -101,12 +112,15 @@ namespace uhal
     try{					\
       expr;								\
       std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl; \
+			AllTestsPassed = false; \
     } catch(signature& e) {					\
       std::cout << "TEST_THROW PASSED: " << #expr << std::endl; \
     } catch(std::exception& e) {						\
-      std::cerr << "TEST_THROW FAILED by THROWING " << e.what() << " @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
+			AllTestsPassed = false; \
     }	catch(...) {							\
-      std::cerr << "TEST_THROW FAILED by THROWING unknown @" << __FILE__ << ":" << __LINE__ << std::endl; \
+      std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
+			AllTestsPassed = false; \
     }									\
   } while(0)
 

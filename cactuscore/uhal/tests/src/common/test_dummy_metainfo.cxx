@@ -156,5 +156,5 @@ int main ( int argc,char* argv[] )
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   check_meta_info ( connection_file,device_id );
-  return 0;
+  return !AllTestsPassed; /*Invert since zero means passed and one means failed*/
 }

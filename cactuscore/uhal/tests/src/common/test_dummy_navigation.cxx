@@ -109,5 +109,5 @@ int main ( int argc,char* argv[] )
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   CACTUS_TEST ( navigation_and_traversal ( connection_file,device_id ) );
   CACTUS_TEST ( write_read ( connection_file,device_id ) );
-  return 0;
+  return !AllTestsPassed; /*Invert since zero means passed and one means failed*/
 }

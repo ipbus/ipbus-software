@@ -145,5 +145,5 @@ int main ( int argc,char* argv[] )
   //CACTUS_TEST_THROW(block_bigger_than_size_attribute(connection_file,device_id ),uhal::exception::BulkTransferRequestedTooLarge);
   block_transfer_too_big ( connection_file,device_id );
   block_bigger_than_size_attribute ( connection_file,device_id );
-  return 0;
+  return !AllTestsPassed; /*Invert since zero means passed and one means failed*/
 }

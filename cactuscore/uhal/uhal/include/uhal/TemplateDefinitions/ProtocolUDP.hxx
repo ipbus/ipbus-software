@@ -151,10 +151,12 @@ namespace uhal
     mDeadlineTimer.expires_from_now ( mUDP.getRawTimeoutPeriod() );
     mErrorCode = boost::asio::error::would_block;
     mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-    HostToTargetInspector< 2 , 0 > lH2TInspector;
-    std::vector<uint32_t>::const_iterator lBegin ( ( uint32_t* ) ( aBuffers->getSendBuffer() ) );
-    std::vector<uint32_t>::const_iterator lEnd ( ( uint32_t* ) ( aBuffers->getSendBuffer() +aBuffers->sendCounter() ) );
-    lH2TInspector.analyze ( lBegin , lEnd );
+    /*
+        HostToTargetInspector< 2 , 0 > lH2TInspector;
+        std::vector<uint32_t>::const_iterator lBegin ( ( uint32_t* ) ( aBuffers->getSendBuffer() ) );
+        std::vector<uint32_t>::const_iterator lEnd ( ( uint32_t* ) ( aBuffers->getSendBuffer() +aBuffers->sendCounter() ) );
+        lH2TInspector.analyze ( lBegin , lEnd );
+    */
 
     do
     {
@@ -202,10 +204,12 @@ namespace uhal
       throw exception::ErrorInUdpCallback();
     }
 
-    TargetToHostInspector< 2 , 0 > lT2HInspector;
-    std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
-    std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
-    lT2HInspector.analyze ( lBegin2 , lEnd2 );
+    /*
+        TargetToHostInspector< 2 , 0 > lT2HInspector;
+        std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
+        std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
+        lT2HInspector.analyze ( lBegin2 , lEnd2 );
+    */
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 

@@ -92,7 +92,7 @@ namespace uhal
     uint32_t lSendTransactionId , lReplyTransactionId;
     uint8_t lSendResponseGood , lReplyResponseGood;
 
-    //log ( Debug() , ThisLocation() );
+    // log ( Debug() , ThisLocation() );
     do
     {
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )

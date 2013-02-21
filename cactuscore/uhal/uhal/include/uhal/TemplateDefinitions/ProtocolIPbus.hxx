@@ -143,48 +143,41 @@ namespace uhal
   {
     logging();
 
-    try
+    switch ( aHeader & 0xF8 )
     {
-      switch ( aHeader & 0xF8 )
-      {
-        case 0xF8 :
-          aType = B_O_T;
-          break;
-        case 0x18 :
-          aType = READ;
-          break;
-        case 0x20 :
-          aType = WRITE;
-          break;
-        case 0x28 :
-          aType = RMW_BITS;
-          break;
-        case 0x30 :
-          aType = RMW_SUM;
-          break;
-        case 0xF0 :
-          aType = R_A_I;
-          break;
-        case 0x40 :
-          aType = NI_READ;
-          break;
-        case 0x48 :
-          aType = NI_WRITE;
-          break;
-        default:
-          log ( Error() , "Unknown IPbus-header " , Integer ( uint8_t ( ( aHeader & 0xF8 ) ) , IntFmt<hex,fixed>() ) );
-          throw exception::ValidationError();
-      }
+      case 0xF8 :
+        aType = B_O_T;
+        break;
+      case 0x18 :
+        aType = READ;
+        break;
+      case 0x20 :
+        aType = WRITE;
+        break;
+      case 0x28 :
+        aType = RMW_BITS;
+        break;
+      case 0x30 :
+        aType = RMW_SUM;
+        break;
+      case 0xF0 :
+        aType = R_A_I;
+        break;
+      case 0x40 :
+        aType = NI_READ;
+        break;
+      case 0x48 :
+        aType = NI_WRITE;
+        break;
+      default:
+        log ( Error() , "Unknown IPbus-header " , Integer ( uint8_t ( ( aHeader & 0xF8 ) ) , IntFmt<hex,fixed>() ) );
+        return false;
+    }
 
-      aWordCount = ( aHeader >> 8 ) & 0x1ff;
-      aTransactionId = ( aHeader >> 17 ) & 0x7ff;
-      aInfoCode = aHeader & 0x3;
-      return true;
-    }
-    catch ( const std::exception& aExc )
-    {
-      return false;
-    }
+    aWordCount = ( aHeader >> 8 ) & 0x1ff;
+    aTransactionId = ( aHeader >> 17 ) & 0x7ff;
+    aInfoCode = aHeader & 0x3;
+    return true;
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
@@ -291,7 +284,7 @@ namespace uhal
         break;
       case R_A_I :
         log ( Error() , "Reserved-Address-Info undefined in IPbus version 2" );
-        throw exception::ValidationError();
+        return false;
     }
 
     return ( 0x2000000F | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType );
@@ -311,42 +304,35 @@ namespace uhal
   {
     logging();
 
-    try
+    switch ( aHeader & 0xF0 )
     {
-      switch ( aHeader & 0xF0 )
-      {
-        case 0x00 :
-          aType = READ;
-          break;
-        case 0x10 :
-          aType = WRITE;
-          break;
-        case 0x20 :
-          aType = NI_READ;
-          break;
-        case 0x30 :
-          aType = NI_WRITE;
-          break;
-        case 0x40 :
-          aType = RMW_BITS;
-          break;
-        case 0x50 :
-          aType = RMW_SUM;
-          break;
-        default:
-          log ( Error() , "Unknown IPbus-header " , Integer ( uint8_t ( ( aHeader & 0xF0 ) >>4 ) , IntFmt<hex,fixed>() ) );
-          throw exception::ValidationError();
-      }
+      case 0x00 :
+        aType = READ;
+        break;
+      case 0x10 :
+        aType = WRITE;
+        break;
+      case 0x20 :
+        aType = NI_READ;
+        break;
+      case 0x30 :
+        aType = NI_WRITE;
+        break;
+      case 0x40 :
+        aType = RMW_BITS;
+        break;
+      case 0x50 :
+        aType = RMW_SUM;
+        break;
+      default:
+        log ( Error() , "Unknown IPbus-header " , Integer ( uint8_t ( ( aHeader & 0xF0 ) >>4 ) , IntFmt<hex,fixed>() ) );
+        return false;
+    }
 
-      aWordCount = ( aHeader >> 8 ) & 0xff;
-      aTransactionId = ( aHeader >> 16 ) & 0xfff;
-      aInfoCode = aHeader & 0xf;
-      return true;
-    }
-    catch ( const std::exception& aExc )
-    {
-      return false;
-    }
+    aWordCount = ( aHeader >> 8 ) & 0xff;
+    aTransactionId = ( aHeader >> 16 ) & 0xfff;
+    aInfoCode = aHeader & 0xf;
+    return true;
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
