@@ -36,8 +36,8 @@
 	@date 2012
 */
 
-//#include "uhal/log/BacktraceSymbols.hpp"
-#include <execinfo.h>
+#include "uhal/log/BacktraceSymbols.hpp"
+//#include <execinfo.h>
 
 #include "uhal/log/exception.hpp"
 #include "boost/lexical_cast.hpp"
@@ -53,22 +53,37 @@ namespace uhal
 
     exception::exception ( ) :
       std::exception ()
-    {}
+    {
+      mMessage.clear();
+    }
 
     exception::~exception() throw()
     {
       boost::lock_guard<boost::mutex> lLock ( mMutex );
+      mMessage.clear();
+      exception::map_type::iterator lIt = mExceptions.find ( boost::this_thread::get_id() );
 
-      if ( mExceptions[ boost::this_thread::get_id() ].back().mExc == this )
+      if ( lIt->second.back().mExc == this )
       {
-        mExceptions[ boost::this_thread::get_id() ].pop_back();
+        lIt->second.pop_back();
+      }
+
+      if ( ! lIt->second.size() )
+      {
+        mExceptions.erase ( lIt );
       }
     }
 
     const char* exception::what() const throw()
     {
       boost::lock_guard<boost::mutex> lLock ( mMutex );
-      mMessage = "\n";
+
+      if ( mMessage.size() )
+      {
+        return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
+      }
+
+      mMessage += "\n";
 #ifdef COURTEOUS_EXCEPTIONS
       mMessage += "I'm terribly sorry to have to tell you this, but it seems that there was an exception:\n";
 #endif

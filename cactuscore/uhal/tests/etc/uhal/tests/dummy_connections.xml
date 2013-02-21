@@ -7,6 +7,7 @@
   <connection id="dummy.docu.udp" uri="ipbusudp-1.3://localhost:50001" address_table="file://docu_examples_address.xml" />
 
   <connection id="dummy.udp2" uri="ipbusudp-2.0://localhost:60001"	address_table="file://dummy_address.xml" />
+  <connection id="dummy.docu.udp2" uri="ipbusudp-2.0://localhost:60001" address_table="file://docu_examples_address.xml" />
   
 
   <!-- DUMMY TCP -->
@@ -14,6 +15,7 @@
   <connection id="dummy.docu.tcp" uri="ipbustcp-1.3://localhost:50002" address_table="file://docu_examples_address.xml" />
 
   <connection id="dummy.tcp2" uri="ipbustcp-2.0://localhost:60002"	address_table="file://dummy_address.xml" />
+  <connection id="dummy.docu.tcp2" uri="ipbustcp-2.0://localhost:60002" address_table="file://docu_examples_address.xml" />
 
   
   <!-- DUMMY ControlHub to DUMMY UDP -->
@@ -21,6 +23,7 @@
   <connection id="dummy.docu.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"  address_table="file://docu_examples_address.xml" />
 
   <connection id="dummy.controlhub2" uri="chtcp-2.0://localhost:10203?target=localhost:60001"	address_table="file://dummy_address.xml" />
+  <connection id="dummy.docu.controlhub2" uri="chtcp-2.0://localhost:10203?target=localhost:60001"  address_table="file://docu_examples_address.xml" />
   
 </connections>
 
