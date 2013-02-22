@@ -52,7 +52,8 @@ namespace uhal
 }
 
 
-bool AllTestsPassed = true;
+uint32_t FailedTestCount(0);
+uint32_t PassedTestCount(0);
 
 
 //!Checks if the condition is fullfilled and it does not throw.
@@ -61,16 +62,17 @@ bool AllTestsPassed = true;
     try {								\
       if (cond) { \
 	      std::cout << "CHECK PASSED: " << #cond << std::endl; \
+        PassedTestCount++; \
       }  else  {							\
 				std::cerr << "CHECK FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
-  			AllTestsPassed = false; \
+  			FailedTestCount++; \
       }									\
     } catch(std::exception& e) {						\
       std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
- 			AllTestsPassed = false; \
+ 			FailedTestCount++; \
     } catch(...) {							\
       std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
- 			AllTestsPassed = false; \
+ 			FailedTestCount++; \
     }									\
   } while(0)
 
@@ -83,12 +85,13 @@ bool AllTestsPassed = true;
       expr;					\
       gettimeofday ( &end, NULL );					\
       std::cout << "TEST PASSED in " << uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
+      PassedTestCount++; \
     } catch(std::exception& e) {					\
       std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-			AllTestsPassed = false; \
+			FailedTestCount++; \
     } catch(...) {							\
       std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-			AllTestsPassed = false; \
+			FailedTestCount++; \
     }									\
   } while(0)
 
@@ -97,12 +100,13 @@ bool AllTestsPassed = true;
     try{					\
       expr;					\
       std::cout << "TEST_NOTHROW PASSED: "  << #expr << std::endl; \
+      PassedTestCount++; \
     } catch(std::exception& e) {					\
       std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << ": " << std::endl; \
-			AllTestsPassed = false; \
+			FailedTestCount++; \
     } catch(...) {							\
       std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << ": " << std::endl; \
-			AllTestsPassed = false; \
+			FailedTestCount++; \
     }									\
   } while(0)
 
@@ -112,16 +116,32 @@ bool AllTestsPassed = true;
     try{					\
       expr;								\
       std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl; \
-			AllTestsPassed = false; \
+			FailedTestCount++; \
     } catch(signature& e) {					\
       std::cout << "TEST_THROW PASSED: " << #expr << std::endl; \
+      PassedTestCount++; \
     } catch(std::exception& e) {						\
       std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-			AllTestsPassed = false; \
+			FailedTestCount++; \
     }	catch(...) {							\
       std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-			AllTestsPassed = false; \
+			FailedTestCount++; \
     }									\
   } while(0)
 
 #endif
+
+#define RESULT( NAME )  \
+  do { \
+    if( FailedTestCount == 0 ){  \
+      std::cout << "RESULTS : ALL (" << PassedTestCount << ") TESTS PASSED." << std::endl; \
+      std::cout << "RESULTS : " << NAME << " PASSED." << std::endl; \
+      return 0; \
+    }else{  \
+      std::cout << "RESULTS : " << PassedTestCount << " TESTS PASSED. " << FailedTestCount << " TESTS FAILED." << std::endl; \
+      std::cout << "RESULTS : " << NAME << " FAILED." << std::endl; \
+      return 1; \
+    } \
+  } while(0) 
+
+
