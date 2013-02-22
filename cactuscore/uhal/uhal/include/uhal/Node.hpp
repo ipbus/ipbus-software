@@ -232,7 +232,6 @@ namespace uhal
       */
       ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
       {
-        logging();
         log ( Error() , "THIS METHOD IS DEPRECATED! "
               "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
               "AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
@@ -267,7 +266,6 @@ namespace uhal
       */
       ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
       {
-        logging();
         log ( Error() , "THIS METHOD IS DEPRECATED! "
               "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
               "AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "

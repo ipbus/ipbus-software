@@ -52,8 +52,8 @@ namespace uhal
 }
 
 
-uint32_t FailedTestCount(0);
-uint32_t PassedTestCount(0);
+uint32_t FailedTestCount ( 0 );
+uint32_t PassedTestCount ( 0 );
 
 
 //!Checks if the condition is fullfilled and it does not throw.
@@ -142,6 +142,6 @@ uint32_t PassedTestCount(0);
       std::cout << "RESULTS : " << NAME << " FAILED." << std::endl; \
       return 1; \
     } \
-  } while(0) 
+  } while(0)
 
 

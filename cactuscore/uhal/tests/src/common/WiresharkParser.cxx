@@ -83,7 +83,6 @@ struct ethernet_frame
 // main function
 int main ( int argc, char* argv[] )
 {
-  logging();
   HostToTargetInspector< 1 , 3 > lHostToTarget;
   TargetToHostInspector< 1 , 3 > lTargetToHost;
   std::ifstream file ( "etc/uhal/tests/wireshark.txt" );

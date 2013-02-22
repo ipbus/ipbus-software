@@ -60,7 +60,6 @@ namespace uhal
 
   NodeTreeBuilder::NodeTreeBuilder ()
   {
-    logging();
     //------------------------------------------------------------------------------------------------------------------------
     Rule<Node*> lPlainNode;
     lPlainNode.forbid ( NodeTreeBuilder::mClassAttribute )
@@ -126,15 +125,12 @@ namespace uhal
 
   NodeTreeBuilder::~NodeTreeBuilder ()
   {
-    logging();
   }
 
 
 
   NodeTreeBuilder& NodeTreeBuilder::getInstance()
   {
-    logging();
-
     if ( mInstance == NULL )
     {
       mInstance = new NodeTreeBuilder();
@@ -145,7 +141,6 @@ namespace uhal
 
   Node* NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath )
   {
-    logging();
     std::vector< std::pair<std::string, std::string> >  lAddressFiles;
     uhal::utilities::ParseSemicolonDelimitedUriList<true> ( aFilenameExpr , lAddressFiles );
 
@@ -176,7 +171,6 @@ namespace uhal
 
   void NodeTreeBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< const Node* >& aNodes )
   {
-    logging();
     std::string lName ( aProtocol + ( aPath.string() ) );
     std::hash_map< std::string , const Node* >::iterator lNodeIt = mNodes.find ( lName );
 
@@ -257,7 +251,6 @@ namespace uhal
 
   Node* NodeTreeBuilder::plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
   {
-    logging();
     Node* lNode ( new Node() );
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
@@ -274,7 +267,6 @@ namespace uhal
 
   Node* NodeTreeBuilder::classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
   {
-    logging();
     std::string lClassStr;
     //get attribute from xml file as string
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
@@ -314,7 +306,6 @@ namespace uhal
 
   Node* NodeTreeBuilder::moduleNodeCreator ( const pugi::xml_node& aXmlNode )
   {
-    logging();
     std::string lModule;
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mModuleAttribute , lModule );
     Node* lNode ( getNodeTree ( lModule , mFileCallStack.back( ) ) );
@@ -333,8 +324,6 @@ namespace uhal
 
   Node* NodeTreeBuilder::bitmaskNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
   {
-    logging();
-
     if ( aXmlNode.child ( "node" ) )
     {
       log ( Error() , "Bit-masked nodes are not allowed to have child nodes" );
@@ -359,8 +348,6 @@ namespace uhal
 
   void NodeTreeBuilder::setUid ( const bool& aRequireId , const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
-
     if ( aRequireId )
     {
       if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , NodeTreeBuilder::mIdAttribute , aNode->mUid ) )
@@ -377,7 +364,6 @@ namespace uhal
 
   void NodeTreeBuilder::setAddr ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
     //Address is an optional attribute for hierarchical addressing
     uint32_t lAddr ( 0 );
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mAddressAttribute , lAddr );
@@ -386,7 +372,6 @@ namespace uhal
 
   void NodeTreeBuilder::setTags ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
     std::string lStr;
     //Tags is an optional attribute to allow the user to add a description to a node
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mTagsAttribute , lStr );
@@ -406,7 +391,6 @@ namespace uhal
 
   void NodeTreeBuilder::setDescription ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
     std::string lStr;
     //Tags is an optional attribute to allow the user to add a description to a node
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mDescriptionAttribute , lStr );
@@ -425,7 +409,6 @@ namespace uhal
 
   void NodeTreeBuilder::setPermissions ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
     //Permissions is an optional attribute for specifying read/write permissions
     std::string lPermission;
 
@@ -444,7 +427,6 @@ namespace uhal
 
   void NodeTreeBuilder::setMask ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
     //Tags is an optional attribute to allow the user to add a description to a node
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mMaskAttribute , aNode->mMask );
   }
@@ -452,7 +434,6 @@ namespace uhal
 
   void NodeTreeBuilder::setModeAndSize ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
     //Mode is an optional attribute for specifying whether a block is incremental, non-incremental or a single register
     std::string lMode;
 
@@ -490,7 +471,6 @@ namespace uhal
 
   void NodeTreeBuilder::addChildren ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    logging();
     pugi::xml_node lXmlNode = aXmlNode.child ( "node" );
 
     if ( aNode->mMode == defs::NON_INCREMENTAL )
@@ -523,8 +503,6 @@ namespace uhal
 
   void NodeTreeBuilder::calculateHierarchicalAddresses ( Node* aNode , const uint32_t& aAddr )
   {
-    logging();
-
     if ( aNode->mMode == defs::HIERARCHICAL )
     {
       if ( aNode->mChildren.size() == 0 )
@@ -600,7 +578,6 @@ namespace uhal
 
   void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode )
   {
-    logging();
     std::hash_map< std::string , Node* >::iterator lIt, lIt2;
     Node* lNode1, *lNode2;
 
@@ -748,7 +725,6 @@ namespace uhal
 
   NodeTreeBuilder::permissions_lut::permissions_lut()
   {
-    logging();
     add
     ( "r"			, defs::READ )
     ( "w"			, defs::WRITE )
@@ -766,7 +742,6 @@ namespace uhal
 
   NodeTreeBuilder::mode_lut::mode_lut()
   {
-    logging();
     add
     ( "single"			, defs::SINGLE )
     ( "block"			, defs::INCREMENTAL )

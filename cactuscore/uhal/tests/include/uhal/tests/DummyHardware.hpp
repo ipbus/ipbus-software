@@ -68,7 +68,6 @@ namespace uhal
 
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
-        logging();
         mReply.clear();
         std::vector<uint32_t>::const_iterator lBegin ( mReceive.begin() );
         std::vector<uint32_t>::const_iterator lEnd ( mReceive.begin() + ( aByteCount>>2 ) );
@@ -228,7 +227,6 @@ namespace uhal
 
       void unknown_type()
       {
-        logging();
         log ( Error() , Integer ( base_type::mHeader, IntFmt<hex,fixed>() ) , " is an unknown IPbus header. Throwing." );
         throw 0;
       }

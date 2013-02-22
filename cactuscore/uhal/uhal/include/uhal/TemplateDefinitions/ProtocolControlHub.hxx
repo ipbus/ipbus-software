@@ -52,7 +52,6 @@ namespace uhal
     mDevicePort ( 0 ),
     mTransactionCounter ( 0 )
   {
-    logging();
     std::pair< uint32_t , uint16_t > lPair ( ExtractTargetID ( aUri ) );
     mDeviceIPaddress = htonl ( lPair.first );
     mDevicePort = htons ( lPair.second );
@@ -63,7 +62,6 @@ namespace uhal
   template < typename InnerProtocol >
   ControlHub< InnerProtocol >::~ControlHub()
   {
-    logging();
     //log ( Debug() , ThisLocation() );
   }
 
@@ -71,7 +69,6 @@ namespace uhal
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::preamble( )
   {
-    logging();
     //log ( Debug() , ThisLocation() );
     // -------------------------------------------------------------------------------------------------------------
     // 12 bytes form the preamble:
@@ -114,7 +111,6 @@ namespace uhal
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::predispatch( )
   {
-    logging();
     //log ( Debug() , ThisLocation() );
     tpreamble& lPreambles = mPreambles.back();
     uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
@@ -129,7 +125,6 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    logging();
     aReplyStartIt++;
     aReplyStartIt++;
     uint32_t lReplyIPaddress ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) );

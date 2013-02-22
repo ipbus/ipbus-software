@@ -48,20 +48,16 @@ class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
       mIOservice(),
       mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) )
     {
-      logging();
       mAcceptor.listen();
     }
 
 
     ~TCPdummyHardware()
     {
-      logging();
     }
 
     void run()
     {
-      logging();
-
       while ( true )
       {
         tcp::socket lSocket ( mIOservice );
@@ -98,7 +94,6 @@ class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
 
 int main ( int argc, char* argv[] )
 {
-  logging();
   CommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
 
   if ( lOptions.version == 1 )

@@ -211,14 +211,12 @@ namespace uhal
           */
           CreatorInterface()
           {
-            logging();
           }
           /**
           Destructor
           */
           virtual ~CreatorInterface()
           {
-            logging();
           }
           /**
           Interface to a function which create a new IPbus client based on the protocol identifier specified
@@ -239,14 +237,12 @@ namespace uhal
           */
           Creator()
           {
-            logging();
           }
           /**
           Destructor
           */
           virtual ~Creator()
           {
-            logging();
           }
           /**
           Concrete function which creates a new IPbus client based on the protocol identifier specified

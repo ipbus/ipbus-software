@@ -41,7 +41,6 @@ namespace uhal
   {
     void PugiXMLParseResultPrettifier ( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile )
     {
-      logging();
       log ( Error() , "Failed to parse file " , aPath.c_str() , ". PugiXML returned the following description " , Quote ( aLoadResult.description() ) , "." );
       std::size_t lLineCounter ( 1 );
       std::vector<uint8_t>::const_iterator lIt0 ( aFile.begin() );
@@ -109,7 +108,6 @@ namespace uhal
   {
     unsigned int TrailingRightBits ( uint32_t aValue )
     {
-      logging();
       // unsigned int lReturn = sizeof ( aValue ) * 8; // lReturn will be the number of zero bits on the right
       unsigned int lReturn = sizeof ( aValue ) << 3; // lReturn will be the number of zero bits on the right
       aValue &= -signed ( aValue );

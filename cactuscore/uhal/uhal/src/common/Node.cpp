@@ -96,7 +96,6 @@ namespace uhal
     mChildren ( ),
     mChildrenMap ( )
   {
-    logging();
   }
 
 
@@ -114,8 +113,6 @@ namespace uhal
     mChildren ( ),
     mChildrenMap ( )
   {
-    logging();
-
     for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
       mChildren.push_back ( ( **lIt ).clone() );
@@ -137,7 +134,6 @@ namespace uhal
 
   Node& Node::operator= ( const Node& aNode )
   {
-    logging();
     mHw = aNode.mHw;
     mUid = aNode.mUid ;
     mPartialAddr = aNode.mPartialAddr;
@@ -182,7 +178,6 @@ namespace uhal
 
   Node* Node::clone ( ) const
   {
-    logging();
     return new Node ( *this );
   }
 
@@ -191,8 +186,6 @@ namespace uhal
 
   Node::~Node()
   {
-    logging();
-
     for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       if ( *lIt )
@@ -209,7 +202,6 @@ namespace uhal
 
   bool Node::operator == ( const Node& aNode ) const
   {
-    logging();
     return this->getAddress() == aNode.getAddress() &&
            this->getMask() == aNode.getMask() &&
            this->getPermission() == aNode.getPermission() &&
@@ -219,58 +211,49 @@ namespace uhal
 
   const std::string& Node::getId() const
   {
-    logging();
     return mUid;
   }
 
   const uint32_t& Node::getAddress() const
   {
-    logging();
     return mAddr;
   }
 
   const uint32_t& Node::getMask() const
   {
-    logging();
     return mMask;
   }
 
   const defs::BlockReadWriteMode& Node::getMode() const
   {
-    logging();
     return mMode;
   }
 
   const uint32_t& Node::getSize() const
   {
-    logging();
     return mSize;
   }
 
   const defs::NodePermission& Node::getPermission() const
   {
-    logging();
     return mPermission;
   }
 
 
   const std::string& Node::getTags() const
   {
-    logging();
     return mTags;
   }
 
 
   const std::string& Node::getDescription() const
   {
-    logging();
     return mDescription;
   }
 
 
   void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
   {
-    logging();
     aStream << std::setfill ( '0' ) << std::uppercase;
     aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
     aStream << "Node \"" << mUid << "\", ";
@@ -337,7 +320,6 @@ namespace uhal
 
   Node& Node::getNode ( const std::string& aId ) const
   {
-    logging();
     std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
 
     if ( lIt==mChildrenMap.end() )
@@ -382,7 +364,6 @@ namespace uhal
 
   std::vector<std::string> Node::getNodes() const
   {
-    logging();
     std::vector<std::string> lNodes;
     lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
 
@@ -396,7 +377,6 @@ namespace uhal
 
   std::vector<std::string> Node::getNodes ( const std::string& aRegex ) const
   {
-    logging();
     std::vector<std::string> lNodes;
     lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
     log ( Info() , "Regular Expression : " , aRegex );
@@ -419,8 +399,6 @@ namespace uhal
 
   ValHeader  Node::write ( const uint32_t& aValue ) const
   {
-    logging();
-
     if ( mPermission & defs::WRITE )
     {
       if ( mMask == defs::NOMASK )
@@ -442,8 +420,6 @@ namespace uhal
 
   ValHeader  Node::writeBlock ( const std::vector< uint32_t >& aValues ) const // , const defs::BlockReadWriteMode& aMode )
   {
-    logging();
-
     if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
       log ( Error() , "Bulk Transfer requested on single register node" );
@@ -473,8 +449,6 @@ namespace uhal
 
   ValWord< uint32_t > Node::read() const
   {
-    logging();
-
     if ( mPermission & defs::READ )
     {
       if ( mMask == defs::NOMASK )
@@ -496,8 +470,6 @@ namespace uhal
 
   ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize ) const //, const defs::BlockReadWriteMode& aMode )
   {
-    logging();
-
     if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
       log ( Error() , "Bulk Transfer requested on single register node" );
@@ -650,7 +622,6 @@ namespace uhal
 
   ClientInterface& Node::getClient() const
   {
-    logging();
     return mHw->getClient();
   }
 

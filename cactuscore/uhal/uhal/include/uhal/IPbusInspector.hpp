@@ -72,7 +72,6 @@ namespace uhal
 
       void analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        logging();
         uint32_t lAddress , lPacketHeader, lAddend , lAndTerm , lOrTerm ;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
@@ -145,27 +144,23 @@ namespace uhal
     protected:
       virtual void bot()
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | BOT, transaction ID " , Integer ( mTransactionId ) );
       }
 
       virtual void ni_read ( const uint32_t& aAddress )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
       }
 
       virtual void read ( const uint32_t& aAddress )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
       }
 
       virtual void ni_write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
 
@@ -177,7 +172,6 @@ namespace uhal
 
       virtual void write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
 
@@ -189,7 +183,6 @@ namespace uhal
 
       virtual void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write sum, transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
         log ( Notice() , Integer ( aAddend, IntFmt<hex,fixed>() ) , " |  > Addend" );
@@ -197,7 +190,6 @@ namespace uhal
 
       virtual void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write bits, transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
         log ( Notice() , Integer ( aAndTerm, IntFmt<hex,fixed>() ) , " |  > And-term" );
@@ -206,14 +198,12 @@ namespace uhal
 
       virtual void unknown_type()
       {
-        logging();
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
         throw exception::UnableToParseHeader();
       }
 
       virtual void packet_header ( const uint32_t& aPacketHeader )
       {
-        logging();
         uint32_t lTransactionId ( ( aPacketHeader>>8 ) &0xFFFF );
         log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );
       }
@@ -243,7 +233,6 @@ namespace uhal
 
       void analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        logging();
         uint32_t lNewValue , lPacketHeader;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
@@ -309,13 +298,11 @@ namespace uhal
     protected:
       virtual void bot()
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | BOT, transaction ID " , Integer ( mTransactionId ) );
       }
 
       virtual void ni_read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
 
         while ( aIt != aEnd )
@@ -326,7 +313,6 @@ namespace uhal
 
       virtual void read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
 
         while ( aIt != aEnd )
@@ -337,40 +323,34 @@ namespace uhal
 
       virtual void ni_write ( )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
       }
 
       virtual void write ( )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
       }
 
       virtual void rmw_sum ( const uint32_t& aNewValue )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write sum, transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
       }
 
       virtual void rmw_bits ( const uint32_t& aNewValue )
       {
-        logging();
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write bits, transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
       }
 
       virtual void unknown_type()
       {
-        logging();
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
         throw exception::UnableToParseHeader();
       }
 
       virtual void packet_header ( const uint32_t& aPacketHeader )
       {
-        logging();
         uint32_t lTransactionId ( ( aPacketHeader>>8 ) &0xFFFF );
         log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );
       }

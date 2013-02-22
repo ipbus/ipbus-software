@@ -39,7 +39,6 @@ namespace uhal
   template< typename T >
   uint8_t* Buffers::send ( const T* aPtr )
   {
-    logging();
     uint32_t lSize ( sizeof ( T ) );
     uint8_t* lStartPtr ( &mSendBuffer[0]+mSendCounter );
     memcpy ( lStartPtr , aPtr , lSize );
@@ -50,7 +49,6 @@ namespace uhal
   template< typename T >
   uint8_t* Buffers::send ( const T& aRef )
   {
-    logging();
     uint32_t lSize ( sizeof ( T ) );
     uint8_t* lStartPtr ( &mSendBuffer[0]+mSendCounter );
     memcpy ( lStartPtr , &aRef , lSize );
@@ -61,7 +59,6 @@ namespace uhal
   template< typename T >
   void Buffers::receive ( T* aPtr )
   {
-    logging();
     uint32_t lSize ( sizeof ( T ) );
     mReplyBuffer.push_back ( std::make_pair ( ( uint8_t* ) ( aPtr ) , lSize ) );
     mReplyCounter += lSize;
@@ -70,7 +67,6 @@ namespace uhal
   template< typename T >
   void Buffers::receive ( T& aRef )
   {
-    logging();
     uint32_t lSize ( sizeof ( T ) );
     mReplyBuffer.push_back ( std::make_pair ( ( uint8_t* ) ( &aRef ) , lSize ) );
     mReplyCounter += lSize;

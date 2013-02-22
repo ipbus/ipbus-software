@@ -45,26 +45,22 @@ namespace uhal
     mReplyCounter ( 0 ),
     mSendBuffer ( aMaxSendSize , 0x00 )
   {
-    logging();
   }
 
 
 
   Buffers::~Buffers()
   {
-    logging();
   }
 
 
   const uint32_t& Buffers::sendCounter()
   {
-    logging();
     return mSendCounter;
   }
 
   const uint32_t& Buffers::replyCounter()
   {
-    logging();
     return mReplyCounter;
   }
 
@@ -72,7 +68,6 @@ namespace uhal
 
   uint8_t* Buffers::send ( const uint8_t* aPtr , const uint32_t& aSize )
   {
-    logging();
     uint8_t* lStartPtr ( &mSendBuffer[0]+mSendCounter );
     memcpy ( lStartPtr , aPtr , aSize );
     mSendCounter += aSize;
@@ -82,58 +77,50 @@ namespace uhal
 
   void Buffers::receive ( uint8_t* aPtr , const uint32_t& aSize )
   {
-    logging();
     mReplyBuffer.push_back ( std::make_pair ( aPtr , aSize ) );
     mReplyCounter += aSize;
   }
 
   void Buffers::add ( const ValHeader& aValMem )
   {
-    logging();
     mValHeaders.push_back ( aValMem );
   }
 
   void Buffers::add ( const ValWord< uint32_t >& aValMem )
   {
-    logging();
     mUnsignedValWords.push_back ( aValMem );
   }
 
   // void Buffers::add ( const ValWord< int32_t >& aValMem )
   // {
-  // logging();
+  //
   // mSignedValWords.push_back ( aValMem );
   // }
 
   void Buffers::add ( const ValVector< uint32_t >& aValMem )
   {
-    logging();
     mUnsignedValVectors.push_back ( aValMem );
   }
 
   // void Buffers::add ( const ValVector< int32_t >& aValMem )
   // {
-  // logging();
+  //
   // mSignedValVectors.push_back ( aValMem );
   // }
 
   uint8_t* Buffers::getSendBuffer()
   {
-    logging();
     return &mSendBuffer[0];
   }
 
   std::deque< std::pair< uint8_t* , uint32_t > >& Buffers::getReplyBuffer()
   {
-    logging();
     return mReplyBuffer;
   }
 
 
   void Buffers::validate()
   {
-    logging();
-
     for ( std::deque< ValHeader >::iterator lIt = mValHeaders.begin() ; lIt != mValHeaders.end() ; ++lIt )
     {
       lIt->valid ( true );
@@ -162,7 +149,6 @@ namespace uhal
 
   void Buffers::clear()
   {
-    logging();
     mSendCounter = 0 ;
     mReplyCounter = 0 ;
     mReplyBuffer.clear();

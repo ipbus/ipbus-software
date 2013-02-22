@@ -51,6 +51,7 @@
  class ClassName : public uhal::exception::exception {\
  public:\
  ClassName() : exception() { create(); }\
+ protected:\
  std::string description() const throw() { return std::string( ClassDescription ); } \
 };
 
@@ -81,6 +82,7 @@ namespace uhal
     //! An abstract base exception class providing an interface to a throw/rethrow mechanism which will allow us to catch the base type and rethrow the derived type
     class exception : public std::exception
     {
+        friend class exception_helper;
 
       public:
         /**
@@ -100,9 +102,10 @@ namespace uhal
         */
         virtual const char* what() const throw();
 
+      protected:
         virtual std::string description() const throw() = 0;
 
-      protected:
+
         void create() throw();
 
       private:

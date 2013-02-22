@@ -99,7 +99,7 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\tchar * lEnvVar = getenv ( aEnvVar );\n"
            << "\tif( !lEnvVar )\n"
            << "\t{\n"
-//           << "\t\tlogging();\n"
+           //           << "\t\t\n"
            << "\t\tlog( Warning() , \"No environment variable \" , Quote( aEnvVar ) , \" set. Using level \" , Quote( \"Info\" ) , \" instead.\" );\n"
            << "\t\tsetLogLevelTo ( " << gDefaultLevel << "() );\n"
            << "\t\treturn;\n"
@@ -118,7 +118,7 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
   }
 
   aCppFile << "\t\tdefault:\n"
-           << "\t\t\tlogging();\n"
+           << "\t\t\t\n"
            << "\t\t\tlog ( Warning() , \"Environment varible has invalid value \" , Quote( lEnvVar ) , \". Using level \" , Quote ( \"Info\" ) , \" instead.\" );\n"
            << "\t\t\tsetLogLevelTo ( Info() );\n"
            << "\t}\n"
@@ -277,25 +277,25 @@ std::string suffix ( uint32_t i )
 void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
   std::stringstream lIfDefs , lEndIfs;
-//   aHppFile << "class logger\n"
-//            << "{\n"
-//            << "public:\n"
-//            //          << "\tlogger( const Location& aLocation );\n"
-//            << "\tlogger();\n"
-//            << "\tvirtual ~logger();\n"
-//            //           << "private:\n"
-//            //           << "\tLocation mLocation;\n"
-//            << "public:\n";
-//   aCppFile //<< "logger::logger( const Location& aLocation ) : mLocation( aLocation ) {}\n"
-//       << "logger::logger( ) {}\n"
-//       << "\n"
-//       << "logger::~logger()\n"
-//       << "{\n"
-//       /*          << "\tif (std::uncaught_exception())\n"
-//                 << "\t{\n"
-//                 << "\t\tthis->operator()( Error() , \"Exception spotted at \" , mLocation );\n"
-//                 << "\t}\n"*/
-//       << "}\n";
+  //   aHppFile << "class logger\n"
+  //            << "{\n"
+  //            << "public:\n"
+  //            //          << "\tlogger( const Location& aLocation );\n"
+  //            << "\tlogger();\n"
+  //            << "\tvirtual ~logger();\n"
+  //            //           << "private:\n"
+  //            //           << "\tLocation mLocation;\n"
+  //            << "public:\n";
+  //   aCppFile //<< "logger::logger( const Location& aLocation ) : mLocation( aLocation ) {}\n"
+  //       << "logger::logger( ) {}\n"
+  //       << "\n"
+  //       << "logger::~logger()\n"
+  //       << "{\n"
+  //       /*          << "\tif (std::uncaught_exception())\n"
+  //                 << "\t{\n"
+  //                 << "\t\tthis->operator()( Error() , \"Exception spotted at \" , mLocation );\n"
+  //                 << "\t}\n"*/
+  //       << "}\n";
 
   for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
   {
@@ -322,11 +322,11 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << lDoxygen.str()
                << "\t*/\n"
                << "\ttemplate<" << lTemplatesStr << ">\n"
-//               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
+               //               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
                << "\tvoid log ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
                << "\n";
       aHxxFile << "template<" << lTemplatesStr << ">\n"
-//               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
+               //               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
                << "void log ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
                << "{\n"
                << lIfDefs.str()

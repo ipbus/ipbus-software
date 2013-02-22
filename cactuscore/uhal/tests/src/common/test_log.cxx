@@ -54,7 +54,6 @@ int main ( int argc,char* argv[] )
 {
   try
   {
-    logging();
     // Test basic inserters
     log ( Notice() , "const char*" );
     log ( Notice() , std::string ( "std::string" ) );

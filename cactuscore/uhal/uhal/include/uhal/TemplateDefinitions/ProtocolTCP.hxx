@@ -63,7 +63,6 @@ namespace uhal
     mDeadlineTimer ( *mIOservice ),
     mReplyMemory ( 65536 , 0x00000000 )
   {
-    logging();
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::DispatchWorker::CheckDeadline, this ) );
   }
 
@@ -71,8 +70,6 @@ namespace uhal
   template < typename InnerProtocol >
   TCP< InnerProtocol >::DispatchWorker::~DispatchWorker()
   {
-    logging();
-
     try
     {
       if ( mSocket.unique() )
@@ -90,7 +87,6 @@ namespace uhal
   void TCP< InnerProtocol >::DispatchWorker::operator() ()
   {
 #ifdef USE_TCP_MULTITHREADED
-    logging();
 
     try
     {
@@ -128,9 +124,7 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::DispatchWorker::dispatch ( Buffers* aBuffers )
   {
-    logging();
     // log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTCP.getTimeoutPeriod() ) );
-
     if ( ! mSocket->is_open() )
     {
       log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
@@ -255,7 +249,6 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::DispatchWorker::CheckDeadline()
   {
-    logging();
     //log ( Debug() , ThisLocation() );
 
     // Check whether the deadline has passed. We compare the deadline against
@@ -291,7 +284,6 @@ namespace uhal
     mAsynchronousException ( NULL )
 #endif
   {
-    logging();
     //log ( Debug() , ThisLocation() );
   }
 
@@ -299,9 +291,7 @@ namespace uhal
   template < typename InnerProtocol >
   TCP< InnerProtocol >::~TCP()
   {
-    logging();
     //log ( Debug() , ThisLocation() );
-
     try
     {
 #ifdef USE_TCP_MULTITHREADED
@@ -332,7 +322,6 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::implementDispatch()
   {
-    logging();
     //log ( Debug() , ThisLocation() );
 #ifndef USE_TCP_MULTITHREADED
     mDispatchWorker->dispatch ( & ( * ( this->mCurrentBuffers ) ) );
@@ -344,7 +333,6 @@ namespace uhal
   Buffers* TCP< InnerProtocol >::getCurrentDispatchBuffers()
   {
 #ifdef USE_TCP_MULTITHREADED
-    logging();
     log ( Warning() , "This code is untested - " , ThisLocation() );
 
     if ( this->mDispatchedBuffers.size() )
@@ -372,7 +360,7 @@ namespace uhal
   // template < typename InnerProtocol >
   // void TCP< InnerProtocol >::Flush( )
   // {
-  // logging();
+  //
   // #ifdef USE_TCP_MULTITHREADED
   // bool lContinue ( true );
 

@@ -94,7 +94,6 @@ namespace __gnu_cxx
     size_t operator() ( const std::string& x ) const
     {
       using namespace uhal;
-      logging();
       return hash< const char* >() ( x.c_str() );
     }
   };
@@ -122,8 +121,6 @@ namespace uhal
     template < bool DebugInfo >
     bool ParseSemicolonDelimitedUriList ( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
     {
-      logging();
-
       try
       {
         grammars::SemicolonDelimitedUriListGrammar lGrammar;
@@ -178,8 +175,6 @@ namespace uhal
     template < bool DebugInfo >
     bool ShellExpandFilenameExpr ( const char* aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
     {
-      logging();
-
       if ( !aFiles && !aDirectories )
       {
         // We have nowhere to write the data so don't bother expanding the expression
@@ -291,7 +286,6 @@ namespace uhal
     template < bool DebugInfo >
     bool ShellExpandFilenameExpr ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
     {
-      logging();
       return ShellExpandFilenameExpr< DebugInfo > ( aFilenameExpr.c_str() , aParentPath.c_str() , aFiles , aDirectories );
     }
 
@@ -315,8 +309,6 @@ namespace uhal
     template < bool DebugInfo >
     bool HttpGet ( const std::string& aURL , HttpResponseType& aResponse )
     {
-      logging();
-
       if ( DebugInfo )
       {
         try
@@ -481,7 +473,6 @@ namespace uhal
     template < typename R , typename F , typename L>
     bool OpenFileLocal ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
     {
-      logging();
       std::vector< boost::filesystem::path > lFilePaths;
 
       if ( !uhal::utilities::ShellExpandFilenameExpr<true> ( aFilenameExpr , aParentPath , &lFilePaths ) )
@@ -521,7 +512,6 @@ namespace uhal
     template < typename R , typename F , typename L>
     bool OpenFileHttp ( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder )
     {
-      logging();
       HttpResponseType lHttpResponse;
 
       if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
@@ -546,8 +536,6 @@ namespace uhal
     template < typename R , typename F , typename L>
     bool OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
     {
-      logging();
-
       if ( aProtocol == "file" )
       {
         return uhal::utilities::OpenFileLocal ( aFilenameExpr , aParentPath , aBinder );
@@ -619,7 +607,6 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget )
     {
-      logging();
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
       if ( ! lAttr.empty() )
@@ -649,7 +636,6 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget )
     {
-      logging();
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
       if ( ! lAttr.empty() )
@@ -679,7 +665,6 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget )
     {
-      logging();
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
       if ( ! lAttr.empty() )
@@ -757,7 +742,6 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget )
     {
-      logging();
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
       if ( ! lAttr.empty() )
@@ -835,7 +819,6 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget )
     {
-      logging();
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
       if ( ! lAttr.empty() )
@@ -864,7 +847,6 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget )
     {
-      logging();
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
       if ( ! lAttr.empty() )
@@ -893,7 +875,6 @@ namespace uhal
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , bool& aTarget )
     {
-      logging();
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
 
       if ( ! lAttr.empty() )

@@ -85,7 +85,7 @@ namespace uhal
 
       mMessage += "\n";
 #ifdef COURTEOUS_EXCEPTIONS
-      mMessage += "I'm terribly sorry to have to tell you this, but it seems that there was an exception:\n";
+      mMessage += "I'm terribly sorry to have to tell you this, but it appears that there was an exception:\n";
 #endif
 
       for ( map_type::iterator lIt = mExceptions.begin(); lIt != mExceptions.end(); ++lIt )
@@ -140,20 +140,20 @@ namespace uhal
       mMessages += "\n   - Description:\n";
       mMessages += "     - ";
       mMessages += mExc->description();
-      mMessages += "\n   - Call stack (I have improved on this code, is is just not committed yet):\n";
-      static const uint32_t lMaxBacktraceSize ( 256 );
-      void*    lArray[lMaxBacktraceSize];
-      size_t lSize = backtrace ( lArray, lMaxBacktraceSize );
-      char** lStrings = backtrace_symbols ( lArray, lSize );
+      mMessages += "\n   - Call stack:\n";
+      std::vector< TracePoint > lBacktrace = Backtrace ( 256 );
 
-      for ( uint32_t i = 2; i != lSize-3; ++i )
+      for ( std::vector< TracePoint >::iterator lIt = lBacktrace.begin() +2 ; lIt != lBacktrace.end()-2; ++lIt )
       {
-        mMessages += "     - ";
-        mMessages += lStrings[i];
+        mMessages += "     - function \"";
+        mMessages += lIt->function;
+        mMessages += "\" in ";
+        mMessages += lIt->file;
+        mMessages += ", line ";
+        mMessages += boost::lexical_cast<std::string> ( lIt->line );
         mMessages += "\n";
       }
 
-      free ( lStrings );
       mMessages += "   - Log messages (currently missing):\n";
     }
 

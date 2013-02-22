@@ -44,34 +44,29 @@ namespace uhal
     // , mSendPadding ( 8 , implementCalculateHeader ( B_O_T , 0 , 0 ) ),
     // mReplyPadding ( 8 , 0x00000000 )
   {
-    logging();
   }
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   IPbus< 1 , IPbus_minor , buffer_size >::~IPbus()
   {
-    logging();
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 1 , IPbus_minor , buffer_size >::preamble( )
   {
-    logging();
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 1 , IPbus_minor , buffer_size >::getPreambleSize()
   {
-    logging();
     return 1;
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 1 , IPbus_minor , buffer_size >::predispatch( )
   {
-    logging();
     uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
     //IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
     int32_t lPaddingWords ( ( 7 + this->getPreambleSize() ) - lWords );
@@ -96,7 +91,6 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
   {
-    logging();
     uint8_t lType ( 0x00 );
 
     switch ( aType )
@@ -134,15 +128,12 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 1 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
   {
-    logging();
     return ( IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId ) | 0x00000004 );
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    logging();
-
     switch ( aHeader & 0xF8 )
     {
       case 0xF8 :
@@ -183,14 +174,12 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 1 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
   {
-    logging();
     return IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId );
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 1 , IPbus_minor , buffer_size >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    logging();
     return IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -202,14 +191,12 @@ namespace uhal
     IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) ),
     mPacketCounter ( 1 )
   {
-    logging();
   }
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   IPbus< 2 , IPbus_minor , buffer_size >::~IPbus()
   {
-    logging();
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
@@ -225,7 +212,6 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 2 , IPbus_minor , buffer_size >::getPreambleSize()
   {
-    logging();
     return 1;
   }
 
@@ -237,10 +223,8 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    logging();
     //log ( Debug() , ThisLocation() );
     //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
-
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
     {
       log ( Error() , "Returned Packet Header " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) , IntFmt<hex,fixed>() ) ,
@@ -256,7 +240,6 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
   {
-    logging();
     uint8_t lType ( 0x00 );
 
     switch ( aType )
@@ -294,7 +277,6 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 2 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
   {
-    logging();
     return ( IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId ) & 0xFFFFFFF0 );
   }
 
@@ -302,8 +284,6 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 2 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    logging();
-
     switch ( aHeader & 0xF0 )
     {
       case 0x00 :
@@ -338,14 +318,12 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   uint32_t IPbus< 2 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
   {
-    logging();
     return IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId );
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 2 , IPbus_minor , buffer_size >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    logging();
     return IPbus< 2 , IPbus_minor , buffer_size >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------

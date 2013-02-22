@@ -42,14 +42,12 @@ namespace uhal
     mId ( aId ),
     mUri ( aUri )
   {
-    logging();
   }
 
 
 
   ClientInterface::ClientInterface ( )
   {
-    logging();
   }
 
 
@@ -58,13 +56,11 @@ namespace uhal
     mId ( aClientInterface.mId ),
     mUri ( aClientInterface.mUri )
   {
-    logging();
   }
 
 
   ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
   {
-    logging();
     mId  = aClientInterface.mId;
     mUri = aClientInterface.mUri;
     return *this;
@@ -73,12 +69,10 @@ namespace uhal
 
   ClientInterface::~ClientInterface()
   {
-    logging();
   }
 
   const std::string& ClientInterface::id() const
   {
-    logging();
     return mId;
   }
 
@@ -111,7 +105,6 @@ namespace uhal
 
   std::string ClientInterface::uri() const
   {
-    logging();
     std::stringstream lReturn;
     // url is always of the form "protocol://hostname:port"
     lReturn << mUri.mProtocol << "://" << mUri.mHostname << ":" << mUri.mPort;
@@ -153,7 +146,6 @@ namespace uhal
 
   void ClientInterface::dispatch ()
   {
-    logging();
     this->predispatch( );
     mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) );
     this->implementDispatch( );
@@ -164,7 +156,6 @@ namespace uhal
 
   bool ClientInterface::validate ( )
   {
-    logging();
     log ( Debug() , ThisLocation() );
     //check that the results are valid
     boost::lock_guard<boost::mutex> lLock ( mMutex );
@@ -196,13 +187,11 @@ namespace uhal
 
   void ClientInterface::preamble()
   {
-    logging();
     //log ( Debug() , ThisLocation() );
   }
 
   void ClientInterface::predispatch( )
   {
-    logging();
     //log ( Debug() , ThisLocation() );
   }
 
@@ -210,7 +199,6 @@ namespace uhal
 
   void ClientInterface::CreateFillingBuffer ( )
   {
-    logging();
     log ( Debug() , ThisLocation() );
 
     if ( mBuffers.size() )
@@ -228,7 +216,6 @@ namespace uhal
 
   void ClientInterface::NextFillingBuffer ( )
   {
-    logging();
     log ( Debug() , ThisLocation() );
     //if there are no existing buffers in the pool, create them
     CreateFillingBuffer ( );
@@ -286,13 +273,11 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
   {
-    logging();
     return implementWrite ( aAddr , aSource );
   }
 
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
   {
-    logging();
     uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
     uint32_t lBitShiftedSource ( aSource << lShiftSize );
 
@@ -318,7 +303,6 @@ namespace uhal
 
   ValHeader ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
-    logging();
     return implementWriteBlock ( aAddr, aSource, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -328,19 +312,16 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr )
   {
-    logging();
     return implementRead ( aAddr );
   }
 
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr, const uint32_t& aMask )
   {
-    logging();
     return implementRead ( aAddr, aMask );
   }
 
   ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
-    logging();
     return implementReadBlock ( aAddr, aSize, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -348,7 +329,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
-    logging();
     return implementRMWbits ( aAddr , aANDterm , aORterm );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -357,7 +337,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
   {
-    logging();
     return implementRMWsum ( aAddr , aAddend );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

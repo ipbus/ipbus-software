@@ -58,5 +58,5 @@ int main ( int argc,char* argv[] )
   std::string device_id = params["device_id"];
   std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
   CACTUS_TEST ( check_nonreachable ( connection_file, device_id, 3 ) );
-  RESULT( argv[0] );
+  RESULT ( argv[0] );
 }

@@ -44,13 +44,11 @@ namespace uhal
   template < typename R >
   BaseFunctionObject<R>::BaseFunctionObject()
   {
-    logging();
   }
 
   template < typename R >
   BaseFunctionObject<R>::~BaseFunctionObject()
   {
-    logging();
   }
 
 
@@ -58,13 +56,11 @@ namespace uhal
   FunctionObject<R,T>::FunctionObject ( T& aT ) :
     mT ( aT )
   {
-    logging();
   }
 
   template < typename R , typename T >
   R FunctionObject<R,T>::operator() ( const pugi::xml_node& aNode )
   {
-    logging();
     return ( mT ) ( aNode );
   }
 
@@ -72,13 +68,11 @@ namespace uhal
   FunctionObject<R,T*>::FunctionObject ( T* aT ) :
     mT ( aT )
   {
-    logging();
   }
 
   template < typename R , typename T >
   R FunctionObject<R,T*>::operator() ( const pugi::xml_node& aNode )
   {
-    logging();
     return ( *mT ) ( aNode );
   }
 
@@ -90,14 +84,11 @@ namespace uhal
     mForbiddenHash ( 0x0000000000000000 ),
     mFuncPtr ( NULL )
   {
-    logging();
   }
 
   template < typename R >
   Rule<R>::~Rule()
   {
-    logging();
-
     if ( mFuncPtr )
     {
       delete mFuncPtr;
@@ -108,8 +99,6 @@ namespace uhal
   template < typename R >
   Rule<R>& Rule<R>::require ( const std::string& aStr )
   {
-    logging();
-
     if ( mForbidden.find ( aStr ) != mForbidden.end() )
     {
       log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
@@ -123,8 +112,6 @@ namespace uhal
   template < typename R >
   Rule<R>& Rule<R>::forbid ( const std::string& aStr )
   {
-    logging();
-
     if ( mRequired.find ( aStr ) != mRequired.end() )
     {
       log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
@@ -138,7 +125,6 @@ namespace uhal
   template < typename R >
   Rule<R>& Rule<R>::optional ( const std::string& aStr )
   {
-    logging();
     mOptional.insert ( aStr );
     return *this;
   }
@@ -146,7 +132,6 @@ namespace uhal
   template < typename R >
   std::string Rule<R>::description() const
   {
-    logging();
     std::set<std::string>::const_iterator lIt;
     std::stringstream lStr;
     lStr << "Rule " << mRuleId ;
@@ -219,8 +204,6 @@ namespace uhal
   template < typename R >
   R Rule<R>::operator() ( const pugi::xml_node& aNode )
   {
-    logging();
-
     if ( mFuncPtr )
     {
       return ( *mFuncPtr ) ( aNode );
@@ -238,14 +221,12 @@ namespace uhal
     mNextHash ( 0x0000000000000001 ),
     mRuleCounter ( 0 )
   {
-    logging();
     mHashes.clear();
   }
 
   template < typename R >
   Parser<R>::~Parser()
   {
-    logging();
   }
 
 
@@ -254,7 +235,6 @@ namespace uhal
   template < typename T >
   void Parser<R>::addRule ( const Rule<R> & aRule , T aCallbackHandler )
   {
-    logging();
     mRules.push_back ( aRule );
     Rule<R>& lRule ( mRules.back() );
 
@@ -327,7 +307,6 @@ namespace uhal
   template < typename R >
   R Parser<R>::operator() ( const pugi::xml_node& aNode )
   {
-    logging();
     uint64_t lHash ( 0x0000000000000000 );
 
     for ( pugi::xml_attribute lAttr = aNode.first_attribute(); lAttr; lAttr = lAttr.next_attribute() )

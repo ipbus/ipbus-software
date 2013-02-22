@@ -50,19 +50,15 @@ class UDPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
       mSocket ( mIOservice , udp::endpoint ( udp::v4(), aPort ) )
 
     {
-      logging();
     }
 
 
     ~UDPdummyHardware()
     {
-      logging();
     }
 
     void run()
     {
-      logging();
-
       while ( true )
       {
         uint32_t lBytes = mSocket.receive_from ( boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ) , mSenderEndpoint );
@@ -83,7 +79,6 @@ class UDPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
 
 int main ( int argc, char* argv[] )
 {
-  logging();
   CommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
 
   if ( lOptions.version == 1 )

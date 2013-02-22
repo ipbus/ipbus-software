@@ -54,8 +54,7 @@ void job_multiple ( const std::string& connection, const std::string& id )
 
     for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
 {
-  logging();
-    log ( Info() , "Iteration " , Integer ( iter ) );
+  log ( Info() , "Iteration " , Integer ( iter ) );
     ConnectionManager manager ( connection );
     HwInterface hw=manager.getDevice ( id );
     hw.setTimeoutPeriod ( TIMEOUT_S*1000 );
@@ -192,5 +191,5 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST ( multiple_hwinterfaces ( connection_file,device_id ) );
   //CACTUS_TEST ( single_hwinterface ( connection_file,device_id ) );
   //CACTUS_TEST ( single_copied_hwinterface ( connection_file,device_id ) );
-  RESULT( argv[0] );
+  RESULT ( argv[0] );
 }

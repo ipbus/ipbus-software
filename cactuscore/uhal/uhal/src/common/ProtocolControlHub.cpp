@@ -48,7 +48,6 @@ namespace uhal
 
   std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri )
   {
-    logging();
     NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin();
 
     for ( ; lIt != aUri.mArguments.end() ; ++lIt )

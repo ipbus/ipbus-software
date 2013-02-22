@@ -46,8 +46,6 @@ namespace uhal
 
   ClientFactory& ClientFactory::getInstance()
   {
-    logging();
-
     if ( mInstance == NULL )
     {
       mInstance = new ClientFactory();
@@ -73,18 +71,15 @@ namespace uhal
 
   ClientFactory::ClientFactory()
   {
-    logging();
   }
 
   ClientFactory::~ClientFactory()
   {
-    logging();
   }
 
 
   boost::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri )
   {
-    logging();
     URI lUri;
 
     try

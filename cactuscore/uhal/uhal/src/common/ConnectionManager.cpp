@@ -50,7 +50,6 @@ namespace uhal
   ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess ) :
     connection_file ( aConnectionFile )
   {
-    logging();
     aSuccess=false;
 
     if ( ! uhal::utilities::GetXMLattribute<true> ( aNode , "id" , id ) )
@@ -73,8 +72,6 @@ namespace uhal
 
   bool ConnectionManager::ConnectionDescriptor::operator== ( const ConnectionDescriptor& aConnectionDescriptor ) const
   {
-    logging();
-
     if ( id != aConnectionDescriptor.id )
     {
       return false;
@@ -106,7 +103,6 @@ namespace uhal
 
   ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr )
   {
-    logging();
     //Mutex lock here to be on the safe side
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles;	//protocol, filename
@@ -121,7 +117,6 @@ namespace uhal
 
   ConnectionManager::~ConnectionManager ()
   {
-    logging();
   }
 
 
@@ -131,7 +126,6 @@ namespace uhal
   */
   HwInterface ConnectionManager::getDevice ( const std::string& aId )
   {
-    logging();
     //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
     boost::lock_guard<boost::mutex> lLock ( mMutex );
 
@@ -159,7 +153,6 @@ namespace uhal
   //Static method for building device on the fly
   HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr )
   {
-    logging();
     //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
@@ -172,7 +165,6 @@ namespace uhal
   //Given a regex return the ids that match the
   std::vector<std::string> ConnectionManager::getDevices ( ) const
   {
-    logging();
     std::vector<std::string> lDevices;
     lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
@@ -187,7 +179,6 @@ namespace uhal
 
   std::vector<std::string> ConnectionManager::getDevices ( const std::string& aRegex ) const
   {
-    logging();
     std::vector<std::string> lDevices;
     lDevices.reserve ( mConnectionDescriptors.size() ); //prevent reallocations
 
@@ -209,7 +200,6 @@ namespace uhal
 
   void ConnectionManager::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile )
   {
-    logging();
     std::pair< std::set< std::string >::iterator , bool > lInsert = mPreviouslyOpenedFiles.insert ( aProtocol+ ( aPath.string() ) );
 
     if ( ! lInsert.second )

@@ -41,7 +41,6 @@ namespace uhal
     mClientInterface ( aClientInterface ),
     mNode ( aNode )
   {
-    logging();
     claimNode ( *mNode );
   }
 
@@ -50,19 +49,16 @@ namespace uhal
     mClientInterface ( otherHw.mClientInterface ),
     mNode ( otherHw.mNode->clone() )
   {
-    logging();
     claimNode ( *mNode );
   }
 
 
   HwInterface::~HwInterface()
   {
-    logging();
   }
 
   void HwInterface::claimNode ( Node& aNode )
   {
-    logging();
     aNode.mHw = this;
 
     for ( std::deque< Node* >::iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
@@ -73,7 +69,6 @@ namespace uhal
 
   ClientInterface& HwInterface::getClient()
   {
-    logging();
     return *mClientInterface;
   }
 
@@ -95,60 +90,51 @@ namespace uhal
 
   void HwInterface::dispatch ()
   {
-    logging();
     mClientInterface->dispatch ();
   }
 
 
   const std::string& HwInterface::id() const
   {
-    logging();
     return mClientInterface->id();
   }
 
 
   std::string HwInterface::uri() const
   {
-    logging();
     return mClientInterface->uri();
   }
 
 
   void HwInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
   {
-    logging();
     mClientInterface->setTimeoutPeriod ( aTimeoutPeriod );
   }
 
 
   uint32_t HwInterface::getTimeoutPeriod()
   {
-    logging();
     return mClientInterface->getTimeoutPeriod();
   }
 
   Node& HwInterface::getNode () const
   {
-    logging();
     return *mNode;
   }
 
 
   Node& HwInterface::getNode ( const std::string& aId ) const
   {
-    logging();
     return mNode->getNode ( aId );
   }
 
   std::vector<std::string> HwInterface::getNodes() const
   {
-    logging();
     return mNode->getNodes();
   }
 
   std::vector<std::string> HwInterface::getNodes ( const std::string& aRegex ) const
   {
-    logging();
     return mNode->getNodes ( aRegex );
   }
 

@@ -55,7 +55,7 @@ namespace uhal
 
   // void IPbusCore::preamble( )
   // {
-  // logging();
+  //
   // log ( Debug() , "preamble" );
   // ByteOrderTransaction();
   // }
@@ -65,7 +65,7 @@ namespace uhal
 
   // void IPbusCore::Dispatch( )
   // {
-  // logging();
+  //
   // log ( Debug() , "Dispatch" );
 
   // if ( mCurrentBuffers )
@@ -85,7 +85,6 @@ namespace uhal
                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    logging();
     log ( Debug() , "IPbusCore Validation" );
     eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
     uint32_t lSendWordCount , lReplyWordCount;
@@ -192,7 +191,7 @@ namespace uhal
   // // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
   // bool IPbusCore::Validate ( Buffers* aBuffers )
   // {
-  // logging();
+  //
   // bool lRet = Validate ( aBuffers->getSendBuffer() ,
   // aBuffers->getSendBuffer() +aBuffers->sendCounter() ,
   // aBuffers->getReplyBuffer().begin() ,
@@ -210,7 +209,6 @@ namespace uhal
   // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader IPbusCore::implementBOT()
   {
-    logging();
     log ( Debug() , "Byte Order Transaction" );
     // IPbus send packet format is:
     // HEADER
@@ -235,7 +233,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader IPbusCore::implementWrite ( const uint32_t& aAddr, const uint32_t& aSource )
   {
-    logging();
     log ( Debug() , "Write " , Integer ( aSource , IntFmt<hex,fixed>() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -260,7 +257,6 @@ namespace uhal
 
   ValHeader IPbusCore::implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
-    logging();
     log ( Debug() , "Write block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -314,7 +310,6 @@ namespace uhal
 
   ValWord< uint32_t > IPbusCore::implementRead ( const uint32_t& aAddr, const uint32_t& aMask )
   {
-    logging();
     log ( Debug() , "Read one unsigned word from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -339,7 +334,6 @@ namespace uhal
 
   ValVector< uint32_t > IPbusCore::implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
-    logging();
     log ( Debug() , "Read unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -386,7 +380,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > IPbusCore::implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
-    logging();
     log ( Debug() , "Read/Modify/Write bits (and=" , Integer ( aANDterm , IntFmt<hex,fixed>() ) , ", or=" , Integer ( aORterm , IntFmt<hex,fixed>() ) , ") from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -418,7 +411,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > IPbusCore::implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend )
   {
-    logging();
     log ( Debug() , "Read/Modify/Write sum (addend=" , Integer ( aAddend , IntFmt<hex,fixed>() ) , ") from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );			// IPbus packet format is:
     // HEADER
     // BASE ADDRESS
@@ -447,7 +439,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   void IPbusCore::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
   {
-    logging();
     log ( Debug() , "Checking buffer space" );
     //if there are no existing buffers in the pool, create them
     CreateFillingBuffer ( );
@@ -514,8 +505,6 @@ namespace uhal
 
   void IPbusCore::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
   {
-    logging();
-
     if ( aTimeoutPeriod == 0 )
     {
       mTimeoutPeriod = boost::posix_time::pos_infin;
@@ -528,7 +517,6 @@ namespace uhal
 
   uint64_t IPbusCore::getTimeoutPeriod()
   {
-    logging();
     return mTimeoutPeriod.total_milliseconds();
   }
 

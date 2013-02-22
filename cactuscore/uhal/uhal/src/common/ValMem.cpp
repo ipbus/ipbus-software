@@ -42,7 +42,6 @@ namespace uhal
   _ValHeader_::_ValHeader_ ( const bool& aValid ) :
     valid ( aValid )
   {
-    logging();
   }
 
 
@@ -53,7 +52,6 @@ namespace uhal
     value ( aValue ) ,
     mask ( aMask )
   {
-    logging();
   }
 
 
@@ -64,7 +62,6 @@ namespace uhal
     _ValHeader_ ( aValid ),
     value ( aValue )
   {
-    logging();
   }
 
 
@@ -75,19 +72,16 @@ namespace uhal
   ValHeader::ValHeader() :
     mMembers ( new _ValHeader_ ( false ) )
   {
-    logging();
   }
 
 
   bool ValHeader::valid()
   {
-    logging();
     return mMembers->valid;
   }
 
   void ValHeader::valid ( bool aValid )
   {
-    logging();
     mMembers->valid = aValid;
   }
 
@@ -124,7 +118,6 @@ namespace uhal
   ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) :
     mMembers ( new _ValWord_<T> ( aValue , false , aMask ) )
   {
-    logging();
   }
 
 
@@ -133,7 +126,6 @@ namespace uhal
   ValWord< T >::ValWord ( const ValWord<T>& aVal ) :
     mMembers ( aVal.mMembers )
   {
-    logging();
   }
 
   template< typename T >
@@ -141,27 +133,23 @@ namespace uhal
   ValWord< T >::ValWord() :
     mMembers ( new _ValWord_<T> ( T() , false , 0xFFFFFFFF ) )
   {
-    logging();
   }
 
   template< typename T >
   bool ValWord< T >::valid()
   {
-    logging();
     return mMembers->valid;
   }
 
   template< typename T >
   void ValWord< T >::valid ( bool aValid )
   {
-    logging();
     mMembers->valid = aValid;
   }
 
   template< typename T >
   ValWord< T >& ValWord< T >::operator = ( const T& aValue )
   {
-    logging();
     mMembers->value = aValue ;
     return *this;
   }
@@ -189,15 +177,12 @@ namespace uhal
   template< typename T >
   ValWord< T >::operator T()
   {
-    logging();
     return value();
   }
 
   template< typename T >
   T ValWord< T >::value() const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return ( mMembers->value & mMembers->mask ) >> utilities::TrailingRightBits ( mMembers->mask ) ;
@@ -212,8 +197,6 @@ namespace uhal
   template< typename T >
   void ValWord< T >::value ( const T& aValue )
   {
-    logging();
-
     if ( !mMembers->valid )
     {
       mMembers->value = aValue;
@@ -228,14 +211,12 @@ namespace uhal
   template< typename T >
   const uint32_t& ValWord< T >::mask() const
   {
-    logging();
     return mMembers->mask;
   }
 
   template< typename T >
   void ValWord< T >::mask ( const uint32_t& aMask )
   {
-    logging();
     mMembers->mask = aMask ;
   }
 
@@ -275,7 +256,6 @@ namespace uhal
   ValVector< T >::ValVector ( const std::vector<T>& aValues ) :
     mMembers ( new _ValVector_<T> ( aValues , false ) )
   {
-    logging();
   }
 
 
@@ -284,7 +264,6 @@ namespace uhal
   ValVector< T >::ValVector ( const ValVector& aValues ) :
     mMembers ( aValues.mMembers )
   {
-    logging();
   }
 
 
@@ -293,7 +272,6 @@ namespace uhal
   ValVector< T >::ValVector ( const uint32_t& aSize )  :
     mMembers ( new _ValVector_<T> ( std::vector<T> ( aSize , T() ) , false ) )
   {
-    logging();
   }
 
 
@@ -302,21 +280,18 @@ namespace uhal
   ValVector< T >::ValVector() :
     mMembers ( new _ValVector_<T> ( std::vector<T>() , false ) )
   {
-    logging();
   }
 
 
   template< typename T >
   bool ValVector< T >::valid()
   {
-    logging();
     return mMembers->valid;
   }
 
   template< typename T >
   void ValVector< T >::valid ( bool aValid )
   {
-    logging();
     mMembers->valid = aValid;
   }
 
@@ -325,8 +300,6 @@ namespace uhal
   template< typename T >
   void ValVector< T >::push_back ( const T& aValue )
   {
-    logging();
-
     if ( !mMembers->valid )
     {
       mMembers->value.push_back ( aValue );
@@ -341,8 +314,6 @@ namespace uhal
   template< typename T >
   const T& ValVector< T >::operator[] ( std::size_t aIndex ) const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return ( mMembers->value ) [aIndex];
@@ -357,8 +328,6 @@ namespace uhal
   template< typename T >
   const T& ValVector< T >::at ( std::size_t aIndex ) const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return  mMembers->value.at ( aIndex );
@@ -373,7 +342,6 @@ namespace uhal
   template< typename T >
   std::size_t ValVector< T >::size() const
   {
-    logging();
     return mMembers->value.size();
     /*
     if ( mMembers->valid )
@@ -392,7 +360,6 @@ namespace uhal
   template< typename T >
   void ValVector< T >::clear()
   {
-    logging();
     mMembers->valid = false;
     mMembers->value.clear();
   }
@@ -400,8 +367,6 @@ namespace uhal
   template< typename T >
   typename ValVector< T >::const_iterator ValVector< T >::begin() const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return  mMembers->value.begin();
@@ -416,8 +381,6 @@ namespace uhal
   template< typename T >
   typename ValVector< T >::const_iterator ValVector< T >::end() const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return  mMembers->value.end();
@@ -432,8 +395,6 @@ namespace uhal
   template< typename T >
   typename ValVector< T >::const_reverse_iterator ValVector< T >::rbegin() const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return  mMembers->value.rbegin();
@@ -448,8 +409,6 @@ namespace uhal
   template< typename T >
   typename ValVector< T >::const_reverse_iterator ValVector< T >::rend() const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return  mMembers->value.rend();
@@ -465,8 +424,6 @@ namespace uhal
   template< typename T >
   std::vector<T> ValVector< T >::value() const
   {
-    logging();
-
     if ( mMembers->valid )
     {
       return mMembers->value;
@@ -481,8 +438,6 @@ namespace uhal
   template< typename T >
   void ValVector< T >::value ( const std::vector<T>& aValue )
   {
-    logging();
-
     if ( !mMembers->valid )
     {
       mMembers->value = aValue;
