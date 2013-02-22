@@ -32,7 +32,7 @@ try:
     else:
       print "Entering section:" , section
       for cmd in cmds:
-
+        
         split_cmds = cmd.split()
       
         if "pycohal" in split_cmds[0]:
@@ -40,7 +40,7 @@ try:
 
         if( len(sys.argv) ):
           if "test_" in split_cmds[0]:
-            split_cmds.append( " ".join(sys.argv) );
+            split_cmds.append( " ".join(sys.argv[1:]) );
 
         if ".exe" in split_cmds[0]:
           split_cmds[0] = os.path.join( path_to_here , "bin" , split_cmds[0] )
@@ -49,6 +49,8 @@ try:
 
         print "-----------------------------------------------------------------------------------------------------------------------------------------------------------"
         cmd = " ".join( split_cmds )
+        #print cmd
+        
         p  = subprocess.Popen( cmd ,stdout=subprocess.PIPE,stderr=subprocess.STDOUT, shell=True)
 
         while True:
@@ -61,10 +63,11 @@ try:
 
 
         if p.poll():
-					tmp = ("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"+
-								 "%s (error=%s)"+
-								 "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n") % (cmd, p.poll())
-					raise Exception( tmp )
+          tmp = "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+          tmp += ( "Error in %s\n" % cmd )
+          tmp += ( "return code = %s" % p.poll() )
+          tmp += "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" 
+          raise Exception( tmp )
 
 except Exception as inst:
 		print inst.args[0]
