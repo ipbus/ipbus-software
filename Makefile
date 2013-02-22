@@ -1,5 +1,6 @@
 ifeq ($(Set), uhal)
 PACKAGES = \
+        cactuscore/extern/binutils \
         cactuscore/extern/boost \
         cactuscore/extern/erlang \
         cactuscore/extern/pugixml \
@@ -7,6 +8,7 @@ PACKAGES = \
         cactuscore/controlhub
 else
 PACKAGES = \
+        cactuscore/extern/binutils \
         cactuscore/extern/boost \
         cactuscore/extern/erlang \
         cactuscore/extern/pugixml \
