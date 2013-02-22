@@ -2,8 +2,9 @@ BUILD_HOME = $(shell pwd)/../../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
+Project = cactuscore
 Package = uhal/tests
-PackagePath = $(CACTUS_RPM_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/$(Project)/${Package}
 PackageName = cactuscore-uhal-tests
 
 Packager = Andrew Rose, Marc Magrans de Arbil
@@ -71,11 +72,11 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		-I${UHAL_UHAL_INCLUDE_PREFIX}
 
-CPP_FLAGS = -g -Wall -O3 -MMD -MP -fPIC ${INCLUDE_PATH}
+CPP_FLAGS = -g -Wall -O0 -rdynamic -MMD -MP -fPIC ${INCLUDE_PATH}
 
-LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 ${LIBRARY_PATH} ${LIBRARIES}
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O0 -rdynamic ${LIBRARY_PATH} ${LIBRARIES}
 
-LINK_EXECUTABLE_FLAGS = -Wall -g -O3 ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} 
+LINK_EXECUTABLE_FLAGS = -Wall -g -O0 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} 
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 

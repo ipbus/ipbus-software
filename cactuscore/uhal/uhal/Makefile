@@ -2,8 +2,9 @@ BUILD_HOME = $(shell pwd)/../../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
+Project = cactuscore
 Package = uhal/uhal
-PackagePath = $(CACTUS_RPM_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/$(Project)/${Package}
 PackageName = cactuscore-uhal-uhal
 
 Packager = Andrew Rose
@@ -42,11 +43,11 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
+CPP_FLAGS = -g -O0 -rdynamic -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
 #-D USE_TCP_MULTITHREADED -D USE_UDP_MULTITHREADED  
 #-D THROW_ON_ADDRESS_SPACE_OVERLAP 
 
-LINK_FLAGS = -g -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}
+LINK_FLAGS = -g -shared -fPIC -Wall -O0 -rdynamic ${LIBRARY_PATH} ${LIBRARIES}
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 

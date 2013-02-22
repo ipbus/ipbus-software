@@ -2,8 +2,9 @@ BUILD_HOME = $(shell pwd)/../../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
+Project = cactuscore
 Package = uhal/grammars
-PackagePath = $(CACTUS_RPM_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/$(Project)/${Package}
 PackageName = cactuscore-uhal-grammars
 
 Packager = Andrew Rose
@@ -27,8 +28,8 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_LOG_INCLUDE_PREFIX}
 
 
-CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC
-LINK_FLAGS = -g -shared -fPIC -Wall -O3
+CPP_FLAGS = -g -O0 -rdynamic -Wall -MMD -MP -fPIC
+LINK_FLAGS = -g -shared -fPIC -Wall -O0 -rdynamic
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 

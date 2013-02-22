@@ -2,8 +2,9 @@ BUILD_HOME = $(shell pwd)/../../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
+Project = cactuscore
 Package = uhal/log
-PackagePath = $(CACTUS_RPM_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/$(Project)/${Package}
 PackageName = cactuscore-uhal-log
 
 Packager = Andrew Rose
@@ -15,7 +16,7 @@ PACKAGE_RELEASE = 1
 
 LIBRARY = lib/libcactus_uhal_log.so
 
-FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp) src/common/exception.cpp
+FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp) src/common/exception.cpp src/common/BacktraceSymbols.cpp
 
 #BACKEND_SOURCES = $(wildcard src/common/log_backend.files.cpp)
 BACKEND_SOURCES = $(wildcard src/common/log_backend.colour_terminal.cpp)
@@ -46,7 +47,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/binutils/\
 		-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd/
 
-CPP_FLAGS = -g  -Wall -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS
+CPP_FLAGS = -g  -Wall -O0 -rdynamic -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 
