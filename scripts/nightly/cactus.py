@@ -73,7 +73,6 @@ environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
                                        environ.get("LD_LIBARY_PATH","")])
 
 environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),
-                                       join(CACTUS_PREFIX,"bin/pycohal/tests"),
 				       join(L1PAGE_ROOT,"test"),
                                        environ.get("PATH","")])
 
