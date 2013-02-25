@@ -169,7 +169,7 @@ def html_header(title):
 def html_footer():
     html = """<center>
     <span>
-    <a href=\"https://svnweb.cern.ch/trac/cactus/newticket\">Contact us</a> |
+    <a href=\"https://svnweb.cern.ch/trac/cactus/newticket\">Contact us</a> 
     </span>
     </center>
     """
