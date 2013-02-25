@@ -23,8 +23,9 @@ BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
+Project = cactuscore
 Package = controlhub
-PackagePath = $(CACTUS_RPM_ROOT)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Project}/${Package}
 PackageName = cactuscore-controlhub
 
 Packager = Robert Frazier
