@@ -108,8 +108,16 @@ void mem_rmw_bits ( const std::string& connection, const std::string& id )
   ValWord< uint32_t > reg1 = c->rmw_bits ( addr,x2,x3 );
   ValWord< uint32_t > reg2 = c->read ( addr );
   c->dispatch();
-  CACTUS_CHECK ( reg1.value() == reg2.value() );
-  CACTUS_CHECK ( reg1.value() == ( ( x1 & x2 ) | x3 ) );
+  CACTUS_CHECK( (( x1 & x2 ) | x3) == reg2.value() );
+
+  //IPBus 1.3 bug on RMW: https://svnweb.cern.ch/trac/cactus/ticket/179
+  if (hw.uri().find("ipbusudp-1.3://") != -1 || 
+      hw.uri().find("ipbustcp-1.3://") != -1 ||
+      hw.uri().find("chtcp-1.3://") != -1 ) {
+    CACTUS_CHECK ( reg1.value() == ( ( x1 & x2 ) | x3 ) );
+  } else {
+    CACTUS_CHECK ( reg1.value() == x1 );
+  }
 }
 
 void mem_rmw_sum ( const std::string& connection, const std::string& id )
