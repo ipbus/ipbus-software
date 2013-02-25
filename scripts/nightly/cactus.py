@@ -70,6 +70,9 @@ TEST_PASSED_LIST  = ["TEST PASSED",
 environ["XDAQ_ROOT"]       = XDAQ_ROOT
 environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
                                        join(XDAQ_ROOT,"lib"),
+                                       "/usr/lib",
+                                       "/lib64",
+                                       "/lib",
                                        environ.get("LD_LIBARY_PATH","")])
 
 environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),

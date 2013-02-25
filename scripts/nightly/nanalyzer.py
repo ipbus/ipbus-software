@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """
 Usage: nanalyzer.py [options] configuration.py
-Executes the nightly analyzer with the given configuration file.
+Executes the nightly analyzer with the givn configuration file.
 
 arguments:
    configuration.py  Python configuration file 
@@ -18,7 +18,7 @@ import smtplib
 import platform
 from socket import getfqdn
 from email.MIMEText import MIMEText
-
+import urllib
 LIMIT, ERROR, TEST_PASSED = range(3)
 
 def style(type):
@@ -68,11 +68,12 @@ def report_summary(result):
         if mytype == LIMIT:
             errors = sum([1 for (i, t, d, s) in result if t == ERROR and s == section])
             ok = sum([1 for (i, t, d, s) in result if t == TEST_PASSED and s == section])
+            bookmark = "incidence_" + urllib.quote(section)
             html += "<tr>\n"
-            html += "<td><a href='#incidence_" + section + "'>" + section + "</a></td>"
+            html += "<td><a href='#" + bookmark + "'>" + section + "</a></td>"
             html += "<td>"
             if errors:
-                html += "<a style='text-decoration: none' href='#incidence_" + section + "'>"
+                html += "<a style='text-decoration: none' href='#" + bookmark + "'>"
                 html += "<pre style='" + style(ERROR) + "'> " + str(errors) + " ERRORS </pre>"
                 html += "</a>"
             else:
@@ -80,7 +81,7 @@ def report_summary(result):
             html += "</td>"
             html += "<td>"
             if ok:
-                html += "<a style='text-decoration: none' href='#incidence_" + section + "'>"
+                html += "<a style='text-decoration: none' href='#" + bookmark + "'>"
                 html += "<pre style='" + style(TEST_PASSED) + "'> " + str(ok) + " OK </pre>"
                 html += "</a>"
             html += "</td>"
@@ -102,8 +103,9 @@ def report_links(result):
         incidences = [(c, t, d, section) for (c, t, d, section) in result if section==s]
         incidences.sort()
         for (c, t, d, section) in incidences:
+            bookmark = "incidence_" + urllib.quote(s)
             if t == LIMIT:
-                html += "<a name='incidence_" + s + "'><h5>" + s + "</h5></a>"
+                html += "<a name='" + bookmark + "'><h5>" + s + "</h5></a>"
             elif t == TEST_PASSED:
                 pass
             else:
