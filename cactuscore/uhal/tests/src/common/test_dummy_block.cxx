@@ -132,7 +132,7 @@ int main ( int argc,char* argv[] )
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-  std::cout << "STARTING TEST " << argv[0] << " (connection_file='" << connection_file<<"', device_id='" << device_id << "')..." << std::endl;
+
   //Memory
   CACTUS_TEST ( block_write_read ( N_4B,connection_file,device_id ) );
   CACTUS_TEST ( block_write_read ( N_1kB,connection_file,device_id ) );
@@ -145,5 +145,5 @@ int main ( int argc,char* argv[] )
   //CACTUS_TEST_THROW(block_bigger_than_size_attribute(connection_file,device_id ),uhal::exception::BulkTransferRequestedTooLarge);
   block_transfer_too_big ( connection_file,device_id );
   block_bigger_than_size_attribute ( connection_file,device_id );
-  RESULT ( argv[0] );
+  CACTUS_TEST_RESULT();
 }

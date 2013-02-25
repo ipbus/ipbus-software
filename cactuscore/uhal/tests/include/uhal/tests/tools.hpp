@@ -48,12 +48,11 @@ namespace uhal
 
     //!Return the first argument
     std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
+
+    uint32_t failedTestCount(0);
+    uint32_t passedTestCount(0);
   }
 }
-
-
-uint32_t FailedTestCount ( 0 );
-uint32_t PassedTestCount ( 0 );
 
 
 //!Checks if the condition is fullfilled and it does not throw.
@@ -62,17 +61,17 @@ uint32_t PassedTestCount ( 0 );
     try {								\
       if (cond) { \
 	      std::cout << "CHECK PASSED: " << #cond << std::endl; \
-        PassedTestCount++; \
+	      uhal::tests::passedTestCount++;				\
       }  else  {							\
-				std::cerr << "CHECK FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
-  			FailedTestCount++; \
+		std::cerr << "CHECK FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
+		uhal::tests::failedTestCount++;				\
       }									\
     } catch(std::exception& e) {						\
       std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
- 			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     } catch(...) {							\
       std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
- 			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     }									\
   } while(0)
 
@@ -85,13 +84,13 @@ uint32_t PassedTestCount ( 0 );
       expr;					\
       gettimeofday ( &end, NULL );					\
       std::cout << "TEST PASSED in " << uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
-      PassedTestCount++; \
+      uhal::tests::passedTestCount++;					\
     } catch(std::exception& e) {					\
       std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     } catch(...) {							\
       std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     }									\
   } while(0)
 
@@ -100,13 +99,13 @@ uint32_t PassedTestCount ( 0 );
     try{					\
       expr;					\
       std::cout << "TEST_NOTHROW PASSED: "  << #expr << std::endl; \
-      PassedTestCount++; \
+      uhal::tests::passedTestCount++;					\
     } catch(std::exception& e) {					\
       std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << ": " << std::endl; \
-			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     } catch(...) {							\
       std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << ": " << std::endl; \
-			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     }									\
   } while(0)
 
@@ -116,30 +115,28 @@ uint32_t PassedTestCount ( 0 );
     try{					\
       expr;								\
       std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl; \
-			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     } catch(signature& e) {					\
       std::cout << "TEST_THROW PASSED: " << #expr << std::endl; \
-      PassedTestCount++; \
+      uhal::tests::passedTestCount++;					\
     } catch(std::exception& e) {						\
       std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-			FailedTestCount++; \
+      uhal::tests::failedTestCount++;					\
     }	catch(...) {							\
       std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-			FailedTestCount++; \
+      uhal::tests::failedTestCount++;		\
     }									\
   } while(0)
 
 #endif
 
-#define RESULT( NAME )  \
+#define CACTUS_TEST_RESULT()  \
   do { \
-    if( FailedTestCount == 0 ){  \
-      std::cout << "RESULTS : ALL (" << PassedTestCount << ") TESTS PASSED." << std::endl; \
-      std::cout << "RESULTS : " << NAME << " PASSED." << std::endl; \
+    if( uhal::tests::failedTestCount == 0 ){				\
+      std::cout << "TEST PASSED, " << __FILE__ << ", ALL " << uhal::tests::passedTestCount << " TESTS PASSED." << std::endl; \
       return 0; \
     }else{  \
-      std::cout << "RESULTS : " << PassedTestCount << " TESTS PASSED. " << FailedTestCount << " TESTS FAILED." << std::endl; \
-      std::cout << "RESULTS : " << NAME << " FAILED." << std::endl; \
+      std::cerr << "TEST FAILED, " << __FILE__ << ", " << uhal::tests::failedTestCount << " TESTS FAILED," << uhal::tests::passedTestCount << " TESTS PASSED." << std::endl; \
       return 1; \
     } \
   } while(0)
