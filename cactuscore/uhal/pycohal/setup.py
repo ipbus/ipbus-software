@@ -17,8 +17,7 @@ setup(name='cactuscore-uhal-pycohal',
 
       packages = ['pycohal'], 
       package_dir = {'' : 'pkg'},
-      package_data = {'pycohal' : ['*.so']},
+      package_data = {'pycohal' : ['*.so']}
  
-      scripts=['test_pycohal']
  )
 

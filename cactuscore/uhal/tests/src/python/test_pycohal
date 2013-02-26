@@ -302,9 +302,22 @@ class TestBlock(unittest.TestCase):
         self.assertEqual( xx, [x for x in memVals] )
 
     def test_block_write_read(self):
-        self.exe_test_block_write_read(1)           #4kB
+        import time
+        t0 = time.time()
+        print 
+        print "Block write-read tests ..."
+        self.exe_test_block_write_read(1)           #4B
+        t1 = time.time()
+        print "   * depth=1    took", t1-t0, "seconds"
         self.exe_test_block_write_read(1024/4)      #1kB
+        t2 = time.time()
+        print "   * depth=256  took", t2-t1, "seconds"
+        self.exe_test_block_write_read( 1024 )      #4kB
+        t3 = time.time()
+        print "   * depth=1024 took", t3-t2, "seconds"
         self.exe_test_block_write_read(1024*1024/4) #1MB
+        t4 = time.time()
+        print "   * depth=256*1024 took", t4-t3, "seconds"
 
     def test_block_bigger_than_size(self):
         xx = []
