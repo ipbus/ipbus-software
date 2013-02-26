@@ -103,18 +103,104 @@ def get_commands(conn_file):
 #               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
 #               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
 #               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-#               "test_dummy_single.exe -c %s -d dummy.controlhub" % (conn_file),
-#               "test_dummy_block.exe -c %s -d dummy.controlhub" % (conn_file),
-#               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub" % (conn_file),
-#               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub" % (conn_file),
-#               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub" % (conn_file),
-#               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub" % (conn_file),
-#               "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
-#               "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
-#               "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_single.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "sudo controlhub_stop"]
                 ]]
+
+    cmds += [["TEST IPBUS2.0 UDP",
+             [# SERVER NOT REACHABLE TEST
+              "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp2",
+              # TIMEOUT TEST
+               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
+               "test_dummy_timeout.exe -c " + conn_file + " -d dummy.udp2",
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               # NORMAL TESTS
+               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
+               "test_dummy_single.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_block.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_docu_examples.exe -c " + conn_file + " -d dummy.docu.udp2",
+               "test_dummy_check_permissions.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_hierarchy.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_multithreaded.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_metainfo.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_navigation.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_rawclient.exe -c " + conn_file + " -d dummy.udp2",
+               "pkill -f \"DummyHardwareUdp.exe\""]
+            ]]
+
+    cmds += [["TEST IPBUS2.0 TCP",
+              [# SERVER NOT REACHABLE TESTS
+               "test_dummy_nonreachable.exe -c %s -d dummy.tcp2" % (conn_file),
+               # TIMEOUT TESTS
+               "DummyHardwareTcp.exe --version 2 --port 60002 --delay 2 &> /dev/null &",
+               "test_dummy_timeout.exe -c %s -d dummy.tcp2" % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+               # NORMAL TESTS
+               "DummyHardwareTcp.exe --version 2 --port 60002 &> /dev/null &",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
+               "test_dummy_single.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.tcp2" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\""]
+             ]]
+
+    cmds += [["TEST IPBUS2.0 CONTROLHUB",
+              [# SERVER NOT REACHABLE TESTS
+               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "sudo controlhub_start",
+               "sudo controlhub_status",
+               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "sudo controlhub_stop",
+               # TIMEOUT TESTS
+               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
+               "sudo controlhub_start",
+               "sudo controlhub_status",
+               "test_dummy_timeout.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "sudo controlhub_stop",
+               #CONTROL HUB TESTS
+               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "sudo controlhub_start",
+               "sudo controlhub_status",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "test_dummy_single.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub2" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "sudo controlhub_stop"]
+                ]]
+
 
     cmds += [["TEST IPBUS2.0 UDP",
                   ["echo An IPbus 2.0 udp command"]
@@ -177,7 +263,7 @@ if __name__=="__main__":
     transport_args  = []
     for a in args:
         a = a.lower()
-        if a.split(":") == 2:
+        if len(a.split(":")) == 2:
             sections_to_run += [tuple(a.split(":",1))]
         elif a.startswith("ipbus"):
             ipbus_args += [a]
