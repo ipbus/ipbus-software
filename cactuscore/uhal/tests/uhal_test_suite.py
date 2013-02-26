@@ -24,6 +24,7 @@ import subprocess
 import string
 from datetime import datetime
 import time
+from os import environ
 
 def get_commands(conn_file):
     if not conn_file.startswith("file://"):
@@ -102,15 +103,15 @@ def get_commands(conn_file):
 #               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
 #               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
 #               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "test_dummy_single.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_block.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub" % (conn_file),
-               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_single.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_block.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub" % (conn_file),
+#               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
+#               "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "sudo controlhub_stop"]
                 ]]
@@ -128,6 +129,27 @@ def get_commands(conn_file):
                  ]]
 
     return cmds
+
+
+def run_command(cmd, verbose):
+    if cmd.startswith("sudo"):
+       cmd = "sudo env PATH=$PATH " + cmd[4:]
+    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+    t0 = time.time()
+    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
+    stdout = []
+    while True:
+        nextline = filter(lambda x: x in string.printable,p.stdout.readline())
+        if nextline:
+            stdout += [nextline]
+            if verbose:
+                sys.stdout.write(nextline)
+                sys.stdout.flush()
+        if p.poll() != None and not nextline:
+            break
+
+    return stdout, p.poll(), time.time()-t0
+
 
 if __name__=="__main__":
     # Parse options 
@@ -175,7 +197,7 @@ if __name__=="__main__":
     print "   verbose   :",  verbose
     print "   conn_file :",  conn_file
     print "   sections  :",  sections_to_run 
-    
+
     # Run the commands
     for section_name, cmds in get_commands(conn_file):
         print
@@ -196,49 +218,16 @@ if __name__=="__main__":
             print
             if verbose:
                 print "-----------------------------------------------------------------------------------------------------------------------"
-            print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
-            t1 = time.time()
-            p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
-            content = []
-            while True:
-                nextline = filter(lambda x: x in string.printable,p.stdout.readline())
-                if nextline:
-                    content += [nextline]
-                    if verbose:
-                        sys.stdout.write(nextline)
-                        sys.stdout.flush()
+            stdout, exit_code, cmd_duration = run_command(cmd, verbose)
 
-                if p.poll() != None and not nextline:
-                    break
-            cmd_duration = time.time() - t1
-
-            if len(content) and not verbose:
-                print content[-1].rstrip("\n")
-            if p.poll():
-                tmp = "+ *** ERRORS OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (p.poll(), cmd_duration)
+            if len(stdout) and not verbose:
+                print stdout[-1].rstrip("\n")
+            if exit_code:
+                tmp = "+ *** ERRORS OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (exit_code, cmd_duration)
             else:
                 tmp = "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
             print tmp
-                #if exception:
-                #    raise Exception(tmp)
-                #elif log:
-                #    logger.error(tmp)
-       
-            #return (content, p.poll())
-#
-#        p  = subprocess.Popen( cmd ,stdout=subprocess.PIPE,stderr=subprocess.STDOUT, shell=True)
-#
-#        while True:
-#            line = p.stdout.readline()
-#            print line,
-#            nextline = filter(lambda x: x in string.printable,line)
-#
-#            if p.poll()!= None and not nextline:
-#                break
-#
-#        if p.poll():
-#            tmp = "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-#            tmp += ( "Error in %s\n" % cmd )
-#            tmp += ( "return code = %s" % p.poll() )
-#            tmp += "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" 
-#            raise Exception( tmp )
+
+            if cmd.count("controlhub_stop"):
+                 time.sleep(5)
+
