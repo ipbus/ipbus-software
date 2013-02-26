@@ -1,41 +1,71 @@
 import string
 import sys
+import os
 import logging
 import subprocess
+import fcntl
+import time
 
+#maximum seconds without logs
+SOFT_TIMEOUT_S = 10*60
+#maximum seconds to execute a command 
+HARD_TIMEOUT_S = 120*60
 
+def report_error(msg,exception,log):
+    if exception:
+        raise Exception(msg)
+    elif log:
+        global logger
+        logger.error(msg)
+        
 def system(cmd, exception = True, log=True):
-    '''Execute shell commands
-
-    Note: if no output is received, even if the return value is
-    non-zero, nothing is logged! This assumes the user piped the
-    output to /dev/null or so to keep it quiet.
-
+    '''Execute shell comman    
     '''
-
+    
     if log:
         logger.info("%s..." % cmd)
-    
-    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
+        
+    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,stdin=None,bufsize=0,shell=True)
+    fl = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
+    fcntl.fcntl(p.stdout, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
     content = ""
+    
+    start = time.time()
+    last = start
+    current = start
     while True:
-        nextline = filter(lambda x: x in string.printable,p.stdout.readline())
-        if nextline:
+        try:
+            nextline = filter(lambda x: x in string.printable,p.stdout.readline())
             content = content + nextline
             sys.stdout.write(nextline)
             sys.stdout.flush()
+            last = time.time()
+        except IOError:
+            time.sleep(0.1)
 
-        if p.poll()!= None and not nextline:
-            break
-
+            current = time.time()    
+            if (current-start) > HARD_TIMEOUT_S:
+                system("kill -9 %d" % p.pid,log=False,exception=False)
+                report_error("ERROR: %s (command too slow, timeout of %d sec)" % (cmd,HARD_TIMEOUT_S),exception,log)
+                return (content,-9)
+            
+            if (current-last) > SOFT_TIMEOUT_S:
+                system("kill -9 %d" % p.pid,log=False,exception=False)
+                report_error("ERROR: %s (unresponsive command, missing output for %d sec)" % (cmd,SOFT_TIMEOUT_S),exception,log)
+                return (content,-9)
+                
+            if p.poll()!= None:
+                break
+            
     if p.poll():
-        tmp = "%s (error=%s)" % (cmd, p.poll())
-        if exception:
-            raise Exception(tmp)
-        elif log:
-            logger.error(tmp)
-        
+        report_error("ERROR: %s (error=%s)" % (cmd, p.poll()),exception,log)
+
+    
     return (content, p.poll())
+
+
+
 
 def log_setup():
     global logger
