@@ -321,12 +321,11 @@ COMMANDS += [["TEST TTC",
                "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"]]]
 
 COMMANDS += [["TEST L1PAGE",
-              ["mkdir -p %s" % join(environ["HOME"], "triggerpro/l1page/data"),
-               "sed -i 's/%s/%s/g' %s" % ("\/centraltspro","", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
-               "sed -i 's/%s/%s/g' %s" % ("nfshome0",environ["HOME"],join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
-               "sed -i 's/%s/%s/g' %s" % ("log4j.appender","\#log4j.appender", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/WEB-INF/classes/log4j.properties")),
-               "l1pageTest.py",
-               "rm -rf %s" % join(environ["HOME"], "triggerpro/l1page/data")]]]
+              ["mkdir -p %s" % join(BUILD_HOME, "triggerpro/l1page/data"),
+               "sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
+               "sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
+               "sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/WEB-INF/classes/log4j.properties")),
+               "l1pageTest.py"]]]
 
 COMMANDS += [["REPORTING",
               ["python %s %s" % ("nanalyzer.py","cactus.py"),
