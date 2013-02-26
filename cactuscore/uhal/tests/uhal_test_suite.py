@@ -1,0 +1,244 @@
+#!/bin/env python
+"""
+Usage: test_uhal.py [-v] [-l] [-c <path to xml connections file>] [tests to run]
+This script runs all of the uHAL tests (either using installed system or using checked-out source code)
+
+All options/arguments are optional:
+   -v    : Print all output of tests (if not given, only the results summary for each test command is printed)
+   -l    : Only list commands (don't run them)
+   -c /path/to/dummy_connections.xml  : Full path to 'etc/uhal/tests' directory
+
+E.g:
+  # Limited output of all tests on installed system
+  ./test_uhal.py
+  # Full output of IPbus 1.3 UDP & ControlHub tests on developer source code
+  ./test_uhal.py -v -c /path/to/dummy_connections.xml ipbus1.3:udp ipbus1.3:controlhub
+
+N.B: LD_LIBRARY_PATH and PATH env variables both have to be correctly set before running the script.
+"""
+
+from os.path import join
+import sys
+import getopt
+import subprocess
+import string
+from datetime import datetime
+import time
+
+def get_commands(conn_file):
+    if not conn_file.startswith("file://"):
+        conn_file = "file://" + conn_file
+
+    cmds = []
+    cmds += [["TEST IPBUS1.3 UDP",
+             [# SERVER NOT REACHABLE TEST
+              "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp",
+              # TIMEOUT TEST
+               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
+               "test_dummy_timeout.exe -c " + conn_file + " -d dummy.udp",
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               # NORMAL TESTS
+               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+               "test_dummy_single.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_block.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_docu_examples.exe -c " + conn_file + " -d dummy.docu.udp",
+               "test_dummy_check_permissions.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_hierarchy.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_multithreaded.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_metainfo.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_navigation.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_rawclient.exe -c " + conn_file + " -d dummy.udp",
+               "pkill -f \"DummyHardwareUdp.exe\""]
+            ]]
+
+    cmds += [["TEST IPBUS1.3 TCP",
+              [# SERVER NOT REACHABLE TESTS
+               "test_dummy_nonreachable.exe -c %s -d dummy.tcp" % (conn_file),
+               # TIMEOUT TESTS
+               "DummyHardwareTcp.exe --version 1 --port 50002 --delay 2 &> /dev/null &",
+               "test_dummy_timeout.exe -c %s -d dummy.tcp" % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+               # NORMAL TESTS
+               "DummyHardwareTcp.exe --version 1 --port 50002 &> /dev/null &",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+               "test_dummy_single.exe -c %s -d dummy.tcp" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.tcp" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.tcp" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.tcp" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.tcp" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.tcp" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.tcp" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.tcp" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\""]
+             ]]
+
+    cmds += [["TEST IPBUS1.3 CONTROLHUB",
+              [# SERVER NOT REACHABLE TESTS
+               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
+               "sudo controlhub_start",
+               "sudo controlhub_status",
+               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
+               "sudo controlhub_stop",
+               # TIMEOUT TESTS
+               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
+               "sudo controlhub_start",
+               "sudo controlhub_status",
+               "test_dummy_timeout.exe -c %s -d dummy.controlhub" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "sudo controlhub_stop",
+               #CONTROL HUB TESTS
+               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+               "sudo controlhub_start",
+               "sudo controlhub_status",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+#               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+               "test_dummy_single.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "sudo controlhub_stop"]
+                ]]
+
+    cmds += [["TEST IPBUS2.0 UDP",
+                  ["echo An IPbus 2.0 udp command"]
+                 ]]
+
+    cmds += [["TEST IPBUS2.0 TCP",
+                  ["echo An IPbus 2.0 udp command"]
+                 ]]
+
+    cmds += [["TEST IPBUS2.0 TCP",
+                  ["echo An IPbus 2.0 udp command"]
+                 ]]
+
+    return cmds
+
+if __name__=="__main__":
+    # Parse options 
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hvlc:", ["help"])
+    except getopt.GetoptError, err:
+        print __doc__
+        sys.exit(2)
+
+    verbose = False
+    conn_file = "/opt/cactus/etc/uhal/tests.dummy_connections.xml"
+
+    for opt, value in opts:
+        if opt in ("-h", "--help"):
+            print __doc__
+            sys.exit(0)
+        elif opt == "-v":
+            verbose = True
+        elif opt == "-c":
+            conn_file = value
+    
+    # Generate list of ipbusX.Y, transport pairs to run tests for
+    sections_to_run = []
+    ipbus_args      = []
+    transport_args  = []
+    for a in args:
+        a = a.lower()
+        if a.split(":") == 2:
+            sections_to_run += [tuple(a.split(":",1))]
+        elif a.startswith("ipbus"):
+            ipbus_args += [a]
+        else:
+            transport_args += [a]
+
+    if ipbus_args == [] and (transport_args!=[] or sections_to_run==[]):
+        ipbus_args = ["ipbus1.3", "ipbus2.0"]
+    if transport_args == []:
+        transport_args = ["udp", "tcp", "controlhub"]
+
+    for i in ipbus_args:
+        for j in transport_args:
+            sections_to_run += [(i, j)]
+
+    print "Parsed options are:"
+    print "   verbose   :",  verbose
+    print "   conn_file :",  conn_file
+    print "   sections  :",  sections_to_run 
+    
+    # Run the commands
+    for section_name, cmds in get_commands(conn_file):
+        print
+        print "======================================================================================================================="
+        print "-----------------------------------------------------------------------------------------------------------------------"
+        print " Entering section:", section_name
+
+        skip_section = True
+        for xx in sections_to_run:
+            if min([section_name.lower().count(x) for x in xx])!=0:
+                skip_section = False
+
+        if skip_section:
+            print " SKIPPING SECTION"
+            continue
+ 
+        for cmd in cmds:
+            print
+            if verbose:
+                print "-----------------------------------------------------------------------------------------------------------------------"
+            print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+            t1 = time.time()
+            p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
+            content = []
+            while True:
+                nextline = filter(lambda x: x in string.printable,p.stdout.readline())
+                if nextline:
+                    content += [nextline]
+                    if verbose:
+                        sys.stdout.write(nextline)
+                        sys.stdout.flush()
+
+                if p.poll() != None and not nextline:
+                    break
+            cmd_duration = time.time() - t1
+
+            if len(content) and not verbose:
+                print content[-1].rstrip("\n")
+            if p.poll():
+                tmp = "+ *** ERRORS OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (p.poll(), cmd_duration)
+            else:
+                tmp = "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
+            print tmp
+                #if exception:
+                #    raise Exception(tmp)
+                #elif log:
+                #    logger.error(tmp)
+       
+            #return (content, p.poll())
+#
+#        p  = subprocess.Popen( cmd ,stdout=subprocess.PIPE,stderr=subprocess.STDOUT, shell=True)
+#
+#        while True:
+#            line = p.stdout.readline()
+#            print line,
+#            nextline = filter(lambda x: x in string.printable,line)
+#
+#            if p.poll()!= None and not nextline:
+#                break
+#
+#        if p.poll():
+#            tmp = "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+#            tmp += ( "Error in %s\n" % cmd )
+#            tmp += ( "return code = %s" % p.poll() )
+#            tmp += "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n" 
+#            raise Exception( tmp )
