@@ -74,7 +74,6 @@ environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
                                        environ.get("LD_LIBARY_PATH","")])
 
 environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),
-				       join(L1PAGE_ROOT,"test"),
                                        environ.get("PATH","")])
 
 ####COMMANDS
@@ -307,16 +306,16 @@ COMMANDS += [["TEST TRIGGER SUPERVISOR",
                "sudo /sbin/service xdaqd start",
                "sudo /sbin/service xdaqd status",
                "sleep 240",
-               "cd %s;python multicell.py;python multicell_fault.py;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
+               "cd %s;python -u multicell.py;python -u multicell_fault.py;python -u multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
 
 COMMANDS += [["TEST CENTRAL CELL",
-              ["cd %s;python central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests")]]]
+              ["cd %s;python -u central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests")]]]
 
 COMMANDS += [["TEST RETRI CELL",
-              ["cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests")]]]
+              ["cd %s;python -u retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests")]]]
 
 COMMANDS += [["TEST TTC",
-              ["cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
+              ["cd %s;python -u ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
                "sudo /sbin/service xdaqd stop",
                "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"]]]
 
@@ -325,7 +324,7 @@ COMMANDS += [["TEST L1PAGE",
                "sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
                "sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
                "sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/WEB-INF/classes/log4j.properties")),
-               "l1pageTest.py"]]]
+               "cd %s;python -u l1pageTest.py"  % join(L1PAGE_ROOT,"test")]]]
 
 COMMANDS += [["REPORTING",
               ["python %s %s" % ("nanalyzer.py","cactus.py"),
