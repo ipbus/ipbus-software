@@ -50,7 +50,6 @@ def system(cmd, exception = True, log=True):
             report_error("ERROR: %s (unresponsive command, missing output for %d sec)" % (cmd,SOFT_TIMEOUT_S),exception,log)
             return (content,-1)
 
-        print current-start
         if p.poll()!= None:
             break
         elif (current-start) > HARD_TIMEOUT_S:
