@@ -16,7 +16,12 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 ${DIR}/controlhub_status > /dev/null
 CONTROLHUBSTATUS=$?
 
-CONTROLHUB_ROOTDIR=${DIR}/../lib/controlhub
+if [ -f ${DIR}/../Makefile ]; then
+  echo "Setting CONTROLHUB_ROOTDIR for dev."
+  CONTROLHUB_ROOTDIR=${DIR}/../RPMBUILD/SOURCES/lib/controlhub
+else
+  CONTROLHUB_ROOTDIR=${DIR}/../lib/controlhub
+fi
 
 if [ $CONTROLHUBSTATUS != 0 ]; then
   echo -n "Starting Control Hub... "
