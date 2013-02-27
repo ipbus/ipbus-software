@@ -80,19 +80,19 @@ environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin/uhal/tests"),
 COMMANDS = []
 
 COMMANDS += [["UNINSTALL",
-              ["sudo /sbin/service xdaqd stop &> /dev/null || exit 0",
-               "sudo yum -y groupremove cactus || exit 0",
-               "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null || exit 0",
-               "sudo yum -y groupremove triggersupervisor uhal || exit 0",
-               "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite || exit 0",
-               "sudo pkill -f \"xdaq.exe\" || exit 0",
-               "rpm -qa| grep cactuscore- | xargs sudo rpm -ev &> /dev/null || exit 0",
-               "rpm -qa| grep cactusprojects- | xargs sudo rpm -ev &> /dev/null || exit 0",
-               "sudo pkill -f \"jsvc\" &> /dev/null || exit 0",
-               "sudo pkill -f \"DummyHardwareTcp.exe\" &> /dev/null || exit 0",
-               "sudo pkill -f \"DummyHardwareUdp.exe\" &> /dev/null || exit 0",
-               "sudo pkill -f \"cactus.*erlang\" &> /dev/null || exit 0",
-               "sudo pkill -f \"cactus.*controlhub\" &> /dev/null || exit 0",
+              ["sudo /sbin/service xdaqd stop &> /dev/null ",
+               "sudo yum -y groupremove cactus ",
+               "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null ",
+               "sudo yum -y groupremove triggersupervisor uhal ",
+               "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite ",
+               "sudo pkill -f \"xdaq.exe\" ",
+               "rpm -qa| grep cactuscore- | xargs sudo rpm -ev &> /dev/null ",
+               "rpm -qa| grep cactusprojects- | xargs sudo rpm -ev &> /dev/null ",
+               "sudo pkill -f \"jsvc\" &> /dev/null ",
+               "sudo pkill -f \"DummyHardwareTcp.exe\" &> /dev/null ",
+               "sudo pkill -f \"DummyHardwareUdp.exe\" &> /dev/null ",
+               "sudo pkill -f \"cactus.*erlang\" &> /dev/null ",
+               "sudo pkill -f \"cactus.*controlhub\" &> /dev/null ",
                "sudo rm -rf %s" % BUILD_HOME,
                "sudo mkdir -p %s" % BUILD_HOME,
                "sudo chmod -R 777 %s" % BUILD_HOME]]]
@@ -211,7 +211,7 @@ COMMANDS += [["TEST IPBUS 1.3",
                "pkill -f \"DummyHardwareTcp.exe\"",
                #PYCOHAL TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
-               "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
+               "python -u test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
                "pkill -f \"DummyHardwareUdp.exe\""]]]
 
 COMMANDS += [["TEST IPBUS 2.0",
@@ -289,7 +289,7 @@ COMMANDS += [["TEST IPBUS 2.0",
              "pkill -f \"DummyHardwareTcp.exe\"",
              #PYCOHAL TESTS
              "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-             "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
+             "python -u test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\""]]]
 
 COMMANDS += [["TEST TRIGGER SUPERVISOR",             
@@ -327,7 +327,7 @@ COMMANDS += [["TEST L1PAGE",
                "cd %s;python -u l1pageTest.py"  % join(L1PAGE_ROOT,"test")]]]
 
 COMMANDS += [["REPORTING",
-              ["python %s %s" % ("nanalyzer.py","cactus.py"),
+              ["python -u %s %s" % ("nanalyzer.py","cactus.py"),
                "mkdir -p %s" % RELEASE_LOG_DIR,
                "sudo cp -r %s %s" % ("/var/log/*",RELEASE_LOG_DIR)]]]
 

@@ -3,6 +3,9 @@ import subprocess
 import time
 import Queue
 import threading
+import os
+import fcntl
+import string
 
 #maximum seconds without logs
 SOFT_TIMEOUT_S = 10*60
@@ -16,9 +19,6 @@ def report_error(msg,exception,log):
         global logger
         logger.error(msg)
 
-def reader(f,q):
-    for line in iter(f.readline,None):
-        q.put(line)
 
 def system(cmd, exception = True, log=True):
     '''Execute shell comman    
@@ -28,34 +28,33 @@ def system(cmd, exception = True, log=True):
         logger.info("%s..." % cmd)
         
     p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,stdin=None,shell=True)
-    q = Queue.Queue()
-    t = threading.Thread(target=reader, args=(p.stdout, q))
-    t.setDaemon(True)
-    t.start() 
-   
-    start = time.time()
+    fl = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
+    fcntl.fcntl(p.stdout, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+
     content = ""
+    
+    start = time.time()
+    last = start
+
     while True:
         current = time.time()
         try:
-            l = q.get(True,SOFT_TIMEOUT_S)
-            if l == None:
-                break
-            
-            if log:
-                print l,
-            content = content + l
-        except Queue.Empty:
-            
-            report_error("ERROR: %s (unresponsive command, missing output for %d sec)" % (cmd,SOFT_TIMEOUT_S),exception,log)
-            return (content,-1)
+            nextline = filter(lambda x: x in string.printable,p.stdout.readline()).strip() + "\n"
+            content = content + nextline
+            print nextline,
+            last = time.time()
+        except IOError:
+            time.sleep(0.1)
 
-        if p.poll()!= None:
-            break
-        elif (current-start) > HARD_TIMEOUT_S:
-            report_error("ERROR: %s (command too slow, timeout of %d sec)" % (cmd,HARD_TIMEOUT_S),exception,log)
-            return (content,-1)
-                
+            if p.poll()!= None:
+                break
+            elif (current-start) > HARD_TIMEOUT_S:
+                report_error("ERROR: %s (command too slow, timeout of %d sec)" % (cmd,HARD_TIMEOUT_S),exception,log)
+                return (content,-1)
+            elif (current-last) > SOFT_TIMEOUT_S:
+                report_error("ERROR: %s (unresponsive command, missing output for %d sec)" % (cmd,SOFT_TIMEOUT_S),exception,log)
+                return (content,-1)
+                                
     if p.poll():
         report_error("ERROR: %s (error=%s)" % (cmd, p.poll()),exception,log)
 
