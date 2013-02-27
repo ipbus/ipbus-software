@@ -39,7 +39,7 @@ def system(cmd, exception = True, log=True):
     while True:
         current = time.time()
         try:
-            nextline = filter(lambda x: x in string.printable,p.stdout.readline()).strip() + "\n"
+            nextline = p.stdout.readline().strip()
             content = content + nextline
             print nextline,
             last = time.time()
