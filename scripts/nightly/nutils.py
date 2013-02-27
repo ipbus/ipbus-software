@@ -1,6 +1,3 @@
-import string
-import sys
-import os
 import logging
 import subprocess
 import time
@@ -19,8 +16,8 @@ def report_error(msg,exception,log):
         global logger
         logger.error(msg)
 
-def reader(f,q,log=True):
-    for line in iter(f.readline,""):
+def reader(f,q):
+    for line in iter(f.readline,None):
         q.put(line)
 
 def system(cmd, exception = True, log=True):
@@ -32,7 +29,7 @@ def system(cmd, exception = True, log=True):
         
     p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,stdin=None,shell=True)
     q = Queue.Queue()
-    t = threading.Thread(target=reader, args=(p.stdout, q,log))
+    t = threading.Thread(target=reader, args=(p.stdout, q))
     t.setDaemon(True)
     t.start() 
    
@@ -42,6 +39,9 @@ def system(cmd, exception = True, log=True):
         current = time.time()
         try:
             l = q.get(True,SOFT_TIMEOUT_S)
+            if l == None:
+                break
+            
             if log:
                 print l,
             content = content + l
