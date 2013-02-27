@@ -87,7 +87,7 @@ all: _all
 build: _all
 buildall: _all
 
-_all: $(RPMBUILD_DIR) $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) $(CONTROLHUB_RELEASE_FILES) ${RPMBUILD_SOURCES_DIR}/lib/controlhub ${RPMBUILD_SOURCES_DIR}/bin
+_all: $(RPMBUILD_DIR) $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) $(CONTROLHUB_RELEASE_FILES) ${RPMBUILD_SOURCES_DIR}/lib/controlhub ${RPMBUILD_SOURCES_DIR}/bin scripts/erl_controlhub
 
 
 dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
@@ -115,9 +115,14 @@ _cleanall:
 	rm -f controlhub.boot
 	rm -f controlhub.script
 	rm -f controlhub.tar.gz
+	rm -f scripts/erl_controlhub
 
 
 ############## Nitty gritty ######################
+
+scripts/erl_controlhub:	
+	sed s:%FINAL_ROOTDIR%:${PackagePath}/RPMBUILD/SOURCES/lib/controlhub:  ${RPMBUILD_SOURCES_DIR}/lib/controlhub/erts*/bin/erl.src > $@
+	chmod u+x $@
 
 $(RPMBUILD_DIR):
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
