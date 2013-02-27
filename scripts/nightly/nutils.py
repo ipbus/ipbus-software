@@ -40,8 +40,9 @@ def system(cmd, exception = True, log=True):
         current = time.time()
         try:
             nextline = p.stdout.readline().strip()
-            content = content + nextline
-            print nextline,
+            if nextline:
+                content = content + nextline + "\n"
+                print nextline
             last = time.time()
         except IOError:
             time.sleep(0.1)
