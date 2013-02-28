@@ -39,10 +39,12 @@ def system(cmd, exception = True, log=True):
     while True:
         current = time.time()
         try:
-            nextline = p.stdout.readline().strip()
-            if nextline:
-                content = content + nextline + "\n"
-                print nextline
+            line = p.stdout.readline()
+            if not line:
+                break
+
+            content = content + line
+            print line,
             last = time.time()
         except IOError:
             time.sleep(0.1)
