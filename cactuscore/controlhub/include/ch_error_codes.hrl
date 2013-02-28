@@ -11,8 +11,17 @@
 % Everything was fine
 -define(ERRCODE_SUCCESS, 0).
 
-% Implies a dead / unresponsive / non-existant hardware target.
--define(ERRCODE_TARGET_TIMEOUT, 1).
+% Implies a dead / unresponsive / non-existant hardware target - based on no reply from control port
+-define(ERRCODE_TARGET_CONTROL_TIMEOUT, 1).
+
+% Implies a dead / unresponsive hardware target (for IPbus >= 2.0) - based on no reply from status port
+-define(ERRCODE_TARGET_STATUS_TIMEOUT, 3).
+
+% Implies a dead / unresponsive hardware target (for IPbus >= 2.0) - based on no reply from resend port
+-define(ERRCODE_TARGET_RESEND_TIMEOUT, 4).
+
+% Implies a malfunctioning hardware target (for IPbus >= 2.0) - based on malformed status packet being received.
+-define(ERRCODE_MALFORMED_STATUS, 5).
 
 % Implies that device client probably died (i.e. a ControlHub problem).
 -define(ERRCODE_CH_DEVICE_CLIENT_TIMEOUT, 2).

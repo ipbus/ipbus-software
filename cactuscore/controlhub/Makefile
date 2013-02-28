@@ -62,7 +62,7 @@ endif
 endif
 ######################################################################################
 
-ERLC_FLAGS=
+ERLC_FLAGS = -Werror
 
 INCLUDE_DIR = include
 INCLUDES = $(wildcard $(INCLUDE_DIR)/*.hrl)
