@@ -42,7 +42,7 @@ ch_device_client_test_() ->
 %% @spec setup() -> DummyHwPid::pid()
 setup() ->
     ch_device_client_registry:start_link(), % needs to be available to spawn the device clients
-    DummyHwPid = ch_unittest_common:spawn_udp_echo_server(?DUMMY_HW_PORT),
+    DummyHwPid = ch_unittest_common:spawn_device_emulator(1, ?DUMMY_HW_PORT),
     DummyHwPid.
 
 %% Teardown function for test fixture
