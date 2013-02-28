@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<node id="TOP">
+
+  <!-- Example 1 - "Single Register Address Table" -->
+  <node id="A" address="0x00000000"/>
+
+
+  <!-- Example 2 - "Single Register on a Hierarchical Address Table" -->        
+  <node id="B">
+    <node id="A" address="0x00000100"/>
+  </node>
+
+        
+  <!-- Example 3 - "Multiple Modules with Absolute and Relative Addresses" -->        
+  <node id="C1">
+    <node id="A1" address="0x00000200" />
+    <node id="A2" address="0x00000201" />
+    <node id="A3" address="0x00000202" />
+    <node id="A4" address="0x00000203" />    
+  </node>       
+
+  <node id="C2" address="0x00000300">
+    <node id="A1" address="0x000" />
+    <node id="A2" address="0x001" />
+    <node id="A3" address="0x002" />
+    <node id="A4" address="0x003" />
+  </node>
+
+
+  <!-- Example 4 - "Multiple Modules with Identical Structure" -->        
+  <node id="D1" module="file://docu_examples_mymodule.xml" address="0x00000400" />
+  <node id="D2" module="file://docu_examples_mymodule.xml" address="0x00000500" />
+
+
+  <!-- Example 5 - "Setting Read and Write Access to memory locations" -->
+  <node id="EBA" address="0x600" permission="r"/>
+  <node id="EBB" address="0x601" permission="read"/>
+  <node id="EBC" address="0x602" permission="rw"/>
+  <node id="EBD" address="0x603" permission="wr"/>
+  <node id="EBE" address="0x604" permission="readwrite"/>
+  <node id="EBF" address="0x605" permission="writeread"/>
+  <node id="EBG" address="0x606" permission="w" />
+  <node id="EBH" address="0x607" permission="write" />
+
+
+  <!-- Example 6 - "Read and Write Blocks of Memory and FIFOs" -->
+  <node id="F" address="0x00000700">    
+    <node id="A1" address="0x000" />
+    <node id="A2" address="0x001" mode="single"/>
+    <node id="A3" address="0x010" mode="block" size="16" />
+    <node id="A4" address="0x020" mode="incremental" size="16" />
+    <node id="A5" address="0x030" mode="inc" size="16" />
+    <node id="A6" address="0x040" mode="port" />
+    <node id="A7" address="0x041" mode="non-incremental" />
+    <node id="A8" address="0x042" mode="non-inc" />     
+  </node>
+
+
+  <!-- Example 7 - "Single Register Read and Write Access with Bit-Mask" -->
+  <node id="G" address="0x00000800">
+    <node id="G0" mask="0x01" />
+    <node id="G1" mask="0x02" />
+    <node id="G2" mask="0x04" />
+    <node id="G3" mask="0x08" />
+    <node id="G4" mask="0xF0" />
+  </node>
+  
+  <!-- Example 8 - "Documenting your address table" -->
+  <node id="TOP">
+     <node id="H" address="0x00000900" description="LED control register">
+        <node id="H0" mask="0x01" description="Turn LED1 on/off" />
+        <node id="H1" mask="0x02" description="Turn LED2 on/off" />
+     </node>
+  </node>  
+  
+</node>
+

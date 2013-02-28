@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<node>
+
+    <node id="REG" address="0x0001" permission="rw" tags="test"/>
+
+    <node id="REG_READ_ONLY" address="0x0002" permission="r"/>
+
+    <node id="REG_WRITE_ONLY" address="0x0003" permission="w"/>
+    
+    <node id="REG_UPPER_MASK" address="0x0004" mask="0xffff0000" permission="rw"/>
+    <node id="REG_LOWER_MASK" address="0x0004" mask="0x0000ffff" permission="rw"/>
+
+
+    <node id="FIFO" address="0x0100" permission="rw" mode="non-incremental" size="262144" tags="test" />
+
+    <node id="MEM" address="0x100000" permission="rw" mode="incremental" size="262144" description="A block memory in an example XML file" />
+
+    <node id="SUBSYSTEM1" address="0x200000" module="file://dummy_level2_address.xml" />
+    <node id="SUBSYSTEM2" address="0x300000"  module="file://dummy_level2_address.xml"/>
+
+    <node id="SMALL_MEM" address="0x400000" permission="rw" mode="incremental" size="256"/>
+
+    <node id="LARGE_MEM" address="0x500000"  permission="rw" mode="incremental" size="26214400"/>
+    
+
+</node>
