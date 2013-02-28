@@ -30,7 +30,9 @@ ch_device_client_test_() ->
     { setup,
       fun setup/0,
       fun teardown/1,
-      [ fun test_normal_operation/0,
+      [ fun test_parse_packet_header/0,
+        fun test_reset_packet_id/0,
+        fun test_normal_operation/0,
         fun test_unresponse_target/0,
         fun test_multiple_client_processes/0
       ]
@@ -53,6 +55,26 @@ teardown(DummyHwPid) ->
 %%% ===========================================================================
 %%% Individual Test Functions.
 %%% ===========================================================================
+
+%% Test the reset_packet_id internal function
+test_reset_packet_id() ->
+    Body = <<16#abcdef01:32, 16#deadbeef:32>>,
+    % IPbus 2.0 big-endian packet
+    ?assertEqual( {<<16#20abcdf0:32/big, Body/binary>>, 16#abcd}, 
+                  ch_device_client:reset_packet_id(<<16#201234f0:32/big, Body/binary>>, 16#abcd) ),
+    % IPbus 2.0 little-endian packet
+    ?assertEqual( {<<16#20abcdf0:32/little, Body/binary>>, 16#abcd},
+                  ch_device_client:reset_packet_id(<<16#201234f0:32/little, Body/binary>>, 16#abcd) ),
+    % IPbus 1.3 packet
+    IPbus13Packet = <<16#1000078:32/big, Body/binary>>,
+    ?assertEqual( {IPbus13Packet, notset},
+                  ch_device_client:reset_packet_id(IPbus13Packet, 42) ).
+
+%% Test the parse_packet_header internal function
+test_parse_packet_header() ->
+    ?assertEqual( {2,0, 16#abcd, big},    ch_device_client:parse_packet_header(<<16#20abcdf0:32, 16#deadbeef:32>>)),
+    ?assertEqual( {2,0, 16#f012, little}, ch_device_client:parse_packet_header(<<16#20f012f0:32/little, 16#deafbeef:32>>) ),
+    ?assertEqual( {1, unknown, notset, unknown}, ch_device_client:parse_packet_header(<<16#100000f8:32>>) ).
 
 %% Queue some "requests", and check we get back what we send.  We rely on the
 %% fact that the device client currently doesn't need to look at the actual 

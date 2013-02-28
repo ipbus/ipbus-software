@@ -26,7 +26,8 @@
 -export([start_link/2, enqueue_requests/3]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
+         reset_packet_id/2, parse_packet_header/1]).
 
 -record(state, {socket, nextpktid}).           % Holds network socket to target device.
 
@@ -236,11 +237,11 @@ reset_packet_id(RawIPbusRequest, NewId) ->
     {MajorVer, _MinorVer, _, End} = parse_packet_header(RawIPbusRequest),
     case {MajorVer, NewId} of
         {2, _} when is_integer(NewId) ->
-             <<H1:4, _:16, H2:4, PktBody/binary>> = RawIPbusRequest,
+             <<H1:8, _:16, H2:8, PktBody/binary>> = RawIPbusRequest,
              case End of
-                 big    -> {<<H1:4, NewId:16/big, H2:4, PktBody/binary>>, NewId};
-                 little -> {<<H1:4, NewId:16/little, H2:4, PktBody/binary>>, NewId}
-             end; 
+                 big    -> {<<H1:8, NewId:16/big, H2:8, PktBody/binary>>, NewId};
+                 little -> {<<H1:8, NewId:16/little, H2:8, PktBody/binary>>, NewId}
+             end;
         {2, _} ->
              {_, IdFromStatus} = get_device_status(),
              reset_packet_id(RawIPbusRequest, IdFromStatus);
