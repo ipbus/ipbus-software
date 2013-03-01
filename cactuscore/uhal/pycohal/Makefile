@@ -49,7 +49,7 @@ INCLUDE_PATH = 	-Iinclude  \
 
 CPP_FLAGS = -g -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
 
-LINK_BINDINGS_FLAGS = -shared -fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic ${LIBRARY_PATH} -Wl,-R${CACTUS_ROOT}/lib  ${BINDING_LIBRARIES}
+LINK_BINDINGS_FLAGS = -shared -fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic ${LIBRARY_PATH}  ${BINDING_LIBRARIES}
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update generator
 
