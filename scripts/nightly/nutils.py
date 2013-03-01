@@ -1,11 +1,9 @@
 import logging
 import subprocess
 import time
-import Queue
-import threading
 import os
 import fcntl
-import string
+import sys
 
 #maximum seconds without logs
 SOFT_TIMEOUT_S = 10*60
@@ -44,7 +42,8 @@ def system(cmd, exception = True, log=True):
                 break
 
             content = content + line
-            print line,
+            sys.stdout.write(line)
+            sys.stdout.flush()
             last = time.time()
         except IOError:
             time.sleep(0.1)
