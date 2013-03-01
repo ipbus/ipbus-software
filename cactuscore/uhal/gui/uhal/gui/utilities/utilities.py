@@ -1,30 +1,24 @@
-import os, sys
+import string
 
+def dynamic_loader(gui_class_name):
 
-def dynamic_loader(panel):
-
-    _module_directory = "uhal/gui/guis"
-
-    if not os.path.isdir(_module_directory):
-        print "\'", _module_directory, "\' directory not found! Could not load custom GUIs"
-        return
-
-     # Get the custom guis 
-    _module_list = [os.path.splitext(x)[0] for x in os.listdir(_module_directory) if x != '__init__.py' and x != 'defaultGUI.py' and os.path.splitext(x)[1] == '.py']
-    
+    if gui_class_name == 'DefaultGui':
+        import_prefix = 'uhal.gui.guis.'    
+    else:
+        import_prefix = 'uhal.gui.customguis.'
         
-    for _module in _module_list:
+    try:
+        # Equivalent to: from gui_names.modulename import ClassName
+        gui_module = import_prefix + string.lower(gui_class_name)
         
-        _class_name = _module
-            
-        try:
-            # Equivalent to: from guis.moduleName import className
-            _module_object = __import__(_module_directory + "." + _module, globals(), locals(), [_class_name])
+        module_object = __import__(gui_module, globals(), locals(), [gui_class_name])
                 
-            _class_object = getattr(_module_object, _class_name)
-            _class_instance = _class_object(panel, -1, _class_name)
+        class_object = getattr(module_object, gui_class_name)
+        print 'Trying to import module %s' % gui_class_name
+        
+       # gui_name_instance = class_object(panel, -1, gui_name)
 
-            _class_instance.Show(True)
+       # class_instance.Show(True)
 
-        except ImportError, e:
-            print "Failed to import module ", _module, e
+    except ImportError, e:
+        print "Failed to import module ", gui_class_name, e
