@@ -165,7 +165,7 @@ handle_cast({send, RawIPbusRequest, ClientPid}, State = #state{socket = Socket})
                             { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReplyBin}
                     after ?UDP_RESPONSE_TIMEOUT ->
                         ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
-                                     "a timeout response to originating Transaction Manager...", [TargetIPtuple, TargetPort]),
+                                     "a timeout response to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
                         ch_stats:udp_response_timeout(),
                         { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> }
                     end,
@@ -279,9 +279,9 @@ get_device_status() ->
                _:8, NextId:16, _:8, _TheRest/binary >>} ->
             {NrBuffers, NextId};
         {ok, _Response} ->
-             ?DEBUG_TRACE("Malformed status response received from target at IP addr=~w, status port=~w. Will now throw the atom 'malformed'"
+             ?DEBUG_TRACE("Malformed status response received from target at IP addr=~w, status port=~w. Will now throw the atom 'malformed'",
                           [get(target_ip_tuple), get(target_port)+1]),
-             ?PACKET_TRACE(_Response, "The following malformed status response has been received from target at IP addr=~w, status port=~w."
+             ?PACKET_TRACE(_Response, "The following malformed status response has been received from target at IP addr=~w, status port=~w.",
                                       [get(target_ip_tuple), get(target_port)+1]),
              throw(malformed)
     end.

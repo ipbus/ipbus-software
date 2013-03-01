@@ -153,6 +153,6 @@ wait_for_device_response(TargetIPaddr, TargetPort) ->
 %% Sends reply back to TCP client
 reply_to_client(ClientSocket, ResponseBin) ->
     ?DEBUG_TRACE("Sending response to TCP client"),
-    ?PACKET_TRACE(FullResponseBin, "~n  Sending the following response to the TCP client:"),
+    ?PACKET_TRACE(ResponseBin, "~n  Sending the following response to the TCP client:"),
     gen_tcp:send(ClientSocket, ResponseBin),
     ch_stats:client_response_sent().
