@@ -211,7 +211,7 @@ COMMANDS += [["TEST IPBUS 1.3",
                "pkill -f \"DummyHardwareTcp.exe\"",
                #PYCOHAL TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
-               "python -u test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
+               "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
                "pkill -f \"DummyHardwareUdp.exe\""]]]
 
 COMMANDS += [["TEST IPBUS 2.0",
@@ -289,7 +289,7 @@ COMMANDS += [["TEST IPBUS 2.0",
              "pkill -f \"DummyHardwareTcp.exe\"",
              #PYCOHAL TESTS
              "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-             "python -u test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
+             "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\""]]]
 
 COMMANDS += [["TEST TRIGGER SUPERVISOR",             
@@ -306,16 +306,16 @@ COMMANDS += [["TEST TRIGGER SUPERVISOR",
                "sudo /sbin/service xdaqd start",
                "sudo /sbin/service xdaqd status",
                "sleep 240",
-               "cd %s;python -u multicell.py;python -u multicell_fault.py;python -u multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
+               "cd %s;python multicell.py;python multicell_fault.py;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
 
 COMMANDS += [["TEST CENTRAL CELL",
-              ["cd %s;python -u central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests")]]]
+              ["cd %s;python central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests")]]]
 
 COMMANDS += [["TEST RETRI CELL",
-              ["cd %s;python -u retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests")]]]
+              ["cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests")]]]
 
 COMMANDS += [["TEST TTC",
-              ["cd %s;python -u ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
+              ["cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
                "sudo /sbin/service xdaqd stop",
                "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"]]]
 
@@ -324,7 +324,7 @@ COMMANDS += [["TEST L1PAGE",
                "sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
                "sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
                "sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/WEB-INF/classes/log4j.properties")),
-               "cd %s;python -u l1pageTest.py"  % join(L1PAGE_ROOT,"test")]]]
+               "cd %s;python l1pageTest.py"  % join(L1PAGE_ROOT,"test")]]]
 
 COMMANDS += [["REPORTING",
               ["python -u %s %s" % ("nanalyzer.py","cactus.py"),

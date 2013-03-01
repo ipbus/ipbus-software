@@ -49,9 +49,7 @@ def system(cmd, exception = True, log=True):
         except IOError:
             time.sleep(0.1)
 
-            if p.poll()!= None:
-                break
-            elif (current-start) > HARD_TIMEOUT_S:
+            if (current-start) > HARD_TIMEOUT_S:
                 report_error("ERROR: %s (command too slow, timeout of %d sec)" % (cmd,HARD_TIMEOUT_S),exception,log)
                 return (content,-1)
             elif (current-last) > SOFT_TIMEOUT_S:
