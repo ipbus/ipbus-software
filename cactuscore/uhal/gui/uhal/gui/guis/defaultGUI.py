@@ -3,8 +3,8 @@ import webbrowser
 
 import wx
 
-import modules.utilities
-import modules.hardware
+import uhal.gui.utilities.utilities
+import uhal.gui.utilities.hardware
 
 
 class uHalGuiFrame(wx.Frame):
@@ -20,7 +20,7 @@ class uHalGuiFrame(wx.Frame):
 
 
         # Instantiate custom GUIs
-        modules.utilities.dynamic_loader(panel)
+        uhal.gui.utilities.utilities.dynamic_loader(panel)
 
 
     # CREATE THE MENU BAR
@@ -82,7 +82,7 @@ class uHalGuiFrame(wx.Frame):
     
 
         if file_picker.ShowModal() == wx.ID_OK:
-            modules.hardware.Hardware(file_picker.GetPath())
+            uhal.gui.utilities.hardware.Hardware(file_picker.GetPath())
         
         file_picker.Destroy()
 

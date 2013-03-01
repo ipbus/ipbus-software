@@ -25,6 +25,7 @@ all: _all
 build: _all
 buildall: _all
 _all: 
+	python setup.py sdist
 
 rpm: _rpmall
 _rpmall:

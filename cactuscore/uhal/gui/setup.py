@@ -12,8 +12,7 @@ setup(name = 'cactus-uhal-gui',
       author = 'Carlos Ghabrous Larrea',
       author_email = 'carlos.ghabrous@cern.ch',
       url = 'http://cactus.web.cern.ch/cactus',
-      py_modules = ['uHalGui'],
-      packages = ['guis','modules','test'],
-      package_data = {'test' : ['connections/*.xml']},      
-      scripts = ['uHalGui']
+      packages = ['uhal', 'uhal.gui', 'uhal.gui.guis','uhal.gui.utilities','uhal.gui.test'],
+      package_data = {'uhal.gui.test' : ['connections/*.xml']},      
+      scripts = ['uhal/gui/uhalgui']
       )

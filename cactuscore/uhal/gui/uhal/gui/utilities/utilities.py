@@ -3,7 +3,7 @@ import os, sys
 
 def dynamic_loader(panel):
 
-    _module_directory = "guis"
+    _module_directory = "uhal/gui/guis"
 
     if not os.path.isdir(_module_directory):
         print "\'", _module_directory, "\' directory not found! Could not load custom GUIs"
