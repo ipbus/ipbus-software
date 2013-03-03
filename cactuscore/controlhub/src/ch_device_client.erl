@@ -173,7 +173,7 @@ handle_cast({send, RawIPbusRequest, ClientPid}, State = #state{socket = Socket})
                     end,
             ClientPid ! Reply,
             if 
-              (is_integer(PktId) and PktId =< 16#ffff) -> 
+              (is_integer(PktId) and (PktId =< 16#ffff)) -> 
                 {noreply, State#state{nextpktid = PktId + 1}};
               is_integer(PktId) ->
                 {noreply, State#state{nextpktid = 1}};
@@ -340,7 +340,7 @@ sync_send_reply(_BinToSend, SendPort, ReplyPort, MaxNrSends, TimeoutEachSend, Ma
     TargetIPTuple = get(target_ip_tuple),
     ?DEBUG_TRACE("MAX NUMBER OF TIMEOUTS in sync_send_reply/6! No response from target (IPaddr=~w, send to port=~w, reply port=~w) after ~w attempts, each with timeout of ~wms"
                  "Throwing now", [TargetIPTuple, SendPort, ReplyPort, MaxNrSends, TimeoutEachSend]),
-    throw({timeout, io:lib_format("Communicating with board at ~w (send to port ~w, reply port ~w). No response after ~w attempts, each with timeout of ~wms.", [TargetIPTuple, SendPort, ReplyPort, MaxNrSends, TimeoutEachSend])});
+    throw({timeout, io_lib:format("Communicating with board at ~w (send to port ~w, reply port ~w). No response after ~w attempts, each with timeout of ~wms.", [TargetIPTuple, SendPort, ReplyPort, MaxNrSends, TimeoutEachSend])});
 
 sync_send_reply(BinToSend, SendPort, ReplyPort, MaxNrSends, TimeoutEachSend, SendCount) ->
     Socket = get(socket),
