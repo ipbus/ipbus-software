@@ -162,7 +162,9 @@ handle_cast({send, RawIPbusRequest, ClientPid}, State = #state{socket = Socket})
                             ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w. "
                                          "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
                             ch_stats:udp_in(),
-                            { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReplyBin}
+                            <<OrigHdr:4/binary, _/binary >>  = RawIPbusRequest,
+                            <<_:4/binary, ReplyBody/binary>> = HardwareReplyBin,
+                            { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>}
                     after ?UDP_RESPONSE_TIMEOUT ->
                         ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
                                      "a timeout response to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
@@ -274,7 +276,7 @@ parse_packet_header(_) ->
 %% ---------------------------------------------------------------------
 
 get_device_status() ->
-    case service_port_send_reply(control, 2) of 
+    case service_port_send_reply(status, 2) of 
         {ok, << 16#200000ff:32,_Word1:4/binary, NrBuffers:32,
                _:8, NextId:16, _:8, _TheRest/binary >>} ->
             {NrBuffers, NextId};
