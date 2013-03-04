@@ -149,15 +149,15 @@ handle_call(_Request, _From, State) ->
 handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
     TargetIPTuple = get(target_ip_tuple),
     TargetPort = get(target_port),
-    ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.  Forwarding to "
-                 "IP addr=~w, port=~w...", [ClientPid, TargetIPTuple, TargetPort]),
+    ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
-                  "Manager with PID = ~w.  Forwarding to IP addr=~w, port=~w...",
+                  "Manager with PID = ~w.",
                   [ClientPid, TargetIPTuple, TargetPort]),
     if
       S#state.in_flight =:= none ->
         send_request_to_board({RequestPacket, ClientPid}, S);
       true ->
+        ?DEBUG_TRACE("This request packet is being queued (max nr packets already in flight)."),
         {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}}
     end;
 
@@ -177,12 +177,15 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S) when Soc
                  "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
     ch_stats:udp_in(),
     {_HdrSent, _TimeSent, _PktSent, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
+    ?DEBUG_TRACE("State.v_major is ~w~n", [S#state.v_major]),
     case S#state.v_major of
         2 ->
+            ?DEBUG_TRACE("Entered case statement with state.v_major = 2"),
             <<_:4/binary, ReplyBody/binary>> = HardwareReply,
-            ClientPid ! { device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
+            ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>},
+            ?DEBUG_TRACE("Hardware response was just sent back to Transaction Manager.");
         _ ->
-            ClientPid ! { device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_SUCCESS, HardwareReply }
+            ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReply }
     end,
     if
       S#state.queue =:= [] ->
@@ -222,7 +225,8 @@ handle_info(timeout, S = #state{socket=Socket, nextpktid=NextId}) when S#state.i
         ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
                      "a timeout response to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
         ch_stats:udp_response_timeout(),
-        { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> }
+        ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
+        {noreply, S#state{in_flight=none}}
     end;
 
 handle_info(_Info, State) ->
@@ -251,11 +255,15 @@ code_change(_OldVsn, State, _Extra) ->
 %%% --------------------------------------------------------------------
 
 send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket}) ->
+    TargetIPTuple = get(target_ip_tuple),
+    TargetPort = get(target_port),
+    ?DEBUG_TRACE("Request packet from PID ~w is being forwarded to the board at IP ~w, port ~w...", [ClientPid, TargetIPTuple, TargetPort]),
     <<OrigHdr:4/binary, _/binary>> = Packet,
     case reset_packet_id(Packet, S#state.nextpktid) of
         {error, MsgForClient} ->
+            ?DEBUG_TRACE("ERROR encountered in resetting packet ID - returning following message to Transaction Manager (PID ~w): ~w", [ClientPid, MsgForClient]),
             ClientPid ! MsgForClient,
-            {noreply, S};
+            {noreply, S#state{v_major=unknown, nextpktid=unknown} };
         {MajVer, ModRequest, PktId} ->
             gen_udp:send(Socket, get(target_ip_tuple), get(target_port), ModRequest),
             <<ModHdr:4/binary, _/binary>> = ModRequest,
@@ -269,6 +277,7 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket}) ->
                      true ->
                        S#state{in_flight=InFlightPkt}
                    end,
+           ?DEBUG_TRACE("Request packet sent. Now entering state ~w , with timeout of ~wms", [NewS, ?UDP_RESPONSE_TIMEOUT]),
            {noreply, NewS, ?UDP_RESPONSE_TIMEOUT}
     end.
 
@@ -276,7 +285,8 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket}) ->
 %% ---------------------------------------------------------------------
 %% @doc 
 %% @throws Same as get_device_status/0
-%% @spec reset_packet_id(RawIPbusRequestBin, Id) -> {MajorVer, ModIPbusRequest, PacketId}
+%% @spec reset_packet_id(RawIPbusRequestBin, Id) -> {ok, MajorVer, ModIPbusRequest, PacketId}
+%%                                                | {error, MsgForTransManager}
 %% ---------------------------------------------------------------------
 
 reset_packet_id(RawIPbusRequest, NewId) ->
@@ -289,8 +299,12 @@ reset_packet_id(RawIPbusRequest, NewId) ->
                  little -> {MajorVer, <<H1:8, NewId:16/little, H2:8, PktBody/binary>>, NewId}
              end;
         {2, _} ->
-             {_, IdFromStatus} = get_device_status(),
-             reset_packet_id(RawIPbusRequest, IdFromStatus);
+            case get_device_status() of 
+                {error, MsgForTransManager} ->
+                   {error, MsgForTransManager};
+                {_, IdFromStatus} ->
+                   reset_packet_id(RawIPbusRequest, IdFromStatus)
+             end;
         {_, _} ->
              {MajorVer, RawIPbusRequest, notset}
     end.
@@ -315,21 +329,25 @@ parse_packet_header(_) ->
 
 %% ---------------------------------------------------------------------
 %% @doc
-%% @throws malformed , plus same as service_port_send_reply/2
-%% @spec get_device_status() -> {NrResponseBuffers, NextExpdId}
+%%      N.B: Doesn't throw
+%% @spec get_device_status() ->   {NrResponseBuffers, NextExpdId}
+%%                              | {error, MsgForTransManager}
 %% ---------------------------------------------------------------------
 
 get_device_status() ->
-    case service_port_send_reply(status, 2) of 
+    try service_port_send_reply(status, 2) of 
         {ok, << 16#200000ff:32,_Word1:4/binary, NrBuffers:32,
                _:8, NextId:16, _:8, _TheRest/binary >>} ->
             {NrBuffers, NextId};
         {ok, _Response} ->
-             ?DEBUG_TRACE("Malformed status response received from target at IP addr=~w, status port=~w. Will now throw the atom 'malformed'",
-                          [get(target_ip_tuple), get(target_port)+1]),
-             ?PACKET_TRACE(_Response, "The following malformed status response has been received from target at IP addr=~w, status port=~w.",
-                                      [get(target_ip_tuple), get(target_port)+1]),
-             throw(malformed)
+            ?DEBUG_TRACE("Malformed status response received from target at IP addr=~w, status port=~w. Will now throw the atom 'malformed'",
+                         [get(target_ip_tuple), get(target_port)+1]),
+            ?PACKET_TRACE(_Response, "The following malformed status response has been received from target at IP addr=~w, status port=~w.",
+                                     [get(target_ip_tuple), get(target_port)+1]),
+            {error, {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_MALFORMED_STATUS, <<>> } }
+    catch 
+        throw:{timeout, _PortAtom, _Details} ->
+            {error, {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> } }
     end.
 
 
