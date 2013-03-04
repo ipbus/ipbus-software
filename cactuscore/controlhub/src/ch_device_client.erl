@@ -147,12 +147,9 @@ handle_call(_Request, _From, State) ->
 % handle_cast callback for enqueue_requests API call.
 
 handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
-    TargetIPTuple = get(target_ip_tuple),
-    TargetPort = get(target_port),
     ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
-                  "Manager with PID = ~w.",
-                  [ClientPid, TargetIPTuple, TargetPort]),
+                  "Manager with PID = ~w.", [ClientPid]),
     if
       S#state.in_flight =:= none ->
         send_request_to_board({RequestPacket, ClientPid}, S);

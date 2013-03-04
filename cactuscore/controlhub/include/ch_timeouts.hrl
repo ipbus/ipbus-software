@@ -9,7 +9,7 @@
 %%% ---------------------------------------------------------------------------
 
 % The timeout (ms) used when waiting for a response from a hardware target.
--define(UDP_RESPONSE_TIMEOUT, 200).
+-define(UDP_RESPONSE_TIMEOUT, 100).
 
 % The timeout (ms) used when waiting for a response from a ch_device_client
 % process.  If this timeout is reached, it would generally imply that the

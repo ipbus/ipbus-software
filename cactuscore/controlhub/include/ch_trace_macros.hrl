@@ -13,10 +13,10 @@
 
 
 %% Uncomment line below to globally switch on the simple debug trace messages.
-%-define(debug_trace, true).
+-define(debug_trace, true).
 
 %% Uncomment line below to globally switch on packet trace messages.
-%-define(packet_trace, true).
+-define(packet_trace, true).
 
 
 
@@ -37,11 +37,11 @@
 -ifdef(debug_trace).
 
 -define(DEBUG_TRACE(MESSAGE),
-        io:format(lists:append(lists:append("DEBUG_TRACE : PID=~p : ~p : ", MESSAGE), "~n"), [self(), ?MODULE])
+        io:format(lists:append(lists:append("DEBUG_TRACE @ ~p: PID=~p : ~p : ", MESSAGE), "~n"), [now(), self(), ?MODULE])
        ).
 
 -define(DEBUG_TRACE(MESSAGE, MESSAGE_DATA),
-        io:format(lists:append(lists:append("DEBUG_TRACE : PID=~p : ~p : ", MESSAGE), "~n"), [self(), ?MODULE | MESSAGE_DATA])
+        io:format(lists:append(lists:append("DEBUG_TRACE @ ~p : PID=~p : ~p : ", MESSAGE), "~n"), [now(), self(), ?MODULE | MESSAGE_DATA])
        ).
 
 -else.
@@ -67,12 +67,12 @@
 -ifdef(packet_trace).
 
 -define(PACKET_TRACE(PACKET_BIN, MESSAGE),
-        io:format(lists:append(lists:append("PACKET_TRACE : PID=~p : ~p : ", MESSAGE), "~n"), [self(), ?MODULE]),
+        io:format(lists:append(lists:append("PACKET_TRACE @ ~p: PID=~p : ~p : ", MESSAGE), "~n"), [now(), self(), ?MODULE]),
         ch_utils:print_binary_as_hex(PACKET_BIN)
        ).
 
 -define(PACKET_TRACE(PACKET_BIN, MESSAGE, MESSAGE_DATA),
-        io:format(lists:append(lists:append("PACKET_TRACE : PID=~p : ~p : ", MESSAGE), "~n"), [self(), ?MODULE | MESSAGE_DATA]),        
+        io:format(lists:append(lists:append("PACKET_TRACE @ ~p: PID=~p : ~p : ", MESSAGE), "~n"), [now(), self(), ?MODULE | MESSAGE_DATA]),        
         ch_utils:print_binary_as_hex(PACKET_BIN)
        ).       
 
