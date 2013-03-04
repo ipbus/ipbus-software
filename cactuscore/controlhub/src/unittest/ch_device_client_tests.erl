@@ -60,14 +60,14 @@ teardown(DummyHwPid) ->
 test_reset_packet_id() ->
     Body = <<16#abcdef01:32, 16#deadbeef:32>>,
     % IPbus 2.0 big-endian packet
-    ?assertEqual( {<<16#20abcdf0:32/big, Body/binary>>, 16#abcd}, 
+    ?assertEqual( {2, <<16#20abcdf0:32/big, Body/binary>>, 16#abcd}, 
                   ch_device_client:reset_packet_id(<<16#201234f0:32/big, Body/binary>>, 16#abcd) ),
     % IPbus 2.0 little-endian packet
-    ?assertEqual( {<<16#20abcdf0:32/little, Body/binary>>, 16#abcd},
+    ?assertEqual( {2, <<16#20abcdf0:32/little, Body/binary>>, 16#abcd},
                   ch_device_client:reset_packet_id(<<16#201234f0:32/little, Body/binary>>, 16#abcd) ),
     % IPbus 1.3 packet
     IPbus13Packet = <<16#1000078:32/big, Body/binary>>,
-    ?assertEqual( {IPbus13Packet, notset},
+    ?assertEqual( {1, IPbus13Packet, notset},
                   ch_device_client:reset_packet_id(IPbus13Packet, 42) ).
 
 %% Test the parse_packet_header internal function

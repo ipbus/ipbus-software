@@ -29,7 +29,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
          reset_packet_id/2, parse_packet_header/1]).
 
--record(state, {socket, nextpktid}).           % Holds network socket to target device.
+-record(state, {socket, v_major=unknown, nextpktid, in_flight=none, queue=[]}).           % Holds network socket to target device.
 
 
 %%% ====================================================================
@@ -145,51 +145,20 @@ handle_call(_Request, _From, State) ->
 %% --------------------------------------------------------------------
 
 % handle_cast callback for enqueue_requests API call.
-handle_cast({send, RawIPbusRequest, ClientPid}, State = #state{socket = Socket}) ->
+
+handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
+    TargetIPTuple = get(target_ip_tuple),
+    TargetPort = get(target_port),
     ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.  Forwarding to "
-                 "IP addr=~w, port=~w...", [ClientPid, get(target_ip_tuple), get(target_port)]),
-    ?PACKET_TRACE(RawIPbusRequest, "The following IPbus request have been received from Transaction " 
+                 "IP addr=~w, port=~w...", [ClientPid, TargetIPTuple, TargetPort]),
+    ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
                   "Manager with PID = ~w.  Forwarding to IP addr=~w, port=~w...",
-                  [ClientPid, get(target_ip_tuple), get(target_port)]),
-    try reset_packet_id(RawIPbusRequest, State#state.nextpktid) of 
-        {ModRequest, PktId} -> 
-            TargetIPTuple = get(target_ip_tuple),
-            TargetPort = get(target_port),
-            gen_udp:send(Socket, TargetIPTuple, TargetPort, ModRequest),
-            ch_stats:udp_out(),
-            Reply = receive
-                        {udp, Socket, TargetIPTuple, TargetPort, HardwareReplyBin} -> 
-                            ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w. "
-                                         "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
-                            ch_stats:udp_in(),
-                            <<OrigHdr:4/binary, _/binary >>  = RawIPbusRequest,
-                            <<_:4/binary, ReplyBody/binary>> = HardwareReplyBin,
-                            { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>}
-                    after ?UDP_RESPONSE_TIMEOUT ->
-                        ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
-                                     "a timeout response to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
-                        ch_stats:udp_response_timeout(),
-                        { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> }
-                    end,
-            ClientPid ! Reply,
-            if 
-              (is_integer(PktId) and (PktId =< 16#ffff)) -> 
-                {noreply, State#state{nextpktid = PktId + 1}};
-              is_integer(PktId) ->
-                {noreply, State#state{nextpktid = 1}};
-              true -> 
-              {noreply, State}
-            end
-    catch
-        throw: malformed ->
-            ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_MALFORMED_STATUS, <<>> },
-            {noreply, State};
-        throw: {timeout, status, _Details} ->
-            ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> },
-            {noreply, State};
-        throw: {timeout, resent, _Details} ->
-            ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_RESEND_TIMEOUT, <<>> },
-            {noreply, State}
+                  [ClientPid, TargetIPTuple, TargetPort]),
+    if
+      S#state.in_flight =:= none ->
+        send_request_to_board({RequestPacket, ClientPid}, S);
+      true ->
+        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}}
     end;
 
 %% Default handle cast
@@ -203,6 +172,59 @@ handle_cast(_Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S) when Socket=:=S#state.socket ->
+    ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w. "
+                 "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
+    ch_stats:udp_in(),
+    {_HdrSent, _TimeSent, _PktSent, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
+    case S#state.v_major of
+        2 ->
+            <<_:4/binary, ReplyBody/binary>> = HardwareReply,
+            ClientPid ! { device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
+        _ ->
+            ClientPid ! { device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_SUCCESS, HardwareReply }
+    end,
+    if
+      S#state.queue =:= [] ->
+        {noreply, S#state{in_flight=none}};
+      true ->
+        [H|T] = S#state.queue,
+        send_request_to_board(H, S#state{queue=T, in_flight=none})
+    end;
+
+handle_info(timeout, S = #state{socket=Socket, nextpktid=NextId}) when S#state.in_flight=/=none ->
+    TargetIPTuple = get(target_ip_tuple),
+    TargetPort = get(target_port),
+    {_HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr} = S#state.in_flight,
+    ?DEBUG_TRACE("No response from target hardware at IP addr=~w, port=~w. "
+                 "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
+    if
+      (S#state.v_major=:=2) and (RetryCount<3) ->
+        NewInFlight = {_HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr},
+        try get_device_status() of 
+            {_, HwNextId} when HwNextId =:= (NextId-1) -> % Request packet lost => re-send
+                gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
+                ch_stats:udp_out(),
+                {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
+            {_, HwNextId} when HwNextId =:= NextId ->  % Response packet lost => Ask board to re-send
+                gen_udp:send(Socket, TargetIPTuple, TargetPort+2, <<16#deadbeef:32>>),
+                ch_stats:udp_out(),
+                {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT}
+        catch
+            throw:malformed ->
+                ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_MALFORMED_STATUS, <<>> },
+                {noreply, S#state{in_flight=none}};
+            throw: {timeout, status, _Details} ->
+                ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> },
+                {noreply, S#state{in_flight=none}}
+        end;
+      true ->
+        ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
+                     "a timeout response to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
+        ch_stats:udp_response_timeout(),
+        { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> }
+    end;
+
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -228,11 +250,33 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions (private)
 %%% --------------------------------------------------------------------
 
+send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket}) ->
+    <<OrigHdr:4/binary, _/binary>> = Packet,
+    case reset_packet_id(Packet, S#state.nextpktid) of
+        {error, MsgForClient} ->
+            ClientPid ! MsgForClient,
+            {noreply, S};
+        {MajVer, ModRequest, PktId} ->
+            gen_udp:send(Socket, get(target_ip_tuple), get(target_port), ModRequest),
+            <<ModHdr:4/binary, _/binary>> = ModRequest,
+            InFlightPkt = {ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr},
+            ch_stats:udp_out(),
+            NewS = if
+                     (is_integer(PktId) and (PktId =< 16#ffff)) ->
+                       S#state{v_major=MajVer, in_flight=InFlightPkt, nextpktid = PktId + 1};
+                     is_integer(PktId) ->
+                       S#state{v_major=MajVer, in_flight=InFlightPkt, nextpktid = 1};
+                     true ->
+                       S#state{in_flight=InFlightPkt}
+                   end,
+           {noreply, NewS, ?UDP_RESPONSE_TIMEOUT}
+    end.
+
 
 %% ---------------------------------------------------------------------
 %% @doc 
 %% @throws Same as get_device_status/0
-%% @spec reset_packet_id(RawIPbusRequestBin, Id) -> (ModIPbusRequest, PacketId}
+%% @spec reset_packet_id(RawIPbusRequestBin, Id) -> {MajorVer, ModIPbusRequest, PacketId}
 %% ---------------------------------------------------------------------
 
 reset_packet_id(RawIPbusRequest, NewId) ->
@@ -241,14 +285,14 @@ reset_packet_id(RawIPbusRequest, NewId) ->
         {2, _} when is_integer(NewId) ->
              <<H1:8, _:16, H2:8, PktBody/binary>> = RawIPbusRequest,
              case End of
-                 big    -> {<<H1:8, NewId:16/big, H2:8, PktBody/binary>>, NewId};
-                 little -> {<<H1:8, NewId:16/little, H2:8, PktBody/binary>>, NewId}
+                 big    -> {MajorVer, <<H1:8, NewId:16/big, H2:8, PktBody/binary>>, NewId};
+                 little -> {MajorVer, <<H1:8, NewId:16/little, H2:8, PktBody/binary>>, NewId}
              end;
         {2, _} ->
              {_, IdFromStatus} = get_device_status(),
              reset_packet_id(RawIPbusRequest, IdFromStatus);
         {_, _} ->
-             {RawIPbusRequest, notset}
+             {MajorVer, RawIPbusRequest, notset}
     end.
 
 
