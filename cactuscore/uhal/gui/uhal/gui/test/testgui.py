@@ -1,35 +1,74 @@
+import unittest
+
 import uhal.gui.guiloader
 
-def main():
 
-    print 'Simple configuration'
-    g = uhal.gui.guiloader.GuiLoader()
-    g.start()
+class TestGuiImports(unittest.TestCase):
 
-    print 'Configuration: default=No, []'
-    g = uhal.gui.guiloader.GuiLoader(default='No')
-    g.start()
 
-    print 'Configuration: default=Yes, [\'CustomWindow1\']'
-    g = uhal.gui.guiloader.GuiLoader(['CustomWindow1'])
-    g.start()
+    def setUp(self):
+        pass
+
+
+    def tearDown(self):
+        pass
+
+
+    def test_default_on(self):
+        print '********** Simple configuration **********'
+        g = uhal.gui.guiloader.GuiLoader(test_mode='Yes')
+        self.assertEqual(g.start_test(), 'OK')
+        print
+
+
+    def test_default_off(self):    
+        print '********** Configuration: default=No, guilist=[] **********'
+        g = uhal.gui.guiloader.GuiLoader(default='No', test_mode='Yes')
+        self.assertEqual(g.start_test(), 'OK')
+        print
+
+
+    def test_default_on_custom_one(self):
+        print '********** Configuration: default=Yes, guilist=[\'CustomWindow1\'] **********'
+        g = uhal.gui.guiloader.GuiLoader(guilist=['CustomWindow1'], test_mode='Yes')
+        self.assertEqual(g.start_test(), 'OK')
+        print
+
+
+    def test_default_off_custom_one(self):
+        print '********** Configuration: default=No, guilist=[\'CustomWindow1\'] **********'
+        g = uhal.gui.guiloader.GuiLoader(default='No', guilist=['CustomWindow1'], test_mode='Yes')
+        self.assertEqual(g.start_test(), 'OK')
+        print
+
+
+    def test_default_on_custom_one_two(self):
+        print '********** Configuration: default=Yes, guilist=[\'CustomWindow1\',\'CustomWindow2\']**********'
+        g = uhal.gui.guiloader.GuiLoader(guilist=['CustomWindow1','CustomWindow2'], test_mode='Yes')
+        self.assertEqual(g.start_test(), 'OK')        
+        print
+
+
+    def test_default_off_custom_one_two(self):
+        print '********** Configuration: default=No, guilist=[\'CustomWindow1\',\'CustomWindow2\'] **********'
+        g = uhal.gui.guiloader.GuiLoader(default='No', guilist=['CustomWindow1','CustomWindow2'], test_mode='Yes')
+        self.assertEqual(g.start_test(), 'OK')
+        print
 
     
-    print 'Configuration: default=No, [\'CustomWindow1\']'
-    g = uhal.gui.guiloader.GuiLoader(default='No', listguis=['CustomWindow1'])
-    g.start()
-
-    
-    print 'Configuration: default=Yes, [\'CustomWindow1\',\'CustomWindow2\']'
-    g = uhal.gui.guiloader.GuiLoader(listguis=['CustomWindow1','CustomWindow2'])
-    g.start()
-
-    print 'Configuration: default=No, [\'CustomWindow1\',\'CustomWindow2\']'
-    g = uhal.gui.guiloader.GuiLoader(default='No', listguis=['CustomWindow1','CustomWindow2'])
-    g.start()
+    def test_default_off_non_existing(self):
+        print '********** Configuration: default=No, guilist=[\'NonExistingWindow\'] **********'
+        g = uhal.gui.guiloader.GuiLoader(default='No', guilist=['NonExistingWindow'], test_mode='Yes')
+        self.assertEqual(g.start_test(), 'FAILED')
+        print
 
 
 
-    
+
+def suite():
+    suite = unittest.makeSuite(TestGuiImports, 'test')
+    return suite
+
+
 if __name__ == '__main__':
-    main()
+    unittest.main(defaultTest='suite')

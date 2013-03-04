@@ -19,10 +19,6 @@ class DefaultGui(wx.Frame):
         self.create_menu_bar()
 
 
-        # Instantiate custom GUIs
-        uhal.gui.utilities.utilities.dynamic_loader(panel)
-
-
     # CREATE THE MENU BAR
     def create_menu_bar(self):
 
@@ -135,14 +131,3 @@ class DefaultGui(wx.Frame):
         self.Destroy()
 
 
-
-def start():
-
-    app = wx.PySimpleApp()
-    frame = uHalGuiFrame(None, -1, "uHalGui")
-    frame.Show(True)
-    app.MainLoop()
-
-    
-if __name__ == '__main__':
-    start()
