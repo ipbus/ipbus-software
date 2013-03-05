@@ -214,7 +214,7 @@ COMMANDS += [["TEST IPBUS 1.3",
                "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
                "pkill -f \"DummyHardwareUdp.exe\"",
                #uHALGUI TESTS
-               "uhalgui.exe"]]]
+               "testuhalgui.exe"]]]
 
 COMMANDS += [["TEST IPBUS 2.0",
              [#SERVER NOT REACHABLE TESTS
@@ -294,7 +294,7 @@ COMMANDS += [["TEST IPBUS 2.0",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\""
              #uHALGUI TESTS
-              "uhalgui.exe"]]]
+              "testuhalgui.exe"]]]
 
 COMMANDS += [["TEST TRIGGER SUPERVISOR",             
               ["sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
