@@ -20,7 +20,7 @@ class MainApplication(wx.App):
         
         for gui in self.guilist:
 
-            class_object = dynamic_loader(gui)
+            class_object = dynamic_loader(gui)[0]
             gui_instance = class_object(None, -1, gui)
             gui_instance.Show(True)
 
