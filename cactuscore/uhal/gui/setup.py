@@ -14,5 +14,5 @@ setup(name = 'cactus-uhal-gui',
       url = 'http://cactus.web.cern.ch/cactus',
       packages = ['uhal', 'uhal.gui', 'uhal.gui.guis','uhal.gui.utilities','uhal.gui.test'],
       package_data = {'uhal.gui.test' : ['connections/*.xml']},      
-      scripts = ['uhal/gui/bin/uhalgui.exe']
+      scripts = ['uhal/gui/bin/uhalgui.exe', 'uhal/gui/test/testuhalgui.exe']
       )
