@@ -1,5 +1,4 @@
 import wx
-import os, sys
 
 from uhal.gui.utilities.utilities import dynamic_loader
 
