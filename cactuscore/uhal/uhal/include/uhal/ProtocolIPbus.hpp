@@ -178,6 +178,13 @@ namespace uhal
         */
       virtual uint32_t getPreambleSize();
 
+#ifdef BIG_ENDIAN_HACK
+      /**
+        Finalize the buffer before it is transmitted
+      */
+      virtual void predispatch( );
+#endif
+
     public:
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version

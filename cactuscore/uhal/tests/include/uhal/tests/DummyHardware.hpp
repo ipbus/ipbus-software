@@ -68,10 +68,36 @@ namespace uhal
 
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
+
+
+        #ifdef BIG_ENDIAN_HACK
+        if ( IPbus_major == 2 )
+        {
+          log( Notice() , "Big-Endian Hack included at " , ThisLocation() );
+          for ( std::vector<uint32_t>::iterator lIt( mReceive.begin() ) ; lIt != mReceive.end() ; ++lIt )
+          {
+              *lIt = ntohl( *lIt );
+          }
+        }
+        #endif
+
         mReply.clear();
         std::vector<uint32_t>::const_iterator lBegin ( mReceive.begin() );
         std::vector<uint32_t>::const_iterator lEnd ( mReceive.begin() + ( aByteCount>>2 ) );
         base_type::analyze ( lBegin , lEnd );
+
+
+        #ifdef BIG_ENDIAN_HACK
+        if ( IPbus_major == 2 )
+        {
+          log( Notice() , "Big-Endian Hack included at " , ThisLocation() );
+          for ( std::vector<uint32_t>::iterator lIt( mReply.begin() ) ; lIt != mReply.end() ; ++lIt )
+          {
+              *lIt = htonl( *lIt );
+          }
+        }
+        #endif
+
 
         if ( mReplyDelay )
         {

@@ -34,6 +34,10 @@
 
 #include <cstring>
 
+#ifdef BIG_ENDIAN_HACK
+#include <arpa/inet.h>
+#endif
+
 namespace uhal
 {
 
@@ -185,6 +189,7 @@ namespace uhal
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   IPbus< 2 , IPbus_minor , buffer_size >::IPbus ( const std::string& aId, const URI& aUri ) :
@@ -216,6 +221,24 @@ namespace uhal
   }
 
 
+#ifdef BIG_ENDIAN_HACK
+template< uint8_t IPbus_minor , uint32_t buffer_size >
+  void IPbus< 2 , IPbus_minor , buffer_size >::predispatch( )
+  {
+    log( Notice() , "Big-Endian Hack included" );
+
+    uint32_t* lPtr ( reinterpret_cast<uint32_t*>( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
+    uint32_t lSize ( (mCurrentBuffers->sendCounter()  >> 2) - this->getPreambleSize() + 1 );
+
+    for ( uint32_t i(0); i!= lSize ; ++i , ++lPtr )
+    {
+      *lPtr = htonl( *lPtr );
+    }
+
+  }
+#endif
+
+
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 2 , IPbus_minor , buffer_size >::validate ( uint8_t* aSendBufferStart ,
@@ -223,6 +246,32 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
+
+#ifdef BIG_ENDIAN_HACK
+  log( Notice() , "Big-Endian Hack included" );
+  uint32_t* lPtr;
+  uint32_t lSize;
+  for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt( aReplyStartIt ) ; lIt != aReplyEndIt ; ++lIt )
+  {
+    lPtr = reinterpret_cast<uint32_t*>( lIt->first );
+    lSize = (lIt->second >> 2);
+    
+    for ( uint32_t i(0); i!= lSize ; ++i , ++lPtr )
+    {
+      *lPtr = ntohl( *lPtr );
+    }
+  }
+
+    lPtr = reinterpret_cast<uint32_t*>( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
+    lSize = (mCurrentBuffers->sendCounter()  >> 2) - this->getPreambleSize() + 1 ;
+
+    for ( uint32_t i(0); i!= lSize ; ++i , ++lPtr )
+    {
+      *lPtr = ntohl( *lPtr );
+    }
+
+#endif
+
     //log ( Debug() , ThisLocation() );
     //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )

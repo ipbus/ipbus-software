@@ -72,7 +72,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		-I${UHAL_UHAL_INCLUDE_PREFIX}
 
-CPP_FLAGS = -g -Wall -O0 -rdynamic -MMD -MP -fPIC ${INCLUDE_PATH}
+CPP_FLAGS = -g -Wall -O0 -rdynamic -MMD -MP -fPIC ${INCLUDE_PATH} -DBIG_ENDIAN_HACK
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O0 -rdynamic ${LIBRARY_PATH} ${LIBRARIES}
 
