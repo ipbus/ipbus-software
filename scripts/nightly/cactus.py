@@ -19,14 +19,20 @@ L1PAGE_ROOT	    = "/opt/l1page/tomcat/webapps/ROOT"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 #xdaq.repo file name as a function of the platform, and alias dirs for the nightlies results
 pseudo_platform= "unknown"
+l1page_platform= "noarch"
+
 if PLATFORM.find("i686-with-redhat-5") != -1:
     pseudo_platform="slc5_i686"
+    l1page_platform="i686"
 elif PLATFORM.find("x86_64-with-redhat-5") != -1:
     pseudo_platform="slc5_x86_64"
+    l1page_platform="x86_64"
 elif PLATFORM.find("i686-with-redhat-6") != -1:
     pseudo_platform="slc6_i686"
+    l1page_platform="i686"
 elif PLATFORM.find("x86_64-with-redhat-6") != -1:
     pseudo_platform="slc6_x86_64"
+    l1page_platform="x86_64"
 
 XDAQ_REPO_FILE_NAME = "xdaq.%s.repo" % pseudo_platform
 system("cd %s;rm -f %s" % (NIGHTLY_BASE,pseudo_platform),exception=False)
@@ -85,6 +91,7 @@ COMMANDS += [["UNINSTALL",
                "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null ",
                "sudo yum -y groupremove triggersupervisor uhal ",
                "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite ",
+               "rpm -qa | grep l1page | xargs sudo rpm -ev &> /dev/null ",
                "sudo pkill -f \"xdaq.exe\" ",
                "rpm -qa| grep cactuscore- | xargs sudo rpm -ev &> /dev/null ",
                "rpm -qa| grep cactusprojects- | xargs sudo rpm -ev &> /dev/null ",
@@ -110,6 +117,8 @@ CHECKOUT_CMDS = ["cd %s" % BUILD_HOME,
                  "svn co svn+ssh://svn.cern.ch/reps/cmsos/branches/l1_xaas daq/xaas"]
 #            "svn co svn+ssh://svn.cern.ch/reps/cactus/branches/cactus_1_0_x ./trunk"]
 
+L1PAGE_SED_CMDS = [""
+                   ]
 COMMANDS += [["CHECKOUT",
               [";".join(CHECKOUT_CMDS)]]]
 
@@ -214,7 +223,7 @@ COMMANDS += [["TEST IPBUS 1.3",
                "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
                "pkill -f \"DummyHardwareUdp.exe\"",
                #uHALGUI TESTS
-               "testuhalgui.exe"]]]
+               "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]]]
 
 COMMANDS += [["TEST IPBUS 2.0",
              [#SERVER NOT REACHABLE TESTS
@@ -294,7 +303,7 @@ COMMANDS += [["TEST IPBUS 2.0",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\""
              #uHALGUI TESTS
-              "testuhalgui.exe"]]]
+              "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]]]
 
 COMMANDS += [["TEST TRIGGER SUPERVISOR",             
               ["sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
@@ -324,10 +333,11 @@ COMMANDS += [["TEST TTC",
                "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"]]]
 
 COMMANDS += [["TEST L1PAGE",
-              ["mkdir -p %s" % join(BUILD_HOME, "triggerpro/l1page/data"),
-               "sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
-               "sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(BUILD_HOME, "trunk/cactusprojects/l1page/web/main/l1page.properties")),
-               "sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(BUILD_HOME, "trunk/cactusprojects/l1page/web/WEB-INF/classes/log4j.properties")),
+              ["sudo rpm -iv cactusprojects-l1page-tomcat-1.9.3-0.%s.rpm cactusprojects-l1page-webapps-1.9.3-0.%s.rpm" % (l1page_platform, l1page_platform),
+               "mkdir -p %s" % join(BUILD_HOME, "triggerpro/l1page/data"),
+               "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
+               "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
+               "sudo sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(L1PAGE_ROOT, "WEB-INF/classes/log4j.properties")),
                "cd %s" % join(L1PAGE_ROOT,"test"),
                "python l1pageTest.py"]]]
 
