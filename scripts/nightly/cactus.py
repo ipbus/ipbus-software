@@ -331,7 +331,7 @@ COMMANDS += [["TEST TTC",
                "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"]]]
 
 COMMANDS += [["TEST L1PAGE",
-              ["sudo yum install cactusprojects-l1page-*",
+              ["sudo yum -y install cactusprojects-l1page-*",
                "mkdir -p %s" % join(BUILD_HOME, "triggerpro/l1page/data"),
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
