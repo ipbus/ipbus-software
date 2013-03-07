@@ -23,16 +23,12 @@ l1page_platform= "noarch"
 
 if PLATFORM.find("i686-with-redhat-5") != -1:
     pseudo_platform="slc5_i686"
-    l1page_platform="i686"
 elif PLATFORM.find("x86_64-with-redhat-5") != -1:
     pseudo_platform="slc5_x86_64"
-    l1page_platform="x86_64"
 elif PLATFORM.find("i686-with-redhat-6") != -1:
     pseudo_platform="slc6_i686"
-    l1page_platform="i686"
 elif PLATFORM.find("x86_64-with-redhat-6") != -1:
     pseudo_platform="slc6_x86_64"
-    l1page_platform="x86_64"
 
 XDAQ_REPO_FILE_NAME = "xdaq.%s.repo" % pseudo_platform
 system("cd %s;rm -f %s" % (NIGHTLY_BASE,pseudo_platform),exception=False)
@@ -223,7 +219,8 @@ COMMANDS += [["TEST IPBUS 1.3",
                "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
                "pkill -f \"DummyHardwareUdp.exe\"",
                #uHALGUI TESTS
-               "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]]]
+               "cd /opt/cactus/bin/uhal/gui",
+               "python testuhalgui.exe"]]]
 
 COMMANDS += [["TEST IPBUS 2.0",
              [#SERVER NOT REACHABLE TESTS
@@ -301,9 +298,10 @@ COMMANDS += [["TEST IPBUS 2.0",
              #PYCOHAL TESTS
              "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
-             "pkill -f \"DummyHardwareUdp.exe\""
+             "pkill -f \"DummyHardwareUdp.exe\"",
              #uHALGUI TESTS
-              "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]]]
+              "cd /opt/cactus/bin/uhal/gui",
+              "python testuhalgui.exe"]]]
 
 COMMANDS += [["TEST TRIGGER SUPERVISOR",             
               ["sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
@@ -333,7 +331,7 @@ COMMANDS += [["TEST TTC",
                "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"]]]
 
 COMMANDS += [["TEST L1PAGE",
-              ["sudo rpm -iv cactusprojects-l1page-tomcat-1.9.3-0.%s.rpm cactusprojects-l1page-webapps-1.9.3-0.%s.rpm" % (l1page_platform, l1page_platform),
+              ["sudo yum install cactusprojects-l1page-*",
                "mkdir -p %s" % join(BUILD_HOME, "triggerpro/l1page/data"),
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
