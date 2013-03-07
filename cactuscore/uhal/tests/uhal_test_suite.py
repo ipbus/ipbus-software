@@ -201,19 +201,6 @@ def get_commands(conn_file):
                "sudo controlhub_stop"]
                 ]]
 
-
-    cmds += [["TEST IPBUS2.0 UDP",
-                  ["echo An IPbus 2.0 udp command"]
-                 ]]
-
-    cmds += [["TEST IPBUS2.0 TCP",
-                  ["echo An IPbus 2.0 udp command"]
-                 ]]
-
-    cmds += [["TEST IPBUS2.0 TCP",
-                  ["echo An IPbus 2.0 udp command"]
-                 ]]
-
     return cmds
 
 
