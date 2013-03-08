@@ -33,15 +33,12 @@ spawn_device_emulator(Ver, PortU16) ->
 
 %% The start-point for the dummy hardware
 device_emulator_init(Ver, PortU16) ->
+    {ok, Socket} = gen_udp:open(PortU16, [binary]),
     case Ver of
-         1 -> 
-             {ok, Socket} = gen_udp:open(PortU16, [binary]),
-             device_emulator_loop(Ver, Socket);
-         2 -> 
-             {ok, Socket0} = gen_udp:open(PortU16, [binary]),
-             {ok, Socket1} = gen_udp:open(PortU16+1, [binary]),
-             {ok, Socket2} = gen_udp:open(PortU16+2, [binary]),
-             device_emulator_loop(Ver, {Socket0, Socket1, Socket2, 7645})
+        {1, _} ->
+            device_emulator_loop(Ver, Socket);
+        {2, 0} ->
+            device_emulator_loop(Ver, {Socket, 7645, none})
     end.
 
 
@@ -64,39 +61,45 @@ dummy_request_data_generator(MaxRequestLength) ->
 
 
 %% The receive loop implementation for the hardware emulator
-device_emulator_loop(1, Socket) ->
+device_emulator_loop({1, _} = Ver, Socket) ->
     receive
         {udp, Socket, IP, Port, Packet} ->
             gen_udp:send(Socket, IP, Port, Packet),
-            device_emulator_loop(1, Socket);
+            device_emulator_loop(Ver, Socket);
         shutdown -> 
             ok % For a receiving a clean/normal exit message.
     end;
 
-device_emulator_loop(2, {ControlSocket, StatusSocket, ResendSocket, NextExpdId, LastControlResponse} = State) ->
+device_emulator_loop({2, 0} = Ver, {Socket, NextId, LastResponse} = State) ->
     receive
-        {udp, ControlSocket, IP, Port, <<Header:4/binary, _/binary>> = Packet} ->
-            ExpdHdrUI32 = (16#200000f0 + (NextExpdId bsl 8)),
-            if 
-              (Header =:= <<ExpdHdrUI32:32/big>>) or (Header =:= <<ExpdHdrUI32:32/little>>) ->
-                gen_udp:send(ControlSocket, IP, Port, Packet),
-                device_emulator_loop(2, {ControlSocket, StatusSocket, ResendSocket, NextExpdId+1, Packet});
-              true ->
-                device_emulator_loop(2, State)
-            end;
-        {udp, StatusSocket, IP, Port, <<16#200000f0:32, 16#200000f0:32, 16#200000f0:32, 16#200000f0:32, 
-                                        16#200000f0:32, 16#200000f0:32, 16#200000f0:32, 16#200000f0:32, 
-                                        16#200000f0:32, 16#200000f0:32, 16#200000f0:32, 16#200000f0:32, 
-                                        16#200000f0:32, 16#200000f0:32, 16#200000f0:32, 16#200000f0:32>>} ->
-            Response = <<16#200000ff:32, 8184:32, 
-                         1:32, ((16#2 bsl 28) + (NextExpdId bsl 8) + 16#f0):32,
-                         0:(32*12)>>,
-            gen_udp:send(StatusSocket, IP, Port, Response),
-            device_emulator_loop(2, State);
-        {udp, ResendSocket, IP, Port, _} ->
-            gen_udp:send(ControlSocket, IP, Port, LastControlResponse),
-            device_emulator_loop(2, State);
-        shutdown ->
-            ok
-    end.
+        {udp, Socket, IP, Port, <<Hdr:4/binary, _/binary>> = Packet} ->
+            case Hdr of
+                % Control packet, correct non-zero ID
+                <<16#20:8, NextId:16, 16#f0>> ->
+                    gen_udp:send(Socket, IP, Port, Packet),
+                    device_emulator_loop(Ver, {Socket, ch_device_client:increment_pkt_id(NextId), Packet});
+                % Control packet, ID = 0
+                <<16#20:8, 0:16, 16#f0>> ->
+                    gen_udp:send(Socket, IP, Port, Packet),
+                    device_emulator_loop(Ver, {Socket, NextId, Packet});
+                % Status packet
+                <<2:4, 0:20, 16#f1:8, 0:(15*32)>> ->
+                    StatusResponse = <<2:4, 0:20, 16#f1:8,          % Header
+                                       0:32,                        % MTU
+                                       1:32,                        % nResponseBuffers
+                                       16#20:8, NextId:16, 16#f0:8, % Next expected control header
+                                       0:(32*12)>>,
+                    gen_udp:send(Socket, IP, Port, StatusResponse),
+                    device_emulator_loop(Ver, State);
+                % Re-send request
+                <<16#20:8, Id:16, 16#f2:8>> ->
+                    case LastResponse of 
+                        <<16#20:8, Id:16, 16#f0:8, _/binary>> ->
+                            gen_udp:send(Socket, IP, Port, LastResponse);
+                        _ ->
+                            void
+                    end,
+                    device_emulator_loop(Ver, State)
+            end
+     end.
     

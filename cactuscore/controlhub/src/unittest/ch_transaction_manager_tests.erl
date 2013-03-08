@@ -52,7 +52,7 @@ setup() ->
     ch_device_client_registry:start_link(), % needs to be available to spawn the device clients.
     ch_stats:start_link(), % Needed to prove the control hub is ignoring malformed requests.
     % Spawn the dummy hardware
-    DummyHwPidList = lists:map(fun({A,B}) -> ch_unittest_common:spawn_device_emulator(A, B) end, [{1,X} || X <- ?DUMMY_HW_PORTS_LIST]),
+    DummyHwPidList = lists:map(fun({A,B}) -> ch_unittest_common:spawn_device_emulator(A, B) end, [{{1,3},X} || X <- ?DUMMY_HW_PORTS_LIST]),
     {ok, TcpListenSocket} = gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, ?TCP_SOCKET_OPTIONS),
     TestBaggage = #test_baggage{listen_socket=TcpListenSocket, dummy_hw_pid_list=DummyHwPidList},
     TestBaggage.
