@@ -1,20 +1,11 @@
 import wx
+from uhal.gui.guis import defaultgui
 
-
-class CustomWindow1(wx.Frame):
+class CustomWindow1(defaultgui.DefaultGui):
 
     def __init__(self, parent, id, title):
 
-        wx.Frame.__init__(self, parent, id, title)
-
-        panel = wx.Panel(self)
-        panel.SetBackgroundColour('White')
-        self.Bind(wx.EVT_CLOSE, self.onCloseWindow)
-
-
-    def onCloseWindow(self, event):
-        self.Destroy()
-
+        defaultgui.DefaultGui.__init__(self, parent, id, title)
 
 
 def start():

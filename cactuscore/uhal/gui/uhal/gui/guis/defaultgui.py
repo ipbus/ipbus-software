@@ -12,12 +12,13 @@ class DefaultGui(wx.Frame):
     def __init__(self, parent, id, title):
 
         wx.Frame.__init__(self, parent, id, title)
-
+        
         panel = wx.Panel(self)
         panel.SetBackgroundColour('White')
         self.Bind(wx.EVT_CLOSE, self.on_close_window)
         self.create_menu_bar()
 
+        self.hardware = None
 
     # CREATE THE MENU BAR
     def create_menu_bar(self):
@@ -64,7 +65,7 @@ class DefaultGui(wx.Frame):
 
     # FILE PICKER 
     def on_load_hw(self, event):
-
+            
         wildcard = "XML files (*.xml)|*.xml|" \
                    "All files (*.*)|*.*"
 
@@ -78,11 +79,16 @@ class DefaultGui(wx.Frame):
     
 
         if file_picker.ShowModal() == wx.ID_OK:
-            uhal.gui.utilities.hardware.Hardware(file_picker.GetPath())
-        
+
+            if (self.hardware):
+                print "Killing HW thread"
+                self.hardware.join()
+                self.hardware = None
+
+            self.hardware = uhal.gui.utilities.hardware.Hardware(connection_file = file_picker.GetPath())            
+            self.hardware.start()
+
         file_picker.Destroy()
-
-
     
     def on_click_doc(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus")
@@ -128,6 +134,12 @@ class DefaultGui(wx.Frame):
         wx.AboutBox(info)
 
     def on_close_window(self, event):
+
+        if (self.hardware):
+            print "Killing HW thread"
+            self.hardware.join()
+            self.hardware = None
+             
         self.Destroy()
 
 
