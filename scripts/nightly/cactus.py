@@ -219,8 +219,8 @@ COMMANDS += [["TEST IPBUS 1.3",
                "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
                "pkill -f \"DummyHardwareUdp.exe\"",
                #uHALGUI TESTS
-               "cd /opt/cactus/bin/uhal/gui",
-               "python testuhalgui.exe"]]]
+               "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]
+              ]]
 
 COMMANDS += [["TEST IPBUS 2.0",
              [#SERVER NOT REACHABLE TESTS
@@ -300,8 +300,8 @@ COMMANDS += [["TEST IPBUS 2.0",
              "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
              "pkill -f \"DummyHardwareUdp.exe\"",
              #uHALGUI TESTS
-              "cd /opt/cactus/bin/uhal/gui",
-              "python testuhalgui.exe"]]]
+              "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]
+              ]]
 
 COMMANDS += [["TEST TRIGGER SUPERVISOR",             
               ["sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
@@ -336,8 +336,8 @@ COMMANDS += [["TEST L1PAGE",
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(L1PAGE_ROOT, "WEB-INF/classes/log4j.properties")),
-               "cd %s" % join(L1PAGE_ROOT,"test"),
-               "python l1pageTest.py"]]]
+               "python %s" % join(L1PAGE_ROOT, "test/l1pageTest.py")]
+              ]]
 
 COMMANDS += [["REPORTING",
               ["python -u %s %s" % ("nanalyzer.py","cactus.py"),
