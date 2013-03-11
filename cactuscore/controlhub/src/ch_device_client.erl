@@ -29,7 +29,11 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
          reset_packet_id/2, parse_packet_header/1]).
 
--record(state, {socket, v_major=unknown, nextpktid, in_flight=none, queue=[]}).           % Holds network socket to target device.
+-record(state, {socket,             % Holds network socket to target device 
+                ipbus_v = unknown,  % IPbus version of target (only set when there is successful communication with target)
+                next_id,            % Next packet ID to be sent to target
+                in_flight=none,     % Details of packet in-flight to board
+                queue=[]}).         % Queue of packets waiting to be sent to board
 
 
 %%% ====================================================================
@@ -145,7 +149,6 @@ handle_call(_Request, _From, State) ->
 %% --------------------------------------------------------------------
 
 % handle_cast callback for enqueue_requests API call.
-
 handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
     ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
@@ -154,13 +157,16 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
       S#state.in_flight =:= none ->
         send_request_to_board({RequestPacket, ClientPid}, S);
       true ->
+        {_HdrSent, TimeSent, _PktSent, _RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
+        TimeSinceSent = timer:now_diff( now(), TimeSent ),
         ?DEBUG_TRACE("This request packet is being queued (max nr packets already in flight)."),
-        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}}
+        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent}
     end;
 
 %% Default handle cast
 handle_cast(_Msg, State) ->
     {noreply, State}.
+
 
 %% --------------------------------------------------------------------
 %% Function: handle_info/2
@@ -174,13 +180,10 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S) when Soc
                  "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
     ch_stats:udp_in(),
     {_HdrSent, _TimeSent, _PktSent, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
-    ?DEBUG_TRACE("State.v_major is ~w~n", [S#state.v_major]),
-    case S#state.v_major of
-        2 ->
-            ?DEBUG_TRACE("Entered case statement with state.v_major = 2"),
+    case S#state.ipbus_v of
+        {2, 0} ->
             <<_:4/binary, ReplyBody/binary>> = HardwareReply,
-            ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>},
-            ?DEBUG_TRACE("Hardware response was just sent back to Transaction Manager.");
+            ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
         _ ->
             ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReply }
     end,
@@ -192,18 +195,19 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S) when Soc
         send_request_to_board(H, S#state{queue=T, in_flight=none})
     end;
 
-handle_info(timeout, S = #state{socket=Socket, nextpktid=NextId}) when S#state.in_flight=/=none ->
+handle_info(timeout, S = #state{socket=Socket, next_id=NextId}) when S#state.in_flight=/=none ->
     TargetIPTuple = get(target_ip_tuple),
     TargetPort = get(target_port),
     {_HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr} = S#state.in_flight,
     ?DEBUG_TRACE("No response from target hardware at IP addr=~w, port=~w. "
                  "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
     if
-      (S#state.v_major=:=2) and (RetryCount<3) ->
+      (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
         NewInFlight = {_HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr},
+        NextIdMinusOne = decrement_pkt_id(NextId),
         case get_device_status() of 
             % Request packet lost => re-send
-            {ok, HwNextId} when HwNextId =:= (NextId-1) -> 
+            {ok, HwNextId} when HwNextId =:= NextIdMinusOne -> 
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
                 ch_stats:udp_out(),
                 {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
@@ -228,6 +232,7 @@ handle_info(timeout, S = #state{socket=Socket, nextpktid=NextId}) when S#state.i
 handle_info(_Info, State) ->
     {noreply, State}.
 
+
 %% --------------------------------------------------------------------
 %% Function: terminate/2
 %% Description: Shutdown the server
@@ -235,6 +240,7 @@ handle_info(_Info, State) ->
 %% --------------------------------------------------------------------
 terminate(_Reason, _State) ->
     ok.
+
 
 %% --------------------------------------------------------------------
 %% Func: code_change/3
@@ -264,19 +270,19 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket}) ->
     TargetPort = get(target_port),
     ?DEBUG_TRACE("Request packet from PID ~w is being forwarded to the board at IP ~w, port ~w...", [ClientPid, TargetIPTuple, TargetPort]),
     <<OrigHdr:4/binary, _/binary>> = Packet,
-    case reset_packet_id(Packet, S#state.nextpktid) of
+    case reset_packet_id(Packet, S#state.next_id) of
         {error, _Type, MsgForClient} ->
             ?DEBUG_TRACE("ERROR encountered in resetting packet ID - returning following message to Transaction Manager (PID ~w): ~w", [ClientPid, MsgForClient]),
             ClientPid ! MsgForClient,
-            {noreply, S#state{v_major=unknown, nextpktid=unknown} };
-        {MajVer, ModRequest, PktId} ->
+            {noreply, S#state{ipbus_v=unknown, next_id=unknown} };
+        {IPbusVer, ModRequest, PktId} ->
             gen_udp:send(Socket, get(target_ip_tuple), get(target_port), ModRequest),
             <<ModHdr:4/binary, _/binary>> = ModRequest,
             InFlightPkt = {ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr},
             ch_stats:udp_out(),
             NewS = if
                      is_integer(PktId) ->
-                       S#state{v_major=MajVer, in_flight=InFlightPkt, nextpktid = increment_pkt_id(PktId)};
+                       S#state{ipbus_v=IPbusVer, in_flight=InFlightPkt, next_id = increment_pkt_id(PktId)};
                      true ->
                        S#state{in_flight=InFlightPkt}
                    end,
@@ -288,21 +294,21 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket}) ->
 %% ---------------------------------------------------------------------
 %% @doc 
 %% @throws Same as get_device_status/0
-%% @spec reset_packet_id(RawIPbusRequestBin, Id) -> {ok, MajorVer, ModIPbusRequest, PacketId}
+%% @spec reset_packet_id(RawIPbusRequestBin, Id) -> {ok, IPbusVer, ModIPbusRequest, PacketId}
 %%                                                | {error, malformed, MsgForTransManager}
 %%                                                | {error, timeout, MsgForTransManager}
 %% ---------------------------------------------------------------------
 
 reset_packet_id(RawIPbusRequest, NewId) ->
-    {MajorVer, MinorVer, _, End} = parse_packet_header(RawIPbusRequest),
-    case {MajorVer, MinorVer, NewId} of
-        {2, 0, _} when is_integer(NewId) ->
+    {Ver, _, End} = parse_packet_header(RawIPbusRequest),
+    case {Ver, NewId} of
+        {{2,0}, _} when is_integer(NewId) ->
              <<H1:8, _:16, H2:8, PktBody/binary>> = RawIPbusRequest,
              case End of
-                 big    -> {MajorVer, <<H1:8, NewId:16/big, H2:8, PktBody/binary>>, NewId};
-                 little -> {MajorVer, <<H1:8, NewId:16/little, H2:8, PktBody/binary>>, NewId}
+                 big    -> {Ver, <<H1:8, NewId:16/big, H2:8, PktBody/binary>>, NewId};
+                 little -> {Ver, <<H1:8, NewId:16/little, H2:8, PktBody/binary>>, NewId}
              end;
-        {2, 0, _} ->
+        {{2,0}, _} ->
             case get_device_status() of 
                 {error, _Type, _MsgForTransManager} = X ->
                    X;
@@ -310,8 +316,23 @@ reset_packet_id(RawIPbusRequest, NewId) ->
                    reset_packet_id(RawIPbusRequest, IdFromStatus)
              end;
         _ ->
-             {MajorVer, RawIPbusRequest, notset}
+             {Ver, RawIPbusRequest, notset}
     end.
+
+
+%% ---------------------------------------------------------------------
+%% @doc Decrements packet ID looping round from 1 to 0xffff
+%% @spec decrement_pkt_id( Id::integer() ) -> IdMinusOne::integer()
+%% ---------------------------------------------------------------------
+
+decrement_pkt_id(Id) when is_integer(Id) and Id>0 ->
+    if
+      Id =:= 1 ->
+        16#ffff;
+      true ->
+        Id - 1
+    end.
+
 
 %% ---------------------------------------------------------------------
 %% @doc Increments packet ID looping round from 0xffff to 1 
@@ -328,18 +349,29 @@ increment_pkt_id(Id) when is_integer(Id) and Id>0 ->
 
 %% ---------------------------------------------------------------------
 %% @doc ... TODO ...
-%% @spec parse_packet_header( RawHeader::binary() ) -> {MajorVer, MinorVer, Id, End}
+%% @spec parse_packet_header( RawHeader::binary() ) -> {IPbusVer, Id, End}
+%% where 
+%%    IPbusVer = {2,0} | {1,3} | unknown
+%%    Id::integer()
+%%    End = big | little | unknown
 %% ---------------------------------------------------------------------
 
 parse_packet_header(PacketBin) when size(PacketBin)>4 ->
     <<Header:4/binary, _/binary>> = PacketBin,
     parse_packet_header(Header);
+
 parse_packet_header(<<16#20:8/big, Id:16/big, 16#f0:8/big>>) ->
-    {2, 0, Id, big};
+    {{2,0}, Id, big};
 parse_packet_header(<<16#f0:8/big, Id:16/little, 16#20:8/big>>) ->
-    {2, 0, Id, little};
+    {{2,0}, Id, little};
+
+parse_packet_header(<<1:4/big, _:12/big, 0:8, 16#f8/big>>) ->
+    {{1,3}, notset, big};
+parse_packet_header(<<16#f8/big, 0:8/big, _:8, 1:4/big, _:4>>) ->
+    {{1,3}, notset, little};
+
 parse_packet_header(_) ->
-    {1, unknown, notset, unknown}.
+    {unknown, notset, unknown}.
 
 
 %% ------------------------------------------------------------------------------------
