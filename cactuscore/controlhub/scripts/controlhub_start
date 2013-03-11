@@ -25,7 +25,7 @@ fi
 
 if [ $CONTROLHUBSTATUS != 0 ]; then
   echo -n "Starting Control Hub... "
-  ${DIR}/erl_controlhub -sname controlhub -setcookie ch_cookie -boot ${CONTROLHUB_ROOTDIR}/releases/1.1.0/start -config ${CONTROLHUB_ROOTDIR}/releases/1.1.0/sys # -detached
+  ${DIR}/erl_controlhub -sname controlhub -setcookie ch_cookie -boot ${CONTROLHUB_ROOTDIR}/releases/1.1.0/start -config ${CONTROLHUB_ROOTDIR}/releases/1.1.0/sys -detached
   sleep 1
   ${DIR}/controlhub_status > /dev/null
   if [ $? = 0 ]; then
