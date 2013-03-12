@@ -59,7 +59,7 @@ class TestGuiImports(unittest.TestCase):
     def test_default_off_non_existing(self):
         print '********** Configuration: default=No, guilist=[\'NonExistingWindow\'] **********'
         g = uhal.gui.guiloader.GuiLoader(default='No', guilist=['NonExistingWindow'], test_mode='Yes')
-        self.assertEqual(g.start_test(), 'FAILED')
+        self.assertEqual(g.start_test(), 'OK')
         print
 
 
