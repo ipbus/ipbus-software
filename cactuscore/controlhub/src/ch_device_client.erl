@@ -29,11 +29,11 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
          reset_packet_id/2, parse_packet_header/1]).
 
--record(state, {socket,              % Holds network socket to target device 
-                ipbus_v = unknown,   % IPbus version of target (only set when there is successful communication with target)
-                next_id,             % Next packet ID to be sent to target
-                in_flight=none,      % Details of packet in-flight to board
-                queue=queue:new()}). % Queue of packets waiting to be sent to board
+-record(state, {socket,             % Holds network socket to target device 
+                ipbus_v = unknown,  % IPbus version of target (only set when there is successful communication with target)
+                next_id,            % Next packet ID to be sent to target
+                in_flight=none,     % Details of packet in-flight to board
+                queue=[]}).         % Queue of packets waiting to be sent to board
 
 
 %%% ====================================================================
@@ -151,8 +151,8 @@ handle_call(_Request, _From, State) ->
 % handle_cast callback for enqueue_requests API call.
 handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
     ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
-%    ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
-%                  "Manager with PID = ~w.", [ClientPid]),
+    ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
+                  "Manager with PID = ~w.", [ClientPid]),
     if
       S#state.in_flight =:= none ->
         send_request_to_board({RequestPacket, ClientPid}, S);
@@ -160,7 +160,7 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
         {_HdrSent, TimeSent, _PktSent, _RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
         TimeSinceSent = timer:now_diff( now(), TimeSent ),
         ?DEBUG_TRACE("This request packet is being queued (max nr packets already in flight)."),
-        {noreply, S#state{queue=queue:in({RequestPacket, ClientPid}, Queue)}, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent}
+        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent}
     end;
 
 %% Default handle cast
@@ -178,23 +178,21 @@ handle_cast(_Msg, State) ->
 handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S) when Socket=:=S#state.socket ->
     ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w. "
                  "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
-    ?PACKET_TRACE(HardwareReply, "Received response is:"),
     ch_stats:udp_in(),
     {_HdrSent, _TimeSent, _PktSent, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     case S#state.ipbus_v of
         {2, 0} ->
             <<_:4/binary, ReplyBody/binary>> = HardwareReply,
-            ?DEBUG_TRACE("Sending back to transaction manager with PID ~w, message: ~w", [ClientPid, { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>}]),
             ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
         _ ->
-            ?DEBUG_TRACE("Sending back to transaction manager with PID ~w, message: ~w", [ClientPid,  { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReply }]),
             ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_SUCCESS, HardwareReply }
     end,
-    case queue:out(S#state.queue) of
-        {empty, _} ->
-           {noreply, S#state{in_flight=none}};
-        {{value, NextReq}, NewQueue} ->
-            send_request_to_board(NextReq, S#state{queue=NewQueue, in_flight=none})
+    if
+      S#state.queue =:= [] ->
+        {noreply, S#state{in_flight=none}};
+      true ->
+        [H|T] = S#state.queue,
+        send_request_to_board(H, S#state{queue=T, in_flight=none})
     end;
 
 handle_info(timeout, S = #state{socket=Socket, next_id=NextId}) when S#state.in_flight=/=none ->
@@ -271,7 +269,6 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket}) ->
     TargetIPTuple = get(target_ip_tuple),
     TargetPort = get(target_port),
     ?DEBUG_TRACE("Request packet from PID ~w is being forwarded to the board at IP ~w, port ~w...", [ClientPid, TargetIPTuple, TargetPort]),
-%    ?PACKET_TRACE(Packet, "Request packet is:"),
     <<OrigHdr:4/binary, _/binary>> = Packet,
     case reset_packet_id(Packet, S#state.next_id) of
         {error, _Type, MsgForClient} ->
