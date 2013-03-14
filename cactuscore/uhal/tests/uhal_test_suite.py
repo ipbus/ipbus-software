@@ -204,7 +204,7 @@ def get_commands(conn_file):
     return cmds
 
 
-def run_command(cmd, verbose):
+def run_command(cmd, verbose=True):
     if cmd.startswith("sudo"):
        cmd = "sudo env PATH=$PATH " + cmd[4:]
     print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
@@ -271,21 +271,26 @@ if __name__=="__main__":
     print "   conn_file :",  conn_file
     print "   sections  :",  sections_to_run 
 
+    print
+    print "Environment variables ..."
+    run_command("echo $PATH")
+    run_command("echo $LD_LIBRARY_PATH")
+
     # Run the commands
     for section_name, cmds in get_commands(conn_file):
-        print
-        print "======================================================================================================================="
-        print "-----------------------------------------------------------------------------------------------------------------------"
-        print " Entering section:", section_name
-
         skip_section = True
         for xx in sections_to_run:
             if min([section_name.lower().count(x) for x in xx])!=0:
                 skip_section = False
 
+        print
+        print "======================================================================================================================="
+        print "-----------------------------------------------------------------------------------------------------------------------"
         if skip_section:
-            print " SKIPPING SECTION"
+            print " SKIPPING section:", section_name
             continue
+        else:
+            print " Entering section:", section_name 
  
         for cmd in cmds:
             print
