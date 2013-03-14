@@ -222,6 +222,10 @@ COMMANDS += [["TEST IPBUS 1.3",
                "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]
               ]]
 
+COMMANDS += [["TEST IPBUS 1.3 - uhal_test_suite.py",
+              ["uhal_test_suite.py -v -c /opt/cactus/etc/uhal/tests/dummy_connections.xml ipbus1.3"]
+            ]]
+
 COMMANDS += [["TEST IPBUS 2.0",
              [#SERVER NOT REACHABLE TESTS
              "test_dummy_nonreachable.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.udp2",
