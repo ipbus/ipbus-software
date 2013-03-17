@@ -116,6 +116,8 @@ namespace uhal
     uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
     * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
     * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-12 ) >>2 );
+
+    InnerProtocol::predispatch();
   }
 
 
