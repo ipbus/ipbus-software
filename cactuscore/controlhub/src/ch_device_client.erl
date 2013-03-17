@@ -215,12 +215,12 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
         NextIdMinusOne = decrement_pkt_id(NextId),
         case get_device_status() of 
             % Request packet lost => re-send
-            {ok, HwNextId} when HwNextId =:= NextIdMinusOne -> 
+            {ok, _, HwNextId} when HwNextId =:= NextIdMinusOne -> 
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
                 ch_stats:udp_out(),
                 {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
             % Response packet lost => Ask board to re-send
-            {ok, HwNextId} when HwNextId =:= NextId ->
+            {ok, _, HwNextId} when HwNextId =:= NextId ->
                 gen_udp:send(Socket, TargetIPTuple, TargetPort+2, <<16#deadbeef:32>>),
                 ch_stats:udp_out(),
                 {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
@@ -326,7 +326,7 @@ reset_packet_id(RawIPbusRequest, NewId) ->
             case get_device_status() of 
                 {error, _Type, _MsgForTransManager} = X ->
                    X;
-                {_, IdFromStatus} ->
+                {ok, _, IdFromStatus} ->
                    reset_packet_id(RawIPbusRequest, IdFromStatus)
              end;
         _ ->
@@ -339,7 +339,7 @@ reset_packet_id(RawIPbusRequest, NewId) ->
 %% @spec decrement_pkt_id( Id::integer() ) -> IdMinusOne::integer()
 %% ---------------------------------------------------------------------
 
-decrement_pkt_id(Id) when is_integer(Id) and Id>0 ->
+decrement_pkt_id(Id) when is_integer(Id), Id>0 ->
     if
       Id =:= 1 ->
         16#ffff;
@@ -353,7 +353,7 @@ decrement_pkt_id(Id) when is_integer(Id) and Id>0 ->
 %% @spec increment_pkt_id( Id:integer() ) -> IdPlusOne::integer
 %% ---------------------------------------------------------------------
 
-increment_pkt_id(Id) when is_integer(Id) and Id>0 ->
+increment_pkt_id(Id) when is_integer(Id), Id>0 ->
     if
       Id=:=16#ffff ->
         1;
@@ -392,7 +392,7 @@ parse_packet_header(_) ->
 %% @doc Retrieves number of response buffers and next expected packet ID for the
 %%       device, assuming it's an IPbus 2.0 device. Returns tuple beginning with
 %%       atom error in case there was a timeout or response was malformed.
-%% @spec get_device_status() ->   {NrResponseBuffers, NextExpdId}
+%% @spec get_device_status() ->   {ok, NrResponseBuffers, NextExpdId}
 %%                              | {error, malformed, MsgForTransManager}
 %%                              | {error, timeout, MsgForTransManager}
 %% ------------------------------------------------------------------------------------
@@ -403,7 +403,7 @@ get_device_status() ->
         {ok, << 16#200000f1:32, _Word1:4/binary, 
                 NrBuffers:32, 16#20:8, NextId:16, 16#f0:8, 
                 _TheRest/binary >>} ->
-            {NrBuffers, NextId};
+            {ok, NrBuffers, NextId};
         {ok, _Response} ->
             ?DEBUG_TRACE("Malformed status response received from target at IP addr=~w, ipbus port=~w. Will now throw the atom 'malformed'",
                          [get(target_ip_tuple), get(target_port)]),
