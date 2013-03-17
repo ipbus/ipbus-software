@@ -141,6 +141,7 @@ init([IPaddrU32, PortU16]) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_call(_Request, _From, State) ->
+    ?DEBUG_TRACE("ERROR! Unexpected call ~w received; device client state is ~w.", [_Request, State]),
     Reply = ok,
     {reply, Reply, State}.
 
@@ -155,7 +156,6 @@ handle_call(_Request, _From, State) ->
 
 % handle_cast callback for enqueue_requests API call.
 handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
-    put(last_handle, cast_send),
     ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
                   "Manager with PID = ~w.", [ClientPid]),
@@ -164,14 +164,14 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
         send_request_to_board({RequestPacket, ClientPid}, S);
       true ->
         {_HdrSent, TimeSent, _PktSent, _RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
-        TimeSinceSent = timer:now_diff( now(), TimeSent )/1000.0,
-        put(timeout_value, round(?UDP_RESPONSE_TIMEOUT - TimeSinceSent)),
+        TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
         ?DEBUG_TRACE("This request packet is being queued (max nr packets already in flight)."),
-        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, round(?UDP_RESPONSE_TIMEOUT - TimeSinceSent)}
+        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent}
     end;
 
 %% Default handle cast
-handle_cast(_Msg, State) ->
+handle_cast(_Msg, State) -> 
+    ?DEBUG_TRACE("ERROR! Unexpected cast ~w received; device client state is ~w.", [_Msg, State]),
     {noreply, State}.
 
 
@@ -182,12 +182,13 @@ handle_cast(_Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
-handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}=S) ->
-    put(last_handle, info_udp),
-    ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w. "
-                 "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
+
+% handle_info callback for udp packets from device
+handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when S#state.in_flight=/=none ->
+    ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w (in_flight=~w) "
+                 "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort, S#state.in_flight]),
     ch_stats:udp_in(),
-    {_HdrSent, _TimeSent, _PktSent, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
+    {_HdrSent, _TimeSent, _PktSnt, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     case S#state.ipbus_v of
         {2, 0} ->
             <<_:4/binary, ReplyBody/binary>> = HardwareReply,
@@ -203,10 +204,10 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, #state{sock
         send_request_to_board(H, S#state{queue=T, in_flight=none})
     end;
 
+% handle_info callback for device response timeout
 handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort, next_id=NextId}) when S#state.in_flight=/=none ->
-    put(last_handle, info_timeout),
     {_HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr} = S#state.in_flight,
-    ?DEBUG_TRACE("No response from target hardware at IP addr=~w, port=~w. "
+    ?DEBUG_TRACE("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
                  "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
     if
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
@@ -233,10 +234,18 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                      "a timeout response to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
         ch_stats:udp_response_timeout(),
         ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
-        {noreply, S#state{in_flight=none}}
+        if 
+          S#state.queue =:= [] ->
+            {noreply, S#state{in_flight=none}};
+          true ->
+            [H|T] = S#state.queue,
+            send_request_to_board(H, S#state{queue=T, in_flight=none})
+        end
     end;
 
+% Default handle_info callback
 handle_info(_Info, State) ->
+    ?DEBUG_TRACE("ERROR! Unexpected message ~p received; device client state is ~w.", [_Info, State]),
     {noreply, State}.
 
 
@@ -273,7 +282,6 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------------------
 
 send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
-    put(last_handle, send_req),
     ?DEBUG_TRACE("Request packet from PID ~w is being forwarded to the board at IP ~w, port ~w...", [ClientPid, TargetIPTuple, TargetPort]),
     <<OrigHdr:4/binary, _/binary>> = Packet,
     case reset_packet_id(Packet, S#state.next_id) of
