@@ -111,13 +111,13 @@ namespace uhal
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::predispatch( )
   {
+    InnerProtocol::predispatch();
+
     //log ( Debug() , ThisLocation() );
     tpreamble& lPreambles = mPreambles.back();
     uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
     * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
     * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-12 ) >>2 );
-
-    InnerProtocol::predispatch();
   }
 
 
