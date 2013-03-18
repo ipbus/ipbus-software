@@ -29,15 +29,17 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
          reset_packet_id/2, parse_packet_header/1]).
 
--record(state, {socket,             % Holds network socket to target device 
+-record(state, {mode = setup,       % Running mode of device_client - either setup, normal, recover_lost_pkt, timeout
+                socket,             % Holds network socket to target device 
                 target_ip_tuple,
                 target_ip_u32,
                 target_port,
                 ipbus_v = unknown,  % IPbus version of target (only set when there is successful communication with target)
                 next_id,            % Next packet ID to be sent to target
-                in_flight=none,     % Details of packet in-flight to board
-                queue=[]}).         % Queue of packets waiting to be sent to board
-
+                in_flight = none,   % Details of packet in-flight to board
+                queue = []          % Queue of packets waiting to be sent to board
+                }
+        ).
 
 %%% ====================================================================
 %%% API functions (public interface)
@@ -188,6 +190,11 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S = #state{
     ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w (in_flight=~w) "
                  "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort, S#state.in_flight]),
     ch_stats:udp_in(),
+    if
+      S#state.mode =:= recover_lost_pkt ->
+        ch_stats:udp_response_timeout(recovered);
+      true -> void
+    end,
     {_HdrSent, _TimeSent, _PktSnt, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     case S#state.ipbus_v of
         {2, 0} ->
@@ -198,10 +205,10 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S = #state{
     end,
     if
       S#state.queue =:= [] ->
-        {noreply, S#state{in_flight=none}};
+        {noreply, S#state{in_flight=none, mode = norm}};
       true ->
         [H|T] = S#state.queue,
-        send_request_to_board(H, S#state{queue=T, in_flight=none})
+        send_request_to_board(H, S#state{queue=T, in_flight=none, mode = norm})
     end;
 
 % handle_info callback for device response timeout
@@ -209,6 +216,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
     {_HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr} = S#state.in_flight,
     ?DEBUG_TRACE("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
                  "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
+    ch_stats:udp_response_timeout(),
     if
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
         NewInFlight = {_HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr},
@@ -218,28 +226,27 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
             {ok, _, HwNextId} when HwNextId =:= NextIdMinusOne -> 
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
                 ch_stats:udp_out(),
-                {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
+                {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
             % Response packet lost => Ask board to re-send
             {ok, _, HwNextId} when HwNextId =:= NextId ->
                 gen_udp:send(Socket, TargetIPTuple, TargetPort+2, <<16#deadbeef:32>>),
                 ch_stats:udp_out(),
-                {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
+                {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
             % Error in getting device status
             {error, _Type, MsgForTransManager} ->
                 ClientPid ! MsgForTransManager,
-                {noreply, S#state{in_flight=none}}
+                {noreply, S#state{in_flight=none, mode=timeout}}
         end;
       true ->
         ?DEBUG_TRACE("TIMEOUT REACHED! No response from target (IPaddr=~w, port=~w) . Generating and sending "
                      "a timeout response to originating Transaction Manager...", [TargetIPTuple, TargetPort]),
-        ch_stats:udp_response_timeout(),
         ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
         if 
           S#state.queue =:= [] ->
-            {noreply, S#state{in_flight=none}};
+            {noreply, S#state{in_flight=none, mode=timeout}};
           true ->
             [H|T] = S#state.queue,
-            send_request_to_board(H, S#state{queue=T, in_flight=none})
+            send_request_to_board(H, S#state{queue=T, in_flight=none, mode=timeout})
         end
     end;
 

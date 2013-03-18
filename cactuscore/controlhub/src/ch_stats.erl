@@ -25,6 +25,7 @@
          udp_malformed/0,
          udp_out/0,
          udp_response_timeout/0,
+         udp_response_timeout/1,
          get_active_clients/0,
          get_max_active_clients/0,
          get_cumulative_client_count/0,
@@ -35,6 +36,7 @@
          get_udp_malformed/0,
          get_udp_out/0,
          get_udp_response_timeouts/0,
+         get_udp_response_timeouts/1,
          report_to_console/0,
          report_to_string/0]).
 
@@ -51,7 +53,8 @@
                 udp_in = 0 :: integer(),
                 udp_malformed = 0 :: integer(),
                 udp_out = 0 :: integer(),
-                udp_response_timeouts = 0 :: integer()}).
+                udp_response_timeouts = 0 :: integer(),
+                udp_recovered_response_timeouts = 0 :: integer()}).
 
 
 
@@ -166,6 +169,16 @@ udp_response_timeout() -> gen_server:cast(?MODULE, udp_response_timeout).
 
 
 %% ---------------------------------------------------------------------
+%% @doc Inform the stats server that a UDP response timeout has been
+%%      recovered from. (The timeout should have already been reported
+%%      via udp_response_timeout()
+%%
+%% @spec udp_response_timeout(recovered) -> ok
+%% @end
+%% ---------------------------------------------------------------------
+udp_response_timeout(recovered) -> gen_server:cast(?MODULE, udp_recovered_response_timeout).
+
+%% ---------------------------------------------------------------------
 %% @doc Returns the current number of connected user-clients.
 %%
 %% @spec get_active_clients() -> integer()
@@ -261,6 +274,16 @@ get_udp_out() -> gen_server:call(?MODULE, get_udp_out).
 %% ----------------------------------------------------------------------------
 get_udp_response_timeouts() -> gen_server:call(?MODULE, get_udp_response_timeouts).
 
+%% ----------------------------------------------------------------------------
+%% @doc Returns the current total of UDP response timeouts that have been 
+%%      recovered from
+%%
+%% @spec get_udp_response_timeouts(recovered) -> integer()
+%% @end
+%% ----------------------------------------------------------------------------
+get_udp_response_timeouts(recovered) -> gen_server:call(?MODULE, get_udp_recovered_response_timeouts).
+
+
 
 %% ----------------------------------------------------------------------------
 %% @doc Prints a report of all the current stats to the console.
@@ -338,6 +361,9 @@ handle_call(get_udp_out, _From,  State) ->
 handle_call(get_udp_response_timeouts, _From,  State) ->
     {reply, State#state.udp_response_timeouts, State};
 
+handle_call(get_udp_recovered_response_timeouts, _From, State) ->
+    {reply, State#state.udp_recovered_response_timeouts, State};
+
 handle_call(report_to_string, _From, State) ->
     {reply, report_to_string(State), State};
 
@@ -398,6 +424,10 @@ handle_cast(udp_response_timeout, State = #state{udp_response_timeouts = Value})
     NewState = State#state{udp_response_timeouts = Value+1},
     {noreply, NewState};
 
+handle_cast(udp_recovered_response_timeout, State = #state{udp_recovered_response_timeouts = Value}) ->
+    NewState = State#state{udp_recovered_response_timeouts = Value+1},
+    {noreply, NewState};
+
 handle_cast(report_to_console, State) ->
     io:format("~n~s~n", [report_to_string(State)]),
     {noreply, State};
@@ -452,7 +482,7 @@ report_to_string(State) ->
                                 "              Responses sent: ~p~n~n"
                                 "UDP              Packets Out: ~p~n"
                                 "                  Packets In: ~p (of which ~p were malformed)~n"
-                                "                    Timeouts: ~p",
+                                "                    Timeouts: ~p (of which ~p were recovered)~n",
                                 [State#state.cumulative_client_count,
                                  State#state.active_clients,
                                  State#state.max_active_clients,
@@ -462,4 +492,5 @@ report_to_string(State) ->
                                  State#state.udp_out,
                                  State#state.udp_in,
                                  State#state.udp_malformed,
-                                 State#state.udp_response_timeouts])).
+                                 State#state.udp_response_timeouts,
+                                 State#state.udp_recovered_response_timeouts])).
