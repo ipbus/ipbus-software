@@ -1,0 +1,41 @@
+#!/usr/bin/python
+"""
+usage: bin/ipbus_addr_map.py [options] <address_table.xml>
+
+Extracts the different IPBus maps associated to an address table. That is, for each bus, it retrieves the space separated list of:
+* slave number           [dec]
+* slave name             [string]
+* slace address          [hex]
+* number of address bits [dec]
+
+where:
+  <address_table.xml>    address table in uHAL format
+
+options:
+  -v, --verbose          verbose
+"""
+import uhal.tools
+import getopt
+import sys
+
+
+if __name__ == '__main__':
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "vh", ["verbose","help"])
+    except getopt.GetoptError, err:
+        print __doc__
+        sys.exit(2)
+
+    for o, a in opts:
+        if o in ("-v", "--verbose"):
+            uhal.setLogLevelTo( uhal.LogLevel.DEBUG)
+        if o in ("-h", "--help"):
+            print __doc__
+            sys.exit(0)
+            
+    if len(args) != 1:
+            print __doc__
+            sys.exit(1)
+
+
+    uhal.tools.ipbus_addr_map(atgs[1],verbose)
