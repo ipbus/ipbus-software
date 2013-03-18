@@ -26,6 +26,7 @@ main(_Ignore) ->
                          io:format("Stopping Control Hub... "),
                          case rpc:call(Node, init, stop, [0]) of
                              ok ->
+                                 wait_for_node_death(Node),
                                  io:format("ok~n"),
                                  0;
                              {badrpc, Reason} ->
@@ -37,3 +38,14 @@ main(_Ignore) ->
                          end
                  end,
     halt(ReturnCode).
+
+%% Loops around with 0.2 second delay only returning when controlhub node can't be contacted anymore
+wait_for_node_death(Node) when is_atom(Node) ->
+    timer:sleep(200),
+    case net_adm:ping(Node) of
+        pang ->
+            ok;
+        pong ->
+            wait_for_node_death(Node)
+    end.
+    
