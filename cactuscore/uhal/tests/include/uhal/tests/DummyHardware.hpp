@@ -412,9 +412,9 @@ namespace uhal
           base_type::resend_packet_header();
         }
 
-        std::deque< std::pair< uint32_t , std::vector< uint32_t > > >::iterator lIt = mReplyHistory.begin();
+        std::deque< std::pair< uint32_t , std::vector< uint32_t > > >::reverse_iterator lIt = mReplyHistory.rbegin();
 
-        for( ; lIt!=mReplyHistory.end() ; ++lIt )
+        for( ; lIt!=mReplyHistory.rend() ; ++lIt )
         {
           if( lIt->first == base_type::mPacketCounter )
           {
