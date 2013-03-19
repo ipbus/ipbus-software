@@ -84,7 +84,7 @@ def ipbus_addr_map(fn,verbose=False):
         fn = "file://"+fn
 
     try:
-        d = uhal.getDevice("dummy","ipbusudp-2.0://localhost:12345",fn)
+        d = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345",fn)
     except Exception,e:
         raise Exception("File '%s' does not exist or has incorrect format" % fn)
         
