@@ -102,7 +102,7 @@ namespace uhal
 
             if ( IPbus_major != 1 )
             {
-              if( !control_packet_header ( ) )
+              if ( !control_packet_header ( ) )
               {
                 return false;
               }
@@ -320,7 +320,7 @@ namespace uhal
 
             if ( IPbus_major != 1 )
             {
-              if( !control_packet_header ( ) )
+              if ( !control_packet_header ( ) )
               {
                 return false;
               }

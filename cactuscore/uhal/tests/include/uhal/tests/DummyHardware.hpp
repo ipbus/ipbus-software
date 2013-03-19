@@ -68,8 +68,8 @@ namespace uhal
         mReplyDelay ( aReplyDelay ),
         mReceive ( BUFFER_SIZE , 0x00000000 ),
         mReply ( BUFFER_SIZE , 0x00000000 ),
-        mReplyHistory( REPLY_HISTORY_DEPTH , std::make_pair( 0 , mReply ) ),
-        mLastPacketHeader(0x200000f0),
+        mReplyHistory ( REPLY_HISTORY_DEPTH , std::make_pair ( 0 , mReply ) ),
+        mLastPacketHeader ( 0x200000f0 ),
         mTrafficHistory ( 16, 0x00 ),
         mReceivedControlPacketHeaderHistory ( 4 , 0x00000000 ),
         mSentControlPacketHeaderHistory ( 4 , 0x00000000 )
@@ -120,9 +120,9 @@ namespace uhal
         lEnd = mReceive.begin() + ( aByteCount>>2 );
         base_type::analyze ( lBegin , lEnd );
 
-        if( ( base_type::mPacketType == 0 ) && ( mReply.size() != 0 ) )
+        if ( ( base_type::mPacketType == 0 ) && ( mReply.size() != 0 ) )
         {
-          mReplyHistory.push_back( std::make_pair( base_type::mPacketCounter , mReply ) );
+          mReplyHistory.push_back ( std::make_pair ( base_type::mPacketCounter , mReply ) );
           mReplyHistory.pop_front();
         }
 
@@ -163,7 +163,6 @@ namespace uhal
           mReplyDelay = 0;
           log ( Info() , "Now replying " );
         }
-
       }
 
     private:
@@ -331,21 +330,22 @@ namespace uhal
           base_type::control_packet_header();
         }
 
-        if( base_type::mPacketCounter != 0 )
+        if ( base_type::mPacketCounter != 0 )
         {
           uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
-          if (lTemp == 0 )
+
+          if ( lTemp == 0 )
           {
             lTemp = 1;
           }
-  
-          if( base_type::mPacketCounter != lTemp )
+
+          if ( base_type::mPacketCounter != lTemp )
           {
             mTrafficHistory.push_back ( 5 );
             mTrafficHistory.pop_front();
             return false;
           }
-    
+
           mLastPacketHeader = base_type::mPacketHeader;
         }
 
@@ -353,7 +353,6 @@ namespace uhal
         mTrafficHistory.push_back ( 2 );
         mTrafficHistory.pop_front();
         return true;
-        
       }
 
 
@@ -367,14 +366,14 @@ namespace uhal
         mReply.push_back ( base_type::mPacketHeader );
         mReply.push_back ( BUFFER_SIZE * sizeof ( uint32_t ) );
         mReply.push_back ( REPLY_HISTORY_DEPTH );
-
         uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
-        if (lTemp == 0 )
+
+        if ( lTemp == 0 )
         {
           lTemp = 1;
         }
-        mReply.push_back ( ( mLastPacketHeader & 0xFF0000FF ) | ( ( lTemp <<8 ) & 0x00FFFF00 ) );
 
+        mReply.push_back ( ( mLastPacketHeader & 0xFF0000FF ) | ( ( lTemp <<8 ) & 0x00FFFF00 ) );
         std::deque< uint8_t >::const_iterator lIt ( mTrafficHistory.begin() );
 
         for ( uint32_t i = 0; i != 4 ; ++i )
@@ -415,9 +414,9 @@ namespace uhal
 
         std::deque< std::pair< uint32_t , std::vector< uint32_t > > >::reverse_iterator lIt = mReplyHistory.rbegin();
 
-        for( ; lIt!=mReplyHistory.rend() ; ++lIt )
+        for ( ; lIt!=mReplyHistory.rend() ; ++lIt )
         {
-          if( lIt->first == base_type::mPacketCounter )
+          if ( lIt->first == base_type::mPacketCounter )
           {
             mReply = lIt->second;
             break;

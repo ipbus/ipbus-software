@@ -63,7 +63,8 @@ class UDPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
       {
         uint32_t lBytes = mSocket.receive_from ( boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ) , mSenderEndpoint );
         base_type::AnalyzeReceivedAndCreateReply ( lBytes );
-        if( base_type::mReply.size() )
+
+        if ( base_type::mReply.size() )
         {
           mSocket.send_to ( boost::asio::buffer ( & ( base_type::mReply[0] ) , base_type::mReply.size() <<2 ) , mSenderEndpoint );
         }

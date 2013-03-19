@@ -35,6 +35,7 @@ EXECUTABLE_SOURCES = \
 		src/common/test_dummy_metainfo.cxx \
 		src/common/test_dummy_navigation.cxx \
 		src/common/test_dummy_rawclient.cxx \
+		src/common/test_random.cxx \
 		src/common/PerfTester.cxx
 
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})

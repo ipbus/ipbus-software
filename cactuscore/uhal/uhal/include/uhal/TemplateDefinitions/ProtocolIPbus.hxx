@@ -138,6 +138,14 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
+    uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
+
+    if ( lProtocolVersion != 1 )
+    {
+      log ( Error() , "Wrong Protocol Version! " , Integer ( lProtocolVersion ) , " != 1" );
+      return false;
+    }
+
     switch ( aHeader & 0xF8 )
     {
       case 0xF8 :
@@ -196,11 +204,11 @@ namespace uhal
     IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) ),
     mPacketCounter (
 #ifndef DISABLE_PACKET_COUNTER_HACK
- 1
+      1
 #else
- 0
+      0
 #endif
- )
+    )
   {
   }
 
@@ -340,6 +348,14 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   bool IPbus< 2 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
+    uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
+
+    if ( lProtocolVersion != 2 )
+    {
+      log ( Error() , "Wrong Protocol Version! " , Integer ( lProtocolVersion ) , " != 2" );
+      return false;
+    }
+
     switch ( aHeader & 0xF0 )
     {
       case 0x00 :
