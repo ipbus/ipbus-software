@@ -79,7 +79,10 @@ class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
           }
 
           base_type::AnalyzeReceivedAndCreateReply ( lBytes );
-          boost::asio::write ( lSocket , boost::asio::buffer ( & ( base_type::mReply[0] ) , base_type::mReply.size() <<2 ) );
+          if( base_type::mReply.size() )
+          {
+            boost::asio::write ( lSocket , boost::asio::buffer ( & ( base_type::mReply[0] ) , base_type::mReply.size() <<2 ) );
+          }
         }
       }
     }
