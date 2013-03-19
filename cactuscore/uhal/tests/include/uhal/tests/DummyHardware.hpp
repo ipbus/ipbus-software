@@ -345,10 +345,11 @@ namespace uhal
             mTrafficHistory.pop_front();
             return false;
           }
+    
+          mLastPacketHeader = base_type::mPacketHeader;
         }
 
         mReply.push_back ( base_type::mPacketHeader );
-        mLastPacketHeader = base_type::mPacketHeader;
         mTrafficHistory.push_back ( 2 );
         mTrafficHistory.pop_front();
         return true;
