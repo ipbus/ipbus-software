@@ -207,7 +207,10 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 2 , IPbus_minor , buffer_size >:: preamble( )
   {
-    mSendPacketHeader.push_back ( 0x200000F0 | ( ( mPacketCounter++&0xffff ) <<8 ) );
+    mSendPacketHeader.push_back ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
+#ifndef DISABLE_PACKET_COUNTER_HACK
+    mPacketCounter++;
+#endif
     mCurrentBuffers->send ( mSendPacketHeader.back() );
     mReceivePacketHeader.push_back ( 0x00000000 );
     mCurrentBuffers->receive ( mReceivePacketHeader.back() );

@@ -112,7 +112,6 @@ namespace uhal
   void ControlHub< InnerProtocol >::predispatch( )
   {
     InnerProtocol::predispatch();
-
     //log ( Debug() , ThisLocation() );
     tpreamble& lPreambles = mPreambles.back();
     uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
