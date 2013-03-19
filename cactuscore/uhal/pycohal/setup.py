@@ -15,9 +15,9 @@ setup(name='cactuscore-uhal-pycohal',
       author_email = 'T.Williams@cern.ch',
       url = 'http://cactus.web.cern.ch/cactus',
 
-      packages = ['pycohal'], 
+      packages = ['uhal'], 
       package_dir = {'' : 'pkg'},
-      package_data = {'pycohal' : ['*.so']}
+      package_data = {'uhal' : ['*.so']}
  
  )
 

@@ -3,5 +3,5 @@
 # (Specifically, scripts and package_data files in setup.py are not automatically shipped)
 
 include test_pycohal
-include pkg/pycohal/*.so
+include pkg/uhal/*.so
 

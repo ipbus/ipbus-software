@@ -13,7 +13,7 @@ export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
 
 BINDINGS_SOURCES = $(wildcard src/common/*.cpp)
 BINDINGS_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${BINDINGS_SOURCES})
-BINDINGS_LIB = pkg/pycohal/_pycohal.so
+BINDINGS_LIB = pkg/uhal/_core.so
 
 LIBRARY_PATH = -L${EXTERN_BOOST_LIB_PREFIX} \
 				-L${EXTERN_PUGIXML_LIB_PREFIX} \

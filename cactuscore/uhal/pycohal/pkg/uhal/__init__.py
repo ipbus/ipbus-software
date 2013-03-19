@@ -1,4 +1,4 @@
-from _pycohal import *
+from _core import *
 
 def exception_to_string(self):
    return self.what
