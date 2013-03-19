@@ -97,7 +97,6 @@ int main ( int argc,char* argv[] )
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-
   CACTUS_TEST ( connect_write_read ( connection_file,device_id ) );
   CACTUS_TEST ( on_the_fly_connect_write_read ( connection_file,device_id ) );
   CACTUS_TEST ( search_device_id ( connection_file,device_id ) );

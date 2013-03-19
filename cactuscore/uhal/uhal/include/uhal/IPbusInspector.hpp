@@ -47,18 +47,28 @@
 namespace uhal
 {
 
-  namespace exception
-  {
-    //! Exception class to handle the case where we are unable to parse a badly formed IPbus header.
-    ExceptionClass ( UnableToParseHeader , "Exception class to handle the case where we are unable to parse a badly formed IPbus header." );
-  }
+  /*  namespace exception
+    {
+      //! Exception class to handle the case where we are unable to parse a badly formed IPbus header.
+      ExceptionClass ( UnableToParseHeader , "Exception class to handle the case where we are unable to parse a badly formed IPbus header." );
+      ExceptionClass ( IllegalPacketHeader , "Exception class to handle the case where an illegal packet header is received." );
+    }*/
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class HostToTargetInspector
   {
     public:
-      HostToTargetInspector( ) {}
+      HostToTargetInspector( ) :
+        mHeader ( 0 ),
+        mWordCounter ( 0 ),
+        mTransactionId ( 0 ),
+        mResponseGood ( 0 ),
+        mPacketHeader ( 0 ),
+        mPacketCounter ( 0 ),
+        mPacketType ( 0 )
+      {}
+
       virtual ~HostToTargetInspector( ) {}
 
     protected:
@@ -68,77 +78,107 @@ namespace uhal
       uint32_t mTransactionId;
       uint8_t mResponseGood;
 
+      uint32_t mPacketHeader;
+      uint32_t mPacketCounter;
+      uint32_t mPacketType;
+
     public:
 
-      void analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        uint32_t lAddress , lPacketHeader, lAddend , lAndTerm , lOrTerm ;
+        uint32_t lAddress , lAddend , lAndTerm , lOrTerm ;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
         if ( IPbus_major != 1 )
         {
-          lPacketHeader = *aIt++;
-          packet_header ( lPacketHeader );
+          mPacketHeader = *aIt++;
+          mPacketCounter = ( mPacketHeader>>8 ) &0xFFFF ;
+          mPacketType = mPacketHeader&0x0F ;
         }
 
-        do
+        switch ( mPacketType )
         {
-          mHeader = *aIt++;
+          case 0:
 
-          if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
-                 mHeader ,
-                 mType ,
-                 mWordCounter ,
-                 mTransactionId ,
-                 mResponseGood )
-             )
-          {
-            log ( Error() , "Unable to parse send header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
-            throw exception::UnableToParseHeader();
-          }
+            if ( IPbus_major != 1 )
+            {
+              control_packet_header ();
+            }
 
-          switch ( mType )
-          {
-            case B_O_T:
-              bot();
-              break;
-            case NI_READ:
-              lAddress = *aIt++;
-              ni_read ( lAddress );
-              break;
-            case READ:
-              lAddress = *aIt++;
-              read ( lAddress );
-              break;
-            case NI_WRITE:
-              lAddress = *aIt++;
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
-              ni_write ( lAddress , lPayloadBegin , lPayloadEnd );
-              break;
-            case WRITE:
-              lAddress = *aIt++;
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
-              write ( lAddress , lPayloadBegin , lPayloadEnd );
-              break;
-            case RMW_SUM:
-              lAddress = *aIt++;
-              lAddend = *aIt++;
-              rmw_sum ( lAddress , lAddend );
-              break;
-            case RMW_BITS:
-              lAddress = *aIt++;
-              lAndTerm = *aIt++;
-              lOrTerm = *aIt++;
-              rmw_bits ( lAddress , lAndTerm , lOrTerm );
-              break;
-            default:
-              unknown_type();
-              break;
-          }
+            do
+            {
+              mHeader = *aIt++;
+
+              if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
+                     mHeader ,
+                     mType ,
+                     mWordCounter ,
+                     mTransactionId ,
+                     mResponseGood )
+                 )
+              {
+                log ( Error() , "Unable to parse send header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
+                return false;
+              }
+
+              switch ( mType )
+              {
+                case B_O_T:
+                  bot();
+                  break;
+                case NI_READ:
+                  lAddress = *aIt++;
+                  ni_read ( lAddress );
+                  break;
+                case READ:
+                  lAddress = *aIt++;
+                  read ( lAddress );
+                  break;
+                case NI_WRITE:
+                  lAddress = *aIt++;
+                  lPayloadBegin = ( aIt++ );
+                  lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+                  ni_write ( lAddress , lPayloadBegin , lPayloadEnd );
+                  break;
+                case WRITE:
+                  lAddress = *aIt++;
+                  lPayloadBegin = ( aIt++ );
+                  lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+                  write ( lAddress , lPayloadBegin , lPayloadEnd );
+                  break;
+                case RMW_SUM:
+                  lAddress = *aIt++;
+                  lAddend = *aIt++;
+                  rmw_sum ( lAddress , lAddend );
+                  break;
+                case RMW_BITS:
+                  lAddress = *aIt++;
+                  lAndTerm = *aIt++;
+                  lOrTerm = *aIt++;
+                  rmw_bits ( lAddress , lAndTerm , lOrTerm );
+                  break;
+                default:
+                  unknown_type();
+                  return false;
+              }
+            }
+            while ( aIt!=aEnd );
+
+            break;
+          case 1:
+            aIt=aEnd;
+            status_packet_header();
+            break;
+          case 2:
+            aIt=aEnd;
+            resend_packet_header();
+            break;
+          default:
+            unknown_packet_header( );
+            return false;
         }
-        while ( aIt!=aEnd );
+
+        return true;
       }
 
     protected:
@@ -198,14 +238,28 @@ namespace uhal
 
       virtual void unknown_type()
       {
-        log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
-        throw exception::UnableToParseHeader();
+        log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown Transaction Header" );
       }
 
-      virtual void packet_header ( const uint32_t& aPacketHeader )
+
+      virtual void control_packet_header ()
       {
-        uint32_t lTransactionId ( ( aPacketHeader>>8 ) &0xFFFF );
-        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );
+        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , transaction ID " , Integer ( mTransactionId ) );
+      }
+
+      virtual void status_packet_header()
+      {
+        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Status Packet Header" );
+      }
+
+      virtual void resend_packet_header()
+      {
+        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Resend Request Packet Header" );
+      }
+
+      virtual void unknown_packet_header()
+      {
+        log ( Error() , Integer ( mPacketHeader, IntFmt<hex,fixed>() ) , " | Unknown Packet Header" );
       }
 
   };
@@ -219,7 +273,15 @@ namespace uhal
   class TargetToHostInspector
   {
     public:
-      TargetToHostInspector( ) {}
+      TargetToHostInspector( ) :
+        mHeader ( 0 ),
+        mWordCounter ( 0 ),
+        mTransactionId ( 0 ),
+        mResponseGood ( 0 ),
+        mPacketHeader ( 0 ),
+        mPacketCounter ( 0 ),
+        mPacketType ( 0 )
+      {}
       virtual ~TargetToHostInspector( ) {}
 
     protected:
@@ -229,70 +291,97 @@ namespace uhal
       uint32_t mTransactionId;
       uint8_t mResponseGood;
 
+      uint32_t mPacketHeader;
+      uint32_t mPacketCounter;
+      uint32_t mPacketType;
+
+
     public:
 
-      void analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        uint32_t lNewValue , lPacketHeader;
+        uint32_t lNewValue;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
-        if ( IPbus_major > 1 )
+        if ( IPbus_major != 1 )
         {
-          lPacketHeader = *aIt++;
-          packet_header ( lPacketHeader );
+          mPacketHeader = *aIt++;
+          mPacketCounter = ( mPacketHeader>>8 ) &0xFFFF ;
+          mPacketType = mPacketHeader&0x0F ;
         }
 
-        do
+        switch ( mPacketType )
         {
-          mHeader = *aIt++;
+          case 0:
 
-          if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
-                 mHeader ,
-                 mType ,
-                 mWordCounter ,
-                 mTransactionId ,
-                 mResponseGood )
-             )
-          {
-            log ( Error() , "Unable to parse reply header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
-            throw exception::UnableToParseHeader();
-          }
+            if ( IPbus_major != 1 )
+            {
+              control_packet_header ( );
+            }
 
-          switch ( mType )
-          {
-            case B_O_T:
-              bot();
-              break;
-            case NI_READ:
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
-              ni_read ( lPayloadBegin , lPayloadEnd );
-              break;
-            case READ:
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
-              read ( lPayloadBegin , lPayloadEnd );
-              break;
-            case NI_WRITE:
-              ni_write ();
-              break;
-            case WRITE:
-              write ();
-              break;
-            case RMW_SUM:
-              lNewValue = *aIt++;
-              rmw_sum ( lNewValue );
-              break;
-            case RMW_BITS:
-              lNewValue = *aIt++;
-              rmw_bits ( lNewValue );
-              break;
-            default:
-              unknown_type();
-              break;
-          }
+            do
+            {
+              mHeader = *aIt++;
+
+              if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
+                     mHeader ,
+                     mType ,
+                     mWordCounter ,
+                     mTransactionId ,
+                     mResponseGood )
+                 )
+              {
+                log ( Error() , "Unable to parse reply header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
+                return false;
+              }
+
+              switch ( mType )
+              {
+                case B_O_T:
+                  bot();
+                  break;
+                case NI_READ:
+                  lPayloadBegin = ( aIt++ );
+                  lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+                  ni_read ( lPayloadBegin , lPayloadEnd );
+                  break;
+                case READ:
+                  lPayloadBegin = ( aIt++ );
+                  lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+                  read ( lPayloadBegin , lPayloadEnd );
+                  break;
+                case NI_WRITE:
+                  ni_write ();
+                  break;
+                case WRITE:
+                  write ();
+                  break;
+                case RMW_SUM:
+                  lNewValue = *aIt++;
+                  rmw_sum ( lNewValue );
+                  break;
+                case RMW_BITS:
+                  lNewValue = *aIt++;
+                  rmw_bits ( lNewValue );
+                  break;
+                default:
+                  unknown_type();
+                  return false;
+              }
+            }
+            while ( aIt!=aEnd );
+
+            break;
+          case 1:
+            aIt=aEnd;
+            status_packet_header( );
+            break;
+          default:
+            unknown_packet_header( );
+            return false;
         }
-        while ( aIt!=aEnd );
+
+        return true;
       }
 
     protected:
@@ -345,14 +434,22 @@ namespace uhal
 
       virtual void unknown_type()
       {
-        log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown" );
-        throw exception::UnableToParseHeader();
+        log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown Transaction Header" );
       }
 
-      virtual void packet_header ( const uint32_t& aPacketHeader )
+      virtual void control_packet_header ()
       {
-        uint32_t lTransactionId ( ( aPacketHeader>>8 ) &0xFFFF );
-        log ( Notice() , Integer ( aPacketHeader , IntFmt<hex,fixed>() ) , " | Packet Header , transaction ID " , Integer ( lTransactionId ) );
+        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , transaction ID " , Integer ( mTransactionId ) );
+      }
+
+      virtual void status_packet_header()
+      {
+        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Status Packet Header" );
+      }
+
+      virtual void unknown_packet_header()
+      {
+        log ( Error() , Integer ( mPacketHeader, IntFmt<hex,fixed>() ) , " | Unknown Packet Header" );
       }
 
   };

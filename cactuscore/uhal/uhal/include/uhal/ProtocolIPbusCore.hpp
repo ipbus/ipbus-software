@@ -179,7 +179,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId ) = 0;
+      virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 ) = 0;
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version

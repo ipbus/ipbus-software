@@ -49,8 +49,8 @@ namespace uhal
     //!Return the first argument
     std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
 
-    uint32_t failedTestCount(0);
-    uint32_t passedTestCount(0);
+    uint32_t failedTestCount ( 0 );
+    uint32_t passedTestCount ( 0 );
   }
 }
 

@@ -219,7 +219,11 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( B_O_T , 0 , mTransactionCounter++ ) );
+    mCurrentBuffers->send ( implementCalculateHeader ( B_O_T , 0 , mTransactionCounter
+#ifndef DISABLE_TRANSACTION_COUNTER_HACK
+                            ++
+#endif
+                                                     ) );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
     lReply.second->IPbusHeaders.push_back ( 0 );
     mCurrentBuffers->add ( lReply.first );
@@ -245,7 +249,11 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( WRITE , 1 , mTransactionCounter++ ) );
+    mCurrentBuffers->send ( implementCalculateHeader ( WRITE , 1 , mTransactionCounter
+#ifndef DISABLE_TRANSACTION_COUNTER_HACK
+                            ++
+#endif
+                                                     ) );
     mCurrentBuffers->send ( aAddr );
     mCurrentBuffers->send ( aSource );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
@@ -284,7 +292,11 @@ namespace uhal
       //log ( Info() , "lSendBytesAvailableForPayload (bytes) = " , Integer(lSendBytesAvailableForPayload) );
       //log ( Info() , "lSendBytesAvailableForPayload (words) = " , Integer(lSendBytesAvailableForPayload>>2) );
       //log ( Info() , "lPayloadByteCount = " , Integer(lPayloadByteCount) );
-      mCurrentBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ ) );
+      mCurrentBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter
+#ifndef DISABLE_TRANSACTION_COUNTER_HACK
+                              ++
+#endif
+                                                       ) );
       mCurrentBuffers->send ( lAddr );
       mCurrentBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
       lSourcePtr += lSendBytesAvailableForPayload;
@@ -322,7 +334,11 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( READ , 1 , mTransactionCounter++ ) );
+    mCurrentBuffers->send ( implementCalculateHeader ( READ , 1 , mTransactionCounter
+#ifndef DISABLE_TRANSACTION_COUNTER_HACK
+                            ++
+#endif
+                                                     ) );
     mCurrentBuffers->send ( aAddr );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 , aMask ) );
     mCurrentBuffers->add ( lReply.first );
@@ -357,7 +373,11 @@ namespace uhal
     {
       checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lReplyBytesAvailableForPayload ( ( lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
-      mCurrentBuffers->send ( implementCalculateHeader ( lType , lReplyBytesAvailableForPayload>>2 , mTransactionCounter++ ) );
+      mCurrentBuffers->send ( implementCalculateHeader ( lType , lReplyBytesAvailableForPayload>>2 , mTransactionCounter
+#ifndef DISABLE_TRANSACTION_COUNTER_HACK
+                              ++
+#endif
+                                                       ) );
       mCurrentBuffers->send ( lAddr );
       lReply.second->IPbusHeaders.push_back ( 0 );
       mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
@@ -394,7 +414,11 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( RMW_BITS , 1 , mTransactionCounter++ ) );
+    mCurrentBuffers->send ( implementCalculateHeader ( RMW_BITS , 1 , mTransactionCounter
+#ifndef DISABLE_TRANSACTION_COUNTER_HACK
+                            ++
+#endif
+                                                     ) );
     mCurrentBuffers->send ( aAddr );
     mCurrentBuffers->send ( aANDterm );
     mCurrentBuffers->send ( aORterm );
@@ -423,7 +447,11 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( RMW_SUM , 1 , mTransactionCounter++ ) );
+    mCurrentBuffers->send ( implementCalculateHeader ( RMW_SUM , 1 , mTransactionCounter
+#ifndef DISABLE_TRANSACTION_COUNTER_HACK
+                            ++
+#endif
+                                                     ) );
     mCurrentBuffers->send ( aAddr );
     mCurrentBuffers->send ( static_cast< uint32_t > ( aAddend ) );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 ) );

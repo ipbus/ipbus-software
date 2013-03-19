@@ -108,14 +108,17 @@ void mem_rmw_bits ( const std::string& connection, const std::string& id )
   ValWord< uint32_t > reg1 = c->rmw_bits ( addr,x2,x3 );
   ValWord< uint32_t > reg2 = c->read ( addr );
   c->dispatch();
-  CACTUS_CHECK( (( x1 & x2 ) | x3) == reg2.value() );
+  CACTUS_CHECK ( ( ( x1 & x2 ) | x3 ) == reg2.value() );
 
   //IPBus 1.3 bug on RMW: https://svnweb.cern.ch/trac/cactus/ticket/179
-  if (hw.uri().find("ipbusudp-1.3://") != -1 || 
-      hw.uri().find("ipbustcp-1.3://") != -1 ||
-      hw.uri().find("chtcp-1.3://") != -1 ) {
+  if ( hw.uri().find ( "ipbusudp-1.3://" ) != -1 ||
+       hw.uri().find ( "ipbustcp-1.3://" ) != -1 ||
+       hw.uri().find ( "chtcp-1.3://" ) != -1 )
+  {
     CACTUS_CHECK ( reg1.value() == ( ( x1 & x2 ) | x3 ) );
-  } else {
+  }
+  else
+  {
     CACTUS_CHECK ( reg1.value() == x1 );
   }
 }
@@ -154,7 +157,6 @@ int main ( int argc,char* argv[] )
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-
   CACTUS_TEST ( single_write_read ( connection_file,device_id ) );
   CACTUS_TEST ( mem_write_read ( connection_file,device_id ) );
   CACTUS_TEST ( mem_rmw_bits ( connection_file,device_id ) );

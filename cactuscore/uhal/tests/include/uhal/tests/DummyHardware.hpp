@@ -43,10 +43,18 @@
 #include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <map>
+#include <vector>
+#include <deque>
+
+
 // Using the uhal namespace
 namespace uhal
 {
   static const uint32_t ADDRESSMASK = 0x000FFFFF;
+  static const uint32_t REPLY_HISTORY_DEPTH = 5;
+  static const uint32_t BUFFER_SIZE = 500;
+
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
@@ -58,46 +66,87 @@ namespace uhal
       DummyHardware ( const uint32_t& aReplyDelay ) : HostToTargetInspector< IPbus_major , IPbus_minor >() ,
         mMemory ( ADDRESSMASK+1 , 0x00000000 ),
         mReplyDelay ( aReplyDelay ),
-        mReceive ( 500 , 0x00000000 ),
-        mReply ( 500 , 0x00000000 )
-      {}
+        mReceive ( BUFFER_SIZE , 0x00000000 ),
+        mReply ( BUFFER_SIZE , 0x00000000 ),
+        mTrafficHistory ( 16, 0x00 ),
+        mReceivedControlPacketHeaderHistory ( 4 , 0x00000000 ),
+        mSentControlPacketHeaderHistory ( 4 , 0x00000000 )
+      {
+      }
 
-      virtual ~DummyHardware() {}
+      virtual ~DummyHardware()
+      {
+      }
 
       virtual void run() = 0;
 
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
+#ifdef BIG_ENDIAN_HACK
 
-
-        #ifdef BIG_ENDIAN_HACK
         if ( IPbus_major == 2 )
         {
-          log( Notice() , "Big-Endian Hack included at " , ThisLocation() );
-          for ( std::vector<uint32_t>::iterator lIt( mReceive.begin() ) ; lIt != mReceive.end() ; ++lIt )
+          if ( LoggingIncludes ( Debug() ) )
           {
-              *lIt = ntohl( *lIt );
+            log ( Notice() , "Big-Endian Hack included" );
+          }
+
+          for ( std::vector<uint32_t>::iterator lIt ( mReceive.begin() ) ; lIt != mReceive.end() ; ++lIt )
+          {
+            *lIt = ntohl ( *lIt );
           }
         }
-        #endif
 
+#endif
+        std::vector<uint32_t>::const_iterator lBegin, lEnd;
+
+        //
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        if ( LoggingIncludes ( Debug() ) )
+        {
+          log ( Debug() , "\n=============================================== RECEIVED ===============================================" );
+          HostToTargetInspector< IPbus_major , IPbus_minor > lHostToTargetDebugger;
+          lBegin =  mReceive.begin();
+          lEnd = mReceive.begin() + ( aByteCount>>2 );
+          lHostToTargetDebugger.analyze ( lBegin , lEnd );
+        }
+
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //
         mReply.clear();
-        std::vector<uint32_t>::const_iterator lBegin ( mReceive.begin() );
-        std::vector<uint32_t>::const_iterator lEnd ( mReceive.begin() + ( aByteCount>>2 ) );
+        lBegin =  mReceive.begin();
+        lEnd = mReceive.begin() + ( aByteCount>>2 );
         base_type::analyze ( lBegin , lEnd );
 
+        //
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        if ( LoggingIncludes ( Debug() ) )
+        {
+          log ( Debug() , "\n=============================================== SENDING ===============================================" );
+          TargetToHostInspector< IPbus_major , IPbus_minor > lTargetToHostDebugger;
+          lBegin =  mReply.begin();
+          lEnd = mReply.end();
+          lTargetToHostDebugger.analyze ( lBegin , lEnd );
+        }
 
-        #ifdef BIG_ENDIAN_HACK
+        //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //
+#ifdef BIG_ENDIAN_HACK
+
         if ( IPbus_major == 2 )
         {
-          log( Notice() , "Big-Endian Hack included at " , ThisLocation() );
-          for ( std::vector<uint32_t>::iterator lIt( mReply.begin() ) ; lIt != mReply.end() ; ++lIt )
+          if ( LoggingIncludes ( Debug() ) )
           {
-              *lIt = htonl( *lIt );
+            log ( Notice() , "Big-Endian Hack included" );
+          }
+
+          for ( std::vector<uint32_t>::iterator lIt ( mReply.begin() ) ; lIt != mReply.end() ; ++lIt )
+          {
+            *lIt = htonl ( *lIt );
           }
         }
-        #endif
 
+#endif
 
         if ( mReplyDelay )
         {
@@ -106,28 +155,35 @@ namespace uhal
           mReplyDelay = 0;
           log ( Info() , "Now replying " );
         }
+
+        if ( mReplyHistory.size() == REPLY_HISTORY_DEPTH )
+        {
+          mReplyHistory.erase ( mReplyHistory.begin() );
+        }
+
+        mReplyHistory[ ( base_type::mPacketHeader>>8 ) &0xFFFF ] = mReply;
       }
 
     private:
       void bot()
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::bot();
-        }
-
-        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId ) );
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
+        uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId ) );
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
       }
 
       void ni_read ( const uint32_t& aAddress )
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::ni_read ( aAddress );
-        }
-
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+        uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
 
         for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
         {
@@ -137,13 +193,13 @@ namespace uhal
 
       void read ( const uint32_t& aAddress )
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::read ( aAddress );
-        }
-
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+        uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
 
         for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
         {
@@ -153,12 +209,8 @@ namespace uhal
 
       void ni_write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          std::vector<uint32_t>::const_iterator lIt ( aIt );
-          base_type::ni_write ( aAddress , lIt , aEnd );
-        }
-
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
         uint32_t lAddress ( aAddress );
 
         while ( aIt != aEnd )
@@ -166,24 +218,26 @@ namespace uhal
           mMemory.at ( lAddress & ADDRESSMASK ) = *aIt++;
         }
 
+        uint32_t lExpected;
+
         if ( IPbus_major == 1 )
         {
-          mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId ) );
+          lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId );
         }
         else
         {
-          mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+          lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId );
         }
+
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
       }
 
       void write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          std::vector<uint32_t>::const_iterator lIt ( aIt );
-          base_type::write ( aAddress , lIt , aEnd );
-        }
-
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
         uint32_t lAddress ( aAddress );
 
         while ( aIt != aEnd )
@@ -191,25 +245,31 @@ namespace uhal
           mMemory.at ( lAddress++ & ADDRESSMASK ) = *aIt++;
         }
 
+        uint32_t lExpected;
+
         if ( IPbus_major == 1 )
         {
-          mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId ) );
+          lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId );
         }
         else
         {
-          mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+          lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId );
         }
+
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
       }
 
       void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::rmw_sum ( aAddress , aAddend );
-        }
-
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 1 , base_type::mTransactionId ) );
+        uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 1 , base_type::mTransactionId ) );
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
 
         if ( IPbus_major == 1 )
         {
@@ -227,13 +287,13 @@ namespace uhal
 
       void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::rmw_bits ( aAddress , aAndTerm ,  aOrTerm );
-        }
-
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
         uint32_t lAddress ( aAddress );
-        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 1 , base_type::mTransactionId ) );
+        uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 1 , base_type::mTransactionId ) );
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
 
         if ( IPbus_major == 1 )
         {
@@ -253,20 +313,96 @@ namespace uhal
 
       void unknown_type()
       {
-        log ( Error() , Integer ( base_type::mHeader, IntFmt<hex,fixed>() ) , " is an unknown IPbus header. Throwing." );
-        throw 0;
+        log ( Error() , Integer ( base_type::mHeader, IntFmt<hex,fixed>() ) , " is an unknown IPbus transaction header. Returning error code." );
+        mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+        mReceivedControlPacketHeaderHistory.pop_front();
+        uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId , 1 ) );
+        mReply.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.push_back ( lExpected );
+        mSentControlPacketHeaderHistory.pop_front();
       }
 
-
-      void packet_header ( const uint32_t& aPacketHeader )
+      void control_packet_header ()
       {
         if ( LoggingIncludes ( Debug() ) )
         {
-          base_type::packet_header ( aPacketHeader );
+          base_type::control_packet_header();
         }
 
-        mReply.push_back ( aPacketHeader );
+        mReply.push_back ( base_type::mPacketHeader );
+        mLastHeader = base_type::mPacketHeader;
+        mTrafficHistory.push_back ( 2 );
+        mTrafficHistory.pop_front();
       }
+
+
+      void status_packet_header ( )
+      {
+        if ( LoggingIncludes ( Debug() ) )
+        {
+          base_type::status_packet_header();
+        }
+
+        mReply.push_back ( base_type::mPacketHeader );
+        mReply.push_back ( BUFFER_SIZE * sizeof ( uint32_t ) );
+        mReply.push_back ( REPLY_HISTORY_DEPTH );
+        uint16_t lTemp ( ( ( mLastHeader>>8 ) &0x0000FFFF ) + 1 );
+        mReply.push_back ( ( mLastHeader & 0xFF0000FF ) | ( ( lTemp <<8 ) & 0x00FFFF00 ) );
+        std::deque< uint8_t >::const_iterator lIt ( mTrafficHistory.begin() );
+
+        for ( uint32_t i = 0; i != 4 ; ++i )
+        {
+          uint32_t lTemp ( 0x00000000 );
+
+          for ( uint32_t j = 0; j != 4 ; ++j )
+          {
+            lTemp <<= 8;
+            lTemp |= ( uint32_t ) ( *lIt );
+            lIt++;
+          }
+
+          mReply.push_back ( lTemp );;
+        }
+
+        for ( std::deque< uint32_t >::const_iterator i = mReceivedControlPacketHeaderHistory.begin(); i != mReceivedControlPacketHeaderHistory.end() ; ++i )
+        {
+          mReply.push_back ( *i );
+        }
+
+        for ( std::deque< uint32_t >::const_iterator i = mSentControlPacketHeaderHistory.begin(); i != mSentControlPacketHeaderHistory.end() ; ++i )
+        {
+          mReply.push_back ( *i );
+        }
+
+        mTrafficHistory.push_back ( 3 );
+        mTrafficHistory.pop_front();
+      }
+
+      void resend_packet_header ()
+      {
+        if ( LoggingIncludes ( Debug() ) )
+        {
+          base_type::resend_packet_header();
+        }
+
+        std::map< uint32_t , std::vector< uint32_t > >::iterator lIt = mReplyHistory.find ( ( base_type::mPacketHeader>>8 ) &0xFFFF );
+
+        if ( lIt != mReplyHistory.end() )
+        {
+          mReply = lIt->second;
+        }
+
+        mTrafficHistory.push_back ( 4 );
+        mTrafficHistory.pop_front();
+      }
+
+      void unknown_packet_header()
+      {
+        mTrafficHistory.push_back ( 5 );
+        mTrafficHistory.pop_front();
+      }
+
+
 
     private:
       std::vector< uint32_t > mMemory;
@@ -275,6 +411,16 @@ namespace uhal
     protected:
       std::vector< uint32_t > mReceive;
       std::vector< uint32_t > mReply;
+
+      //IPbus 2.0 and above only
+      std::map< uint32_t , std::vector< uint32_t > > mReplyHistory;
+      uint32_t mLastHeader;
+      std::deque< uint8_t > mTrafficHistory;
+
+      std::deque< uint32_t > mReceivedControlPacketHeaderHistory;
+      std::deque< uint32_t > mSentControlPacketHeaderHistory;
+
+
   };
 
 

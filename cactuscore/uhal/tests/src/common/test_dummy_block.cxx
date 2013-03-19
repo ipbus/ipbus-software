@@ -132,7 +132,6 @@ int main ( int argc,char* argv[] )
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-
   //Memory
   CACTUS_TEST ( block_write_read ( N_4B,connection_file,device_id ) );
   CACTUS_TEST ( block_write_read ( N_1kB,connection_file,device_id ) );

@@ -97,7 +97,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+      static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version
@@ -106,7 +106,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -129,7 +129,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -193,7 +193,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+      static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
       Abstract interface of function to calculate the IPbus header for a particular protocol version
@@ -202,7 +202,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -239,7 +239,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId );
+      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version

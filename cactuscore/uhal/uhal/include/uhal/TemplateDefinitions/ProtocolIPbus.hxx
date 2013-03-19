@@ -93,7 +93,7 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -125,14 +125,14 @@ namespace uhal
         break;
     }
 
-    return ( 0x10000000 | ( ( aTransactionId&0x7ff ) <<17 ) | ( ( aWordCount&0x1ff ) <<8 ) | lType );
+    return ( 0x10000000 | ( ( aTransactionId&0x7ff ) <<17 ) | ( ( aWordCount&0x1ff ) <<8 ) | lType | ( aInfoCode&0x7 ) );
   }
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId ) | 0x00000004 );
+    return ( IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
@@ -176,9 +176,9 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId );
+    return IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
@@ -222,19 +222,17 @@ namespace uhal
 
 
 #ifdef BIG_ENDIAN_HACK
-template< uint8_t IPbus_minor , uint32_t buffer_size >
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 2 , IPbus_minor , buffer_size >::predispatch( )
   {
-    log( Notice() , "Big-Endian Hack included" );
+    log ( Notice() , "Big-Endian Hack included" );
+    uint32_t* lPtr ( reinterpret_cast<uint32_t*> ( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
+    uint32_t lSize ( ( mCurrentBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 );
 
-    uint32_t* lPtr ( reinterpret_cast<uint32_t*>( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
-    uint32_t lSize ( (mCurrentBuffers->sendCounter()  >> 2) - this->getPreambleSize() + 1 );
-
-    for ( uint32_t i(0); i!= lSize ; ++i , ++lPtr )
+    for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
     {
-      *lPtr = htonl( *lPtr );
+      *lPtr = htonl ( *lPtr );
     }
-
   }
 #endif
 
@@ -246,28 +244,28 @@ template< uint8_t IPbus_minor , uint32_t buffer_size >
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-
 #ifdef BIG_ENDIAN_HACK
-  log( Notice() , "Big-Endian Hack included" );
-  uint32_t* lPtr;
-  uint32_t lSize;
-  for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt( aReplyStartIt ) ; lIt != aReplyEndIt ; ++lIt )
-  {
-    lPtr = reinterpret_cast<uint32_t*>( lIt->first );
-    lSize = (lIt->second >> 2);
-    
-    for ( uint32_t i(0); i!= lSize ; ++i , ++lPtr )
+    log ( Notice() , "Big-Endian Hack included" );
+    uint32_t* lPtr;
+    uint32_t lSize;
+
+    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt ( aReplyStartIt ) ; lIt != aReplyEndIt ; ++lIt )
     {
-      *lPtr = ntohl( *lPtr );
+      lPtr = reinterpret_cast<uint32_t*> ( lIt->first );
+      lSize = ( lIt->second >> 2 );
+
+      for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
+      {
+        *lPtr = ntohl ( *lPtr );
+      }
     }
-  }
 
-    lPtr = reinterpret_cast<uint32_t*>( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
-    lSize = (mCurrentBuffers->sendCounter()  >> 2) - this->getPreambleSize() + 1 ;
+    lPtr = reinterpret_cast<uint32_t*> ( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
+    lSize = ( mCurrentBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 ;
 
-    for ( uint32_t i(0); i!= lSize ; ++i , ++lPtr )
+    for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
     {
-      *lPtr = ntohl( *lPtr );
+      *lPtr = ntohl ( *lPtr );
     }
 
 #endif
@@ -287,7 +285,7 @@ template< uint8_t IPbus_minor , uint32_t buffer_size >
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -319,14 +317,14 @@ template< uint8_t IPbus_minor , uint32_t buffer_size >
         return false;
     }
 
-    return ( 0x2000000F | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType );
+    return ( 0x20000000 | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType | ( aInfoCode&0xF ) );
   }
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId ) & 0xFFFFFFF0 );
+    return ( IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
   }
 
 
@@ -365,9 +363,9 @@ template< uint8_t IPbus_minor , uint32_t buffer_size >
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId )
+  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId );
+    return IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
