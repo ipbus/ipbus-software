@@ -68,6 +68,7 @@ namespace uhal
         mReplyDelay ( aReplyDelay ),
         mReceive ( BUFFER_SIZE , 0x00000000 ),
         mReply ( BUFFER_SIZE , 0x00000000 ),
+        mReplyHistory( REPLY_HISTORY_DEPTH , std::make_pair( 0 , mReply ) ),
         mLastPacketHeader(0x200000f0),
         mTrafficHistory ( 16, 0x00 ),
         mReceivedControlPacketHeaderHistory ( 4 , 0x00000000 ),
@@ -119,12 +120,11 @@ namespace uhal
         lEnd = mReceive.begin() + ( aByteCount>>2 );
         base_type::analyze ( lBegin , lEnd );
 
-        if ( mReplyHistory.size() == REPLY_HISTORY_DEPTH )
+        if( base_type::mPacketType == 0 )
         {
-          mReplyHistory.erase ( mReplyHistory.begin() );
+          mReplyHistory.push_back( std::make_pair( base_type::mPacketCounter , mReply ) );
+          mReplyHistory.pop_front();
         }
-
-        mReplyHistory[ ( base_type::mPacketHeader>>8 ) &0xFFFF ] = mReply;
 
         //
         //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -404,6 +404,7 @@ namespace uhal
         mTrafficHistory.pop_front();
       }
 
+
       void resend_packet_header ()
       {
         if ( LoggingIncludes ( Debug() ) )
@@ -411,11 +412,15 @@ namespace uhal
           base_type::resend_packet_header();
         }
 
-        std::map< uint32_t , std::vector< uint32_t > >::iterator lIt = mReplyHistory.find ( ( base_type::mPacketHeader>>8 ) &0xFFFF );
+        std::deque< std::pair< uint32_t , std::vector< uint32_t > > >::iterator lIt = mReplyHistory.begin();
 
-        if ( lIt != mReplyHistory.end() )
+        for( ; lIt!=mReplyHistory.end() ; ++lIt )
         {
-          mReply = lIt->second;
+          if( lIt->first == base_type::mPacketCounter )
+          {
+            mReply = lIt->second;
+            break;
+          }
         }
 
         mTrafficHistory.push_back ( 4 );
@@ -439,7 +444,7 @@ namespace uhal
       std::vector< uint32_t > mReply;
 
       //IPbus 2.0 and above only
-      std::map< uint32_t , std::vector< uint32_t > > mReplyHistory;
+      std::deque< std::pair< uint32_t , std::vector< uint32_t > > > mReplyHistory;
       uint32_t mLastPacketHeader;
       std::deque< uint8_t > mTrafficHistory;
 
