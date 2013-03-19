@@ -4,7 +4,8 @@ PACKAGES = \
 	uhal \
 	tests \
 	pycohal \
-	gui
+	gui \
+	tools
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
 
