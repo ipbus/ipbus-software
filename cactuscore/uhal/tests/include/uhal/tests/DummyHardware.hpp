@@ -68,6 +68,7 @@ namespace uhal
         mReplyDelay ( aReplyDelay ),
         mReceive ( BUFFER_SIZE , 0x00000000 ),
         mReply ( BUFFER_SIZE , 0x00000000 ),
+        mLastPacketHeader(0x200000f0),
         mTrafficHistory ( 16, 0x00 ),
         mReceivedControlPacketHeaderHistory ( 4 , 0x00000000 ),
         mSentControlPacketHeaderHistory ( 4 , 0x00000000 )
@@ -330,7 +331,7 @@ namespace uhal
         }
 
         mReply.push_back ( base_type::mPacketHeader );
-        mLastHeader = base_type::mPacketHeader;
+        mLastPacketHeader = base_type::mPacketHeader;
         mTrafficHistory.push_back ( 2 );
         mTrafficHistory.pop_front();
       }
@@ -346,8 +347,10 @@ namespace uhal
         mReply.push_back ( base_type::mPacketHeader );
         mReply.push_back ( BUFFER_SIZE * sizeof ( uint32_t ) );
         mReply.push_back ( REPLY_HISTORY_DEPTH );
-        uint16_t lTemp ( ( ( mLastHeader>>8 ) &0x0000FFFF ) + 1 );
-        mReply.push_back ( ( mLastHeader & 0xFF0000FF ) | ( ( lTemp <<8 ) & 0x00FFFF00 ) );
+
+        uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
+        mReply.push_back ( ( mLastPacketHeader & 0xFF0000FF ) | ( ( lTemp <<8 ) & 0x00FFFF00 ) );
+
         std::deque< uint8_t >::const_iterator lIt ( mTrafficHistory.begin() );
 
         for ( uint32_t i = 0; i != 4 ; ++i )
@@ -414,7 +417,7 @@ namespace uhal
 
       //IPbus 2.0 and above only
       std::map< uint32_t , std::vector< uint32_t > > mReplyHistory;
-      uint32_t mLastHeader;
+      uint32_t mLastPacketHeader;
       std::deque< uint8_t > mTrafficHistory;
 
       std::deque< uint32_t > mReceivedControlPacketHeaderHistory;
