@@ -46,9 +46,9 @@ if __name__ == '__main__':
         sys.exit(1)
         
     for bus,slaves in m:
-        print "#%s bus address map"
+        print "#%s bus address map" % bus
         print "#slave_num\tslave_id\taddress[hex]\taddress_width[bits]"
         for n,(slave,addr,width) in enumerate(slaves):
-            print "%s\t%s\t%s\t%s" % (n,slave,hex32(addr),width)
+            print "%d\t%s\t%s\t%s" % (n,slave,hex32(addr),width)
 
         print "\n\n"

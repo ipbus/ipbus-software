@@ -28,12 +28,21 @@ def __getWidth(node):
     if __isFIFO(node) or __isRegister(node):
         return 0
     elif __isMemory(node):
-        return int(math.ceil(math.log(n.getSize(),2)))
+        return int(math.ceil(math.log(node.getSize(),2)))
     elif __isModule(node):
         result = 0
-        children = n.getNodes()
-        minaddr = min(n.getNode(id).getAddress() for id in children)
-        maxaddr = min(n.getNode(id).getAddress() + n.getNode(id).getSize() for id in children)
+        children = node.getNodes()
+        minaddr = None
+        maxaddr = None
+        for id in children:
+            if __isSlave(node.getNode(id)):
+                raise Exception("Slave '%s' inside '%s' slave" % (id,node.getId()))
+            addr = node.getNode(id).getAddress()
+            if not minaddr or minaddr>addr:
+                minaddr = addr
+            if not maxaddr or maxaddr<addr:
+                maxaddr = addr
+
         return int(math.ceil(math.log(maxaddr-minaddr,2)))
     
 def __isModule(node):
@@ -58,7 +67,7 @@ def __getChildren(n):
     return n.getNodes("[^.]*")
 
 def hex32(num):
-    return "0x%s"%("00000000%x"%(n&0xffffffff))[-8:]
+    return "0x%s"%("00000000%x"%(num&0xffffffff))[-8:]
 
 
 
@@ -76,8 +85,8 @@ def ipbus_addr_map(fn,verbose=False):
 
     try:
         d = uhal.getDevice("dummy","ipbusudp-2.0://localhost:12345",fn)
-    except e:
-        raise Exception("File '%s' does not exist or has incorrect format")
+    except Exception,e:
+        raise Exception("File '%s' does not exist or has incorrect format" % fn)
         
 
     result = []
@@ -86,37 +95,40 @@ def ipbus_addr_map(fn,verbose=False):
     while (buses):
         bus = buses.pop(0)
         if bus == "__root__":
-            n = d
+            parent = d
         else:
-            n = d.getNode(bus)
+            parent = parent.getNode(bus)
             
-        children = __getChildren(n)
+        children = __getChildren(parent)
         slaves = []
         while (children):
             id = children.pop(0)
-            print id
-            n = d.getNode(id)
-            if __isBus(n):
-                if __isSlave(n):
-                    raise Exception("Node '%s' is tagged as slave and bus at the same time" % i)
-                elif not __isModule(n):
-                    raise Exception("Node '%s' is tagged as bus but it does not have children" % i)
+            child = parent.getNode(id)
+            if __isBus(child):
+                if __isSlave(child):
+                    raise Exception("Node '%s' is tagged as slave and bus at the same time" % id)
+                elif not __isModule(child):
+                    raise Exception("Node '%s' is tagged as bus but it does not have children" % id)
                 else:
                     buses.append(id)
-            elif __isSlave(n):
-                addr = n.getAddress()
+            elif __isSlave(child):
+                addr = child.getAddress()
 
                 #remove duplicates (e.g. masks)
                 if addr in addrs:
+                    if verbose:
+                        print "WARNING: Node '%s' has duplicate address %s. Ignoring slave..." % (id, hex32(addr))
                     continue
-                addrs.insert(addr)
-                width = __getWidth(n)
+                addrs.add(addr)
+                width = __getWidth(child)
 
                 slaves.append((id,addr,width))
                 
-            elif __isModule(n):
-                children += __getChildren(n)
+            elif __isModule(child):
+                children += map(lambda x: "%s.%s" % (id,x),__getChildren(child))
 
+        #sort by address        
+        slaves.sort(lambda x,y: cmp(d.getNode(x[0]).getAddress(),d.getNode(y[0]).getAddress()))
         result.append((bus,slaves))
 
     return result
