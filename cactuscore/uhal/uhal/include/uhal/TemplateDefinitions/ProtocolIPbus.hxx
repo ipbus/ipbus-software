@@ -194,7 +194,13 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   IPbus< 2 , IPbus_minor , buffer_size >::IPbus ( const std::string& aId, const URI& aUri ) :
     IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) ),
-    mPacketCounter ( 1 )
+    mPacketCounter (
+#ifndef DISABLE_PACKET_COUNTER_HACK
+ 1
+#else
+ 0
+#endif
+ )
   {
   }
 
