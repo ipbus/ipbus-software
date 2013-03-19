@@ -119,6 +119,13 @@ namespace uhal
         lEnd = mReceive.begin() + ( aByteCount>>2 );
         base_type::analyze ( lBegin , lEnd );
 
+        if ( mReplyHistory.size() == REPLY_HISTORY_DEPTH )
+        {
+          mReplyHistory.erase ( mReplyHistory.begin() );
+        }
+
+        mReplyHistory[ ( base_type::mPacketHeader>>8 ) &0xFFFF ] = mReply;
+
         //
         //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
         if ( LoggingIncludes ( Debug() ) )
@@ -157,12 +164,6 @@ namespace uhal
           log ( Info() , "Now replying " );
         }
 
-        if ( mReplyHistory.size() == REPLY_HISTORY_DEPTH )
-        {
-          mReplyHistory.erase ( mReplyHistory.begin() );
-        }
-
-        mReplyHistory[ ( base_type::mPacketHeader>>8 ) &0xFFFF ] = mReply;
       }
 
     private:
@@ -330,24 +331,28 @@ namespace uhal
           base_type::control_packet_header();
         }
 
-        uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
-        if (lTemp == 0 )
+        if( base_type::mPacketCounter != 0 )
         {
-          lTemp = 1;
+          uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
+          if (lTemp == 0 )
+          {
+            lTemp = 1;
+          }
+  
+          if( base_type::mPacketCounter != lTemp )
+          {
+            mTrafficHistory.push_back ( 5 );
+            mTrafficHistory.pop_front();
+            return false;
+          }
         }
 
-        if( base_type::mPacketCounter != 0 && base_type::mPacketCounter != lTemp )
-        {
-          mTrafficHistory.push_back ( 5 );
-          mTrafficHistory.pop_front();
-          return false;
-        }else{
-          mReply.push_back ( base_type::mPacketHeader );
-          mLastPacketHeader = base_type::mPacketHeader;
-          mTrafficHistory.push_back ( 2 );
-          mTrafficHistory.pop_front();
-          return true;
-        }
+        mReply.push_back ( base_type::mPacketHeader );
+        mLastPacketHeader = base_type::mPacketHeader;
+        mTrafficHistory.push_back ( 2 );
+        mTrafficHistory.pop_front();
+        return true;
+        
       }
 
 
