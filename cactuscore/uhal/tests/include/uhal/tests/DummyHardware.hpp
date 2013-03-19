@@ -120,7 +120,7 @@ namespace uhal
         lEnd = mReceive.begin() + ( aByteCount>>2 );
         base_type::analyze ( lBegin , lEnd );
 
-        if( base_type::mPacketType == 0 )
+        if( ( base_type::mPacketType == 0 ) && ( mReply.size() != 0 ) )
         {
           mReplyHistory.push_back( std::make_pair( base_type::mPacketCounter , mReply ) );
           mReplyHistory.pop_front();
