@@ -323,17 +323,31 @@ namespace uhal
         mSentControlPacketHeaderHistory.pop_front();
       }
 
-      void control_packet_header ()
+      bool control_packet_header ()
       {
         if ( LoggingIncludes ( Debug() ) )
         {
           base_type::control_packet_header();
         }
 
-        mReply.push_back ( base_type::mPacketHeader );
-        mLastPacketHeader = base_type::mPacketHeader;
-        mTrafficHistory.push_back ( 2 );
-        mTrafficHistory.pop_front();
+        uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
+        if (lTemp == 0 )
+        {
+          lTemp = 1;
+        }
+
+        if( base_type::mPacketCounter != 0 && base_type::mPacketCounter != lTemp )
+        {
+          mTrafficHistory.push_back ( 5 );
+          mTrafficHistory.pop_front();
+          return false;
+        }else{
+          mReply.push_back ( base_type::mPacketHeader );
+          mLastPacketHeader = base_type::mPacketHeader;
+          mTrafficHistory.push_back ( 2 );
+          mTrafficHistory.pop_front();
+          return true;
+        }
       }
 
 

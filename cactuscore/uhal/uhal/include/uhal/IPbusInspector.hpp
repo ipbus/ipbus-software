@@ -102,7 +102,10 @@ namespace uhal
 
             if ( IPbus_major != 1 )
             {
-              control_packet_header ();
+              if( !control_packet_header ( ) )
+              {
+                return false;
+              }
             }
 
             do
@@ -242,9 +245,10 @@ namespace uhal
       }
 
 
-      virtual void control_packet_header ()
+      virtual bool control_packet_header ()
       {
         log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , transaction ID " , Integer ( mTransactionId ) );
+        return true;
       }
 
       virtual void status_packet_header()
@@ -316,7 +320,10 @@ namespace uhal
 
             if ( IPbus_major != 1 )
             {
-              control_packet_header ( );
+              if( !control_packet_header ( ) )
+              {
+                return false;
+              }
             }
 
             do
@@ -437,9 +444,10 @@ namespace uhal
         log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown Transaction Header" );
       }
 
-      virtual void control_packet_header ()
+      virtual bool control_packet_header ()
       {
         log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , transaction ID " , Integer ( mTransactionId ) );
+        return true;
       }
 
       virtual void status_packet_header()
