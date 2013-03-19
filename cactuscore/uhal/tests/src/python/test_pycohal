@@ -12,7 +12,7 @@ Mandatory option:
 from random import randint
 import sys, os, getopt
 import unittest
-import pycohal as uhal
+import uhal
 import time
 
 # USEFUL FUNCTIONS
