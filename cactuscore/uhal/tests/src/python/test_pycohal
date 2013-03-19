@@ -359,14 +359,14 @@ class TestRawClient(unittest.TestCase):
         self.assertEqual( reg.valid(), False)
         self.assertRaises( uhal.NonValidatedMemory, reg.value )
         self.assertRaises( uhal.NonValidatedMemory, int, (reg) )
-        try:
-            reg.value()
-        except uhal.NonValidatedMemory, e:
-            self.assertEqual( e.what, "uhal::exception::NonValidatedMemory")
-        try:
-            reg.value()
-        except uhal.exception, e:
-            self.assertEqual( e.what, "uhal::exception::NonValidatedMemory")
+#        try:
+#            reg.value()
+#        except uhal.NonValidatedMemory, e:
+#            self.assertEqual( e.what, "uhal::exception::NonValidatedMemory")
+#        try:
+#            reg.value()
+#        except uhal.exception, e:
+#            self.assertEqual( e.what, "uhal::exception::NonValidatedMemory")
         self.assertRaises( uhal.exception, reg.value )
         # Dispatch & check value
         client.dispatch()
@@ -498,9 +498,11 @@ class TestMetaInfo(unittest.TestCase):
         """Run meta-info tests for ConnectionManager class."""
         devices_list = self.manager.getDevices()
         self.assertTrue( isinstance(devices_list, list) )
-        self.assertEqual( len(devices_list), 6 )
-        self.assertEqual( devices_list, sorted(['dummy.udp','dummy.docu.udp','dummy.tcp','dummy.docu.tcp','dummy.controlhub','dummy.docu.controlhub']) )
-        self.assertEqual( len(self.manager.getDevices(".*udp.*")), 2 )
+        self.assertEqual( len(devices_list), 12 )
+        self.assertEqual( devices_list, sorted(['dummy.udp','dummy.docu.udp','dummy.udp2','dummy.docu.udp2',
+                                                'dummy.tcp','dummy.docu.tcp','dummy.tcp2','dummy.docu.tcp2',
+                                                'dummy.controlhub','dummy.docu.controlhub', 'dummy.controlhub2', 'dummy.docu.controlhub2']) )
+        self.assertEqual( len(self.manager.getDevices(".*udp.*")), 4 )
 
     def exe_test_Interfaces_metainfo(self, hwId, hwUri):
         """Execute meta-info tests for a particular hw device & associated client interface."""
