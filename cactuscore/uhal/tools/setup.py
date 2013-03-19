@@ -14,5 +14,5 @@ setup(name = 'cactuscore-uhal-tools',
       url = 'http://cactus.web.cern.ch/cactus',
       packages = ['uhal.tools'],
       scripts = ['ipbus_addr_map'],
-      package_data={'uhal.tools': ['etc/uhal/tools/*.xml']},
+      package_data={'uhal.tools': ['test_data/*.xml']},
       )

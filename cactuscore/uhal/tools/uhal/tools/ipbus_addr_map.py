@@ -2,6 +2,7 @@ import pycohal as uhal
 import math
 import sys
 import re
+import unittest
 
 BUS_REGEX = re.compile("(^|[,])\s*bus\s*([,]|$)");
 SLAVE_REGEX = re.compile("(^|[,])\s*slave\s*([,]|$)");
@@ -132,4 +133,15 @@ def ipbus_addr_map(fn,verbose=False):
         result.append((bus,slaves))
 
     return result
-    
+
+class TestSimple(unittest.TestCase):
+    def test_simple(self):
+        m = ipbus_addr_map("uhal/tools/test_data/simple.xml")
+
+        buses = [bus for bus,slaves in m]
+        self.assertTrue("__root__" in buses)
+        self.assertTrue("SUBSYSTEM1" in buses)
+        self.assertTrue("SUBSYSTEM3" in buses)
+
+if __name__ == '__main__':
+    unittest.main()
