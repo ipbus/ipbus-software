@@ -349,6 +349,10 @@ namespace uhal
         mReply.push_back ( REPLY_HISTORY_DEPTH );
 
         uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
+        if (lTemp == 0 )
+        {
+          lTemp = 1;
+        }
         mReply.push_back ( ( mLastPacketHeader & 0xFF0000FF ) | ( ( lTemp <<8 ) & 0x00FFFF00 ) );
 
         std::deque< uint8_t >::const_iterator lIt ( mTrafficHistory.begin() );
