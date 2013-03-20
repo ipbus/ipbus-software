@@ -1,1 +1,2 @@
 include uhal/tools/test_data/*.xml
+include uhal/tools/templates/*.vhd

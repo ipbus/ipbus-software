@@ -1,0 +1,182 @@
+#!/usr/bin/python
+"""
+usage: gen_ipus_addr_decode [options] <uhal_address_table.xml>
+
+The script generates the address select logic in the
+file for the ipbus system.
+
+The script takes an uHAL compliant XML input file and prints out the vhdl module.
+
+Note that full address decoding is not performed (would be very
+inefficient with 32b address space), so slaves will appear at many
+locations.
+
+options:
+   -v, --verbose                            verbose
+   -b <id>, --bus=<id>                      generates the VHDL file for the bus
+                                            number or id <id> (default is 0 or
+                                            "__root__")
+   -t <file>, --template=<file>             uses a different vhdl template file
+                                            (default
+                                            uhal/tools/templates/ipbus_addr_decode.vhd)
+"""
+import getopt
+import sys
+from uhal.tools import ipbus_addr_map
+import time
+
+verbose = False
+
+def v_print(str):
+    global verbose
+    if verbose:
+        print str
+    
+def log_and_exit(str):
+    sys.stderr.write("%s\n" % str)
+    sys.exit(1)
+    
+class BitArray:
+    def __init__(self,value=0):
+        self.length = 32
+        if (value> (1<<self.length)-1):
+            raise Exception("Value '%d' too big. It does not fit in %d bits\n" % (value,self.length))
+        
+        self.bits = [value>>i & 1 for i in xrange(self.length)]
+
+    def __getitem__(self,index):
+        return self.bits[index]
+        
+    def __and__(self,other):
+        if not isinstance(other,BitArray):
+            raise Exception("BitArray.__and__ method requires BitArray")
+
+        result = BitArray()
+        result.bits = [x & y for (x,y) in zip(self.bits,other.bits)]
+        return result
+
+    def __or__(self,other):
+        if not isinstance(other,BitArray):
+            raise Exception("BitArray.__and__ method requires BitArray")
+
+        result = BitArray()
+        result.bits = [x | y for (x,y) in zip(self.bits,other.bits)]
+        return result
+    
+    def __invert__(self):
+        result = BitArray()
+        result.bits = [(x+1) % 2 for x in self.bits]
+        return result
+    
+    def __str__(self):
+        return "".join(map(lambda x: x and "1" or "0",self.bits[::-1]))
+
+    def uint(self):
+        result = 0
+        for i,x in enumerate(self.bits):
+            result += x << i
+            
+        return result
+
+    def hex(self):
+        return "0x%08x" % self.uint()
+    
+def main():    
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "vhb:t:", ["verbose","help","bus=","template="])
+    except getopt.GetoptError, err:
+        print __doc__
+        sys.exit(2)
+
+    bus = 0
+    template_fn = "uhal/tools/templates/ipbus_addr_decode.vhd"
+    for o, a in opts:
+        if o in ("-v", "--verbose"):
+            global verbose
+            verbose = True
+        elif o in ("-h", "--help"):
+            print __doc__
+            sys.exit(0)
+        elif o in ("-b", "--bus"):
+            bus = a
+        elif o in ("-t", "--template"):
+            template_fn = a
+            
+    if len(args) != 1:
+        sys.stderr.write("ERROR: Missing <address_table.xml>\n")
+        print __doc__
+        sys.exit(1)
+
+    #Generate ipbus_addr_map
+    try:
+        m = ipbus_addr_map(args[0],verbose)
+    except Exception,e:
+        log_and_exit("ERROR: %s\n" % str(e))
+
+    #select slaves and bus id either from a number or id
+    if len(m[0]) == 0:
+        slog_and_exit("ERROR: file '%s' does not have any slave defined" % args[0])
+    try:
+        bus = int(bus)
+        if bus < 0 or bus >= len(m):
+            log_and_exit("ERROR: Incorrect bus number '%d', it should be between 0 and %d" % (bus,len(m)))
+            
+        uhal_slaves = m[bus][1]
+        bus = m[bus][0]
+    except ValueError,e:
+        m = dict(((id,addr,width) for (id,addr,width) in m[0][1]))
+        if bus not in m:
+            log_and_exit("ERROR: Incorrect bus id '%s', it should be one of: %s" % (bus,",".join(m.keys())))
+
+        uhal_slaves = m[bus]
+        
+    #retrieve masks and addresses
+    or_prod = BitArray(0x0)
+    and_prod = BitArray(0xffffffff)
+
+    slaves = []
+    for n,(id,addr,width) in enumerate(uhal_slaves):
+        addr_bits = BitArray(addr)
+        mask_bits = BitArray(2**width - 1)
+        v_print("uHAL slave %s,%s,0b%s,0b%s" % (n,id,addr_bits, mask_bits))
+        if (addr_bits & mask_bits).uint() != 0:
+           log_and_exit("ERROR: Non Aligned address 0b%s with respect to address bit mask 0b%s" % (str(addr_bits),str(mask_bits)))
+        
+        masked = addr_bits & ~mask_bits
+        or_prod = or_prod | masked
+        and_prod = and_prod & masked
+        slaves.append((n,id,addr_bits,mask_bits))
+
+    addr_mask = or_prod & ~and_prod
+    v_print("Significant address bits 0b%s" % str(addr_mask))
+
+    #generate vhdl snippet    
+    snippet = "-- START automatically  generated VHDL the %s \n" % time.asctime()
+    for n,id,addr_bits,mask_bits in slaves:
+        mask = addr_mask & ~mask_bits
+        if n == 0:
+            snippet += "\t\tif    "
+        else:
+            snippet += "\t\telsif "
+
+        snippet += "std_match(addr, \""
+        for i in range(32)[::-1]:
+            if not mask[i]:
+                snippet += "-"
+            elif addr_bits[i]:
+                snippet += "1"
+            else:
+                snippet += "0"
+        snippet += "\") then\n"
+            
+        snippet += "\t\t\tsel := " + str(n) + "; -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + addr_mask.hex() + "\n"
+    snippet += "\t\t-- END automatic generated VHDL\n"
+    
+    #print vhdl
+    print open(template_fn, "r").read().replace("--ADDR_TABLE_HERE",snippet)
+    
+if __name__ == '__main__':
+    main()
+
+    
+        

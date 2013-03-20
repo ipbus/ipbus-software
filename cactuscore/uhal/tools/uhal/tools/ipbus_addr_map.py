@@ -68,7 +68,7 @@ def __getChildren(n):
     return n.getNodes("[^.]*")
 
 def hex32(num):
-    return "0x%s"%("00000000%x"%(num&0xffffffff))[-8:]
+    return "0x%08x" % num
 
 
 

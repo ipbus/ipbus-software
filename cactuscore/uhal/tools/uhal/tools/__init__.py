@@ -1,1 +1,1 @@
-import uhal.tools.ipbus_addr_map
+from uhal.tools.ipbus_addr_map import *

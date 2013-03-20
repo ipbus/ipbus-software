@@ -18,7 +18,7 @@ from uhal.tools.ipbus_addr_map import ipbus_addr_map,hex32
 import getopt
 import sys
 
-if __name__ == '__main__':
+def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "vh", ["verbose","help"])
     except getopt.GetoptError, err:
@@ -52,3 +52,6 @@ if __name__ == '__main__':
             print "%d\t%s\t%s\t%s" % (n,slave,hex32(addr),width)
 
         print "\n\n"
+    
+if __name__ == '__main__':
+    main()
