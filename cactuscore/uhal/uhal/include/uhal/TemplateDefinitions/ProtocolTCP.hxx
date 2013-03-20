@@ -124,13 +124,52 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::DispatchWorker::dispatch ( Buffers* aBuffers )
   {
-    // log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTCP.getTimeoutPeriod() ) );
-    if ( ! mSocket->is_open() )
+    try
     {
-      log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
+      // log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTCP.getTimeoutPeriod() ) );
+      if ( ! mSocket->is_open() )
+      {
+        log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
+        mDeadlineTimer.expires_from_now ( mTCP.getRawTimeoutPeriod() );
+        mErrorCode = boost::asio::error::would_block;
+        boost::asio::async_connect ( *mSocket , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+        do
+        {
+          mIOservice->run_one();
+        }
+        while ( mErrorCode == boost::asio::error::would_block );
+
+        if ( mErrorCode )
+        {
+          if ( mSocket.unique() )
+          {
+            mSocket->close();
+          }
+
+          if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+          {
+            log ( Error() , "ASIO reported a Timeout in TCP callback" );
+            throw exception::ErrorInTcpCallback();
+          }
+
+          log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+          throw exception::ErrorInTcpCallback();
+        }
+
+        mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
+        log ( Info() , "TCP connection succeeded" );
+      }
+
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      // Send data
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      std::vector< boost::asio::const_buffer > lAsioSendBuffer;
+      lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
+      log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
       mDeadlineTimer.expires_from_now ( mTCP.getRawTimeoutPeriod() );
       mErrorCode = boost::asio::error::would_block;
-      boost::asio::async_connect ( *mSocket , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+      boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
 
       do
       {
@@ -138,7 +177,28 @@ namespace uhal
       }
       while ( mErrorCode == boost::asio::error::would_block );
 
-      if ( mErrorCode )
+      /*if ( mErrorCode )
+      {
+      log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+      throw exception::ErrorInTcpCallback();
+      }*/
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      // Read back replies
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
+      lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
+      log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
+      mDeadlineTimer.expires_from_now ( mTCP.getRawTimeoutPeriod() );
+      mErrorCode = boost::asio::error::would_block;
+      boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+      do
+      {
+        mIOservice->run_one();
+      }
+      while ( mErrorCode == boost::asio::error::would_block );
+
+      if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
       {
         if ( mSocket.unique() )
         {
@@ -151,96 +211,46 @@ namespace uhal
           throw exception::ErrorInTcpCallback();
         }
 
-        log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+        log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
+        mTCP.validate ( );
         throw exception::ErrorInTcpCallback();
       }
 
-      mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-      log ( Info() , "TCP connection succeeded" );
-    }
+      std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
+      uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Send data
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    std::vector< boost::asio::const_buffer > lAsioSendBuffer;
-    lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-    log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-    mDeadlineTimer.expires_from_now ( mTCP.getRawTimeoutPeriod() );
-    mErrorCode = boost::asio::error::would_block;
-    boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-
-    do
-    {
-      mIOservice->run_one();
-    }
-    while ( mErrorCode == boost::asio::error::would_block );
-
-    /*if ( mErrorCode )
-    {
-    log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-    throw exception::ErrorInTcpCallback();
-    }*/
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Read back replies
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-    lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
-    log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
-    mDeadlineTimer.expires_from_now ( mTCP.getRawTimeoutPeriod() );
-    mErrorCode = boost::asio::error::would_block;
-    boost::asio::async_read ( *mSocket , lAsioReplyBuffer ,  boost::asio::transfer_all(), boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-
-    do
-    {
-      mIOservice->run_one();
-    }
-    while ( mErrorCode == boost::asio::error::would_block );
-
-    if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
-    {
-      if ( mSocket.unique() )
+      for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
       {
-        mSocket->close();
+        memcpy ( lIt->first, lReplyBuf, lIt->second );
+        lReplyBuf += lIt->second;
       }
 
-      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+      /*
+      uint32_t lCounter(0);
+      for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
       {
-        log ( Error() , "ASIO reported a Timeout in TCP callback" );
-        throw exception::ErrorInTcpCallback();
+      uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
+      uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
+
+      for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
+      {
+      log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
+      }
+      }
+      */
+
+      if ( !mTCP.validate () )
+      {
+        log ( Error() , "Validation function reported an error!" );
+        throw exception::ValidationError ();
       }
 
-      log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
-      mTCP.validate ( );
-      throw exception::ErrorInTcpCallback();
+      //log ( Debug() , ThisLocation() );
     }
-
-    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
-    uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
-
-    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    catch ( const std::exception& aExc )
     {
-      memcpy ( lIt->first, lReplyBuf, lIt->second );
-      lReplyBuf += lIt->second;
-    }
-
-    /*
-    uint32_t lCounter(0);
-    for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
-    {
-    uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
-    uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
-
-    for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
-    {
-    log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
-    }
-    }
-    */
-
-    if ( !mTCP.validate () )
-    {
-      log ( Error() , "Validation function reported an error!" );
-      throw exception::ValidationError ();
+      mTCP.dispatchExceptionHandler();
+      throw aExc;
     }
   }
 

@@ -317,7 +317,9 @@ namespace uhal
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt ) = 0;
 
-    private:
+      virtual void dispatchExceptionHandler();
+
+    protected:
       //! A MutEx lock used to make sure the access functions are thread safe
       boost::mutex mMutex;
 

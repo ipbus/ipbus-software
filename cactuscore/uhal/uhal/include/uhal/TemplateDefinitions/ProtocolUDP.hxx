@@ -129,113 +129,121 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::DispatchWorker::dispatch ( Buffers* aBuffers )
   {
-    if ( ! mSocket->is_open() )
+    try
     {
-      log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
-      mSocket = boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) );
-      log ( Info() , "UDP socket created successfully." );
-    }
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Send data
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    std::vector< boost::asio::const_buffer > lAsioSendBuffer;
-    lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-    log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-    mDeadlineTimer.expires_from_now ( mUDP.getRawTimeoutPeriod() );
-    mErrorCode = boost::asio::error::would_block;
-    mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-    /*
-        HostToTargetInspector< 2 , 0 > lH2TInspector;
-        std::vector<uint32_t>::const_iterator lBegin ( ( uint32_t* ) ( aBuffers->getSendBuffer() ) );
-        std::vector<uint32_t>::const_iterator lEnd ( ( uint32_t* ) ( aBuffers->getSendBuffer() +aBuffers->sendCounter() ) );
-        lH2TInspector.analyze ( lBegin , lEnd );
-    */
-
-    do
-    {
-      mIOservice->run_one();
-    }
-    while ( mErrorCode == boost::asio::error::would_block );
-
-    /*if ( mErrorCode )
-    {
-    log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
-    throw exception::ErrorInUdpCallback();
-    }*/
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Read back replies
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-    lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
-    log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
-    boost::asio::ip::udp::endpoint lEndpoint;
-    mDeadlineTimer.expires_from_now ( mUDP.getRawTimeoutPeriod() );
-    mErrorCode = boost::asio::error::would_block;
-    mSocket->async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
-
-    do
-    {
-      mIOservice->run_one();
-    }
-    while ( mErrorCode == boost::asio::error::would_block );
-
-    if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
-    {
-      if ( mSocket.unique() )
+      if ( ! mSocket->is_open() )
       {
-        mSocket->close();
+        log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
+        mSocket = boost::shared_ptr< boost::asio::ip::udp::socket > ( new boost::asio::ip::udp::socket ( *mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ) );
+        log ( Info() , "UDP socket created successfully." );
       }
 
-      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      // Send data
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      std::vector< boost::asio::const_buffer > lAsioSendBuffer;
+      lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
+      log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+      mDeadlineTimer.expires_from_now ( mUDP.getRawTimeoutPeriod() );
+      mErrorCode = boost::asio::error::would_block;
+      mSocket->async_send_to ( lAsioSendBuffer , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+      /*
+          HostToTargetInspector< 2 , 0 > lH2TInspector;
+          std::vector<uint32_t>::const_iterator lBegin ( ( uint32_t* ) ( aBuffers->getSendBuffer() ) );
+          std::vector<uint32_t>::const_iterator lEnd ( ( uint32_t* ) ( aBuffers->getSendBuffer() +aBuffers->sendCounter() ) );
+          lH2TInspector.analyze ( lBegin , lEnd );
+      */
+
+      do
       {
-        log ( Error() , "ASIO reported a Timeout in UDP callback" );
+        mIOservice->run_one();
+      }
+      while ( mErrorCode == boost::asio::error::would_block );
+
+      /*if ( mErrorCode )
+      {
+      log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+      throw exception::ErrorInUdpCallback();
+      }*/
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      // Read back replies
+      // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
+      lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
+      log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
+      boost::asio::ip::udp::endpoint lEndpoint;
+      mDeadlineTimer.expires_from_now ( mUDP.getRawTimeoutPeriod() );
+      mErrorCode = boost::asio::error::would_block;
+      mSocket->async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+
+      do
+      {
+        mIOservice->run_one();
+      }
+      while ( mErrorCode == boost::asio::error::would_block );
+
+      if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
+      {
+        if ( mSocket.unique() )
+        {
+          mSocket->close();
+        }
+
+        if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+        {
+          log ( Error() , "ASIO reported a Timeout in UDP callback" );
+          throw exception::ErrorInUdpCallback();
+        }
+
+        log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
+        mUDP.validate();
         throw exception::ErrorInUdpCallback();
       }
 
-      log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
-      mUDP.validate();
-      throw exception::ErrorInUdpCallback();
+      /*
+          TargetToHostInspector< 2 , 0 > lT2HInspector;
+          std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
+          std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
+          lT2HInspector.analyze ( lBegin2 , lEnd2 );
+      */
+      std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
+      uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
+
+      for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+      {
+        memcpy ( lIt->first, lReplyBuf, lIt->second );
+        //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( lIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( lIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( lIt->second ) );
+        lReplyBuf += lIt->second;
+      }
+
+      /*
+      uint32_t lCounter(0);
+      for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
+      {
+      uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
+      uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
+
+      for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
+      {
+      log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
+      }
+      }
+      */
+      //log ( Debug() , ThisLocation() );
+
+      if ( !mUDP.validate() )
+      {
+        log ( Error() , "Validation function reported an error!" );
+        throw exception::ValidationError ();
+      }
+
+      //log ( Debug() , ThisLocation() );
     }
-
-    /*
-        TargetToHostInspector< 2 , 0 > lT2HInspector;
-        std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
-        std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
-        lT2HInspector.analyze ( lBegin2 , lEnd2 );
-    */
-    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
-    uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
-
-    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    catch ( const std::exception& aExc )
     {
-      memcpy ( lIt->first, lReplyBuf, lIt->second );
-      //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( lIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( lIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( lIt->second ) );
-      lReplyBuf += lIt->second;
+      mUDP.dispatchExceptionHandler();
+      throw aExc;
     }
-
-    /*
-    uint32_t lCounter(0);
-    for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
-    {
-    uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
-    uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
-
-    for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
-    {
-    log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
-    }
-    }
-    */
-    //log ( Debug() , ThisLocation() );
-
-    if ( !mUDP.validate() )
-    {
-      log ( Error() , "Validation function reported an error!" );
-      throw exception::ValidationError ();
-    }
-
-    //log ( Debug() , ThisLocation() );
   }
 
 

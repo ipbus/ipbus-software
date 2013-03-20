@@ -251,6 +251,14 @@ namespace uhal
   }
 
 
+  void ClientInterface::dispatchExceptionHandler()
+  {
+    mCurrentBuffers->clear();
+    this->preamble();
+  }
+
+
+
   std::pair < ValHeader , _ValHeader_* > ClientInterface::CreateValHeader()
   {
     ValHeader lReply;

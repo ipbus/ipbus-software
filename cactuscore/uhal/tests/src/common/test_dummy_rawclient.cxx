@@ -131,11 +131,35 @@ void mem_rmw_sum ( const std::string& connection, const std::string& id )
   ClientInterface* c = &hw.getClient();
   uint32_t total = 0;
   std::vector<uint32_t> xx;
+  bool IPbus1_3;
+
+  //IPBus 1.3 bug on RMW: https://svnweb.cern.ch/trac/cactus/ticket/179
+  if ( hw.uri().find ( "ipbusudp-1.3://" ) != -1 ||
+       hw.uri().find ( "ipbustcp-1.3://" ) != -1 ||
+       hw.uri().find ( "chtcp-1.3://" ) != -1 )
+  {
+    IPbus1_3=true;
+  }
+  else
+  {
+    IPbus1_3=false;
+  }
+
+  uint32_t x ( 0x00000000 );
 
   for ( size_t i=0; i!= N; ++i )
   {
-    uint32_t x = static_cast<uint32_t> ( rand() );
-    total += x;
+    if ( !IPbus1_3 )
+    {
+      total += x;
+      x = static_cast<uint32_t> ( rand() );
+    }
+    else
+    {
+      x = static_cast<uint32_t> ( rand() );
+      total += x;
+    }
+
     xx.push_back ( x );
   }
 

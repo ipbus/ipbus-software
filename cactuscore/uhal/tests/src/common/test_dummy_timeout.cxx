@@ -47,7 +47,7 @@ void check_timeout ( const std::string& connection, const std::string& id, int s
   ConnectionManager manager ( connection );
   HwInterface hw = manager.getDevice ( id );
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
-  CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::exception );
+  CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , std::exception );
   std::cout << "Sleeping for " << sleepAfterFirstDispatch << " seconds to allow DummyHardware to clear itself" << std::endl;
   sleep ( sleepAfterFirstDispatch );
   // Check we can continue as normal without further exceptions.
