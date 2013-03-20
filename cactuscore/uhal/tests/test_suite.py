@@ -27,7 +27,7 @@ try:
   CONF.environ['PATH'] += ":"+PATH
 
   for section,cmds in CONF.COMMANDS:
-    if not "TEST IPBUS 2" in section:
+    if not "TEST IPBUS" in section:
       print "Skipping section:" , section
     else:
       print "Entering section:" , section
