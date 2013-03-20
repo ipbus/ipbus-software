@@ -205,11 +205,47 @@ def get_commands(conn_file):
                "sudo controlhub_stop"]
                 ]]
 
+    cmds += [["TEST IPBUS2.0 CONTROLHUB with packet loss",
+              [# Setup
+               "sudo /sbin/tc -s qdisc ls dev lo",
+               "sudo /sbin/tc qdisc del dev lo root",
+               "sudo /sbin/tc qdisc add dev lo root netem loss 0.2%",
+               "sudo /sbin/tc -s qdisc ls dev lo",
+               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "sudo controlhub_start",
+               "sudo controlhub_status",
+               "controlhub_stats",
+               # Main tests
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "test_dummy_single.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub2" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
+               # Clean up
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "controlhub_stats",
+               "sudo controlhub_stop",
+               "sudo /sbin/tc qdisc del dev lo root",
+               "sudo /sbin/tc -s qdisc ls dev lo"]
+                ]]
+
     cmds += [["TEST uHALGUI",
               ["python -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
         ]]
 
     return cmds
+
+
+def get_sections():
+    return [section for section, cmds in get_commands("")]
 
 
 def run_command(cmd, verbose=True):
@@ -235,49 +271,36 @@ def run_command(cmd, verbose=True):
 if __name__=="__main__":
     # Parse options 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hvlc:", ["help"])
+        opts, args = getopt.getopt(sys.argv[1:], "hvls:c:", ["help"])
     except getopt.GetoptError, err:
         print __doc__
         sys.exit(2)
 
     verbose = False
-    conn_file = "/opt/cactus/etc/uhal/tests.dummy_connections.xml"
+    conn_file = "/opt/cactus/etc/uhal/tests/dummy_connections.xml"
+    section_search_str = None
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
             print __doc__
+            print "The sections in this suite are:"
+            for s in get_sections():
+                print "  ", s
             sys.exit(0)
         elif opt == "-v":
             verbose = True
         elif opt == "-c":
             conn_file = value
-    
-    # Generate list of ipbusX.Y, transport pairs to run tests for
-    sections_to_run = []
-    ipbus_args      = []
-    transport_args  = []
-    for a in args:
-        a = a.lower()
-        if len(a.split(":")) == 2:
-            sections_to_run += [tuple(a.split(":",1))]
-        elif a.startswith("ipbus"):
-            ipbus_args += [a]
-        else:
-            transport_args += [a]
-
-    if ipbus_args == [] and (transport_args!=[] or sections_to_run==[]):
-        ipbus_args = ["ipbus1.3", "ipbus2.0"]
-    if transport_args == []:
-        transport_args = ["udp", "tcp", "controlhub"]
-
-    for i in ipbus_args:
-        for j in transport_args:
-            sections_to_run += [(i, j)]
+        elif opt == "-s":
+            section_search_str = value
 
     print "Parsed options are:"
     print "   verbose   :",  verbose
     print "   conn_file :",  conn_file
-    print "   sections  :",  sections_to_run 
+    if section_search_str is None:
+        print "All sections will be run"
+    else:
+        print 'Only sections whose names contain "'+section_search_str+'" will be run'
 
     print
     print "Environment variables ..."
@@ -286,10 +309,10 @@ if __name__=="__main__":
 
     # Run the commands
     for section_name, cmds in get_commands(conn_file):
-        skip_section = True
-        for xx in sections_to_run:
-            if min([section_name.lower().count(x) for x in xx])!=0:
-                skip_section = False
+        if section_search_str is None:
+           skip_section = False
+        else:
+           skip_section = not (section_search_str.lower() in section_name.lower())
 
         print
         print "======================================================================================================================="
@@ -299,7 +322,7 @@ if __name__=="__main__":
             continue
         else:
             print " Entering section:", section_name 
- 
+
         for cmd in cmds:
             print
             if verbose:
@@ -313,7 +336,4 @@ if __name__=="__main__":
             else:
                 tmp = "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
             print tmp
-
-            if cmd.count("controlhub_stop"):
-                 time.sleep(5)
 
