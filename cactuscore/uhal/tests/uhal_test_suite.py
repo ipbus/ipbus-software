@@ -1,20 +1,23 @@
 #!/bin/env python
 """
-Usage: test_uhal.py [-v] [-l] [-c <path to xml connections file>] [tests to run]
-This script runs all of the uHAL tests (either using installed system or using checked-out source code)
+Usage: uhal_test_suite.py [-v] [-c <path to xml connections file>] [-s <search string for sections to run>]
+
+This script runs all of the IPbus/uHAL tests (either on an installed system or using checked-out source code).
+The tests for different IPbus versions / different uHAL components are separated into different sections.
 
 All options/arguments are optional:
-   -v    : Print all output of tests (if not given, only the results summary for each test command is printed)
-   -l    : Only list commands (don't run them)
-   -c /path/to/dummy_connections.xml  : Full path to 'etc/uhal/tests' directory
+   -v                          : Print all output of tests (if omitted, only the results summary for each test command is printed)
+   -c /path/to/dummy_conns.xml : Full path to dummy_connections.xml (without file:// prefix)
+   -s search_string            : If specified, only sections that contain this string will be run (case-insenstive search).
+                                 Otherwise, all sections will be run (see section list at end).
 
 E.g:
   # Limited output of all tests on installed system
-  ./test_uhal.py
-  # Full output of IPbus 1.3 UDP & ControlHub tests on developer source code
-  ./test_uhal.py -v -c /path/to/dummy_connections.xml ipbus1.3:udp ipbus1.3:controlhub
+  ./uhal_test_suite.py
+  # Full output of IPbus 1.3 tests on developer source code
+  ./uhal_test_suite.py -v -c /path/to/dummy_connections.xml -s 1.3
 
-N.B: LD_LIBRARY_PATH and PATH env variables both have to be correctly set before running the script.
+N.B: All env variables have to be correctly set before running the script.
 """
 
 from os.path import join
@@ -35,10 +38,10 @@ def get_commands(conn_file):
               [#uhal.tools.ipbus_addr_map
                "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\"",
                # SERVER NOT REACHABLE TEST
-               "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
                # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
-               "test_dummy_timeout.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_timeout.exe -c %s -d dummy.udp" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
@@ -46,15 +49,15 @@ def get_commands(conn_file):
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
-               "test_dummy_single.exe -c " + conn_file + " -d dummy.udp",
-               "test_dummy_block.exe -c " + conn_file + " -d dummy.udp",
-               "test_dummy_docu_examples.exe -c " + conn_file + " -d dummy.docu.udp",
-               "test_dummy_check_permissions.exe -c " + conn_file + " -d dummy.udp",
-               "test_dummy_hierarchy.exe -c " + conn_file + " -d dummy.udp",
-               "test_dummy_multithreaded.exe -c " + conn_file + " -d dummy.udp",
-               "test_dummy_metainfo.exe -c " + conn_file + " -d dummy.udp",
-               "test_dummy_navigation.exe -c " + conn_file + " -d dummy.udp",
-               "test_dummy_rawclient.exe -c " + conn_file + " -d dummy.udp",
+               "test_dummy_single.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.udp" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
@@ -122,10 +125,10 @@ def get_commands(conn_file):
               [#uhal.tools.ipbus_addr_map
                "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\"",
                # SERVER NOT REACHABLE TEST
-               "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_nonreachable.exe -c %s -d dummy.udp2" % (conn_file),
                # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
-               "test_dummy_timeout.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_timeout.exe -c %s -d dummy.udp2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
@@ -133,15 +136,16 @@ def get_commands(conn_file):
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
-               "test_dummy_single.exe -c " + conn_file + " -d dummy.udp2",
-               "test_dummy_block.exe -c " + conn_file + " -d dummy.udp2",
-               "test_dummy_docu_examples.exe -c " + conn_file + " -d dummy.docu.udp2",
-               "test_dummy_check_permissions.exe -c " + conn_file + " -d dummy.udp2",
-               "test_dummy_hierarchy.exe -c " + conn_file + " -d dummy.udp2",
-               "test_dummy_multithreaded.exe -c " + conn_file + " -d dummy.udp2",
-               "test_dummy_metainfo.exe -c " + conn_file + " -d dummy.udp2",
-               "test_dummy_navigation.exe -c " + conn_file + " -d dummy.udp2",
-               "test_dummy_rawclient.exe -c " + conn_file + " -d dummy.udp2",
+               "test_dummy_single.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.udp2" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_random.exe -c %s -d dummy.udp2 -t 300" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
@@ -167,6 +171,7 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
+               "test_random.exe -c %s -d dummy.tcp2 -t 300" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
@@ -201,6 +206,7 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_random.exe -c %s -d dummy.controlhub2 -t 300" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "sudo controlhub_stop"]
                 ]]
@@ -229,9 +235,11 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_random.exe -c %s -d dummy.controlhub2 -t 300" % (conn_file),
                # Clean up
                "pkill -f \"DummyHardwareUdp.exe\"",
                "controlhub_stats",
+               "cat /var/log/controlhub.log",
                "sudo controlhub_stop",
                "sudo /sbin/tc qdisc del dev lo root",
                "sudo /sbin/tc -s qdisc ls dev lo"]
@@ -293,6 +301,11 @@ if __name__=="__main__":
             conn_file = value
         elif opt == "-s":
             section_search_str = value
+
+    if len(args) != 0:
+        print "Incorrect usage!"
+        print __doc__
+        sys.exit(1)
 
     print "Parsed options are:"
     print "   verbose   :",  verbose
