@@ -31,7 +31,7 @@ def get_commands(conn_file):
         conn_file = "file://" + conn_file
 
     cmds = []
-    cmds += [["TEST IPBUS1.3 UDP"
+    cmds += [["TEST IPBUS1.3 UDP",
               [#uhal.tools.ipbus_addr_map
                "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\"",
                # SERVER NOT REACHABLE TEST
