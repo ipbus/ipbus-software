@@ -41,7 +41,7 @@
 using namespace uhal;
 
 static const uint32_t RegisterOffset = 0x00001000;
-static const uint32_t RegisterSpace  = 0x00001000;
+static const uint32_t RegisterSpace  = 1000;
 static const uint32_t MaxSize        = std::min ( static_cast<uint32_t> ( 10000 ), RegisterSpace );
 
 
@@ -167,6 +167,11 @@ int main ( int argc, char* argv[] )
       lAddrIdx = ( rand() % RegisterSpace );
       lAddress = RegisterOffset + lAddrIdx;
 
+      //log( Notice() , "Value at 0x16EC should be : ", Integer( lRegisters.at(0x16EC - RegisterOffset), IntFmt<hex,fixed>() ) );
+      //ValWord<uint32_t> tmpValue = c->read( 0x16EC );
+      //c->dispatch();
+      //log( Notice() , "Value at 0x16EC from read is : ", Integer( tmpValue.value(), IntFmt<hex,fixed>() ) );
+
       switch ( lType )
       {
         case 0:
@@ -244,7 +249,7 @@ int main ( int argc, char* argv[] )
             lAddress = RegisterOffset + lAddrIdx;
           }
 
-          log ( Notice() , "Incrementing Write, depth ", Integer ( lSize ), " @ ", Integer ( lAddress, IntFmt<hex,fixed>() ) );
+          log ( Notice() , "Incrementing Write, depth ", Integer ( lSize ), " @ ", Integer ( lAddress, IntFmt<hex,fixed>() ), " addrIdx=", Integer( lAddrIdx, IntFmt<hex,fixed>() ) );
           lIt1 = lRandom.begin() +lPosition ;
           lIt2 = lIt1 + lSize;
           lData.assign ( lIt1 , lIt2 );
@@ -289,8 +294,8 @@ int main ( int argc, char* argv[] )
           break;
         case 5:
           //rmw_sum
-          log ( Notice() , "Read-Modify-Write sum @ ", Integer ( lAddress, IntFmt<hex,fixed>() ) );
           lTemp1 = rand();
+          log ( Notice() , "Read-Modify-Write sum @ ", Integer ( lAddress, IntFmt<hex,fixed>() ), " (Addend=", Integer( lTemp1, IntFmt<hex,fixed>() ), ")" );
           lValWord = c->rmw_sum ( lAddress, lTemp1 );
           c->dispatch();
           lIt1 = lRegisters.begin() + lAddrIdx;

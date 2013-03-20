@@ -503,6 +503,9 @@ class TestMetaInfo(unittest.TestCase):
                                                 'dummy.tcp','dummy.docu.tcp','dummy.tcp2','dummy.docu.tcp2',
                                                 'dummy.controlhub','dummy.docu.controlhub', 'dummy.controlhub2', 'dummy.docu.controlhub2']) )
         self.assertEqual( len(self.manager.getDevices(".*udp.*")), 4 )
+        # Check for throw when try to create ConnectionManager from non-existant file
+        self.assertRaises( uhal.exception, uhal.ConnectionManager, ("some_bad_invalid_string") )
+        self.assertRaises( uhal.exception, uhal.ConnectionManager, ("file://a_nonexistant_conn_file.xml") )
 
     def exe_test_Interfaces_metainfo(self, hwId, hwUri):
         """Execute meta-info tests for a particular hw device & associated client interface."""
@@ -533,6 +536,9 @@ class TestMetaInfo(unittest.TestCase):
         self.exe_test_Interfaces_metainfo("dummy.docu.tcp",        "ipbustcp-1.3://localhost:50002")
         self.exe_test_Interfaces_metainfo("dummy.controlhub",      "chtcp-1.3://localhost:10203?target=localhost:50001")
         self.exe_test_Interfaces_metainfo("dummy.docu.controlhub", "chtcp-1.3://localhost:10203?target=localhost:50001")
+        #Test for throw when create HwInterface object from invalid address table string
+        self.assertRaises( uhal.exception, uhal.getDevice, "id0", "ipbusudp-1.3://localhost:12345", "file://a_non_existant_address_table.xml")
+        self.assertRaises( uhal.exception, uhal.getDevice, "id1", "ipbusudp-1.3://localhost:23456", "invalid_format.xml")
 
     def exe_test_node_metainfo(self, deviceId, longId, address, ownId, permission, description, size, mask, mode, tags):
         """Execute meta-info tests for a particular node."""
