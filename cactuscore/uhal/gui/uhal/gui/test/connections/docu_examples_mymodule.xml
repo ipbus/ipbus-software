@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- Used as part of the "Multiple Modules with Identical Structure" documentation example -->
+<node id="TOP">
+  <node id="A1" address="0x00000001" />
+  <node id="A2" address="0x00000002" />
+  <node id="A3" address="0x00000003" />
+  <node id="A4" address="0x00000004" />
+</node>
+
