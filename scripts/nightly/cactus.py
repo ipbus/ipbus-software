@@ -218,13 +218,11 @@ COMMANDS += [["TEST IPBUS 1.3",
                #PYCOHAL TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
                "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
-               "pkill -f \"DummyHardwareUdp.exe\"",
-               #uHALGUI TESTS
-               "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]
+               "pkill -f \"DummyHardwareUdp.exe\""]
               ]]
 
 COMMANDS += [["TEST IPBUS 1.3 - uhal_test_suite.py",
-              ["uhal_test_suite.py -v -c /opt/cactus/etc/uhal/tests/dummy_connections.xml ipbus1.3"]
+              ["uhal_test_suite.py -v -s 1.3"]
             ]]
 
 COMMANDS += [["TEST IPBUS 2.0",
@@ -299,14 +297,17 @@ COMMANDS += [["TEST IPBUS 2.0",
              "test_dummy_metainfo.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
              "test_dummy_navigation.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
              "test_dummy_rawclient.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -d dummy.tcp2",
-             "pkill -f \"DummyHardwareTcp.exe\"",
-             #PYCOHAL TESTS
-             "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-             "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
-             "pkill -f \"DummyHardwareUdp.exe\"",
-             #uHALGUI TESTS
-              "cd /opt/cactus/bin/uhal/gui; python testuhalgui.exe"]
+             "pkill -f \"DummyHardwareTcp.exe\""]
               ]]
+
+COMMANDS += [["TEST IPBUS 2.0 - uhal_test_suite.py",
+              ["uhal_test_suite.py -v -s 2.0"]
+            ]]
+
+COMMANDS += [["TEST uHAL GUI",
+              ["uhal_test_suite.py -v -s gui"]
+            ]]
+
 
 COMMANDS += [["TEST TRIGGER SUPERVISOR",             
               ["sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
