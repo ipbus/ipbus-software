@@ -31,15 +31,17 @@
 
 #include "uhal/uhal.hpp"
 
-#include <vector>
+#include <algorithm>
 #include <iostream>
+#include <vector>
 
 #include "uhal/tests/tools.hpp"
 
 using namespace uhal;
 
-static const uint32_t RegisterSpace = 0x00100000;
-
+static const uint32_t RegisterOffset = 0x00001000;
+static const uint32_t RegisterSpace  = 0x00001000;
+static const uint32_t MaxSize        = std::min(static_cast<uint32_t>(10000), RegisterSpace);
 
 int main ( int argc, char* argv[] )
 {
@@ -82,7 +84,7 @@ int main ( int argc, char* argv[] )
 
   std::vector< uint32_t > lRegisters ( RegisterSpace , 0x00000000 );
   uint32_t lType;
-  uint32_t lAddress;
+  uint32_t lAddress, lAddrIdx;
   uint32_t lSize , lPosition;
   uint32_t lTemp1, lTemp2;
   ValWord< uint32_t > lValWord;
@@ -94,17 +96,18 @@ int main ( int argc, char* argv[] )
   while ( true )
   {
     lType = ( rand() % 6 );
-    lAddress = ( rand() % RegisterSpace );
+    lAddrIdx = ( rand() % RegisterSpace );
+    lAddress = RegisterOffset + lAddrIdx;
 
     switch ( lType )
     {
       case 0:
         //ni_read
-        log ( Notice() , "Non-Incrementing Read" );
-        lSize = ( rand() % 10000 ) +1;
+        lSize = ( rand() % MaxSize ) + 1;
+        log ( Notice() , "Non-Incrementing Read, depth ", Integer ( lSize, IntFmt<hex,fixed>() ), " @ ", Integer ( lAddress, IntFmt<hex,fixed>()) );
         lValVector = c->readBlock ( lAddress, lSize, defs::NON_INCREMENTAL );
         c->dispatch();
-        lIt1 = lRegisters.begin() + lAddress;
+        lIt1 = lRegisters.begin() + lAddrIdx;
         lValIt = lValVector.begin();
 
         for ( ; lValIt!=lValVector.end(); ++lValIt )
@@ -119,17 +122,18 @@ int main ( int argc, char* argv[] )
         break;
       case 1:
         //read
-        log ( Notice() , "Incrementing Read" );
-        lSize = ( rand() % 10000 ) +1;
+        lSize = ( rand() % MaxSize ) +1;
 
-        if ( lAddress + lSize >= RegisterSpace )
+        if ( lAddrIdx + lSize >= RegisterSpace )
         {
-          lAddress = RegisterSpace - lSize - 1;
+          lAddrIdx = RegisterSpace - lSize;
+          lAddress = RegisterOffset + lAddrIdx;
         }
+        log ( Notice(), "Incrementing Read, depth ", Integer( lSize, IntFmt<hex,fixed>() ), " @ ", Integer( lAddress, IntFmt<hex,fixed>() ) );
 
         lValVector = c->readBlock ( lAddress, lSize, defs::INCREMENTAL );
         c->dispatch();
-        lIt1 = lRegisters.begin() + lAddress;
+        lIt1 = lRegisters.begin() + lAddrIdx;
         lValIt = lValVector.begin();
 
         for ( ; lValIt!=lValVector.end(); ++lValIt , ++lIt1 )
@@ -144,15 +148,15 @@ int main ( int argc, char* argv[] )
         break;
       case 2:
         //ni_write
-        log ( Notice() , "Non-Incrementing Write" );
-        lSize = ( rand() % 10000 ) +1;
+        lSize = ( rand() % MaxSize ) +1;
+        log ( Notice() , "Non-Incrementing Write, depth ", Integer( lSize, IntFmt<hex,fixed>() ), " @ ", Integer( lAddress, IntFmt<hex,fixed>() ) );
         lPosition = ( rand() % 40000 );
         lIt1 = lRandom.begin() +lPosition ;
         lIt2 = lIt1 + lSize;
         lData.assign ( lIt1 , lIt2 );
         c->writeBlock ( lAddress, lData , defs::NON_INCREMENTAL );
         c->dispatch();
-        lIt1 = lRegisters.begin() + lAddress;
+        lIt1 = lRegisters.begin() + lAddrIdx;
         lIt2 = lData.begin();
 
         for ( ; lIt2!=lData.end(); ++lIt2 )
@@ -163,21 +167,22 @@ int main ( int argc, char* argv[] )
         break;
       case 3:
         //write
-        log ( Notice() , "Incrementing Write" );
-        lSize = ( rand() % 10000 ) +1;
+        lSize = ( rand() % MaxSize ) +1;
         lPosition = ( rand() % 40000 );
 
-        if ( lAddress + lSize >= RegisterSpace )
+        if ( lAddrIdx + lSize >= RegisterSpace )
         {
-          lAddress = RegisterSpace - lSize - 1;
+          lAddrIdx = RegisterSpace - lSize;
+          lAddress = RegisterOffset + lAddrIdx;
         }
+        log ( Notice() , "Incrementing Write, depth ", Integer( lSize, IntFmt<hex,fixed>() ), " @ ", Integer( lAddress, IntFmt<hex,fixed>() ) );
 
         lIt1 = lRandom.begin() +lPosition ;
         lIt2 = lIt1 + lSize;
         lData.assign ( lIt1 , lIt2 );
         c->writeBlock ( lAddress, lData , defs::INCREMENTAL );
         c->dispatch();
-        lIt1 = lRegisters.begin() + lAddress;
+        lIt1 = lRegisters.begin() + lAddrIdx;
         lIt2 = lData.begin();
 
         for ( ; lIt2!=lData.end(); ++lIt2 , ++lIt1 )
@@ -188,12 +193,12 @@ int main ( int argc, char* argv[] )
         break;
       case 4:
         //rmw_bits
-        log ( Notice() , "Read-Modify-Write bits" );
+        log ( Notice() , "Read-Modify-Write bits @ ", Integer( lAddress, IntFmt<hex,fixed>() ) );
         lTemp1 = rand();
         lTemp2 = rand();
         lValWord = c->rmw_bits ( lAddress, lTemp1 , lTemp2 );
         c->dispatch();
-        lIt1 = lRegisters.begin() + lAddress;
+        lIt1 = lRegisters.begin() + lAddrIdx;
 
         if ( lProtocol == 1 )
         {
@@ -216,11 +221,11 @@ int main ( int argc, char* argv[] )
         break;
       case 5:
         //rmw_sum
-        log ( Notice() , "Read-Modify-Write sum" );
+        log ( Notice() , "Read-Modify-Write sum @ ", Integer( lAddress, IntFmt<hex,fixed>() ) );
         lTemp1 = rand();
         lValWord = c->rmw_sum ( lAddress, lTemp1 );
         c->dispatch();
-        lIt1 = lRegisters.begin() + lAddress;
+        lIt1 = lRegisters.begin() + lAddrIdx;
 
         if ( lProtocol == 1 )
         {
