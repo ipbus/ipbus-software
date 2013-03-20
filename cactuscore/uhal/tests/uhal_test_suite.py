@@ -205,6 +205,10 @@ def get_commands(conn_file):
                "sudo controlhub_stop"]
                 ]]
 
+    cmds += [["TEST uHALGUI",
+              ["python -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
+        ]]
+
     return cmds
 
 
