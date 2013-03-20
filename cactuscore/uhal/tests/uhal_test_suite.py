@@ -31,10 +31,12 @@ def get_commands(conn_file):
         conn_file = "file://" + conn_file
 
     cmds = []
-    cmds += [["TEST IPBUS1.3 UDP",
-             [# SERVER NOT REACHABLE TEST
-              "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp",
-              # TIMEOUT TEST
+    cmds += [["TEST IPBUS1.3 UDP"
+              [#uhal.tools.ipbus_addr_map
+               "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\"",
+               # SERVER NOT REACHABLE TEST
+               "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp",
+               # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
                "test_dummy_timeout.exe -c " + conn_file + " -d dummy.udp",
                "pkill -f \"DummyHardwareUdp.exe\"",
@@ -117,9 +119,11 @@ def get_commands(conn_file):
                 ]]
 
     cmds += [["TEST IPBUS2.0 UDP",
-             [# SERVER NOT REACHABLE TEST
-              "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp2",
-              # TIMEOUT TEST
+              [#uhal.tools.ipbus_addr_map
+               "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\"",
+               # SERVER NOT REACHABLE TEST
+               "test_dummy_nonreachable.exe -c " + conn_file + " -d dummy.udp2",
+               # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
                "test_dummy_timeout.exe -c " + conn_file + " -d dummy.udp2",
                "pkill -f \"DummyHardwareUdp.exe\"",
