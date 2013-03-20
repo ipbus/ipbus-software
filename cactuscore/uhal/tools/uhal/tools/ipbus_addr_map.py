@@ -138,10 +138,29 @@ class TestSimple(unittest.TestCase):
     def test_simple(self):
         m = ipbus_addr_map("uhal/tools/test_data/simple.xml")
 
+        #just a smoke test
         buses = [bus for bus,slaves in m]
+        self.assertTrue(len(buses) == 3)
         self.assertTrue("__root__" in buses)
         self.assertTrue("SUBSYSTEM1" in buses)
-        self.assertTrue("SUBSYSTEM3" in buses)
+        self.assertTrue("SUBSYSTEM2" in buses)
 
+        sroot = dict(((id,(hex32(addr),width)) for id,addr,width in m[0][1]))
+        self.assertTrue(len(sroot) == 6)
+        self.assertTrue(sroot['REG'][0] == "0x00000001")
+        self.assertTrue(sroot['REG'][1] == 0)
+        self.assertTrue(sroot['MEM'][0] == "0x00100000")
+        self.assertTrue(sroot['MEM'][1] == 18)
+        self.assertTrue(sroot['FIFO'][0] == "0x00000100")
+        self.assertTrue(sroot['FIFO'][1] == 0)
+
+        sub2 = dict(((id,(hex32(addr),width)) for id,addr,width in m[2][1]))
+        self.assertTrue(len(sub2) == 4)
+        self.assertTrue(sub2['REG'][0] == "0x00300001")
+        self.assertTrue(sub2['REG'][1] == 0)
+        
+def main():
+     unittest.main()
+     
 if __name__ == '__main__':
-    unittest.main()
+    main()
