@@ -167,8 +167,9 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
       true ->
         {_HdrSent, TimeSent, _PktSent, _RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
         TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
-        log(info, "Request packet from ~w is being queued (max nr packets already in flight, new queue length~w).", [ClientPid, length(S#state.queue)]),
-        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent}
+        NewTimeout = max(0, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent),
+        log(info, "Request packet from ~w is being queued (max nr packets already in flight, new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.queue), NewTimeout]),
+        {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, NewTimeout}
     end;
 
 %% Default handle cast
@@ -186,7 +187,7 @@ handle_cast(_Msg, State) ->
 %% --------------------------------------------------------------------
 
 % handle_info callback for udp packets from device
-handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when S#state.in_flight=/=none ->
+handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when S#state.in_flight=/=none ->
     ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w (in_flight=~w) "
                  "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort, S#state.in_flight]),
     ch_stats:udp_in(),
@@ -196,15 +197,22 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, HardwareReply}, S = #state{
         ch_stats:udp_response_timeout(recovered);
       true -> void
     end,
-    {_HdrSent, _TimeSent, _PktSnt, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
-    case S#state.ipbus_v of
-        {2, 0} ->
-            <<_:4/binary, ReplyBody/binary>> = HardwareReply,
-            ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
-        _ ->
-            ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_SUCCESS, HardwareReply }
-    end,
+    {HdrSent, TimeSent, _PktSnt, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
+    MoveOn = case {S#state.ipbus_v, ReplyBin} of
+                 {{2, 0}, <<HdrSent:4/binary, ReplyBody/binary>>} ->
+                     ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
+                 {{2, 0}, _} ->
+                     log({warning,S}, "Received UDP response packet with wrong header - either a slightly delayed reply packet that I requested re-send of, or an error!~n"
+                                      "Received packet is: ~w", [ReplyBin]),
+                     no;
+                 _ ->
+                     ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_SUCCESS, ReplyBin }
+             end,
     if
+      MoveOn =:= no ->
+        TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
+        NewTimeout = max(0, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent),
+        {noreply, S, NewTimeout};
       S#state.queue =:= [] ->
         {noreply, S#state{in_flight=none, mode = norm}};
       true ->
@@ -425,7 +433,8 @@ resend_request_pkt(Id, End) when Id =< 16#ffff, Id >= 0 ->
 
 get_device_status() ->
     RequestBin = <<2:4, 0:20, 16#f1:8, 0:(32*15)>>,
-    try sync_send_reply(RequestBin, 2, ?UDP_RESPONSE_TIMEOUT) of 
+    ExpdResponseHdr = <<2:4, 0:20, 16#f1:8>>, 
+    try sync_send_reply(RequestBin, ExpdResponseHdr, 2, ?UDP_RESPONSE_TIMEOUT) of 
         {ok, << 16#200000f1:32, _Word1:4/binary, 
                 NrBuffers:32, 16#20:8, NextId:16, 16#f0:8, 
                 _TheRest/binary >>} ->
@@ -456,35 +465,36 @@ get_device_status() ->
 %%   end
 %% ------------------------------------------------------------------------------------
 
-sync_send_reply(BinToSend, MaxNrSends, TimeoutEachSend) ->
-    sync_send_reply(BinToSend, MaxNrSends, TimeoutEachSend, 0).
+sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend) ->
+    sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, 0).
 
 
 %% ------------------------------------------------------------------------------------
 %% @doc Sends packet to device, and waits for reply, and loops back round to retry if 
 %%      timeout occurs
 %% @throws timeout
-%% @spec sync_send_reply(RequestBin, MaxNrSends, TimeoutEachSend, NrAttemptsAlready)
+%% @spec sync_send_reply(RequestBin, ReplyHdr, MaxNrSends, TimeoutEachSend, NrAttemptsAlready)
 %%                        -> {ok, ResponseBin}
 %%   where
 %%     RequestBin::binary()
+%%     ReplyHdr::binary()
 %%     MaxNrSends::integer() > 0
 %%     TimeoutEachSend::float()
 %%   end
 %% ------------------------------------------------------------------------------------
 
-sync_send_reply(_BinToSend, MaxNrSends, TimeoutEachSend, MaxNrSends) ->
+sync_send_reply(_BinToSend, _ReplyHdr, MaxNrSends, TimeoutEachSend, MaxNrSends) ->
     log(error, "MAX NUMBER OF TIMEOUTS reached in sync_send_reply/4! No response from target after ~w attempts, each with timeout of ~wms. Throwing now.", [MaxNrSends, TimeoutEachSend]),
     throw(timeout);
 
-sync_send_reply(BinToSend, MaxNrSends, TimeoutEachSend, SendCount) ->
+sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) when is_binary(ReplyHdr), size(ReplyHdr)=:=4 ->
     Socket = get(socket),
     TargetIPTuple = get(target_ip_tuple),
     TargetPort = get(target_port),
     gen_udp:send(Socket, TargetIPTuple, TargetPort, BinToSend),
     ch_stats:udp_out(),
     receive
-        {udp, Socket, TargetIPTuple, TargetPort, ReplyBin} -> 
+        {udp, Socket, TargetIPTuple, TargetPort, <<ReplyHdr:4/binary, _/binary>> = ReplyBin} -> 
             ?DEBUG_TRACE("In sync_send_reply/4 : Received response from target (IP addr=~w, port=~w) on attempt no. ~w of ~w", 
                          [TargetIPTuple, TargetPort, SendCount+1, MaxNrSends]),
             ch_stats:udp_in(),
@@ -492,7 +502,7 @@ sync_send_reply(BinToSend, MaxNrSends, TimeoutEachSend, SendCount) ->
     after TimeoutEachSend ->
         log(warning, "TIMEOUT waiting for response in sync_send_reply/4! No response from target on attempt no. ~w of ~w.", [SendCount+1, MaxNrSends]),
         ch_stats:udp_response_timeout(),
-        sync_send_reply(BinToSend, MaxNrSends, TimeoutEachSend, SendCount+1)
+        sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount+1)
     end.
 
 
@@ -501,7 +511,7 @@ sync_send_reply(BinToSend, MaxNrSends, TimeoutEachSend, SendCount) ->
 %%       and target_port entries in process dict
 %% @spec target_ip_port() -> {TargetIPTuple, TargetPort}
 %% @end
-
+%% ------------------------------------------------------------------------------------
 target_ip_port() ->
     {get(target_ip_tuple), get(target_port)}.
 
