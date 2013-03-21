@@ -1,0 +1,44 @@
+import getopt
+import sys
+import uhal.gui.guiloader
+
+"""
+usage: uhalgui.py [options] <guis python list>
+
+Instantiates all GUIs being part of the list
+
+where:
+    <guis python list> is a space separated list containing all GUIs the user wants to instantiate.
+
+options:
+-h, --help          prints the documentation
+"""
+
+def main():
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hn", ["help"])
+    except getopt.GetoptError, err:
+        print __doc__
+        sys.exit(2)
+
+
+    for o, a in opts:
+        if o in ("-h","--help"):
+            print __doc__
+            sys.exit(0)
+    
+
+    try:
+        gui_list = args
+        g = uhal.gui.guiloader.GuiLoader(guilist=args)
+        g.start()
+    except Exception, e:
+        sys.stderr.write("ERROR: %s\n" % str(e))
+        sys.exit(1)
+
+    
+if __name__ == '__main__':
+    main()
+
+    
