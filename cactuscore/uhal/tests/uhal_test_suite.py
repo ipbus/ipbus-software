@@ -227,7 +227,7 @@ def get_commands(conn_file):
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
                "sudo /sbin/tc qdisc del dev lo root",
-               "sudo /sbin/tc qdisc add dev lo root netem loss 0.2%",
+               "sudo /sbin/tc qdisc add dev lo root netem loss 0.1%",
                "sudo /sbin/tc -s qdisc ls dev lo",
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                "sudo controlhub_start",
