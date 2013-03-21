@@ -1,6 +1,6 @@
 #!/bin/env python
 """
-Usage: uhal_test_suite.py [-v] [-c <path to xml connections file>] [-s <search string for sections to run>]
+Usage: uhal_test_suite.py [-v] [-l] [-c <path to xml connections file>] [-s <search string for sections to run>]
 
 This script runs all of the IPbus/uHAL tests (either on an installed system or using checked-out source code).
 The tests for different IPbus versions / different uHAL components are separated into different sections.
