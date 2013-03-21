@@ -6,10 +6,9 @@ from uhal.gui.utilities.utilities import dynamic_loader
 
 class MainApplication(wx.App):
 
-    def __init__(self, guilist, testmode, redirect=True, file_name=None):
+    def __init__(self, guilist, redirect=True, file_name=None):
 
         self.guilist = guilist
-        self.testmode = testmode
         wx.App.__init__(self, redirect, file_name)
 
 
@@ -32,11 +31,10 @@ class GuiLoader:
     It builds up a list of GUIs that should be instantiated from the arguments list,
     builds the MainApplication object, and calls its MainLoop"""
 
-    def __init__(self, default='yes', guilist=[], test_mode='No'):
+    def __init__(self, default='yes', guilist=[]):
 
         self.d = default
         self.guilist = guilist
-        self.testmode = test_mode
         
         if self.d == 'yes' and self.guilist.count('DefaultGui') == 0:
             self.guilist.insert(0, 'DefaultGui')
@@ -50,22 +48,5 @@ class GuiLoader:
         
         output_to_window = False
         
-        if self.testmode == 'No':    
-            app = MainApplication(self.guilist, self.testmode, output_to_window)        
-            app.MainLoop()
-
-
-        if self.testmode == 'Yes':
-            self.start_test()
-
-
-            
-    def start_test(self):
-
-        for gui in self.guilist:
-            status = dynamic_loader(gui)[1]
-            if status == 'FAILED':
-                return 'FAILED'
-
-        return 'OK'
-
+        app = MainApplication(self.guilist, output_to_window)        
+        app.MainLoop()
