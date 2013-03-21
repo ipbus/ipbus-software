@@ -6,6 +6,7 @@ This script runs all of the IPbus/uHAL tests (either on an installed system or u
 The tests for different IPbus versions / different uHAL components are separated into different sections.
 
 All options/arguments are optional:
+   -l                          : Just list commands (i.e. don't run them)
    -v                          : Print all output of tests (if omitted, only the results summary for each test command is printed)
    -c /path/to/dummy_conns.xml : Full path to dummy_connections.xml (without file:// prefix)
    -s search_string            : If specified, only sections that contain this string will be run (case-insenstive search).
