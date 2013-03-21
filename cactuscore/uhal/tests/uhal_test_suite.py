@@ -303,7 +303,8 @@ if __name__=="__main__":
         print __doc__
         sys.exit(2)
 
-    verbose = False
+    run_cmds = True
+    verbose  = False
     conn_file = "/opt/cactus/etc/uhal/tests/dummy_connections.xml"
     section_search_str = None
 
@@ -314,6 +315,8 @@ if __name__=="__main__":
             for s in get_sections():
                 print "  ", s
             sys.exit(0)
+        elif opt == "-l":
+            run_cmds = False
         elif opt == "-v":
             verbose = True
         elif opt == "-c":
@@ -335,9 +338,12 @@ if __name__=="__main__":
         print 'Only sections whose names contain "'+section_search_str+'" will be run'
 
     print
-    print "Environment variables ..."
-    run_command("echo $PATH")
-    run_command("echo $LD_LIBRARY_PATH")
+    if run_cmds:
+        print "Environment variables ..."
+        run_command("echo $PATH")
+        run_command("echo $LD_LIBRARY_PATH")
+    else:
+        print "N.B: Commands will only be listed, not run"
 
     # Run the commands
     for section_name, cmds in get_commands(conn_file):
@@ -354,8 +360,13 @@ if __name__=="__main__":
             continue
         else:
             print " Entering section:", section_name 
+        print
 
         for cmd in cmds:
+            if run_cmds == False:
+                print cmd
+                continue
+
             print
             if verbose:
                 print "-----------------------------------------------------------------------------------------------------------------------"
@@ -369,4 +380,6 @@ if __name__=="__main__":
                 tmp = "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
             print tmp
 
-
+            if "DummyHardware" in cmd:
+                print "     (Brief sleep after dummy H/W command)"
+                time.sleep(0.5)
