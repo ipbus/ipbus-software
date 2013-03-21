@@ -35,9 +35,7 @@ def get_commands(conn_file):
 
     cmds = []
     cmds += [["TEST IPBUS1.3 UDP",
-              [#uhal.tools.ipbus_addr_map
-               "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\"",
-               # SERVER NOT REACHABLE TEST
+              [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
                # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
@@ -58,6 +56,9 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+               "test_random.exe -c %s -d dummy.udp -t 300",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
@@ -83,6 +84,9 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+               "DummyHardwareTcp.exe --version 1 --port 50002 &> /dev/null &",
+               "test_random.exe -c %s -d dummy.tcp -t 300" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
@@ -118,13 +122,14 @@ def get_commands(conn_file):
                "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
+               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+               "test_dummy_random.exe -c %s -d dummy.controlhub -t 300" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
                "sudo controlhub_stop"]
                 ]]
 
     cmds += [["TEST IPBUS2.0 UDP",
-              [#uhal.tools.ipbus_addr_map
-               "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\"",
-               # SERVER NOT REACHABLE TEST
+              [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp2" % (conn_file),
                # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
@@ -145,6 +150,8 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.udp2 -t 300" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
@@ -171,6 +178,8 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+               "DummyHardwareTcp.exe --version 2 --port 60002 &> /dev/null &",
                "test_random.exe -c %s -d dummy.tcp2 -t 300" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
@@ -206,6 +215,8 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.controlhub2 -t 300" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "sudo controlhub_stop"]
@@ -235,6 +246,8 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.controlhub2 -t 300" % (conn_file),
                # Clean up
                "pkill -f \"DummyHardwareUdp.exe\"",
@@ -245,9 +258,14 @@ def get_commands(conn_file):
                "sudo /sbin/tc -s qdisc ls dev lo"]
                 ]]
 
-    cmds += [["TEST uHALGUI",
+    cmds += [["TEST uHAL GUI",
               ["python -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
-        ]]
+            ]]
+
+    cmds += [["TEST uHAL TOOLS",
+              [#uhal.tools.ipbus_addr_map
+               "python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\""]
+            ]]
 
     return cmds
 
@@ -349,4 +367,5 @@ if __name__=="__main__":
             else:
                 tmp = "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
             print tmp
+
 
