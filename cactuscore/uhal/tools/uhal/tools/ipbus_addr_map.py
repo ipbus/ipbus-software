@@ -43,8 +43,8 @@ def __getWidth(node):
                 minaddr = addr
             if not maxaddr or maxaddr<addr:
                 maxaddr = addr
-
-        return int(math.ceil(math.log(maxaddr-minaddr,2)))
+        print node.getId()," ",minaddr," ",maxaddr      
+        return int(math.ceil(math.log(maxaddr-minaddr+1,2)))
     
 def __isModule(node):
     if node.getNodes():
