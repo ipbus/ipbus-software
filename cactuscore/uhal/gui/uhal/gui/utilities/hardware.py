@@ -1,165 +1,146 @@
 import threading
 import time
-
 import pycohal
 
 
-class AbstractNode:
+########## NODE RELATED CLASSES ##########
 
-    def __init__(self, node):
+    
+class Node:
 
-        self.name = node.getId()
-        self.address = node.getAddress()
-        self.mask = node.getMask()
-        self.value = None
-        self.mode = node.getMode()        
-        self.permission = node.getPermission()
-        self.size = node.getSize()
-        self.tags = node.getTags()
+    def __init__(self, node, parent_name=""):
+
+        self.__name = node.getId()
+        if parent_name:
+            self.__name = parent_name + "." + self.__name
+            
+        self.__address = node.getAddress()
+        self.__mode = str(node.getMode())
+        self.__permission = str(node.getPermission())
+        self.__mask = node.getMask()
+        self.__value = ""
+        self.__size = node.getSize()
+        self.__tags = node.getTags()
+
+        print "Creating node %s %s" % (self.__name, self.__permission)
+        self.__parent = parent_name
+        self.__children = []
+
+        for n in self.__get_parent_nodes(node):
+            new_node = node.getNode(n)
+            kid_node = Node(new_node, parent_name=self.__name)
+            self.__add_kid(kid_node)
+
+            
+    def __add_kid(self, node):
+        print "Adding kid %s to node %s" % (node.get_name(), self.get_name())
+        self.__children.append(node)
+
+    
+    def __get_parent_nodes(self, node):
+        return node.getNodes("[^.]*")
+
+    
+    def get_name(self):
+        return self.__name
+
+    def get_address(self):
+        return self.__address
+
+    def get_mode(self):
+        return self.__mode
+
+    def get_permission(self):
+        return self.__permission
+
+    def get_mask(self):
+        return self.__mask
+
+    def get_value(self):
+        return self.__value
+
+    def get_size(self):
+        return self.__size
+
+    def get_tags(self):
+        return self.__tags
+
+    def get_kids(self):
+        return self.__children
+
+    def get_parent(self):
+        return self.__parent
+
+    def has_kids(self):
+
+        if not self.__children:
+            return False
+
+        return True
+
+    def set_value(self, value):
+        self.__value = value
 
 
-    def update(self):
-        pass
+    def print_node(self):
+        print "Node: %s %s %s" % (self.__name, self.__mode, self.__permission)
+        for c in self.__children:
+            print "\t",c.print_node()
+     
+
+
+
         
-        
-        
-    def getId(self):
-        return self.name
-
-    def getAddress(self):
-        return self.address
-
-    def getMask(self):
-        return self.mask
-
-    def getPermission(self):
-        return self.permission
-
-
-class RegNode(AbstractNode):
-    pass
-
-
-class MemNode(AbstractNode):
-    pass
-
-
-class FifoNode(AbstractNode):
-    pass
-
-
-
+########## HW & IP END POINT CLASSES ##########
+    
 class IPEndPoint:
 
-    def __init__(self, device, status = "Undefined"):
+    def __init__(self, ip_ep, status="Undefined"):
 
-        self.hw = device
-        self.id = device.id()
-        self.uri = device.uri()
-        self.node_list = device.getNodes()
-        self.status = status
-        
-        self.__nodes_dict = {}
+        self.__id = ip_ep.id()
+        self.__uri = ip_ep.uri()        
+        self.__status = status        
 
-        self.__fill_nodes_dict()
+        print "IP End Point instantiated: %s %s %s" %(self.__id, self.__uri, self.__status)
+        self.__nodes_list = []
 
 
-    def __fill_nodes_dict(self):
+    def add_node(self, node):
+        print "Adding node %s to the IP End Point %s" % (node.get_name(), self.__id)
+        self.__nodes_list.append(node)
 
-        for node in self.node_list:
-            if node not in self.__nodes_dict.keys():
-                self.__nodes_dict[node] = AbstractNode(self.hw.getNode(node))
-            else:
-                print "Duplicated node: ", node, " won't be inserted in node list"
 
-                    
-        
-    def update(self):
+    def get_id(self):
+        return self.__id
 
-        #Update IP END POINT status before the loop
 
-        #Update nodes' values
-        for node in self.__nodes_dict.keys():
-            
-            try:
-                node = self.hw.getNode(node).read()
-                self.hw.dispatch()
-                print node
-            except pycohal.exception, e:
-                print "Tried to read only-write node: ", str(e)
+    def set_status(self, status):
+        self.__status = status
+
+
+    def get_nodes(self):
+        return self.__nodes_list
+
+
+    def print_ip_end_point(self):
+        print "IP End Point: %s %s %s" % (self.__id, self.__uri, self.__status)
+        for n in self.__nodes_list:
+            n.print_node()
+
 
        
-class Hardware(threading.Thread):
+class HardwareStruct:
+
+    def __init__(self):
+        self.__ip_end_points_list = []
 
 
-    def __init__(self, connection_file = ""):
+    def add_ip_end_point(self, ip_ep):
 
-        threading.Thread.__init__(self)
-
-        self.__auto_refresh = True
-        self.__refresh_period = 60.0
-        self.__stop_event = threading.Event()
-        
-        self.__connection_file = connection_file
-        self.__ip_end_points_dict = {}
-        self.__hw_manager = pycohal.ConnectionManager(str("file://" + self.__connection_file))
-
-        self.__load_hardware(self.__hw_manager)
-                
-        
-    def run(self):
-
-        if self.__auto_refresh:
-            
-            while not self.__stop_event.isSet():
-                try:
-                    self.__update()
-                    self.__stop_event.wait(self.__refresh_period)                    
-                except:
-                    print "Exception while updating HW!"
-            time.sleep(self.__refresh_period)
-
-        else:            
-            try:
-                self.__update()                
-            except:
-                print "Exception while updating HW!"
+        print "Adding IP End Point %s to the IP End Point list..." % ip_ep.get_id()
+        self.__ip_end_points_list.append(ip_ep)
 
 
+    def get_ip_end_points(self):
+        return self.__ip_end_points_list
 
-    def join(self, timeout=None):
-
-        self.__stop_event.set()
-        threading.Thread.join(self, timeout)
-
-
-
-    def set_auto_refresh(self, auto_refresh):
-        self.__auto_refresh = auto_refresh
-        
-
-
-    def __load_hardware(self, hw_man):
-        
-        """ Tries to load all HW items present in the connection file.
-        If there is an exception while getting the device, the IP end point
-        will not be added to the monitoring list"""
-        
-        for dev_name in hw_man.getDevices():
-
-            try:
-                device = hw_man.getDevice(dev_name)
-                    
-                if dev_name not in self.__ip_end_points_dict:
-                    self.__ip_end_points_dict[dev_name] = IPEndPoint(device)
-            
-            except pycohal.exception, e:
-                print "Pycohal exception while getting device %s: %s" % (dev_name, e)
-                    
-        
-        
-    def __update(self):
-
-        for name in self.__ip_end_points_dict.keys():          
-            print "Updating ip end point ", name
-            self.__ip_end_points_dict[name].update()

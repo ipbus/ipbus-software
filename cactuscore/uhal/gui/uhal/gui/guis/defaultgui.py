@@ -4,7 +4,7 @@ import webbrowser
 import wx
 
 import uhal.gui.utilities.utilities
-import uhal.gui.utilities.hardware
+from uhal.gui.utilities import monitoring_starter
 
 
 class DefaultGui(wx.Frame):
@@ -13,12 +13,20 @@ class DefaultGui(wx.Frame):
 
         wx.Frame.__init__(self, parent, id, title)
         
-        panel = wx.Panel(self)
-        panel.SetBackgroundColour('White')
-        self.Bind(wx.EVT_CLOSE, self.on_close_window)
-        self.create_menu_bar()
+        self.panel = wx.Panel(self)
+        self.panel.SetBackgroundColour('White')
 
-        self.hardware = None
+        self.grid_bag_sizer = wx.GridBagSizer()
+        self.panel.SetSizer(self.grid_bag_sizer)
+        self.Fit()
+        
+        self.Bind(wx.EVT_CLOSE, self.on_close_window)
+
+        self.create_menu_bar()
+        self.create_auto_refresh_box()
+        self.create_refresh_button()
+
+        self.__hw_mon = None
 
     # CREATE THE MENU BAR
     def create_menu_bar(self):
@@ -62,9 +70,26 @@ class DefaultGui(wx.Frame):
         return menu
 
 
+    def create_auto_refresh_box(self):
 
-    # FILE PICKER 
+        self.auto_refresh_box = wx.CheckBox(self.panel, -1, "Auto-refresh", pos=wx.DefaultPosition, size=wx.DefaultSize)        
+        self.Bind(wx.EVT_CHECKBOX, self.on_click_auto_refresh, self.auto_refresh_box)
+
+
+    def create_refresh_button(self):
+
+        self.refresh_button = wx.Button(self.panel, -1, "Refresh", pos=(0, 100))
+        self.Bind(wx.EVT_BUTTON, self.on_click_refresh, self.refresh_button)
+
+
+
+
+########## EVENT HANDLERS ##########
+    
     def on_load_hw(self, event):
+
+        # Right now, only a connection file picker is offered.
+        # Another dialog should be displayed to cope with pycohal ConnectionManager('device_id', 'uri', 'address_table')
             
         wildcard = "XML files (*.xml)|*.xml|" \
                    "All files (*.*)|*.*"
@@ -79,16 +104,10 @@ class DefaultGui(wx.Frame):
     
 
         if file_picker.ShowModal() == wx.ID_OK:
-
-            if (self.hardware):
-                print "Killing HW thread"
-                self.hardware.join()
-                self.hardware = None
-
-            self.hardware = uhal.gui.utilities.hardware.Hardware(connection_file = file_picker.GetPath())            
-            self.hardware.start()
-
+            self.__hw_mon = monitoring_starter.MonitoringStarter(file_picker.GetPath())            
+        
         file_picker.Destroy()
+
     
     def on_click_doc(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus")
@@ -133,13 +152,16 @@ class DefaultGui(wx.Frame):
 
         wx.AboutBox(info)
 
-    def on_close_window(self, event):
 
-        if (self.hardware):
-            print "Killing HW thread"
-            self.hardware.join()
-            self.hardware = None
-             
+    def on_close_window(self, event):
+        self.__hw_mon.stop_mon()
         self.Destroy()
 
 
+    def on_click_refresh(self, event):
+        print "Refresh button clicked"
+        """ Access HW cache and print values"""
+
+    def on_click_auto_refresh(self, event):
+        print "Setting auto-refresh option %s" % self.auto_refresh_box.GetValue()
+        """ Access HW cache and print values periodically """
