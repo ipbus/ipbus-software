@@ -217,7 +217,7 @@ def get_commands(conn_file):
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "sleep 30; DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.controlhub2 -t 300" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "controlhub_stats",
