@@ -434,7 +434,7 @@ resend_request_pkt(Id, End) when Id =< 16#ffff, Id >= 0 ->
 get_device_status() ->
     RequestBin = <<2:4, 0:20, 16#f1:8, 0:(32*15)>>,
     ExpdResponseHdr = <<2:4, 0:20, 16#f1:8>>, 
-    try sync_send_reply(RequestBin, ExpdResponseHdr, 2, ?UDP_RESPONSE_TIMEOUT) of 
+    try sync_send_reply(RequestBin, ExpdResponseHdr, 4, ?UDP_RESPONSE_TIMEOUT) of 
         {ok, << 16#200000f1:32, _Word1:4/binary, 
                 NrBuffers:32, 16#20:8, NextId:16, 16#f0:8, 
                 _TheRest/binary >>} ->
@@ -495,12 +495,12 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) whe
     ch_stats:udp_out(),
     receive
         {udp, Socket, TargetIPTuple, TargetPort, <<ReplyHdr:4/binary, _/binary>> = ReplyBin} -> 
-            ?DEBUG_TRACE("In sync_send_reply/4 : Received response from target (IP addr=~w, port=~w) on attempt no. ~w of ~w", 
+            ?DEBUG_TRACE("In sync_send_reply/5 : Received response from target (IP addr=~w, port=~w) on attempt no. ~w of ~w", 
                          [TargetIPTuple, TargetPort, SendCount+1, MaxNrSends]),
             ch_stats:udp_in(),
             {ok, ReplyBin}
     after TimeoutEachSend ->
-        log(warning, "TIMEOUT waiting for response in sync_send_reply/4! No response from target on attempt no. ~w of ~w.", [SendCount+1, MaxNrSends]),
+        log(warning, "TIMEOUT waiting for response in sync_send_reply/5! No response from target on attempt no. ~w of ~w.", [SendCount+1, MaxNrSends]),
         ch_stats:udp_response_timeout(),
         sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount+1)
     end.
