@@ -145,7 +145,7 @@ init([IPaddrU32, PortU16]) ->
 handle_call(_Request, _From, State) ->
     log({error, State}, "Unexpected call received : ~p", [_Request]),
     Reply = ok,
-    {reply, Reply, State}.
+    {reply, Reply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
 
 %% --------------------------------------------------------------------
@@ -175,7 +175,7 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
 %% Default handle cast
 handle_cast(_Msg, State) -> 
     log({error, State}, "Unexpected cast received : ~p", [_Msg]),
-    {noreply, State}.
+    {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
 
 %% --------------------------------------------------------------------
@@ -214,7 +214,7 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
         NewTimeout = max(0, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent),
         {noreply, S, NewTimeout};
       S#state.queue =:= [] ->
-        {noreply, S#state{in_flight=none, mode = norm}};
+        {noreply, S#state{in_flight=none, mode = norm}, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
       true ->
         [H|T] = S#state.queue,
         send_request_to_board(H, S#state{queue=T, in_flight=none, mode = norm})
@@ -253,7 +253,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
         ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
         if 
           S#state.queue =:= [] ->
-            {noreply, S#state{in_flight=none, mode=timeout}};
+            {noreply, S#state{in_flight=none, mode=timeout}, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
           true ->
             [H = {ClientPid, _Pkt}|T] = S#state.queue,
             log(info, "Request packet from ~w is now being processed.", [ClientPid]),
@@ -261,10 +261,15 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
         end
     end;
 
+% handle_info for when no communication through through this device client in given time
+handle_info(timeout, State) -> 
+    log({info, State}, "No communication has passed through this device client in ~pms ; shutting down now"),
+    {stop, normal, State};
+
 % Default handle_info callback
 handle_info(_Info, State) ->
     log({error,State}, "Unexpected handle_info message received : ~p", [_Info]),
-    {noreply, State}.
+    {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
 
 %% --------------------------------------------------------------------
