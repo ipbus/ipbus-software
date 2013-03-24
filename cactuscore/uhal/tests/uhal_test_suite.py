@@ -228,42 +228,34 @@ def get_commands(conn_file):
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
                "sudo /sbin/tc qdisc del dev lo root",
-               "sudo /sbin/tc qdisc add dev lo root netem loss 0.1%",
-               "sudo /sbin/tc -s qdisc ls dev lo",
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-               "DummyHardwareTcp.exe --version 2 --port 60002 &> /dev/null &",
                "sudo controlhub_start",
                "sudo controlhub_status",
                "controlhub_stats",
-               "netstat -s --udp", "netstat -s --tcp",
-               # Main tests 
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d ipbustcp-2.0://localhost:60002",
+               # Main tests - no packet loss reference
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "sudo /sbin/tc qdisc add dev lo root netem loss 0.000001%",
+               "sudo /sbin/tc -s qdisc ls dev lo",
+               # Main tests - no packet loss reference
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "controlhub_stats",
-               "netstat -s --udp", "netstat -s --tcp",
-               # Main tests - [no packet loss reference]
-               "sudo /sbin/tc qdisc del dev lo root",
+               # Main tests
+               "sudo /sbin/tc qdisc add dev lo root netem loss 0.5%",
                "sudo /sbin/tc -s qdisc ls dev lo",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 2000   -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d ipbustcp-2.0://localhost:60002",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "controlhub_stats", 
-               "netstat -s --udp", "netstat -s --tcp",
                # Clean up
-               "pkill -f \"DummyHardwareUdp.exe\"",
-               "pkill -f \"DummyHardwareTcp.exe\"",
-               "cat /var/log/controlhub.log",
-               "sudo controlhub_stop",
                "sudo /sbin/tc qdisc del dev lo root",
-               "sudo /sbin/tc -s qdisc ls dev lo"]
+               "sudo /sbin/tc -s qdisc ls dev lo",
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               "cat /var/log/controlhub.log",
+               "sudo controlhub_stop"]
                 ]]
 
     cmds += [["TEST uHAL GUI",
