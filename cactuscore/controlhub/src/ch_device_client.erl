@@ -263,7 +263,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
 
 % handle_info for when no communication through through this device client in given time
 handle_info(timeout, State) -> 
-    log({info, State}, "No communication has passed through this device client in ~pms ; shutting down now"),
+    log({info, State}, "No communication has passed through this device client in ~pms ; shutting down now", [?DEVICE_CLIENT_SHUTDOWN_AFTER]),
     {stop, normal, State};
 
 % Default handle_info callback
