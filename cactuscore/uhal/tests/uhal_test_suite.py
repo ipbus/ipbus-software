@@ -126,6 +126,7 @@ def get_commands(conn_file):
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
                "test_dummy_random.exe -c %s -d dummy.controlhub -t 300" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
+               "sudo controlhub_stats",
                "sudo controlhub_stop"]
                 ]]
 
