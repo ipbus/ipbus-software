@@ -237,6 +237,7 @@ def get_commands(conn_file):
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "controlhub_stats",
                "sudo /sbin/tc qdisc add dev lo root netem loss 0.000001%",
                "sudo /sbin/tc -s qdisc ls dev lo",
                # Main tests - no packet loss reference
@@ -245,7 +246,7 @@ def get_commands(conn_file):
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "controlhub_stats",
                # Main tests
-               "sudo /sbin/tc qdisc add dev lo root netem loss 0.5%",
+               "sudo /sbin/tc qdisc change dev lo root netem loss 0.5%",
                "sudo /sbin/tc -s qdisc ls dev lo",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 250000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
