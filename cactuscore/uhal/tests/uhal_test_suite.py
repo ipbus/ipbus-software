@@ -22,15 +22,20 @@ N.B: All env variables have to be correctly set before running the script.
 """
 
 from os.path import join
+import fcntl
 import sys
 import getopt
 import subprocess
 import string
 from datetime import datetime
 import time
-from os import environ
+import os
+
+SOFT_TIMEOUT_S = 570
 
 def get_commands(conn_file):
+    """Return full list of all sections/commands in this test suite."""
+
     if not conn_file.startswith("file://"):
         conn_file = "file://" + conn_file
 
@@ -57,6 +62,7 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
+               "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
                "pkill -f \"DummyHardwareUdp.exe\"",
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.udp -t 300" % (conn_file),
@@ -273,25 +279,50 @@ def get_commands(conn_file):
 
 
 def get_sections():
+    """Return list of all sections of commands defined in this test suite"""
+
     return [section for section, cmds in get_commands("")]
 
 
 def run_command(cmd, verbose=True):
+    """
+    Run command, printing stdout and stderr to stdout if argument verbose = True
+    Additionally, command will be killed if it produces no output over a period of
+    SOFT_TIMEOUT_S seconds
+    """
+
     if cmd.startswith("sudo"):
        cmd = "sudo PATH=$PATH " + cmd[4:]
     print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
     t0 = time.time()
     p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
+    f1 = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
+    fcntl.fcntl(p.stdout, fcntl.F_SETFL, f1 | os.O_NONBLOCK)
     stdout = []
+
+    last = time.time()
+
     while True:
-        nextline = filter(lambda x: x in string.printable,p.stdout.readline())
-        if nextline:
-            stdout += [nextline]
-            if verbose:
-                sys.stdout.write(nextline)
-                sys.stdout.flush()
-        if p.poll() != None and not nextline:
-            break
+        current = time.time()
+        
+        try:
+            nextline = p.stdout.readline()
+            if nextline != []:
+                last = time.time()
+                stdout += nextline
+                if verbose:
+                    sys.stdout.write(nextline)
+                    sys.stdout.flush()
+
+            if p.poll() != None and not nextline:
+                break
+
+        except IOError:
+            time.sleep(0.1)
+            
+            if (current-last) > SOFT_TIMEOUT_S:
+                print "+ ERROR: unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
+                return stdout, -1, SOFT_TIMEOUT_S
 
     return stdout, p.poll(), time.time()-t0
 
