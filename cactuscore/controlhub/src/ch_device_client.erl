@@ -165,9 +165,9 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
       S#state.in_flight =:= none ->
         send_request_to_board({RequestPacket, ClientPid}, S);
       true ->
-        {_HdrSent, TimeSent, _PktSent, _RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
+        {_HdrSent, TimeSent, _PktSent, RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
         TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
-        NewTimeout = max(0, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent),
+        NewTimeout = max(0, (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)) - TimeSinceSent),
         log(info, "Request packet from ~w is being queued (max nr packets already in flight, new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.queue), NewTimeout]),
         {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, NewTimeout}
     end;
@@ -191,13 +191,13 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
     ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w (in_flight=~w) "
                  "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort, S#state.in_flight]),
     ch_stats:udp_in(),
+    {HdrSent, TimeSent, _PktSnt, RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     if
       S#state.mode =:= recover_lost_pkt ->
         log({info, S}, "Recovered lost packet!"),
         ch_stats:udp_response_timeout(recovered);
       true -> void
     end,
-    {HdrSent, TimeSent, _PktSnt, _RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     MoveOn = case {S#state.ipbus_v, ReplyBin} of
                  {{2, 0}, <<HdrSent:4/binary, ReplyBody/binary>>} ->
                      ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
@@ -211,7 +211,7 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
     if
       MoveOn =:= no ->
         TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
-        NewTimeout = max(0, ?UDP_RESPONSE_TIMEOUT - TimeSinceSent),
+        NewTimeout = max(0, (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)) - TimeSinceSent),
         {noreply, S, NewTimeout};
       S#state.queue =:= [] ->
         {noreply, S#state{in_flight=none, mode = norm}, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
@@ -227,6 +227,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                  "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
     ch_stats:udp_response_timeout(),
     if
+      % Packet-loss recovery for IPbus 2.0
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
         log({warning, S}, "Timeout when waiting for response from target; starting packet loss recovery (attempt ~w) ... ",[RetryCount+1]),
         NewInFlight = {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr},
@@ -248,6 +249,12 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 ClientPid ! MsgForTransManager,
                 {noreply, S#state{in_flight=none, mode=timeout}}
         end;
+      % Workaround for softer timeout with non-IPbus 2.0 packets
+      RetryCount<3 ->
+         log({warning, S}, "Timeout nr. ~w when waiting for response from target; not IPbus 2.0 and so will just wait for another ~wms ... ", [RetryCount+1, ?UDP_RESPONSE_TIMEOUT]),
+         NewInFlight = {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr},
+         {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
+      % Clause for ultimate irrecoverable timeout
       true ->
         log({error, S}, "TIMEOUT! No response from target~n. Generating and sending a timeout response to originating Transaction Manager..."),
         ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
