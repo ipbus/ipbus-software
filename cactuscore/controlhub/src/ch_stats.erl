@@ -24,7 +24,6 @@
          udp_in/0,
          udp_malformed/0,
          udp_out/0,
-         udp_response_timeout/0,
          udp_response_timeout/1,
          get_active_clients/0,
          get_max_active_clients/0,
@@ -35,7 +34,6 @@
          get_udp_in/0,
          get_udp_malformed/0,
          get_udp_out/0,
-         get_udp_response_timeouts/0,
          get_udp_response_timeouts/1,
          report_to_console/0,
          report_to_string/0]).
@@ -53,8 +51,10 @@
                 udp_in = 0 :: integer(),
                 udp_malformed = 0 :: integer(),
                 udp_out = 0 :: integer(),
-                udp_response_timeouts = 0 :: integer(),
-                udp_recovered_response_timeouts = 0 :: integer()}).
+                udp_response_timeouts_normal = 0 :: integer(),
+                udp_response_timeouts_resend = 0 :: integer(),
+                udp_response_timeouts_status = 0 :: integer(),
+                udp_response_timeouts_recovered = 0 :: integer()}).
 
 
 
@@ -160,23 +160,22 @@ udp_out() -> gen_server:cast(?MODULE, udp_out).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a UDP response timeout occurred.
+%% @doc Inform the stats server that a UDP response timeout has occured / 
+%%      been recovered from. The different types of timeouts are:
+%%         * normal : i.e. timeout to original request sent
+%%         * resend : timeout after resend of original request / request
+%%                    for device to resend
+%%         * status : timeout to status request
+%%         * recovered : recovered packet loss in control packet timeout
+%%      
 %%
-%% @spec udp_response_timeout() -> ok
+%% @spec udp_response_timeout(Type) -> ok
+%%      where 
+%%         Type = normal | resend | status | recovered
 %% @end
 %% ---------------------------------------------------------------------
-udp_response_timeout() -> gen_server:cast(?MODULE, udp_response_timeout).
-
-
-%% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a UDP response timeout has been
-%%      recovered from. (The timeout should have already been reported
-%%      via udp_response_timeout()
-%%
-%% @spec udp_response_timeout(recovered) -> ok
-%% @end
-%% ---------------------------------------------------------------------
-udp_response_timeout(recovered) -> gen_server:cast(?MODULE, udp_recovered_response_timeout).
+udp_response_timeout(Type) when is_atom(Type) ->
+    gen_server:cast(?MODULE, {udp_response_timeout, Type}).
 
 %% ---------------------------------------------------------------------
 %% @doc Returns the current number of connected user-clients.
@@ -267,22 +266,14 @@ get_udp_out() -> gen_server:call(?MODULE, get_udp_out).
 
 
 %% ----------------------------------------------------------------------------
-%% @doc Returns the current total of UDP reponse timeouts that have occurred.
+%% @doc Returns the current total of UDP response timeouts that have occured, 
+%%      or been recovered from. Same Type values as udp_response_timeout function.
 %%
-%% @spec get_udp_response_timeouts() -> integer()
+%% @spec get_udp_response_timeouts(normal | resend | status | recovered) -> integer()
 %% @end
 %% ----------------------------------------------------------------------------
-get_udp_response_timeouts() -> gen_server:call(?MODULE, get_udp_response_timeouts).
-
-%% ----------------------------------------------------------------------------
-%% @doc Returns the current total of UDP response timeouts that have been 
-%%      recovered from
-%%
-%% @spec get_udp_response_timeouts(recovered) -> integer()
-%% @end
-%% ----------------------------------------------------------------------------
-get_udp_response_timeouts(recovered) -> gen_server:call(?MODULE, get_udp_recovered_response_timeouts).
-
+get_udp_response_timeouts(Type) when is_atom(Type) ->
+    gen_server:call(?MODULE, {get_udp_response_timeouts, Type}).
 
 
 %% ----------------------------------------------------------------------------
@@ -358,11 +349,15 @@ handle_call(get_udp_malformed, _From,  State) ->
 handle_call(get_udp_out, _From,  State) ->
     {reply, State#state.udp_out, State};
 
-handle_call(get_udp_response_timeouts, _From,  State) ->
-    {reply, State#state.udp_response_timeouts, State};
-
-handle_call(get_udp_recovered_response_timeouts, _From, State) ->
-    {reply, State#state.udp_recovered_response_timeouts, State};
+handle_call({get_udp_response_timeouts, Type}, _From,  State) ->
+    Nr = case Type of
+              normal -> State#state.udp_response_timeouts_normal;
+              resend -> State#state.udp_response_timeouts_resend;
+              status -> State#state.udp_response_timeouts_status;
+              recovered -> State#state.udp_response_timeouts_recovered;
+              _ -> invalid
+         end,
+    {reply, Nr, State};
 
 handle_call(report_to_string, _From, State) ->
     {reply, report_to_string(State), State};
@@ -420,12 +415,20 @@ handle_cast(udp_out, State = #state{udp_out = Packets}) ->
     NewState = State#state{udp_out = Packets+1},
     {noreply, NewState};
 
-handle_cast(udp_response_timeout, State = #state{udp_response_timeouts = Value}) ->
-    NewState = State#state{udp_response_timeouts = Value+1},
+handle_cast({udp_response_timeout, normal}, State = #state{udp_response_timeouts_normal = Value}) ->
+    NewState = State#state{udp_response_timeouts_normal = Value+1},
     {noreply, NewState};
 
-handle_cast(udp_recovered_response_timeout, State = #state{udp_recovered_response_timeouts = Value}) ->
-    NewState = State#state{udp_recovered_response_timeouts = Value+1},
+handle_cast({udp_response_timeout, resend}, State = #state{udp_response_timeouts_resend = Value}) ->
+    NewState = State#state{udp_response_timeouts_resend = Value+1},
+    {noreply, NewState};
+
+handle_cast({udp_response_timeout, status}, State = #state{udp_response_timeouts_status = Value}) ->
+    NewState = State#state{udp_response_timeouts_status = Value+1},
+    {noreply, NewState};
+
+handle_cast({udp_response_timeout, recovered}, State = #state{udp_response_timeouts_recovered = Value}) ->
+    NewState = State#state{udp_response_timeouts_recovered = Value+1},
     {noreply, NewState};
 
 handle_cast(report_to_console, State) ->
@@ -479,10 +482,12 @@ report_to_string(State) ->
                                 "CLIENT  All-time connections: ~p~n"  
                                 "          Active connections: ~p (peak: ~p)~n"
                                 "           Requests received: ~p (of which ~p were malformed)~n"
-                                "              Responses sent: ~p~n~n"
+                                "              Responses sent: ~p~n"
+                                "~n"
                                 "UDP              Packets Out: ~p~n"
                                 "                  Packets In: ~p (of which ~p were malformed)~n"
-                                "                    Timeouts: ~p (of which ~p were recovered)~n",
+                                "                    Timeouts: ~p in normal operation (of which ~p were recovered)~n"
+                                "              Other timeouts: ~p (status), ~p (in resends)~n",
                                 [State#state.cumulative_client_count,
                                  State#state.active_clients,
                                  State#state.max_active_clients,
@@ -492,5 +497,7 @@ report_to_string(State) ->
                                  State#state.udp_out,
                                  State#state.udp_in,
                                  State#state.udp_malformed,
-                                 State#state.udp_response_timeouts,
-                                 State#state.udp_recovered_response_timeouts])).
+                                 State#state.udp_response_timeouts_normal,
+                                 State#state.udp_response_timeouts_recovered,
+                                 State#state.udp_response_timeouts_status,
+                                 State#state.udp_response_timeouts_resend])).

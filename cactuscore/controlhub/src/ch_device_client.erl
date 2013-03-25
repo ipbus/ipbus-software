@@ -225,7 +225,10 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
     {HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr} = S#state.in_flight,
     ?DEBUG_TRACE("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
                  "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
-    ch_stats:udp_response_timeout(),
+    case RetryCount of
+         0 -> ch_stats:udp_response_timeout(normal);
+         _ -> ch_stats:udp_response_timeout(resend)
+    end,
     if
       % Packet-loss recovery for IPbus 2.0
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
@@ -513,7 +516,7 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) whe
             {ok, ReplyBin}
     after TimeoutEachSend ->
         log(warning, "TIMEOUT waiting for response in sync_send_reply/5! No response from target on attempt no. ~w of ~w.", [SendCount+1, MaxNrSends]),
-        ch_stats:udp_response_timeout(),
+        ch_stats:udp_response_timeout(status),
         sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount+1)
     end.
 

@@ -104,11 +104,20 @@ test_udp_out() ->
     ?assertEqual(29, ch_stats:get_udp_out()).
 
 test_udp_response_timeout() ->
-    ?assertEqual(0, ch_stats:get_udp_response_timeouts()),
-    n_call(31, fun ch_stats:udp_response_timeout/0),
+    ?assertEqual(0, ch_stats:get_udp_response_timeouts(normal)),
+    ?assertEqual(0, ch_stats:get_udp_response_timeouts(recovered)),
+    ?assertEqual(0, ch_stats:get_udp_response_timeouts(status)),
+    ?assertEqual(0, ch_stats:get_udp_response_timeouts(resend)),
+
+    n_call(31, fun () -> ch_stats:udp_response_timeout(normal) end),
     n_call(25, fun () -> ch_stats:udp_response_timeout(recovered) end),
-    ?assertEqual(31, ch_stats:get_udp_response_timeouts()),
-    ?assertEqual(25, ch_stats:get_udp_response_timeouts(recovered)).
+    n_call(5,  fun () -> ch_stats:udp_response_timeout(status) end),
+    n_call(3,  fun () -> ch_stats:udp_response_timeout(resend) end),
+
+    ?assertEqual(31, ch_stats:get_udp_response_timeouts(normal)),
+    ?assertEqual(25, ch_stats:get_udp_response_timeouts(recovered)),
+    ?assertEqual(5,  ch_stats:get_udp_response_timeouts(status)),
+    ?assertEqual(3,  ch_stats:get_udp_response_timeouts(resend)).
 
 test_report_to_string() ->
     StatsReportString = ch_stats:report_to_string(),
@@ -120,7 +129,8 @@ test_report_to_string() ->
                      "              Responses sent: 7\n\n"
                      "UDP              Packets Out: 29\n"
                      "                  Packets In: 19 (of which 3 were malformed)\n"
-                     "                    Timeouts: 31 (of which 25 were recovered)\n",
+                     "                    Timeouts: 31 in normal operation (of which 25 were recovered)\n"
+                     "              Other timeouts: 5 (status), 3 (in resends)\n",
     ?assertEqual(ExpectedResult, StatsReportString).
 
 %%% ==========================================================================
