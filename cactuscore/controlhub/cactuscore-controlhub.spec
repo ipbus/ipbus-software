@@ -29,6 +29,9 @@ cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 
+# create directory for log files
+mkdir -p $RPM_BUILD_ROOT/var/log/controlhub
+
 # Now update the escript executable paths in various controlhub scripts
 cd $RPM_BUILD_ROOT%{_prefix}/bin
 sed -i "s|/bin/env escript|%{_prefix}/bin/escript|" controlhub_*
@@ -53,3 +56,4 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 %defattr(-, root, root)
 %{_prefix}/bin/*
 %{_prefix}/lib/*
+/var/log/controlhub
