@@ -36,7 +36,7 @@ system("cd %s;ln -s %s %s" % (NIGHTLY_BASE,PLATFORM,pseudo_platform),exception=F
   
 
 ####VARIABLES: analysis of logs
-TITLE             = "CACTUS Nightlies: %s " % PLATFORM
+TITLE             = "CACTUS Nightlies: %s " % pseudo_platform
 FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
 WEB_URL           = join("http://cern.ch/cactus/nightly/",PLATFORM)
@@ -323,7 +323,9 @@ COMMANDS += [["TEST TRIGGER SUPERVISOR",
                "sudo /sbin/service xdaqd start",
                "sudo /sbin/service xdaqd status",
                "sleep 240",
-               "cd %s;python multicell.py;python multicell_fault.py;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
+               "cd %s;python multicell.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
+               "cd %s;python multicell_fault.py;" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
+               "cd %s;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
 
 COMMANDS += [["TEST CENTRAL CELL",
               ["cd %s;python central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests")]]]
