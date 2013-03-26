@@ -279,6 +279,16 @@ def get_commands(conn_file):
     return cmds
 
 
+def cleanup_cmds():
+    """Return list of cleanup commands to be used in case test script interupted - e.g. by ctrl-c"""
+    
+    cmds = ["pkill -f \"DummyHardwareUdp.exe\"",
+            "pkill -f \"DummyHardwareTcp.exe\"",
+            "sudo controlhub_stop",
+            "sudo /sbin/tc qdisc del dev lo root"]
+    return cmds
+
+
 def get_sections():
     """Return list of all sections of commands defined in this test suite"""
 
@@ -382,40 +392,46 @@ if __name__=="__main__":
         print "N.B: Commands will only be listed, not run"
 
     # Run the commands
-    for section_name, cmds in get_commands(conn_file):
-        if section_search_str is None:
-           skip_section = False
-        else:
-           skip_section = not (section_search_str.lower() in section_name.lower())
-
-        print
-        print "======================================================================================================================="
-        print "-----------------------------------------------------------------------------------------------------------------------"
-        if skip_section:
-            print " SKIPPING section:", section_name
-            continue
-        else:
-            print " Entering section:", section_name 
-        print
-
-        for cmd in cmds:
-            if run_cmds == False:
-                print cmd
-                continue
+    try:
+        for section_name, cmds in get_commands(conn_file):
+            if section_search_str is None:
+               skip_section = False
+            else:
+               skip_section = not (section_search_str.lower() in section_name.lower())
 
             print
-            if verbose:
-                print "-----------------------------------------------------------------------------------------------------------------------"
-            stdout, exit_code, cmd_duration = run_command(cmd, verbose)
-
-            if len(stdout) and not verbose:
-                print stdout[-1].rstrip("\n")
-            if exit_code:
-                tmp = "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (exit_code, cmd_duration)
+            print "======================================================================================================================="
+            print "-----------------------------------------------------------------------------------------------------------------------"
+            if skip_section:
+                print " SKIPPING section:", section_name
+                continue
             else:
-                tmp = "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
-            print tmp
+                print " Entering section:", section_name 
+            print
 
-            if "DummyHardware" in cmd:
-                print "     (Brief sleep after dummy H/W command)"
-                time.sleep(0.5)
+            for cmd in cmds:
+                if run_cmds == False:
+                    print cmd
+                    continue
+
+                print
+                if verbose:
+                    print "-----------------------------------------------------------------------------------------------------------------------"
+                stdout, exit_code, cmd_duration = run_command(cmd, verbose)
+
+                if len(stdout) and not verbose:
+                    print stdout[-1].rstrip("\n")
+                if exit_code:
+                    print "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (exit_code, cmd_duration)
+                else:
+                    print "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
+
+                if "DummyHardware" in cmd:
+                    print "     (Brief sleep after dummy H/W command)"
+                    time.sleep(0.5)
+
+    except KeyboardInterrupt:
+        print 
+        print "+ Ctrl-C detected. Running cleanup commands ..."
+        for cmd in cleanup_cmds():
+            run_command(cmd, False)
