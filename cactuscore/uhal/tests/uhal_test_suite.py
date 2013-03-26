@@ -62,7 +62,7 @@ def get_commands(conn_file):
                "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
-               "test_pycohal -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml -v",
+               "test_pycohal -c %s -v" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.udp -t 300" % (conn_file),
@@ -295,26 +295,29 @@ def run_command(cmd, verbose=True):
        cmd = "sudo PATH=$PATH " + cmd[4:]
     print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
     t0 = time.time()
-    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,shell=True)
+
+    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True)
     f1 = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
     fcntl.fcntl(p.stdout, fcntl.F_SETFL, f1 | os.O_NONBLOCK)
-    stdout = []
 
+    stdout = []
     last = time.time()
 
     while True:
         current = time.time()
-        
+
         try:
             nextline = p.stdout.readline()
-            if nextline != []:
-                last = time.time()
-                stdout += nextline
-                if verbose:
-                    sys.stdout.write(nextline)
-                    sys.stdout.flush()
+            if not nextline:
+                break
 
-            if p.poll() != None and not nextline:
+            last = time.time()
+            stdout += [nextline]
+            if verbose:
+                sys.stdout.write(nextline)
+                sys.stdout.flush()
+
+            if p.poll() != None:
                 break
 
         except IOError:
@@ -322,7 +325,7 @@ def run_command(cmd, verbose=True):
             
             if (current-last) > SOFT_TIMEOUT_S:
                 print "+ ERROR: unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
-                return stdout, -1, SOFT_TIMEOUT_S
+                return stdout, -1, time.time()-t0
 
     return stdout, p.poll(), time.time()-t0
 
