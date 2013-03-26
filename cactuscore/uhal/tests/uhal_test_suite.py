@@ -324,7 +324,7 @@ def run_command(cmd, verbose=True):
             time.sleep(0.1)
             
             if (current-last) > SOFT_TIMEOUT_S:
-                print "+ ERROR: unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
+                print "+ ERROR : unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
                 return stdout, -1, time.time()-t0
 
     return stdout, p.poll(), time.time()-t0
@@ -410,7 +410,7 @@ if __name__=="__main__":
             if len(stdout) and not verbose:
                 print stdout[-1].rstrip("\n")
             if exit_code:
-                tmp = "+ *** ERRORS OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (exit_code, cmd_duration)
+                tmp = "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (exit_code, cmd_duration)
             else:
                 tmp = "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
             print tmp
