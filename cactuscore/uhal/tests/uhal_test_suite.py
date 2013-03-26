@@ -40,7 +40,7 @@ def get_commands(conn_file):
         conn_file = "file://" + conn_file
 
     cmds = []
-    cmds += [["TEST IPBUS1.3 UDP",
+    cmds += [["TEST IPBUS 1.3 UDP",
               [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
                # TIMEOUT TEST
@@ -69,7 +69,7 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
-    cmds += [["TEST IPBUS1.3 TCP",
+    cmds += [["TEST IPBUS 1.3 TCP",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.tcp" % (conn_file),
                # TIMEOUT TESTS
@@ -97,7 +97,7 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
-    cmds += [["TEST IPBUS1.3 CONTROLHUB",
+    cmds += [["TEST IPBUS 1.3 CONTROLHUB",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
                "sudo controlhub_start",
@@ -136,7 +136,7 @@ def get_commands(conn_file):
                "sudo controlhub_stop"]
                 ]]
 
-    cmds += [["TEST IPBUS2.0 UDP",
+    cmds += [["TEST IPBUS 2.0 UDP",
               [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp2" % (conn_file),
                # TIMEOUT TEST
@@ -164,7 +164,7 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
-    cmds += [["TEST IPBUS2.0 TCP",
+    cmds += [["TEST IPBUS 2.0 TCP",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.tcp2" % (conn_file),
                # TIMEOUT TESTS
@@ -192,7 +192,7 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
-    cmds += [["TEST IPBUS2.0 CONTROLHUB",
+    cmds += [["TEST IPBUS 2.0 CONTROLHUB",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
                "sudo controlhub_start",
@@ -231,7 +231,7 @@ def get_commands(conn_file):
                "sudo controlhub_stop"]
                 ]]
 
-    cmds += [["TEST IPBUS2.0 CONTROLHUB with packet loss",
+    cmds += [["TEST IPBUS 2.0 CONTROLHUB with packet loss",
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
                "sudo /sbin/tc qdisc del dev lo root",
