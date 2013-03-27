@@ -15,14 +15,11 @@ from nutils import logger, log_setup, system
 import os
 import sys
 import getopt
+import nanalyzer
 
-def execute(silent):
+def execute():
     logger.info("The following sections will be executed: %s" % ",".join([s for s,c in CONF.COMMANDS]))
     for section,cmds in CONF.COMMANDS:
-        if section.find("REPORTING") != -1 and silent:
-             logger.info("Final reporting and email notifications were disabled")
-             continue
-        
         logger.info("----++++%s++++----" % section)
         for cmd in cmds:
             system(cmd,log=True, exception=False)
@@ -57,10 +54,18 @@ if __name__== "__main__":
         
     # Execute build/test/etc.
     try:
-        execute(silent)
+        execute()
     except KeyboardInterrupt,e:
         logger.warning('Aborting after CTRL-C...\n')
         sys.exit(1)
     except Exception,e:
         logger.error(e)
 
+
+    if silent:
+        logger.info("Final reporting and email notifications were disabled")
+    else:
+        logger.info("----++++REPORTING++++----")
+        nanalyzer.report(CONF)
+        system("mkdir -p %s" % CONF.RELEASE_LOG_DIR,log=True, exception=False)
+        system( "sudo cp -r %s %s" % ("/var/log/*",CONF.RELEASE_LOG_DIR),log=True, exception=False)

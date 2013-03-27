@@ -196,7 +196,3 @@ COMMANDS += [["TEST L1PAGE",
                "python %s" % join(L1PAGE_ROOT, "test/l1pageTest.py")]
               ]]
 
-COMMANDS += [["REPORTING",
-              ["python -u %s %s" % ("nanalyzer.py","cactus.py"),
-               "mkdir -p %s" % RELEASE_LOG_DIR,
-               "sudo cp -r %s %s" % ("/var/log/*",RELEASE_LOG_DIR)]]]

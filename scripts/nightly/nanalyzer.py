@@ -209,8 +209,10 @@ def send_mail():
     s.quit()
 
 
-def report():
-
+def report(conf):
+    global CONF
+    CONF = conf
+    
     result = analyze_log()
 
     render_log(result)
@@ -246,4 +248,4 @@ if __name__ == '__main__':
         print __doc__
         sys.exit(2)
         
-    report()
+    report(CONF)
