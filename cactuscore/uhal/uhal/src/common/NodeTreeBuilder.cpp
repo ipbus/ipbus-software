@@ -122,7 +122,6 @@ namespace uhal
     mNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , _1 ) );
     //------------------------------------------------------------------------------------------------------------------------
   }
-
   NodeTreeBuilder::~NodeTreeBuilder ()
   {
   }
@@ -142,7 +141,7 @@ namespace uhal
   Node* NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath )
   {
     std::vector< std::pair<std::string, std::string> >  lAddressFiles;
-    uhal::utilities::ParseSemicolonDelimitedUriList<true> ( aFilenameExpr , lAddressFiles );
+    uhal::utilities::ParseSemicolonDelimitedUriList ( aFilenameExpr , lAddressFiles );
 
     if ( lAddressFiles.size() != 1 )
     {

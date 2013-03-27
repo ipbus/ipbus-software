@@ -39,6 +39,29 @@ namespace uhal
 {
   namespace utilities
   {
+
+    void ParseSemicolonDelimitedUriList ( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
+    {
+      try
+	{
+	  grammars::SemicolonDelimitedUriListGrammar lGrammar;
+	  boost::spirit::qi::phrase_parse ( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
+	}
+      catch ( const std::exception& aExc )
+	{
+	  log ( Error() , "Expression " , Quote ( aSemicolonDelimitedUriList ) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
+	  throw exception::UriListParsingError();
+	}
+
+      log ( Debug() , "Parsed " , Quote ( aSemicolonDelimitedUriList ) , " to:" );
+
+      for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
+	{
+	  log ( Debug() , " > [" , lIt->first , "] " , Quote ( lIt->second ) );
+	}
+
+    }
+
     void PugiXMLParseResultPrettifier ( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile )
     {
       log ( Error() , "Failed to parse file " , aPath.c_str() , ". PugiXML returned the following description " , Quote ( aLoadResult.description() ) , "." );

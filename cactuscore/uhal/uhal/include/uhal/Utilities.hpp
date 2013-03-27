@@ -108,6 +108,8 @@ namespace uhal
   {
     //! Exception class to handle the case where the string will not fit into a 32-bit number.
     ExceptionClass ( StringNumberWillNotFitInto32BitNumber , "Exception class to handle the case where the string will not fit into a 32-bit number." );
+    //! Exception class to handle the case where the string is not a comma-delimiter list of URIs.
+    ExceptionClass ( UriListParsingError , "Exception class to handle the case where the string is not a comma-delimiter list of URIs." );
   }
 
   namespace utilities
@@ -116,41 +118,8 @@ namespace uhal
     	Parse a semicolon delimited list of URIs into a vector of protocol/address pairs
     	@param aSemicolonDelimitedUriList a string containing a semicolon delimited list of URIs
     	@param aUriList a vector to which the extracted protocol/address pairs are appended
-    	@return success/failure status
     */
-    template < bool DebugInfo >
-    bool ParseSemicolonDelimitedUriList ( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
-    {
-      try
-      {
-        grammars::SemicolonDelimitedUriListGrammar lGrammar;
-        boost::spirit::qi::phrase_parse ( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
-      }
-      catch ( const std::exception& aExc )
-      {
-        log ( Error() , "Expression " , Quote ( aSemicolonDelimitedUriList ) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
-        return false;
-      }
-
-      if ( DebugInfo )
-      {
-        try
-        {
-          log ( Info() , "Parsed " , Quote ( aSemicolonDelimitedUriList ) , " to:" );
-
-          for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
-          {
-            log ( Info() , " > [" , lIt->first , "] " , Quote ( lIt->second ) );
-          }
-        }
-        catch ( const std::exception& aExc )
-        {
-          log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );					// Just debugging so although exception	is worrying, it is not critical
-        }
-      }
-
-      return true;
-    }
+    void ParseSemicolonDelimitedUriList ( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList );
   }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

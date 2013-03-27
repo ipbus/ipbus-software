@@ -106,7 +106,7 @@ namespace uhal
     //Mutex lock here to be on the safe side
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles;	//protocol, filename
-    uhal::utilities::ParseSemicolonDelimitedUriList<true> ( aFilenameExpr , lConnectionFiles );
+    uhal::utilities::ParseSemicolonDelimitedUriList ( aFilenameExpr , lConnectionFiles );
 
     for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = lConnectionFiles.begin() ; lIt != lConnectionFiles.end() ; ++lIt )
     {
