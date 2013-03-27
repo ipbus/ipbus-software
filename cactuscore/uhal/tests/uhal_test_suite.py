@@ -327,9 +327,6 @@ def run_command(cmd, verbose=True):
                 sys.stdout.write(nextline)
                 sys.stdout.flush()
 
-            if p.poll() != None:
-                break
-
         except IOError:
             time.sleep(0.1)
             
