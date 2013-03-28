@@ -1,6 +1,6 @@
 import getopt
 import sys
-import uhal.gui.guiloader
+from uhal.gui import guiloader
 
 """
 usage: uhalgui.py [options] <guis python list>
@@ -31,8 +31,8 @@ def main():
 
     try:
         gui_list = args
-        g = uhal.gui.guiloader.GuiLoader(guilist=args)
-        g.start()
+        guiloader.gui_loader(guilist=args)
+        guiloader.start()
     except Exception, e:
         sys.stderr.write("ERROR: %s\n" % str(e))
         sys.exit(1)
