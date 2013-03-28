@@ -12,6 +12,6 @@ setup(name = 'cactuscore-uhal-gui',
       author = 'Carlos Ghabrous Larrea',
       author_email = 'carlos.ghabrous@cern.ch',
       url = 'http://cactus.web.cern.ch/cactus',
-      packages = ['uhal.gui','uhal.gui.guis','uhal.gui.customguis','uhal.gui.utilities','uhal.gui.test'], 
-      scripts = ['testuhalgui.exe']
+      packages = ['uhal.gui','uhal.gui.guis','uhal.gui.customguis','uhal.gui.utilities','uhal.gui.test'],
+      scripts = ['start_uhal_gui.exe']
       )
