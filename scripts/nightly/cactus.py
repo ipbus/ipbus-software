@@ -193,6 +193,7 @@ COMMANDS += [["TEST L1PAGE",
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(L1PAGE_ROOT, "WEB-INF/classes/log4j.properties")),
-               "python %s" % join(L1PAGE_ROOT, "test/l1pageTest.py")]
+               "python %s" % join(L1PAGE_ROOT, "test/l1pageTest.py"),
+               "sudo /sbin/service l1paged stop"]
               ]]
 
