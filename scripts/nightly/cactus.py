@@ -86,7 +86,8 @@ COMMANDS += [["UNINSTALL",
               ["sudo /sbin/service xdaqd stop &> /dev/null ",
                "sudo yum -y groupremove cactus ",
                "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null ",
-               "sudo yum -y groupremove triggersupervisor uhal ",
+               "rpm -qa | grep daq-xaas-l1test | xargs sudo rpm -ev",
+               "sudo yum -y groupremove triggersupervisor uhal",
                "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite ",
                "rpm -qa | grep l1page | xargs sudo rpm -ev &> /dev/null ",
                "sudo pkill -f \"xdaq.exe\" ",
@@ -174,18 +175,26 @@ COMMANDS += [["TEST TRIGGER SUPERVISOR",
                "sleep 240",
                "cd %s;python multicell.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
                "cd %s;python multicell_fault.py;" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
-               "cd %s;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests")]]]
+               "cd %s;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
+               "sudo /sbin/service xdaqd stop"]]]
 
 COMMANDS += [["TEST CENTRAL CELL",
-              ["cd %s;python central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests")]]]
+              ["sudo /sbin/service xdaqd start",
+               "sleep 30",
+               "cd %s;python central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests"),
+               "sudo /sbin/service xdaqd stop"]]]
 
-COMMANDS += [["TEST RETRI CELL",
-              ["cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests")]]]
+COMMANDS += [["TEST RETRI CELL"
+              ["sudo /sbin/service xdaqd start",
+               "sleep 30",
+               "cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests"),
+               "sudo /sbin/service xdaqd stop"]]]
 
 COMMANDS += [["TEST TTC",
-              ["cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
-               "sudo /sbin/service xdaqd stop",
-               "rpm -qa | grep daq-xaas-l1tes | xargs sudo rpm -ev"]]]
+              ["sudo /sbin/service xdaqd start",
+               "sleep 30",
+               "cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
+               "sudo /sbin/service xdaqd stop"]]]
 
 COMMANDS += [["TEST L1PAGE",
               ["sudo yum -y install cactusprojects-l1page-*",
