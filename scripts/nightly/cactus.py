@@ -183,7 +183,7 @@ COMMANDS += [["TEST CENTRAL CELL",
                "cd %s;python central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests"),
                "sudo /sbin/service xdaqd stop"]]]
 
-COMMANDS += [["TEST RETRI CELL"
+COMMANDS += [["TEST RETRI CELL",
               ["sudo /sbin/service xdaqd start",
                "sleep 30",
                "cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests"),
