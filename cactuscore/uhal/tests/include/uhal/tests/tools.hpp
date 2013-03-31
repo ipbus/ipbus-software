@@ -32,6 +32,7 @@
 #ifndef _uhal_tests_tools_hpp_
 #define _uhal_tests_tools_hpp_
 
+#include <stdint.h>
 #include <iostream>
 #include <map>
 #include <string>

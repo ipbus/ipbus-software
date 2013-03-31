@@ -78,11 +78,12 @@
 #include <string.h>
 #include <execinfo.h>
 #include <bfd.h>
+#define HAVE_DECL_BASENAME 1
 #include <libiberty.h>
 #include <dlfcn.h>
 #include <link.h>
 #include <demangle.h>
-
+#include <stdlib.h>
 
 
 #include <cstddef>
