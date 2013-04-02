@@ -22,7 +22,7 @@ PugiXML - Light-weight, simple and fast XML parser for C++ with XPath support
 
 
 %install 
-curdir=`pwd` 
+curdir=$PWD
 rm -rf $RPM_BUILD_ROOT 
 
 # copy includes to RPM_BUILD_ROOT and set aliases
