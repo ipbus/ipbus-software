@@ -110,6 +110,9 @@ namespace uhal
     ExceptionClass ( StringNumberWillNotFitInto32BitNumber , "Exception class to handle the case where the string will not fit into a 32-bit number." );
     //! Exception class to handle the case where the string is not a comma-delimiter list of URIs.
     ExceptionClass ( UriListParsingError , "Exception class to handle the case where the string is not a comma-delimiter list of URIs." );
+    ExceptionClass ( NonSupportedUriPotocol , "Exception class to handle the case where a URI contains a non-supported protocol." );
+    ExceptionClass ( CannotOpenFile , "Exception class to handle the case where a URI can not be opened." );
+    ExceptionClass ( FileNotFound , "Exception class to handle the case where a URI using the 'file://' protocol can not be expanded." );
   }
 
   namespace utilities
@@ -138,126 +141,8 @@ namespace uhal
     	@param aFilenameExpr a c-style string containing a linux shell expression to be expanded
     	@param aParentPath a path which will be prepended to relative file names
     	@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
-    	@param aDirectories a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
-    	@return success/failure status
     */
-    template < bool DebugInfo >
-    bool ShellExpandFilenameExpr ( const char* aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
-    {
-      if ( !aFiles && !aDirectories )
-      {
-        // We have nowhere to write the data so don't bother expanding the expression
-        return true;
-      }
-
-      try
-      {
-        //	boost::lock_guard<boost::mutex> lLock ( gUtilityMutex );
-        //struct which will store the shell expansions of the expression
-        wordexp_t lShellExpansion;
-        wordexp ( aFilenameExpr , &lShellExpansion , 0 );
-
-        for ( std::size_t i = 0 ; i != lShellExpansion.we_wordc ; i++ )
-        {
-          boost::filesystem::path lPath ( lShellExpansion.we_wordv[i] );
-          log ( Debug() , "lPath was " , Quote ( lPath.c_str() ) );
-          log ( Debug() , "aParentPath is " , Quote ( aParentPath.c_str() ) );
-          lPath = boost::filesystem::absolute ( lPath , aParentPath );
-          log ( Debug() , "lPath now " , Quote ( lPath.c_str() ) );
-
-          if ( boost::filesystem::exists ( lPath ) )
-          {
-            if ( aFiles )
-            {
-              if ( boost::filesystem::is_regular_file ( lPath ) )
-              {
-                aFiles->push_back ( lPath );
-              }
-            }
-
-            if ( aDirectories )
-            {
-              if ( boost::filesystem::is_directory ( lPath ) )
-              {
-                aDirectories->push_back ( lPath );
-              }
-            }
-          }
-        }
-
-        wordfree ( &lShellExpansion );
-      }
-      catch ( const std::exception& aExc )
-      {
-        log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-        return false;
-      }
-
-      // Don't bother with Logging if the logger won't include it!
-      Info lLoggingLevel;
-
-      if ( LoggingIncludes ( lLoggingLevel ) )
-      {
-        // After that we listen to the user's preference
-        if ( DebugInfo )
-        {
-          try
-          {
-            if ( aFiles || aDirectories )
-            {
-              log ( lLoggingLevel , "Shell expansion of " , Quote ( aFilenameExpr ) , " returned:" );
-            }
-
-            if ( aFiles )
-            {
-              for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles->begin() ; lIt !=  aFiles->end() ; ++lIt )
-              {
-                log ( lLoggingLevel , " > [file] " , lIt->c_str() );
-              }
-
-              if ( ! aFiles->size() )
-              {
-                log ( lLoggingLevel , " > No matching files." );
-              }
-            }
-
-            if ( aDirectories )
-            {
-              for ( std::vector< boost::filesystem::path >::iterator lIt = aDirectories->begin() ; lIt !=  aDirectories->end() ; ++lIt )
-              {
-                log ( lLoggingLevel , " > [directory] " , lIt->c_str() );
-              }
-
-              if ( ! aDirectories->size() )
-              {
-                log ( lLoggingLevel , " > No matching directories." );
-              }
-            }
-          }
-          catch ( const std::exception& aExc )
-          {
-            log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );						// Just debugging so although exception	is worrying, it is not critical
-          }
-        }
-      }
-
-      return true;
-    }
-
-    /**
-    	Perform shell expansion of a linux shell expression ( e.g. "~/c*.xml" -> "/usr/home/awr/connections.xml" ) and convert into boost::filesystem::paths
-    	@param aFilenameExpr a string containing a linux shell expression to be expanded
-    	@param aParentPath a path which will be prepended to relative file names
-    	@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
-    	@param aDirectories a pointer to a vector of boost::filesystem::paths onto which the returned directory names are appended
-    	@return success/failure status
-    */
-    template < bool DebugInfo >
-    bool ShellExpandFilenameExpr ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path > * aFiles = NULL , std::vector< boost::filesystem::path > * aDirectories = NULL )
-    {
-      return ShellExpandFilenameExpr< DebugInfo > ( aFilenameExpr.c_str() , aParentPath.c_str() , aFiles , aDirectories );
-    }
-
+    void ShellExpandFilenameExpr ( const std::string & aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path >& aFiles );
   }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -437,17 +322,13 @@ namespace uhal
     	@param aFilenameExpr a linux shell expression to be expanded
     	@param aParentPath a path which will be prepended to relative file names
     	@param aBinder a callback function to be called on each file matching the linux shell expression
-    	@return success/failure status
     */
     template < typename R , typename F , typename L>
-    bool OpenFileLocal ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
+    void OpenFileLocal ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
     {
       std::vector< boost::filesystem::path > lFilePaths;
 
-      if ( !uhal::utilities::ShellExpandFilenameExpr<true> ( aFilenameExpr , aParentPath , &lFilePaths ) )
-      {
-        return false;
-      }
+      uhal::utilities::ShellExpandFilenameExpr ( aFilenameExpr , aParentPath , lFilePaths );
 
       for ( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 )
       {
@@ -455,7 +336,8 @@ namespace uhal
 
         if ( !lStr.is_open() )
         {
-          log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
+	  log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
+          throw  uhal::exception::CannotOpenFile();
         }
         else
         {
@@ -469,7 +351,6 @@ namespace uhal
         lStr.close();
       }
 
-      return true;
     }
 
     /**
@@ -479,19 +360,18 @@ namespace uhal
     	@return success/failure status
     */
     template < typename R , typename F , typename L>
-    bool OpenFileHttp ( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder )
+    void OpenFileHttp ( const std::string& aURL , boost::_bi::bind_t<R,F,L> aBinder )
     {
       HttpResponseType lHttpResponse;
 
       if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
       {
         log ( Error() , "Failed to download file " , aURL , ". Continuing for now but be aware!" );
-        return false;
+        throw  uhal::exception::CannotOpenFile();
       }
 
       boost::filesystem::path lFilePath = boost::filesystem::path ( aURL );
       aBinder ( std::string ( "http" ) , lFilePath , boost::ref ( lHttpResponse.content ) );
-      return true;
     }
 
     /**
@@ -503,20 +383,19 @@ namespace uhal
     	@return success/failure status
     */
     template < typename R , typename F , typename L>
-    bool OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
+    void OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
     {
       if ( aProtocol == "file" )
       {
-        return uhal::utilities::OpenFileLocal ( aFilenameExpr , aParentPath , aBinder );
+        uhal::utilities::OpenFileLocal ( aFilenameExpr , aParentPath , aBinder );
       }
       else if ( aProtocol == "http" )
       {
-        return uhal::utilities::OpenFileHttp ( aFilenameExpr , aBinder );
+        uhal::utilities::OpenFileHttp ( aFilenameExpr , aBinder );
       }
       else
       {
-        log ( Error() , "Protocol " , Quote ( aProtocol ) , " is unknown and I am, thus, ignoring file " , Quote ( aFilenameExpr ) , ". Continuing for now but be aware!" );
-        return false;
+	throw uhal::exception::NonSupportedUriPotocol();
       }
     }
 

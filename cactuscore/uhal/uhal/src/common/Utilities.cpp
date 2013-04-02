@@ -122,6 +122,66 @@ namespace uhal
   }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+namespace uhal
+{
+  namespace utilities
+  {
+    void ShellExpandFilenameExpr ( const std::string & aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path >& aFiles )
+    {
+      try
+      {
+        //	boost::lock_guard<boost::mutex> lLock ( gUtilityMutex );
+        //struct which will store the shell expansions of the expression
+        wordexp_t lShellExpansion;
+        wordexp ( aFilenameExpr.c_str() , &lShellExpansion , 0 );
+
+        for ( std::size_t i = 0 ; i != lShellExpansion.we_wordc ; i++ )
+        {
+          boost::filesystem::path lPath ( lShellExpansion.we_wordv[i] );
+          log ( Debug() , "lPath was " , Quote ( lPath.c_str() ) );
+          log ( Debug() , "aParentPath is " , Quote ( aParentPath.c_str() ) );
+          lPath = boost::filesystem::absolute ( lPath , aParentPath );
+          log ( Debug() , "lPath now " , Quote ( lPath.c_str() ) );
+
+          if ( boost::filesystem::exists ( lPath ) )
+          {
+	    if ( boost::filesystem::is_regular_file ( lPath ) )
+            {
+	      aFiles.push_back ( lPath );
+	    }
+	  }
+
+	}
+        
+        wordfree ( &lShellExpansion );
+      }
+      catch ( const std::exception& aExc )
+      {
+        log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+        throw;
+      }
+
+      log ( Debug() , "Shell expansion of " , Quote ( aFilenameExpr.c_str() ) , " returned:" );
+      
+      if ( ! aFiles.size() )
+      {
+	log ( Error() , " > No matching files." );
+	throw uhal::exception::FileNotFound();
+      } 
+      else 
+      {
+
+	for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles.begin() ; lIt !=  aFiles.end() ; ++lIt )
+	{
+	  log ( Debug() , " > [file] " , lIt->c_str() );
+	}
+
+      }
+
+
+    }
+  }
+}
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

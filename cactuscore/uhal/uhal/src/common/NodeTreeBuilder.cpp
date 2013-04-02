@@ -151,11 +151,7 @@ namespace uhal
 
     std::vector< const Node* > lNodes;
 
-    if ( !uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , boost::ref ( lNodes ) ) ) )
-    {
-      log ( Error() , "Failed to open address table file " , Quote ( lAddressFiles[0].second ) );
-      throw exception::FailedToOpenAddressTableFile();
-    }
+    uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , boost::ref ( lNodes ) ) );
 
     if ( lNodes.size() != 1 )
     {
