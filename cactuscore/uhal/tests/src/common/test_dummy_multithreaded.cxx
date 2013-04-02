@@ -43,8 +43,8 @@
 
 using namespace uhal;
 
-#define N_THREADS     50
-#define N_ITERATIONS  10
+#define N_THREADS     10
+#define N_ITERATIONS  5
 #define N_SIZE        1024*1024/4
 #define TIMEOUT_S     50
 

@@ -49,10 +49,10 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-1.3://localhost:50001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-1.3://localhost:50001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-1.3://localhost:50001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbusudp-1.3://localhost:50001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-1.3://localhost:50001",
                "test_dummy_single.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_block.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_docu_examples.exe -c %s -d dummy.docu.udp" % (conn_file),
@@ -65,7 +65,7 @@ def get_commands(conn_file):
                "test_pycohal -c %s -v" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
-               "test_random.exe -c %s -d dummy.udp -t 300" % (conn_file),
+               "test_random.exe -c %s -d dummy.udp -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
@@ -78,10 +78,10 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareTcp.exe\"",
                # NORMAL TESTS
                "DummyHardwareTcp.exe --version 1 --port 50002 &> /dev/null &",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-1.3://localhost:50002",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-1.3://localhost:50002",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-1.3://localhost:50002",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbustcp-1.3://localhost:50002",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-1.3://localhost:50002",
                "test_dummy_single.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_block.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_docu_examples.exe -c %s -d dummy.docu.tcp" % (conn_file),
@@ -93,7 +93,7 @@ def get_commands(conn_file):
                "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
                "DummyHardwareTcp.exe --version 1 --port 50002 &> /dev/null &",
-               "test_random.exe -c %s -d dummy.tcp -t 300" % (conn_file),
+               "test_random.exe -c %s -d dummy.tcp -t 5" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
@@ -115,10 +115,10 @@ def get_commands(conn_file):
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
                "sudo controlhub_start",
                "sudo controlhub_status",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
                "test_dummy_single.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_block.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub" % (conn_file),
@@ -130,7 +130,7 @@ def get_commands(conn_file):
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
-               "test_random.exe -c %s -d dummy.controlhub -t 300" % (conn_file),
+               "test_random.exe -c %s -d dummy.controlhub -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "sudo controlhub_stats",
                "sudo controlhub_stop"]
@@ -145,10 +145,10 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbusudp-2.0://localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0://localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-2.0://localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0://localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-2.0://localhost:60001",
                "test_dummy_single.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_block.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_docu_examples.exe -c %s -d dummy.docu.udp2" % (conn_file),
@@ -160,7 +160,7 @@ def get_commands(conn_file):
                "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-               "test_random.exe -c %s -d dummy.udp2 -t 300" % (conn_file),
+               "test_random.exe -c %s -d dummy.udp2 -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
@@ -173,10 +173,10 @@ def get_commands(conn_file):
                "pkill -f \"DummyHardwareTcp.exe\"",
                # NORMAL TESTS
                "DummyHardwareTcp.exe --version 2 --port 60002 &> /dev/null &",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d ipbustcp-2.0://localhost:60002",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0://localhost:60002",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-2.0://localhost:60002",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0://localhost:60002",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-2.0://localhost:60002",
                "test_dummy_single.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_block.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_docu_examples.exe -c %s -d dummy.docu.tcp2" % (conn_file),
@@ -188,7 +188,7 @@ def get_commands(conn_file):
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
                "DummyHardwareTcp.exe --version 2 --port 60002 &> /dev/null &",
-               "test_random.exe -c %s -d dummy.tcp2 -t 300" % (conn_file),
+               "test_random.exe -c %s -d dummy.tcp2 -t 5" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
@@ -210,10 +210,10 @@ def get_commands(conn_file):
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                "sudo controlhub_start",
                "sudo controlhub_status",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 1000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "test_dummy_single.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_block.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub2" % (conn_file),
@@ -225,7 +225,7 @@ def get_commands(conn_file):
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "sleep 30; DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-               "test_random.exe -c %s -d dummy.controlhub2 -t 300" % (conn_file),
+               "test_random.exe -c %s -d dummy.controlhub2 -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                "controlhub_stats",
                "sudo controlhub_stop"]
