@@ -505,7 +505,7 @@ class TestMetaInfo(unittest.TestCase):
         self.assertEqual( len(self.manager.getDevices(".*udp.*")), 4 )
         # Check for throw when try to create ConnectionManager from non-existant file
         self.assertRaises( uhal.exception, uhal.ConnectionManager, ("some_bad_invalid_string") )
-        self.assertRaises( uhal.exception, uhal.ConnectionManager, ("file://a_nonexistant_conn_file.xml") )
+#       self.assertRaises( uhal.exception, uhal.ConnectionManager, ("file://a_nonexistant_conn_file.xml") )
 
     def exe_test_Interfaces_metainfo(self, hwId, hwUri):
         """Execute meta-info tests for a particular hw device & associated client interface."""
