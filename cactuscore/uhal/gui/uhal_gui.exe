@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import getopt
 import sys
 from uhal.gui import guiloader
