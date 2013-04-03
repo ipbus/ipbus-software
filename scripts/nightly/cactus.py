@@ -25,8 +25,6 @@ if PLATFORM.find("i686-with-redhat-5") != -1:
     pseudo_platform="slc5_i686"
 elif PLATFORM.find("x86_64-with-redhat-5") != -1:
     pseudo_platform="slc5_x86_64"
-elif PLATFORM.find("i686-with-redhat-6") != -1:
-    pseudo_platform="slc6_i686"
 elif PLATFORM.find("x86_64-with-redhat-6") != -1:
     pseudo_platform="slc6_x86_64"
 
