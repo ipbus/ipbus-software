@@ -33,11 +33,16 @@ import os
 
 SOFT_TIMEOUT_S = 570
 
-def get_commands(conn_file):
+def get_commands(conn_file, controlhub_scripts_dir):
     """Return full list of all sections/commands in this test suite."""
 
     if not conn_file.startswith("file://"):
         conn_file = "file://" + conn_file
+
+    controlhub_start = "sudo " + join(controlhub_scripts_dir, "controlhub_start")
+    controlhub_status = join(controlhub_scripts_dir, "controlhub_status")
+    controlhub_stats = join(controlhub_scripts_dir, "controlhub_stats")
+    controlhub_stop = "sudo " + join(controlhub_scripts_dir, "controlhub_stop")
 
     cmds = []
     cmds += [["TEST IPBUS 1.3 UDP",
@@ -100,21 +105,21 @@ def get_commands(conn_file):
     cmds += [["TEST IPBUS 1.3 CONTROLHUB",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
-               "sudo controlhub_start",
-               "sudo controlhub_status",
+               controlhub_start,
+               controlhub_status,
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
-               "sudo controlhub_stop",
+               controlhub_stop,
                # TIMEOUT TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
-               "sudo controlhub_start",
-               "sudo controlhub_status",
+               controlhub_start,
+               controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "sudo controlhub_stop",
+               controlhub_stop,
                #CONTROL HUB TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
-               "sudo controlhub_start",
-               "sudo controlhub_status",
+               controlhub_start,
+               controlhub_status,
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
@@ -132,8 +137,8 @@ def get_commands(conn_file):
                "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.controlhub -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "sudo controlhub_stats",
-               "sudo controlhub_stop"]
+               controlhub_stats,
+               controlhub_stop]
                 ]]
 
     cmds += [["TEST IPBUS 2.0 UDP",
@@ -195,21 +200,21 @@ def get_commands(conn_file):
     cmds += [["TEST IPBUS 2.0 CONTROLHUB",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "sudo controlhub_start",
-               "sudo controlhub_status",
+               controlhub_start,
+               controlhub_status,
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "sudo controlhub_stop",
+               controlhub_stop,
                # TIMEOUT TESTS
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
-               "sudo controlhub_start",
-               "sudo controlhub_status",
+               controlhub_start,
+               controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "sudo controlhub_stop",
+               controlhub_stop,
                #CONTROL HUB TESTS
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-               "sudo controlhub_start",
-               "sudo controlhub_status",
+               controlhub_start,
+               controlhub_status,
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
@@ -227,8 +232,8 @@ def get_commands(conn_file):
                "sleep 30; DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                "test_random.exe -c %s -d dummy.controlhub2 -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "controlhub_stats",
-               "sudo controlhub_stop"]
+               controlhub_stats,
+               controlhub_stop]
                 ]]
 
     cmds += [["TEST IPBUS 2.0 CONTROLHUB with packet loss",
@@ -236,34 +241,34 @@ def get_commands(conn_file):
                "sudo /sbin/tc -s qdisc ls dev lo",
                "sudo /sbin/tc qdisc del dev lo root",
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
-               "sudo controlhub_start",
-               "sudo controlhub_status",
-               "controlhub_stats",
+               controlhub_start,
+               controlhub_status,
+               controlhub_stats,
                # Main tests - no packet loss reference
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "controlhub_stats",
+               controlhub_stats,
                "sudo /sbin/tc qdisc add dev lo root netem loss 0.0001%",
                "sudo /sbin/tc -s qdisc ls dev lo",
                # Main tests - no packet loss reference
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "controlhub_stats",
+               controlhub_stats,
                # Main tests
                "sudo /sbin/tc qdisc change dev lo root netem loss 0.5%",
                "sudo /sbin/tc -s qdisc ls dev lo",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "controlhub_stats", 
+               controlhub_stats, 
                # Clean up
                "sudo /sbin/tc qdisc del dev lo root",
                "sudo /sbin/tc -s qdisc ls dev lo",
                "pkill -f \"DummyHardwareUdp.exe\"",
                "cat /var/log/controlhub.log",
-               "sudo controlhub_stop"]
+               controlhub_stop]
                 ]]
 
     cmds += [["TEST uHAL GUI",
@@ -291,7 +296,7 @@ def cleanup_cmds():
 def get_sections():
     """Return list of all sections of commands defined in this test suite"""
 
-    return [section for section, cmds in get_commands("")]
+    return [section for section, cmds in get_commands("", "")]
 
 
 def run_command(cmd, verbose=True):
@@ -379,6 +384,7 @@ if __name__=="__main__":
     else:
         print 'Only sections whose names contain "'+section_search_str+'" will be run'
 
+    # Display env vars
     print
     if run_cmds:
         print "Environment variables ..."
@@ -387,9 +393,18 @@ if __name__=="__main__":
     else:
         print "N.B: Commands will only be listed, not run"
 
+    # Find directory for controlhub commands
+    print
+    which_controlhub_status = run_command("which controlhub_status", False)
+    if which_controlhub_status[1]:
+        controlhub_scripts_dir = "/opt/cactus/bin"
+    else:
+        controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") ) 
+    print 'Using dir "'+controlhub_scripts_dir+'" for controlhub scripts ...'
+
     # Run the commands
     try:
-        for section_name, cmds in get_commands(conn_file):
+        for section_name, cmds in get_commands(conn_file, controlhub_scripts_dir):
             if section_search_str is None:
                skip_section = False
             else:
