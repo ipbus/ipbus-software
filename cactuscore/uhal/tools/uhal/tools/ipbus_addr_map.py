@@ -1,4 +1,4 @@
-import pycohal as uhal
+import uhal
 import math
 import sys
 import re
