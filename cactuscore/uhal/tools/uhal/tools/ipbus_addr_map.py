@@ -137,10 +137,13 @@ def ipbus_addr_map(fn,verbose=False):
 
     return result
 
-def get_decode_template_fn():
-    this_dir, this_filename = os.path.split(__file__)
-    return os.path.join(this_dir, "templates", "ipbus_addr_decode.vhd")
-    
+def get_vhdl_template(fn=None):
+    if not fn:
+        this_dir, this_filename = os.path.split(__file__)
+        fn = os.path.join(this_dir, "templates", "ipbus_addr_decode.vhd")
+
+    return open(fn).read()
+
 class TestSimple(unittest.TestCase):
     def test_simple(self):
         this_dir, this_filename = os.path.split(__file__)

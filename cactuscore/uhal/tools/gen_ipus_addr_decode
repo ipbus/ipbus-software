@@ -22,7 +22,7 @@ options:
 """
 import getopt
 import sys
-from uhal.tools import ipbus_addr_map
+from uhal.tools import ipbus_addr_map, get_vhdl_template
 import time
 
 verbose = False
@@ -173,7 +173,7 @@ def main():
     snippet += "\t\t-- END automatic generated VHDL\n"
     
     #print vhdl
-    print open(template_fn, "r").read().replace("--ADDR_TABLE_HERE",snippet)
+    print get_vhdl_template().read().replace("--ADDR_TABLE_HERE",snippet)
     
 if __name__ == '__main__':
     main()
