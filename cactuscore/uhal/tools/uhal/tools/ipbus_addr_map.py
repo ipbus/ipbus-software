@@ -3,9 +3,7 @@ import math
 import sys
 import re
 import unittest
-
-BUS_REGEX = re.compile("(^|[,])\s*bus\s*([,]|$)");
-SLAVE_REGEX = re.compile("(^|[,])\s*slave\s*([,]|$)");
+import os
 
 def __isFIFO(node):
     if str(node.getMode()) == "NON_INCREMENTAL":
@@ -134,9 +132,15 @@ def ipbus_addr_map(fn,verbose=False):
 
     return result
 
+def get_decode_template_fn():
+    this_dir, this_filename = os.path.split(__file__)
+    return os.path.join(this_dir, "templates", "ipbus_addr_decode.vhd")
+    
 class TestSimple(unittest.TestCase):
     def test_simple(self):
-        m = ipbus_addr_map("uhal/tools/test_data/simple.xml")
+        this_dir, this_filename = os.path.split(__file__)
+        simplefn = os.path.join(this_dir, "test_data","simple.xml")
+        m = ipbus_addr_map(simplefn)
 
         #just a smoke test
         buses = [bus for bus,slaves in m]
