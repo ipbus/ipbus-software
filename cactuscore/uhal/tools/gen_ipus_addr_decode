@@ -173,7 +173,7 @@ def main():
     snippet += "\t\t-- END automatic generated VHDL\n"
     
     #print vhdl
-    print get_vhdl_template().read().replace("--ADDR_TABLE_HERE",snippet)
+    print get_vhdl_template().replace("--ADDR_TABLE_HERE",snippet)
     
 if __name__ == '__main__':
     main()
