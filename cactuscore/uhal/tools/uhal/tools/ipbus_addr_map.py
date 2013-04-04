@@ -1,9 +1,9 @@
 import uhal
 import math
 import sys
-import re
 import unittest
 import os
+import re
 
 BUS_REGEX = re.compile("(^|[,])\s*bus\s*([,]|$)");
 SLAVE_REGEX = re.compile("(^|[,])\s*slave\s*([,]|$)");
@@ -36,10 +36,10 @@ def __getWidth(node):
         children = node.getNodes()
         minaddr = None
         maxaddr = None
-        for id in children:
-            if __isSlave(node.getNode(id)):
-                raise Exception("Slave '%s' inside '%s' slave" % (id,node.getId()))
-            addr = node.getNode(id).getAddress()
+        for name in children:
+            if __isSlave(node.getNode(name)):
+                raise Exception("Slave '%s' inside '%s' slave" % (name,node.getId()))
+            addr = node.getNode(name).getAddress()
             if not minaddr or minaddr>addr:
                 minaddr = addr
             if not maxaddr or maxaddr<addr:
@@ -106,30 +106,30 @@ def ipbus_addr_map(fn,verbose=False):
         children = __getChildren(parent)
         slaves = []
         while (children):
-            id = children.pop(0)
-            child = parent.getNode(id)
+            name = children.pop(0)
+            child = parent.getNode(name)
             if __isBus(child):
                 if __isSlave(child):
-                    raise Exception("Node '%s' is tagged as slave and bus at the same time" % id)
+                    raise Exception("Node '%s' is tagged as slave and bus at the same time" % name)
                 elif not __isModule(child):
-                    raise Exception("Node '%s' is tagged as bus but it does not have children" % id)
+                    raise Exception("Node '%s' is tagged as bus but it does not have children" % name)
                 else:
-                    buses.append(id)
+                    buses.append(name)
             elif __isSlave(child):
                 addr = child.getAddress()
 
                 #remove duplicates (e.g. masks)
                 if addr in addrs:
                     if verbose:
-                        print "WARNING: Node '%s' has duplicate address %s. Ignoring slave..." % (id, hex32(addr))
+                        print "WARNING: Node '%s' has duplicate address %s. Ignoring slave..." % (name, hex32(addr))
                     continue
                 addrs.add(addr)
                 width = __getWidth(child)
 
-                slaves.append((id,addr,width))
+                slaves.append((name,addr,width))
                 
             elif __isModule(child):
-                children += map(lambda x: "%s.%s" % (id,x),__getChildren(child))
+                children += map(lambda x: "%s.%s" % (name,x),__getChildren(child))
 
         #sort by address        
         slaves.sort(lambda x,y: cmp(d.getNode(x[0]).getAddress(),d.getNode(y[0]).getAddress()))
@@ -154,7 +154,7 @@ class TestSimple(unittest.TestCase):
         self.assertTrue("SUBSYSTEM1" in buses)
         self.assertTrue("SUBSYSTEM2" in buses)
 
-        sroot = dict(((id,(hex32(addr),width)) for id,addr,width in m[0][1]))
+        sroot = dict(((name,(hex32(addr),width)) for name,addr,width in m[0][1]))
         self.assertTrue(len(sroot) == 6)
         self.assertTrue(sroot['REG'][0] == "0x00000001")
         self.assertTrue(sroot['REG'][1] == 0)
@@ -163,7 +163,7 @@ class TestSimple(unittest.TestCase):
         self.assertTrue(sroot['FIFO'][0] == "0x00000100")
         self.assertTrue(sroot['FIFO'][1] == 0)
 
-        sub2 = dict(((id,(hex32(addr),width)) for id,addr,width in m[2][1]))
+        sub2 = dict(((name,(hex32(addr),width)) for name,addr,width in m[2][1]))
         self.assertTrue(len(sub2) == 4)
         self.assertTrue(sub2['REG'][0] == "0x00300001")
         self.assertTrue(sub2['REG'][1] == 0)
