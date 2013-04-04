@@ -5,6 +5,9 @@ import re
 import unittest
 import os
 
+BUS_REGEX = re.compile("(^|[,])\s*bus\s*([,]|$)");
+SLAVE_REGEX = re.compile("(^|[,])\s*slave\s*([,]|$)");
+
 def __isFIFO(node):
     if str(node.getMode()) == "NON_INCREMENTAL":
         return True
@@ -41,8 +44,10 @@ def __getWidth(node):
                 minaddr = addr
             if not maxaddr or maxaddr<addr:
                 maxaddr = addr
-        print node.getId()," ",minaddr," ",maxaddr      
+
         return int(math.ceil(math.log(maxaddr-minaddr+1,2)))
+    else:
+        return 0
     
 def __isModule(node):
     if node.getNodes():
