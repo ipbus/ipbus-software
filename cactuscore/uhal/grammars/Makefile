@@ -9,10 +9,10 @@ PackageName = cactuscore-uhal-grammars
 
 Packager = Andrew Rose
 
-PACKAGE_VER_MAJOR = 1
+PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 0
-PACKAGE_VER_PATCH = 2
-PACKAGE_RELEASE = 1
+PACKAGE_VER_PATCH = 0
+PACKAGE_RELEASE = 0
 
 LIBRARY = lib/libcactus_uhal_grammars.so
 
