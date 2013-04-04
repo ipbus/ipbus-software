@@ -23,7 +23,7 @@ class TestGuiImports(unittest.TestCase):
 
     def test_default_off(self):    
         print '********** Configuration: default=No, guilist=[] **********'
-        g = uhal.gui.guiloader.gui_loader(default='No', test_mode='Yes')
+        g = uhal.gui.guiloader.gui_loader(default=False, test_mode='Yes')
         self.assertEqual(uhal.gui.guiloader.start_test(), 'OK')
         print
 
@@ -37,7 +37,7 @@ class TestGuiImports(unittest.TestCase):
 
     def test_default_off_custom_one(self):
         print '********** Configuration: default=No, guilist=[\'CustomWindow1\'] **********'
-        g = uhal.gui.guiloader.gui_loader(default='No', guilist=['CustomWindow1'], test_mode='Yes')
+        g = uhal.gui.guiloader.gui_loader(default=False, guilist=['CustomWindow1'], test_mode='Yes')
         self.assertEqual(uhal.gui.guiloader.start_test(), 'OK')
         print
 
@@ -51,7 +51,7 @@ class TestGuiImports(unittest.TestCase):
 
     def test_default_off_custom_one_two(self):
         print '********** Configuration: default=No, guilist=[\'CustomWindow1\',\'CustomWindow2\'] **********'
-        g = uhal.gui.guiloader.gui_loader(default='No', guilist=['CustomWindow1','CustomWindow2'], test_mode='Yes')
+        g = uhal.gui.guiloader.gui_loader(default=False, guilist=['CustomWindow1','CustomWindow2'], test_mode='Yes')
         self.assertEqual(uhal.gui.guiloader.start_test(), 'OK')
         print
 

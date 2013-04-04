@@ -31,3 +31,6 @@ _rpmall:
 	rm -rf /var/tmp/cactus*
 	python setup.py bdist_rpm --release ${PACKAGE_RELEASE} --binary-only
 
+install: _install
+_install:
+	find . -name "*.rpm" -exec sudo rpm -iv {} \;

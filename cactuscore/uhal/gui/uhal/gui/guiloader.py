@@ -27,41 +27,47 @@ class MainApplication(wx.App):
             
 
 
+class GuiLoader:
 
-glist = []
-testmode = ""
+    def __init__(self, guilist):
+        self.gui_list = guilist    
 
-def gui_loader(default='yes', guilist=[], test_mode='no'):
 
-    global glist, testmode    
+    def start(self):
+
+        output_to_window = False
+        app = MainApplication(self.gui_list, output_to_window)
+        app.MainLoop()
+
+
     
-    d = default
-    glist = guilist
-    testmode = test_mode
-    
-    if d == 'yes' and glist.count('DefaultGui') == 0:
-          glist.insert(0, 'DefaultGui')
 
-    if d == 'no' and glist.count('DefaultGui') == 1:
-          glist.remove('DefaultGui')
+
+def loader(default=True, guilist=[], test_mode='no'):
+    
+    if default == True and guilist.count('DefaultGui') == 0:
+          guilist.insert(0, 'DefaultGui')
+
+    if default == False and guilist.count('DefaultGui') == 1:
+          guilist.remove('DefaultGui')
+
+    g = GuiLoader(guilist)
+    return g
 
 
 
 def start():
-
-    global glist, testmode
-    
-    output_to_window = False
-    app = MainApplication(glist, output_to_window)
-    app.MainLoop()
+    pass
 
 
 def start_test():
-
-    for gui in glist:
+    pass
+"""
+    for gui in GLIST:
         status = dynamic_loader(gui)[1]
         if status == 'FAILED':
             return status
 
 
     return 'OK'
+"""

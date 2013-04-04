@@ -3,7 +3,7 @@ import webbrowser
 
 import wx
 
-import uhal.gui.utilities.utilities
+from uhal.gui.guis import hardware_tree
 from uhal.gui.utilities import monitoring_starter
 
 
@@ -11,22 +11,18 @@ class DefaultGui(wx.Frame):
 
     def __init__(self, parent, id, title):
 
-        wx.Frame.__init__(self, parent, id, title)
+        wx.Frame.__init__(self, parent, id, title, size=(500, 400))
         
-        self.panel = wx.Panel(self)
-        self.panel.SetBackgroundColour('White')
-
-        self.grid_bag_sizer = wx.GridBagSizer()
-        self.panel.SetSizer(self.grid_bag_sizer)
-        self.Fit()
+        panel = wx.Panel(self)
+        panel.SetBackgroundColour('White')
+        
+        self.create_menu_bar()
+        self.create_refresh_controls(panel)
         
         self.Bind(wx.EVT_CLOSE, self.on_close_window)
 
-        self.create_menu_bar()
-        self.create_auto_refresh_box()
-        self.create_refresh_button()
-
         self.__hw_mon = None
+
 
     # CREATE THE MENU BAR
     def create_menu_bar(self):
@@ -38,7 +34,8 @@ class DefaultGui(wx.Frame):
             menu_bar.Append(self.create_menu(menu_items), menu_label)
 
         self.SetMenuBar(menu_bar)
-        
+
+
 
     # MENU BAR ITEMS
     def menu_data(self):
@@ -69,19 +66,24 @@ class DefaultGui(wx.Frame):
 
         return menu
 
+    def create_refresh_controls(self, panel):
 
-    def create_auto_refresh_box(self):
+        refresh_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        auto_refresh_box = wx.CheckBox(panel, -1, "Auto-refresh")
+        refresh_button = wx.Button(panel, -1, "Refresh")
+        refresh_sizer.Add(auto_refresh_box, 0, wx.ALL, 10)
+        refresh_sizer.Add(refresh_button, 0, wx.ALL, 200)
 
-        self.auto_refresh_box = wx.CheckBox(self.panel, -1, "Auto-refresh", pos=wx.DefaultPosition, size=wx.DefaultSize)        
-        self.Bind(wx.EVT_CHECKBOX, self.on_click_auto_refresh, self.auto_refresh_box)
+        refresh_sizer.Fit(self)
+        
+        self.Bind(wx.EVT_CHECKBOX, self.on_click_auto_refresh, auto_refresh_box)
+        self.Bind(wx.EVT_BUTTON, self.on_click_refresh, refresh_button)
+        
 
-
-    def create_refresh_button(self):
-
-        self.refresh_button = wx.Button(self.panel, -1, "Refresh", pos=(0, 100))
-        self.Bind(wx.EVT_BUTTON, self.on_click_refresh, self.refresh_button)
-
-
+    def __create_hardware_tree(self):
+        ht = hardware_tree.HardwareTree(self)
+        ht.Show()
 
 
 ########## EVENT HANDLERS ##########
@@ -104,7 +106,8 @@ class DefaultGui(wx.Frame):
     
 
         if file_picker.ShowModal() == wx.ID_OK:
-            self.__hw_mon = monitoring_starter.MonitoringStarter(file_picker.GetPath())            
+            self.__hw_mon = monitoring_starter.start_monitoring(file_picker.GetPath())            
+            self.__create_hardware_tree()
         
         file_picker.Destroy()
 
@@ -154,7 +157,9 @@ class DefaultGui(wx.Frame):
 
 
     def on_close_window(self, event):
-        self.__hw_mon.stop_mon()
+        if self.__hw_mon:
+            self.__hw_mon.stop_mon()
+            
         self.Destroy()
 
 

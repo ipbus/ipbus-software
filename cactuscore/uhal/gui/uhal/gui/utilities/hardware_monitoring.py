@@ -19,7 +19,7 @@ class HardwareMonitoring(threading.Thread):
 
         self.__stop = threading.Event()
         
-        self.__hw_struct = None
+        #self.__hw_struct = None
 
         if self.__conn_file != "":
             self.__hw_manager = pycohal.ConnectionManager(str("file://" + self.__conn_file))
@@ -38,7 +38,7 @@ class HardwareMonitoring(threading.Thread):
         If there is an exception while getting the device, the IP end point
         will not be added to the monitoring list """
 
-        self.__hw_struct = hardware.HardwareStruct()
+        #self.__hw_struct = hardware.HardwareStruct()
 
         for dev_name in self.__hw_manager.getDevices():        
 
@@ -53,8 +53,9 @@ class HardwareMonitoring(threading.Thread):
                 ip_end_point.add_node(node)
             
             
-            self.__hw_struct.add_ip_end_point(ip_end_point)
-
+            #self.__hw_struct.add_ip_end_point(ip_end_point)
+            hardware.add_ip_end_point(ip_end_point)
+            
         self.__print_hardware()
 
 
@@ -64,12 +65,14 @@ class HardwareMonitoring(threading.Thread):
     
     def __print_hardware(self):
 
-        for i in self.__hw_struct.get_ip_end_points():
+        #for i in self.__hw_struct.get_ip_end_points():
+        for i in hardware.get_ip_end_points():
             i.print_ip_end_point()
 
                 
     def run(self):
-
+        pass
+    '''
         while not self.__is_stopped():
 
             for i in self.__hw_struct.get_ip_end_points():
@@ -82,7 +85,8 @@ class HardwareMonitoring(threading.Thread):
                     self.__update(i.get_id(), n)
 
                     
-            time.sleep(10.0)
+            time.sleep(20.0)
+        '''
             
 
     def __update(self, ip_ep_name, node):
