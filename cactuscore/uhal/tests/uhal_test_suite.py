@@ -239,7 +239,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
     cmds += [["TEST IPBUS 2.0 CONTROLHUB with packet loss",
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
-               "sudo /sbin/tc qdisc del dev lo root",
+               "sudo /sbin/tc qdisc del dev lo root ; sudo /sbin/tc -s qdisc ls dev lo",
                "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
                controlhub_start,
                controlhub_status,
