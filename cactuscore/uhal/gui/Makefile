@@ -28,7 +28,7 @@ _all:
 
 rpm: _rpmall
 _rpmall:
-	rm -rf /var/tmp/cactus*
+	rm -rf /var/tmp/cactus* 
 	python setup.py bdist_rpm --release ${PACKAGE_RELEASE} --binary-only
 
 install: _install
