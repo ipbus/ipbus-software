@@ -19,7 +19,7 @@ L1PAGE_ROOT	    = "/opt/l1page/tomcat/webapps/ROOT"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 #xdaq.repo file name as a function of the platform, and alias dirs for the nightlies results
 pseudo_platform= "unknown"
-l1page_platform= "noarch"
+
 
 if PLATFORM.find("i686-with-redhat-5") != -1:
     pseudo_platform="slc5_i686"
@@ -199,7 +199,6 @@ COMMANDS += [["TEST L1PAGE",
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
                "sudo sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(L1PAGE_ROOT, "WEB-INF/classes/log4j.properties")),
-               "python %s" % join(L1PAGE_ROOT, "test/l1pageTest.py"),
-               "sudo /sbin/service l1paged stop"]
+               "python %s" % join(L1PAGE_ROOT, "test/l1pageTest.py")]
               ]]
 
