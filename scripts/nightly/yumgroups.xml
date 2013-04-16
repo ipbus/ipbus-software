@@ -81,4 +81,52 @@
 
 </packagelist>
 </group>
+
+
+<group>
+<id>gtgmt</id>
+<name>gtgmt</name>
+<default>true</default>
+<description>GT & GMT  Packages of the CACTUS YUM repository</description>
+<uservisible>true</uservisible>
+<grouplist></grouplist>
+<packagelist>
+      <packagereq type="mandatory">cactusprojects-FDL</packagereq>
+      <packagereq type="mandatory">cactusprojects-FDL-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-FDLGUI</packagereq>
+      <packagereq type="mandatory">cactusprojects-GMTDriver</packagereq>
+      <packagereq type="mandatory">cactusprojects-GMTDriver-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-GTBase</packagereq>
+      <packagereq type="mandatory">cactusprojects-GTBase-GtUtils</packagereq>
+      <packagereq type="mandatory">cactusprojects-GTBase-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-GTFE</packagereq>
+      <packagereq type="mandatory">cactusprojects-GTFE-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-GTL</packagereq>
+      <packagereq type="mandatory">cactusprojects-GTL-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-PSB</packagereq>
+      <packagereq type="mandatory">cactusprojects-PSB-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-PSBOgti</packagereq>
+      <packagereq type="mandatory">cactusprojects-PSBOgti-Utils</packagereq>
+      <packagereq type="mandatory">cactusprojects-PSBOgti-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-TCS</packagereq>
+      <packagereq type="mandatory">cactusprojects-TCS-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-TCSGUI</packagereq>
+      <packagereq type="mandatory">cactusprojects-TIM</packagereq>
+      <packagereq type="mandatory">cactusprojects-TIM-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-TIMGUI</packagereq>
+      <packagereq type="mandatory">cactusprojects-gmttscell</packagereq>
+      <packagereq type="mandatory">cactusprojects-gmttscell-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-gtexterndip</packagereq>
+      <packagereq type="mandatory">cactusprojects-gtexterndip-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttscell</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttscell-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttsextern</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttsextern-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttsl1triggermenueditor</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttsl1triggermenueditor-devel</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttstestcell</packagereq>
+      <packagereq type="mandatory">cactusprojects-gttstestcell-devel</packagereq>
+</packagelist>
+</group>
+
 </comps>

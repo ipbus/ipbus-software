@@ -38,6 +38,9 @@ PACKAGES = \
         cactusprojects/ttc/ts/TTCMonitoringCell \
 	\
         cactusprojects/l1page
+	\
+	cactusprojects/gt \
+	cactusprojects/gmt
 endif
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
