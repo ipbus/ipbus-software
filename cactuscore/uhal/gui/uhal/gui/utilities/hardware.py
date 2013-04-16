@@ -1,6 +1,5 @@
 import threading
 import time
-import pycohal
 
 
 
@@ -128,8 +127,8 @@ class IPEndPoint:
         for n in self.__nodes_list:
             n.print_node()
 
-
-'''       
+            
+      
 class HardwareStruct:
 
     def __init__(self):
@@ -144,20 +143,11 @@ class HardwareStruct:
 
     def get_ip_end_points(self):
         return self.__ip_end_points_list
-'''
 
 
-ip_end_points_list = []
 
-def add_ip_end_point(ip_ep):
-
-    global ip_end_points_list
-    
-    print "Adding IP End Point %s to the IP End Point list..." % ip_ep.get_id()
-    ip_end_points_list.append(ip_ep)
+def get_hardware():
+    return HardwareStruct()
 
 
-def get_ip_end_points():
 
-    global ip_end_points_list
-    return ip_end_points_list
