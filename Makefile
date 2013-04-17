@@ -37,7 +37,7 @@ PACKAGES = \
         cactusprojects/ttc/ts/TTCmiCell \
         cactusprojects/ttc/ts/TTCMonitoringCell \
 	\
-        cactusprojects/l1page
+        cactusprojects/l1page \
 	\
 	cactusprojects/gt \
 	cactusprojects/gmt
