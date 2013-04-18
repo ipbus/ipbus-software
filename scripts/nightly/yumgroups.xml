@@ -87,7 +87,7 @@
 <id>gtgmt</id>
 <name>gtgmt</name>
 <default>true</default>
-<description>GT & GMT  Packages of the CACTUS YUM repository</description>
+<description>GT/GMT  Packages of the CACTUS YUM repository</description>
 <uservisible>true</uservisible>
 <grouplist></grouplist>
 <packagelist>
