@@ -146,8 +146,3 @@ class HardwareStruct:
 
 
 
-def get_hardware():
-    return HardwareStruct()
-
-
-

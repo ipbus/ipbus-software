@@ -11,7 +11,7 @@ class HardwareTree(wx.Frame):
         self.tree = wx.TreeCtrl(self)
         root = self.tree.AddRoot("uTCA HW")
 
-        hw = hardware.HardwareStruct()
+        hw = hardware.get_hardware()
         ip_end_points = hw.get_ip_end_points()
         print "IP end points in tree are:", ip_end_points
         self.add_tree_nodes(root)

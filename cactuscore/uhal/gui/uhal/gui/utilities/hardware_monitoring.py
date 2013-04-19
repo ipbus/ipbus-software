@@ -3,7 +3,7 @@ import threading
 import time
 
 import uhal
-from uhal.gui.utilities import hardware
+from uhal.gui.utilities.hardware import HardwareStruct, IPEndPoint, Node
 
 
 class HardwareMonitoring(threading.Thread):
@@ -16,9 +16,7 @@ class HardwareMonitoring(threading.Thread):
         self.__id = id
         self.__uri = uri
         self.__add_table = address_table
-
-        self.__stop = threading.Event()
-        
+ 
         self.__hw_struct = None
 
         if self.__conn_file != "":
@@ -38,18 +36,18 @@ class HardwareMonitoring(threading.Thread):
         If there is an exception while getting the device, the IP end point
         will not be added to the monitoring list """
 
-        self.__hw_struct = hardware.get_hardware()
+        self.__hw_struct = HardwareStruct()
 
         for dev_name in self.__hw_manager.getDevices():        
 
             dev_object = self.__hw_manager.getDevice(dev_name)
-            ip_end_point = hardware.IPEndPoint(dev_object)
+            ip_end_point = IPEndPoint(dev_object)
 
             
             for n in self.__get_parent_nodes(dev_object):
 
                 node_object = dev_object.getNode(n)
-                node = hardware.Node(node_object)
+                node = Node(node_object)
                 ip_end_point.add_node(node)
             
             
@@ -70,19 +68,15 @@ class HardwareMonitoring(threading.Thread):
                 
     def run(self):
        
-        while not self.__is_stopped():
+        for i in self.__hw_struct.get_ip_end_points():
+            print "Updating IP End Point %s" % i.get_id()
+            ##### get the status here, or make the IP end point object to find it out #####
+            i.set_status("Undefined")
 
-            for i in self.__hw_struct.get_ip_end_points():
-                print "Updating IP End Point %s" % i.get_id()
-                ##### get the status here, or make the IP end point object to find it out #####
-                i.set_status("Undefined")
-                
-                for n in i.get_nodes():
-                    print "Updating node %s" % n.get_name()
-                    self.__update(i.get_id(), n)
-
-                    
-            time.sleep(20.0)
+            for n in i.get_nodes():
+                print "Updating node %s" % n.get_name()
+                self.__update(i.get_id(), n)
+    
         
             
 

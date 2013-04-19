@@ -3,57 +3,69 @@ import webbrowser
 
 import wx
 
-from uhal.gui.guis import hardware_tree
-from uhal.gui.utilities import monitoring_starter
-
+from uhal.gui.guis.hardware_tree import HardwareTree
+from uhal.gui.guis.refresh_buttons_panel import RefreshButtonsPanel
+        
 
 class DefaultGui(wx.Frame):
 
     def __init__(self, parent, id, title):
 
         wx.Frame.__init__(self, parent, id, title, size=(500, 400))
-        
-        panel = wx.Panel(self)
-        panel.SetBackgroundColour('White')
-        
-        self.create_menu_bar()
-        self.create_refresh_controls(panel)
-        
-        self.Bind(wx.EVT_CLOSE, self.on_close_window)
 
+        # Attributes
         self.__hw_mon = None
 
 
+        # Layout
+        self.__create_menu_bar()
+        self.__do_layout()
+        self.CreateStatusBar()
+
+        
+        # Event handlers 
+        self.Bind(wx.EVT_CLOSE, self.__on_close_window)
+
+
+
+    def __do_layout(self):
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(RefreshButtonsPanel(self), 1, wx.ALIGN_CENTER)
+        self.SetSizer(sizer)
+        self.SetMinSize((800, 600))
+
+
     # CREATE THE MENU BAR
-    def create_menu_bar(self):
+    def __create_menu_bar(self):
 
         menu_bar = wx.MenuBar()
-        for each_menu_data in self.menu_data():
+        for each_menu_data in self.__menu_data():
             menu_label = each_menu_data[0]
             menu_items = each_menu_data[1:]
-            menu_bar.Append(self.create_menu(menu_items), menu_label)
+            menu_bar.Append(self.__create_menu(menu_items), menu_label)
 
         self.SetMenuBar(menu_bar)
 
 
 
-    # MENU BAR ITEMS
-    def menu_data(self):
+    # menu bar items
+    def __menu_data(self):
         
         return (("&File",
-                 ("&LoadHW", "Load HW", self.on_load_hw),
-                 ("&Quit", "Quit", self.on_close_window)
+                 ("&LoadHW", "Load HW", self.__on_load_hw),
+                 ("&Quit", "Quit", self.__on_close_window)
                  ),            
                 ("&Help",
-                 ("&Documentation", "Documentation", self.on_click_doc),
-                 ("&Support", "Support", self.on_click_support),
-                 ("&About", "About", self.on_click_about)               
+                 ("&Documentation", "Documentation", self.__on_click_doc),
+                 ("&Support", "Support", self.__on_click_support),
+                 ("&About", "About", self.__on_click_about)               
                  )
                 )
 
 
-    # CREATE INDIVIDUAL MENU ITEMS
-    def create_menu(self, items):
+    # create individual menu objects
+    def __create_menu(self, items):
 
         menu = wx.Menu()
         for each_label, each_status, each_handler in items:
@@ -66,29 +78,16 @@ class DefaultGui(wx.Frame):
 
         return menu
 
-    def create_refresh_controls(self, panel):
 
-        refresh_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        
-        auto_refresh_box = wx.CheckBox(panel, -1, "Auto-refresh")
-        refresh_button = wx.Button(panel, -1, "Refresh")
-        refresh_sizer.Add(auto_refresh_box, 0, wx.ALL, 10)
-        refresh_sizer.Add(refresh_button, 0, wx.ALL, 200)
 
-        refresh_sizer.Fit(self)
-        
-        self.Bind(wx.EVT_CHECKBOX, self.on_click_auto_refresh, auto_refresh_box)
-        self.Bind(wx.EVT_BUTTON, self.on_click_refresh, refresh_button)
-        
-
+  
     def __create_hardware_tree(self):
-        ht = hardware_tree.HardwareTree(self)
+        ht = HardwareTree()
         ht.Show()
 
 
-########## EVENT HANDLERS ##########
     
-    def on_load_hw(self, event):
+    def __on_load_hw(self, event):
 
         # Right now, only a connection file picker is offered.
         # Another dialog should be displayed to cope with pycohal ConnectionManager('device_id', 'uri', 'address_table')
@@ -106,21 +105,21 @@ class DefaultGui(wx.Frame):
     
 
         if file_picker.ShowModal() == wx.ID_OK:
-            self.__hw_mon = monitoring_starter.start_monitoring(file_picker.GetPath())            
-            self.__create_hardware_tree()
+            pass
+            #self.__hw_mon = HardwareThread()                    
         
         file_picker.Destroy()
-
+        
     
-    def on_click_doc(self, event):
+    def __on_click_doc(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus")
 
 
-    def on_click_support(self, event):
+    def __on_click_support(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus")
 
 
-    def on_click_about(self, event):        
+    def __on_click_about(self, event):        
 
         description = """uHAL GUI is a Python based graphical user interface 
         written using the graphical library wxPython. Bla bla bla...
@@ -142,8 +141,6 @@ class DefaultGui(wx.Frame):
 
 
         info = wx.AboutDialogInfo()
-
-        #info.SetIcon(wx.Icon('hunter.png', wx.BITMAP_TYPE_PNG))
         info.SetName('uHAL GUI')
         info.SetVersion('1.0.0')
         info.SetDescription(description)
@@ -156,17 +153,13 @@ class DefaultGui(wx.Frame):
         wx.AboutBox(info)
 
 
-    def on_close_window(self, event):
-        if self.__hw_mon:
-            self.__hw_mon.stop_mon()
-            
-        self.Destroy()
+    def __on_close_window(self, event):
 
+        msg = "Do you really want to close this GUI?"
+        
+        dialog = wx.MessageDialog(self, msg, "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
+        result = dialog.ShowModal()
+        dialog.Destroy()
 
-    def on_click_refresh(self, event):
-        print "Refresh button clicked"
-        """ Access HW cache and print values"""
-
-    def on_click_auto_refresh(self, event):
-        print "Setting auto-refresh option %s" % self.auto_refresh_box.GetValue()
-        """ Access HW cache and print values periodically """
+        if result == wx.ID_OK:
+            self.Destroy()
