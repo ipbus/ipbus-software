@@ -85,7 +85,7 @@ COMMANDS += [["UNINSTALL",
                "sudo yum -y groupremove cactus ",
                "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null ",
                "rpm -qa | grep daq-xaas-l1test | xargs sudo rpm -ev",
-               "sudo yum -y groupremove triggersupervisor uhal",
+               "sudo yum -y groupremove triggersupervisor uhal gtgmt",
                "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite ",
                "rpm -qa | grep l1page | xargs sudo rpm -ev &> /dev/null ",
                "sudo pkill -f \"xdaq.exe\" ",
@@ -135,7 +135,7 @@ COMMANDS += [["RELEASE",
 COMMANDS += [["INSTALL",
               ["sed \"s/<platform>/%s/\" cactus.repo  | sudo tee /etc/yum.repos.d/cactus.repo > /dev/null" % PLATFORM,
                "sudo yum clean all",
-               "sudo yum -y groupinstall triggersupervisor uhal"]]]
+               "sudo yum -y groupinstall triggersupervisor uhal gtgmt"]]]
 
 COMMANDS += [["TEST CONTROLHUB",
               ["sudo chmod +w /var/log",
