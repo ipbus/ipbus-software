@@ -124,6 +124,12 @@ namespace uhal
                 return false;
               }
 
+              if ( (IPbus_major==1 && mResponseGood != 0) || (IPbus_major==2 && mResponseGood != 0xf) )
+              {
+                log ( Error(), "Bad InfoCode value of ", Integer(mResponseGood), " detected in IPbus transaction request header ", Integer ( mHeader, IntFmt<hex,fixed>() ) );
+                return false;
+              }
+
               switch ( mType )
               {
                 case B_O_T:
