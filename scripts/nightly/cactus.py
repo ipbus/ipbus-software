@@ -135,7 +135,9 @@ COMMANDS += [["RELEASE",
 COMMANDS += [["INSTALL",
               ["sed \"s/<platform>/%s/\" cactus.repo  | sudo tee /etc/yum.repos.d/cactus.repo > /dev/null" % PLATFORM,
                "sudo yum clean all",
-               "sudo yum -y groupinstall triggersupervisor uhal gtgmt"]]]
+               "sudo yum -y groupinstall uhal",
+               "sudo yum -y groupinstall triggersupervisor",
+               "sudo yum -y groupinstall gtgmt"]]]
 
 COMMANDS += [["TEST CONTROLHUB",
               ["sudo chmod +w /var/log",
