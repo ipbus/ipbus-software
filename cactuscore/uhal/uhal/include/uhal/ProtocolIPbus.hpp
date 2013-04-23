@@ -129,7 +129,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -141,6 +141,9 @@ namespace uhal
       @return whether extraction succeeded
       */
       bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+
+      //! Returns the InfoCode for request transactions in this IPbus version.
+      uint8_t requestTransactionInfoCode () const { return 0; }
 
       // std::vector< uint32_t > mSendPadding;
       // std::vector< uint32_t > mReplyPadding;
@@ -239,7 +242,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -251,6 +254,9 @@ namespace uhal
       @return whether extraction succeeded
       */
       bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+
+       //! Returns the InfoCode for request transactions in this IPbus version.
+      uint8_t requestTransactionInfoCode () const { return 0xF; }
 
     private:
       //! The transaction counter which will be incremented in the sent IPbus headers

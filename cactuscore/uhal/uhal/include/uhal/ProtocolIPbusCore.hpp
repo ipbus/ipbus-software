@@ -179,7 +179,7 @@ namespace uhal
       @param aTransactionId the TransactionId of the IPbus header
       @return an IPbus header
       */
-      virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 ) = 0;
+      virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode ) = 0;
 
       /**
       Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -192,6 +192,8 @@ namespace uhal
       */
       virtual bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode ) = 0;
 
+      //! Returns the InfoCode for request transactions in this IPbus version.
+      virtual uint8_t requestTransactionInfoCode() const = 0;
 
       /**
       	Function which checks the available space in the currently filling buffer against requested send and receive sizes and, if there is insufficient space in the currently filling buffer, then dispatch it and create a new buffer
