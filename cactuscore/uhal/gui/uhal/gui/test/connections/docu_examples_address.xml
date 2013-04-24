@@ -30,7 +30,7 @@
 
   <!-- Example 4 - "Multiple Modules with Identical Structure" -->        
   <node id="D1" module="file://docu_examples_mymodule.xml" address="0x00000400" />
-  <node id="D2" module="file://docu_examples_mymodule.xml" address="0x00000500" />
+  <node id="D2" module="file://docu_examples_mymodule.xml" address="0x00000500" /> 
 
 
   <!-- Example 5 - "Setting Read and Write Access to memory locations" -->

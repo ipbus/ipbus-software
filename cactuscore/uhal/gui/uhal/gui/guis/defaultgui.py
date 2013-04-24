@@ -3,7 +3,9 @@ import webbrowser
 
 import wx
 
+from uhal.gui.utilities.hardware_monitoring import HardwareMonitoring
 from uhal.gui.guis.hardware_tree import HardwareTree
+from uhal.gui.utilities.hardware import HardwareStruct
 from uhal.gui.guis.refresh_buttons_panel import RefreshButtonsPanel
         
 
@@ -13,17 +15,21 @@ class DefaultGui(wx.Frame):
 
         wx.Frame.__init__(self, parent, id, title, size=(500, 400))
 
-        # Attributes
+        # Attributes       
+        self.__hw = None
         self.__hw_mon = None
-
+        
+        # GUIs Attributes
+        self.__hw_tree = None
+        self.__refresh_buttons_panel = None
 
         # Layout
         self.__create_menu_bar()
         self.__do_layout()
         self.CreateStatusBar()
-
         
         # Event handlers 
+        self.Bind(HardwareMonitoring.EVT_HWREADY, self.__on_hw_ready)
         self.Bind(wx.EVT_CLOSE, self.__on_close_window)
 
 
@@ -31,9 +37,11 @@ class DefaultGui(wx.Frame):
     def __do_layout(self):
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(RefreshButtonsPanel(self), 1, wx.ALIGN_CENTER)
+        self.__refresh_buttons_panel = RefreshButtonsPanel(self)
+        sizer.Add(self.__refresh_buttons_panel, 1, wx.ALIGN_CENTER)
         self.SetSizer(sizer)
         self.SetMinSize((800, 600))
+
 
 
     # CREATE THE MENU BAR
@@ -64,6 +72,7 @@ class DefaultGui(wx.Frame):
                 )
 
 
+
     # create individual menu objects
     def __create_menu(self, items):
 
@@ -81,9 +90,12 @@ class DefaultGui(wx.Frame):
 
 
   
-    def __create_hardware_tree(self):
-        ht = HardwareTree()
-        ht.Show()
+    def __create_hardware_tree(self, hw):
+        if self.__hw_is_valid():
+            self.__hw_tree = HardwareTree(self, hw)
+            self.__hw_tree.Show()
+        else:
+            print "ERROR: could not start hardware_tree -> self.__hw is not a valid object"
 
 
     
@@ -104,19 +116,25 @@ class DefaultGui(wx.Frame):
         file_picker.SetFilename("gui")
     
 
-        if file_picker.ShowModal() == wx.ID_OK:
-            pass
-            #self.__hw_mon = HardwareThread()                    
+        if file_picker.ShowModal() == wx.ID_OK:            
+            file_name = file_picker.GetPath()
+            
+            self.__hw = HardwareStruct(file_name)                    
+            self.__create_hardware_tree(self.__hw)            
+            
         
         file_picker.Destroy()
         
+    
     
     def __on_click_doc(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus")
 
 
+
     def __on_click_support(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus")
+
 
 
     def __on_click_about(self, event):        
@@ -153,6 +171,7 @@ class DefaultGui(wx.Frame):
         wx.AboutBox(info)
 
 
+
     def __on_close_window(self, event):
 
         msg = "Do you really want to close this GUI?"
@@ -163,3 +182,36 @@ class DefaultGui(wx.Frame):
 
         if result == wx.ID_OK:
             self.Destroy()
+          
+          
+          
+    def __on_hw_ready(self, event):
+            
+        print "DEBUG: HW READY in default GUI"
+        value = "-1"
+        for i in self.__hw.get_ip_end_points():
+            for n in i.get_nodes():
+                if n.get_id() == "REG":
+                    value = n.get_value()  
+                        
+        self.__refresh_buttons_panel.on_hw_ready(value)
+        self.__hw_tree.redraw(self.__hw)
+        
+        
+        
+    def __hw_is_valid(self):
+        return self.__hw is not None
+    
+          
+    
+    def start_hw_thread(self):
+        print "DEBUG: Received message from refresh_buttons_panel. Should start HW thread now"
+        if self.__hw_is_valid():
+            hw_worker = HardwareMonitoring(self, self.__hw)
+            hw_worker.start()
+        else: 
+            print "ERROR: could not start HW update thread -> self.__hw is not a valid object"
+        
+        
+   
+        

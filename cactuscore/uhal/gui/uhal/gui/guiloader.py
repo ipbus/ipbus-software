@@ -1,50 +1,9 @@
-import Queue
-import threading
 import wx
-import time
 
 from uhal.gui.utilities.utilities import dynamic_loader
 from uhal.gui.guis import defaultgui
 
 
-class ThreadClient(wx.Timer):
-
-    def __init__(self, main_app):
-
-        self.main_app = main_app
-        self.queue = Queue.Queue()
-        self.gui = defaultgui.DefaultGui(None, -1, "DefaultGui: Asynchronous thread test")
-        self.gui.Show(True)
-
-        self.running = True
-        self.hw_thread = threading.Thread(target = self.hw_worker)
-        self.hw_thread.start()
-
-        wx.Timer.__init__(self)
-        self.Bind(wx.EVT_TIMER, self.gui_periodic_check)
-        self.Start(10000)
-
-
-    def gui_periodic_check(self, event):
-
-        self.gui.process_incoming()
-        
-        if not self.running:
-            import sys
-            sys.exit(1)
-
-
-    def hw_worker(self):
-
-        while self.running:
-            time.sleep(20)
-            print "executing hw_worker thread"
-            print "putting hw object in queue"
-        
-
-    def end_application(self):
-
-        self.running = False
 
         
 
@@ -95,7 +54,7 @@ class GuiLoader:
 
 def loader(default=True, guilist=[]):
 
-    if default == True:
+    if default:
 
         try:
             default_mod_obj = __import__('uhal.gui.guis', globals(), locals(), ['defaultgui'])

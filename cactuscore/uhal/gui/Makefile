@@ -24,7 +24,9 @@ _cleanall:
 all: _all
 build: _all
 buildall: _all
-_all: 
+_all: all
+all:
+	pychecker --limit 1000 uhal/gui/guiloader.py 
 
 rpm: _rpmall
 _rpmall:
@@ -33,4 +35,5 @@ _rpmall:
 
 install: _install
 _install:
+	sudo rpm -ev cactuscore-uhal-gui &>/dev/null; exit 0
 	find . -name "*.rpm" -exec sudo rpm -iv {} \;
