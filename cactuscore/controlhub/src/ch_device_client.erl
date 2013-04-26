@@ -311,7 +311,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%      it's called from
 %% @spec send_request_to_board({Packet::binary(), ClientPid::pid()}, S::state())
 %%                        -> {noreply, NewState}
-%%                        -> {noreply, NewState, Timeout}
+%%                         | {noreply, NewState, Timeout}
+%% @end
 %% ------------------------------------------------------------------------------
 
 send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
@@ -339,11 +340,11 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_t
 
 
 %% ---------------------------------------------------------------------
-%% @doc 
-%% @throws Same as get_device_status/0
+%% @doc ... TODO ...
 %% @spec reset_packet_id(RawIPbusRequestBin, Id) -> {ok, IPbusVer, ModIPbusRequest, PacketId}
 %%                                                | {error, malformed, MsgForTransManager}
 %%                                                | {error, timeout, MsgForTransManager}
+%% @end
 %% ---------------------------------------------------------------------
 
 reset_packet_id(RawIPbusRequest, NewId) ->
@@ -370,6 +371,7 @@ reset_packet_id(RawIPbusRequest, NewId) ->
 %% ---------------------------------------------------------------------
 %% @doc Decrements packet ID looping round from 1 to 0xffff
 %% @spec decrement_pkt_id( Id::integer() ) -> IdMinusOne::integer()
+%% @end
 %% ---------------------------------------------------------------------
 
 decrement_pkt_id(Id) when is_integer(Id), Id>0 ->
@@ -383,7 +385,8 @@ decrement_pkt_id(Id) when is_integer(Id), Id>0 ->
 
 %% ---------------------------------------------------------------------
 %% @doc Increments packet ID looping round from 0xffff to 1 
-%% @spec increment_pkt_id( Id:integer() ) -> IdPlusOne::integer
+%% @spec increment_pkt_id( Id::integer() ) -> IdPlusOne::integer()
+%% @end
 %% ---------------------------------------------------------------------
 
 increment_pkt_id(Id) when is_integer(Id), Id>0 ->
@@ -394,13 +397,13 @@ increment_pkt_id(Id) when is_integer(Id), Id>0 ->
         Id + 1
     end.
 
+
 %% ---------------------------------------------------------------------
 %% @doc ... TODO ...
-%% @spec parse_packet_header( RawHeader::binary() ) -> {IPbusVer, Id, End}
+%% @spec parse_packet_header( RawHeader::binary() ) -> {IPbusVer, Id::integer(), End}
 %% where 
-%%    IPbusVer = {2,0} | {1,3} | unknown
-%%    Id::integer()
-%%    End = big | little | unknown
+%%       IPbusVer = {2,0} | {1,3} | unknown,
+%%       End = big | little | unknown
 %% @end
 %% ---------------------------------------------------------------------
 
@@ -424,9 +427,9 @@ parse_packet_header(_) ->
 
 %% ------------------------------------------------------------------------------------
 %% @doc Returns re-send request packet with specified packet ID and endian-ness
-%% @spec resend_request_pkt(Id :: integer(), End :: atom() ) ->
-%%       where
-%%         End = big | little
+%% @spec resend_request_pkt(Id :: integer(), End ) -> Pkt::<<_:32>>
+%% where
+%%       End = big | little
 %% @end
 %% ------------------------------------------------------------------------------------
 resend_request_pkt(Id, End) when Id =< 16#ffff, Id >= 0 ->
@@ -435,6 +438,7 @@ resend_request_pkt(Id, End) when Id =< 16#ffff, Id >= 0 ->
         big    -> <<Value:32/big>>;
         little -> <<Value:32/little>>
     end.
+
 
 %% ------------------------------------------------------------------------------------
 %% @doc Retrieves number of response buffers and next expected packet ID for the
@@ -472,12 +476,8 @@ get_device_status() ->
 %% @doc Sends packet to device, waits for reply, and if timeout occurs, 
 %%      retries specified number of times 
 %% @throws timeout
-%% @spec sync_send_reply(RequestBin, MaxNrSends, TimeoutEachSend) -> {ok, ResponseBin}
-%%   where 
-%%     RequestBin::binary()
-%%     MaxNrSends::integer() > 0
-%%     TimeoutEachSend::float()
-%%   end
+%% @spec sync_send_reply(Request::binary(), ReplyHdr::binary(), MaxNrSends::pos_integer(), TimeoutEachSend::float()) -> {ok, Reply::binary()}
+%% @end
 %% ------------------------------------------------------------------------------------
 
 sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend) ->
@@ -488,14 +488,9 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend) ->
 %% @doc Sends packet to device, and waits for reply, and loops back round to retry if 
 %%      timeout occurs
 %% @throws timeout
-%% @spec sync_send_reply(RequestBin, ReplyHdr, MaxNrSends, TimeoutEachSend, NrAttemptsAlready)
-%%                        -> {ok, ResponseBin}
-%%   where
-%%     RequestBin::binary()
-%%     ReplyHdr::binary()
-%%     MaxNrSends::integer() > 0
-%%     TimeoutEachSend::float()
-%%   end
+%% @spec sync_send_reply(Request::binary(), ReplyHdr::binary(), MaxNrSends::pos_integer(), TimeoutEachSend::float(), NrAttemptsAlready::non_neg_integer())
+%%                        -> {ok, Reply::binary()}
+%% @end
 %% ------------------------------------------------------------------------------------
 
 sync_send_reply(_BinToSend, _ReplyHdr, MaxNrSends, TimeoutEachSend, MaxNrSends) ->
@@ -522,7 +517,7 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) whe
 
 
 %% ------------------------------------------------------------------------------------
-%% @doc Returns tuple containing target IP tuple & port retrieved from target_ip_tuple
+%% @doc Returns tuple containing target IP tuple and port retrieved from target_ip_tuple
 %%       and target_port entries in process dict
 %% @spec target_ip_port() -> {TargetIPTuple, TargetPort}
 %% @end

@@ -73,6 +73,7 @@ get_pid(IPaddr, Port) ->
 %% @doc Returns the number of Device Clients currently registered.
 %%
 %% @spec total_device_clients() -> integer()
+%% @end
 %% ---------------------------------------------------------------------
 total_device_clients() ->
     [NumDeviceClients] = [ X || {size, X} <- ets:info(device_client_index) ],

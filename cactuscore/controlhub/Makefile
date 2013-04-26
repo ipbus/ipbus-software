@@ -119,7 +119,7 @@ _cleanall:
 	rm -f controlhub.script
 	rm -f controlhub.tar.gz
 	rm -f scripts/erl_controlhub
-	rm -f doc/*
+	rm -rf doc/*
 
 
 ############## Nitty gritty ######################
