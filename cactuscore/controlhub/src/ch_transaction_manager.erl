@@ -1,5 +1,6 @@
 %%% ===========================================================================
 %%% @author Robert Frazier
+%%% @author Tom Williams
 %%%
 %%% @since May 2012
 %%%
@@ -56,7 +57,7 @@ tcp_acceptor(TcpListenSocket) ->
             case inet:peername(ClientSocket) of
                 {ok, {_ClientAddr, _ClientPort}} ->
                     ?DEBUG_TRACE("TCP socket accepted from client at IP addr=~w, port=~p", [_ClientAddr, _ClientPort]),
-                    tcp_receive_handler_loop(ClientSocket);
+                    tcp_receive_handler_loop(ClientSocket, now());
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?DEBUG_TRACE("Socket error whilst getting peername.")
@@ -79,13 +80,22 @@ tcp_acceptor(TcpListenSocket) ->
 %%% --------------------------------------------------------------------
 
 %% Receive loop the incoming TCP requests; if socket closes the function exits the receive loop.
-tcp_receive_handler_loop(ClientSocket) ->
+tcp_receive_handler_loop(ClientSocket, TimeOfLastResponse) ->
+    TargetIPaddr = get(target_ip_addr),
+    TargetPort   = get(target_port),
+    TimeSinceLastResponse = round(timer:now_diff(now(), TimeOfLastResponse)/1000.0),
+    NewTimeout = max(0, ?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT - TimeSinceLastResponse),
     receive
+        {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
+            ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
+                         "Port=~w", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
+            reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>),
+            tcp_receive_handler_loop(ClientSocket, now());
         {tcp, ClientSocket, RequestBin} ->
             ?DEBUG_TRACE("Received a request from client."),
             ch_stats:client_request_in(),
-            process_request(ClientSocket, RequestBin),
-            tcp_receive_handler_loop(ClientSocket);
+            forward_request(RequestBin),
+            tcp_receive_handler_loop(ClientSocket, TimeOfLastResponse);
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
             ?DEBUG_TRACE("TCP socket closed.");
@@ -95,17 +105,21 @@ tcp_receive_handler_loop(ClientSocket) ->
             ?DEBUG_TRACE("TCP socket error (~p).", [_Reason]);
         _Else ->
             ?DEBUG_TRACE("WARNING! Received and ignoring unexpected message: ~p", [_Else]),
-            tcp_receive_handler_loop(ClientSocket)
+            tcp_receive_handler_loop(ClientSocket, TimeOfLastResponse)
+    after NewTimeout ->
+        ?DEBUG_TRACE("Timeout whilst awaiting response from device client for target IPaddr=~w,"
+                     "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
+        reply_to_client(ClientSocket, <<8:32, TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>)
     end.
 
 
-%% Top-level function for actually dealing with the client request and returning a response.
-process_request(ClientSocket, RequestBin) ->
+%% Top-level function that forwards the client requests to the device_client process.
+forward_request(RequestBin) ->
     try unpack_target_request(RequestBin) of
         {TargetIPaddr, TargetPort, IPbusRequest} ->
             ch_device_client:enqueue_requests(TargetIPaddr, TargetPort, IPbusRequest),
-            ResponseBin = wait_for_device_response(TargetIPaddr, TargetPort),
-            reply_to_client(ClientSocket, ResponseBin)
+            put(target_ip_addr, TargetIPaddr),
+            put(target_port, TargetPort)
     catch
         throw:{malformed, _WhyMalformed} ->
           ?DEBUG_TRACE("WARNING! Malformed (~w) client request received; will ignore.", [_WhyMalformed]),
@@ -136,19 +150,6 @@ unpack_target_request(RequestBin) ->
             {TargetIPaddr, TargetPort, Remainder}
     end.
 
-
-%% Waits for response message from the device_client process 
-wait_for_device_response(TargetIPaddr, TargetPort) ->
-    receive
-        {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
-            ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
-                         "Port=~p", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
-            <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>
-        after (?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT) ->
-            ?DEBUG_TRACE("Timout whilst awaiting response from device client for target IPaddr=~w,"
-                         "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
-            <<TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>
-    end.
 
 %% Sends reply back to TCP client
 reply_to_client(ClientSocket, ResponseBin) ->
