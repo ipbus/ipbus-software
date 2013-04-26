@@ -105,6 +105,9 @@ _rpmall:
 		--define "packager ${Packager}" \
 		${PackageName}.spec
 
+doc: _doc
+_doc:
+	erl -noshell -eval "edoc:application(controlhub, \".\", [{new,true}])."
 
 clean: _cleanall
 _cleanall:
@@ -116,6 +119,7 @@ _cleanall:
 	rm -f controlhub.script
 	rm -f controlhub.tar.gz
 	rm -f scripts/erl_controlhub
+	rm -f doc/*
 
 
 ############## Nitty gritty ######################
