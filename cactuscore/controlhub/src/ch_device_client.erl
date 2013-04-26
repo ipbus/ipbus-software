@@ -1,5 +1,5 @@
 %%% ===========================================================================
-%%% @author Robert Frazier
+%%% @author Robert Frazier and Tom Williams
 %%%
 %%% @since May 2012
 %%%
