@@ -107,7 +107,7 @@ _rpmall:
 
 doc: _doc
 _doc:
-	erl -noshell -eval "edoc:application(controlhub, \".\", [{new,true}])."
+	$(ERL) -noshell -eval "edoc:application(controlhub, \".\", [{new,true}]), halt(0)."
 
 clean: _cleanall
 _cleanall:

@@ -46,8 +46,11 @@ ch_transaction_manager_test_() ->
       }
     }.
 
-%% Setup function for test fixture
-%% @spec setup() -> {test_inits, {dummy_hw, [DummyHw1Pid::pid(), ...]}, {
+
+%% @doc Setup function for test fixture
+%% @spec setup() -> Baggage::test_baggage()
+%% @end
+
 setup() ->
     ch_device_client_registry:start_link(), % needs to be available to spawn the device clients.
     ch_stats:start_link(), % Needed to prove the control hub is ignoring malformed requests.

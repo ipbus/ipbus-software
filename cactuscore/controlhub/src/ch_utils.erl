@@ -18,7 +18,7 @@
 %% @doc Given a binary containing an integer number of 32-bit words, it will print to
 %%      console the content as a column of 32-bit-wide hex-numbers.
 %% 
-%% @spec print_binary_as_hex(Binary::binary()) -> ok.
+%% @spec print_binary_as_hex(Binary::binary()) -> ok
 %% @end
 %% -------------------------------------------------------------------------------------
 print_binary_as_hex(Binary) when is_binary(Binary) ->
@@ -50,10 +50,14 @@ ipv4_u32_addr_to_tuple(IPaddrRawU32) when is_integer(IPaddrRawU32),
 %%% Internal functions (private)
 %%% --------------------------------------------------------------------
 
-%% Extracts a 32-bit value from the binary and breaks it down into eight nibbles
-%% that get converted into the characters 0-9,a-f as appropriate and printed to
-%% the console. Rinse and repeat until binary is sucked dry.
-%% @spec do_print_binary_as_hex(binary()) -> ok.
+%% -------------------------------------------------------------------------------------
+%% @doc Extracts a 32-bit value from the binary and breaks it down into eight nibbles
+%%      that get converted into the characters 0-9,a-f as appropriate and printed to
+%%      the console. Rinse and repeat until binary is sucked dry.
+%% @spec do_print_binary_as_hex(binary()) -> ok
+%% @end
+%% -------------------------------------------------------------------------------------
+
 do_print_binary_as_hex(<<Nibble1:4/integer, Nibble2:4/integer, Nibble3:4/integer, Nibble4:4/integer,
                          Nibble5:4/integer, Nibble6:4/integer, Nibble7:4/integer, Nibble8:4/integer,
                          Remainder/binary>>) ->
