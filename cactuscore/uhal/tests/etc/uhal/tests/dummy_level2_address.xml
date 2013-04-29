@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 
-<node address="0x10000" >
+<node address="0x10001" >
     <node id="REG" address="0x0001" permission="rw" tags="test"/>
 
     <node id="MEM" address="0x0002" permission="rw" mode="incremental" size="262144" tags="test" />
