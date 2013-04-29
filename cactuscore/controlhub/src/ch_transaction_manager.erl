@@ -57,7 +57,7 @@ tcp_acceptor(TcpListenSocket) ->
             case inet:peername(ClientSocket) of
                 {ok, {_ClientAddr, _ClientPort}} ->
                     ?DEBUG_TRACE("TCP socket accepted from client at IP addr=~w, port=~p", [_ClientAddr, _ClientPort]),
-                    tcp_receive_handler_loop(ClientSocket, now());
+                    tcp_receive_handler_loop(ClientSocket, queue:new());
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?DEBUG_TRACE("Socket error whilst getting peername.")
@@ -80,22 +80,27 @@ tcp_acceptor(TcpListenSocket) ->
 %%% --------------------------------------------------------------------
 
 %% Receive loop the incoming TCP requests; if socket closes the function exits the receive loop.
-tcp_receive_handler_loop(ClientSocket, TimeOfLastResponse) ->
+tcp_receive_handler_loop(ClientSocket, RequestTimesQueue) ->
     TargetIPaddr = get(target_ip_addr),
     TargetPort   = get(target_port),
-    TimeSinceLastResponse = round(timer:now_diff(now(), TimeOfLastResponse)/1000.0),
-    NewTimeout = max(0, ?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT - TimeSinceLastResponse),
+    NewTimeout = case queue:is_empty(RequestTimesQueue) of
+                   true ->
+                     infinity;
+                   false ->
+                     TimeSinceLastResponse = round(timer:now_diff(now(), queue:get(RequestTimesQueue))/1000.0),
+                     max(0, ?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT - TimeSinceLastResponse)
+                 end,
     receive
         {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
             ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
                          "Port=~w", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
             reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>),
-            tcp_receive_handler_loop(ClientSocket, now());
+            tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue) );
         {tcp, ClientSocket, RequestBin} ->
             ?DEBUG_TRACE("Received a request from client."),
             ch_stats:client_request_in(),
             forward_request(RequestBin),
-            tcp_receive_handler_loop(ClientSocket, TimeOfLastResponse);
+            tcp_receive_handler_loop(ClientSocket, queue:in(now(),RequestTimesQueue) );
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
             ?DEBUG_TRACE("TCP socket closed.");
@@ -105,11 +110,12 @@ tcp_receive_handler_loop(ClientSocket, TimeOfLastResponse) ->
             ?DEBUG_TRACE("TCP socket error (~p).", [_Reason]);
         _Else ->
             ?DEBUG_TRACE("WARNING! Received and ignoring unexpected message: ~p", [_Else]),
-            tcp_receive_handler_loop(ClientSocket, TimeOfLastResponse)
+            tcp_receive_handler_loop(ClientSocket, RequestTimesQueue)
     after NewTimeout ->
         ?DEBUG_TRACE("Timeout whilst awaiting response from device client for target IPaddr=~w,"
                      "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
-        reply_to_client(ClientSocket, <<8:32, TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>)
+        reply_to_client(ClientSocket, <<8:32, TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>),
+        tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue) )
     end.
 
 
