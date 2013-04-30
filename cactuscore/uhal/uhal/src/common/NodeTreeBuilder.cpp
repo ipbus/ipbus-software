@@ -561,7 +561,7 @@ namespace uhal
       }
     }
 
-    aNode->mAddr = aNode->mPartialAddr | aAddr;
+    aNode->mAddr = aNode->mPartialAddr + aAddr;
 
     for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
     {
