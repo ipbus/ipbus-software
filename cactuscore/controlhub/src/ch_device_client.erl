@@ -28,7 +28,7 @@
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
-         reset_packet_id/2, parse_packet_header/1]).
+         reset_packet_id/2, parse_packet_header/1, state_as_string/1]).
 
 -record(state, {mode = setup,       % Running mode of device_client - either setup, normal, recover_lost_pkt, timeout
                 socket,             % Holds network socket to target device 
@@ -144,7 +144,7 @@ init([IPaddrU32, PortU16]) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_call(_Request, _From, State) ->
-    log({error, State}, "Unexpected call received : ~p", [_Request]),
+    ?CH_LOG_ERROR("Unexpected call received : ~p", [_Request], State),
     Reply = ok,
     {reply, Reply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
@@ -169,13 +169,13 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
         {_HdrSent, TimeSent, _PktSent, RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
         TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
         NewTimeout = max(0, (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)) - TimeSinceSent),
-        log(info, "Request packet from ~w is being queued (max nr packets already in flight, new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.queue), NewTimeout]),
+        ?CH_LOG_DEBUG("Request packet from ~w is being queued (max nr packets already in flight, new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.queue), NewTimeout]),
         {noreply, S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, NewTimeout}
     end;
 
 %% Default handle cast
 handle_cast(_Msg, State) -> 
-    log({error, State}, "Unexpected cast received : ~p", [_Msg]),
+    ?CH_LOG_ERROR("Unexpected cast received : ~p", [_Msg], State),
     {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
 
@@ -195,7 +195,7 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
     {HdrSent, TimeSent, _PktSnt, RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     if
       S#state.mode =:= recover_lost_pkt ->
-        log({info, S}, "Recovered lost packet!"),
+        ?CH_LOG_INFO( "Recovered lost packet!", [], S),
         ch_stats:udp_response_timeout(recovered);
       true -> void
     end,
@@ -203,8 +203,8 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
                  {{2, 0}, <<HdrSent:4/binary, ReplyBody/binary>>} ->
                      ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>};
                  {{2, 0}, _} ->
-                     log({warning,S}, "Received UDP response packet with wrong header - either a slightly delayed reply packet that I requested re-send of, or an error!~n"
-                                      "Received packet is: ~w", [ReplyBin]),
+                     ?CH_LOG_WARN("Received UDP response packet with wrong header - either a slightly delayed reply packet that I requested re-send of, or an error!~n"
+                                  "Received packet is: ~w", [ReplyBin], S),
                      no;
                  _ ->
                      ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_SUCCESS, ReplyBin }
@@ -233,7 +233,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
     if
       % Packet-loss recovery for IPbus 2.0
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
-        log({warning, S}, "Timeout when waiting for response from target; starting packet loss recovery (attempt ~w) ... ",[RetryCount+1]),
+        ?CH_LOG_WARN("Timeout when waiting for response from target; starting packet loss recovery (attempt ~w) ... ",[RetryCount+1], S),
         NewInFlight = {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr},
         NextIdMinusOne = decrement_pkt_id(NextId),
         case get_device_status() of 
@@ -255,31 +255,32 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
         end;
       % Workaround for softer timeout with non-IPbus 2.0 packets
       RetryCount<3 ->
-         log({warning, S}, "Timeout nr. ~w when waiting for response from target; not IPbus 2.0 and so will just wait for another ~wms ... ", [RetryCount+1, ?UDP_RESPONSE_TIMEOUT]),
+         ?CH_LOG_WARN("Timeout nr. ~w when waiting for response from target; not IPbus 2.0 and so will just wait for another ~wms ... ", 
+                      [RetryCount+1, ?UDP_RESPONSE_TIMEOUT], S),
          NewInFlight = {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr},
          {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
       % Clause for ultimate irrecoverable timeout
       true ->
-        log({error, S}, "TIMEOUT! No response from target~n. Generating and sending a timeout response to originating Transaction Manager..."),
+        ?CH_LOG_ERROR("TIMEOUT! No response from target~n. Generating and sending a timeout response to originating Transaction Manager...", [], S),
         ClientPid ! { device_client_response, S#state.target_ip_u32, TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
         if 
           S#state.queue =:= [] ->
             {noreply, S#state{in_flight=none, mode=timeout}, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
           true ->
             [H = {ClientPid, _Pkt}|T] = S#state.queue,
-            log(info, "Request packet from ~w is now being processed.", [ClientPid]),
+            ?CH_LOG_INFO("Request packet from ~w is now being processed.", [ClientPid]),
             send_request_to_board(H, S#state{queue=T, in_flight=none, mode=timeout})
         end
     end;
 
 % handle_info for when no communication through through this device client in given time
 handle_info(timeout, State) -> 
-    log({info, State}, "No communication has passed through this device client in ~pms ; shutting down now", [?DEVICE_CLIENT_SHUTDOWN_AFTER]),
+    ?CH_LOG_INFO("No communication has passed through this device client in ~pms ; shutting down now", [?DEVICE_CLIENT_SHUTDOWN_AFTER], State),
     {stop, normal, State};
 
 % Default handle_info callback
 handle_info(_Info, State) ->
-    log({error,State}, "Unexpected handle_info message received : ~p", [_Info]),
+    ?CH_LOG_ERROR("Unexpected handle_info message received : ~p", [_Info], State),
     {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
 
@@ -464,11 +465,11 @@ get_device_status() ->
                           [get(target_ip_tuple), get(target_port)]),
             ?PACKET_TRACE(_Response, "The following malformed status response has been received from target at IP addr=~w, ipbus port=~w.",
                                      [get(target_ip_tuple), get(target_port)]),
-            log(error, "Malformed status response ~w received from target at ~w:~w", [_Response, get(target_tuple), get(target_port)]),
+            ?CH_LOG_ERROR("Malformed status response ~w received from target at ~w:~w", [_Response, get(target_tuple), get(target_port)]),
             {error, malformed, {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_MALFORMED_STATUS, <<>> } }
     catch 
         throw:timeout ->
-            log(error,"No response from target in get_device_status"),
+            ?CH_LOG_ERROR("No response from target in get_device_status"),
             {error, timeout, {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> } }
     end.
 
@@ -495,13 +496,12 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend) ->
 %% ------------------------------------------------------------------------------------
 
 sync_send_reply(_BinToSend, _ReplyHdr, MaxNrSends, TimeoutEachSend, MaxNrSends) ->
-    log(error, "MAX NUMBER OF TIMEOUTS reached in sync_send_reply/4! No response from target after ~w attempts, each with timeout of ~wms. Throwing now.", [MaxNrSends, TimeoutEachSend]),
+    ?CH_LOG_ERROR("MAX NUMBER OF TIMEOUTS reached in sync_send_reply/4! No response from target after ~w attempts, each with timeout of ~wms. Throwing now.", [MaxNrSends, TimeoutEachSend]),
     throw(timeout);
 
 sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) when is_binary(ReplyHdr), size(ReplyHdr)=:=4 ->
     Socket = get(socket),
-    TargetIPTuple = get(target_ip_tuple),
-    TargetPort = get(target_port),
+    {TargetIPTuple, TargetPort} = target_ip_port(),
     gen_udp:send(Socket, TargetIPTuple, TargetPort, BinToSend),
     ch_stats:udp_out(),
     receive
@@ -511,7 +511,7 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) whe
             ch_stats:udp_in(),
             {ok, ReplyBin}
     after TimeoutEachSend ->
-        log(warning, "TIMEOUT waiting for response in sync_send_reply/5! No response from target on attempt no. ~w of ~w.", [SendCount+1, MaxNrSends]),
+        ?CH_LOG_WARN("TIMEOUT waiting for response in sync_send_reply/5! No response from target on attempt no. ~w of ~w.", [SendCount+1, MaxNrSends]),
         ch_stats:udp_response_timeout(status),
         sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount+1)
     end.
@@ -525,39 +525,6 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) whe
 %% ------------------------------------------------------------------------------------
 target_ip_port() ->
     {get(target_ip_tuple), get(target_port)}.
-
-
-%% ------------------------------------------------------------------------------------
-%% @doc Prints an info/warning/error message (currently to std::out), with the State
-%%      appended to the end of the message in an easy-to-read format if given as an argument
-%%
-%% @spec log(Level | {Level, State}, MsgString) -> ok
-%% @end
-%% ------------------------------------------------------------------------------------
-
-log(Arg1, String) ->
-   log(Arg1, String, []).
-
-
-%% ------------------------------------------------------------------------------------
-%% @doc Prints an info/warning/error message (currently to std::out), with the State
-%%      appended to the end of the message in an easy-to-read format if given as an argument
-%%
-%% @spec log(Level | {Level, State}, MsgFmtString, MsgData) -> ok
-%% @end
-%% ------------------------------------------------------------------------------------
-
-log(Level, MsgString, MsgData) when Level=:=info; Level=:=warning; Level=:=error ->
-    {IPTuple, Port} = target_ip_port(),
-    Preamble = io_lib:format(" ch_device_client : Pid=~w , target @ ~w:~w      Time: ~w~n", [self(), IPTuple, Port, now()]),
-    case Level of
-        info    -> error_logger:info_msg(   lists:append(Preamble, MsgString), MsgData);
-        warning -> error_logger:warning_msg(lists:append(Preamble, MsgString), MsgData);
-        error   -> error_logger:error_msg(  lists:append(Preamble, MsgString), MsgData)
-    end,
-    ok;
-log({Level, State}, MsgString, MsgData) when is_record(State, state) ->
-    log(Level, lists:flatten([state_as_string(State), MsgString, "~n"]), MsgData).
 
 
 %% ------------------------------------------------------------------------------------
