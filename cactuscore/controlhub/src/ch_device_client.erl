@@ -159,7 +159,7 @@ handle_call(_Request, _From, State) ->
 
 % handle_cast callback for enqueue_requests API call.
 handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
-    ?DEBUG_TRACE("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
+    ?CH_LOG_DEBUG("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
                   "Manager with PID = ~w.", [ClientPid]),
     if
@@ -189,8 +189,8 @@ handle_cast(_Msg, State) ->
 
 % handle_info callback for udp packets from device
 handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when S#state.in_flight=/=none ->
-    ?DEBUG_TRACE("Received response from target hardware at IP addr=~w, port=~w (in_flight=~w) "
-                 "Passing it to originating Transaction Manager...", [TargetIPTuple, TargetPort, S#state.in_flight]),
+    ?CH_LOG_DEBUG("Received response from target hardware; passing it to originating Transaction Manager...", 
+                  [TargetIPTuple, TargetPort, S#state.in_flight]),
     ch_stats:udp_in(),
     {HdrSent, TimeSent, _PktSnt, RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     if
@@ -224,8 +224,8 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
 % handle_info callback for device response timeout
 handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort, next_id=NextId}) when S#state.in_flight=/=none ->
     {HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr} = S#state.in_flight,
-    ?DEBUG_TRACE("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
-                 "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
+    ?CH_LOG_DEBUG("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
+                  "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
     case RetryCount of
          0 -> ch_stats:udp_response_timeout(normal);
          _ -> ch_stats:udp_response_timeout(resend)
@@ -317,11 +317,11 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------------------
 
 send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
-    ?DEBUG_TRACE("Request packet from PID ~w is being forwarded to the board at IP ~w, port ~w...", [ClientPid, TargetIPTuple, TargetPort]),
+    ?CH_LOG_DEBUG("Request packet from PID ~w is being forwarded to the board at IP ~w, port ~w...", [ClientPid, TargetIPTuple, TargetPort]),
     <<OrigHdr:4/binary, _/binary>> = Packet,
     case reset_packet_id(Packet, S#state.next_id) of
         {error, _Type, MsgForClient} ->
-            ?DEBUG_TRACE("ERROR encountered in resetting packet ID - returning following message to Transaction Manager (PID ~w): ~w", [ClientPid, MsgForClient]),
+            ?CH_LOG_DEBUG("ERROR encountered in resetting packet ID - returning following message to Transaction Manager (PID ~w): ~w", [ClientPid, MsgForClient]),
             ClientPid ! MsgForClient,
             {noreply, S#state{ipbus_v=unknown, next_id=unknown} };
         {IPbusVer, ModRequest, PktId} ->
@@ -335,7 +335,7 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_t
                      true ->
                        S#state{in_flight=InFlightPkt}
                    end,
-           ?DEBUG_TRACE("Request packet sent. Now entering state ~w , with timeout of ~wms", [NewS, ?UDP_RESPONSE_TIMEOUT]),
+           ?CH_LOG_DEBUG("Request packet sent. Now entering state ~w , with timeout of ~wms", [NewS, ?UDP_RESPONSE_TIMEOUT]),
            {noreply, NewS, ?UDP_RESPONSE_TIMEOUT}
     end.
 
@@ -460,8 +460,8 @@ get_device_status() ->
                 _TheRest/binary >>} ->
             {ok, NrBuffers, NextId};
         {ok, _Response} ->
-            ?DEBUG_TRACE("Malformed status response received from target at IP addr=~w, ipbus port=~w. Will now throw the atom 'malformed'",
-                         [get(target_ip_tuple), get(target_port)]),
+            ?CH_LOG_DEBUG("Malformed status response received from target at IP addr=~w, ipbus port=~w.",
+                          [get(target_ip_tuple), get(target_port)]),
             ?PACKET_TRACE(_Response, "The following malformed status response has been received from target at IP addr=~w, ipbus port=~w.",
                                      [get(target_ip_tuple), get(target_port)]),
             log(error, "Malformed status response ~w received from target at ~w:~w", [_Response, get(target_tuple), get(target_port)]),
@@ -506,8 +506,8 @@ sync_send_reply(BinToSend, ReplyHdr, MaxNrSends, TimeoutEachSend, SendCount) whe
     ch_stats:udp_out(),
     receive
         {udp, Socket, TargetIPTuple, TargetPort, <<ReplyHdr:4/binary, _/binary>> = ReplyBin} -> 
-            ?DEBUG_TRACE("In sync_send_reply/5 : Received response from target (IP addr=~w, port=~w) on attempt no. ~w of ~w", 
-                         [TargetIPTuple, TargetPort, SendCount+1, MaxNrSends]),
+            ?CH_LOG_DEBUG("In sync_send_reply/5 : Received response from target (IP addr=~w, port=~w) on attempt no. ~w of ~w", 
+                          [TargetIPTuple, TargetPort, SendCount+1, MaxNrSends]),
             ch_stats:udp_in(),
             {ok, ReplyBin}
     after TimeoutEachSend ->

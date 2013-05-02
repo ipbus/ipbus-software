@@ -309,7 +309,7 @@ report_to_string() -> gen_server:call(?MODULE, report_to_string).
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    ?DEBUG_TRACE("Initialising the stats server."),
+    ?CH_LOG_DEBUG("Initialising the stats server."),
     {ok, #state{}}.
 
 %% --------------------------------------------------------------------

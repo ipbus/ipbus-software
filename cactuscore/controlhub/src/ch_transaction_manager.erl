@@ -39,7 +39,7 @@
 %% @end
 %% ---------------------------------------------------------------------
 start_link(TcpListenSocket) ->
-    ?DEBUG_TRACE("Spawning new transaction manager."),
+    ?CH_LOG_DEBUG("Spawning new transaction manager."),
     proc_lib:spawn_link(?MODULE, tcp_acceptor, [TcpListenSocket]),
     ok.
     
@@ -49,28 +49,28 @@ start_link(TcpListenSocket) ->
 %% the start_link function above.  Need to find a way of refactoring
 %% this module so it doesn't need to be an external function.
 tcp_acceptor(TcpListenSocket) ->
-    ?DEBUG_TRACE("Transaction manager born. Waiting for TCP connection..."),
+    ?CH_LOG_DEBUG("Transaction manager born. Waiting for TCP connection..."),
     case gen_tcp:accept(TcpListenSocket) of
         {ok, ClientSocket} ->
             ch_tcp_listener:connection_accept_completed(),
             ch_stats:client_connected(),
             case inet:peername(ClientSocket) of
                 {ok, {_ClientAddr, _ClientPort}} ->
-                    ?DEBUG_TRACE("TCP socket accepted from client at IP addr=~w, port=~p", [_ClientAddr, _ClientPort]),
+                    ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p", [_ClientAddr, _ClientPort]),
                     tcp_receive_handler_loop(ClientSocket, queue:new());
                 _Else ->
                     ch_stats:client_disconnected(),
-                    ?DEBUG_TRACE("Socket error whilst getting peername.")
+                    ?CH_LOG_ERROR("Socket error whilst getting peername.")
             end;
         {error, _Reason} ->
             ch_tcp_listener:connection_accept_completed(),
             % Something funny happened whilst trying to accept the socket.
-            ?DEBUG_TRACE("Error (~p) occurred during TCP accept.", [_Reason]);
+            ?CH_LOG_ERROR("Error (~p) occurred during TCP accept.", [_Reason]);
         _Else ->  % Belt and braces...
             ch_tcp_listener:connection_accept_completed(),
-            ?DEBUG_TRACE("Unexpected event (~p) occurred during TCP accept.", [_Else])
+            ?CH_LOG_ERROR("Unexpected event (~p) occurred during TCP accept.", [_Else])
     end,
-    ?DEBUG_TRACE("I am now redundant; exiting normally."),
+    ?CH_LOG_INFO("I am now redundant; exiting normally."),
     ok.
 
 
@@ -92,28 +92,28 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue) ->
                  end,
     receive
         {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
-            ?DEBUG_TRACE("Received device client response from target IPaddr=~w,"
-                         "Port=~w", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
+            ?CH_LOG_DEBUG("Received device client response from target IPaddr=~w, Port=~w",
+                          [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
             reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>),
             tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue) );
         {tcp, ClientSocket, RequestBin} ->
-            ?DEBUG_TRACE("Received a request from client."),
+            ?CH_LOG_DEBUG("Received a request from client."),
             ch_stats:client_request_in(),
             forward_request(RequestBin),
             tcp_receive_handler_loop(ClientSocket, queue:in(now(),RequestTimesQueue) );
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
-            ?DEBUG_TRACE("TCP socket closed.");
+            ?CH_LOG_INFO("TCP socket closed.");
         {tcp_error, ClientSocket, _Reason} ->
             % Assume this ends up with the socket closed from a stats standpoint
             ch_stats:client_disconnected(),
-            ?DEBUG_TRACE("TCP socket error (~p).", [_Reason]);
+            ?CH_LOG_WARN("TCP socket error (~p).", [_Reason]);
         _Else ->
-            ?DEBUG_TRACE("WARNING! Received and ignoring unexpected message: ~p", [_Else]),
+            ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [_Else]),
             tcp_receive_handler_loop(ClientSocket, RequestTimesQueue)
     after NewTimeout ->
-        ?DEBUG_TRACE("Timeout whilst awaiting response from device client for target IPaddr=~w,"
-                     "Port=~p. Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
+        ?CH_LOG_WARN("Timeout whilst awaiting response from device client for target IPaddr=~w, Port=~p."
+                     " Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
         reply_to_client(ClientSocket, <<8:32, TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>),
         tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue) )
     end.
@@ -128,7 +128,7 @@ forward_request(RequestBin) ->
             put(target_port, TargetPort)
     catch
         throw:{malformed, _WhyMalformed} ->
-          ?DEBUG_TRACE("WARNING! Malformed (~w) client request received; will ignore.", [_WhyMalformed]),
+          ?CH_LOG_WARN("Malformed (~w) client request received; will ignore.", [_WhyMalformed]),
           ?PACKET_TRACE(RequestBin, "WARNING!~n  Received and ignoring this malformed (~w) packet:", [_WhyMalformed]),
           ch_stats:client_request_malformed()
     end.
@@ -159,7 +159,7 @@ unpack_target_request(RequestBin) ->
 
 %% Sends reply back to TCP client
 reply_to_client(ClientSocket, ResponseBin) ->
-    ?DEBUG_TRACE("Sending response to TCP client"),
+    ?CH_LOG_DEBUG("Sending response to TCP client"),
     ?PACKET_TRACE(ResponseBin, "~n  Sending the following response to the TCP client:"),
     gen_tcp:send(ClientSocket, ResponseBin),
     ch_stats:client_response_sent().

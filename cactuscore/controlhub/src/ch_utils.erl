@@ -7,12 +7,62 @@
 
 
 %% Exported Functions
--export([print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1]).
+-export([print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1, log/4, log/5]).
 
 
 %%% ------------------------------------------------------------------------------------
 %%% API Functions (public interface)
 %%% ------------------------------------------------------------------------------------
+
+%% -------------------------------------------------------------------------------------
+%% @doc Prints a debug/info/warning/error message, with the State appended to the end of
+%%      the message
+%%
+%% @spec log(Level, Module :: atom(), MsgFmtString :: string(), MsgData :: list(), State :: tuple()) -> ok
+%%  where
+%%       Level = debug | info | warning | error
+%% @end
+%% -------------------------------------------------------------------------------------
+
+log(Level, Module, MsgFmtString, MsgData, State) ->
+    log(Level, Module, lists:flatten([MsgFmtString, "~n", Module:state_as_string(State)]), MsgData).
+
+
+%% -------------------------------------------------------------------------------------
+%% @doc Prints a debug/info/warning/error message
+%%
+%% @spec log(Level, Module :: atom(), MsgFmtString :: string(), MsgData :: list() | State :: tuple() ) -> ok
+%%  where
+%%       Level = debug | info | warning | error
+%% @end
+%% -------------------------------------------------------------------------------------
+
+log(Level, Module, MsgFmtString, MsgData) when is_list(MsgData) ->
+    Preamble = io_lib:format("~w - ~w - ~w ~w ~s", [now(), Level, Module, self(), mini_state_string(Module)]),
+    case Level of
+         error ->   
+             error_logger:error_msg(lists:append(Preamble, MsgFmtString), MsgData);
+         warning ->
+             error_logger:warning_msg(lists:append(Preamble, MsgFmtString), MsgData);
+         _ ->
+             error_logger:info_msg(lists:append(Preamble, MsgFmtString), MsgData)
+    end,
+    ok;
+log(Level, Module, MsgFmtString, State) when is_tuple(State) ->
+    log(Level, Module, MsgFmtString, [], State).
+
+
+%% -------------------------------------------------------------------------------------
+%% @doc Converts binary to short, descriptive string containing first 2 32-bit words and
+%%      last word as hex numbers.
+%%
+%% @spec short_hex_string( binary() ) -> string()
+%% @end
+%% -------------------------------------------------------------------------------------
+
+%short_hex_string(Binary) when is_binary(Binary) ->
+%    "<<>>".
+
 
 %% -------------------------------------------------------------------------------------
 %% @doc Given a binary containing an integer number of 32-bit words, it will print to
@@ -90,3 +140,15 @@ hex_number_to_hex_letter(HexNumber) ->
         14 -> $e;
         15 -> $f
     end.
+
+
+%% Prints a mini state string for given module, based off process's dictionary
+%%  variables in
+%% @spec mini_state_string( Module :: atom() ) -> string()
+
+mini_state_string(ch_device_client) ->
+    io_lib:format("target ~w:~w", [get(target_ip_tuple), get(target_port)]);
+mini_state_string(_) ->
+    "".
+    
+

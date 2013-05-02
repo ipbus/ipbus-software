@@ -84,7 +84,7 @@ connection_accept_completed() ->
 %% @end
 %% --------------------------------------------------------------------
 init([]) ->
-    ?DEBUG_TRACE("Initialising the TCP listener."),
+    ?CH_LOG_DEBUG("Initialising the TCP listener."),
     process_flag(trap_exit, true),
     case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, ?TCP_SOCKET_OPTIONS) of
         {ok, TcpListenSocket} ->
@@ -151,7 +151,7 @@ handle_cast(_Msg, State) ->
 
 % Observe any exit signals that come our way but do nothing with them other than a trace message
 handle_info({'EXIT', _Pid, _Reason}, State) ->
-    ?DEBUG_TRACE("Observed transaction manager process ~p shutting down with reason: ~p", [_Pid, _Reason]),
+    ?CH_LOG_DEBUG("Observed transaction manager process ~p shutting down with reason: ~p", [_Pid, _Reason]),
     {noreply, State};
 
 %% Default info handler - on unknown info message it does nothing

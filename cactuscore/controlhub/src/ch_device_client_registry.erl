@@ -96,7 +96,7 @@ total_device_clients() ->
 init([]) ->
     % Note that our ETS table for holding the index of device clients
     % gets created as part of the standard server state record.
-    ?DEBUG_TRACE("Initialising the device client registry."),
+    ?CH_LOG_DEBUG("Initialising the device client registry."),
     % Trap exits - if any device clients spawned by the registry end
     % up dying, we'll need to catch the message and remove the device
     % client from the index.
@@ -154,7 +154,7 @@ handle_cast(_Msg, State) ->
 
 %%
 handle_info({'EXIT', Pid, _Reason}, State = #state{dc_index = Index, dc_reverse_index = RIndex}) ->
-    ?DEBUG_TRACE("Observed process ~p shutting down with reason: ~p", [Pid, _Reason]),
+    ?CH_LOG_DEBUG("Observed process ~p shutting down with reason: ~p", [Pid, _Reason]),
     % If the dead process is registered, delete the entries associated with it.
     case ets:lookup(RIndex, Pid) of
         [{Pid, {IPaddr, Port}}] ->

@@ -1,5 +1,6 @@
 %%% ===========================================================================
 %%% @author Robert Frazier
+%%% @author Tom Williams
 %%%
 %%% @since April 2012
 %%%
@@ -21,7 +22,6 @@
 
 
 
-
 %% ----------------------------------------------------------------------------
 %% @doc Debug Trace Macro - for simple text trace messages.
 %%      It works in a similar fashion to io:format/1 and io:format/2.
@@ -36,20 +36,30 @@
 %% ----------------------------------------------------------------------------
 -ifdef(debug_trace).
 
--define(DEBUG_TRACE(MESSAGE),
-        io:format(lists:append(lists:append("DEBUG_TRACE @ ~p: PID=~p : ~p : ", MESSAGE), "~n"), [now(), self(), ?MODULE])
-       ).
-
--define(DEBUG_TRACE(MESSAGE, MESSAGE_DATA),
-        io:format(lists:append(lists:append("DEBUG_TRACE @ ~p : PID=~p : ~p : ", MESSAGE), "~n"), [now(), self(), ?MODULE | MESSAGE_DATA])
-       ).
+-define( CH_LOG_DEBUG(MESSAGE), ch_utils:log(debug, ?MODULE, MESSAGE) ).
+-define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA), ch_utils:log(debug, ?MODULE, MESSAGE, MESSAGE_DATA) ).
+-define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(debug, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
 
 -else.
 
--define(DEBUG_TRACE(MESSAGE), void).
--define(DEBUG_TRACE(MESSAGE, MESSAGE_DATA), void).
+-define( CH_LOG_DEBUG(MESSAGE), void ).
+-define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA), void ).
+-define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA, STATE), void ).
 
 -endif.
+
+
+-define( CH_LOG_INFO(MESSAGE), ch_utils:log(info, ?MODULE, MESSAGE) ).
+-define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA) ).
+-define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
+
+-define( CH_LOG_WARN(MESSAGE), ch_utils:log(warning, ?MODULE, MESSAGE) ).
+-define( CH_LOG_WARN(MESSAGE, MESSAGE_DATA), ch_utils:log(warning, ?MODULE, MESSAGE, MESSAGE_DATA) ).
+-define( CH_LOG_WARN(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(warning, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
+
+-define( CH_LOG_ERROR(MESSAGE), ch_utils:log(error, ?MODULE, MESSAGE) ).
+-define( CH_LOG_ERROR(MESSAGE, MESSAGE_DATA), ch_utils:log(error, ?MODULE, MESSAGE, MESSAGE_DATA) ).
+-define( CH_LOG_ERROR(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(error, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
 
 
 %% ----------------------------------------------------------------------------
