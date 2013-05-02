@@ -7,7 +7,8 @@
 
 
 %% Exported Functions
--export([print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1, log/4, log/5]).
+-export([log/5, log/4, log/3,
+         print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1]).
 
 
 %%% ------------------------------------------------------------------------------------
@@ -50,6 +51,19 @@ log(Level, Module, MsgFmtString, MsgData) when is_list(MsgData) ->
     ok;
 log(Level, Module, MsgFmtString, State) when is_tuple(State) ->
     log(Level, Module, MsgFmtString, [], State).
+
+
+%% -------------------------------------------------------------------------------------
+%% @doc Prints a debug/info/warning/error log message
+%%
+%% @spec log( Level, Module :: atom(), MsgString :: string() )  ->  ok
+%% where
+%%      Level = debug | info | warnig | error
+%% @end
+%% -------------------------------------------------------------------------------------
+
+log(Level, Module, MsgString) ->
+    log(Level, Module, MsgString, []).
 
 
 %% -------------------------------------------------------------------------------------
