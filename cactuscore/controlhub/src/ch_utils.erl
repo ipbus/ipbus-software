@@ -1,6 +1,13 @@
-%% Author: rob
-%% Created: Dec 15, 2010
-%% Description: TODO: Add description to utils
+%%% =================================================================================================
+%%% @author Robert Frazier
+%%% @author Tom Williams
+%%%
+%%% @since Dec 2012
+%%%
+%%% @doc General functions used by more than one of the main ControlHub modules.
+%%% @end
+%%% =================================================================================================
+
 -module(ch_utils).
 
 -include("ch_global.hrl").
@@ -32,7 +39,7 @@ log(Level, Module, MsgFmtString, MsgData, State) ->
 %% -------------------------------------------------------------------------------------
 %% @doc Prints a debug/info/warning/error message
 %%
-%% @spec log(Level, Module :: atom(), MsgFmtString :: string(), MsgData :: list() | State :: tuple() ) -> ok
+%% @spec log(Level, Module :: atom(), MsgFmtString :: string(), MsgDataOrState :: (list() | tuple()) ) -> ok
 %%  where
 %%       Level = debug | info | warning | error
 %% @end
@@ -66,13 +73,13 @@ log(Level, Module, MsgString) ->
     log(Level, Module, MsgString, []).
 
 
-%% -------------------------------------------------------------------------------------
-%% @doc Converts binary to short, descriptive string containing first 2 32-bit words and
-%%      last word as hex numbers.
-%%
-%% @spec short_hex_string( binary() ) -> string()
-%% @end
-%% -------------------------------------------------------------------------------------
+% %% -------------------------------------------------------------------------------------
+% %% @doc Converts binary to short, descriptive string containing first 2 32-bit words and
+% %%      last word as hex numbers.
+% %%
+% %% @spec short_hex_string( binary() ) -> string()
+% %% @end
+% %% -------------------------------------------------------------------------------------
 
 %short_hex_string(Binary) when is_binary(Binary) ->
 %    "<<>>".
