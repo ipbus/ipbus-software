@@ -109,8 +109,8 @@ COMMANDS += [["DEPENDENCIES",
                "sudo yum -y groupinstall extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite"]]]
 
 CHECKOUT_CMDS = ["cd %s" % BUILD_HOME,
-                 #"svn co svn+ssh://svn.cern.ch/reps/cactus/trunk",
-                 "svn co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk",
+                 "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk",
+#                 "svn co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk",
                  "svn co svn+ssh://svn.cern.ch/reps/cmsos/branches/l1_xaas daq/xaas"]
 
 L1PAGE_SED_CMDS = [""
