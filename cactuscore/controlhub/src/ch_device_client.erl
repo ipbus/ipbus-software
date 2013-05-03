@@ -30,15 +30,22 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
          reset_packet_id/2, parse_packet_header/1, state_as_string/1]).
 
--record(state, {mode = setup,       % Running mode of device_client - either setup, normal, recover_lost_pkt, timeout
-                socket,             % Holds network socket to target device 
-                target_ip_tuple,
-                target_ip_u32,
-                target_port,
-                ipbus_v = unknown,  % IPbus version of target (only set when there is successful communication with target)
-                next_id,            % Next packet ID to be sent to target
-                in_flight = none,   % Details of packet in-flight to board
-                queue = []          % Queue of packets waiting to be sent to board
+-type mode() :: 'setup' | 'normal' | 'recover_lost_pkt' | 'timeout'.
+
+-type ipbus_version() :: {1, 3} | {2, 0} | 'unknown'.
+
+-type in_flight_info() :: {<<_:32>>, any(), binary(), non_neg_integer(), pid(), <<_:32>>}. %{ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr},
+
+-record(state, {mode = setup      :: mode(), 
+                socket,            % Holds network socket to target device 
+                target_ip_tuple   :: tuple(),
+                target_ip_u32     :: non_neg_integer(),
+                target_port       :: non_neg_integer(),
+                ipbus_v = unknown :: ipbus_version(), 
+                next_id           :: non_neg_integer(),
+                max_in_flight     :: non_neg_integer(),
+                in_flight = none  :: [in_flight_info()],   % Details of packet in-flight to board
+                queue = []         % Queue of packets waiting to be sent to board
                 }
         ).
 
@@ -116,7 +123,8 @@ init([IPaddrU32, PortU16]) ->
         {ok, Socket} ->
             put(socket, Socket),
             {ok, #state{socket = Socket, target_ip_tuple=IPTuple,
-                        target_ip_u32 = IPaddrU32, target_port=PortU16}};
+                        target_ip_u32 = IPaddrU32, target_port=PortU16,
+                        max_in_flight = unknown}};
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             get(targetSummary),
