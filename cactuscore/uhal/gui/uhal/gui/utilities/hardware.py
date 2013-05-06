@@ -163,6 +163,7 @@ class HardwareStruct:
         
         self.__hw_manager = None
         self.__ip_end_points = []
+        # self.__ip_to_nodeId_to_value = {}
         
         if connection_file:            
             self.__connection_file = connection_file
@@ -199,16 +200,18 @@ class HardwareStruct:
 
             dev_object = self.__hw_manager.getDevice(dev_name)
             ip_end_point = IPEndPoint(dev_object)
+            # self.__ip_to_nodeId_to_value[dev_name] = {}
             
             for n in self.__get_parent_nodes(dev_object):
 
                 node_object = dev_object.getNode(n)
                 node = Node(node_object)
                 ip_end_point.add_node(node)
+                # self.__ip_to_nodeId_to_value[dev_name][n] = 0
                     
             self.add_ip_end_point(ip_end_point)            
             
-        self.__print_hardware()
+        #self.__print_hardware()
 
 
     def __get_parent_nodes(self, device):
@@ -237,6 +240,11 @@ class HardwareStruct:
 
     def get_ip_end_points(self):
         return self.__ip_end_points
-
+    
+    def update_node_value(self, dev, node_id, node_value):
+        self.__ip_to_nodeId_to_value[dev][node_id] = node_value
+        
+    def update_nodes(self):
+        pass
 
 

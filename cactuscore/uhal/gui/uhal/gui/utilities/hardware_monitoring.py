@@ -24,29 +24,36 @@ class HardwareMonitoring(threading.Thread):
 
     def run(self):
         print "DEBUG: Checking HW... start!"
+        '''
+        cm = self.__hw.get_hw_manager()
+        for dev in cm.getDevices():
+            dev_object = cm.getDevice(dev)
+            
+            for n in dev_object.getNodes():
+                value = dev_object.getNode(n).read()
+                dev_object.dispatch()
+                self.__hw.update_node_value(dev, n, value)
+        '''         
         
         
-        for i in self.__hw.get_ip_end_points():
-            time.sleep(20)
-            '''
+        for i in self.__hw.get_ip_end_points():            
+            
             print "DEBUG: Updating IP End Point %s" % i.get_id()
             ##### get the status here, or make the IP end point object to find it out #####
             i.set_status("Undefined")
 
-            for n in i.get_nodes():                             
-                                                 
+            for n in i.get_nodes():                                             
                 print "DEBUG: Updating node %s" % n.get_id()
                 reg_value = self.__update(i.get_id(), n)
                 print "DEBUG: returned value is %s " % reg_value
                 
-            '''
+        
         evt = HwReadyEvent(self.myEVT_HWREADY, -1, self.__hw)
         wx.PostEvent(self.__parent, evt)
 
             
             
-    def __update(self, ip_ep_name, node):
-        
+    def __update(self, ip_ep_name, node):      
         hw_man = self.__hw.get_hw_manager()
         ip_ep = hw_man.getDevice(ip_ep_name)
         new_value = ""
@@ -63,7 +70,7 @@ class HardwareMonitoring(threading.Thread):
             except Exception, e:
                 print "ERROR: %s" % str(e)
         
-        for n in node.get_children():
+        for n in node.get_children():           
             self.__update(ip_ep_name, n)
             
         return new_value

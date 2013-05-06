@@ -10,7 +10,7 @@ class HwReadyEvent(wx.PyCommandEvent):
         self.__value = value       
 
 
-    def GetValue(self):
+    def get_event_info(self):
         return self.__value
    
 

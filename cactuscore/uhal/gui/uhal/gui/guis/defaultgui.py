@@ -7,6 +7,7 @@ from uhal.gui.utilities.hardware_monitoring import HardwareMonitoring
 from uhal.gui.guis.hardware_tree import HardwareTree
 from uhal.gui.utilities.hardware import HardwareStruct
 from uhal.gui.guis.refresh_buttons_panel import RefreshButtonsPanel
+from uhal.gui.guis.hardware_table_panel import HardwareTablePanel
         
 
 class DefaultGui(wx.Frame):
@@ -14,7 +15,7 @@ class DefaultGui(wx.Frame):
     def __init__(self, parent, id, title):
 
         wx.Frame.__init__(self, parent, id, title, size=(500, 400))
-
+        
         # Attributes       
         self.__hw = None
         self.__hw_mon = None
@@ -22,6 +23,7 @@ class DefaultGui(wx.Frame):
         # GUIs Attributes
         self.__hw_tree = None
         self.__refresh_buttons_panel = None
+        self.__hw_table_panel = None
 
         # Layout
         self.__create_menu_bar()
@@ -36,10 +38,18 @@ class DefaultGui(wx.Frame):
 
     def __do_layout(self):
 
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.__refresh_buttons_panel = RefreshButtonsPanel(self)
-        sizer.Add(self.__refresh_buttons_panel, 1, wx.ALIGN_CENTER)
+        self.__hw_table_panel = HardwareTablePanel(self)
+        
+        border_flags = wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT 
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.__refresh_buttons_panel, 1, border_flags | wx.ALIGN_TOP | wx.ALIGN_RIGHT, 10)
+        # sizer.Add(wx.StaticLine(self), 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 50)
+        sizer.Add(self.__hw_table_panel, 1, border_flags | wx.EXPAND | wx.ALIGN_TOP, 10)
+        
         self.SetSizer(sizer)
+        #sizer.Fit(self)
         self.SetMinSize((800, 600))
 
 
@@ -120,7 +130,8 @@ class DefaultGui(wx.Frame):
             file_name = file_picker.GetPath()
             
             self.__hw = HardwareStruct(file_name)                    
-            self.__create_hardware_tree(self.__hw)            
+            self.__create_hardware_tree(self.__hw) 
+            self.__hw_table_panel.draw_hw_naked_tables(self.__hw)           
             
         
         file_picker.Destroy()
@@ -188,13 +199,8 @@ class DefaultGui(wx.Frame):
     def __on_hw_ready(self, event):
             
         print "DEBUG: HW READY in default GUI"
-        value = "-1"
-        for i in self.__hw.get_ip_end_points():
-            for n in i.get_nodes():
-                if n.get_id() == "REG":
-                    value = n.get_value()  
-                        
-        self.__refresh_buttons_panel.on_hw_ready(value)
+        self.__hw = event.get_event_info()               
+        self.__hw_table_panel.on_hw_ready(self.__hw)
         self.__hw_tree.redraw(self.__hw)
         
         
@@ -207,6 +213,7 @@ class DefaultGui(wx.Frame):
     def start_hw_thread(self):
         print "DEBUG: Received message from refresh_buttons_panel. Should start HW thread now"
         if self.__hw_is_valid():
+           
             hw_worker = HardwareMonitoring(self, self.__hw)
             hw_worker.start()
         else: 
