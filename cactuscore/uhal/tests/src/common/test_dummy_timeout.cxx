@@ -31,6 +31,9 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/ProtocolUDP.hpp"
+#include "uhal/ProtocolTCP.hpp"
+
 #include "uhal/tests/tools.hpp"
 
 #include <iostream>
@@ -47,7 +50,12 @@ void check_timeout ( const std::string& connection, const std::string& id, int s
   ConnectionManager manager ( connection );
   HwInterface hw = manager.getDevice ( id );
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
-  CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , std::exception );
+  if( hw.uri().find("ipbusudp") != std::string::npos ){
+    CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
+  }
+  else{
+    CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
+  }
   std::cout << "Sleeping for " << sleepAfterFirstDispatch << " seconds to allow DummyHardware to clear itself" << std::endl;
   sleep ( sleepAfterFirstDispatch );
   // Check we can continue as normal without further exceptions.
