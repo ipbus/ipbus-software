@@ -49,14 +49,21 @@ void connect_write_read ( const std::string& connection, const std::string& id )
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
   // hw.ping();
-  uint32_t x = static_cast<uint32_t> ( rand() );
-  hw.getNode ( "REG" ).write ( x );
-  ValWord< uint32_t > mem = hw.getNode ( "REG" ).read();
-  CACTUS_CHECK ( !mem.valid() );
-  CACTUS_TEST_THROW ( mem.value(),uhal::exception::NonValidatedMemory );
+  uint32_t x1 = static_cast<uint32_t> ( rand() );
+  uint32_t x2 = static_cast<uint32_t> ( rand() );
+  hw.getNode ( "SUBSYSTEM1.REG" ).write ( x1 );
+  hw.getNode ( "SUBSYSTEM2.REG" ).write ( x2 );
+  ValWord< uint32_t > mem1 = hw.getNode ( "SUBSYSTEM1.REG" ).read();
+  ValWord< uint32_t > mem2 = hw.getNode ( "SUBSYSTEM2.REG" ).read();
+  CACTUS_CHECK ( !mem1.valid() );
+  CACTUS_CHECK ( !mem2.valid() );
+  CACTUS_TEST_THROW ( mem1.value(),uhal::exception::NonValidatedMemory );
+  CACTUS_TEST_THROW ( mem2.value(),uhal::exception::NonValidatedMemory );
   CACTUS_TEST ( hw.dispatch() );
-  CACTUS_CHECK ( mem.valid() );
-  CACTUS_CHECK ( mem.value() == x );
+  CACTUS_CHECK ( mem1.valid() );
+  CACTUS_CHECK ( mem1.value() == x1 );
+  CACTUS_CHECK ( mem2.value() == x2 );
+
 }
 
 void on_the_fly_connect_write_read ( const std::string& connection, const std::string& id )
