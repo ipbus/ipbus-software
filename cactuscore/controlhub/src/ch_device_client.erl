@@ -254,7 +254,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
             % Response packet lost => Ask board to re-send
             {ok, _, HwNextId} when HwNextId =:= NextId ->
-                {_, Id, End} = parse_packet_header(HdrSent),
+                {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
                 ch_stats:udp_out(),
                 {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
@@ -360,7 +360,7 @@ send_request_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_t
 %% ---------------------------------------------------------------------
 
 reset_packet_id(RawIPbusRequest, NewId) ->
-    {Ver, _, End} = parse_packet_header(RawIPbusRequest),
+    {Ver, _, End} = parse_ipbus_packet(RawIPbusRequest),
     case {Ver, NewId} of
         {{2,0}, _} when is_integer(NewId) ->
              <<H1:8, _:16, H2:8, PktBody/binary>> = RawIPbusRequest,
