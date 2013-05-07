@@ -28,13 +28,15 @@
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
-         reset_packet_id/2, parse_packet_header/1, state_as_string/1]).
+         reset_packet_id/2, parse_ipbus_packet/1, state_as_string/1]).
 
 -type mode() :: 'setup' | 'normal' | 'recover_lost_pkt' | 'timeout'.
 
 -type ipbus_version() :: {1, 3} | {2, 0} | 'unknown'.
 
 -type in_flight_info() :: {<<_:32>>, any(), binary(), non_neg_integer(), pid(), <<_:32>>}. %{ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr},
+
+%-type endness() :: big | little.
 
 -record(state, {mode = setup      :: mode(), 
                 socket,            % Holds network socket to target device 
@@ -394,8 +396,19 @@ decrement_pkt_id(Id) when is_integer(Id), Id>0 ->
 
 
 %% ---------------------------------------------------------------------
+%% @doc Decrements packet ID N times, looping round from 1 to 0xffff
+%% @spec decrement_pt_id( Id :: pos_integer(), N :: pos_integer() ) -> IdPlusN :: pos_integer()
+%% @end
+%% ---------------------------------------------------------------------
+
+decrement_pkt_id(Id, 0) ->
+    Id;
+decrement_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 ->
+    decrement_pkt_id( decrement_pkt_id(Id) , N-1 ).
+
+%% ---------------------------------------------------------------------
 %% @doc Increments packet ID looping round from 0xffff to 1 
-%% @spec increment_pkt_id( Id::integer() ) -> IdPlusOne::integer()
+%% @spec increment_pkt_id( Id::pos_integer() ) -> IdPlusOne::pos_integer()
 %% @end
 %% ---------------------------------------------------------------------
 
@@ -409,31 +422,65 @@ increment_pkt_id(Id) when is_integer(Id), Id>0 ->
 
 
 %% ---------------------------------------------------------------------
-%% @doc ... TODO ...
-%% @spec parse_packet_header( RawHeader::binary() ) -> {IPbusVer, Id::integer(), End}
-%% where 
-%%       IPbusVer = {2,0} | {1,3} | unknown,
-%%       End = big | little | unknown
+%% @doc Increments packet ID N times, loooping round fom 0xffff to 1
+%% @spec increment_pkt_id( Id::pos_integer(), N::pos_integer() ) -> IdPlusN::pos_integer()
 %% @end
 %% ---------------------------------------------------------------------
 
-parse_packet_header(PacketBin) when size(PacketBin)>4 ->
-    <<Header:4/binary, _/binary>> = PacketBin,
-    parse_packet_header(Header);
+increment_pkt_id(Id, 0) when is_integer(Id), Id>0 ->
+    Id;
+increment_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 ->
+    increment_pkt_id( increment_pkt_id(Id), N-1 ).
 
-parse_packet_header(<<16#20:8/big, Id:16/big, 16#f0:8/big>>) ->
-    {{2,0}, Id, big};
-parse_packet_header(<<16#f0:8/big, Id:16/little, 16#20:8/big>>) ->
-    {{2,0}, Id, little};
 
-parse_packet_header(<<1:4/big, _:12/big, 0:8, 16#f8/big>>) ->
-    {{1,3}, notset, big};
-parse_packet_header(<<16#f8/big, 0:8/big, _:8, 1:4/big, _:4>>) ->
-    {{1,3}, notset, little};
+%% ---------------------------------------------------------------------
+%% @doc Parses an IPbus 1.3 or 2.0 packet; typically only looks at the header.
+%% @spec parse_ipbus_packet( binary() ) -> {ipbus_version(), Type, endness()} | malformed
+%% where 
+%%       Type = {control, integer() | void} 
+%%            | {status, request}
+%%            | {status, MTU::pos_integer(), NBuffers::pos_integer(), NextId::pos_integer()} 
+%%            | {resend, Id :: pos_integer()}
+%% @end
+%% ---------------------------------------------------------------------
 
-parse_packet_header(_) ->
-    {unknown, notset, unknown}.
+parse_ipbus_packet(PacketBin) when is_binary(PacketBin) ->
+    PktSize = size(PacketBin),
+    case PacketBin of
+        <<16#20:8/big, Id:16/big, 15:4/big, Type:4/big, _/binary>> ->
+            if
+              Type =:= 0 ->
+                {{2,0}, {control, Id}, big};
+              (Type =:= 1) and (PktSize =:= 4) ->
+                {{2,0}, {resend, Id}, big};
+              (Type =:= 2) and (PktSize =:= 64) ->
+                parse_ipbus_packet({status, PacketBin});
+              true ->
+                malformed
+            end;
+        <<15:4/big, Type:4/big, Id:16/little, 16#20:8/big, _/binary>> ->
+            if
+              Type =:= 0 ->
+                {{2,0}, {control, Id}, little};
+              (Type =:= 1) and (PktSize =:= 0) ->
+                {{2,0}, {resend, Id}, little};
+              true ->
+                malformed
+            end;
+        <<1:4/big, _:12, 0:8, 16#1f:5, _:1, 0:2, _/binary>> ->
+            {{1,3}, {control, void}, big};
+        <<16#1f:5/big, _:1, 0:2, 0:8, _:8, 1:4/big, _:4, _/binary>> ->
+            {{1,3}, {control, void}, little}
+    end;
 
+parse_ipbus_packet({status, Bin}) when is_binary(Bin) ->
+    case Bin of
+        <<16#200000f1:32/big, 0:(15*32)/big>> ->
+            {status, request};
+        <<16#200000f1:32/big, MTU:32/big, NBuffers:32/big, 
+          16#20:8, NextId:16, 16#f0:8, _:(12*32)/big>> ->
+            {status, MTU, NBuffers, NextId}
+    end.
 
 %% ------------------------------------------------------------------------------------
 %% @doc Returns re-send request packet with specified packet ID and endian-ness
