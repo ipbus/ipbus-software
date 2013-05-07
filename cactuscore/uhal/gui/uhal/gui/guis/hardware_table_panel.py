@@ -1,4 +1,5 @@
 import string
+
 import wx
 import wx.lib.scrolledpanel as scroll
 
@@ -65,6 +66,7 @@ class NodeWidget(wx.Panel):
         
         
     def update_value(self, value):
+                
         try:
             value_to_set = hex(value)
         except TypeError:
@@ -74,7 +76,7 @@ class NodeWidget(wx.Panel):
         
         if self.__plotreg:
             
-            self.__plotreg.add_pair(time, value)
+            self.__plotreg.add_pair(value_to_set)
             self.__plotreg.plot()
         
     

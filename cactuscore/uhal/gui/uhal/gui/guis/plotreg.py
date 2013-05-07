@@ -1,3 +1,5 @@
+import time
+
 import wx
 from wx.lib.plot import PlotCanvas, PlotGraphics, PolyLine
 
@@ -11,7 +13,7 @@ class Plot(wx.Frame):
         self.__panel = wx.Panel(self, wx.ID_ANY)
         self.__panel.SetBackgroundColour("Gray")
         self.__id = regname
-        self.__data = [(1,1), (2,0), (3,6), (4,7), (5,5)]
+        self.__data = []
         
         # Layout attributes
         self.__toggle_grid   = wx.CheckBox(self.__panel, label="Show Grid")
@@ -45,20 +47,30 @@ class Plot(wx.Frame):
         self.plot()
         
     
-    def add_pair(self, x, y):
-        pass
+    def add_pair(self, y):
+        
+        x = time.time()        
+        print "Received new time/value pair : %s/%s" % (x, y) 
+        x_string = time.strftime("%H:%M:%S:", time.localtime())  
+        self.__data.append((x,y))
         
         
     def plot(self):
+        print "DEBUG: plotting with data", str(self.__data)
         self.__canvas.Draw(self.__draw_reg_plot())
     
     
     def __draw_reg_plot(self):
-        plot_title = "Dummy plot"
+        
+        plot_title = "REGISTER %s" % self.__id
+        
+        if not self.__data:
+            plot_title = "NO DATA YET"
+            
         x_axis_title = "Time"
         y_axis_title = self.__id
               
-        line1 = PolyLine(self.__data, colour='green', legend='Feb.', width=5)       
+        line1 = PolyLine(self.__data, colour='blue', legend='Register vs Time', width=2)       
                 
         return PlotGraphics([line1],
                         plot_title, 
