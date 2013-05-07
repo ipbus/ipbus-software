@@ -14,7 +14,7 @@ class DefaultGui(wx.Frame):
 
     def __init__(self, parent, id, title):
 
-        wx.Frame.__init__(self, parent, id, title, size=(500, 400))
+        wx.Frame.__init__(self, parent, id, title, size=(500, 400))       
         
         # Attributes       
         self.__hw = None
@@ -41,15 +41,15 @@ class DefaultGui(wx.Frame):
         self.__refresh_buttons_panel = RefreshButtonsPanel(self)
         self.__hw_table_panel = HardwareTablePanel(self)
         
-        border_flags = wx.TOP | wx.LEFT | wx.BOTTOM | wx.RIGHT 
+        border_flags = wx.ALL
         
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.__refresh_buttons_panel, 1, border_flags | wx.ALIGN_TOP | wx.ALIGN_RIGHT, 10)
+        sizer.Add(self.__refresh_buttons_panel, 0, border_flags, 5)
         # sizer.Add(wx.StaticLine(self), 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 50)
-        sizer.Add(self.__hw_table_panel, 1, border_flags | wx.EXPAND | wx.ALIGN_TOP, 10)
+        sizer.Add(self.__hw_table_panel, 1, border_flags | wx.EXPAND, 5)
         
         self.SetSizer(sizer)
-        #sizer.Fit(self)
+        self.SetAutoLayout(True)   
         self.SetMinSize((800, 600))
 
 

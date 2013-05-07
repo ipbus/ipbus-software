@@ -41,11 +41,16 @@ class HardwareMonitoring(threading.Thread):
             print "DEBUG: Updating IP End Point %s" % i.get_id()
             ##### get the status here, or make the IP end point object to find it out #####
             i.set_status("Undefined")
-
+            
+            # Do the following ONLY if status is OK:
+            '''
+            if i.get_status() != "OK":
+                continue
+            '''
             for n in i.get_nodes():                                             
                 print "DEBUG: Updating node %s" % n.get_id()
-                reg_value = self.__update(i.get_id(), n)
-                print "DEBUG: returned value is %s " % reg_value
+                self.__update(i.get_id(), n)
+      
                 
         
         evt = HwReadyEvent(self.myEVT_HWREADY, -1, self.__hw)
@@ -54,26 +59,25 @@ class HardwareMonitoring(threading.Thread):
             
             
     def __update(self, ip_ep_name, node):      
+        
         hw_man = self.__hw.get_hw_manager()
         ip_ep = hw_man.getDevice(ip_ep_name)
         new_value = ""
         
-        if node.has_no_children():
-            
-            try:
-                new_value = ip_ep.getNode(node.get_id()).read()
+        try:
+        # Before reading, check that node permission's allow to read
+            if node.has_no_children() and ("READ" in node.get_permission()):            
+                node_id = node.get_id()
+                new_value = ip_ep.getNode(node_id).read()
                 ip_ep.dispatch()
-                print "DEBUG: Setting value %s in node %s, parent %s" % (new_value, node.get_id(), node.get_parent())
+                print "DEBUG: Setting value %s in node %s, parent %s" % (new_value, node_id, node.get_parent())
                 node.set_value(new_value)
-                
-
-            except Exception, e:
-                print "ERROR: %s" % str(e)
+        except Exception, e:
+            print "ERROR: updating the node %s from HW device %s" %(node_id, ip_ep_name)
+                            
         
         for n in node.get_children():           
-            self.__update(ip_ep_name, n)
-            
-        return new_value
+            self.__update(ip_ep_name, n)        
     
     
     def __print_hardware(self):

@@ -8,13 +8,14 @@ class HardwareTree(wx.Frame):
 
     def __init__(self, parent, hw):
         print "DEBUG: Hardware tree instantiated"
-        wx.Frame.__init__(self, parent, title="uTCA hardware", size=(500,400))
+        wx.Frame.__init__(self, parent, title="uTCA hardware", size=(500,400))         
 
         # Attributes
         self.__hw = hw
         
         # GUIs Attributes
-        self.__tree = None     
+        self.__tree = None   
+        self.__sizer = None  
 
         # Layout
         self.__do_layout()
@@ -28,9 +29,9 @@ class HardwareTree(wx.Frame):
         
             
 
-    def __do_layout(self):
+    def __do_layout(self):            
         
-        ip_end_pts = self.__hw.get_ip_end_points()
+        ip_end_pts = self.__hw.get_ip_end_points()        
         
         if ip_end_pts:
             self.__tree = wx.TreeCtrl(self, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.TR_DEFAULT_STYLE)
@@ -38,7 +39,7 @@ class HardwareTree(wx.Frame):
             self.add_tree_nodes(root, ip_end_pts)
             self.__tree.Expand(root)
         else:
-            print "ERROR: cannot add IP END POINTS TO HW tree!"
+            print "ERROR: cannot add IP END POINTS TO HW tree!"            
         
         
     def add_tree_nodes(self, parent, items):
@@ -63,19 +64,19 @@ class HardwareTree(wx.Frame):
         
         
     def on_item_expanded(self, event):
-        print "on_item_expanded", self.get_item_text(event.GetItem())
+        print "DEBUG: on_item_expanded", self.get_item_text(event.GetItem())
 
 
     def on_item_collapsed(self, event):
-        print "on_item_collapsed", self.get_item_text(event.GetItem())
+        print "DEBUG: on_item_collapsed", self.get_item_text(event.GetItem())
 
 
     def on_sel_changed(self, event):
-        print "on_sel_changed", self.get_item_text(event.GetItem())
+        print "DEBUG: on_sel_changed", self.get_item_text(event.GetItem())
 
 
     def on_item_activated(self, event):
-        print "on_item_activated", self.get_item_text(event.GetItem())
+        print "DEBUG: on_item_activated", self.get_item_text(event.GetItem())
     
     
     def redraw(self, hw):

@@ -23,13 +23,15 @@ class RefreshButtonsPanel(wx.Panel):
         
     def __do_layout(self):
         
-        self.SetBackgroundColour('White')
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # self.SetBackgroundColour('White')
+        box = wx.StaticBox(self, -1, "Refresh Controls")
+        sizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
         
-        sizer.Add(self.__auto_refresh_box, 0, wx.ALIGN_TOP, 10)
-        sizer.Add(self.__refresh_button, 0, wx.ALIGN_TOP, 200)       
+        sizer.Add(self.__auto_refresh_box, 0, wx.ALL, 5)
+        sizer.Add(self.__refresh_button, 0, wx.ALL, 5)       
         
         self.SetSizer(sizer)
+        self.SetAutoLayout(True)
         sizer.Fit(self)
 
     def __on_click_refresh(self, event):
