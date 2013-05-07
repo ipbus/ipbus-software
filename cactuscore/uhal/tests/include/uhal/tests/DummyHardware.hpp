@@ -51,7 +51,7 @@
 // Using the uhal namespace
 namespace uhal
 {
-  static const uint32_t ADDRESSMASK = 0x000FFFFF;
+  static const uint32_t ADDRESSMASK = 0x00FFFFFF;
   static const uint32_t REPLY_HISTORY_DEPTH = 5;
   static const uint32_t BUFFER_SIZE = 500;
 

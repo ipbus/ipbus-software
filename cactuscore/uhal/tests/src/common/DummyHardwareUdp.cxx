@@ -36,7 +36,6 @@
 using boost::asio::ip::udp;
 using namespace uhal;
 
-static const uint32_t ADDRESSMASK = 0x000FFFFF;
 
 template< uint8_t IPbus_major , uint8_t IPbus_minor >
 class UDPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
