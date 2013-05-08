@@ -54,9 +54,14 @@ class Plot(wx.Frame):
         if not self.__data:
             self.__first_time_point = x
             
+            
         normalized_x = x - self.__first_time_point
+        if len(self.__data) >= 100:
+        	new_data = self.__data[1:]
+        	self.__data = new_data
+        	
         self.__data.append((normalized_x,y))
-        
+              
         
     def plot(self):
         print "DEBUG: plotting with data", str(self.__data)
