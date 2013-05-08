@@ -14,6 +14,7 @@ class Plot(wx.Frame):
         self.__panel.SetBackgroundColour("Gray")
         self.__id = regname
         self.__data = []
+        self.__first_time_point = -1
         
         # Layout attributes
         self.__toggle_grid   = wx.CheckBox(self.__panel, label="Show Grid")
@@ -49,10 +50,12 @@ class Plot(wx.Frame):
     
     def add_pair(self, y):
         
-        x = time.time()        
-        print "Received new time/value pair : %s/%s" % (x, y) 
-        x_string = time.strftime("%H:%M:%S:", time.localtime())  
-        self.__data.append((x,y))
+        x = int(time.time())
+        if not self.__data:
+            self.__first_time_point = x
+            
+        normalized_x = x - self.__first_time_point
+        self.__data.append((normalized_x,y))
         
         
     def plot(self):
@@ -67,7 +70,7 @@ class Plot(wx.Frame):
         if not self.__data:
             plot_title = "NO DATA YET"
             
-        x_axis_title = "Time"
+        x_axis_title = "Time (seconds since first sample)"
         y_axis_title = self.__id
               
         line1 = PolyLine(self.__data, colour='blue', legend='Register vs Time', width=2)       
