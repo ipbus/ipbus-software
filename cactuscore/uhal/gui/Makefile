@@ -26,7 +26,6 @@ build: _all
 buildall: _all
 _all: all
 all:
-	pychecker --limit 1000 uhal/gui/guiloader.py 
 
 rpm: _rpmall
 _rpmall:
