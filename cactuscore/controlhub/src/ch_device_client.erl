@@ -34,7 +34,9 @@
 
 -type ipbus_version() :: {1, 3} | {2, 0} | 'unknown'.
 
--type in_flight_info() :: {<<_:32>>, any(), binary(), non_neg_integer(), pid(), <<_:32>>}. %{ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr},
+-type timestamp() :: { non_neg_integer() , non_neg_integer() , non_neg_integer() }.
+
+-type in_flight_info() :: {<<_:32>>, timestamp(), binary(), non_neg_integer(), pid(), <<_:32>>}. %{ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr},
 
 %-type endness() :: big | little.
 
