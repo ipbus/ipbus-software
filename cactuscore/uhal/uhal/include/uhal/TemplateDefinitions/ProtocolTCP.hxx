@@ -150,7 +150,7 @@ namespace uhal
           if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
           {
             log ( Error() , "ASIO reported a Timeout in TCP callback" );
-            throw exception::ErrorInTcpCallback();
+            throw exception::TcpTimeout();
           }
 
           log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
@@ -208,7 +208,7 @@ namespace uhal
         if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
         {
           log ( Error() , "ASIO reported a Timeout in TCP callback" );
-          throw exception::ErrorInTcpCallback();
+          throw exception::TcpTimeout();
         }
 
         log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
@@ -250,7 +250,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       mTCP.dispatchExceptionHandler();
-      throw aExc;
+      throw;
     }
   }
 

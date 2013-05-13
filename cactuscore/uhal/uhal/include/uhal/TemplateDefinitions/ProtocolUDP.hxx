@@ -192,7 +192,7 @@ namespace uhal
         if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
         {
           log ( Error() , "ASIO reported a Timeout in UDP callback" );
-          throw exception::ErrorInUdpCallback();
+          throw exception::UdpTimeout();
         }
 
         log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
@@ -242,7 +242,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       mUDP.dispatchExceptionHandler();
-      throw aExc;
+      throw;
     }
   }
 
