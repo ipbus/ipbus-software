@@ -23,7 +23,9 @@
 
 %% Server state record definition
 -record(state, {dc_index = ets:new(device_client_index, [named_table, protected, {read_concurrency, true}]),
-                dc_reverse_index = ets:new(device_client_reverse_index, [private])}).
+                dc_reverse_index = ets:new(device_client_reverse_index, [private]),
+                max_in_flight = 16
+                }).
 
 
 %%% ====================================================================
@@ -97,11 +99,13 @@ init([]) ->
     % Note that our ETS table for holding the index of device clients
     % gets created as part of the standard server state record.
     ?CH_LOG_DEBUG("Initialising the device client registry."),
+    % Grab max_in_flight value from configuration file
+    {ok, MaxInFlight} = application:get_env(contolhub_app, max_in_flight),
     % Trap exits - if any device clients spawned by the registry end
     % up dying, we'll need to catch the message and remove the device
     % client from the index.
     process_flag(trap_exit, true),
-    {ok, #state{}}.
+    {ok, #state{max_in_flight=MaxInFlight}}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -120,7 +124,7 @@ handle_call({register, {IPaddr, Port}}, _From, State) ->
     % hasn't already been created+registered, and proceed from there.
     Reply = case ets:lookup(State#state.dc_index, {IPaddr, Port}) of
                 [ { {IPaddr, Port}, Pid } ] -> {ok, Pid};  % Already got created
-                [] -> create_and_register_device_client(IPaddr, Port, State#state.dc_index, State#state.dc_reverse_index)
+                [] -> create_and_register_device_client(IPaddr, Port, State#state.max_in_flight, State#state.dc_index, State#state.dc_reverse_index)
             end,
     {reply, Reply, State};
 
@@ -190,8 +194,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions (private)
 %%% --------------------------------------------------------------------
 
-create_and_register_device_client(IPaddr, Port, Index, ReverseIndex) ->
-    case ch_device_client:start_link(IPaddr, Port) of
+create_and_register_device_client(IPaddr, Port, MaxInFlight, Index, ReverseIndex) ->
+    case ch_device_client:start_link(IPaddr, Port, MaxInFlight) of
         {ok, Pid} -> 
             ets:insert(Index, {{IPaddr, Port}, Pid}),
             % For reverse lookups.
