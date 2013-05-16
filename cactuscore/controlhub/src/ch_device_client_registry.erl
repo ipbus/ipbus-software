@@ -100,7 +100,7 @@ init([]) ->
     % gets created as part of the standard server state record.
     ?CH_LOG_DEBUG("Initialising the device client registry."),
     % Grab max_in_flight value from configuration file
-    {ok, MaxInFlight} = application:get_env(contolhub_app, max_in_flight),
+    {ok, MaxInFlight} = application:get_env(controlhub, max_in_flight),
     % Trap exits - if any device clients spawned by the registry end
     % up dying, we'll need to catch the message and remove the device
     % client from the index.
