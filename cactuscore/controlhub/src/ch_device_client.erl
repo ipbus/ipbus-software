@@ -30,7 +30,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
          reset_packet_id/2, parse_ipbus_packet/1, state_as_string/1]).
 
--type mode() :: 'setup' | 'normal' | 'recover_lost_pkt' | 'timeout'.
+-type mode() :: 'unresponsive_target' | 'normal' | 'recover_lost_pkt' | 'timeout'.
 
 -type ipbus_version() :: {1, 3} | {2, 0} | 'unknown'.
 
@@ -40,7 +40,7 @@
 
 %-type endness() :: big | little.
 
--record(state, {mode = setup      :: mode(), 
+-record(state, {mode = normal     :: mode(), 
                 socket,            % Holds network socket to target device 
                 target_ip_tuple   :: tuple(),
                 target_port       :: non_neg_integer(),
@@ -120,8 +120,8 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
     IPTuple = ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32),
     put(target_ip_tuple, IPTuple),   
     put(target_port, PortU16),
-    ?CH_LOG_INFO("Setting up device client (in ch_device_client:init/1) for target at ~w (~w) : ~w. Absolute max nr packets in flight is ~w.", 
-                 [IPTuple, IPaddrU32, PortU16, ChMaxInFlight]),
+    ?CH_LOG_INFO("Setting up device client (in ch_device_client:init/1). Absolute max nr packets in flight is ~w.", 
+                 [ChMaxInFlight]),
 
     % Try opening ephemeral port and we want data delivered as a binary.
     case gen_udp:open(0, [binary]) of   
@@ -130,21 +130,17 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
             BasicState = #state{socket = Socket, target_ip_tuple=IPTuple, target_port=PortU16},
             case get_device_status(unknown) of
                 {ok, {1,3}, {}} ->
-                    ?CH_LOG_INFO("Target at ~w:~w speaks IPbus v1.3", [IPTuple, PortU16]),
+                    ?CH_LOG_INFO("Target speaks IPbus v1.3"),
                     {ok, BasicState#state{ ipbus_v={1,3} }};
                 {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
-                    ?CH_LOG_INFO("Target at ~w:~w speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [IPTuple, PortU16, _MTU, TargetNrBuffers, NextExpdId]),
+                    ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
                     {ok, BasicState#state{ ipbus_v={2,0},
                                            max_in_flight = min(TargetNrBuffers, ChMaxInFlight),
                                            next_id = NextExpdId
                                           }};
                 {error, _, MsgForTransManager} ->
-                    ?CH_LOG_INFO("Target didn't respond correctly to status request in ch_device_client:init/1."),
-                    receive 
-                        {send, _IPbusRequestPkt, Pid} ->
-                            Pid ! MsgForTransManager
-                    end,
-                    {stop, "Device did not respond to status request packets in setup (i.e. ch_device_client:init/1)."}
+                    ?CH_LOG_WARN("Target didn't respond correctly to status request in ch_device_client:init/1."),
+                    {ok, BasicState#state{ mode = unresponsive_target }}
             end;
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
@@ -192,6 +188,9 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
                   "Manager with PID = ~w.", [ClientPid]),
     if
+      S#state.mode =:= unresponsive_target ->
+        ClientPid ! {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> },
+        {stop, normal, S};
       S#state.in_flight =:= none ->
         send_request_to_board({RequestPacket, ClientPid}, S);
       true ->
@@ -470,10 +469,10 @@ parse_ipbus_packet(PacketBin) when is_binary(PacketBin) ->
             if
               Type =:= 0 ->
                 {{2,0}, {control, Id}, big};
-              (Type =:= 1) and (PktSize =:= 4) ->
-                {{2,0}, {resend, Id}, big};
-              (Type =:= 2) and (PktSize =:= 64) ->
+              (Type =:= 1) and (Id =:= 0) and (PktSize =:= 64) ->
                 parse_ipbus_packet({status, PacketBin});
+              (Type =:= 2) and (PktSize =:= 4) ->
+                {{2,0}, {resend, Id}, big};
               true ->
                 malformed
             end;
@@ -495,10 +494,10 @@ parse_ipbus_packet(PacketBin) when is_binary(PacketBin) ->
 parse_ipbus_packet({status, Bin}) when is_binary(Bin) ->
     case Bin of
         <<16#200000f1:32/big, 0:(15*32)/big>> ->
-            {status, request};
+            {{2,0}, {status, request}, big};
         <<16#200000f1:32/big, MTU:32/big, NBuffers:32/big, 
           16#20:8, NextId:16, 16#f0:8, _:(12*32)/big>> ->
-            {status, MTU, NBuffers, NextId}
+            {{2,0}, {status, MTU, NBuffers, NextId}, big}
     end.
 
 %% ------------------------------------------------------------------------------------
@@ -551,8 +550,8 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when NrAttemptsLeft
                   [IPbusVer, TotNrAttempts, ?UDP_RESPONSE_TIMEOUT]),
     {error, timeout, {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> } };
 
-get_device_status(_IPbusVer, NrAttemptsLeft) when is_integer(NrAttemptsLeft), NrAttemptsLeft > 0 ->
-    get_device_status({NrAttemptsLeft, NrAttemptsLeft});
+get_device_status(IPbusVer, NrAttemptsLeft) when is_integer(NrAttemptsLeft), NrAttemptsLeft > 0 ->
+    get_device_status(IPbusVer, {NrAttemptsLeft, NrAttemptsLeft});
 
 get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrAttemptsLeft), NrAttemptsLeft > 0 ->
     AttemptNr = TotNrAttempts - NrAttemptsLeft + 1,
@@ -571,7 +570,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
              ch_stats:udp_out();
          unknown ->
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
-             time:sleep(2),
+             timer:sleep(2),
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
              ch_stats:udp_out()
     end,
@@ -588,9 +587,9 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
                     ?CH_LOG_INFO("Received a well-formed IPbus 2.0 'status response' from target at ~w:~w on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=-~w",
                                  [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts, MTU, NBuffers, NextId]),
                     {ok, {2,0}, {MTU, NBuffers, NextId}};
-                _ ->
-                    ?CH_LOG_ERROR("Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format) from target at ~w:~w.",
-                                 [TargetIPTuple, TargetPort]),
+                _Details ->
+                    ?CH_LOG_ERROR("Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format) from target at ~w:~w. parse_ipbus_packet returned ~w",
+                                 [TargetIPTuple, TargetPort, _Details]),
                     {error, malformed, {device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_MALFORMED_STATUS, <<>>} }
             end
     after ?UDP_RESPONSE_TIMEOUT ->
