@@ -30,7 +30,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
          reset_packet_id/2, parse_ipbus_packet/1, state_as_string/1]).
 
--type mode() :: 'unresponsive_target' | 'normal' | 'recover_lost_pkt' | 'timeout'.
+-type mode() :: 'setup' | 'normal' | 'recover_lost_pkt' | 'timeout'.
 
 -type ipbus_version() :: {1, 3} | {2, 0} | 'unknown'.
 
@@ -127,21 +127,22 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
     case gen_udp:open(0, [binary]) of   
         {ok, Socket} ->
             put(socket, Socket),
-            BasicState = #state{socket = Socket, target_ip_tuple=IPTuple, target_port=PortU16},
-            case get_device_status(unknown) of
-                {ok, {1,3}, {}} ->
-                    ?CH_LOG_INFO("Target speaks IPbus v1.3"),
-                    {ok, BasicState#state{ ipbus_v={1,3} }};
-                {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
-                    ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
-                    {ok, BasicState#state{ ipbus_v={2,0},
-                                           max_in_flight = min(TargetNrBuffers, ChMaxInFlight),
-                                           next_id = NextExpdId
-                                          }};
-                {error, _, MsgForTransManager} ->
-                    ?CH_LOG_WARN("Target didn't respond correctly to status request in ch_device_client:init/1."),
-                    {ok, BasicState#state{ mode = unresponsive_target }}
-            end;
+            put(abs_max_in_flight, ChMaxInFlight),
+            {ok, #state{mode = setup, socket = Socket, target_ip_tuple=IPTuple, target_port=PortU16}};
+%            case get_device_status(unknown) of
+%                {ok, {1,3}, {}} ->
+%                    ?CH_LOG_INFO("Target speaks IPbus v1.3"),
+%                    {ok, BasicState#state{ ipbus_v={1,3} }};
+%                {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
+%                    ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
+%                    {ok, BasicState#state{ ipbus_v={2,0},
+%                                           max_in_flight = min(TargetNrBuffers, ChMaxInFlight),
+%                                           next_id = NextExpdId
+%                                          }};
+%                {error, _, MsgForTransManager} ->
+%                    ?CH_LOG_WARN("Target didn't respond correctly to status request in ch_device_client:init/1."),
+%                    {ok, BasicState#state{ mode = unresponsive_target }}
+%            end;
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             get(targetSummary),
@@ -188,9 +189,24 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
                   "Manager with PID = ~w.", [ClientPid]),
     if
-      S#state.mode =:= unresponsive_target ->
-        ClientPid ! {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> },
-        {stop, normal, S};
+      S#state.mode =:= setup ->
+        {ReqIPbusVer, _Type, _End} = parse_ipbus_packet(RequestPacket),
+        case get_device_status(ReqIPbusVer) of
+            {ok, {1,3}, {}} ->
+                ?CH_LOG_INFO("Target speaks IPbus v1.3"),
+                send_request_to_board({RequestPacket, ClientPid}, S#state{ mode=normal, ipbus_v={1,3} });
+            {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
+                ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
+                send_request_to_board({RequestPacket, ClientPid}, S#state{mode = normal,
+                                                                          ipbus_v = {2,0},
+                                                                          max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
+                                                                          next_id = NextExpdId
+                                                                          });
+            {error, _, MsgForTransManager} ->
+                ?CH_LOG_ERROR("Target didn't respond correctly to status request in ch_device_client:init/1."),
+                ClientPid ! MsgForTransManager,
+                {stop, "Target didn't respond correctly to status request in device client setup.", S}
+        end;
       S#state.in_flight =:= none ->
         send_request_to_board({RequestPacket, ClientPid}, S);
       true ->
@@ -217,8 +233,7 @@ handle_cast(_Msg, State) ->
 
 % handle_info callback for udp packets from device
 handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when S#state.in_flight=/=none ->
-    ?CH_LOG_DEBUG("Received response from target hardware; passing it to originating Transaction Manager...", 
-                  [TargetIPTuple, TargetPort, S#state.in_flight]),
+    ?CH_LOG_DEBUG("Received response from target hardware; passing it to originating Transaction Manager..."),
     ch_stats:udp_in(),
     {HdrSent, TimeSent, _PktSnt, RetryCount, ClientPid, OrigHdr} = S#state.in_flight,
     if
@@ -289,7 +304,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
          {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
       % Clause for ultimate irrecoverable timeout
       true ->
-        ?CH_LOG_ERROR("TIMEOUT! No response from target~n. Generating and sending a timeout response to originating Transaction Manager...", [], S),
+        ?CH_LOG_ERROR("TIMEOUT! No response from target. Generating and sending a timeout response to originating Transaction Manager...", [], S),
         ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
         if 
           S#state.queue =:= [] ->
@@ -557,7 +572,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     AttemptNr = TotNrAttempts - NrAttemptsLeft + 1,
     Socket = get(socket),
     {TargetIPTuple, TargetPort} = target_ip_port(),
-    StatusReq13 = binary:copy(<<16#100000f8:32/big>>, 10),
+    StatusReq13 = binary:copy(<<16#100000f8:32/native>>, 10),
     StatusReq20 = <<16#200000f1:32/big, 0:(15*32)>>,
     ?CH_LOG_INFO("Sending IPbus status request to target at ~w:~w (attempt ~w of ~w).",
                  [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts]),
@@ -575,7 +590,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
              ch_stats:udp_out()
     end,
     receive
-        {udp, Socket, TargetIPTuple, TargetPort, StatusReq13} ->
+        {udp, Socket, TargetIPTuple, TargetPort, <<16#100000fc:32/native, _/binary>>} ->
             ?CH_LOG_INFO("Received an IPbus 1.3 'status response' from target at ~w:~w on attempt ~w of ~w.",
                          [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts]),
             ch_stats:udp_in(),
