@@ -57,6 +57,12 @@ namespace uhal
   {
     //! Exception class to handle the case where the received header does not match the expected header.
     ExceptionClass ( XMLfileMissingRequiredParameters , "Exception class to handle the case where the received header does not match the expected header." );
+
+    //! Exception class to handle the case where the target does not respond to the ControlHub
+    ExceptionClass ( ControlHubTargetTimeout , "Exception class to handle the case where the target does not respond to the ControlHub" );
+
+    //! Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub
+    ExceptionClass ( ControlHubInternalTimeout , "Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub" );
   }
 
   /**

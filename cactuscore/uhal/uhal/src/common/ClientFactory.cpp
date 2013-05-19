@@ -51,13 +51,13 @@ namespace uhal
       mInstance = new ClientFactory();
       // ---------------------------------------------------------------------
       mInstance->add< UDP< IPbus< 1 , 3 , 350 > > > ( "ipbusudp-1.3" , "Direct access to hardware via UDP, using IPbus version 1.3" );
-      mInstance->add< UDP< IPbus< 2 , 0 , 256 > > > ( "ipbusudp-2.0" , "Direct access to hardware via UDP, using IPbus version 2.0" );
+      mInstance->add< UDP< IPbus< 2 , 0 , 350 > > > ( "ipbusudp-2.0" , "Direct access to hardware via UDP, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
       mInstance->add< TCP< IPbus< 1 , 3 , 350 > > > ( "ipbustcp-1.3" , "Direct access to hardware via TCDP, using IPbus version 1.3" );
-      mInstance->add< TCP< IPbus< 2 , 0 , 256 > > > ( "ipbustcp-2.0" , "Direct access to hardware via TCDP, using IPbus version 2.0" );
+      mInstance->add< TCP< IPbus< 2 , 0 , 350 > > > ( "ipbustcp-2.0" , "Direct access to hardware via TCDP, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
       mInstance->add< TCP< ControlHub < IPbus< 1 , 3 , 350 > > > > ( "chtcp-1.3", "Hardware access via the Control Hub, using IPbus version 1.3" );
-      mInstance->add< TCP< ControlHub < IPbus< 2 , 0 , 256 > > > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0" );
+      mInstance->add< TCP< ControlHub < IPbus< 2 , 0 , 350 > > > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
     }
 
