@@ -366,7 +366,7 @@ send_requests_to_board( State ) ->
       EmptyQueue ->
         {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
       true ->
-        {H = {_,_},NewQ} = queue:out(State#state.queue),
+        {{value, H = {_,_}},NewQ} = queue:out(State#state.queue),
         send_requests_to_board(H, State#state{queue=NewQ})
     end.
 
