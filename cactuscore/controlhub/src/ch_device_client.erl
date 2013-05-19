@@ -421,6 +421,9 @@ forward_replies_to_transaction_manager(ReplyBin, S) when is_binary(ReplyBin), is
         {ClientPid, Bin} ->
             ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, Bin},
             forward_replies_to_transaction_manager(ReplyBin, S#state{in_flight=T});
+        _ when S#state.ipbus_v =:= {1,3} ->
+            element(5,H) ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, ReplyBin},
+            send_requests_to_board(S#state{in_flight=[]});
         {ReplyHdr, _TimeSent, _, NrRetries, ClientPid, OrigHdr} ->
             ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>},
             if
