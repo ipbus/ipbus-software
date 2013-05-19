@@ -41,7 +41,7 @@
 using namespace uhal;
 
 static const uint32_t RegisterOffset = 0x00001000;
-static const uint32_t RegisterSpace  = 0x00001000;
+static const uint32_t RegisterSpace  = 0x00000400;
 static const uint32_t MaxSize        = std::min ( static_cast<uint32_t> ( 10000 ), RegisterSpace );
 
 
