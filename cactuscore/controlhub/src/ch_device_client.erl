@@ -40,15 +40,15 @@
 
 %-type endness() :: big | little.
 
--record(state, {mode = normal     :: mode(), 
-                socket,            % Holds network socket to target device 
-                target_ip_tuple   :: tuple(),
-                target_port       :: non_neg_integer(),
-                ipbus_v = unknown :: ipbus_version(), 
-                next_id           :: non_neg_integer(),
-                max_in_flight     :: non_neg_integer(),
-                in_flight = []    :: [in_flight_info()],   % Details of packet in-flight to board
-                queue = []         % Queue of packets waiting to be sent to board
+-record(state, {mode = normal       :: mode(), 
+                socket,              % Holds network socket to target device 
+                target_ip_tuple     :: tuple(),
+                target_port         :: non_neg_integer(),
+                ipbus_v = unknown   :: ipbus_version(), 
+                next_id             :: non_neg_integer(),
+                max_in_flight       :: non_neg_integer(),
+                in_flight = []      :: [in_flight_info()],   % Details of packet in-flight to board
+                queue = queue:new() % Queue of packets waiting to be sent to board
                 }
         ).
 
@@ -211,13 +211,10 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
       length(S#state.in_flight) < S#state.max_in_flight ->
         send_requests_to_board({RequestPacket, ClientPid}, S);
       true ->
-        {_HdrSent, TimeSent, _PktSent, RetryCount, _Pid, _OrigHdr} = S#state.in_flight,
-        TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
-        NewTimeout = max(0, (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)) - TimeSinceSent),
-        ?CH_LOG_DEBUG("Request packet from ~w is being queued (max nr packets already in flight, new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.queue), NewTimeout]),
-        {noreply, 
-             S#state{queue=lists:append(Queue, [{RequestPacket, ClientPid}])}, 
-             NewTimeout}
+        {_HdrSent, TimeSent, _, RetryCount, _Pid, _OrigHdr} = lists:nth(1, S#state.in_flight),
+        NewTimeout = updated_timeout( (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent),
+        ?CH_LOG_DEBUG("Request packet from ~w is being queued (max nr packets already in flight, new queue length ~w, new timeout ~wms).", [ClientPid, queue:len(S#state.queue), NewTimeout]),
+        {noreply, S#state{queue=queue:in({RequestPacket, ClientPid}, Queue)}, NewTimeout}
     end;
 
 %% Default handle cast
@@ -299,11 +296,11 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
       true ->
         ?CH_LOG_ERROR("TIMEOUT! No response from target. Generating and sending a timeout response to originating Transaction Manager...", [], S),
         ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
-        if 
-          S#state.queue =:= [] ->
-            {noreply, S#state{in_flight=[], mode=timeout}, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
-          true ->
-            send_requests_to_board(S#state{in_flight=[], mode=timeout})
+        case queue:is_empty(S#state.queue) of
+            true ->
+                {noreply, S#state{in_flight=[], mode=timeout}, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
+            false ->
+                send_requests_to_board(S#state{in_flight=[], mode=timeout})
         end
     end;
 
@@ -361,15 +358,16 @@ updated_timeout(OrigTimeout, TimeSent) when is_integer(OrigTimeout), OrigTimeout
 %% ------------------------------------------------------------------------------
 
 send_requests_to_board( State ) ->
+    EmptyQueue = queue:is_empty(State#state.queue),
     if
       length(State#state.in_flight) =:= State#state.max_in_flight ->
         [{_, TimeSent, _, RetryCount, _, _}, _] = State#state.in_flight,
         {noreply, State, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent)};
-      State#state.queue =:= [] ->
+      EmptyQueue ->
         {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
       true ->
-        [H = {_,_}|T] = State#state.queue,
-        send_requests_to_board(H, State#state{queue=T})
+        {H = {_,_},NewQ} = queue:out(State#state.queue),
+        send_requests_to_board(H, State#state{queue=NewQ})
     end.
 
 
