@@ -267,7 +267,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
             {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
                 % Add request packets that would have been dropped, back to front of state's queue
                 InFlightTail = lists:nthtail(1, S#state.in_flight),
-                DroppedRequests = [{Pid, <<OrigHdr:4/binary, ReqBody/binary>>} || {_, _, <<_:4/binary, ReqBody/binary>>, _, Pid, OrigHdr} <- lists:reverse(InFlightTail)],
+                DroppedRequests = [{<<OrigHdr:4/binary, ReqBody/binary>>, Pid} || {_, _, <<_:4/binary, ReqBody/binary>>, _, Pid, OrigHdr} <- lists:reverse(InFlightTail)],
                 NewQ = queue:join( queue:from_list(DroppedRequests), S#state.queue ),
                 NewInFlight = [{HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}],
                 % Re-send original packet
@@ -381,7 +381,7 @@ send_requests_to_board( State ) ->
 %% @end
 %% ------------------------------------------------------------------------------
 
-send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
+send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when is_binary(Packet), is_pid(ClientPid) ->
     ?CH_LOG_DEBUG("Request packet from PID ~w is being forwarded to the board.", [ClientPid]),
     <<OrigHdr:4/binary, _/binary>> = Packet,
     case reset_packet_id(Packet, S#state.next_id) of
