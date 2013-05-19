@@ -264,16 +264,22 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
       % Packet-loss recovery for IPbus 2.0
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
         ?CH_LOG_WARN("Timeout when waiting for response from target; starting packet loss recovery (attempt ~w) ... ",[RetryCount+1], S),
-        NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}),
-        NextIdMinusOne = decrement_pkt_id(NextId),
+        NextIdMinusN = decrement_pkt_id(NextId, length(S#state.in_flight)),
         case get_device_status(S#state.ipbus_v) of 
             % Request packet lost => re-send
-            {ok, _, HwNextId} when HwNextId =:= NextIdMinusOne -> 
+            {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
+                % Add request packets that would have been dropped, back to front of state's queue
+                InFlightTail = lists:nthtail(1, S#state.in_flight),
+                DroppedRequests = [{Pid, <<OrigHdr:4/binary, ReqBody/binary>>} || {_, _, <<_:4/binary, ReqBody/binary>>, _, Pid, OrigHdr} <- lists:reverse(InFlightTail)],
+                NewQ = queue:join( queue:from_list(DroppedRequests), S#state.queue ),
+                NewInFlight = [{HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}],
+                % Re-send original packet
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
                 ch_stats:udp_out(),
-                {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
+                {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt, next_id=increment_pkt_id(HwNextId), queue=NewQ}, ?UDP_RESPONSE_TIMEOUT};
             % Response packet lost => Ask board to re-send
-            {ok, _, HwNextId} when HwNextId =:= NextId ->
+            {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextId ->
+                NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}),
                 {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
                 ch_stats:udp_out(),
@@ -475,6 +481,18 @@ decrement_pkt_id(Id) when is_integer(Id), Id>0 ->
       true ->
         Id - 1
     end.
+
+
+%% --------------------------------------------------------------------- 
+%% @doc Decrements packet ID N times, looping round from 1 to 0xffff 
+%% @spec decrement_pt_id( Id :: pos_integer(), N :: pos_integer() ) -> IdPlusN :: pos_integer() 
+%% @end 
+%% --------------------------------------------------------------------- 
+ 
+decrement_pkt_id(Id, 0) -> 
+    Id; 
+decrement_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 -> 
+    decrement_pkt_id( decrement_pkt_id(Id) , N-1 ). 
 
 
 %% ---------------------------------------------------------------------
