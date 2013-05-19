@@ -622,9 +622,11 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     ?CH_LOG_INFO("Sending IPbus status request to target at ~w:~w (attempt ~w of ~w).",
                  [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts]),
     case IPbusVer of
-         {1,3} ->
+         {1,3} when NrAttemptsLeft=:=TotNrAttempts ->
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
              ch_stats:udp_out();
+         {1,3} ->
+             void;
          {2,0} ->
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
              ch_stats:udp_out();
