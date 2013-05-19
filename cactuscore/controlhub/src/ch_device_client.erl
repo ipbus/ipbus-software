@@ -357,17 +357,16 @@ updated_timeout(OrigTimeout, TimeSent) when is_integer(OrigTimeout), OrigTimeout
 %% @end
 %% ------------------------------------------------------------------------------
 
-send_requests_to_board( State ) ->
-    EmptyQueue = queue:is_empty(State#state.queue),
-    if
-      length(State#state.in_flight) =:= State#state.max_in_flight ->
-        {_, TimeSent, _, RetryCount, _, _} = lists:nth(1, State#state.in_flight),
-        {noreply, State, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent)};
-      EmptyQueue ->
-        {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
-      true ->
-        {{value, H = {_,_}},NewQ} = queue:out(State#state.queue),
-        send_requests_to_board(H, State#state{queue=NewQ})
+send_requests_to_board( State = #state{queue = Queue, in_flight = InFlightList} ) ->
+    case queue:is_empty(State#state.queue) of
+        false when length(InFlightList) < State#state.max_in_flight ->
+            {{value, H = {_,_}},NewQ} = queue:out(Queue),
+            send_requests_to_board(H, State#state{queue=NewQ});
+        true when length(InFlightList) =:= 0 ->
+            {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
+        _ ->
+            {_, TimeSent, _, RetryCount, _, _} = lists:nth(1, InFlightList),
+            {noreply, State, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent)}
     end.
 
 
