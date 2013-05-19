@@ -33,6 +33,7 @@
 
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/ProtocolTCP.hpp"
+#include "uhal/ProtocolControlHub.hpp"
 
 #include "uhal/tests/tools.hpp"
 
@@ -53,8 +54,11 @@ void check_timeout ( const std::string& connection, const std::string& id, int s
   if( hw.uri().find("ipbusudp") != std::string::npos ){
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
   }
-  else{
+  else if( hw.uri().find("ipbustcp") != std::string::npos ){
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
+  }
+  else{
+    CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ControlHubTargetTimeout );
   }
   std::cout << "Sleeping for " << sleepAfterFirstDispatch << " seconds to allow DummyHardware to clear itself" << std::endl;
   sleep ( sleepAfterFirstDispatch );
