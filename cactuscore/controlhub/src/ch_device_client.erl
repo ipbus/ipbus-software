@@ -213,7 +213,7 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
       true ->
         {_HdrSent, TimeSent, _, RetryCount, _Pid, _OrigHdr} = lists:nth(1, S#state.in_flight),
         NewTimeout = updated_timeout( (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent),
-        ?CH_LOG_DEBUG("Request packet from ~w is being queued (max nr packets already in flight, new queue length ~w, new timeout ~wms).", [ClientPid, queue:len(S#state.queue), NewTimeout]),
+        ?CH_LOG_DEBUG("Request packet from ~w is being queued (~w packets already in-flight (max nr), new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.in_flight), queue:len(Queue), NewTimeout]),
         {noreply, S#state{queue=queue:in({RequestPacket, ClientPid}, Queue)}, NewTimeout}
     end;
 
@@ -645,7 +645,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
             ch_stats:udp_in(),
             case parse_ipbus_packet(ReplyBin) of 
                 {{2,0}, {status, MTU, NBuffers, NextId}, big} ->
-                    ?CH_LOG_INFO("Received a well-formed IPbus 2.0 'status response' from target at ~w:~w on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=-~w",
+                    ?CH_LOG_INFO("Received a well-formed IPbus 2.0 'status response' from target at ~w:~w on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
                                  [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts, MTU, NBuffers, NextId]),
                     {ok, {2,0}, {MTU, NBuffers, NextId}};
                 _Details ->
@@ -682,9 +682,10 @@ state_as_string(S) when is_record(S, state) ->
     io_lib:format(" State:  mode = ~w   ||   ipbus version = ~w   ||   next_id = ~w~n"
                   "         target is at ~w port ~w~n"
                   "         in_flight = ~w~n"
+                  "         max_in_flight = ~w~n"
                   "         queue     = ~w~n",
                   [S#state.mode, S#state.ipbus_v, S#state.next_id, 
                    S#state.target_ip_tuple, S#state.target_port,
-                   S#state.in_flight, 
+                   S#state.in_flight, S#state.max_in_flight,
                    S#state.queue]
                   ).
