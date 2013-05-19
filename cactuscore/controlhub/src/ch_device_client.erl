@@ -249,8 +249,8 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
     end;
 
 % handle_info callback for device response timeout
-handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort, next_id=NextId}) when S#state.in_flight=/=[] ->
-    [{HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr}, _] = S#state.in_flight,
+handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort, next_id=NextId}) when length(S#state.in_flight)=/=0 ->
+    {HdrSent, TimeSent, PktSent, RetryCount, ClientPid, _OrigHdr} = lists:nth(1, S#state.in_flight),
     ?CH_LOG_DEBUG("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
                   "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
     case RetryCount of
@@ -361,7 +361,7 @@ send_requests_to_board( State ) ->
     EmptyQueue = queue:is_empty(State#state.queue),
     if
       length(State#state.in_flight) =:= State#state.max_in_flight ->
-        [{_, TimeSent, _, RetryCount, _, _}, _] = State#state.in_flight,
+        {_, TimeSent, _, RetryCount, _, _} = lists:nth(1, State#state.in_flight),
         {noreply, State, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent)};
       EmptyQueue ->
         {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
