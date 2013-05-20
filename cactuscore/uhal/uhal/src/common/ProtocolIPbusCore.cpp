@@ -280,7 +280,7 @@ namespace uhal
     while ( lPayloadByteCount > 0 )
     {
       checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-      uint32_t lSendBytesAvailableForPayload ( ( lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
+      uint32_t lSendBytesAvailableForPayload ( std::min(4*getMaxTransactionWordCount(), lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
       //log ( Info() , "lSendBytesAvailable = " , Integer(lSendBytesAvailable) );
       //log ( Info() , "lSendBytesAvailableForPayload (bytes) = " , Integer(lSendBytesAvailableForPayload) );
       //log ( Info() , "lSendBytesAvailableForPayload (words) = " , Integer(lSendBytesAvailableForPayload>>2) );
@@ -359,7 +359,7 @@ namespace uhal
     while ( lPayloadByteCount > 0 )
     {
       checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-      uint32_t lReplyBytesAvailableForPayload ( ( lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
+      uint32_t lReplyBytesAvailableForPayload ( std::min( 4*getMaxTransactionWordCount(), lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
       mCurrentBuffers->send ( implementCalculateHeader ( lType , lReplyBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode()
                                                        ) );
       mCurrentBuffers->send ( lAddr );

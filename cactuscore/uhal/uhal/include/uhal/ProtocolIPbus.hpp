@@ -145,6 +145,9 @@ namespace uhal
       //! Returns the InfoCode for request transactions in this IPbus version.
       uint8_t requestTransactionInfoCode () const { return 0; }
 
+      //! Returns the maximum value of the word count in the transaction header, for each IPbus version
+      uint32_t getMaxTransactionWordCount() const { return 0x1ff; }
+
       // std::vector< uint32_t > mSendPadding;
       // std::vector< uint32_t > mReplyPadding;
 
@@ -257,6 +260,9 @@ namespace uhal
 
        //! Returns the InfoCode for request transactions in this IPbus version.
       uint8_t requestTransactionInfoCode () const { return 0xF; }
+
+      //! Returns the maximum value of the word count in the transaction header, for each IPbus version
+      uint32_t getMaxTransactionWordCount() const { return 0xff; }
 
     private:
       //! The transaction counter which will be incremented in the sent IPbus headers

@@ -195,6 +195,9 @@ namespace uhal
       //! Returns the InfoCode for request transactions in this IPbus version.
       virtual uint8_t requestTransactionInfoCode() const = 0;
 
+      //! Returns the maximum value of the word count in the transaction header, for each IPbus version
+      virtual uint32_t getMaxTransactionWordCount() const = 0;
+
       /**
       	Function which checks the available space in the currently filling buffer against requested send and receive sizes and, if there is insufficient space in the currently filling buffer, then dispatch it and create a new buffer
       	@param aSendSize the amount of data that the current instruction wishes to send
