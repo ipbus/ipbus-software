@@ -31,6 +31,10 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/ProtocolUDP.hpp"
+#include "uhal/ProtocolTCP.hpp"
+#include "uhal/ProtocolControlHub.hpp"
+
 #include "uhal/tests/tools.hpp"
 
 #include <iostream>
@@ -42,12 +46,27 @@ using namespace uhal;
 
 
 
-void check_nonreachable ( const std::string& connection, const std::string& id, int sleepAfterFirstDispatch )
+void check_nonreachable ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw = manager.getDevice ( id );
-  // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
-  CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , std::exception );
+  // Check we get an exception corresponding to target being unreachable
+  if( hw.uri().find("ipbusudp") != std::string::npos ){
+    CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
+  }
+  else if( hw.uri().find("ipbustcp") != std::string::npos ){
+    CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
+  }
+  else{
+    try{ 
+      hw.getNode ( "REG" ).read();
+      hw.dispatch(); 
+      CACTUS_CHECK(false);
+    }
+    catch(uhal::exception::exception& e){
+      CACTUS_CHECK( ( (typeid(e)==typeid(uhal::exception::ControlHubTargetTimeout)) || (typeid(e)==typeid(uhal::exception::TcpTimeout)) ) );
+    }
+  }
 }
 
 
@@ -56,6 +75,6 @@ int main ( int argc,char* argv[] )
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-  CACTUS_TEST ( check_nonreachable ( connection_file, device_id, 3 ) );
+  CACTUS_TEST ( check_nonreachable ( connection_file, device_id ) );
   CACTUS_TEST_RESULT();
 }
