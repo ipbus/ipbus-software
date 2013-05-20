@@ -431,12 +431,26 @@ forward_replies_to_transaction_manager(ReplyBin, S) when is_binary(ReplyBin), is
                 ch_stats:udp_response_timeout(recovered);
               true -> void
             end,
-            send_requests_to_board(S#state{in_flight=T});
+            send_requests_to_board( S#state{in_flight=forward_pending_replies(T)} );
         _ ->
             {ReplyHdr, _TimeSent, _, _NrRetries, ClientPid, OrigHdr} = lists:keyfind(ReplyHdr, 1, S#state.in_flight),
             send_requests_to_board(S#state{ in_flight = lists:keyreplace(ReplyHdr, 1, S#state.in_flight, {ClientPid, <<OrigHdr/binary, ReplyBody/binary>>}) })
     end.
 
+
+%% ---------------------------------------------------------------------
+%% @doc
+%%
+%% @spec
+%% 
+%% @end
+%% ---------------------------------------------------------------------
+
+forward_pending_replies( [{ClientPid, ReplyBin} | T] ) when is_pid(ClientPid), is_binary(ReplyBin) ->
+    ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, ReplyBin},
+    forward_pending_replies(T);
+forward_pending_replies( L ) when is_list(L) ->
+    L.
 
 
 %% ---------------------------------------------------------------------
