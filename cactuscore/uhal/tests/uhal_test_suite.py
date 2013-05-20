@@ -248,6 +248,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub2" % (conn_file),
                controlhub_stats,
                "sudo /sbin/tc qdisc add dev lo root netem loss 0.0001%",
                "sudo /sbin/tc -s qdisc ls dev lo",
@@ -262,6 +263,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
+               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub2" % (conn_file),
                controlhub_stats, 
                # Clean up
                "sudo /sbin/tc qdisc del dev lo root",
