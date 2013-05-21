@@ -262,6 +262,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
         ?CH_LOG_WARN("Timeout when waiting for response from target; starting packet loss recovery (attempt ~w) ... ",[RetryCount+1], S),
         NextIdMinusN = decrement_pkt_id(NextId, length(S#state.in_flight)),
+        NextIdPlusOneMinusN = increment_pkt_id(NextIdMinusN),
         case get_device_status(S#state.ipbus_v) of 
             % Request packet lost => re-send
             {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
@@ -275,7 +276,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 ch_stats:udp_out(),
                 {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt, next_id=increment_pkt_id(HwNextId), queue=NewQ}, ?UDP_RESPONSE_TIMEOUT};
             % Response packet lost => Ask board to re-send
-            {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextId ->
+            {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdPlusOneMinusN ->
                 NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}),
                 {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
