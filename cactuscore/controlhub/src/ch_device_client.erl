@@ -262,7 +262,6 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
       (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
         ?CH_LOG_WARN("Timeout when waiting for response from target; starting packet loss recovery (attempt ~w) ... ",[RetryCount+1], S),
         NextIdMinusN = decrement_pkt_id(NextId, length(S#state.in_flight)),
-        NextIdPlusOneMinusN = increment_pkt_id(NextIdMinusN),
         case get_device_status(S#state.ipbus_v) of 
             % Request packet lost => re-send
             {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
@@ -276,12 +275,22 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 ch_stats:udp_out(),
                 {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt, next_id=increment_pkt_id(HwNextId), queue=NewQ}, ?UDP_RESPONSE_TIMEOUT};
             % Response packet lost => Ask board to re-send
-            {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdPlusOneMinusN ->
-                NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}),
-                {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
-                gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
-                ch_stats:udp_out(),
-                {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
+            {ok, {2,0}, {_, _, HwNextId}} ->
+                LostResponseNextIds = [increment_pkt_id(NextIdMinusN, X) || X <- lists:seq(1,length(S#state.in_flight))],
+                case lists:member(HwNextId, LostResponseNextIds) of
+                    true ->
+                        NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}),
+                        {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
+                        gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
+                        ch_stats:udp_out(),
+                        {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
+                    false ->
+                        Msg = io_lib:format("Target board's next expected ID has unexpected value of ~w. Another client (ControlHub or uHAL) is probably communicating with this target at the same time. "
+                                      "I've experienced timeout, with ~w request packets already in-flight, and I think board's next ID should now be lie in the range ~w to ~w (incl.) in case of packet loss.",
+                                      [ HwNextId, length(S#state.in_flight), NextId, NextIdMinusN, lists:last(LostResponseNextIds) ]),                     
+                        ?CH_LOG_ERROR(Msg, [], S),
+                        {stop, Msg}
+                end;
             % Error in getting device status
             {error, _Type, MsgForTransManager} ->
                 ClientPid ! MsgForTransManager,
@@ -525,6 +534,18 @@ increment_pkt_id(Id) when is_integer(Id), Id>0 ->
     end.
 
 
+%% --------------------------------------------------------------------- 
+%% @doc Increments packet ID N times, loooping round fom 0xffff to 1 
+%% @spec increment_pkt_id( Id::pos_integer(), N::pos_integer() ) -> IdPlusN::pos_integer() 
+%% @end 
+%% --------------------------------------------------------------------- 
+
+increment_pkt_id(Id, 0) when is_integer(Id), Id>0 -> 
+    Id; 
+increment_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 -> 
+    increment_pkt_id( increment_pkt_id(Id), N-1 ). 
+
+
 %% ---------------------------------------------------------------------
 %% @doc Parses an IPbus 1.3 or 2.0 packet; typically only looks at the header.
 %% @spec parse_ipbus_packet( binary() ) -> {ipbus_version(), Type, endness()} | malformed
@@ -696,11 +717,10 @@ target_ip_port() ->
 state_as_string(S) when is_record(S, state) ->
     io_lib:format(" State:  mode = ~w   ||   ipbus version = ~w   ||   next_id = ~w~n"
                   "         target is at ~w port ~w~n"
-                  "         in_flight = ~w~n"
-                  "         max_in_flight = ~w~n"
-                  "         queue     = ~w~n",
+                  "         number in-flight = ~w   (max = ~w)~n"
+                  "         number queued    = ~w~n",
                   [S#state.mode, S#state.ipbus_v, S#state.next_id, 
                    S#state.target_ip_tuple, S#state.target_port,
-                   S#state.in_flight, S#state.max_in_flight,
-                   S#state.queue]
+                   length(S#state.in_flight), S#state.max_in_flight,
+                   queue:len(S#state.queue)]
                   ).
