@@ -213,7 +213,7 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
       true ->
         {_HdrSent, TimeSent, _, RetryCount, _Pid, _OrigHdr} = lists:nth(1, S#state.in_flight),
         NewTimeout = updated_timeout( (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent),
-        ?CH_LOG_DEBUG("Request packet from ~w is being queued (~w packets already in-flight (max nr), new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.in_flight), queue:len(Queue), NewTimeout]),
+        ?CH_LOG_DEBUG("Request packet from ~w is being queued (~w packets already in-flight (max nr), new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.in_flight), queue:len(Queue)+1, NewTimeout]),
         {noreply, S#state{queue=queue:in({RequestPacket, ClientPid}, Queue)}, NewTimeout}
     end;
 
@@ -286,8 +286,8 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                         {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
                     false ->
                         Msg = io_lib:format("Target board's next expected ID has unexpected value of ~w. Another client (ControlHub or uHAL) is probably communicating with this target at the same time. "
-                                      "I've experienced timeout, with ~w request packets already in-flight, and I think board's next ID should now be lie in the range ~w to ~w (incl.) in case of packet loss.",
-                                      [ HwNextId, length(S#state.in_flight), NextId, NextIdMinusN, lists:last(LostResponseNextIds) ]),                     
+                                      "I've experienced timeout, with ~w request packets already in-flight, and I think board's next ID should now lie in the range ~w to ~w (incl.) in case of packet loss.",
+                                      [ HwNextId, length(S#state.in_flight), NextIdMinusN, lists:last(LostResponseNextIds) ]),                     
                         ?CH_LOG_ERROR(Msg, [], S),
                         {stop, Msg}
                 end;
