@@ -266,6 +266,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
             % Request packet lost => re-send
             {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
                 % Add request packets that would have been dropped, back to front of state's queue
+                ?CH_LOG_INFO("Request packet got lost on way to board."),
                 InFlightTail = lists:nthtail(1, S#state.in_flight),
                 DroppedRequests = [{<<OrigHdr:4/binary, ReqBody/binary>>, Pid} || {_, _, <<_:4/binary, ReqBody/binary>>, _, Pid, OrigHdr} <- lists:reverse(InFlightTail)],
                 NewQ = queue:join( queue:from_list(DroppedRequests), S#state.queue ),
@@ -279,6 +280,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 LostResponseNextIds = [increment_pkt_id(NextIdMinusN, X) || X <- lists:seq(1,length(S#state.in_flight))],
                 case lists:member(HwNextId, LostResponseNextIds) of
                     true ->
+                        ?CH_LOG_INFO("Reply packet got lost on way back from board."),
                         NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}),
                         {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
                         gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
