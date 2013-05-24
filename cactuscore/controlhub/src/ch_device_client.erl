@@ -234,7 +234,7 @@ handle_cast(_Msg, State) ->
 % handle_info callback for udp packets from device
 handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when length(S#state.in_flight)=/=0 ->
     ?CH_LOG_DEBUG("Received response from target hardware; passing it to originating Transaction Manager..."),
-    ch_stats:udp_in(),
+%    ch_stats:udp_in(),
     << ReplyHdr:4/binary, _/binary>> = ReplyBin,
     case {S#state.ipbus_v, lists:keymember(ReplyHdr, 1, S#state.in_flight)} of
         {{2, 0}, true} ->
@@ -404,7 +404,7 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
             gen_udp:send(Socket, TargetIPTuple, TargetPort, ModRequest),
             <<ModHdr:4/binary, _/binary>> = ModRequest,
             NewInFlightList = lists:append( S#state.in_flight, [{ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr}] ),
-            ch_stats:udp_out(),
+%            ch_stats:udp_out(),
             NewS = if
                      is_integer(PktId) ->
                        S#state{ipbus_v=IPbusVer, in_flight=NewInFlightList, next_id = increment_pkt_id(PktId)};
