@@ -235,7 +235,7 @@ handle_cast(_Msg, State) ->
 handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when length(S#state.in_flight)=/=0 ->
     ?CH_LOG_DEBUG("Received response from target hardware; passing it to originating Transaction Manager..."),
 %    ch_stats:udp_in(),
-    << ReplyHdr:4/binary, _/binary>> = ReplyBin,
+    ReplyHdr = binary_part(ReplyBin, 0, 4),
     case {S#state.ipbus_v, lists:keymember(ReplyHdr, 1, S#state.in_flight)} of
         {{2, 0}, true} ->
             forward_replies_to_transaction_manager(ReplyBin, S#state{mode=normal});
@@ -350,13 +350,14 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions (private)
 %%% --------------------------------------------------------------------
 
+
 %% ------------------------------------------------------------------------------
 %% @spec updated_timeout( OrigTimeout :: pos_integer(), TimeSent ) -> NewTimeout
 %% @end
 %% ------------------------------------------------------------------------------
 
 updated_timeout(OrigTimeout, TimeSent) when is_integer(OrigTimeout), OrigTimeout>0 ->
-    TimeSinceSent = round(timer:now_diff( now(), TimeSent )/1000.0),
+    TimeSinceSent = ( timer:now_diff(now(),TimeSent) div 1000 ),
     max(0, (OrigTimeout - TimeSinceSent)).
 
 
@@ -369,16 +370,17 @@ updated_timeout(OrigTimeout, TimeSent) when is_integer(OrigTimeout), OrigTimeout
 %% @end
 %% ------------------------------------------------------------------------------
 
-send_requests_to_board( State = #state{queue = Queue, in_flight = InFlightList} ) ->
-    case queue:is_empty(State#state.queue) of
-        false when length(InFlightList) < State#state.max_in_flight ->
-            {{value, H = {_,_}},NewQ} = queue:out(Queue),
-            send_requests_to_board(H, State#state{queue=NewQ});
+send_requests_to_board( S = #state{queue = Q, in_flight = InFlightList} ) ->
+    case queue:is_empty(Q) of
+        false when length(InFlightList) < S#state.max_in_flight ->
+            send_requests_to_board(element(2,queue:peek(Q)), 
+                                   S#state{queue=queue:drop(Q)}
+                                   );
         true when length(InFlightList) =:= 0 ->
-            {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
+            {noreply, S, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
         _ ->
             {_, TimeSent, _, RetryCount, _, _} = lists:nth(1, InFlightList),
-            {noreply, State, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent)}
+            {noreply, S, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent)}
     end.
 
 
@@ -392,22 +394,20 @@ send_requests_to_board( State = #state{queue = Queue, in_flight = InFlightList} 
 %% @end
 %% ------------------------------------------------------------------------------
 
-send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when is_binary(Packet), is_pid(ClientPid) ->
+send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort, ipbus_v=IPbusVer}) when is_binary(Packet), is_pid(ClientPid) ->
     ?CH_LOG_DEBUG("Request packet from PID ~w is being forwarded to the board.", [ClientPid]),
-    <<OrigHdr:4/binary, _/binary>> = Packet,
     case reset_packet_id(Packet, S#state.next_id) of
         {error, _Type, MsgForClient} ->
             ?CH_LOG_DEBUG("ERROR encountered in resetting packet ID - returning following message to Transaction Manager (PID ~w): ~w", [ClientPid, MsgForClient]),
             ClientPid ! MsgForClient,
             {noreply, S#state{ipbus_v=unknown, next_id=unknown} };
-        {IPbusVer, ModRequest, PktId} ->
-            gen_udp:send(Socket, TargetIPTuple, TargetPort, ModRequest),
-            <<ModHdr:4/binary, _/binary>> = ModRequest,
-            NewInFlightList = lists:append( S#state.in_flight, [{ModHdr, now(), ModRequest, 0, ClientPid, OrigHdr}] ),
+        {IPbusVer, ModPkt, PktId} ->
+            gen_udp:send(Socket, TargetIPTuple, TargetPort, ModPkt),
+            NewInFlightList = lists:append( S#state.in_flight, [{binary_part(ModPkt,0,4), now(), ModPkt, 0, ClientPid, binary_part(Packet,0,4)}] ),
 %            ch_stats:udp_out(),
             NewS = if
                      is_integer(PktId) ->
-                       S#state{ipbus_v=IPbusVer, in_flight=NewInFlightList, next_id = increment_pkt_id(PktId)};
+                       S#state{in_flight=NewInFlightList, next_id = increment_pkt_id(PktId)};
                      true ->
                        S#state{in_flight=NewInFlightList}
                    end,
@@ -426,8 +426,8 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
 %% ---------------------------------------------------------------------
 
 forward_replies_to_transaction_manager(ReplyBin, S) when is_binary(ReplyBin), is_record(S,state) ->
-    << ReplyHdr:4/binary, ReplyBody/binary>> = ReplyBin,
     [H | T] = S#state.in_flight,
+    ReplyHdr = binary_part(ReplyBin, 0, 4),
     case H of
         {ClientPid, Bin} ->
             ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, Bin},
@@ -436,7 +436,7 @@ forward_replies_to_transaction_manager(ReplyBin, S) when is_binary(ReplyBin), is
             element(5,H) ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, ReplyBin},
             send_requests_to_board(S#state{in_flight=[]});
         {ReplyHdr, _TimeSent, _, NrRetries, ClientPid, OrigHdr} ->
-            ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, <<OrigHdr/binary, ReplyBody/binary>>},
+            ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, reset_header(ReplyBin, OrigHdr)},
             if
               NrRetries>0 ->
                 ?CH_LOG_INFO( "Recovered lost packet!", [], S),
@@ -446,7 +446,7 @@ forward_replies_to_transaction_manager(ReplyBin, S) when is_binary(ReplyBin), is
             send_requests_to_board( S#state{in_flight=forward_pending_replies(T)} );
         _ ->
             {ReplyHdr, _TimeSent, _, _NrRetries, ClientPid, OrigHdr} = lists:keyfind(ReplyHdr, 1, S#state.in_flight),
-            send_requests_to_board(S#state{ in_flight = lists:keyreplace(ReplyHdr, 1, S#state.in_flight, {ClientPid, <<OrigHdr/binary, ReplyBody/binary>>}) })
+            send_requests_to_board(S#state{ in_flight = lists:keyreplace(ReplyHdr, 1, S#state.in_flight, {ClientPid, reset_header(ReplyBin, OrigHdr)} ) })
     end.
 
 
@@ -466,31 +466,43 @@ forward_pending_replies( L ) when is_list(L) ->
 
 
 %% ---------------------------------------------------------------------
-%% @doc ... TODO ...
-%% @spec reset_packet_id(RawIPbusRequestBin, Id) -> {ok, IPbusVer, ModIPbusRequest, PacketId}
-%%                                                | {error, malformed, MsgForTransManager}
-%%                                                | {error, timeout, MsgForTransManager}
+%% @doc Resets the first 4 bytes of a binary
+%% @spec reset_header(Packet::<<_:32>>, CurrentHdr::<<_:32>>, NewHdr::<<_:32>>) -> binary()
+%%
 %% @end
 %% ---------------------------------------------------------------------
 
-reset_packet_id(RawIPbusRequest, NewId) ->
-    {Ver, _, End} = parse_ipbus_packet(RawIPbusRequest),
+reset_header(Packet, NewHdr) when is_binary(Packet), size(Packet)>3, is_binary(NewHdr), size(NewHdr)>3 ->
+    <<_:4/binary, Body/binary>> = Packet,
+    <<NewHdr/binary, Body/binary>>.
+
+
+%% ---------------------------------------------------------------------
+%% @doc ... TODO ...
+%% @spec reset_packet_id(RawRequestBin, Id) -> {ok, IPbusVer, ModIPbusRequest, PacketId}
+%%                                           | {error, malformed, MsgForTransManager}
+%%                                           | {error, timeout, MsgForTransManager}
+%% @end
+%% ---------------------------------------------------------------------
+
+reset_packet_id(RawRequest, NewId) ->
+    {Ver, _, End} = parse_ipbus_packet(RawRequest),
     case {Ver, NewId} of
         {{2,0}, _} when is_integer(NewId) ->
-             <<H1:8, _:16, H2:8, PktBody/binary>> = RawIPbusRequest,
+             RawHdr = binary_part(RawRequest, 0, 4),
              case End of
-                 big    -> {Ver, <<H1:8, NewId:16/big, H2:8, PktBody/binary>>, NewId};
-                 little -> {Ver, <<H1:8, NewId:16/little, H2:8, PktBody/binary>>, NewId}
+                 big    -> {Ver, reset_header(RawRequest, <<16#20:8, NewId:16/big, 16#f0:8>>), NewId};
+                 little -> {Ver, reset_header(RawRequest, <<16#f0:8, NewId:16/little, 16#20:8>>), NewId}
              end;
         {{2,0}, _} ->
             case get_device_status({2,0}) of 
                 {error, _Type, _MsgForTransManager} = X ->
                    X;
                 {ok, _, IdFromStatus} ->
-                   reset_packet_id(RawIPbusRequest, IdFromStatus)
+                   reset_packet_id(RawRequest, IdFromStatus)
              end;
         _ ->
-             {Ver, RawIPbusRequest, notset}
+             {Ver, RawRequest, notset}
     end.
 
 
