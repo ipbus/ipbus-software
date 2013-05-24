@@ -50,16 +50,21 @@ void check_timeout ( const std::string& connection, const std::string& id, int s
 {
   ConnectionManager manager ( connection );
   HwInterface hw = manager.getDevice ( id );
+
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
-  if( hw.uri().find("ipbusudp") != std::string::npos ){
+  if ( hw.uri().find ( "ipbusudp" ) != std::string::npos )
+  {
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
   }
-  else if( hw.uri().find("ipbustcp") != std::string::npos ){
+  else if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
+  {
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
   }
-  else{
+  else
+  {
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ControlHubTargetTimeout );
   }
+
   std::cout << "Sleeping for " << sleepAfterFirstDispatch << " seconds to allow DummyHardware to clear itself" << std::endl;
   sleep ( sleepAfterFirstDispatch );
   // Check we can continue as normal without further exceptions.

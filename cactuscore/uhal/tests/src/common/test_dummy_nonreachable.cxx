@@ -50,21 +50,27 @@ void check_nonreachable ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw = manager.getDevice ( id );
+
   // Check we get an exception corresponding to target being unreachable
-  if( hw.uri().find("ipbusudp") != std::string::npos ){
+  if ( hw.uri().find ( "ipbusudp" ) != std::string::npos )
+  {
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
   }
-  else if( hw.uri().find("ipbustcp") != std::string::npos ){
+  else if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
+  {
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
   }
-  else{
-    try{ 
+  else
+  {
+    try
+    {
       hw.getNode ( "REG" ).read();
-      hw.dispatch(); 
-      CACTUS_CHECK(false);
+      hw.dispatch();
+      CACTUS_CHECK ( false );
     }
-    catch(uhal::exception::exception& e){
-      CACTUS_CHECK( ( (typeid(e)==typeid(uhal::exception::ControlHubTargetTimeout)) || (typeid(e)==typeid(uhal::exception::TcpTimeout)) ) );
+    catch ( uhal::exception::exception& e )
+    {
+      CACTUS_CHECK ( ( ( typeid ( e ) ==typeid ( uhal::exception::ControlHubTargetTimeout ) ) || ( typeid ( e ) ==typeid ( uhal::exception::TcpTimeout ) ) ) );
     }
   }
 }

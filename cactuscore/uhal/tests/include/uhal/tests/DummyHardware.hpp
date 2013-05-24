@@ -53,7 +53,7 @@ namespace uhal
 {
   static const uint32_t ADDRESSMASK = 0x00FFFFFF;
   static const uint32_t REPLY_HISTORY_DEPTH = 5;
-  static const uint32_t BUFFER_SIZE = 500;
+  static const uint32_t BUFFER_SIZE = 100000;
 
 
 
@@ -118,10 +118,10 @@ namespace uhal
         mReply.clear();
         lBegin =  mReceive.begin();
         lEnd = mReceive.begin() + ( aByteCount>>2 );
-        
-        if( ! base_type::analyze ( lBegin , lEnd ) ) // Cope with receiving bad headers
+
+        if ( ! base_type::analyze ( lBegin , lEnd ) ) // Cope with receiving bad headers
         {
-          mReply.push_back( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId , (IPbus_major==1 ? 2 : 1) ) );
+          mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId , ( IPbus_major==1 ? 2 : 1 ) ) );
         }
 
         if ( ( base_type::mPacketType == 0 ) && ( mReply.size() != 0 ) )

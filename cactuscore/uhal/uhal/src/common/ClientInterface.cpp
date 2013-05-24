@@ -146,12 +146,22 @@ namespace uhal
 
   void ClientInterface::dispatch ()
   {
+    unflushedDispatch ();
+    this->Flush();
+  }
+
+
+  void ClientInterface::unflushedDispatch ()
+  {
     this->predispatch( );
-    mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) );
     this->implementDispatch( );
+    mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) );
     NextFillingBuffer ();
   }
 
+
+  void ClientInterface::Flush ()
+  {}
 
 
   bool ClientInterface::validate ( )
@@ -172,9 +182,7 @@ namespace uhal
       lBuffer->validate();
     }
 
-    //log ( Debug() , ThisLocation() );
     mDispatchedBuffers.pop_front();
-    //log ( Debug() , ThisLocation() );
     return lRet;
   }
 
@@ -208,11 +216,13 @@ namespace uhal
 
     log ( Debug() , "Adding new Buffers to the memory pool" );
     Buffers lBuffers ( this->getMaxSendSize() );
-    mBuffers.insert ( mBuffers.end() , 10 , lBuffers );
+    mBuffers.insert ( mBuffers.end() , 16 , lBuffers );
     mCurrentBuffers = mBuffers.begin();
     mCurrentBuffers->clear();
     this->preamble();
   }
+
+
 
   void ClientInterface::NextFillingBuffer ( )
   {
@@ -225,6 +235,19 @@ namespace uhal
     {
       mCurrentBuffers = mBuffers.begin();
     }
+
+    bool lWillPause ( false );
+
+    if ( LoggingIncludes ( Warning() ) )
+    {
+      boost::lock_guard<boost::mutex> lLock ( mMutex );
+      lWillPause =  mDispatchedBuffers.size() && & ( *mCurrentBuffers ) == mDispatchedBuffers.front();
+    }
+
+    //     if ( lWillPause )
+    //     {
+    //       log ( Warning() , "The fill queue has caught up with the dispatch queue - should implement a mechanism for expanding the memory pool to handle this case, but for now just wait for the dispatch queue to clear a bit" );
+    //     }
 
     //we will wait if the buffer that we are expecting to fill is still waiting for dispatch and validation
     while ( true )
@@ -240,12 +263,12 @@ namespace uhal
       {
         break;
       }
-      else
-      {
-        log ( Warning() , "The fill queue has caught up with the dispatch queue - should implement a mechanism for expanding the memory pool to handle this case, but for now just wait for the dispatch queue to clear a bit" );
-      }
     }
 
+    //     if ( lWillPause )
+    //     {
+    //       log ( Warning() , "Escaped pause, now clearing mCurrentBuffer (", Pointer( &( *mCurrentBuffers ) ) , ") and adding preamble." );
+    //     }
     mCurrentBuffers->clear();
     this->preamble();
   }

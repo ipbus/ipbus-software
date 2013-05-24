@@ -142,7 +142,7 @@ namespace uhal
     	@param aParentPath a path which will be prepended to relative file names
     	@param aFiles a pointer to a vector of boost::filesystem::paths onto which the returned file names are appended
     */
-    void ShellExpandFilenameExpr ( const std::string & aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path >& aFiles );
+    void ShellExpandFilenameExpr ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path >& aFiles );
   }
 }
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -327,7 +327,6 @@ namespace uhal
     void OpenFileLocal ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , boost::_bi::bind_t<R,F,L> aBinder )
     {
       std::vector< boost::filesystem::path > lFilePaths;
-
       uhal::utilities::ShellExpandFilenameExpr ( aFilenameExpr , aParentPath , lFilePaths );
 
       for ( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 )
@@ -336,7 +335,7 @@ namespace uhal
 
         if ( !lStr.is_open() )
         {
-	  log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
+          log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
           throw  uhal::exception::CannotOpenFile();
         }
         else
@@ -350,7 +349,6 @@ namespace uhal
 
         lStr.close();
       }
-
     }
 
     /**
@@ -395,7 +393,7 @@ namespace uhal
       }
       else
       {
-	throw uhal::exception::NonSupportedUriPotocol();
+        throw uhal::exception::NonSupportedUriPotocol();
       }
     }
 

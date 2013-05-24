@@ -143,10 +143,16 @@ namespace uhal
       bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
       //! Returns the InfoCode for request transactions in this IPbus version.
-      uint8_t requestTransactionInfoCode () const { return 0; }
+      uint8_t requestTransactionInfoCode () const
+      {
+        return 0;
+      }
 
       //! Returns the maximum value of the word count in the transaction header, for each IPbus version
-      uint32_t getMaxTransactionWordCount() const { return 0x1ff; }
+      uint32_t getMaxTransactionWordCount() const
+      {
+        return 0x1ff;
+      }
 
       // std::vector< uint32_t > mSendPadding;
       // std::vector< uint32_t > mReplyPadding;
@@ -258,11 +264,17 @@ namespace uhal
       */
       bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
-       //! Returns the InfoCode for request transactions in this IPbus version.
-      uint8_t requestTransactionInfoCode () const { return 0xF; }
+      //! Returns the InfoCode for request transactions in this IPbus version.
+      uint8_t requestTransactionInfoCode () const
+      {
+        return 0xF;
+      }
 
       //! Returns the maximum value of the word count in the transaction header, for each IPbus version
-      uint32_t getMaxTransactionWordCount() const { return 0xff; }
+      uint32_t getMaxTransactionWordCount() const
+      {
+        return 0xff;
+      }
 
     private:
       //! The transaction counter which will be incremented in the sent IPbus headers

@@ -124,9 +124,9 @@ namespace uhal
                 return false;
               }
 
-              if ( (IPbus_major==1 && mResponseGood != 0) || (IPbus_major==2 && mResponseGood != 0xf) )
+              if ( ( IPbus_major==1 && mResponseGood != 0 ) || ( IPbus_major==2 && mResponseGood != 0xf ) )
               {
-                log ( Error(), "Bad InfoCode value of ", Integer(mResponseGood), " detected in IPbus transaction request header ", Integer ( mHeader, IntFmt<hex,fixed>() ) );
+                log ( Error(), "Bad InfoCode value of ", Integer ( mResponseGood ), " detected in IPbus transaction request header ", Integer ( mHeader, IntFmt<hex,fixed>() ) );
                 return false;
               }
 
@@ -212,10 +212,11 @@ namespace uhal
       {
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+        uint32_t lCounter ( 0 );
 
         while ( aIt != aEnd )
         {
-          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
         }
       }
 
@@ -223,10 +224,11 @@ namespace uhal
       {
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
         log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+        uint32_t lCounter ( 0 );
 
         while ( aIt != aEnd )
         {
-          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
         }
       }
 
@@ -406,20 +408,22 @@ namespace uhal
       virtual void ni_read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+        uint32_t lCounter ( 0 );
 
         while ( aIt != aEnd )
         {
-          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
         }
       }
 
       virtual void read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
         log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+        uint32_t lCounter ( 0 );
 
         while ( aIt != aEnd )
         {
-          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data" );
+          log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
         }
       }
 

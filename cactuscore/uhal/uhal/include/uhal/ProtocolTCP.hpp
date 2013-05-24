@@ -79,65 +79,6 @@ namespace uhal
   {
 
     public:
-      //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
-      class DispatchWorker
-      {
-        public:
-          /**
-          Constructor
-          @param aTCP a link to the parent
-          @param aHostname the target hostname or IP address
-          @param aServiceOrPort the target port
-          */
-          DispatchWorker ( TCP< InnerProtocol > & aTCP , const std::string& aHostname , const std::string& aServiceOrPort );
-
-          /**
-          Destructor
-          */
-          virtual ~DispatchWorker();
-
-          /**
-          The functor-function used for launching a thread in multithreaded mode.
-          Starts a loop which just monitors the buffer queue and, if there is a buffer waiting,
-          pass it to dispatch function for the actual dispatch
-          */
-          void operator() ();
-
-          /**
-          Concrete implementation to send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
-          @param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
-          Can be called directly for single-threaded operation or from the dispatch worker's functor-function for multithreaded operation
-          */
-          void dispatch ( Buffers* aBuffers );
-
-
-          void CheckDeadline();
-
-        private:
-
-          //! A reference to the parent of this DispatchWorker
-          TCP< InnerProtocol >& mTCP;
-
-          //! The boost::asio::io_service used to create the connections
-          boost::shared_ptr< boost::asio::io_service > mIOservice;
-
-          //! A shared pointer to a boost::asio udp socket through which the operation will be performed
-          boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
-
-          boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > mEndpoint;
-
-
-          //! Error code for the async callbacks to fill
-          boost::system::error_code mErrorCode;
-
-          boost::asio::deadline_timer mDeadlineTimer;
-
-          std::vector<uint8_t> mReplyMemory;
-
-      };
-
-      //! Make the dispatch worker a friend so that it can access our private members
-      friend class DispatchWorker;
 
       /**
       	Constructor
@@ -158,35 +99,56 @@ namespace uhal
       */
       void implementDispatch ();
 
-      // /**
-      // Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
-      // If multithreaded, block until all buffers have been sent, recieved and validated.
-      // If single-threaded, just returns since all buffers are validated in the call to Dispatch().
-      // */
-      // virtual void Flush( );
-
       /**
-        	Function which dispatch calls when the reply is received to check that the headers are as expected
-        	@return whether the returned packet is valid
-        */
-      virtual bool validate ();
+      Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
+       */
+      virtual void Flush( );
+
 
     private:
 
-      //! A shared pointer to the DispatchWorker which performs the actual transport
-      boost::shared_ptr< DispatchWorker > mDispatchWorker;
+      void connect();
+
+      void write ( Buffers* aBuffers );
+      void write_callback ( Buffers* aBuffers , const boost::system::error_code& ec );
+      void read ( Buffers* aBuffers );
+      void read_callback ( Buffers* aBuffers , const boost::system::error_code& ec );
 
 
-      Buffers* getCurrentDispatchBuffers();
+      void CheckDeadline();
 
-      const boost::posix_time::time_duration& getRawTimeoutPeriod();
+    private:
 
-#ifdef USE_TCP_MULTITHREADED
-      //! A shared pointer to a thread for multithreaded running
+      //! The boost::asio::io_service used to create the connections
+      boost::shared_ptr< boost::asio::io_service > mIOservice;
+
+      //! A shared pointer to a boost::asio udp socket through which the operation will be performed
+      boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
+
+      boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > mEndpoint;
+
+
+      //! Error code for the async callbacks to fill
+      boost::system::error_code mErrorCode;
+
+      boost::asio::deadline_timer mDeadlineTimer;
+
+      std::vector<uint8_t> mReplyMemory;
+
       boost::shared_ptr< boost::thread > mDispatchThread;
-      //! A pointer to an exception which is NULL when operation is good and which is created >>new<< when an exception occurs in the thread since exceptions are not naturally propogated out of the thread
-      uhal::exception* mAsynchronousException;
+      std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
+
+
+#define FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
+
+#ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
+      //! A MutEx lock used to make sure the access functions are thread safe
+      boost::mutex mTcpMutex;
+      std::deque < Buffers* > mDispatchQueue;
+      std::deque < Buffers* > mReplyQueue;
 #endif
+
+
 
   };
 

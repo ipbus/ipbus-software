@@ -43,23 +43,22 @@ namespace uhal
     void ParseSemicolonDelimitedUriList ( const std::string& aSemicolonDelimitedUriList , std::vector< std::pair<std::string, std::string> >& aUriList )
     {
       try
-	{
-	  grammars::SemicolonDelimitedUriListGrammar lGrammar;
-	  boost::spirit::qi::phrase_parse ( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
-	}
+      {
+        grammars::SemicolonDelimitedUriListGrammar lGrammar;
+        boost::spirit::qi::phrase_parse ( aSemicolonDelimitedUriList.begin() , aSemicolonDelimitedUriList.end() , lGrammar , boost::spirit::ascii::space , aUriList );
+      }
       catch ( const std::exception& aExc )
-	{
-	  log ( Error() , "Expression " , Quote ( aSemicolonDelimitedUriList ) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
-	  throw exception::UriListParsingError();
-	}
+      {
+        log ( Error() , "Expression " , Quote ( aSemicolonDelimitedUriList ) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
+        throw exception::UriListParsingError();
+      }
 
       log ( Debug() , "Parsed " , Quote ( aSemicolonDelimitedUriList ) , " to:" );
 
       for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
-	{
-	  log ( Debug() , " > [" , lIt->first , "] " , Quote ( lIt->second ) );
-	}
-
+      {
+        log ( Debug() , " > [" , lIt->first , "] " , Quote ( lIt->second ) );
+      }
     }
 
     void PugiXMLParseResultPrettifier ( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile )
@@ -126,7 +125,7 @@ namespace uhal
 {
   namespace utilities
   {
-    void ShellExpandFilenameExpr ( const std::string & aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path >& aFiles )
+    void ShellExpandFilenameExpr ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , std::vector< boost::filesystem::path >& aFiles )
     {
       try
       {
@@ -145,14 +144,13 @@ namespace uhal
 
           if ( boost::filesystem::exists ( lPath ) )
           {
-	    if ( boost::filesystem::is_regular_file ( lPath ) )
+            if ( boost::filesystem::is_regular_file ( lPath ) )
             {
-	      aFiles.push_back ( lPath );
-	    }
-	  }
+              aFiles.push_back ( lPath );
+            }
+          }
+        }
 
-	}
-        
         wordfree ( &lShellExpansion );
       }
       catch ( const std::exception& aExc )
@@ -162,23 +160,19 @@ namespace uhal
       }
 
       log ( Debug() , "Shell expansion of " , Quote ( aFilenameExpr.c_str() ) , " returned:" );
-      
+
       if ( ! aFiles.size() )
       {
-	log ( Error() , " > No matching files." );
-	throw uhal::exception::FileNotFound();
-      } 
-      else 
-      {
-
-	for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles.begin() ; lIt !=  aFiles.end() ; ++lIt )
-	{
-	  log ( Debug() , " > [file] " , lIt->c_str() );
-	}
-
+        log ( Error() , " > No matching files." );
+        throw uhal::exception::FileNotFound();
       }
-
-
+      else
+      {
+        for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles.begin() ; lIt !=  aFiles.end() ; ++lIt )
+        {
+          log ( Debug() , " > [file] " , lIt->c_str() );
+        }
+      }
     }
   }
 }

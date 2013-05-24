@@ -63,7 +63,6 @@ void connect_write_read ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( mem1.valid() );
   CACTUS_CHECK ( mem1.value() == x1 );
   CACTUS_CHECK ( mem2.value() == x2 );
-
 }
 
 void on_the_fly_connect_write_read ( const std::string& connection, const std::string& id )

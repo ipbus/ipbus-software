@@ -43,6 +43,8 @@ using namespace uhal;
 #define N_4B    1
 #define N_1kB   1024/4
 #define N_1MB   1024*1024/4
+#define N_1GB   1024*1024*1024/4
+
 
 void block_write_read ( size_t N,const std::string& connection, const std::string& id )
 {
@@ -80,12 +82,15 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
   std::vector<uint32_t> xx;
+  xx.reserve ( N );
+  std::cout << "Filling test vector" << std::flush;
 
   for ( size_t i=0; i!= N; ++i )
   {
     xx.push_back ( static_cast<uint32_t> ( rand() ) );
   }
 
+  std::cout << " done." << std::endl;
   hw.getNode ( "FIFO" ).writeBlock ( xx );
   ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlock ( N );
   CACTUS_CHECK ( !mem.valid() );
@@ -140,6 +145,7 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST ( fifo_write_read ( N_4B,connection_file,device_id ) );
   CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
   CACTUS_TEST ( fifo_write_read ( N_1MB,connection_file,device_id ) );
+  CACTUS_TEST ( fifo_write_read ( N_1GB,connection_file,device_id ) );
   //Block to big
   //CACTUS_TEST_THROW(block_bigger_than_size_attribute(connection_file,device_id ),uhal::exception::BulkTransferRequestedTooLarge);
   block_transfer_too_big ( connection_file,device_id );

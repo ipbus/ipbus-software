@@ -132,9 +132,15 @@ namespace uhal
       std::string uri() const;
 
       /**
-      	Method to dispatch all IPbus packets which are in the queue of IPbusPacketInfo's
+      	Method to dispatch all IPbus packets which are in the queue of IPbusPacketInfo's and wait until all queued packets are flushed
       */
       void dispatch ();
+
+      /**
+        Method to dispatch all IPbus packets which are in the queue of IPbusPacketInfo's and return immediately
+      */
+      void unflushedDispatch ();
+
 
       /**
       	A method to modify the timeout period for any pending or future transactions
@@ -220,6 +226,9 @@ namespace uhal
       Send a byte order transaction
       */
       virtual void implementDispatch( ) = 0;
+
+      virtual void Flush( );
+
 
       /**
       Send a byte order transaction
