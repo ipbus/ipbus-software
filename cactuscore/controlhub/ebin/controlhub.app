@@ -25,6 +25,6 @@
                  ch_tcp_listener]},
    {applications, [appmon, kernel, sasl, stdlib]},
    {mod, {controlhub_app, []}},
-   {env, [{max_in_flight, 10}]}
+   {env, [{max_in_flight, 16}]}
  ]
 }.
