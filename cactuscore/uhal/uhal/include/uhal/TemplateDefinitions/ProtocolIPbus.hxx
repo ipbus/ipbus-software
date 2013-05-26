@@ -277,8 +277,8 @@ namespace uhal
       }
     }
 
-    lPtr = reinterpret_cast<uint32_t*> ( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
-    lSize = ( mCurrentBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 ;
+    lPtr = reinterpret_cast<uint32_t*> ( aSendBufferStart ); //mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
+    lSize = reinterpret_cast<uint32_t*> ( aSendBufferEnd ) - lPtr; //( mCurrentBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 ;
 
     for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
     {
