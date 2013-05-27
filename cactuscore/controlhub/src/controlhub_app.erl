@@ -30,6 +30,7 @@
 %% --------------------------------------------------------------------
 start(_Type, _StartArgs) ->
     ?CH_LOG_DEBUG("Starting the Control Hub application."),
+%    fprof:trace(start),
     % Start the root supervisor and return its process ID.
     case ch_sup:start_link() of
       {ok, Pid} ->

@@ -46,7 +46,7 @@ log(Level, Module, MsgFmtString, MsgData, State) ->
 %% -------------------------------------------------------------------------------------
 
 log(Level, Module, MsgFmtString, MsgData) when is_list(MsgData) ->
-    Preamble = io_lib:format("~w - ~w - ~w ~w ~s", [now(), Level, Module, self(), mini_state_string(Module)]),
+    Preamble = io_lib:format("~s ~-7w ~w~w~s -- ", [timestamp_string(now()), Level, self(), Module, mini_state_string(Module)]),
     case Level of
          error ->   
              error_logger:error_msg(lists:append(Preamble, MsgFmtString), MsgData);
@@ -71,6 +71,18 @@ log(Level, Module, MsgFmtString, State) when is_tuple(State) ->
 
 log(Level, Module, MsgString) ->
     log(Level, Module, MsgString, []).
+
+
+%% -------------------------------------------------------------------------------------
+%% @doc Prints timestamp in nice string format for log messages
+%% 
+%% @spec timestamp_string( {integer() >= 0, integer() >= 0, integer() >= 0} ) -> string()
+%% @end
+%% -------------------------------------------------------------------------------------
+
+timestamp_string( {_,_,Micro} = TS ) ->
+    {{Yr,Month,Day},{Hr,Min,Sec}} = calendar:now_to_universal_time(TS),
+    io_lib:format("~2..0w-~2..0w-~2..0w ~2..0w:~2..0w:~2..0w.~6..0w", [Day,Month,Yr-2000,Hr,Min,Sec,Micro]).
 
 
 % %% -------------------------------------------------------------------------------------
@@ -168,7 +180,8 @@ hex_number_to_hex_letter(HexNumber) ->
 %% @spec mini_state_string( Module :: atom() ) -> string()
 
 mini_state_string(ch_device_client) ->
-    io_lib:format("target ~w:~w", [get(target_ip_tuple), get(target_port)]);
+    {IP1,IP2,IP3,IP4} = get(target_ip_tuple),
+    io_lib:format(" -> ~w.~w.~w.~w:~w", [IP1, IP2, IP3, IP4, get(target_port)]);
 mini_state_string(_) ->
     "".
     

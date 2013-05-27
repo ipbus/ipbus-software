@@ -129,20 +129,6 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
             put(socket, Socket),
             put(abs_max_in_flight, ChMaxInFlight),
             {ok, #state{mode = setup, socket = Socket, target_ip_tuple=IPTuple, target_port=PortU16}};
-%            case get_device_status(unknown) of
-%                {ok, {1,3}, {}} ->
-%                    ?CH_LOG_INFO("Target speaks IPbus v1.3"),
-%                    {ok, BasicState#state{ ipbus_v={1,3} }};
-%                {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
-%                    ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
-%                    {ok, BasicState#state{ ipbus_v={2,0},
-%                                           max_in_flight = min(TargetNrBuffers, ChMaxInFlight),
-%                                           next_id = NextExpdId
-%                                          }};
-%                {error, _, MsgForTransManager} ->
-%                    ?CH_LOG_WARN("Target didn't respond correctly to status request in ch_device_client:init/1."),
-%                    {ok, BasicState#state{ mode = unresponsive_target }}
-%            end;
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             get(targetSummary),
@@ -373,9 +359,7 @@ updated_timeout(OrigTimeout, TimeSent) when is_integer(OrigTimeout), OrigTimeout
 send_requests_to_board( S = #state{queue = Q, in_flight = InFlightList} ) ->
     case queue:is_empty(Q) of
         false when length(InFlightList) < S#state.max_in_flight ->
-            send_requests_to_board(element(2,queue:peek(Q)), 
-                                   S#state{queue=queue:drop(Q)}
-                                   );
+            send_requests_to_board(queue:get(Q), S#state{queue=queue:drop(Q)} );
         true when length(InFlightList) =:= 0 ->
             {noreply, S, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
         _ ->
@@ -411,7 +395,7 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
                      true ->
                        S#state{in_flight=NewInFlightList}
                    end,
-           ?CH_LOG_DEBUG("Request packet sent. Now entering state ~w , with timeout of ~wms", [NewS, ?UDP_RESPONSE_TIMEOUT]),
+           ?CH_LOG_DEBUG("Request packet sent. New state  ...", [], NewS),
            send_requests_to_board(NewS)
     end.
 
@@ -489,7 +473,6 @@ reset_packet_id(RawRequest, NewId) ->
     {Ver, _, End} = parse_ipbus_packet(RawRequest),
     case {Ver, NewId} of
         {{2,0}, _} when is_integer(NewId) ->
-             RawHdr = binary_part(RawRequest, 0, 4),
              case End of
                  big    -> {Ver, reset_header(RawRequest, <<16#20:8, NewId:16/big, 16#f0:8>>), NewId};
                  little -> {Ver, reset_header(RawRequest, <<16#f0:8, NewId:16/little, 16#20:8>>), NewId}
@@ -668,8 +651,8 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     {TargetIPTuple, TargetPort} = target_ip_port(),
     StatusReq13 = binary:copy(<<16#100000f8:32/native>>, 10),
     StatusReq20 = <<16#200000f1:32/big, 0:(15*32)>>,
-    ?CH_LOG_INFO("Sending IPbus status request to target at ~w:~w (attempt ~w of ~w).",
-                 [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts]),
+    ?CH_LOG_INFO("Sending IPbus status request to target (attempt ~w of ~w).",
+                 [AttemptNr, TotNrAttempts]),
     case IPbusVer of
          {1,3} when NrAttemptsLeft=:=TotNrAttempts ->
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
@@ -687,7 +670,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     end,
     receive
         {udp, Socket, TargetIPTuple, TargetPort, <<16#100000fc:32/native, _/binary>>} ->
-            ?CH_LOG_INFO("Received an IPbus 1.3 'status response' from target at ~w:~w on attempt ~w of ~w.",
+            ?CH_LOG_INFO("Received an IPbus 1.3 'status response' from target, on attempt ~w of ~w.",
                          [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts]),
             ch_stats:udp_in(),
             {ok, {1,3}, {}};
@@ -695,17 +678,17 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
             ch_stats:udp_in(),
             case parse_ipbus_packet(ReplyBin) of 
                 {{2,0}, {status, MTU, NBuffers, NextId}, big} ->
-                    ?CH_LOG_INFO("Received a well-formed IPbus 2.0 'status response' from target at ~w:~w on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
-                                 [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts, MTU, NBuffers, NextId]),
+                    ?CH_LOG_INFO("Received an IPbus 2.0 'status response' from target, on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
+                                 [AttemptNr, TotNrAttempts, MTU, NBuffers, NextId]),
                     {ok, {2,0}, {MTU, NBuffers, NextId}};
                 _Details ->
-                    ?CH_LOG_ERROR("Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format) from target at ~w:~w. parse_ipbus_packet returned ~w",
-                                 [TargetIPTuple, TargetPort, _Details]),
+                    ?CH_LOG_ERROR("Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format). parse_ipbus_packet returned ~w",
+                                 [_Details]),
                     {error, malformed, {device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_MALFORMED_STATUS, <<>>} }
             end
     after ?UDP_RESPONSE_TIMEOUT ->
-        ?CH_LOG_WARN("TIMEOUT waiting for response in get_device_status! No response from target at ~w:~w on attempt ~w of ~w, ipbus version ~w.",
-                     [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts, IPbusVer]),
+        ?CH_LOG_WARN("TIMEOUT waiting for response in get_device_status! No response from target on attempt ~w of ~w, ipbus version ~w.",
+                     [AttemptNr, TotNrAttempts, IPbusVer]),
         ch_stats:udp_response_timeout(status),
         get_device_status(IPbusVer, {NrAttemptsLeft-1, TotNrAttempts})
     end.

@@ -56,8 +56,10 @@ tcp_acceptor(TcpListenSocket) ->
             ch_stats:client_connected(),
             case inet:peername(ClientSocket) of
                 {ok, {_ClientAddr, _ClientPort}} ->
-                    ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p", [_ClientAddr, _ClientPort]),
-                    tcp_receive_handler_loop(ClientSocket, queue:new());
+                    ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p~n"
+                                 "Socket options: ~w~n",
+                                 [_ClientAddr, _ClientPort, inet:getopts(TcpListenSocket, [buffer,low_watermark,high_watermark, recbuf, sndbuf])]),
+                    tcp_receive_handler_loop(ClientSocket, queue:new(), 0);
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?CH_LOG_ERROR("Socket error whilst getting peername.")
@@ -80,7 +82,7 @@ tcp_acceptor(TcpListenSocket) ->
 %%% --------------------------------------------------------------------
 
 %% Receive loop the incoming TCP requests; if socket closes the function exits the receive loop.
-tcp_receive_handler_loop(ClientSocket, RequestTimesQueue) ->
+tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
     TargetIPaddr = get(target_ip_addr),
     TargetPort   = get(target_port),
     NewTimeout = case queue:is_empty(RequestTimesQueue) of
@@ -90,17 +92,24 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue) ->
                      TimeSinceLastResponse = round(timer:now_diff(now(), queue:get(RequestTimesQueue))/1000.0),
                      max(0, ?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT - TimeSinceLastResponse)
                  end,
+%   if
+%     QueueLen > 30 -> 
+%       inet:setopts(ClientSocket,[{active,once}]);
+%     true ->
+%       inet:setopts(ClientSocket,[{active,true}])
+%   end,
     receive
+        {tcp, ClientSocket, RequestBin} ->
+%            inet:setopts(ClientSocket,[{activve,once}]),
+            ?CH_LOG_DEBUG("Received a request from client (QueueLen=~w).", [QueueLen]),
+            ch_stats:client_request_in(),
+            forward_request(RequestBin),
+            tcp_receive_handler_loop(ClientSocket, queue:in(now(),RequestTimesQueue), QueueLen+1);
         {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
             ?CH_LOG_DEBUG("Received device client response from target IPaddr=~w, Port=~w",
                           [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
             reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>),
-            tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue) );
-        {tcp, ClientSocket, RequestBin} ->
-            ?CH_LOG_DEBUG("Received a request from client."),
-            ch_stats:client_request_in(),
-            forward_request(RequestBin),
-            tcp_receive_handler_loop(ClientSocket, queue:in(now(),RequestTimesQueue) );
+            tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue), QueueLen-1 );
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
             ?CH_LOG_INFO("TCP socket closed.");
@@ -110,12 +119,12 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue) ->
             ?CH_LOG_WARN("TCP socket error (~p).", [_Reason]);
         _Else ->
             ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [_Else]),
-            tcp_receive_handler_loop(ClientSocket, RequestTimesQueue)
+            tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen)
     after NewTimeout ->
         ?CH_LOG_WARN("Timeout whilst awaiting response from device client for target IPaddr=~w, Port=~p."
                      " Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
         reply_to_client(ClientSocket, <<8:32, TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>),
-        tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue) )
+        tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue), QueueLen-1 )
     end.
 
 
@@ -161,5 +170,5 @@ unpack_target_request(RequestBin) ->
 reply_to_client(ClientSocket, ResponseBin) ->
     ?CH_LOG_DEBUG("Sending response to TCP client"),
     ?PACKET_TRACE(ResponseBin, "~n  Sending the following response to the TCP client:"),
-    gen_tcp:send(ClientSocket, ResponseBin),
+    gen_tcp:send(ClientSocket, ResponseBin).
     ch_stats:client_response_sent().
