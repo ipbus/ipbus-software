@@ -232,19 +232,21 @@ class HardwareStruct:
     def get_hw_manager(self):
         return self.__hw_manager
     
+
     
     def add_ip_end_point(self, ip_ep):
         print "DEBUG: Adding IP End Point %s to the IP End Point list" % ip_ep.get_id()
         self.__ip_end_points.append(ip_ep)
 
 
+
     def get_ip_end_points(self):
         return self.__ip_end_points
+    
+    
     
     def update_node_value(self, dev, node_id, node_value):
         self.__ip_to_nodeId_to_value[dev][node_id] = node_value
         
-    def update_nodes(self):
-        pass
 
 

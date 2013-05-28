@@ -10,15 +10,13 @@ class Plot(wx.Frame):
         wx.Frame.__init__(self, parent, wx.ID_ANY, regname, size=(400, 300))
         
         # Attributes
-        self.__panel = wx.Panel(self, wx.ID_ANY)
-        self.__panel.SetBackgroundColour("Gray")
+        self.__panel = wx.Panel(self, wx.ID_ANY)        
         self.__id = regname
         self.__data = []
         self.__first_time_point = -1
         
         # Layout attributes
         self.__toggle_grid   = wx.CheckBox(self.__panel, label="Show Grid")
-        self.__toggle_legend = wx.CheckBox(self.__panel, label="Show Legend")     
         self.__main_sizer = None
         self.__check_sizer = None
         self.__canvas = None
@@ -28,10 +26,11 @@ class Plot(wx.Frame):
         
         # Handlers
         self.Bind(wx.EVT_CHECKBOX, self.__on_toggle_grid, self.__toggle_grid)
-        self.Bind(wx.EVT_CHECKBOX, self.__on_toggle_legend, self.__toggle_legend)
-    
+       
     
     def __do_layout(self):
+        
+        self.__panel.SetBackgroundColour("Gray")
         
         self.__main_sizer  = wx.BoxSizer(wx.VERTICAL)
         self.__check_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -39,7 +38,6 @@ class Plot(wx.Frame):
         self.__canvas = PlotCanvas(self.__panel)  
         
         self.__check_sizer.Add(self.__toggle_grid, 0, wx.ALL, 5)
-        self.__check_sizer.Add(self.__toggle_legend, 0, wx.ALL, 5)
         self.__main_sizer.Add(self.__canvas, 1, wx.EXPAND)
         self.__main_sizer.Add(self.__check_sizer)
         self.__panel.SetSizer(self.__main_sizer)
@@ -53,14 +51,20 @@ class Plot(wx.Frame):
         x = int(time.time())
         if not self.__data:
             self.__first_time_point = x
-            
-            
-        normalized_x = x - self.__first_time_point
+                            
+        # Restrict number of maximum plotted points to 100
         if len(self.__data) >= 100:
-        	new_data = self.__data[1:]
+        	new_data = self.__data[2:]
         	self.__data = new_data
         	
-        self.__data.append((normalized_x,y))
+        time_elapsed = x - self.__first_time_point   
+        
+        if self.__data:
+            previous_y = self.__data[-1][1]
+            print "previous y is %s" % previous_y            
+            self.__data.append((time_elapsed, previous_y))         
+        
+        self.__data.append((time_elapsed, y))
               
         
     def plot(self):
@@ -78,7 +82,7 @@ class Plot(wx.Frame):
         x_axis_title = "Time (seconds since first sample)"
         y_axis_title = self.__id
               
-        line1 = PolyLine(self.__data, colour='blue', legend='Register vs Time', width=2)       
+        line1 = PolyLine(self.__data, colour='blue', width=3)       
                 
         return PlotGraphics([line1],
                         plot_title, 
@@ -88,7 +92,3 @@ class Plot(wx.Frame):
     
     def __on_toggle_grid(self, event):
         self.__canvas.SetEnableGrid(event.IsChecked())
-    
-    
-    def __on_toggle_legend(self, event):
-        self.__canvas.SetEnableLegend(event.IsChecked())

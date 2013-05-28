@@ -4,11 +4,14 @@ import wx
 import wx.lib.scrolledpanel as scroll
 
 from uhal.gui.guis.plotreg import Plot
+from uhal.gui.guis.regvalues import RegValues
 from uhal.gui.utilities.hardware import HardwareStruct
+
+
 
 class NodeWidget(wx.Panel):
     
-    def __init__(self, parent, n):
+    def __init__(self, parent, n, colour):
         
         print "DEBUG: Init NodeWidget with id %s" % n.get_id()
         wx.Panel.__init__(self, parent)
@@ -22,8 +25,11 @@ class NodeWidget(wx.Panel):
                  
         self.__wid_dict = {}
         self.__wid_order = ["id", "address", "mask", "value"]
+        
         # Layout attributes
+        self.__colour = colour
         self.__plotreg = None
+        self.__values_window = None
         self.__sizer = None
         
         self.__id_field        = None
@@ -41,7 +47,7 @@ class NodeWidget(wx.Panel):
     
     def __do_layout(self):
         
-        self.SetBackgroundColour('Yellow')
+        self.SetBackgroundColour(self.__colour)
         self.__sizer = wx.BoxSizer(wx.HORIZONTAL)
         
         self.__id_field        = wx.StaticText(self, label=str(self.__id))
@@ -72,12 +78,18 @@ class NodeWidget(wx.Panel):
         except TypeError:
             value_to_set = value
         
-        self.__wid_dict["value"].SetLabel(value_to_set)
+        self.__value = value_to_set
+        self.__wid_dict["value"].SetLabel(self.__value)
         
         if self.__plotreg:
             
-            self.__plotreg.add_pair(value_to_set)
+            self.__plotreg.add_pair(self.__value)
             self.__plotreg.plot()
+            
+        if self.__values_window:
+            self.__values_window.update(self.__value)
+        
+        
         
     
     def __on_click_regname(self, event):
@@ -87,7 +99,18 @@ class NodeWidget(wx.Panel):
         
     
     def __on_click_regvalue(self, event):
-        print "DEBUG: Showing values in different formats for register %s..." % self.__id
+        pass
+        '''
+        print "DEBUG: Showing values in different formats for register %s and value %s..." % (self.__id, self.__value)
+        regvalue = RegValues(self, self.__id, self.__value)            
+        regvalue.Show()
+        '''
+    
+    
+    def get_value_field(self):
+        return self.__value_field
+
+
         
     
     
@@ -111,7 +134,7 @@ class StaticFields(wx.Panel):
         
     def __do_layout(self):
         
-        self.SetBackgroundColour('Green')
+        self.SetBackgroundColour('#CCFFFF')
         self.__sizer = wx.BoxSizer(wx.HORIZONTAL)
         
         self.__wid_dict["name"]    = wx.StaticText(self, label="NAME")
@@ -141,25 +164,26 @@ class IpEndPointWidget(wx.Panel):
         
         # Attributes      
         self.__wid_dict = {}
-        self.__wid_order = ["name", "status", "static"] 
+        self.__wid_order = ["name", "static"] 
+        #self.__wid_order = ["name", "status", "static"]
         self.__nodes_dict = {}
         self.__id = name
            
         # Layout
         self.__do_layout()
+        
         # Event handlers
         
         
     def __do_layout(self):
         
-        self.__borders = wx.ALL
-        # self.SetBackgroundColour('White')
+        self.__borders = wx.ALL       
                 
         box = wx.StaticBox(self, -1, self.__id)
         self.__widget_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
             
-        self.__wid_dict["name"]   = wx.StaticText(self, label="Name")    
-        self.__wid_dict["status"] = wx.StaticText(self, label="Status")
+        self.__wid_dict["name"]   = wx.StaticText(self, label="Name")         
+        # self.__wid_dict["status"] = wx.StaticText(self, label="Status")
         self.__wid_dict["static"] = StaticFields(self)
         
         
@@ -182,21 +206,21 @@ class IpEndPointWidget(wx.Panel):
     def set_name(self, name):
         self.__wid_dict["name"].SetLabel(unicode(str(name)))
         
-        
+    '''    
     def set_status(self, status):
         self.__wid_dict["status"].SetLabel(unicode(str(status)))
+    ''' 
         
-        
-    def add_node_row(self, n):
+    def add_node_row(self, n, colour):
         borders = self.__borders | wx.EXPAND
         id = n.get_id()
         print "Adding node row for node %s " % id
-        self.__nodes_dict[id] = NodeWidget(self, n) 
+        self.__nodes_dict[id] = NodeWidget(self, n, colour) 
         print "Node widget for node %s is ready" % id   
         self.__widget_sizer.Add(self.__nodes_dict[id], 1, borders, 1)
         
         for child in n.get_children():
-            self.add_node_row(child)
+            self.add_node_row(child, colour)
         
     
     def update_node_value(self, n):
@@ -206,8 +230,6 @@ class IpEndPointWidget(wx.Panel):
         for child in n.get_children():
             self.update_node_value(child)        
     
-    #def update_layout(self):
-    #    self.__widget_sizer.Layout()
 
 
 
@@ -246,15 +268,16 @@ class HardwareTablePanel(scroll.ScrolledPanel):
     
     def draw_hw_naked_tables(self, hw):
         
+        bck_colour = "#99CCFF"
         for ep in hw.get_ip_end_points():
             new_widget = IpEndPointWidget(self)
             
             ep_id = ep.get_id()
             new_widget.set_name(string.upper(ep_id))
-            new_widget.set_status(ep.get_status())
+            # new_widget.set_status(ep.get_status())
             
-            for n in ep.get_nodes():
-                new_widget.add_node_row(n)
+            for n in ep.get_nodes():                
+                new_widget.add_node_row(n, bck_colour)
                 
             if not self.__widget_dict.has_key(ep_id):
                 self.__widget_dict[ep_id] = new_widget
@@ -279,7 +302,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
             new_status = ep.get_status()
             
             w = self.__widget_dict[ep_id]
-            w.set_status(new_status)
+            # w.set_status(new_status)
             
             for n in ep.get_nodes():
                 # Pass here 'address' instead of 'name' to identify the node because there could be name collisions (?)

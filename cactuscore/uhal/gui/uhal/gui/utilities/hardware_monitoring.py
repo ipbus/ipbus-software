@@ -23,18 +23,7 @@ class HardwareMonitoring(threading.Thread):
 
 
     def run(self):
-        print "DEBUG: Checking HW... start!"
-        '''
-        cm = self.__hw.get_hw_manager()
-        for dev in cm.getDevices():
-            dev_object = cm.getDevice(dev)
-            
-            for n in dev_object.getNodes():
-                value = dev_object.getNode(n).read()
-                dev_object.dispatch()
-                self.__hw.update_node_value(dev, n, value)
-        '''         
-        
+        print "DEBUG: Checking HW... start!"        
         
         for i in self.__hw.get_ip_end_points():            
             
@@ -67,8 +56,8 @@ class HardwareMonitoring(threading.Thread):
         try:
         # Before reading, check that node permission's allow to read
             if node.has_no_children() and ("READ" in node.get_permission()):            
-                node_id = node.get_id()
-                new_value = ip_ep.getNode(node_id).read()
+                node_id = node.get_id()               
+                new_value = ip_ep.getNode(node_id).read()                
                 ip_ep.dispatch()
                 print "DEBUG: Setting value %s in node %s, parent %s" % (new_value, node_id, node.get_parent())
                 node.set_value(new_value)

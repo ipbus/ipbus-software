@@ -19,6 +19,7 @@ class DefaultGui(wx.Frame):
         # Attributes       
         self.__hw = None
         self.__hw_mon = None
+        self.__auto_refresh = False
         
         # GUIs Attributes
         self.__hw_tree = None
@@ -71,15 +72,18 @@ class DefaultGui(wx.Frame):
     def __menu_data(self):
         
         return (("&File",
-                 ("&LoadHW", "Load HW", self.__on_load_hw),
-                 ("&Quit", "Quit", self.__on_close_window)
-                 ),            
+                 ("&LoadHW", "Load HW", wx.ITEM_NORMAL, self.__on_load_hw),
+                 ("&Quit", "Quit", wx.ITEM_NORMAL, self.__on_close_window)
+                ),                
+                #("&View",
+                # ("&AutoRefresh", "Auto-refresh", wx.ITEM_CHECK, self.__on_click_autorefresh)
+                # ),                        
                 ("&Help",
-                 ("&Documentation", "Documentation", self.__on_click_doc),
-                 ("&Support", "Support", self.__on_click_support),
-                 ("&About", "About", self.__on_click_about)               
-                 )
+                 ("&Documentation", "Documentation", wx.ITEM_NORMAL, self.__on_click_doc),
+                 ("&Support", "Support", wx.ITEM_NORMAL, self.__on_click_support),
+                 ("&About", "About", wx.ITEM_NORMAL, self.__on_click_about)               
                 )
+            )
 
 
 
@@ -87,28 +91,19 @@ class DefaultGui(wx.Frame):
     def __create_menu(self, items):
 
         menu = wx.Menu()
-        for each_label, each_status, each_handler in items:
+        for each_label, each_status, each_kind, each_handler in items:
+            
             if not each_label:
                 menu.AppendSeparator()
-                continue
+                continue                
 
-            menu_item = menu.Append(-1, each_label, each_status)
+            menu_item = menu.Append(-1, each_label, each_status, kind=each_kind)
             self.Bind(wx.EVT_MENU, each_handler, menu_item)
 
         return menu
 
 
 
-  
-    def __create_hardware_tree(self, hw):
-        if self.__hw_is_valid():
-            self.__hw_tree = HardwareTree(self, hw)
-            self.__hw_tree.Show()
-        else:
-            print "ERROR: could not start hardware_tree -> self.__hw is not a valid object"
-
-
-    
     def __on_load_hw(self, event):
 
         # Right now, only a connection file picker is offered.
@@ -131,27 +126,59 @@ class DefaultGui(wx.Frame):
             
             self.__hw = HardwareStruct(file_name)                    
             self.__create_hardware_tree(self.__hw) 
-            self.__hw_table_panel.draw_hw_naked_tables(self.__hw)           
-            
+            self.__hw_table_panel.draw_hw_naked_tables(self.__hw)                               
         
         file_picker.Destroy()
+
+  
+  
+    def __create_hardware_tree(self, hw):
+        if self.__hw_is_valid():
+            self.__hw_tree = HardwareTree(self, hw)
+            self.__hw_tree.Show()
+        else:
+            print "ERROR: could not start hardware_tree -> self.__hw is not a valid object"
+
+
+
+    def __on_hw_ready(self, event):
+            
+        print "DEBUG: HW READY in default GUI"
+        self.__hw = event.get_event_info()               
+        self.__hw_table_panel.on_hw_ready(self.__hw)
+        self.__hw_tree.redraw(self.__hw)
         
+        
+        
+    def __hw_is_valid(self):
+        return self.__hw is not None
     
     
+    
+    def __on_click_autorefresh(self, event):
+        
+        if self.__auto_refresh == False:
+            self.__auto_refresh = True            
+        else:
+            self.__auto_refresh = False  
+        
+
+
     def __on_click_doc(self, event):
-        webbrowser.open("https://svnweb.cern.ch/trac/cactus")
+        webbrowser.open("https://svnweb.cern.ch/trac/cactus/wiki/uhalGuiInstructions")
 
 
 
     def __on_click_support(self, event):
-        webbrowser.open("https://svnweb.cern.ch/trac/cactus")
+        webbrowser.open("https://svnweb.cern.ch/trac/cactus/newticket")
 
 
 
     def __on_click_about(self, event):        
 
         description = """uHAL GUI is a Python based graphical user interface 
-        written using the graphical library wxPython. Bla bla bla...
+        written using the graphical library wxPython. It has been designed to provide a simple interface
+        for uTCA HW developers which use the uHAL C++ library
         """
 
         licence = """uHAL GUI is free software; you can redistribute 
@@ -173,9 +200,9 @@ class DefaultGui(wx.Frame):
         info.SetName('uHAL GUI')
         info.SetVersion('1.0.0')
         info.SetDescription(description)
-        info.SetCopyright('(C) 2013 Carlos Ghabrous')
+        info.SetCopyright('(C) 2013 Carlos Ghabrous, Marc Magrans de Abril')
         info.SetWebSite('http://svnweb.cern.ch/trac/cactus')
-        info.SetLicence(licence)
+        # info.SetLicence(licence)
         info.AddDeveloper('Carlos Ghabrous')
         info.AddDocWriter('Carlos Ghabrous')
 
@@ -193,23 +220,9 @@ class DefaultGui(wx.Frame):
 
         if result == wx.ID_OK:
             self.Destroy()
-          
-          
-          
-    def __on_hw_ready(self, event):
             
-        print "DEBUG: HW READY in default GUI"
-        self.__hw = event.get_event_info()               
-        self.__hw_table_panel.on_hw_ready(self.__hw)
-        self.__hw_tree.redraw(self.__hw)
-        
-        
-        
-    def __hw_is_valid(self):
-        return self.__hw is not None
-    
-          
-    
+            
+            
     def start_hw_thread(self):
         print "DEBUG: Received message from refresh_buttons_panel. Should start HW thread now"
         if self.__hw_is_valid():
@@ -218,7 +231,3 @@ class DefaultGui(wx.Frame):
             hw_worker.start()
         else: 
             print "ERROR: could not start HW update thread -> self.__hw is not a valid object"
-        
-        
-   
-        
