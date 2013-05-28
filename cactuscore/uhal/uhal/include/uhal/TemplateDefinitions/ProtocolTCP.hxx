@@ -171,6 +171,8 @@ namespace uhal
     }
 
     mSocket->set_option ( boost::asio::ip::tcp::no_delay ( true ) );
+    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
+    mSocket->io_control ( lNonBlocking );
     log ( Info() , "TCP connection succeeded" );
   }
 
