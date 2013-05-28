@@ -154,8 +154,8 @@ namespace uhal
   void ClientInterface::unflushedDispatch ()
   {
     this->predispatch( );
-    this->implementDispatch( );
     mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) );
+    this->implementDispatch( );
     NextFillingBuffer ();
   }
 
@@ -219,6 +219,7 @@ namespace uhal
     mBuffers.insert ( mBuffers.end() , 16 , lBuffers );
     mCurrentBuffers = mBuffers.begin();
     mCurrentBuffers->clear();
+    log ( Debug() , "Calling preamble() from " , ThisLocation() );
     this->preamble();
   }
 
@@ -270,6 +271,7 @@ namespace uhal
     //       log ( Warning() , "Escaped pause, now clearing mCurrentBuffer (", Pointer( &( *mCurrentBuffers ) ) , ") and adding preamble." );
     //     }
     mCurrentBuffers->clear();
+    log ( Debug() , "Calling preamble() from " , ThisLocation() );
     this->preamble();
   }
 
@@ -277,6 +279,7 @@ namespace uhal
   void ClientInterface::dispatchExceptionHandler()
   {
     mCurrentBuffers->clear();
+    log ( Debug() , "Calling preamble() from " , ThisLocation() );
     this->preamble();
   }
 

@@ -86,6 +86,7 @@ namespace uhal
 
       bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
+        // log ( Notice() , Pointer(&(*aIt)) , " : " , Pointer(&(*aEnd)) , "(", Integer((&(*aEnd)-&(*aIt))*4)  ,")" );
         uint32_t lAddress , lAddend , lAndTerm , lOrTerm ;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
@@ -121,7 +122,17 @@ namespace uhal
                  )
               {
                 log ( Error() , "Unable to parse send header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
-                return false;
+
+                if ( IPbus_major != 1 )
+                {
+                  log ( Warning() , "Attempting to see if it is because the bad header was, in fact, a packet header" );
+                  aIt--;
+                  return analyze ( aIt , aEnd );
+                }
+                else
+                {
+                  return false;
+                }
               }
 
               if ( ( IPbus_major==1 && mResponseGood != 0 ) || ( IPbus_major==2 && mResponseGood != 0xf ) )
@@ -144,12 +155,26 @@ namespace uhal
                   read ( lAddress );
                   break;
                 case NI_WRITE:
+
+                  if ( mWordCounter == 0 )
+                  {
+                    log ( Error(), "Write size of 0 is invalid" );
+                    return false;
+                  }
+
                   lAddress = *aIt++;
                   lPayloadBegin = ( aIt++ );
                   lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
                   ni_write ( lAddress , lPayloadBegin , lPayloadEnd );
                   break;
                 case WRITE:
+
+                  if ( mWordCounter == 0 )
+                  {
+                    log ( Error(), "Write size of 0 is invalid" );
+                    return false;
+                  }
+
                   lAddress = *aIt++;
                   lPayloadBegin = ( aIt++ );
                   lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
@@ -356,11 +381,25 @@ namespace uhal
                   bot();
                   break;
                 case NI_READ:
+
+                  if ( mWordCounter == 0 )
+                  {
+                    log ( Error(), "Read size of 0 is invalid" );
+                    return false;
+                  }
+
                   lPayloadBegin = ( aIt++ );
                   lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
                   ni_read ( lPayloadBegin , lPayloadEnd );
                   break;
                 case READ:
+
+                  if ( mWordCounter == 0 )
+                  {
+                    log ( Error(), "Read size of 0 is invalid" );
+                    return false;
+                  }
+
                   lPayloadBegin = ( aIt++ );
                   lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
                   read ( lPayloadBegin , lPayloadEnd );

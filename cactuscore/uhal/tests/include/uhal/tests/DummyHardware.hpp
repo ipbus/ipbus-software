@@ -84,8 +84,8 @@ namespace uhal
 
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
+        //std::cout << aByteCount << " bytes received" << std::endl;
 #ifdef BIG_ENDIAN_HACK
-
         if ( IPbus_major == 2 )
         {
           if ( LoggingIncludes ( Debug() ) )
@@ -93,7 +93,7 @@ namespace uhal
             log ( Notice() , "Big-Endian Hack included" );
           }
 
-          for ( std::vector<uint32_t>::iterator lIt ( mReceive.begin() ) ; lIt != mReceive.end() ; ++lIt )
+          for ( std::vector<uint32_t>::iterator lIt ( mReceive.begin() ) ; lIt != mReceive.begin() + ( aByteCount>>2 ) ; ++lIt )
           {
             *lIt = ntohl ( *lIt );
           }
@@ -121,6 +121,7 @@ namespace uhal
 
         if ( ! base_type::analyze ( lBegin , lEnd ) ) // Cope with receiving bad headers
         {
+          log ( Error() , "Found a bad header" );
           mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId , ( IPbus_major==1 ? 2 : 1 ) ) );
         }
 
@@ -329,11 +330,10 @@ namespace uhal
 
       bool control_packet_header ()
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::control_packet_header();
-        }
-
+        //         if ( LoggingIncludes ( Debug() ) )
+        //         {
+        //           base_type::control_packet_header();
+        //         }
         if ( base_type::mPacketCounter != 0 )
         {
           uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
@@ -362,11 +362,10 @@ namespace uhal
 
       void status_packet_header ( )
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::status_packet_header();
-        }
-
+        //         if ( LoggingIncludes ( Debug() ) )
+        //         {
+        //           base_type::status_packet_header();
+        //         }
         mReply.push_back ( base_type::mPacketHeader );
         mReply.push_back ( BUFFER_SIZE * sizeof ( uint32_t ) );
         mReply.push_back ( REPLY_HISTORY_DEPTH );
@@ -411,11 +410,10 @@ namespace uhal
 
       void resend_packet_header ()
       {
-        if ( LoggingIncludes ( Debug() ) )
-        {
-          base_type::resend_packet_header();
-        }
-
+        //         if ( LoggingIncludes ( Debug() ) )
+        //         {
+        //           base_type::resend_packet_header();
+        //         }
         std::deque< std::pair< uint32_t , std::vector< uint32_t > > >::reverse_iterator lIt = mReplyHistory.rbegin();
 
         for ( ; lIt!=mReplyHistory.rend() ; ++lIt )

@@ -108,7 +108,6 @@ namespace uhal
   {
     try
     {
-      // log ( Info() , ThisLocation() , " : mTimeOut = " , Integer ( mTCP.getTimeoutPeriod() ) );
       if ( ! mSocket->is_open() )
       {
         connect();
@@ -146,15 +145,15 @@ namespace uhal
   {
     log ( Info() , "Attempting to create TCP connection to '" , ( **mEndpoint ).host_name() , "' port " , ( **mEndpoint ).service_name() , "." );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
-    mErrorCode = boost::asio::error::would_block;
-    boost::asio::async_connect ( *mSocket , *mEndpoint , boost::lambda::var ( mErrorCode ) = boost::lambda::_1 );
+    boost::system::error_code lErrorCode = boost::asio::error::would_block;
+    boost::asio::async_connect ( *mSocket , *mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
 
     do
     {
     }
-    while ( mErrorCode == boost::asio::error::would_block );
+    while ( lErrorCode == boost::asio::error::would_block );
 
-    if ( mErrorCode )
+    if ( lErrorCode )
     {
       if ( mSocket.unique() )
       {
@@ -167,7 +166,7 @@ namespace uhal
         throw exception::TcpTimeout();
       }
 
-      log ( Error() , "ASIO reported an error: " , mErrorCode.message() );
+      log ( Error() , "ASIO reported an error: " , lErrorCode.message() );
       throw exception::ErrorInTcpCallback();
     }
 
@@ -180,25 +179,29 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::write ( Buffers* aBuffers )
   {
-    //log( Info() , ThisLocation(), ", Buffer: " , Pointer( aBuffers ) );
+    log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
     //     std::vector<uint32_t>::const_iterator lBegin( reinterpret_cast<uint32_t*>( aBuffers->getSendBuffer() ) );
     //     std::vector<uint32_t>::const_iterator lEnd = lBegin + (aBuffers->sendCounter()>>2);
-    //     HostToTargetInspector< 1 , 3 >().analyze ( lBegin , lEnd );
-    std::vector< boost::asio::const_buffer > lAsioSendBuffer;
-    lAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
+    //     std::vector<uint32_t> lData;
+    //     for( ; lBegin!=lEnd ; ++lBegin )
+    //     {
+    //       lData.push_back( ntohl ( *lBegin ) );
+    //     }
+    //     lBegin = lData.begin();
+    //     lEnd = lData.end();
+    //     HostToTargetInspector< 2 , 0 >().analyze ( lBegin , lEnd );
+    mAsioSendBuffer.clear();
+    mAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
-    mErrorCode = boost::asio::error::would_block;
-    boost::asio::async_write ( *mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, aBuffers , _1 ) );
+    boost::asio::async_write ( *mSocket , mAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, aBuffers , _1 ) );
   }
 
 
 
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::write_callback ( Buffers* aBuffers , const boost::system::error_code& ec )
+  void TCP< InnerProtocol >::write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
-    //log( Info() , ThisLocation(), ", Buffer: " , Pointer( aBuffers ) );
-    mErrorCode = ec;
 #ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
     mReplyQueue.push_back ( aBuffers );
@@ -229,19 +232,15 @@ namespace uhal
     mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
     log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
-    mErrorCode = boost::asio::error::would_block;
     boost::asio::async_read ( *mSocket , mAsioReplyBuffer ,  boost::asio::transfer_all(), boost::bind ( &TCP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
   }
 
 
 
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::read_callback ( Buffers* aBuffers , const boost::system::error_code& ec )
+  void TCP< InnerProtocol >::read_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
-    //log( Info() , ThisLocation(), ", Buffer: " , Pointer( aBuffers ) );
-    mErrorCode = ec;
-
-    if ( mErrorCode && ( mErrorCode != boost::asio::error::eof ) )
+    if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       if ( mSocket.unique() )
       {
@@ -254,7 +253,7 @@ namespace uhal
         throw exception::TcpTimeout();
       }
 
-      log ( Error() , "ASIO reported an error: " , Quote ( mErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
+      log ( Error() , "ASIO reported an error: " , Quote ( aErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
       ClientInterface::validate();
       throw exception::ErrorInTcpCallback();
     }
@@ -322,7 +321,7 @@ namespace uhal
     }
 
     // Put the actor back to sleep.
-    mDeadlineTimer.async_wait ( boost::bind ( &TCP< InnerProtocol >::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
   }
 
 
@@ -333,7 +332,6 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::Flush( )
   {
-    log ( Warning() , ThisLocation() );
     bool lContinue ( true );
 
     do

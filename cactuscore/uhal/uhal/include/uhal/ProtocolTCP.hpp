@@ -110,9 +110,9 @@ namespace uhal
       void connect();
 
       void write ( Buffers* aBuffers );
-      void write_callback ( Buffers* aBuffers , const boost::system::error_code& ec );
+      void write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode );
       void read ( Buffers* aBuffers );
-      void read_callback ( Buffers* aBuffers , const boost::system::error_code& ec );
+      void read_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode );
 
 
       void CheckDeadline();
@@ -129,13 +129,15 @@ namespace uhal
 
 
       //! Error code for the async callbacks to fill
-      boost::system::error_code mErrorCode;
+      //       boost::system::error_code mErrorCode;
 
       boost::asio::deadline_timer mDeadlineTimer;
 
       std::vector<uint8_t> mReplyMemory;
 
       boost::shared_ptr< boost::thread > mDispatchThread;
+
+      std::vector< boost::asio::const_buffer > mAsioSendBuffer;
       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
 
 
