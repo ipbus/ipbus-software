@@ -369,7 +369,7 @@ namespace uhal
       std::deque< Node* > mChildren;
 
       //! Helper to assist look-up of a particular child node, given a name
-      std::hash_map< std::string , Node* > mChildrenMap;
+      boost::unordered_map< std::string , Node* > mChildrenMap;
 
 
 

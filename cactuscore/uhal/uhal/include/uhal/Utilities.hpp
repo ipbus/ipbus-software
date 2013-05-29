@@ -72,33 +72,35 @@
 #include "uhal/log/log.hpp"
 #include "uhal/log/exception.hpp"
 
-#ifdef __GNUC__
-#include <ext/hash_map>
-#else
-#include <hash_map>
-#endif
+#include "boost/unordered_map.hpp"
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-namespace std
-{
-  using namespace __gnu_cxx;
-}
-
-//! Working in the __gnu_cxx namespace
-namespace __gnu_cxx
-{
-  //! Add a hash function for a c++ std::string
-  template<> struct hash< std::string >
-  {
-    //! implement the hash by calling the hash for the equivalent c-string
-    size_t operator() ( const std::string& x ) const
-    {
-      using namespace uhal;
-      return hash< const char* >() ( x.c_str() );
-    }
-  };
-}
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// #ifdef __GNUC__
+// #include <ext/hash_map>
+// #else
+// #include <hash_map>
+// #endif
+// 
+// // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// namespace std
+// {
+//   using namespace __gnu_cxx;
+// }
+// 
+// //! Working in the __gnu_cxx namespace
+// namespace __gnu_cxx
+// {
+//   //! Add a hash function for a c++ std::string
+//   template<> struct hash< std::string >
+//   {
+//     //! implement the hash by calling the hash for the equivalent c-string
+//     size_t operator() ( const std::string& x ) const
+//     {
+//       using namespace uhal;
+//       return hash< const char* >() ( x.c_str() );
+//     }
+//   };
+// }
+// // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

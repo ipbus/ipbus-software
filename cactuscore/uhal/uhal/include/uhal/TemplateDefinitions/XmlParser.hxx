@@ -240,7 +240,7 @@ namespace uhal
 
     for ( std::set<std::string>::iterator lIt = lRule.mRequired.begin() ; lIt != lRule.mRequired.end() ; ++lIt )
     {
-      std::hash_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( *lIt ) );
+      boost::unordered_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( *lIt ) );
 
       if ( lIt2 == mHashes.end() )
       {
@@ -262,7 +262,7 @@ namespace uhal
 
     for ( std::set<std::string>::iterator lIt = lRule.mForbidden.begin() ; lIt != lRule.mForbidden.end() ; ++lIt )
     {
-      std::hash_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( *lIt ) );
+      boost::unordered_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( *lIt ) );
 
       if ( lIt2 == mHashes.end() )
       {
@@ -284,7 +284,7 @@ namespace uhal
 
     for ( std::set<std::string>::iterator lIt = lRule.mOptional.begin() ; lIt != lRule.mOptional.end() ; ++lIt )
     {
-      std::hash_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( *lIt ) );
+      boost::unordered_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( *lIt ) );
 
       if ( lIt2 == mHashes.end() )
       {
@@ -311,7 +311,7 @@ namespace uhal
 
     for ( pugi::xml_attribute lAttr = aNode.first_attribute(); lAttr; lAttr = lAttr.next_attribute() )
     {
-      std::hash_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( lAttr.name() ) );
+      boost::unordered_map< std::string , uint64_t >::iterator lIt2 ( mHashes.find ( lAttr.name() ) );
 
       if ( lIt2 == mHashes.end() )
       {
@@ -394,7 +394,7 @@ namespace uhal
       std::stringstream lStr;
       uint64_t lTemp ( ( **lIt ).mRequiredHash & ~lHash );
 
-      for ( std::hash_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
+      for ( boost::unordered_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
       {
         if ( ( lIt2->second ) & lTemp )
         {
@@ -412,7 +412,7 @@ namespace uhal
       std::stringstream lStr;
       uint64_t lTemp ( ( **lIt ).mForbiddenHash & lHash );
 
-      for ( std::hash_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
+      for ( boost::unordered_map< std::string , uint64_t >::iterator lIt2 = mHashes.begin() ; lIt2 != mHashes.end() ; ++lIt2 )
       {
         if ( ( lIt2->second ) & lTemp )
         {

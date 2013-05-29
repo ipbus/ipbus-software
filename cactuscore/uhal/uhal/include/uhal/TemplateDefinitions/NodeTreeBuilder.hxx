@@ -37,7 +37,7 @@ namespace uhal
   template <class T>
   void NodeTreeBuilder::add ( const std::string& aNodeClassName )
   {
-    std::hash_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNodeClassName ) ;
+    boost::unordered_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNodeClassName ) ;
 
     if ( lIt != mCreators.end() )
     {

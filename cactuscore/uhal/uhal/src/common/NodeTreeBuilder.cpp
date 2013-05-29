@@ -166,7 +166,7 @@ namespace uhal
   void NodeTreeBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< const Node* >& aNodes )
   {
     std::string lName ( aProtocol + ( aPath.string() ) );
-    std::hash_map< std::string , const Node* >::iterator lNodeIt = mNodes.find ( lName );
+    boost::unordered_map< std::string , const Node* >::iterator lNodeIt = mNodes.find ( lName );
 
     if ( lNodeIt != mNodes.end() )
     {
@@ -270,13 +270,13 @@ namespace uhal
     NodeTreeClassAttribute lClass;
     boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
     //create an object of the class type returned by the parsed string
-    std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
+    boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
 
     if ( lIt == mCreators.end() )
     {
       log ( Error() , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory. Known types are:" );
 
-      for ( std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+      for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
       {
         log ( Error() , " > " , lIt->first );
       }
@@ -486,7 +486,7 @@ namespace uhal
       {
         aNode->mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
 
-        for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+        for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
         {
           aNode->mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
         }
@@ -572,7 +572,7 @@ namespace uhal
 
   void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode )
   {
-    std::hash_map< std::string , Node* >::iterator lIt, lIt2;
+    boost::unordered_map< std::string , Node* >::iterator lIt, lIt2;
     Node* lNode1, *lNode2;
 
     for ( lIt = aNode->mChildrenMap.begin() ; lIt != aNode->mChildrenMap.end() ; ++lIt )

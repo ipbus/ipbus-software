@@ -208,6 +208,8 @@ namespace uhal
       std::deque < Buffers* > mReplyQueue;
 #endif
 
+      std::exception* mAsynchronousException;
+
   };
 
 

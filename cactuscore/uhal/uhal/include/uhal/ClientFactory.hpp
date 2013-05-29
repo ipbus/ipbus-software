@@ -161,7 +161,7 @@ namespace uhal
       //! The single instance of the class
       static ClientFactory* mInstance;
       //! Hash map associating a creator for a particular protocol with a file name
-      std::hash_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators; //map string name of each protocol to a creator for that protocol
+      boost::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators; //map string name of each protocol to a creator for that protocol
       //! Store the description of the factory product
       std::map< std::string , std::string > mProductDescriptions;
 

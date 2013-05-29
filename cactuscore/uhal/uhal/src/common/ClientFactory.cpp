@@ -96,7 +96,7 @@ namespace uhal
     }
 
     log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
-    std::hash_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
+    boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
 
     if ( lIt == mCreators.end() )
     {

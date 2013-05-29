@@ -37,7 +37,7 @@ namespace uhal
   template <class T>
   void ClientFactory::add ( const std::string& aProtocol , const std::string& aDescription )
   {
-    std::hash_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aProtocol ) ;
+    boost::unordered_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aProtocol ) ;
 
     if ( lIt != mCreators.end() )
     {

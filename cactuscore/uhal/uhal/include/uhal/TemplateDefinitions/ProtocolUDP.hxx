@@ -59,7 +59,8 @@ namespace uhal
               ),
     mDeadlineTimer ( *mIOservice ),
     mReplyMemory ( 65536 , 0x00000000 ),
-    mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( boost::bind ( &boost::asio::io_service::run , & ( *mIOservice ) ) ) ) )
+    mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( boost::bind ( &boost::asio::io_service::run , & ( *mIOservice ) ) ) ) ),
+    mAsynchronousException( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
   }
@@ -90,6 +91,12 @@ namespace uhal
   {
     try
     {
+
+      if( mAsynchronousException )
+      {
+        throw *mAsynchronousException;
+      }
+
       if ( ! mSocket->is_open() )
       {
         connect();
@@ -191,12 +198,14 @@ namespace uhal
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         log ( Error() , "ASIO reported a Timeout in UDP callback" );
-        throw exception::UdpTimeout();
+        mAsynchronousException = new exception::UdpTimeout();
+        return;
       }
 
       log ( Error() , "ASIO reported an error: " , Quote ( aErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
       ClientInterface::validate();
-      throw exception::ErrorInUdpCallback();
+      mAsynchronousException = new exception::ErrorInUdpCallback();
+      return;
     }
 
     /*
@@ -233,7 +242,8 @@ namespace uhal
     if ( !ClientInterface::validate() )
     {
       log ( Error() , "Validation function reported an error!" );
-      throw exception::ValidationError ();
+      mAsynchronousException = new exception::ValidationError ();
+      return;
     }
 
 #ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
@@ -246,7 +256,6 @@ namespace uhal
     }
 
 #endif
-    //log ( Debug() , ThisLocation() );
   }
 
 
@@ -254,9 +263,7 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::CheckDeadline()
   {
-    //log ( Debug() , ThisLocation() );
-
-    // Check whether the deadline has passed. We compare the deadline against
+     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
@@ -285,6 +292,12 @@ namespace uhal
     do
     {
       boost::lock_guard<boost::mutex> lLock ( this->mMutex );
+
+      if( mAsynchronousException )
+      {
+        throw *mAsynchronousException;
+      }
+
       lContinue = ( this->mDispatchedBuffers.size() );
     }
     while ( lContinue );

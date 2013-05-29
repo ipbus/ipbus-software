@@ -122,7 +122,7 @@ namespace uhal
     {
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
 
-      for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+      for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
       {
         mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
       }
@@ -166,7 +166,7 @@ namespace uhal
     {
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
 
-      for ( std::hash_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
+      for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
       {
         mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
       }
@@ -320,7 +320,7 @@ namespace uhal
 
   Node& Node::getNode ( const std::string& aId ) const
   {
-    std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
+    boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
 
     if ( lIt==mChildrenMap.end() )
     {
@@ -337,7 +337,7 @@ namespace uhal
           break;
         }
 
-        std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
+        boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
 
         if ( lIt!=mChildrenMap.end() )
         {
@@ -367,7 +367,7 @@ namespace uhal
     std::vector<std::string> lNodes;
     lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
 
-    for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+    for ( boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
     {
       lNodes.push_back ( lIt->first );
     }
@@ -381,7 +381,7 @@ namespace uhal
     lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
     log ( Info() , "Regular Expression : " , aRegex );
 
-    for ( std::hash_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+    for ( boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
     {
       boost::cmatch lMatch;
 

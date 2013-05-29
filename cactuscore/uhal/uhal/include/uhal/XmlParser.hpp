@@ -158,7 +158,7 @@ namespace uhal
 
     private:
       uint64_t mNextHash;
-      std::hash_map< std::string , uint64_t > mHashes;
+      boost::unordered_map< std::string , uint64_t > mHashes;
       std::deque< Rule<R> > mRules;
       uint32_t mRuleCounter;
 

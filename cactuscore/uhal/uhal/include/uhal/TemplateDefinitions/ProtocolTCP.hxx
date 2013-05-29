@@ -45,19 +45,6 @@
 namespace uhal
 {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -76,7 +63,8 @@ namespace uhal
               ),
     mDeadlineTimer ( *mIOservice ),
     mReplyMemory ( 65536 , 0x00000000 ),
-    mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( boost::bind ( &boost::asio::io_service::run , & ( *mIOservice ) ) ) ) )
+    mDispatchThread ( boost::shared_ptr< boost::thread > ( new boost::thread ( boost::bind ( &boost::asio::io_service::run , & ( *mIOservice ) ) ) ) ),
+    mAsynchronousException( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
   }
@@ -108,6 +96,12 @@ namespace uhal
   {
     try
     {
+      if( mAsynchronousException )
+      {
+        throw *mAsynchronousException;
+      }
+
+
       if ( ! mSocket->is_open() )
       {
         connect();
@@ -252,12 +246,14 @@ namespace uhal
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         log ( Error() , "ASIO reported a Timeout in TCP callback" );
-        throw exception::TcpTimeout();
+        mAsynchronousException = new exception::TcpTimeout();
+        return;
       }
 
       log ( Error() , "ASIO reported an error: " , Quote ( aErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
       ClientInterface::validate();
-      throw exception::ErrorInTcpCallback();
+      mAsynchronousException = new exception::ErrorInTcpCallback();
+      return;
     }
 
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
@@ -286,7 +282,8 @@ namespace uhal
     if ( !ClientInterface::validate() )
     {
       log ( Error() , "Validation function reported an error when processing buffer: " , Pointer ( aBuffers ) );
-      throw exception::ValidationError ();
+      mAsynchronousException = new exception::ValidationError ();
+      return;
     }
 
 #ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
@@ -339,6 +336,12 @@ namespace uhal
     do
     {
       boost::lock_guard<boost::mutex> lLock ( this->mMutex );
+
+      if( mAsynchronousException )
+      {
+        throw *mAsynchronousException;
+      }
+
       lContinue = ( this->mDispatchedBuffers.size() );
     }
     while ( lContinue );
