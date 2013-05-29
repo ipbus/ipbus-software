@@ -79,21 +79,22 @@ namespace uhal
 //!Test that the expression is executed without exceptions and measures the execution time
 #define CACTUS_TEST(expr)				\
   do {						\
-    try{					\
-      timeval start,end;			\
-      gettimeofday ( &start, NULL );		\
-      expr;					\
-      gettimeofday ( &end, NULL );					\
-      std::cout << "TEST PASSED in " << uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
-      uhal::tests::passedTestCount++;					\
-    } catch(std::exception& e) {					\
+    try{          \
+      timeval start,end;      \
+      gettimeofday ( &start, NULL );    \
+      expr;         \
+      gettimeofday ( &end, NULL );          \
+      std::cout << "TEST COMPLETED in " << uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
+    } catch(std::exception& e) {          \
       std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    } catch(...) {							\
+      uhal::tests::failedTestCount++;         \
+    } catch(...) {              \
       std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    }									\
+      uhal::tests::failedTestCount++;         \
+    }  \
   } while(0)
+
+
 
 #define CACTUS_TEST_NOTHROW(expr)				\
   do {						\
@@ -121,10 +122,10 @@ namespace uhal
       std::cout << "TEST_THROW PASSED: " << #expr << std::endl; \
       uhal::tests::passedTestCount++;					\
     } catch(std::exception& e) {						\
-      std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
+      std::cerr << "TEST_THROW FAILED by NOT THROWING REQUIRED TYPE '" << #signature << "' @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
       uhal::tests::failedTestCount++;					\
     }	catch(...) {							\
-      std::cerr << "TEST_THROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
+      std::cerr << "TEST_THROW FAILED by NOT THROWING REQUIRED TYPE '" << #signature << "' @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
       uhal::tests::failedTestCount++;		\
     }									\
   } while(0)

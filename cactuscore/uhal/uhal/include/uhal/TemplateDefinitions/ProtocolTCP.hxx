@@ -98,7 +98,7 @@ namespace uhal
     {
       if( mAsynchronousException )
       {
-        throw *mAsynchronousException;
+        mAsynchronousException->ThrowAsDerivedType();
       }
 
 
@@ -123,7 +123,6 @@ namespace uhal
 #else
       write ( lCurrentBuffer );
 #endif
-      std::cout << '.' << std::flush;
     }
     catch ( const std::exception& aExc )
     {
@@ -339,7 +338,7 @@ namespace uhal
 
       if( mAsynchronousException )
       {
-        throw *mAsynchronousException;
+        mAsynchronousException->ThrowAsDerivedType();
       }
 
       lContinue = ( this->mDispatchedBuffers.size() );

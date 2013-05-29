@@ -50,10 +50,16 @@
 #define ExceptionClass( ClassName , ClassDescription )\
  class ClassName : public uhal::exception::exception {\
  public:\
- ClassName() : exception() { create(); }\
+ ClassName() : uhal::exception::exception() {}\
+ void ThrowAsDerivedType_(){ throw *static_cast<ClassName*>(this); } \
  protected:\
  std::string description() const throw() { return std::string( ClassDescription ); } \
 };
+
+#define ThrowAsDerivedType() ThrowAsDerivedType_(); throw 0;
+
+#define MaxExceptionHistoryLength 256
+
 
 namespace uhal
 {
@@ -62,28 +68,9 @@ namespace uhal
   namespace exception
   {
 
-    class exception;
-
-    class exception_helper
-    {
-        friend class exception;
-
-      private:
-        exception_helper ( exception* aExc );
-
-      public:
-        ~exception_helper();
-
-      private:
-        exception* mExc;
-        std::string mMessages;
-    };
-
-    //! An abstract base exception class providing an interface to a throw/rethrow mechanism which will allow us to catch the base type and rethrow the derived type
+    //! An abstract base exception class providing an interface to a throw/ThrowAsDerivedType mechanism which will allow us to catch the base type and ThrowAsDerivedType the derived type
     class exception : public std::exception
     {
-        friend class exception_helper;
-
       public:
         /**
         	Constructor
@@ -102,24 +89,16 @@ namespace uhal
         */
         virtual const char* what() const throw();
 
+        virtual void ThrowAsDerivedType_() = 0;
+
       protected:
         virtual std::string description() const throw() = 0;
 
-
-        void create() throw();
-
       private:
-        typedef std::map< boost::thread::id , std::list<exception_helper> > map_type;
-
         static std::string mMessage;
-        static map_type mExceptions;
-
-        //!Define a static Mutex lock for thread safe logging
-        static boost::mutex mMutex;
+        std::vector< void* > mBacktrace;
+        boost::thread::id mThreadId;
     };
-
-
-
 
   }
 }

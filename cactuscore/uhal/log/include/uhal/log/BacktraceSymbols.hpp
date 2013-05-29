@@ -54,7 +54,9 @@ struct TracePoint
 };
 
 
-std::vector< TracePoint > Backtrace ( const uint32_t& aMaxDepth );
+void Backtrace ( std::vector< void* >& aBacktrace );
+
+std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktrace );
 
 
 #endif

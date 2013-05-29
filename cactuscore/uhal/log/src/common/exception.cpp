@@ -52,114 +52,69 @@ namespace uhal
   {
 
     exception::exception ( ) :
-      std::exception ()
+      std::exception (),
+      mBacktrace( MaxExceptionHistoryLength , NULL ),
+      mThreadId( boost::this_thread::get_id() )
     {
-      mMessage.clear();
+      Backtrace( mBacktrace );
     }
 
     exception::~exception() throw()
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      mMessage.clear();
-      exception::map_type::iterator lIt = mExceptions.find ( boost::this_thread::get_id() );
+    {}
 
-      if ( lIt->second.back().mExc == this )
-      {
-        lIt->second.pop_back();
-      }
-
-      if ( ! lIt->second.size() )
-      {
-        mExceptions.erase ( lIt );
-      }
-    }
 
     const char* exception::what() const throw()
     {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
+      std::stringstream lStr;
 
-      if ( mMessage.size() )
-      {
-        return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
-      }
-
-      mMessage += "\n";
+      lStr << "\n";
 #ifdef COURTEOUS_EXCEPTIONS
-      mMessage += "I'm terribly sorry to have to tell you this, but it appears that there was an exception:\n";
+      lStr << "I'm terribly sorry to have to tell you this, but it appears that there was an exception:\n";
 #endif
 
-      for ( map_type::iterator lIt = mExceptions.begin(); lIt != mExceptions.end(); ++lIt )
-      {
-        mMessage += "In thread ";
-        mMessage += boost::lexical_cast<std::string> ( lIt->first );
-        mMessage += ":\n";
-        uint32_t i ( 0 );
-
-        for ( std::list<exception_helper>::iterator lIt2 = lIt->second.begin() ; lIt2 != lIt->second.end() ; ++ lIt2, ++i )
-        {
-          mMessage += " - Exception ";
-          mMessage += boost::lexical_cast<std::string> ( i );
-          mMessage += ":\n";
-          mMessage += lIt2->mMessages;
-        }
-      }
-
-      return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
-    }
-
-    void exception::create() throw()
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      exception_helper lExcHlpr ( this );
-      mExceptions[ boost::this_thread::get_id() ].push_back ( lExcHlpr );
-    }
-
-    std::string exception::mMessage;
-    exception::map_type exception::mExceptions;
-    boost::mutex exception::mMutex;
-  }
-}
-
-namespace uhal
-{
-  namespace exception
-  {
-
-    exception_helper::exception_helper ( exception* aExc ) :
-      mExc ( aExc )
-    {
-      mMessages += "   - Exception of type:\n";
-      mMessages += "     - ";
+      lStr << " * Exception type: ";
 #ifdef __GNUG__
       // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
       int lStatus ( 0 );
-      mMessages += abi::__cxa_demangle ( typeid ( *mExc ).name() , 0 , 0 , &lStatus );
+      lStr << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
 #else
-      mMessages += typeid ( *mExc ).name();
+      lStr << typeid ( *this ).name();
 #endif
-      mMessages += "\n   - Description:\n";
-      mMessages += "     - ";
-      mMessages += mExc->description();
-      mMessages += "\n   - Call stack:\n";
-      std::vector< TracePoint > lBacktrace = Backtrace ( 256 );
+      lStr << "\n";
 
-      for ( std::vector< TracePoint >::iterator lIt = lBacktrace.begin() +2 ; lIt != lBacktrace.end()-2; ++lIt )
+      lStr << " * Description: " << description() << "\n";
+
+      boost::thread::id lThreadId( boost::this_thread::get_id() );
+      if( mThreadId == lThreadId )
       {
-        mMessages += "     - function \"";
-        mMessages += lIt->function;
-        mMessages += "\" in ";
-        mMessages += lIt->file;
-        mMessages += ", line ";
-        mMessages += boost::lexical_cast<std::string> ( lIt->line );
-        mMessages += "\n";
+        lStr << " * Exception occured in same thread as it was caught in (" << lThreadId << ")\n";
+      }
+      else
+      {
+        lStr << " * Exception occured in thread with ID: " << mThreadId << "\n";
+        lStr << " * Current thread has ID: " << lThreadId << "\n";
       }
 
-      mMessages += "   - Log messages (currently missing):\n";
+      lStr << " * Call stack:\n";
+
+      std::vector< TracePoint > lBacktrace = BacktraceSymbols ( mBacktrace );
+      uint32_t lCounter( 0 );
+
+      for ( std::vector< TracePoint >::iterator lIt = lBacktrace.begin()+3 ; lIt != lBacktrace.end(); ++lIt , ++lCounter )
+      {
+        lStr << "   [ " << lCounter << " ] " << lIt->function << "\n";
+        lStr << "            at " << lIt->file << ":" << lIt->line << "\n";
+      }
+
+      mMessage = lStr.str();
+      return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
     }
 
-    exception_helper::~exception_helper()
-    {}
+
+    std::string exception::mMessage;
 
   }
 }
+
+
 

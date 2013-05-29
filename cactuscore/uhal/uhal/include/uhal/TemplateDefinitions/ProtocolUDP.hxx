@@ -94,7 +94,7 @@ namespace uhal
 
       if( mAsynchronousException )
       {
-        throw *mAsynchronousException;
+        mAsynchronousException->ThrowAsDerivedType();
       }
 
       if ( ! mSocket->is_open() )
@@ -115,7 +115,6 @@ namespace uhal
 #else
       write ( lCurrentBuffer );
 #endif
-      std::cout << '.' << std::flush;
     }
     catch ( const std::exception& aExc )
     {
@@ -295,7 +294,7 @@ namespace uhal
 
       if( mAsynchronousException )
       {
-        throw *mAsynchronousException;
+        mAsynchronousException->ThrowAsDerivedType();
       }
 
       lContinue = ( this->mDispatchedBuffers.size() );

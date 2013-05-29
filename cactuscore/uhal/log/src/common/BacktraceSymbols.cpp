@@ -275,22 +275,27 @@ static int FindMatchingFiles ( struct dl_phdr_info* aInfo, size_t aSize, void* a
 }
 
 
-
-
-std::vector< TracePoint > Backtrace ( const uint32_t& aMaxDepth )
+void Backtrace ( std::vector< void* >& aBacktrace )
 {
-  void* lArray[ aMaxDepth ];
-  size_t lSize = backtrace ( lArray, aMaxDepth );
+  size_t lSize = backtrace ( &(aBacktrace[0]) , aBacktrace.size() );
+  aBacktrace.resize( lSize );
+}
+
+
+
+std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktrace )
+{
   std::vector< TracePoint > lRet;
-  lRet.reserve ( lSize );
+  lRet.reserve ( aBacktrace.size() );
+
   bfd_init();
 
-  for ( uint32_t x=1; x!=lSize; ++x )
+  for ( std::vector< void* >::const_iterator x=aBacktrace.begin(); x!=aBacktrace.end(); ++x )
   {
     struct FindFilesHelperStruct match;
-    match.address = lArray[x];
+    match.address = *x;
     dl_iterate_phdr ( FindMatchingFiles, &match );
-    bfd_vma aAddr = ( std::size_t ) ( lArray[x] ) - ( std::size_t ) ( match.base );
+    bfd_vma aAddr = ( std::size_t ) ( *x ) - ( std::size_t ) ( match.base );
     TracePoint lTracePoint;
 
     if ( ProcessFiles ( ( ( match.lFile && strlen ( match.lFile ) ) ?match.lFile:"/proc/self/exe" ) , &aAddr, 1 , lTracePoint ) )
