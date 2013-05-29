@@ -21,20 +21,17 @@
          client_request_in/0,
          client_request_malformed/0,
          client_response_sent/0,
-         udp_in/0,
-         udp_malformed/0,
-         udp_out/0,
-         udp_response_timeout/1,
+         new_device_client_table/2,
+         udp_sent/1,
+         udp_rcvd/1,
+         udp_timeout/2,
+         udp_lost/2,
          get_active_clients/0,
          get_max_active_clients/0,
          get_cumulative_client_count/0,
          get_total_client_requests/0,
          get_total_client_malformed_requests/0,
          get_total_client_responses/0,
-         get_udp_in/0,
-         get_udp_malformed/0,
-         get_udp_out/0,
-         get_udp_response_timeouts/1,
          report_to_console/0,
          report_to_string/0]).
 
@@ -48,13 +45,9 @@
                 request_count = 0 :: integer(),
                 malformed_request_count = 0 :: integer(),
                 response_count = 0 :: integer(),
-                udp_in = 0 :: integer(),
-                udp_malformed = 0 :: integer(),
-                udp_out = 0 :: integer(),
-                udp_response_timeouts_normal = 0 :: integer(),
-                udp_response_timeouts_resend = 0 :: integer(),
-                udp_response_timeouts_status = 0 :: integer(),
-                udp_response_timeouts_recovered = 0 :: integer()}).
+                previous_udp_stats_table,
+                current_udp_stats_tables = []
+                }).
 
 
 
@@ -131,51 +124,70 @@ client_request_malformed() -> gen_server:cast(?MODULE, client_request_malformed)
 client_response_sent() -> gen_server:cast(?MODULE, client_response_sent).
 
 
-%% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a UDP packet arrived.
+%% ------------------------------------------------------------------------------------
+%% @doc Returns a fresh ETS table for collating device_client stats, with all counters
+%%      already inserted, and set to 0
 %%
-%% @spec udp_in() -> ok
+%% @spec new_device_client_table(TargetIPTuple, TargetPort) -> NewStatsTable
+%% @end
+%% ------------------------------------------------------------------------------------
+
+new_device_client_table(TargetIPTuple, TargetPort) ->
+    T = new_device_client_table(),
+    ets:insert(T, {start, os:timestamp()}),
+    ets:insert(T, {target_ip, TargetIPTuple}),
+    ets:insert(T, {target_port, TargetPort}),
+    ets:setopts(T, [{heir, whereis(ch_stats), no_data}]),
+    ch_stats ! {new_device_client_table, self(), T},
+    T.
+
+
+%% ---------------------------------------------------------------------
+%% @doc Increment "udp_sent" counter in device_client stats table
+%%
+%% @spec udp_sent(StatsTable) -> NewValue
 %% @end
 %% ---------------------------------------------------------------------
-udp_in() -> gen_server:cast(?MODULE, udp_in).
+udp_sent(T) ->
+    ets:update_counter(T, udp_sent, 1).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a UDP packet was determined
-%%      to be malformed.
+%% @doc Increment "udp_rcvd" counter in device_client stats table
 %%
-%% @spec udp_malformed() -> ok
+%% @spec udp_rcvd(StatsTable) -> NewValue
 %% @end
 %% ---------------------------------------------------------------------
-udp_malformed() -> gen_server:cast(?MODULE, udp_malformed).
+
+udp_rcvd(T) ->
+    ets:update_counter(T, udp_rcvd, 1).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a UDP packet was sent.
+%% @doc Increment one of the "udp_timeout" counters in device_client stats table
 %%
-%% @spec udp_out() -> ok
+%% @spec udp_timeout(StatsTable, Type) -> NewValue
+%% where
+%%     Type = normal | recovered | resend | status
 %% @end
 %% ---------------------------------------------------------------------
-udp_out() -> gen_server:cast(?MODULE, udp_out).
+
+udp_timeout(T, Type) when Type=:=normal; Type=:=recovered; Type=:=resend; Type=:=status ->
+    ets:update_counter(T, {udp_timeout, Type}, 1).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a UDP response timeout has occured / 
-%%      been recovered from. The different types of timeouts are:
-%%         * normal : i.e. timeout to original request sent
-%%         * resend : timeout after resend of original request / request
-%%                    for device to resend
-%%         * status : timeout to status request
-%%         * recovered : recovered packet loss in control packet timeout
-%%      
+%% @doc Increment one of the "udp_lost" counters in device_client stats table
 %%
-%% @spec udp_response_timeout(Type) -> ok
-%%      where 
-%%         Type = normal | resend | status | recovered
+%% @spec udp_timeout(StatsTable, Type) -> NewValue
+%% where 
+%%     Type = request | response
 %% @end
 %% ---------------------------------------------------------------------
-udp_response_timeout(Type) when is_atom(Type) ->
-    gen_server:cast(?MODULE, {udp_response_timeout, Type}).
+
+udp_lost(T, Type) when Type=:=request; Type=:=response ->
+    ets:update_counter(T, {udp_lost, Type}, 1).
+
 
 %% ---------------------------------------------------------------------
 %% @doc Returns the current number of connected user-clients.
@@ -237,46 +249,6 @@ get_total_client_responses() -> gen_server:call(?MODULE, get_total_client_respon
 
 
 %% ----------------------------------------------------------------------------
-%% @doc Returns the current total of incoming UDP packets that have been
-%%      received (malformed or valid).
-%%
-%% @spec get_udp_in() -> integer()
-%% @end
-%% ----------------------------------------------------------------------------
-get_udp_in() -> gen_server:call(?MODULE, get_udp_in).
-
-
-%% ----------------------------------------------------------------------------
-%% @doc Returns the current total of incoming UDP packets that have been
-%%      determined to be malformed.
-%%
-%% @spec get_udp_malformed() -> integer()
-%% @end
-%% ----------------------------------------------------------------------------
-get_udp_malformed() -> gen_server:call(?MODULE, get_udp_malformed).
-
-
-%% ----------------------------------------------------------------------------
-%% @doc Returns the current total of UDP packets that have been sent.
-%%
-%% @spec get_udp_out() -> integer()
-%% @end
-%% ----------------------------------------------------------------------------
-get_udp_out() -> gen_server:call(?MODULE, get_udp_out).
-
-
-%% ----------------------------------------------------------------------------
-%% @doc Returns the current total of UDP response timeouts that have occured, 
-%%      or been recovered from. Same Type values as udp_response_timeout function.
-%%
-%% @spec get_udp_response_timeouts(normal | resend | status | recovered) -> integer()
-%% @end
-%% ----------------------------------------------------------------------------
-get_udp_response_timeouts(Type) when is_atom(Type) ->
-    gen_server:call(?MODULE, {get_udp_response_timeouts, Type}).
-
-
-%% ----------------------------------------------------------------------------
 %% @doc Prints a report of all the current stats to the console.
 %%
 %% @spec report_to_console() -> ok
@@ -310,7 +282,8 @@ report_to_string() -> gen_server:call(?MODULE, report_to_string).
 %% --------------------------------------------------------------------
 init([]) ->
     ?CH_LOG_DEBUG("Initialising the stats server."),
-    {ok, #state{}}.
+    State = #state{previous_udp_stats_table=new_device_client_table()},
+    {ok, State}.
 
 %% --------------------------------------------------------------------
 %% Function: handle_call/3
@@ -336,28 +309,6 @@ handle_call(get_total_client_requests, _From,  State) ->
 
 handle_call(get_total_client_malformed_requests, _From,  State) ->
     {reply, State#state.malformed_request_count, State};
-
-handle_call(get_total_client_responses, _From,  State) ->
-    {reply, State#state.response_count, State};
-
-handle_call(get_udp_in, _From,  State) ->
-    {reply, State#state.udp_in, State};
-
-handle_call(get_udp_malformed, _From,  State) ->
-    {reply, State#state.udp_malformed, State};
-
-handle_call(get_udp_out, _From,  State) ->
-    {reply, State#state.udp_out, State};
-
-handle_call({get_udp_response_timeouts, Type}, _From,  State) ->
-    Nr = case Type of
-              normal -> State#state.udp_response_timeouts_normal;
-              resend -> State#state.udp_response_timeouts_resend;
-              status -> State#state.udp_response_timeouts_status;
-              recovered -> State#state.udp_response_timeouts_recovered;
-              _ -> invalid
-         end,
-    {reply, Nr, State};
 
 handle_call(report_to_string, _From, State) ->
     {reply, report_to_string(State), State};
@@ -403,34 +354,6 @@ handle_cast(client_response_sent, State = #state{response_count = Responses}) ->
     NewState = State#state{response_count = Responses+1},
     {noreply, NewState};
 
-handle_cast(udp_in, State = #state{udp_in = Packets}) ->
-    NewState = State#state{udp_in = Packets+1},
-    {noreply, NewState};
-
-handle_cast(udp_malformed, State = #state{udp_malformed = Packets}) ->
-    NewState = State#state{udp_malformed = Packets+1},
-    {noreply, NewState};
-
-handle_cast(udp_out, State = #state{udp_out = Packets}) ->
-    NewState = State#state{udp_out = Packets+1},
-    {noreply, NewState};
-
-handle_cast({udp_response_timeout, normal}, State = #state{udp_response_timeouts_normal = Value}) ->
-    NewState = State#state{udp_response_timeouts_normal = Value+1},
-    {noreply, NewState};
-
-handle_cast({udp_response_timeout, resend}, State = #state{udp_response_timeouts_resend = Value}) ->
-    NewState = State#state{udp_response_timeouts_resend = Value+1},
-    {noreply, NewState};
-
-handle_cast({udp_response_timeout, status}, State = #state{udp_response_timeouts_status = Value}) ->
-    NewState = State#state{udp_response_timeouts_status = Value+1},
-    {noreply, NewState};
-
-handle_cast({udp_response_timeout, recovered}, State = #state{udp_response_timeouts_recovered = Value}) ->
-    NewState = State#state{udp_response_timeouts_recovered = Value+1},
-    {noreply, NewState};
-
 handle_cast(report_to_console, State) ->
     io:format("~n~s~n", [report_to_string(State)]),
     {noreply, State};
@@ -449,6 +372,25 @@ handle_cast(_Request, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
+handle_info({new_device_client_table, DeviceClientPid, TableId}, S) ->
+    NewTablesList = [ {DeviceClientPid,TableId} | S#state.current_udp_stats_tables ],
+    {noreply, S#state{current_udp_stats_tables=NewTablesList}};
+
+handle_info({'ETS-TRANSFER', T1, Pid, no_data}, S) ->
+    T0 = S#state.previous_udp_stats_table,
+    lists:foreach(fun(X) -> ets:update_counter(T0, X, ets:lookup_element(T1, X, 2)) end,
+                  [udp_sent,
+                   udp_rcvd,
+                   {udp_timeout,normal},
+                   {udp_lost,request},
+                   {udp_lost,response},
+                   {udp_timeout,recovered},
+                   {udp_timeout,resend},
+                   {udp_timeout,status}
+                   ]),
+    NewTablesList = lists:keydelete(Pid, 1, S#state.current_udp_stats_tables),
+    {noreply, S#state{current_udp_stats_tables=NewTablesList}};
+
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -477,27 +419,71 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% Returns a stats report in string form
 report_to_string(State) ->
-    lists:flatten(io_lib:format("Control Hub Stats Report~n"
+    lists:flatten([io_lib:format("Control Hub Stats Report~n"
                                 "------------------------~n~n"
                                 "CLIENT  All-time connections: ~p~n"  
                                 "          Active connections: ~p (peak: ~p)~n"
                                 "           Requests received: ~p (of which ~p were malformed)~n"
-                                "              Responses sent: ~p~n"
-                                "~n"
-                                "UDP              Packets Out: ~p~n"
-                                "                  Packets In: ~p (of which ~p were malformed)~n"
-                                "                    Timeouts: ~p in normal operation (of which ~p were recovered)~n"
-                                "              Other timeouts: ~p (status), ~p (in resends)~n",
+                                "              Responses sent: ~p~n",
                                 [State#state.cumulative_client_count,
                                  State#state.active_clients,
                                  State#state.max_active_clients,
                                  State#state.request_count,
                                  State#state.malformed_request_count,
-                                 State#state.response_count,
-                                 State#state.udp_out,
-                                 State#state.udp_in,
-                                 State#state.udp_malformed,
-                                 State#state.udp_response_timeouts_normal,
-                                 State#state.udp_response_timeouts_recovered,
-                                 State#state.udp_response_timeouts_status,
-                                 State#state.udp_response_timeouts_resend])).
+                                 State#state.response_count
+                                ]),
+                   lists:flatten([stats_table_to_string(T,"") || {_, T} <- State#state.current_udp_stats_tables]),
+                   stats_table_to_string(State#state.previous_udp_stats_table, "Other UDP")
+                   ]).
+
+
+%% ------------------------------------------------------------------------------------
+%% @doc Returns a fresh ETS table for collating device_client stats, with all counters
+%%      already inserted, and set to 0
+%%
+%% @spec new_device_client_table() -> NewStatsTable
+%% @end
+%% ------------------------------------------------------------------------------------
+
+new_device_client_table() ->
+    T = ets:new(device_client_stats, [ordered_set,protected]),
+    ets:insert(T, {udp_sent, 0}),
+    ets:insert(T, {udp_rcvd, 0}),
+    ets:insert(T, {{udp_timeout,normal}, 0}),
+    ets:insert(T, {{udp_lost,request},0}),
+    ets:insert(T, {{udp_lost,response},0}),
+    ets:insert(T, {{udp_timeout,recovered}, 0}),
+    ets:insert(T, {{udp_timeout,resend}, 0}),
+    ets:insert(T, {{udp_timeout,status}, 0}),
+    T.
+
+
+%% Returns stats table results in string form
+stats_table_to_string(T, DefaultText) ->
+    io_lib:format("~n~s~n"
+                  "              Packets Out: ~p~n"
+                  "               Packets In: ~p~n"
+                  "                 Timeouts: ~p in normal operation (of which ~p were recovered)~n"
+                  "                             in ~p of these instances the request got lost, ~p times response got lost~n"
+                  "           Other timeouts: ~p (status), ~p (in resends)~n",
+                  [case ets:member(T, target_ip) of
+                       true -> 
+                           {IP1,IP2,IP3,IP4} = ets:lookup_element(T, target_ip, 2),
+                           TS = {_,_,Micro} = ets:lookup_element(T, start, 2),
+                           {{Yr,Month,Day}, {Hr,Min,Sec}} = calendar:now_to_universal_time(TS),
+                           io_lib:format("UDP to/from ~w.~w.~w.~w:~w"
+                                         "  since ~2w:~2..0w:~2..0w.~3..0w, ~2..0w-~2..0w-~4w UTC",
+                                         [IP1,IP2,IP3,IP4,ets:lookup_element(T,target_port,2),
+                                          Hr,Min,Sec,Micro div 1000, Day,Month,Yr]);
+                       false ->
+                           DefaultText
+                   end,
+                   ets:lookup_element(T, udp_sent, 2),
+                   ets:lookup_element(T, udp_rcvd, 2),
+                   ets:lookup_element(T, {udp_timeout,normal}, 2),
+                   ets:lookup_element(T, {udp_timeout,recovered}, 2),
+                   ets:lookup_element(T, {udp_lost, request}, 2),
+                   ets:lookup_element(T, {udp_lost, response}, 2),
+                   ets:lookup_element(T, {udp_timeout,status}, 2),
+                   ets:lookup_element(T, {udp_timeout,resend}, 2)
+                  ]).

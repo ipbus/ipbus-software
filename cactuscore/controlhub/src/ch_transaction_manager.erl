@@ -89,22 +89,24 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
                    true ->
                      infinity;
                    false ->
-                     TimeSinceLastResponse = round(timer:now_diff(now(), queue:get(RequestTimesQueue))/1000.0),
+                     TimeSinceLastResponse = timer:now_diff(os:timestamp(), queue:get(RequestTimesQueue)) div 1000,
                      max(0, ?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT - TimeSinceLastResponse)
                  end,
-%   if
-%     QueueLen > 30 -> 
-%       inet:setopts(ClientSocket,[{active,once}]);
-%     true ->
-%       inet:setopts(ClientSocket,[{active,true}])
-%   end,
+    if
+      QueueLen =:= 30 -> 
+        inet:setopts(ClientSocket,[{active,once}]);
+      QueueLen =:= 20 ->
+        inet:setopts(ClientSocket,[{active,true}]);
+      true ->
+        void
+    end,
     receive
         {tcp, ClientSocket, RequestBin} ->
 %            inet:setopts(ClientSocket,[{activve,once}]),
             ?CH_LOG_DEBUG("Received a request from client (QueueLen=~w).", [QueueLen]),
             ch_stats:client_request_in(),
             forward_request(RequestBin),
-            tcp_receive_handler_loop(ClientSocket, queue:in(now(),RequestTimesQueue), QueueLen+1);
+            tcp_receive_handler_loop(ClientSocket, queue:in(os:timestamp(),RequestTimesQueue), QueueLen+1);
         {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
             ?CH_LOG_DEBUG("Received device client response from target IPaddr=~w, Port=~w",
                           [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
@@ -170,5 +172,5 @@ unpack_target_request(RequestBin) ->
 reply_to_client(ClientSocket, ResponseBin) ->
     ?CH_LOG_DEBUG("Sending response to TCP client"),
     ?PACKET_TRACE(ResponseBin, "~n  Sending the following response to the TCP client:"),
-    gen_tcp:send(ClientSocket, ResponseBin).
+    gen_tcp:send(ClientSocket, ResponseBin),
     ch_stats:client_response_sent().

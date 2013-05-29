@@ -48,7 +48,8 @@
                 next_id             :: non_neg_integer(),
                 max_in_flight       :: non_neg_integer(),
                 in_flight = []      :: [in_flight_info()],   % Details of packet in-flight to board
-                queue = queue:new() % Queue of packets waiting to be sent to board
+                queue = queue:new(), % Queue of packets waiting to be sent to board
+                stats = ets:new(device_client_stats, [ordered_set,protected])
                 }
         ).
 
@@ -128,7 +129,9 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
         {ok, Socket} ->
             put(socket, Socket),
             put(abs_max_in_flight, ChMaxInFlight),
-            {ok, #state{mode = setup, socket = Socket, target_ip_tuple=IPTuple, target_port=PortU16}};
+            StatsTable = ch_stats:new_device_client_table(IPTuple,PortU16),
+            put(stats, StatsTable),
+            {ok, #state{ mode=setup, socket=Socket, target_ip_tuple=IPTuple, target_port=PortU16, stats=StatsTable} };
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             get(targetSummary),
@@ -220,7 +223,7 @@ handle_cast(_Msg, State) ->
 % handle_info callback for udp packets from device
 handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) when length(S#state.in_flight)=/=0 ->
     ?CH_LOG_DEBUG("Received response from target hardware; passing it to originating Transaction Manager..."),
-%    ch_stats:udp_in(),
+    ch_stats:udp_rcvd(S#state.stats),
     ReplyHdr = binary_part(ReplyBin, 0, 4),
     case {S#state.ipbus_v, lists:keymember(ReplyHdr, 1, S#state.in_flight)} of
         {{2, 0}, true} ->
@@ -240,8 +243,8 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
     ?CH_LOG_DEBUG("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
                   "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
     case RetryCount of
-         0 -> ch_stats:udp_response_timeout(normal);
-         _ -> ch_stats:udp_response_timeout(resend)
+         0 -> ch_stats:udp_timeout(S#state.stats, normal);
+         _ -> ch_stats:udp_timeout(S#state.stats, resend)
     end,
     if
       % Packet-loss recovery for IPbus 2.0
@@ -259,7 +262,8 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 NewInFlight = [{HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}],
                 % Re-send original packet
                 gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
-                ch_stats:udp_out(),
+                ch_stats:udp_sent(S#state.stats),
+                if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, request); true -> void end,
                 {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt, next_id=increment_pkt_id(HwNextId), queue=NewQ}, ?UDP_RESPONSE_TIMEOUT};
             % Response packet lost => Ask board to re-send
             {ok, {2,0}, {_, _, HwNextId}} ->
@@ -270,7 +274,8 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                         NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid, _OrigHdr}),
                         {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
                         gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
-                        ch_stats:udp_out(),
+                        ch_stats:udp_sent(S#state.stats),
+                        if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, response); true -> void end,
                         {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
                     false ->
                         Msg = io_lib:format("Target board's next expected ID has unexpected value of ~w. Another client (ControlHub or uHAL) is probably communicating with this target at the same time. "
@@ -388,7 +393,7 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
         {IPbusVer, ModPkt, PktId} ->
             gen_udp:send(Socket, TargetIPTuple, TargetPort, ModPkt),
             NewInFlightList = lists:append( S#state.in_flight, [{binary_part(ModPkt,0,4), now(), ModPkt, 0, ClientPid, binary_part(Packet,0,4)}] ),
-%            ch_stats:udp_out(),
+            ch_stats:udp_sent(S#state.stats),
             NewS = if
                      is_integer(PktId) ->
                        S#state{in_flight=NewInFlightList, next_id = increment_pkt_id(PktId)};
@@ -424,7 +429,7 @@ forward_replies_to_transaction_manager(ReplyBin, S) when is_binary(ReplyBin), is
             if
               NrRetries>0 ->
                 ?CH_LOG_INFO( "Recovered lost packet!", [], S),
-                ch_stats:udp_response_timeout(recovered);
+                ch_stats:udp_timeout(S#state.stats, recovered);
               true -> void
             end,
             send_requests_to_board( S#state{in_flight=forward_pending_replies(T)} );
@@ -504,20 +509,20 @@ decrement_pkt_id(Id) when is_integer(Id), Id>0 ->
     end.
 
 
-%% --------------------------------------------------------------------- 
-%% @doc Decrements packet ID N times, looping round from 1 to 0xffff 
-%% @spec decrement_pt_id( Id :: pos_integer(), N :: pos_integer() ) -> IdPlusN :: pos_integer() 
-%% @end 
-%% --------------------------------------------------------------------- 
- 
-decrement_pkt_id(Id, 0) -> 
-    Id; 
-decrement_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 -> 
-    decrement_pkt_id( decrement_pkt_id(Id) , N-1 ). 
+%% ---------------------------------------------------------------------
+%% @doc Decrements packet ID N times, looping round from 1 to 0xffff
+%% @spec decrement_pt_id( Id :: pos_integer(), N :: pos_integer() ) -> IdPlusN :: pos_integer()
+%% @end
+%% ---------------------------------------------------------------------
+
+decrement_pkt_id(Id, 0) ->
+    Id;
+decrement_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 ->
+    decrement_pkt_id( decrement_pkt_id(Id) , N-1 ).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Increments packet ID looping round from 0xffff to 1 
+%% @doc Increments packet ID looping round from 0xffff to 1
 %% @spec increment_pkt_id( Id::pos_integer() ) -> IdPlusOne::pos_integer()
 %% @end
 %% ---------------------------------------------------------------------
@@ -531,25 +536,25 @@ increment_pkt_id(Id) when is_integer(Id), Id>0 ->
     end.
 
 
-%% --------------------------------------------------------------------- 
-%% @doc Increments packet ID N times, loooping round fom 0xffff to 1 
-%% @spec increment_pkt_id( Id::pos_integer(), N::pos_integer() ) -> IdPlusN::pos_integer() 
-%% @end 
-%% --------------------------------------------------------------------- 
+%% ---------------------------------------------------------------------
+%% @doc Increments packet ID N times, loooping round fom 0xffff to 1
+%% @spec increment_pkt_id( Id::pos_integer(), N::pos_integer() ) -> IdPlusN::pos_integer()
+%% @end
+%% ---------------------------------------------------------------------
 
-increment_pkt_id(Id, 0) when is_integer(Id), Id>0 -> 
-    Id; 
-increment_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 -> 
-    increment_pkt_id( increment_pkt_id(Id), N-1 ). 
+increment_pkt_id(Id, 0) when is_integer(Id), Id>0 ->
+    Id;
+increment_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 ->
+    increment_pkt_id( increment_pkt_id(Id), N-1 ).
 
 
 %% ---------------------------------------------------------------------
 %% @doc Parses an IPbus 1.3 or 2.0 packet; typically only looks at the header.
 %% @spec parse_ipbus_packet( binary() ) -> {ipbus_version(), Type, endness()} | malformed
-%% where 
-%%       Type = {control, integer() | void} 
+%% where
+%%       Type = {control, integer() | void}
 %%            | {status, request}
-%%            | {status, MTU::pos_integer(), NBuffers::pos_integer(), NextId::pos_integer()} 
+%%            | {status, MTU::pos_integer(), NBuffers::pos_integer(), NextId::pos_integer()}
 %%            | {resend, Id :: pos_integer()}
 %% @end
 %% ---------------------------------------------------------------------
@@ -587,7 +592,7 @@ parse_ipbus_packet({status, Bin}) when is_binary(Bin) ->
     case Bin of
         <<16#200000f1:32/big, 0:(15*32)/big>> ->
             {{2,0}, {status, request}, big};
-        <<16#200000f1:32/big, MTU:32/big, NBuffers:32/big, 
+        <<16#200000f1:32/big, MTU:32/big, NBuffers:32/big,
           16#20:8, NextId:16, 16#f0:8, _:(12*32)/big>> ->
             {{2,0}, {status, MTU, NBuffers, NextId}, big}
     end.
@@ -656,26 +661,26 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     case IPbusVer of
          {1,3} when NrAttemptsLeft=:=TotNrAttempts ->
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
-             ch_stats:udp_out();
+             ch_stats:udp_sent(get(stats));
          {1,3} ->
              void;
          {2,0} ->
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
-             ch_stats:udp_out();
+             ch_stats:udp_sent(get(stats));
          unknown ->
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
              timer:sleep(2),
              gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
-             ch_stats:udp_out()
+             ch_stats:udp_sent(get(stats))
     end,
     receive
         {udp, Socket, TargetIPTuple, TargetPort, <<16#100000fc:32/native, _/binary>>} ->
             ?CH_LOG_INFO("Received an IPbus 1.3 'status response' from target, on attempt ~w of ~w.",
                          [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts]),
-            ch_stats:udp_in(),
+            ch_stats:udp_rcvd(get(stats)),
             {ok, {1,3}, {}};
         {udp, Socket, TargetIPTuple, TargetPort, <<16#200000f1:32/big, _/binary>> = ReplyBin} ->
-            ch_stats:udp_in(),
+            ch_stats:udp_rcvd(get(stats)),
             case parse_ipbus_packet(ReplyBin) of 
                 {{2,0}, {status, MTU, NBuffers, NextId}, big} ->
                     ?CH_LOG_INFO("Received an IPbus 2.0 'status response' from target, on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
@@ -689,7 +694,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     after ?UDP_RESPONSE_TIMEOUT ->
         ?CH_LOG_WARN("TIMEOUT waiting for response in get_device_status! No response from target on attempt ~w of ~w, ipbus version ~w.",
                      [AttemptNr, TotNrAttempts, IPbusVer]),
-        ch_stats:udp_response_timeout(status),
+        ch_stats:udp_response_timeout(get(stats), status),
         get_device_status(IPbusVer, {NrAttemptsLeft-1, TotNrAttempts})
     end.
 
