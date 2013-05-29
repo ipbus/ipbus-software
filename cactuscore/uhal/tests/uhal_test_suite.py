@@ -197,7 +197,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
-    cmds += [["TEST IPBUS 2.0 CONTROLHUB",
+    cmds += [["TEST IPBUS 2.0 CONTROLHUB (normal)",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
                controlhub_start,
