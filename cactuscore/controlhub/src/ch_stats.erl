@@ -464,7 +464,7 @@ stats_table_to_string(T, DefaultText) ->
                   "              Packets Out: ~p~n"
                   "               Packets In: ~p~n"
                   "                 Timeouts: ~p in normal operation (of which ~p were recovered)~n"
-                  "                             in ~p of these instances the request got lost, ~p times response got lost~n"
+                  "                             (~p request packets got lost, ~p reply packet)~n"
                   "           Other timeouts: ~p (status), ~p (in resends)~n",
                   [case ets:member(T, target_ip) of
                        true -> 
