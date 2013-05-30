@@ -119,7 +119,6 @@ namespace uhal
   void UDP< InnerProtocol >::connect()
   {
     log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
-    throw 0;
     //mSocket = boost::asio::ip::udp::socket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) );
     mSocket.open ( boost::asio::ip::udp::v4() );
     boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
