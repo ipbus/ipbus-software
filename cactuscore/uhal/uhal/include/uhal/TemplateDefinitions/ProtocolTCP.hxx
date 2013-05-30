@@ -71,7 +71,7 @@ namespace uhal
     try
     {
       mSocket.close();
-      log ( Error() , "Closed Socket" );
+      
       mIOservice.stop();
       mDispatchThread.join();
     }
@@ -140,7 +140,7 @@ namespace uhal
     if ( lErrorCode )
     {
       mSocket.close();
-      log ( Error() , "Closed Socket" );
+      
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
@@ -227,7 +227,7 @@ namespace uhal
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
-      log ( Error() , "Closed Socket" );
+      
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
@@ -297,7 +297,7 @@ namespace uhal
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket.close();
-      log ( Error() , "Closed Socket" );
+      
       // There is no longer an active deadline. The expiry is set to positive
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
