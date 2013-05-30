@@ -120,22 +120,20 @@ namespace uhal
     private:
 
       //! The boost::asio::io_service used to create the connections
-      boost::shared_ptr< boost::asio::io_service > mIOservice;
+      boost::asio::io_service mIOservice;
+
+      boost::asio::io_service::work mIOserviceWork;
 
       //! A shared pointer to a boost::asio udp socket through which the operation will be performed
-      boost::shared_ptr< boost::asio::ip::tcp::socket > mSocket;
+      boost::asio::ip::tcp::socket mSocket;
 
-      boost::shared_ptr< boost::asio::ip::tcp::resolver::iterator > mEndpoint;
-
-
-      //! Error code for the async callbacks to fill
-      //       boost::system::error_code mErrorCode;
+      boost::asio::ip::tcp::resolver::iterator mEndpoint;
 
       boost::asio::deadline_timer mDeadlineTimer;
 
       std::vector<uint8_t> mReplyMemory;
 
-      boost::shared_ptr< boost::thread > mDispatchThread;
+      boost::thread mDispatchThread;
 
       std::vector< boost::asio::const_buffer > mAsioSendBuffer;
       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;

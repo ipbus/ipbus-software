@@ -80,64 +80,6 @@ namespace uhal
 
     public:
       //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
-      //       class DispatchWorker
-      //       {
-      //         public:
-      //           /**
-      //           Constructor
-      //           @param aUDP a link to the parent
-      //           @param aHostname the target hostname or IP address
-      //           @param aServiceOrPort the target port
-      //           */
-      //           DispatchWorker ( UDP< InnerProtocol > & aUDP , const std::string& aHostname , const std::string& aServiceOrPort );
-      //
-      //           /**
-      //           Destructor
-      //           */
-      //           virtual ~DispatchWorker();
-      //
-      //           /**
-      //           The functor-function used for launching a thread in multithreaded mode.
-      //           Starts a loop which just monitors the buffer queue and, if there is a buffer waiting,
-      //           pass it to dispatch function for the actual dispatch
-      //           */
-      //           void operator() ();
-      //
-      //           /**
-      //           Concrete implementation to send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
-      //           @param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
-      //           Can be called directly for single-threaded operation or from the dispatch worker's functor-function for multithreaded operation
-      //           */
-      //           void dispatch ( Buffers* aBuffers );
-      //
-      //
-      //           void CheckDeadline();
-      //
-      //         private:
-      //
-      //           //! A reference to the parent of this DispatchWorker
-      //           UDP< InnerProtocol >& mUDP;
-      //
-      //           //! The boost::asio::io_service used to create the connections
-      //           boost::shared_ptr< boost::asio::io_service > mIOservice;
-      //
-      //           //! A shared pointer to a boost::asio udp socket through which the operation will be performed
-      //           boost::shared_ptr< boost::asio::ip::udp::socket > mSocket;
-      //
-      //           //! A shared pointer to a boost::asio udp endpoint stored as a member as UDP as no concept of a connection
-      //           boost::shared_ptr< boost::asio::ip::udp::endpoint > mEndpoint;
-      //
-      //           //! Error code for the async callbacks to fill
-      //           boost::system::error_code mErrorCode;
-      //
-      //           boost::asio::deadline_timer mDeadlineTimer;
-      //
-      //           std::vector<uint8_t> mReplyMemory;
-      //
-      //       };
-      //
-      //       //! Make the dispatch worker a friend so that it can access our private members
-      //       friend class DispatchWorker;
 
       /**
       	Constructor
@@ -179,22 +121,21 @@ namespace uhal
 
     private:
       //! The boost::asio::io_service used to create the connections
-      boost::shared_ptr< boost::asio::io_service > mIOservice;
+      boost::asio::io_service mIOservice;
+
+      boost::asio::io_service::work mIOserviceWork;
 
       //! A shared pointer to a boost::asio udp socket through which the operation will be performed
-      boost::shared_ptr< boost::asio::ip::udp::socket > mSocket;
+      boost::asio::ip::udp::socket mSocket;
 
       //! A shared pointer to a boost::asio udp endpoint stored as a member as UDP as no concept of a connection
-      boost::shared_ptr< boost::asio::ip::udp::endpoint > mEndpoint;
-
-      //! Error code for the async callbacks to fill
-      //       boost::system::error_code mErrorCode;
+      boost::asio::ip::udp::endpoint mEndpoint;
 
       boost::asio::deadline_timer mDeadlineTimer;
 
       std::vector<uint8_t> mReplyMemory;
 
-      boost::shared_ptr< boost::thread > mDispatchThread;
+      boost::thread mDispatchThread;
 
       std::vector< boost::asio::const_buffer > mAsioSendBuffer;
       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;

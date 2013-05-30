@@ -351,6 +351,7 @@ namespace uhal
       void NextFillingBuffer ();
       void CreateFillingBuffer ();
 
+      virtual uint32_t getMaxNumberOfBuffers() = 0;
       virtual uint32_t getMaxSendSize() = 0;
       virtual uint32_t getMaxReplySize() = 0;
 

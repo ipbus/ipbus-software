@@ -146,6 +146,7 @@ namespace uhal
 
   void ClientInterface::dispatch ()
   {
+    CreateFillingBuffer ( ); //put this here to protect against users doing a dispatch with no data to send.
     unflushedDispatch ();
     this->Flush();
   }
@@ -216,7 +217,7 @@ namespace uhal
 
     log ( Debug() , "Adding new Buffers to the memory pool" );
     Buffers lBuffers ( this->getMaxSendSize() );
-    mBuffers.insert ( mBuffers.end() , 16 , lBuffers );
+    mBuffers.insert ( mBuffers.end() , this->getMaxNumberOfBuffers() , lBuffers );
     mCurrentBuffers = mBuffers.begin();
     mCurrentBuffers->clear();
     log ( Debug() , "Calling preamble() from " , ThisLocation() );
@@ -271,15 +272,14 @@ namespace uhal
     //       log ( Warning() , "Escaped pause, now clearing mCurrentBuffer (", Pointer( &( *mCurrentBuffers ) ) , ") and adding preamble." );
     //     }
     mCurrentBuffers->clear();
-    log ( Debug() , "Calling preamble() from " , ThisLocation() );
     this->preamble();
   }
 
 
   void ClientInterface::dispatchExceptionHandler()
   {
+    mDispatchedBuffers.clear();
     mCurrentBuffers->clear();
-    log ( Debug() , "Calling preamble() from " , ThisLocation() );
     this->preamble();
   }
 

@@ -158,6 +158,12 @@ namespace uhal
       //! A queue of preample structs making the memory used by the preambles persistent during the dispatch
       std::deque< tpreamble > mPreambles;
 
+
+      virtual uint32_t getMaxNumberOfBuffers()
+      {
+        return 16;
+      }
+
   };
 
 

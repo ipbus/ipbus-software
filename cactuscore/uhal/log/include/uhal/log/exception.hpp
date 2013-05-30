@@ -91,13 +91,18 @@ namespace uhal
 
         virtual void ThrowAsDerivedType_() = 0;
 
+        virtual void append ( const std::string& aMessage ) throw();
+
       protected:
         virtual std::string description() const throw() = 0;
 
       private:
-        static std::string mMessage;
+        std::vector< std::string > mAdditionalInfo;
         std::vector< void* > mBacktrace;
         boost::thread::id mThreadId;
+
+      private:
+        static std::string mMemory;
     };
 
   }

@@ -37,7 +37,6 @@
 */
 
 #include "uhal/log/BacktraceSymbols.hpp"
-//#include <execinfo.h>
 
 #include "uhal/log/exception.hpp"
 #include "boost/lexical_cast.hpp"
@@ -53,10 +52,10 @@ namespace uhal
 
     exception::exception ( ) :
       std::exception (),
-      mBacktrace( MaxExceptionHistoryLength , NULL ),
-      mThreadId( boost::this_thread::get_id() )
+      mBacktrace ( MaxExceptionHistoryLength , NULL ),
+      mThreadId ( boost::this_thread::get_id() )
     {
-      Backtrace( mBacktrace );
+      Backtrace ( mBacktrace );
     }
 
     exception::~exception() throw()
@@ -66,12 +65,10 @@ namespace uhal
     const char* exception::what() const throw()
     {
       std::stringstream lStr;
-
       lStr << "\n";
 #ifdef COURTEOUS_EXCEPTIONS
       lStr << "I'm terribly sorry to have to tell you this, but it appears that there was an exception:\n";
 #endif
-
       lStr << " * Exception type: ";
 #ifdef __GNUG__
       // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
@@ -81,11 +78,21 @@ namespace uhal
       lStr << typeid ( *this ).name();
 #endif
       lStr << "\n";
-
       lStr << " * Description: " << description() << "\n";
 
-      boost::thread::id lThreadId( boost::this_thread::get_id() );
-      if( mThreadId == lThreadId )
+      if ( mAdditionalInfo.size() )
+      {
+        lStr << " * Additional Information:\n";
+
+        for ( std::vector< std::string >::const_iterator lIt = mAdditionalInfo.begin() ; lIt != mAdditionalInfo.end(); ++lIt )
+        {
+          lStr << "   - " << *lIt << "\n";
+        }
+      }
+
+      boost::thread::id lThreadId ( boost::this_thread::get_id() );
+
+      if ( mThreadId == lThreadId )
       {
         lStr << " * Exception occured in same thread as it was caught in (" << lThreadId << ")\n";
       }
@@ -96,22 +103,26 @@ namespace uhal
       }
 
       lStr << " * Call stack:\n";
-
       std::vector< TracePoint > lBacktrace = BacktraceSymbols ( mBacktrace );
-      uint32_t lCounter( 0 );
+      uint32_t lCounter ( 0 );
 
-      for ( std::vector< TracePoint >::iterator lIt = lBacktrace.begin()+3 ; lIt != lBacktrace.end(); ++lIt , ++lCounter )
+      for ( std::vector< TracePoint >::iterator lIt = lBacktrace.begin() +3 ; lIt != lBacktrace.end(); ++lIt , ++lCounter )
       {
         lStr << "   [ " << lCounter << " ] " << lIt->function << "\n";
         lStr << "            at " << lIt->file << ":" << lIt->line << "\n";
       }
 
-      mMessage = lStr.str();
-      return mMessage.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
+      mMemory = lStr.str();
+      return mMemory.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
     }
 
 
-    std::string exception::mMessage;
+    void exception::append ( const std::string& aMessage ) throw()
+    {
+      mAdditionalInfo.push_back ( aMessage );
+    }
+
+    std::string exception::mMemory; //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
 
   }
 }

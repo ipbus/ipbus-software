@@ -54,17 +54,14 @@ void check_nonreachable ( const std::string& connection, const std::string& id )
   // Check we get an exception corresponding to target being unreachable
   if ( hw.uri().find ( "ipbusudp" ) != std::string::npos )
   {
-    std::cout << "Looking for 'uhal::exception::UdpTimeout'" << std::endl;
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
   }
   else if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
   {
-    std::cout << "Looking for 'uhal::exception::UdpTimeout'" << std::endl;
     CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
   }
   else
   {
-    std::cout << "Looking for other exception type" << std::endl;
     try
     {
       hw.getNode ( "REG" ).read();
@@ -84,7 +81,6 @@ int main ( int argc,char* argv[] )
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-
   CACTUS_TEST ( check_nonreachable ( connection_file, device_id ) );
   CACTUS_TEST_RESULT();
 }

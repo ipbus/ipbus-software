@@ -154,6 +154,11 @@ namespace uhal
         return 0x1ff;
       }
 
+      virtual uint32_t getMaxNumberOfBuffers()
+      {
+        return 2;
+      }
+
       // std::vector< uint32_t > mSendPadding;
       // std::vector< uint32_t > mReplyPadding;
 
@@ -274,6 +279,11 @@ namespace uhal
       uint32_t getMaxTransactionWordCount() const
       {
         return 0xff;
+      }
+
+      virtual uint32_t getMaxNumberOfBuffers()
+      {
+        return 16;
       }
 
     private:

@@ -277,8 +277,8 @@ static int FindMatchingFiles ( struct dl_phdr_info* aInfo, size_t aSize, void* a
 
 void Backtrace ( std::vector< void* >& aBacktrace )
 {
-  size_t lSize = backtrace ( &(aBacktrace[0]) , aBacktrace.size() );
-  aBacktrace.resize( lSize );
+  size_t lSize = backtrace ( & ( aBacktrace[0] ) , aBacktrace.size() );
+  aBacktrace.resize ( lSize );
 }
 
 
@@ -287,7 +287,6 @@ std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktr
 {
   std::vector< TracePoint > lRet;
   lRet.reserve ( aBacktrace.size() );
-
   bfd_init();
 
   for ( std::vector< void* >::const_iterator x=aBacktrace.begin(); x!=aBacktrace.end(); ++x )
