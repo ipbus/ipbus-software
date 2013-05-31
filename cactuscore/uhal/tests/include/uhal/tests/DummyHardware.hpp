@@ -131,6 +131,14 @@ namespace uhal
           mReplyHistory.pop_front();
         }
 
+        if ( mReplyDelay )
+        {
+          log ( Info() , "Sleeping for " , Integer ( mReplyDelay ) , "s" );
+          sleep ( mReplyDelay );
+          mReplyDelay = 0;
+          log ( Info() , "Now replying " );
+        }
+
         //
         //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
         if ( LoggingIncludes ( Debug() ) )
@@ -160,14 +168,6 @@ namespace uhal
         }
 
 #endif
-
-        if ( mReplyDelay )
-        {
-          log ( Info() , "Sleeping for " , Integer ( mReplyDelay ) , "s" );
-          sleep ( mReplyDelay );
-          mReplyDelay = 0;
-          log ( Info() , "Now replying " );
-        }
       }
 
     private:

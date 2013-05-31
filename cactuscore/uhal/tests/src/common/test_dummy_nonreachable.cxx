@@ -58,7 +58,7 @@ void check_nonreachable ( const std::string& connection, const std::string& id )
   }
   else if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
   {
-    CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
+    CACTUS_TEST_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpConnectionFailure );
   }
   else
   {
@@ -70,7 +70,7 @@ void check_nonreachable ( const std::string& connection, const std::string& id )
     }
     catch ( uhal::exception::exception& e )
     {
-      CACTUS_CHECK ( ( ( typeid ( e ) ==typeid ( uhal::exception::ControlHubTargetTimeout ) ) || ( typeid ( e ) ==typeid ( uhal::exception::TcpTimeout ) ) ) );
+      CACTUS_CHECK ( ( ( typeid ( e ) ==typeid ( uhal::exception::ControlHubTargetTimeout ) ) || ( typeid ( e ) ==typeid ( uhal::exception::TcpConnectionFailure ) ) ) );
     }
   }
 }

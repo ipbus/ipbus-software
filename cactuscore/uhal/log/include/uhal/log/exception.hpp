@@ -51,7 +51,7 @@
  class ClassName : public uhal::exception::exception {\
  public:\
  ClassName() : uhal::exception::exception() {}\
- void ThrowAsDerivedType_(){ throw *static_cast<ClassName*>(this); } \
+ void ThrowAsDerivedType_(){ throw ClassName(*this); } \
  protected:\
  std::string description() const throw() { return std::string( ClassDescription ); } \
 };

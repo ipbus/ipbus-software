@@ -47,16 +47,12 @@
 #include <iomanip>
 
 #include <boost/shared_ptr.hpp>
-//#include <boost/bind.hpp>
-//#include <boost/asio.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
-#ifdef USE_TCP_MULTITHREADED
-//#include <boost/thread/thread.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#endif
 
 #include <string>
 
@@ -71,6 +67,9 @@ namespace uhal
     ExceptionClass ( ErrorInTcpCallback , "Exception class to handle the case where the error flag was raised in the asynchronous callback system." );
     //! Exception class to handle a failure to create a TCP socket.
     ExceptionClass ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." );
+    //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
+    ExceptionClass ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." );
+
   }
 
   //! Transport protocol to transfer an IPbus buffer via TCP

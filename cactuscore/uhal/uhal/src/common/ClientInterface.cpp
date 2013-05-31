@@ -155,7 +155,7 @@ namespace uhal
   void ClientInterface::unflushedDispatch ()
   {
     this->predispatch( );
-    mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) );
+    mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) ); //needs to be before the call to implementDispatch to be safe for multithreaded dispatches.
     this->implementDispatch( );
     NextFillingBuffer ();
   }
@@ -208,8 +208,7 @@ namespace uhal
 
   void ClientInterface::CreateFillingBuffer ( )
   {
-    log ( Debug() , ThisLocation() );
-
+    //     log ( Debug() , ThisLocation() );
     if ( mBuffers.size() )
     {
       return;
@@ -228,7 +227,7 @@ namespace uhal
 
   void ClientInterface::NextFillingBuffer ( )
   {
-    log ( Debug() , ThisLocation() );
+    //     log ( Debug() , ThisLocation() );
     //if there are no existing buffers in the pool, create them
     CreateFillingBuffer ( );
     mCurrentBuffers++;
@@ -238,14 +237,13 @@ namespace uhal
       mCurrentBuffers = mBuffers.begin();
     }
 
-    bool lWillPause ( false );
-
-    if ( LoggingIncludes ( Warning() ) )
-    {
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
-      lWillPause =  mDispatchedBuffers.size() && & ( *mCurrentBuffers ) == mDispatchedBuffers.front();
-    }
-
+    //     bool lWillPause ( false );
+    //
+    //     if ( LoggingIncludes ( Warning() ) )
+    //     {
+    //       boost::lock_guard<boost::mutex> lLock ( mMutex );
+    //       lWillPause =  mDispatchedBuffers.size() && & ( *mCurrentBuffers ) == mDispatchedBuffers.front();
+    //     }
     //     if ( lWillPause )
     //     {
     //       log ( Warning() , "The fill queue has caught up with the dispatch queue - should implement a mechanism for expanding the memory pool to handle this case, but for now just wait for the dispatch queue to clear a bit" );
@@ -254,6 +252,7 @@ namespace uhal
     //we will wait if the buffer that we are expecting to fill is still waiting for dispatch and validation
     while ( true )
     {
+      log ( Debug() , ThisLocation() );
       boost::lock_guard<boost::mutex> lLock ( mMutex );
 
       if ( !mDispatchedBuffers.size() )
@@ -278,9 +277,11 @@ namespace uhal
 
   void ClientInterface::dispatchExceptionHandler()
   {
+    //     log( Info() , ThisLocation() );
+    //mBuffers.clear();
     mDispatchedBuffers.clear();
     mCurrentBuffers->clear();
-    this->preamble();
+    CreateFillingBuffer ( );
   }
 
 

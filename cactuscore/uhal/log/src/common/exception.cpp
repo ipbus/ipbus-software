@@ -94,7 +94,7 @@ namespace uhal
 
       if ( mThreadId == lThreadId )
       {
-        lStr << " * Exception occured in same thread as it was caught in (" << lThreadId << ")\n";
+        lStr << " * Exception occured in the same thread as that in which it was caught (" << lThreadId << ")\n";
       }
       else
       {

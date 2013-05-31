@@ -47,16 +47,12 @@
 #include <iomanip>
 
 #include <boost/shared_ptr.hpp>
-//#include <boost/bind.hpp>
-//#include <boost/asio.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
-#ifdef USE_UDP_MULTITHREADED
-//#include <boost/thread/thread.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#endif
 
 #include <string>
 

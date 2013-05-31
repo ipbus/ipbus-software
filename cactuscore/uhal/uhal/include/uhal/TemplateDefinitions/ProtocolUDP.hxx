@@ -43,6 +43,9 @@
 namespace uhal
 {
 
+  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
   template < typename InnerProtocol >
   UDP< InnerProtocol >::UDP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
@@ -65,7 +68,6 @@ namespace uhal
     try
     {
       mSocket.close();
-      
       mIOservice.stop();
       mDispatchThread.join();
     }
@@ -80,37 +82,24 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::implementDispatch()
   {
-    try
+    if ( ! mSocket.is_open() )
     {
-      if ( mAsynchronousException )
-      {
-        mAsynchronousException->ThrowAsDerivedType();
-      }
+      connect();
+    }
 
-      if ( ! mSocket.is_open() )
-      {
-        connect();
-      }
-
-      Buffers* lCurrentBuffer ( & ( * ( this->mCurrentBuffers ) ) );
+    Buffers* lCurrentBuffer ( & ( * ( this->mCurrentBuffers ) ) );
 #ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
-      boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
-      mDispatchQueue.push_back ( lCurrentBuffer );
+    boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
+    mDispatchQueue.push_back ( lCurrentBuffer );
 
-      if ( mDispatchQueue.size() == 1 )
-      {
-        write ( lCurrentBuffer );
-      }
+    if ( mDispatchQueue.size() == 1 )
+    {
+      write ( lCurrentBuffer );
+    }
 
 #else
-      write ( lCurrentBuffer );
+    write ( lCurrentBuffer );
 #endif
-    }
-    catch ( const std::exception& aExc )
-    {
-      this->dispatchExceptionHandler();
-      throw;
-    }
   }
 
 
@@ -181,7 +170,6 @@ namespace uhal
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
-      
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
@@ -259,13 +247,14 @@ namespace uhal
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket.close();
-      
       // There is no longer an active deadline. The expiry is set to positive
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
       //set the error code correctly
       //20/12/2012 - awr - wherever this is in the function, this appears to cause a race condition which results in the timeout recovery failing.
       //mErrorCode = boost::asio::error::timed_out;
+      log ( Error() , "ASIO deadline timer timed out" );
+      mAsynchronousException = new exception::UdpTimeout();
     }
 
     // Put the actor back to sleep.
@@ -276,20 +265,33 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::Flush( )
   {
-    bool lContinue ( true );
-
-    do
+    try
     {
-      boost::lock_guard<boost::mutex> lLock ( this->mMutex );
+      bool lContinue ( true );
 
-      if ( mAsynchronousException )
+      do
       {
-        mAsynchronousException->ThrowAsDerivedType();
-      }
+        boost::lock_guard<boost::mutex> lLock ( this->mUdpMutex );
 
-      lContinue = ( this->mDispatchedBuffers.size() );
+        if ( mAsynchronousException )
+        {
+          mAsynchronousException->ThrowAsDerivedType();
+        }
+
+        lContinue = ( this->mDispatchedBuffers.size() );
+      }
+      while ( lContinue );
     }
-    while ( lContinue );
+    catch ( const exception::exception& aExc )
+    {
+      mSocket.close();
+      mReplyQueue.clear();
+      mDispatchQueue.clear();
+      this->dispatchExceptionHandler();
+      delete mAsynchronousException;
+      mAsynchronousException = NULL;
+      throw;
+    }
   }
 
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
