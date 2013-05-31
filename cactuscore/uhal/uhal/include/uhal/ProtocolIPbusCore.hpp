@@ -207,6 +207,8 @@ namespace uhal
       */
       virtual void checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 
+      virtual void dispatchExceptionHandler();
+
 
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint32_t mTransactionCounter;

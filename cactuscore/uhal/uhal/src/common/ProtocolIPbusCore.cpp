@@ -538,6 +538,16 @@ namespace uhal
     return mMaxReplySize;
   }
 
+
+  void IPbusCore::dispatchExceptionHandler()
+  {
+    log( Info() , ThisLocation() );
+      mTransactionCounter = 0;
+    IPbusCore::dispatchExceptionHandler();
+
+
+  }
+
 }
 
 

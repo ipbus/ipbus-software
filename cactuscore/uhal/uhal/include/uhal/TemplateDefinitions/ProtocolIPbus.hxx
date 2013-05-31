@@ -398,6 +398,21 @@ namespace uhal
   {
     return IPbus< 2 , IPbus_minor , buffer_size >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
+
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
+  void IPbus< 2 , IPbus_minor , buffer_size >::dispatchExceptionHandler()
+  {
+    log( Info() , ThisLocation() );
+#ifndef DISABLE_PACKET_COUNTER_HACK
+      mPacketCounter = 1;
+#else
+      mPacketCounter = 0;
+#endif
+    mSendPacketHeader.clear();
+    mReceivePacketHeader.clear();
+    ClientInterface::dispatchExceptionHandler();
+  }
+
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 }

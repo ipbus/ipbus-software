@@ -277,7 +277,7 @@ namespace uhal
 
   void ClientInterface::dispatchExceptionHandler()
   {
-    //     log( Info() , ThisLocation() );
+    log( Info() , ThisLocation() );
     //mBuffers.clear();
     mDispatchedBuffers.clear();
     mCurrentBuffers->clear();

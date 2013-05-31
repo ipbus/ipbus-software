@@ -286,6 +286,8 @@ namespace uhal
         return 16;
       }
 
+      virtual void dispatchExceptionHandler();
+
     private:
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint16_t mPacketCounter;
