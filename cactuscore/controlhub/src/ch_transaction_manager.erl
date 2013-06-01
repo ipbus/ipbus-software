@@ -89,7 +89,7 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
                    true ->
                      infinity;
                    false ->
-                     TimeSinceLastResponse = timer:now_diff(os:timestamp(), queue:get(RequestTimesQueue)) div 1000,
+                     TimeSinceLastResponse = timer:now_diff(os:timestamp(), element(1,queue:get(RequestTimesQueue))) div 1000,
                      max(0, ?RESPONSE_FROM_DEVICE_CLIENT_TIMEOUT - TimeSinceLastResponse)
                  end,
     if
@@ -106,12 +106,14 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
             ?CH_LOG_DEBUG("Received a request from client (QueueLen=~w).", [QueueLen]),
             ch_stats:client_request_in(),
             forward_request(RequestBin),
-            tcp_receive_handler_loop(ClientSocket, queue:in(os:timestamp(),RequestTimesQueue), QueueLen+1);
+            tcp_receive_handler_loop(ClientSocket, queue:in({os:timestamp(),binary_part(RequestBin,8,4)},RequestTimesQueue), QueueLen+1);
         {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
             ?CH_LOG_DEBUG("Received device client response from target IPaddr=~w, Port=~w",
                           [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
-            reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>),
-            tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue), QueueLen-1 );
+            << _:32, Body/binary>> = TargetResponseBin,
+            {{value, {_, Hdr}}, NewQ} = queue:out(RequestTimesQueue), 
+            reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, Hdr/binary, Body/binary>>),
+            tcp_receive_handler_loop(ClientSocket, NewQ, QueueLen-1 );
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
             ?CH_LOG_INFO("TCP socket closed.");
