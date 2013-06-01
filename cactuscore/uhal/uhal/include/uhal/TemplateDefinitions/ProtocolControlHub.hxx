@@ -150,7 +150,7 @@ namespace uhal
     }
 
     aReplyStartIt++;
-    uint16_t lErrorCode ( * ( ( uint16_t* ) ( aReplyStartIt->first ) ) );
+    uint16_t lErrorCode ( ntohs( * ( ( uint16_t* ) ( aReplyStartIt->first ) ) ) );
 
     if ( lErrorCode != 0 )
     {
