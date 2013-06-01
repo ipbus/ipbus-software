@@ -348,7 +348,7 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------------------
 
 updated_timeout(OrigTimeout, TimeSent) when is_integer(OrigTimeout), OrigTimeout>0 ->
-    TimeSinceSent = ( timer:now_diff(now(),TimeSent) div 1000 ),
+    TimeSinceSent = ( timer:now_diff(os:timestamp(),TimeSent) div 1000 ),
     max(0, (OrigTimeout - TimeSinceSent)).
 
 
@@ -392,7 +392,7 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
             {noreply, S#state{ipbus_v=unknown, next_id=unknown} };
         {IPbusVer, ModPkt, PktId} ->
             gen_udp:send(Socket, TargetIPTuple, TargetPort, ModPkt),
-            NewInFlightList = lists:append( S#state.in_flight, [{binary_part(ModPkt,0,4), now(), ModPkt, 0, ClientPid, binary_part(Packet,0,4)}] ),
+            NewInFlightList = lists:append( S#state.in_flight, [{binary_part(ModPkt,0,4), os:timestamp(), ModPkt, 0, ClientPid, binary_part(Packet,0,4)}] ),
             ch_stats:udp_sent(S#state.stats),
             NewS = if
                      is_integer(PktId) ->
@@ -694,7 +694,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     after ?UDP_RESPONSE_TIMEOUT ->
         ?CH_LOG_WARN("TIMEOUT waiting for response in get_device_status! No response from target on attempt ~w of ~w, ipbus version ~w.",
                      [AttemptNr, TotNrAttempts, IPbusVer]),
-        ch_stats:udp_response_timeout(get(stats), status),
+        ch_stats:udp_timeout(get(stats), status),
         get_device_status(IPbusVer, {NrAttemptsLeft-1, TotNrAttempts})
     end.
 
