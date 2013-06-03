@@ -30,6 +30,7 @@ import string
 from datetime import datetime
 import time
 import os
+import signal
 
 SOFT_TIMEOUT_S = 570
 
@@ -309,38 +310,46 @@ def run_command(cmd, verbose=True):
     SOFT_TIMEOUT_S seconds
     """
 
-    if cmd.startswith("sudo"):
-       cmd = "sudo PATH=$PATH " + cmd[4:]
-    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
-    t0 = time.time()
+    try:
 
-    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True)
-    f1 = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
-    fcntl.fcntl(p.stdout, fcntl.F_SETFL, f1 | os.O_NONBLOCK)
+      if cmd.startswith("sudo"):
+         cmd = "sudo PATH=$PATH " + cmd[4:]
+      print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+      t0 = time.time()
 
-    stdout = []
-    last = time.time()
+      p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
+      f1 = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
+      fcntl.fcntl(p.stdout, fcntl.F_SETFL, f1 | os.O_NONBLOCK)
 
-    while True:
-        current = time.time()
+      stdout = []
+      last = time.time()
 
-        try:
-            nextline = p.stdout.readline()
-            if not nextline:
-                break
+      while True:
+          current = time.time()
 
-            last = time.time()
-            stdout += [nextline]
-            if verbose:
-                sys.stdout.write(nextline)
-                sys.stdout.flush()
+          try:
+              nextline = p.stdout.readline()
+              if not nextline:
+                  break
 
-        except IOError:
-            time.sleep(0.1)
-            
-            if (current-last) > SOFT_TIMEOUT_S:
-                print "+ ERROR : unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
-                return stdout, -1, time.time()-t0
+              last = time.time()
+              stdout += [nextline]
+              if verbose:
+                  sys.stdout.write(nextline)
+                  sys.stdout.flush()
+
+          except IOError:
+              time.sleep(0.1)
+              
+              if (current-last) > SOFT_TIMEOUT_S:
+                  print "+ ERROR : unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
+                  os.killpg(p.pid, signal.SIGTERM)
+                  return stdout, -1, time.time()-t0
+
+    except KeyboardInterrupt:
+        print "+ Ctrl-C detected."
+        os.killpg(p.pid, signal.SIGTERM)
+        return stdout, -2, time.time()-t0
 
     return stdout, p.poll(), time.time()-t0
 
