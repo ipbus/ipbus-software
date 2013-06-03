@@ -124,6 +124,10 @@ namespace uhal
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
 
+      virtual uint32_t getMaxNumberOfBuffers()
+      {
+        return 16;
+      }
 
     private:
       //! The IP address of the target device that is connected to the Control Hub
@@ -157,12 +161,6 @@ namespace uhal
 
       //! A queue of preample structs making the memory used by the preambles persistent during the dispatch
       std::deque< tpreamble > mPreambles;
-
-
-      virtual uint32_t getMaxNumberOfBuffers()
-      {
-        return 16;
-      }
 
   };
 

@@ -156,7 +156,7 @@ namespace uhal
 
       virtual uint32_t getMaxNumberOfBuffers()
       {
-        return 2;
+        return 1;
       }
 
       // std::vector< uint32_t > mSendPadding;

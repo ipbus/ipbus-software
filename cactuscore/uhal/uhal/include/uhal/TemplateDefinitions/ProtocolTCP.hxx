@@ -90,19 +90,21 @@ namespace uhal
       connect();
     }
 
-    Buffers* lCurrentBuffer ( & ( * ( this->mCurrentBuffers ) ) );
-#ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
-    boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
-    mDispatchQueue.push_back ( lCurrentBuffer );
-
-    if ( mDispatchQueue.size() == 1 )
     {
-      write ( lCurrentBuffer );
+      Buffers* lCurrentBuffer ( & ( * ( this->mCurrentBuffers ) ) );
+      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+      mDispatchQueue.push_back ( lCurrentBuffer );
+
+      if ( mDispatchQueue.size() == 1 )
+      {
+        write ( lCurrentBuffer );
+      }
     }
 
-#else
-    write ( lCurrentBuffer );
-#endif
+    if ( this->getMaxNumberOfBuffers() == 1 )
+    {
+      Flush();
+    }
   }
 
 
@@ -170,7 +172,6 @@ namespace uhal
   void TCP< InnerProtocol >::write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
     //     log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
-#ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
     mReplyQueue.push_back ( aBuffers );
 
@@ -185,10 +186,6 @@ namespace uhal
     {
       write ( mDispatchQueue.front() );
     }
-
-#else
-    read ( aBuffers );
-#endif
   }
 
 
@@ -257,7 +254,6 @@ namespace uhal
       return;
     }
 
-#ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
     mReplyQueue.pop_front();
 
@@ -265,8 +261,6 @@ namespace uhal
     {
       read ( mReplyQueue.front() );
     }
-
-#endif
   }
 
   template < typename InnerProtocol >

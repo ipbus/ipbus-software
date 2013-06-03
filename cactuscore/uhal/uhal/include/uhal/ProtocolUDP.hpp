@@ -136,14 +136,10 @@ namespace uhal
       std::vector< boost::asio::const_buffer > mAsioSendBuffer;
       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
 
-#define FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
-
-#ifdef FORCE_ONE_ASYNC_OPERATION_AT_A_TIME
       //! A MutEx lock used to make sure the access functions are thread safe
       boost::mutex mUdpMutex;
       std::deque < Buffers* > mDispatchQueue;
       std::deque < Buffers* > mReplyQueue;
-#endif
 
       uhal::exception::exception* mAsynchronousException;
 
