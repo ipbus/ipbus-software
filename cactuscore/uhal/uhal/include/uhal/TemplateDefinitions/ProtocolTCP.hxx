@@ -145,17 +145,18 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::write ( Buffers* aBuffers )
   {
-    //     log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
-    //     std::vector<uint32_t>::const_iterator lBegin( reinterpret_cast<uint32_t*>( aBuffers->getSendBuffer() ) );
-    //     std::vector<uint32_t>::const_iterator lEnd = lBegin + (aBuffers->sendCounter()>>2);
-    //     std::vector<uint32_t> lData;
-    //     for( ; lBegin!=lEnd ; ++lBegin )
-    //     {
-    //       lData.push_back( ntohl ( *lBegin ) );
-    //     }
-    //     lBegin = lData.begin();
-    //     lEnd = lData.end();
-    //     HostToTargetInspector< 2 , 0 >().analyze ( lBegin , lEnd );
+    //         log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
+    //         std::vector<uint32_t>::const_iterator lBegin( reinterpret_cast<uint32_t*>( aBuffers->getSendBuffer() ) );
+    //         std::vector<uint32_t>::const_iterator lEnd = lBegin + (aBuffers->sendCounter()>>2);
+    //         std::vector<uint32_t> lData;
+    //         for( ; lBegin!=lEnd ; ++lBegin )
+    //         {
+    //           lData.push_back( ntohl ( *lBegin ) );
+    //               std::cout << std::setfill('0') << std::hex << std::setw(8) << ntohl ( *lBegin ) << std::endl;
+    //         }
+    //         lBegin = lData.begin();
+    //         lEnd = lData.end();
+    //         HostToTargetInspector< 2 , 0 >().analyze ( lBegin , lEnd );
     mAsioSendBuffer.clear();
     mAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
@@ -304,7 +305,7 @@ namespace uhal
     try
     {
       bool lContinue ( true );
- 
+
       do
       {
         boost::lock_guard<boost::mutex> lLock ( this->mTcpMutex );

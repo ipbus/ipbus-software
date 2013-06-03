@@ -52,7 +52,7 @@ namespace uhal
 
     exception::exception ( ) :
       std::exception (),
-      mBacktrace ( MaxExceptionHistoryLength , NULL ),
+      mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
       mThreadId ( boost::this_thread::get_id() )
     {
       Backtrace ( mBacktrace );

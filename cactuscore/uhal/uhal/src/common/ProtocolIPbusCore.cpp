@@ -541,11 +541,9 @@ namespace uhal
 
   void IPbusCore::dispatchExceptionHandler()
   {
-    log( Info() , ThisLocation() );
-      mTransactionCounter = 0;
-    IPbusCore::dispatchExceptionHandler();
-
-
+    log ( Info() , ThisLocation() );
+    mTransactionCounter = 0;
+    ClientInterface::dispatchExceptionHandler();
   }
 
 }

@@ -252,7 +252,6 @@ namespace uhal
     //we will wait if the buffer that we are expecting to fill is still waiting for dispatch and validation
     while ( true )
     {
-      log ( Debug() , ThisLocation() );
       boost::lock_guard<boost::mutex> lLock ( mMutex );
 
       if ( !mDispatchedBuffers.size() )
@@ -277,11 +276,11 @@ namespace uhal
 
   void ClientInterface::dispatchExceptionHandler()
   {
-    log( Info() , ThisLocation() );
+    log ( Info() , ThisLocation() );
     //mBuffers.clear();
     mDispatchedBuffers.clear();
     mCurrentBuffers->clear();
-    CreateFillingBuffer ( );
+    NextFillingBuffer ( );
   }
 
 

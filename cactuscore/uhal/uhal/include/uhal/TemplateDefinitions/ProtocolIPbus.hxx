@@ -221,6 +221,7 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 2 , IPbus_minor , buffer_size >:: preamble( )
   {
+    //     log ( Info() , ThisLocation() );
     mSendPacketHeader.push_back ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
 #ifndef DISABLE_PACKET_COUNTER_HACK
     mPacketCounter++;
@@ -402,15 +403,15 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 2 , IPbus_minor , buffer_size >::dispatchExceptionHandler()
   {
-    log( Info() , ThisLocation() );
+    log ( Info() , ThisLocation() );
 #ifndef DISABLE_PACKET_COUNTER_HACK
-      mPacketCounter = 1;
+    mPacketCounter = 1;
 #else
-      mPacketCounter = 0;
+    mPacketCounter = 0;
 #endif
     mSendPacketHeader.clear();
     mReceivePacketHeader.clear();
-    ClientInterface::dispatchExceptionHandler();
+    IPbusCore::dispatchExceptionHandler();
   }
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
