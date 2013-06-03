@@ -283,8 +283,15 @@ void Backtrace ( std::vector< void* >& aBacktrace )
 
 
 
+namespace BacktraceNamespace
+{
+  boost::mutex mBacktraceMutex;
+}
+
+
 std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktrace )
 {
+  boost::lock_guard<boost::mutex> lLock ( BacktraceNamespace::mBacktraceMutex );
   std::vector< TracePoint > lRet;
   lRet.reserve ( aBacktrace.size() );
   bfd_init();

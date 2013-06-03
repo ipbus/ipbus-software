@@ -44,7 +44,7 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-
+#include <boost/thread/mutex.hpp>
 
 struct TracePoint
 {
@@ -57,7 +57,6 @@ struct TracePoint
 void Backtrace ( std::vector< void* >& aBacktrace );
 
 std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktrace );
-
 
 #endif
 
