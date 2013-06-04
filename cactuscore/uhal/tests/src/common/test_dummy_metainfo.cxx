@@ -103,7 +103,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getAddress() == 0x0100 );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getId() == "FIFO" );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getPermission() == uhal::defs::READWRITE );
-  CACTUS_CHECK ( hw.getNode ( "FIFO" ).getSize() == 1024*1024/4 );
+  CACTUS_CHECK ( hw.getNode ( "FIFO" ).getSize() == 1024*1024*1024/4 );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getMode() == uhal::defs::NON_INCREMENTAL );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getTags() == "test" );
