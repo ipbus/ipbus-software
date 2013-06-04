@@ -296,36 +296,37 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::Flush( )
   {
-    try
-    {
-      bool lContinue ( true );
+    bool lContinue ( true );
 
-      do
+    do
+    {
+      if ( mAsynchronousException )
       {
-        boost::lock_guard<boost::mutex> lLock ( this->mTcpMutex );
-
-        if ( mAsynchronousException )
-        {
-          log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
-          mAsynchronousException->ThrowAsDerivedType();
-        }
-
-        lContinue = ( this->mDispatchedBuffers.size() );
+        log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+        mAsynchronousException->ThrowAsDerivedType();
       }
-      while ( lContinue );
+
+      boost::lock_guard<boost::mutex> lLock ( this->mTcpMutex );
+      lContinue = ( this->mDispatchedBuffers.size() );
     }
-    catch ( const exception::exception& aExc )
-    {
-      mSocket.close();
-      mReplyQueue.clear();
-      mDispatchQueue.clear();
-      this->dispatchExceptionHandler();
-      delete mAsynchronousException;
-      mAsynchronousException = NULL;
-      throw;
-    }
+    while ( lContinue );
   }
 
+
+  template < typename InnerProtocol >
+  void TCP< InnerProtocol >::dispatchExceptionHandler()
+  {
+    if ( mAsynchronousException )
+    {
+      delete mAsynchronousException;
+      mAsynchronousException = NULL;
+    }
+
+    mSocket.close();
+    mReplyQueue.clear();
+    mDispatchQueue.clear();
+    InnerProtocol::dispatchExceptionHandler();
+  }
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

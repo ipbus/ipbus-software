@@ -102,6 +102,10 @@ namespace uhal
       virtual void Flush( );
 
 
+    protected:
+      virtual void dispatchExceptionHandler();
+
+
     private:
 
       void connect();

@@ -154,10 +154,18 @@ namespace uhal
 
   void ClientInterface::unflushedDispatch ()
   {
-    this->predispatch( );
-    mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) ); //needs to be before the call to implementDispatch to be safe for multithreaded dispatches.
-    this->implementDispatch( );
-    NextFillingBuffer ();
+    try
+    {
+      this->predispatch( );
+      mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) ); //needs to be before the call to implementDispatch to be safe for multithreaded dispatches.
+      this->implementDispatch( );
+      NextFillingBuffer ();
+    }
+    catch ( const exception::exception& aExc )
+    {
+      this->dispatchExceptionHandler();
+      throw;
+    }
   }
 
 

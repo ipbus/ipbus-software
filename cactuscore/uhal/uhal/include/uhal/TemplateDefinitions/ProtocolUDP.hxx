@@ -259,33 +259,35 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::Flush( )
   {
-    try
-    {
-      bool lContinue ( true );
+    bool lContinue ( true );
 
-      do
+    do
+    {
+      if ( mAsynchronousException )
       {
-        boost::lock_guard<boost::mutex> lLock ( this->mUdpMutex );
-
-        if ( mAsynchronousException )
-        {
-          mAsynchronousException->ThrowAsDerivedType();
-        }
-
-        lContinue = ( this->mDispatchedBuffers.size() );
+        mAsynchronousException->ThrowAsDerivedType();
       }
-      while ( lContinue );
+
+      boost::lock_guard<boost::mutex> lLock ( this->mUdpMutex );
+      lContinue = ( this->mDispatchedBuffers.size() );
     }
-    catch ( const exception::exception& aExc )
+    while ( lContinue );
+  }
+
+
+  template < typename InnerProtocol >
+  void UDP< InnerProtocol >::dispatchExceptionHandler()
+  {
+    if ( mAsynchronousException )
     {
-      mSocket.close();
-      mReplyQueue.clear();
-      mDispatchQueue.clear();
-      this->dispatchExceptionHandler();
       delete mAsynchronousException;
       mAsynchronousException = NULL;
-      throw;
     }
+
+    mSocket.close();
+    mReplyQueue.clear();
+    mDispatchQueue.clear();
+    InnerProtocol::dispatchExceptionHandler();
   }
 
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
