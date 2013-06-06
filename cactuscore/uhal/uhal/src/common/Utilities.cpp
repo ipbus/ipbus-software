@@ -156,7 +156,7 @@ namespace uhal
       catch ( const std::exception& aExc )
       {
         log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-        throw;
+        throw aExc;
       }
 
       log ( Debug() , "Shell expansion of " , Quote ( aFilenameExpr.c_str() ) , " returned:" );

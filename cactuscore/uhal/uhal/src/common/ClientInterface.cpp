@@ -164,7 +164,7 @@ namespace uhal
     catch ( const exception::exception& aExc )
     {
       this->dispatchExceptionHandler();
-      throw;
+      throw aExc;
     }
   }
 
