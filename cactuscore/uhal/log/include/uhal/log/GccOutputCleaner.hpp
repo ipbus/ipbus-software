@@ -36,30 +36,36 @@
   @date 2013
 */
 
-#ifndef _uhal_log_BacktraceSymbols_hpp_
-#define _uhal_log_BacktraceSymbols_hpp_
+#ifndef _uhal_log_GccOutputCleaner_hpp_
+#define _uhal_log_GccOutputCleaner_hpp_
 
-
-#include <cstddef>
-#include <stdint.h>
-#include <vector>
 #include <string>
-#include <boost/thread/mutex.hpp>
+#include <vector>
 
-namespace Backtrace
+
+class GccOutputCleaner
 {
-  struct TracePoint
-  {
-    std::string file;
-    std::string function;
-    uint32_t line;
-  };
+
+  public:
+    GccOutputCleaner ( const uint32_t& aIndent = 2 , std::string ( *aStyling ) ( const uint32_t& ) = &GccOutputCleaner::SquareBracketStyle );
+
+    virtual ~GccOutputCleaner();
 
 
-  void Backtrace ( std::vector< void* >& aBacktrace );
+    std::string operator() ( const std::string& aStr );
 
-  std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktrace );
-}
+    static std::string SquareBracketStyle ( const uint32_t& aIndex );
+    static std::string HashStyle ( const uint32_t& aIndex );
+    static std::string TStyle ( const uint32_t& aIndex );
+
+  private:
+    std::vector< std::string > mTypes;
+    std::string mIndent;
+    std::string ( *mStyling ) ( const uint32_t& );
+
+    uint32_t RecursiveClean ( std::string::const_iterator aIt , std::string::const_iterator aEnd );
+
+};
+
 
 #endif
-

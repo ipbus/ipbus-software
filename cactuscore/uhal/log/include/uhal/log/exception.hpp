@@ -58,7 +58,7 @@
 
 #define ThrowAsDerivedType() ThrowAsDerivedType_(); throw 0;
 
-#define MaxExceptionHistoryLength 256
+#define MaxExceptionHistoryLength 100
 
 
 namespace uhal

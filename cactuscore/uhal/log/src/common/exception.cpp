@@ -37,6 +37,7 @@
 */
 
 #include "uhal/log/BacktraceSymbols.hpp"
+#include "uhal/log/GccOutputCleaner.hpp"
 
 #include "uhal/log/exception.hpp"
 #include "boost/lexical_cast.hpp"
@@ -55,7 +56,7 @@ namespace uhal
       mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
       mThreadId ( boost::this_thread::get_id() )
     {
-      Backtrace ( mBacktrace );
+      Backtrace::Backtrace ( mBacktrace );
     }
 
     exception::~exception() throw()
@@ -103,13 +104,14 @@ namespace uhal
       }
 
       lStr << " * Call stack:\n";
-      std::vector< TracePoint > lBacktrace = BacktraceSymbols ( mBacktrace );
+      std::vector< Backtrace::TracePoint > lBacktrace = Backtrace::BacktraceSymbols ( mBacktrace );
       uint32_t lCounter ( 0 );
+      GccOutputCleaner lOutputCleaner ( 12 , &GccOutputCleaner::TStyle );
 
-      for ( std::vector< TracePoint >::iterator lIt = lBacktrace.begin() +3 ; lIt != lBacktrace.end(); ++lIt , ++lCounter )
+      for ( std::vector< Backtrace::TracePoint >::iterator lIt = lBacktrace.begin() +3 ; lIt != lBacktrace.end(); ++lIt , ++lCounter )
       {
-        lStr << "   [ " << lCounter << " ] " << lIt->function << "\n";
-        lStr << "            at " << lIt->file << ":" << lIt->line << "\n";
+        lStr << "   [ " << std::setw ( 2 ) << lCounter << " ] " << lOutputCleaner ( lIt->function ) << "\n";
+        lStr << "          at " << lIt->file << ":" << lIt->line << "\n";
       }
 
       mMemory = lStr.str();

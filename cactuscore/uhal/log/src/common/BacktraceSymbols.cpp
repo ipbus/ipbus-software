@@ -32,7 +32,7 @@
 
 /*
   This is an object-oriented rewrite of an implementation by Jeff Muizelaar
-  It passes of all horrid memory allocations
+  It passes off all horrid memory allocations
   It has no global variables
   Copyright 2013 Andrew W. Rose
 */
@@ -93,223 +93,226 @@
 
 #include "uhal/log/BacktraceSymbols.hpp"
 
-/* helper struct for passing data to callbacks */
-struct FindFilesHelperStruct
+
+namespace Backtrace
 {
-  const char* lFile;
-  void* address;
-  void* base;
-  void* hdr;
-};
 
-/* helper struct for passing data to callbacks */
-struct FindAddressHelperStruct
-{
-  bfd_vma pc;
-  asymbol** syms;
-  uint32_t found;
-  TracePoint tracepoint;
-};
-
-
-/* Callback for bfd_map_over_sections */
-static void FindAddressInSection ( bfd* aBfd, asection* aSection, void* aData )
-{
-  FindAddressHelperStruct* lFindAddress = ( FindAddressHelperStruct* ) ( aData );
-
-  if ( ( bfd_get_section_flags ( aBfd, aSection ) & SEC_ALLOC ) == 0 )
+  /* helper struct for passing data to callbacks */
+  struct FindFilesHelperStruct
   {
-    return;
-  }
+    const char* lFile;
+    void* address;
+    void* base;
+    void* hdr;
+  };
 
-  bfd_vma vma = bfd_get_section_vma ( aBfd, aSection );
-
-  if ( lFindAddress->pc < vma )
+  /* helper struct for passing data to callbacks */
+  struct FindAddressHelperStruct
   {
-    return;
-  }
+    bfd_vma pc;
+    asymbol** syms;
+    uint32_t found;
+    TracePoint tracepoint;
+  };
 
-  bfd_size_type lSize = bfd_section_size ( aBfd, aSection );
 
-  if ( lFindAddress->pc >= vma + lSize )
+  /* Callback for bfd_map_over_sections */
+  static void FindAddressInSection ( bfd* aBfd, asection* aSection, void* aData )
   {
-    return;
-  }
+    FindAddressHelperStruct* lFindAddress = ( FindAddressHelperStruct* ) ( aData );
 
-  const char* lFile;
-
-  const char* lFunction;
-
-  uint32_t lLine;
-
-  lFindAddress->found = bfd_find_nearest_line ( aBfd, aSection, lFindAddress->syms, lFindAddress->pc - vma, &lFile, &lFunction, &lLine );
-
-  if ( !lFindAddress->found )
-  {
-    return;
-  }
-
-  if ( lFunction == NULL || *lFunction == '\0' )
-  {
-    lFindAddress->tracepoint.function = "??";
-  }
-  else
-  {
-    if ( !strncmp ( lFunction,"_Z",2 ) )
+    if ( ( bfd_get_section_flags ( aBfd, aSection ) & SEC_ALLOC ) == 0 )
     {
-      lFindAddress->tracepoint.function = cplus_demangle ( lFunction,DMGL_PARAMS|DMGL_ANSI|DMGL_TYPES );
+      return;
+    }
+
+    bfd_vma vma = bfd_get_section_vma ( aBfd, aSection );
+
+    if ( lFindAddress->pc < vma )
+    {
+      return;
+    }
+
+    bfd_size_type lSize = bfd_section_size ( aBfd, aSection );
+
+    if ( lFindAddress->pc >= vma + lSize )
+    {
+      return;
+    }
+
+    const char* lFile;
+
+    const char* lFunction;
+
+    uint32_t lLine;
+
+    lFindAddress->found = bfd_find_nearest_line ( aBfd, aSection, lFindAddress->syms, lFindAddress->pc - vma, &lFile, &lFunction, &lLine );
+
+    if ( !lFindAddress->found )
+    {
+      return;
+    }
+
+    if ( lFunction == NULL || *lFunction == '\0' )
+    {
+      lFindAddress->tracepoint.function = "??";
     }
     else
     {
-      lFindAddress->tracepoint.function = lFunction;
-    }
-  }
-
-  if ( lFile == NULL || *lFile == '\0' )
-  {
-    lFindAddress->tracepoint.file = "??";
-  }
-  else
-  {
-    lFindAddress->tracepoint.file = lFile;
-  }
-
-  lFindAddress->tracepoint.line = lLine;
-}
-
-
-
-/* Process a file. */
-static bool ProcessFiles ( const char* aFilename, bfd_vma* aAddr, int aNaddr , TracePoint& aRet )
-{
-  FindAddressHelperStruct lFindAddress;
-  bfd* lBfd = bfd_openr ( aFilename, NULL );
-
-  if ( lBfd == NULL )
-  {
-    throw 0;
-  }
-
-  if ( bfd_check_format ( lBfd, bfd_archive ) )
-  {
-    std::cout << aFilename << ": can not get addresses from archive" << std::endl;
-    throw 0;
-  }
-
-  char** matching;
-
-  if ( !bfd_check_format_matches ( lBfd, bfd_object, &matching ) )
-  {
-    throw 0;
-  }
-
-  if ( ( bfd_get_file_flags ( lBfd ) & HAS_SYMS ) == 0 )
-  {
-    return false;
-  }
-
-  uint32_t lSize;
-  int32_t lSymCount = bfd_read_minisymbols ( lBfd, false, ( void** ) & lFindAddress.syms, &lSize );
-
-  if ( lSymCount < 0 )
-  {
-    throw 0;
-  }
-
-  if ( lSymCount == 0 )
-  {
-    lSymCount = bfd_read_minisymbols ( lBfd, true /* dynamic */ , ( void** ) & lFindAddress.syms, &lSize );
-  }
-
-  while ( aNaddr )
-  {
-    lFindAddress.pc = aAddr[aNaddr-1];
-    lFindAddress.found = false;
-    bfd_map_over_sections ( lBfd, FindAddressInSection, &lFindAddress );
-
-    if ( lFindAddress.found )
-    {
-      break;
-    }
-
-    aNaddr--;
-  }
-
-  if ( lFindAddress.syms )
-  {
-    free ( lFindAddress.syms );
-    lFindAddress.syms = NULL;
-  }
-
-  bfd_close ( lBfd );
-  aRet = lFindAddress.tracepoint;
-  return true;
-}
-
-
-/* Callback used by dl_iterate_phdr */
-static int FindMatchingFiles ( struct dl_phdr_info* aInfo, size_t aSize, void* aData )
-{
-  FindFilesHelperStruct* match = ( FindFilesHelperStruct* ) ( aData );
-  /* This code is modeled from Gfind_proc_info-lsb.c:callback() from libunwind */
-  const ElfW ( Phdr ) *lPhdr;
-  ElfW ( Addr ) lLoadBase = aInfo->dlpi_addr;
-  lPhdr = aInfo->dlpi_phdr;
-
-  for ( uint32_t n = 0 ; n != aInfo->dlpi_phnum ; ++n , ++lPhdr )
-  {
-    if ( lPhdr->p_type == PT_LOAD )
-    {
-      ElfW ( Addr ) lVaddr = lPhdr->p_vaddr + lLoadBase;
-
-      if ( match->address >= ( void* ) ( lVaddr ) && match->address < ( void* ) ( lVaddr + lPhdr->p_memsz ) )
+      if ( !strncmp ( lFunction,"_Z",2 ) )
       {
-        /* we found a match */
-        match->lFile = aInfo->dlpi_name;
-        match->base = ( void* ) ( aInfo->dlpi_addr );
+        lFindAddress->tracepoint.function = cplus_demangle ( lFunction,DMGL_PARAMS|DMGL_ANSI|DMGL_TYPES );
+      }
+      else
+      {
+        lFindAddress->tracepoint.function = lFunction;
       }
     }
-  }
 
-  return 0;
-}
-
-
-void Backtrace ( std::vector< void* >& aBacktrace )
-{
-  size_t lSize = backtrace ( & ( aBacktrace[0] ) , aBacktrace.size() );
-  aBacktrace.resize ( lSize );
-}
-
-
-
-namespace BacktraceNamespace
-{
-  boost::mutex mBacktraceMutex;
-}
-
-
-std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktrace )
-{
-  boost::lock_guard<boost::mutex> lLock ( BacktraceNamespace::mBacktraceMutex );
-  std::vector< TracePoint > lRet;
-  lRet.reserve ( aBacktrace.size() );
-  bfd_init();
-
-  for ( std::vector< void* >::const_iterator x=aBacktrace.begin(); x!=aBacktrace.end(); ++x )
-  {
-    struct FindFilesHelperStruct match;
-    match.address = *x;
-    dl_iterate_phdr ( FindMatchingFiles, &match );
-    bfd_vma aAddr = ( std::size_t ) ( *x ) - ( std::size_t ) ( match.base );
-    TracePoint lTracePoint;
-
-    if ( ProcessFiles ( ( ( match.lFile && strlen ( match.lFile ) ) ?match.lFile:"/proc/self/exe" ) , &aAddr, 1 , lTracePoint ) )
+    if ( lFile == NULL || *lFile == '\0' )
     {
-      lRet.push_back ( lTracePoint );
+      lFindAddress->tracepoint.file = "??";
     }
+    else
+    {
+      lFindAddress->tracepoint.file = lFile;
+    }
+
+    lFindAddress->tracepoint.line = lLine;
   }
 
-  return lRet;
-}
 
+
+  /* Process a file. */
+  static bool ProcessFiles ( const char* aFilename, bfd_vma* aAddr, int aNaddr , TracePoint& aRet )
+  {
+    FindAddressHelperStruct lFindAddress;
+    bfd* lBfd = bfd_openr ( aFilename, NULL );
+
+    if ( lBfd == NULL )
+    {
+      throw 0;
+    }
+
+    if ( bfd_check_format ( lBfd, bfd_archive ) )
+    {
+      std::cout << aFilename << ": can not get addresses from archive" << std::endl;
+      throw 0;
+    }
+
+    char** matching;
+
+    if ( !bfd_check_format_matches ( lBfd, bfd_object, &matching ) )
+    {
+      throw 0;
+    }
+
+    if ( ( bfd_get_file_flags ( lBfd ) & HAS_SYMS ) == 0 )
+    {
+      return false;
+    }
+
+    uint32_t lSize;
+    int32_t lSymCount = bfd_read_minisymbols ( lBfd, false, ( void** ) & lFindAddress.syms, &lSize );
+
+    if ( lSymCount < 0 )
+    {
+      throw 0;
+    }
+
+    if ( lSymCount == 0 )
+    {
+      lSymCount = bfd_read_minisymbols ( lBfd, true /* dynamic */ , ( void** ) & lFindAddress.syms, &lSize );
+    }
+
+    while ( aNaddr )
+    {
+      lFindAddress.pc = aAddr[aNaddr-1];
+      lFindAddress.found = false;
+      bfd_map_over_sections ( lBfd, FindAddressInSection, &lFindAddress );
+
+      if ( lFindAddress.found )
+      {
+        break;
+      }
+
+      aNaddr--;
+    }
+
+    if ( lFindAddress.syms )
+    {
+      free ( lFindAddress.syms );
+      lFindAddress.syms = NULL;
+    }
+
+    bfd_close ( lBfd );
+    aRet = lFindAddress.tracepoint;
+    return true;
+  }
+
+
+  /* Callback used by dl_iterate_phdr */
+  static int FindMatchingFiles ( struct dl_phdr_info* aInfo, size_t aSize, void* aData )
+  {
+    FindFilesHelperStruct* match = ( FindFilesHelperStruct* ) ( aData );
+    /* This code is modeled from Gfind_proc_info-lsb.c:callback() from libunwind */
+    const ElfW ( Phdr ) *lPhdr;
+    ElfW ( Addr ) lLoadBase = aInfo->dlpi_addr;
+    lPhdr = aInfo->dlpi_phdr;
+
+    for ( uint32_t n = 0 ; n != aInfo->dlpi_phnum ; ++n , ++lPhdr )
+    {
+      if ( lPhdr->p_type == PT_LOAD )
+      {
+        ElfW ( Addr ) lVaddr = lPhdr->p_vaddr + lLoadBase;
+
+        if ( match->address >= ( void* ) ( lVaddr ) && match->address < ( void* ) ( lVaddr + lPhdr->p_memsz ) )
+        {
+          /* we found a match */
+          match->lFile = aInfo->dlpi_name;
+          match->base = ( void* ) ( aInfo->dlpi_addr );
+        }
+      }
+    }
+
+    return 0;
+  }
+
+
+  void Backtrace ( std::vector< void* >& aBacktrace )
+  {
+    size_t lSize = backtrace ( & ( aBacktrace[0] ) , aBacktrace.size() );
+    aBacktrace.resize ( lSize );
+  }
+
+
+
+
+  boost::mutex mBacktraceMutex;
+
+
+  std::vector< TracePoint > BacktraceSymbols ( const std::vector< void* >& aBacktrace )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mBacktraceMutex );
+    std::vector< TracePoint > lRet;
+    lRet.reserve ( aBacktrace.size() );
+    bfd_init();
+
+    for ( std::vector< void* >::const_iterator x=aBacktrace.begin(); x!=aBacktrace.end(); ++x )
+    {
+      struct FindFilesHelperStruct match;
+      match.address = *x;
+      dl_iterate_phdr ( FindMatchingFiles, &match );
+      bfd_vma aAddr = ( std::size_t ) ( *x ) - ( std::size_t ) ( match.base );
+      TracePoint lTracePoint;
+
+      if ( ProcessFiles ( ( ( match.lFile && strlen ( match.lFile ) ) ?match.lFile:"/proc/self/exe" ) , &aAddr, 1 , lTracePoint ) )
+      {
+        lRet.push_back ( lTracePoint );
+      }
+    }
+
+    return lRet;
+  }
+
+}
