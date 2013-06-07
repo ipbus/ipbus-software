@@ -312,7 +312,7 @@ def background_run_command(cmd , Pid):
       t0 = time.time()
       p = subprocess.Popen( cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid )
       
-      Pid = [ p.pid ]
+      Pid.append( p.pid )
       p.wait()
         
       exit_code = p.poll()
