@@ -161,10 +161,10 @@ namespace uhal
       this->implementDispatch( );
       NextFillingBuffer ();
     }
-    catch ( const exception::exception& aExc )
+    catch ( ... )
     {
       this->dispatchExceptionHandler();
-      throw aExc;
+      throw;
     }
   }
 
