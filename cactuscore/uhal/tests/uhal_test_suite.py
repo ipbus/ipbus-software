@@ -31,6 +31,7 @@ from datetime import datetime
 import time
 import os
 import signal
+import threading
 
 SOFT_TIMEOUT_S = 570
 
@@ -50,11 +51,11 @@ def get_commands(conn_file, controlhub_scripts_dir):
               [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
                # TIMEOUT TEST
-               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.udp" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
-               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 1 --port 50001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-1.3://localhost:50001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-1.3://localhost:50001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbusudp-1.3://localhost:50001",
@@ -70,7 +71,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
                "test_pycohal -c %s -v" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 1 --port 50001",
                "test_random.exe -c %s -d dummy.udp -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
@@ -79,11 +80,11 @@ def get_commands(conn_file, controlhub_scripts_dir):
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.tcp" % (conn_file),
                # TIMEOUT TESTS
-               "DummyHardwareTcp.exe --version 1 --port 50002 --delay 2 &> /dev/null &",
+               "DummyHardwareTcp.exe --version 1 --port 50002 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.tcp" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
                # NORMAL TESTS
-               "DummyHardwareTcp.exe --version 1 --port 50002 &> /dev/null &",
+               "DummyHardwareTcp.exe --version 1 --port 50002",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-1.3://localhost:50002",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-1.3://localhost:50002",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbustcp-1.3://localhost:50002",
@@ -98,7 +99,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_navigation.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
-               "DummyHardwareTcp.exe --version 1 --port 50002 &> /dev/null &",
+               "DummyHardwareTcp.exe --version 1 --port 50002",
                "test_random.exe -c %s -d dummy.tcp -t 5" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
@@ -111,14 +112,14 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
                controlhub_stop,
                # TIMEOUT TESTS
-               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2",
                controlhub_start,
                controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stop,
                #CONTROL HUB TESTS
-               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 1 --port 50001",
                controlhub_start,
                controlhub_status,
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
@@ -135,7 +136,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "DummyHardwareUdp.exe --version 1 --port 50001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 1 --port 50001",
                "test_random.exe -c %s -d dummy.controlhub -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
@@ -146,11 +147,11 @@ def get_commands(conn_file, controlhub_scripts_dir):
               [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp2" % (conn_file),
                # TIMEOUT TEST
-               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.udp2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
-               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 2 --port 60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0://localhost:60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-2.0://localhost:60001",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0://localhost:60001",
@@ -165,7 +166,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_navigation.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 2 --port 60001",
                "test_random.exe -c %s -d dummy.udp2 -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
@@ -174,11 +175,11 @@ def get_commands(conn_file, controlhub_scripts_dir):
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.tcp2" % (conn_file),
                # TIMEOUT TESTS
-               "DummyHardwareTcp.exe --version 2 --port 60002 --delay 2 &> /dev/null &",
+               "DummyHardwareTcp.exe --version 2 --port 60002 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.tcp2" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
                # NORMAL TESTS
-               "DummyHardwareTcp.exe --version 2 --port 60002 &> /dev/null &",
+               "DummyHardwareTcp.exe --version 2 --port 60002",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0://localhost:60002",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-2.0://localhost:60002",
                "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0://localhost:60002",
@@ -193,7 +194,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_navigation.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
-               "DummyHardwareTcp.exe --version 2 --port 60002 &> /dev/null &",
+               "DummyHardwareTcp.exe --version 2 --port 60002",
                "test_random.exe -c %s -d dummy.tcp2 -t 5" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
@@ -206,14 +207,14 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
                controlhub_stop,
                # TIMEOUT TESTS
-               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2",
                controlhub_start,
                controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stop,
                #CONTROL HUB TESTS
-               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 2 --port 60001",
                controlhub_start,
                controlhub_status,
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
@@ -230,7 +231,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "sleep 30; DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "sleep 30; DummyHardwareUdp.exe --version 2 --port 60001",
                "test_random.exe -c %s -d dummy.controlhub2 -t 5" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
@@ -241,7 +242,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
                "sudo /sbin/tc qdisc del dev lo root ; sudo /sbin/tc -s qdisc ls dev lo",
-               "DummyHardwareUdp.exe --version 2 --port 60001 &> /dev/null &",
+               "DummyHardwareUdp.exe --version 2 --port 60001",
                controlhub_start,
                controlhub_status,
                controlhub_stats,
@@ -303,6 +304,32 @@ def get_sections():
     return [section for section, cmds in get_commands("", "")]
 
 
+def background_run_command(cmd , Pid):
+    """
+    Run command in separate thread, ignoring stdout and stderr
+    """
+    def runInThread(cmd , Pid):
+      t0 = time.time()
+      p = subprocess.Popen( cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid )
+      
+      Pid = [ p.pid ]
+      p.wait()
+        
+      exit_code = p.poll()
+      cmd_duration = time.time()-t0
+      if exit_code == -15:
+        print "+ Background command '%s' was terminated (time elapsed = %s seconds)" % (cmd , cmd_duration)
+      elif exit_code:
+        print "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) IN BACKGROUND COMMAND '%s' ***" % (exit_code, cmd_duration, cmd)
+      else:
+        print "+ Background command '%s' completed successfully, time elapsed: %s seconds" % (cmd, cmd_duration)
+  
+    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Background running ", cmd
+    thread = threading.Thread( target=runInThread , args=( cmd , Pid ) )
+    thread.start()
+
+
+
 def run_command(cmd, verbose=True):
     """
     Run command, printing stdout and stderr to stdout if argument verbose = True
@@ -310,14 +337,13 @@ def run_command(cmd, verbose=True):
     SOFT_TIMEOUT_S seconds
     """
 
+    if cmd.startswith("sudo"):
+      cmd = "sudo PATH=$PATH " + cmd[4:]
+    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+    t0 = time.time()
+
+    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
     try:
-
-      if cmd.startswith("sudo"):
-         cmd = "sudo PATH=$PATH " + cmd[4:]
-      print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
-      t0 = time.time()
-
-      p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
       f1 = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
       fcntl.fcntl(p.stdout, fcntl.F_SETFL, f1 | os.O_NONBLOCK)
 
@@ -414,6 +440,8 @@ if __name__=="__main__":
         controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") ) 
     print 'Using dir "'+controlhub_scripts_dir+'" for controlhub scripts ...'
 
+    BackgroundPid = []
+
     # Run the commands
     try:
         for section_name, cmds in get_commands(conn_file, controlhub_scripts_dir):
@@ -440,7 +468,12 @@ if __name__=="__main__":
                 print
                 if verbose:
                     print "-----------------------------------------------------------------------------------------------------------------------"
-                stdout, exit_code, cmd_duration = run_command(cmd, verbose)
+                    
+                if cmd.startswith( "DummyHardware" ):
+                  background_run_command( cmd , BackgroundPid )
+                  
+                else:
+                  stdout, exit_code, cmd_duration = run_command(cmd, verbose)
 
                 if len(stdout) and not verbose:
                     print stdout[-1].rstrip("\n")
