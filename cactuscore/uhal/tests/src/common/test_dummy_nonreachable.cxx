@@ -70,6 +70,7 @@ void check_nonreachable ( const std::string& connection, const std::string& id )
     }
     catch ( uhal::exception::exception& e )
     {
+      std::cout << "Exception of type " << typeid(e).name() << " was thrown" << std::endl;
       CACTUS_CHECK ( ( ( typeid ( e ) ==typeid ( uhal::exception::ControlHubTargetTimeout ) ) || ( typeid ( e ) ==typeid ( uhal::exception::TcpConnectionFailure ) ) ) );
     }
   }
