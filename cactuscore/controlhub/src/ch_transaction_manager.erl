@@ -110,9 +110,14 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
         {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
             ?CH_LOG_DEBUG("Received device client response from target IPaddr=~w, Port=~w",
                           [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
-            << _:32, Body/binary>> = TargetResponseBin,
-            {{value, {_, Hdr}}, NewQ} = queue:out(RequestTimesQueue), 
-            reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, Hdr/binary, Body/binary>>),
+            {{value, {_, Hdr}}, NewQ} = queue:out(RequestTimesQueue),
+            if 
+              byte_size(TargetResponseBin) >= 4 ->
+                << _:32, Body/binary>> = TargetResponseBin,
+                reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, Hdr/binary, Body/binary>>);
+              true -> 
+                reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>)
+            end,
             tcp_receive_handler_loop(ClientSocket, NewQ, QueueLen-1 );
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
