@@ -154,8 +154,27 @@ namespace uhal
 
     if ( lErrorCode != 0 )
     {
-      log ( Error() , "Control Hub reported error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ) );
       mPreambles.pop_front();
+
+      if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 ) 
+      {
+        log ( Error() , "The ControlHub did not receive any response from the board." );
+        throw uhal::exception::ControlHubTargetTimeout();
+      }
+      else if ( lErrorCode == 2 )
+      {
+        log ( Error(), "Internal timeout within the ControlHub." );
+        throw uhal::exception::ControlHubInternalTimeout();
+      }
+      else if ( lErrorCode == 5 )
+      {
+        log ( Error() , "ControlHub received malformed status packet from target" );
+      }
+      else
+      {
+        log ( Error() , "Control Hub reported an unknown error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ), ". Please report this at https://svnweb.cern.ch/trac/cactus/newticket" );
+      }
+
       return false;
     }
 
