@@ -219,7 +219,13 @@ namespace uhal
       }
 
       log ( Error() , "ASIO reported an error: " , Quote ( aErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
-      ClientInterface::validate();
+
+      try
+      {
+        ClientInterface::validate();
+      }
+      catch ( ... ) {}
+
       mAsynchronousException = new exception::ErrorInTcpCallback();
       return;
     }
@@ -246,12 +252,14 @@ namespace uhal
     }
     }
     */
+    bool lValidated ( false );
 
-    bool lValidated( false );
-
-    try{
+    try
+    {
       lValidated = ClientInterface::validate();
-    }catch( exception::exception& aExc ){
+    }
+    catch ( exception::exception& aExc )
+    {
       mAsynchronousException = aExc.clone();
       return;
     }
