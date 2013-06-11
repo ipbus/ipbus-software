@@ -198,7 +198,7 @@ namespace uhal
     mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
     log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
-    boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_all(), boost::bind ( &TCP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
+    boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least(4), boost::bind ( &TCP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
   }
 
 
