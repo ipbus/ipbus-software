@@ -52,6 +52,7 @@
  public:\
  ClassName() : uhal::exception::exception() {}\
  void ThrowAsDerivedType_(){ throw ClassName(*this); } \
+ exception* clone(){ return new ClassName(*this); } \
  protected:\
  std::string description() const throw() { return std::string( ClassDescription ); } \
 };
@@ -90,6 +91,8 @@ namespace uhal
         virtual const char* what() const throw();
 
         virtual void ThrowAsDerivedType_() = 0;
+
+        virtual exception* clone() = 0;
 
         virtual void append ( const std::string& aMessage ) throw();
 

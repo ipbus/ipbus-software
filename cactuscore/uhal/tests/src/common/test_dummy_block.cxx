@@ -81,22 +81,26 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  std::vector<uint32_t> xx;
 
-  std::cout << "Filling test vector" << std::flush;
-  try{
-    xx.reserve ( N );
-    for ( size_t i=0; i!= N; ++i )
-    {
-      xx.push_back ( static_cast<uint32_t> ( rand() ) );
+  {
+    // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
+    std::vector<uint32_t> xx;
+    std::cout << "Filling test vector..." << std::endl;
+    try{
+      xx.reserve ( N );
+      for ( size_t i=0; i!= N; ++i )
+      {
+        xx.push_back ( static_cast<uint32_t> ( rand() ) );
+      }
+    }catch(...){
+      std::cout << "Filling test vector failed. This is not as a uHAL error, so test will be considered to have passed." << std::endl;
+      return;
     }
-  }catch(...){
-    std::cout << " failed. This is not as a uHAL error, so test will be considered to have passed." << std::endl;
-    return;
+    std::cout << "Filling test vector done." << std::endl;
+  
+    hw.getNode ( "FIFO" ).writeBlock ( xx );
   }
-  std::cout << " done." << std::endl;
 
-  hw.getNode ( "FIFO" ).writeBlock ( xx );
   ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlock ( N );
   CACTUS_CHECK ( !mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
@@ -111,30 +115,54 @@ void block_transfer_too_big ( const std::string& connection, const std::string& 
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  std::vector<uint32_t> xx;
 
-  for ( size_t i=0; i!= 100*1024*1024; ++i )
   {
-    xx.push_back ( 0x0 );
+    // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
+    std::vector<uint32_t> xx;
+    std::cout << "Filling test vector..." << std::endl;
+    try{
+      xx.reserve ( 400 * N_1MB );
+      for ( size_t i=0; i!= 400 * N_1MB; ++i )
+      {
+        xx.push_back ( 0x00000000 );
+      }
+    }catch(...){
+      std::cout << "Filling test vector failed. This is not as a uHAL error, so test will be considered to have passed." << std::endl;
+      return;
+    }
+    std::cout << "Filling test vector done." << std::endl;
+  
+    CACTUS_TEST_THROW ( hw.getNode ( "LARGE_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
   }
 
-  CACTUS_TEST_THROW ( hw.getNode ( "LARGE_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
-  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock ( 100*1024*1024 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock ( 400 * N_1MB ) , uhal::exception::BulkTransferRequestedTooLarge );
 }
 
 void block_bigger_than_size_attribute ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  std::vector<uint32_t> xx;
 
-  for ( size_t i=0; i!= 1024*1024; ++i )
   {
-    xx.push_back ( 0x0 );
+    // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
+    std::vector<uint32_t> xx;
+    std::cout << "Filling test vector..." << std::endl;
+    try{
+      xx.reserve ( 400 * N_1MB );
+      for ( size_t i=0; i!= 400 * N_1MB; ++i )
+      {
+        xx.push_back ( 0x00000000 );
+      }
+    }catch(...){
+      std::cout << "Filling test vector failed. This is not as a uHAL error, so test will be considered to have passed." << std::endl;
+      return;
+    }
+    std::cout << "Filling test vector done." << std::endl;
+  
+    CACTUS_TEST_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
   }
 
-  CACTUS_TEST_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
-  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlock ( 100*1024*1024 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlock ( 400 * N_1MB ) , uhal::exception::BulkTransferRequestedTooLarge );
 }
 
 int main ( int argc,char* argv[] )

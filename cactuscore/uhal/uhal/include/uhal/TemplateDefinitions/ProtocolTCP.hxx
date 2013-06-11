@@ -247,7 +247,16 @@ namespace uhal
     }
     */
 
-    if ( !ClientInterface::validate() )
+    bool lValidated( false );
+
+    try{
+      lValidated = ClientInterface::validate();
+    }catch( exception::exception& aExc ){
+      mAsynchronousException = aExc.clone();
+      return;
+    }
+
+    if ( !lValidated )
     {
       log ( Error() , "Validation function reported an error when processing buffer: " , Pointer ( aBuffers ) );
       mAsynchronousException = new exception::ValidationError ();
