@@ -163,7 +163,7 @@ namespace uhal
 
       if ( ! aFiles.size() )
       {
-        log ( Error() , " > No matching files." );
+        log ( Error() , " > No matching files for expression " , Quote( aFilenameExpr ) , " with parent path " , Quote( aParentPath.c_str() ) );
         throw uhal::exception::FileNotFound();
       }
       else

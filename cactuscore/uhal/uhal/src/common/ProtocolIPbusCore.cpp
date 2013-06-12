@@ -80,7 +80,7 @@ namespace uhal
   // }
   // }
 
-  bool IPbusCore::validate ( uint8_t* aSendBufferStart ,
+   exception::exception* IPbusCore::validate ( uint8_t* aSendBufferStart ,
                              uint8_t* aSendBufferEnd ,
                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
@@ -97,13 +97,13 @@ namespace uhal
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
       {
         log ( Error() , "Unable to parse send header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) );
-        return false;
+        return new uhal::exception::IPbusCoreUnparsableTransactionHeader();
       }
 
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
       {
         log ( Error() , "Unable to parse reply header " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) );
-        return false;
+        return new uhal::exception::IPbusCoreUnparsableTransactionHeader();
       }
 
       if ( lReplyResponseGood )
@@ -113,7 +113,7 @@ namespace uhal
               ", transaction type = " , Integer ( ( uint8_t ) ( ( lReplyIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) ,
               ", word count = " , Integer ( lReplyWordCount ) ,
               " ) had response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicating an error" );
-        return false;
+        return new uhal::exception::IPbusCoreResponseCodeSet();
       }
 
       if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
@@ -122,7 +122,7 @@ namespace uhal
               " does not match that sent " , Integer ( ( uint8_t ) ( ( lSendIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) );
         log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
               " whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
-        return false;
+        return new uhal::exception::IPbusTransactionTypeIncorrect();
       }
 
       if ( lSendTransactionId != lReplyTransactionId )
@@ -131,7 +131,7 @@ namespace uhal
               " does not match that sent " , Integer ( lSendTransactionId ) );
         log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
               " whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
-        return false;
+        return new uhal::exception::IPbusTransactionIdIncorrect();
       }
 
       switch ( lSendIPbusTransactionType )
@@ -176,7 +176,7 @@ namespace uhal
 
     // log ( Info() , "IPbus has validated the packet paylod" );
     log ( Debug() , "Validation Complete!" );
-    return true;
+    return NULL;
   }
   // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 

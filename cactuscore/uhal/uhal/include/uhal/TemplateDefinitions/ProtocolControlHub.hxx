@@ -121,7 +121,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  bool ControlHub< InnerProtocol >::validate ( uint8_t* aSendBufferStart ,
+   exception::exception* ControlHub< InnerProtocol >::validate ( uint8_t* aSendBufferStart ,
       uint8_t* aSendBufferEnd ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
@@ -135,7 +135,7 @@ namespace uhal
       log ( Error() , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
             " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) );
       mPreambles.pop_front();
-      return false;
+      return new uhal::exception::ControlHubReturnedWrongAddress();
     }
 
     aReplyStartIt++;
@@ -146,7 +146,7 @@ namespace uhal
       log ( Error() , "Returned Port number " , Integer ( lReplyPort ) ,
             " does not match that sent " , Integer ( mDevicePort ) );
       mPreambles.pop_front();
-      return false;
+      return new uhal::exception::ControlHubReturnedWrongAddress();
     }
 
     aReplyStartIt++;
@@ -159,20 +159,22 @@ namespace uhal
       if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 ) 
       {
         log ( Error() , "The ControlHub did not receive any response from the board." );
-        throw uhal::exception::ControlHubTargetTimeout();
+        return new uhal::exception::ControlHubTargetTimeout();
       }
       else if ( lErrorCode == 2 )
       {
         log ( Error(), "Internal timeout within the ControlHub." );
-        throw uhal::exception::ControlHubInternalTimeout();
+        return new uhal::exception::ControlHubInternalTimeout();
       }
       else if ( lErrorCode == 5 )
       {
         log ( Error() , "ControlHub received malformed status packet from target" );
+        return new uhal::exception::ControlHubReportedMalformedStatus();
       }
       else
       {
         log ( Error() , "Control Hub reported an unknown error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ), ". Please report this at https://svnweb.cern.ch/trac/cactus/newticket" );
+        return new uhal::exception::ControlHubUnknownErrorCode();
       }
 
       return false;
@@ -189,7 +191,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  bool ControlHub< InnerProtocol >::validate()
+   exception::exception* ControlHub< InnerProtocol >::validate()
   {
     return ClientInterface::validate();
   }

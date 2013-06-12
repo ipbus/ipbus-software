@@ -173,20 +173,21 @@ namespace uhal
   {}
 
 
-  bool ClientInterface::validate ( )
+   exception::exception* ClientInterface::validate ( )
   {
     log ( Debug() , ThisLocation() );
     //check that the results are valid
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     //std::cout << mDispatchedBuffers.size() << std::endl;
     Buffers* lBuffer ( mDispatchedBuffers.front() );
-    bool lRet = this->validate ( lBuffer->getSendBuffer() ,
-                                 lBuffer->getSendBuffer() + lBuffer->sendCounter() ,
-                                 lBuffer->getReplyBuffer().begin() ,
-                                 lBuffer->getReplyBuffer().end() );
+
+    exception::exception* lRet = this->validate ( lBuffer->getSendBuffer() ,
+                                                  lBuffer->getSendBuffer() + lBuffer->sendCounter() ,
+                                                  lBuffer->getReplyBuffer().begin() ,
+                                                  lBuffer->getReplyBuffer().end() );
 
     //results are valid, so mark returned data as valid
-    if ( lRet )
+    if ( !lRet )
     {
       lBuffer->validate();
     }

@@ -124,6 +124,8 @@ namespace uhal
     mAsioSendBuffer.clear();
     mAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+
+    // log( Error() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
     mSocket.async_send_to ( mAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, aBuffers , _1 ) );
   }
@@ -132,6 +134,8 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
+    // log( Error() , ThisLocation() );
+
     boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
     mReplyQueue.push_back ( aBuffers );
 
@@ -156,6 +160,7 @@ namespace uhal
     mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
     log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
+    // log( Error() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
     mSocket.async_receive_from ( mAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
   }
@@ -164,6 +169,7 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::read_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
+    // log( Error() , ThisLocation() );
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
@@ -217,22 +223,19 @@ namespace uhal
     }
     */
     //log ( Debug() , ThisLocation() );
-    bool lValidated ( false );
 
     try
     {
-      lValidated = ClientInterface::validate();
+      mAsynchronousException = ClientInterface::validate();
     }
     catch ( exception::exception& aExc )
     {
-      mAsynchronousException = aExc.clone();
-      return;
+      log ( Error() , "Validation function reported an error when processing buffer: " , Pointer ( aBuffers ) );
+      mAsynchronousException = new exception::ValidationError ();
     }
 
-    if ( !lValidated )
+    if ( mAsynchronousException )
     {
-      log ( Error() , "Validation function reported an error!" );
-      mAsynchronousException = new exception::ValidationError ();
       return;
     }
 
@@ -250,6 +253,7 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::CheckDeadline()
   {
+    // log( Error() , ThisLocation() );
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
@@ -265,7 +269,7 @@ namespace uhal
       //20/12/2012 - awr - wherever this is in the function, this appears to cause a race condition which results in the timeout recovery failing.
       //mErrorCode = boost::asio::error::timed_out;
       log ( Error() , "ASIO deadline timer timed out" );
-      mAsynchronousException = new exception::UdpTimeout();
+      //mAsynchronousException = new exception::UdpTimeout();
     }
 
     // Put the actor back to sleep.

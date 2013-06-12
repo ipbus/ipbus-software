@@ -128,11 +128,13 @@ namespace uhal
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        log ( Error() , "ASIO reported a Timeout in TCP callback" );
-        throw exception::TcpTimeout();
+        log ( Error() , "ASIO TCP connection timed out" );
+      }
+      else
+      {
+        log ( Error() , "ASIO reported an error: " , lErrorCode.message() );
       }
 
-      log ( Error() , "ASIO reported an error: " , lErrorCode.message() );
       throw exception::TcpConnectionFailure();
     }
 
@@ -252,22 +254,19 @@ namespace uhal
     }
     }
     */
-    bool lValidated ( false );
 
     try
     {
-      lValidated = ClientInterface::validate();
+      mAsynchronousException = ClientInterface::validate();
     }
     catch ( exception::exception& aExc )
     {
-      mAsynchronousException = aExc.clone();
-      return;
-    }
-
-    if ( !lValidated )
-    {
       log ( Error() , "Validation function reported an error when processing buffer: " , Pointer ( aBuffers ) );
       mAsynchronousException = new exception::ValidationError ();
+    }
+
+    if ( mAsynchronousException )
+    {
       return;
     }
 

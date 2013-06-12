@@ -65,6 +65,18 @@ namespace uhal
   };
 
 
+  namespace exception
+  {
+    //! Exception class to handle the case where the IPbus header could not be parsed.
+    ExceptionClass ( IPbusCoreUnparsableTransactionHeader , "Exception class to handle the case where the IPbus transaction header could not be parsed." );
+
+    ExceptionClass ( IPbusCoreResponseCodeSet , "Exception class to handle the case where the IPbus transaction header response code indicated an error." );
+    ExceptionClass ( IPbusTransactionTypeIncorrect , "Exception class to handle the case where the IPbus transaction type came back as the wrong type." );
+    ExceptionClass ( IPbusTransactionIdIncorrect , "Exception class to handle the case where the IPbus transaction id came back as incorrect." );
+
+  }
+
+
   //! A class providing the core IPbus packing functionality
   class IPbusCore : public ClientInterface
   {
@@ -167,7 +179,7 @@ namespace uhal
       	@param aReplyEndIt an iterator to the end (one past last valid entry) of the list of memory locations in to which the reply was written
       	@return whether the returned IPbus packet is valid
       */
-      virtual bool validate ( uint8_t* aSendBufferStart ,
+      virtual  exception::exception* validate ( uint8_t* aSendBufferStart ,
                               uint8_t* aSendBufferEnd ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );

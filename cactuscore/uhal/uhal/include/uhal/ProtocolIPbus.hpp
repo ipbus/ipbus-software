@@ -166,6 +166,13 @@ namespace uhal
 
 
 
+  namespace exception
+  {
+    //! Exception class to handle the case where the IPbus header could not be parsed.
+    ExceptionClass ( IPbus2PacketHeaderMismatch , "Exception class to handle the case where the IPbus 2.0 packet header does not match that sent." );
+  }
+
+
   //! A class which provides the version-specific functionality for IPbus
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   class IPbus < 2 , IPbus_minor, buffer_size > : public IPbusCore
@@ -244,7 +251,7 @@ namespace uhal
       	@param aReplyEndIt an iterator to the end (one past last valid entry) of the list of memory locations in to which the reply was written
       	@return whether the returned IPbus packet is valid
       */
-      virtual bool validate ( uint8_t* aSendBufferStart ,
+      virtual  exception::exception* validate ( uint8_t* aSendBufferStart ,
                               uint8_t* aSendBufferEnd ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );

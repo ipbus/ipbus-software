@@ -59,10 +59,18 @@ namespace uhal
     ExceptionClass ( XMLfileMissingRequiredParameters , "Exception class to handle the case where the received header does not match the expected header." );
 
     //! Exception class to handle the case where the target does not respond to the ControlHub
+    ExceptionClass ( ControlHubReturnedWrongAddress , "Exception class to handle the case where the ControlHub returned the wrong IP or Port" );
+
+    //! Exception class to handle the case where the target does not respond to the ControlHub
     ExceptionClass ( ControlHubTargetTimeout , "Exception class to handle the case where the target does not respond to the ControlHub" );
 
     //! Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub
     ExceptionClass ( ControlHubInternalTimeout , "Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub" );
+
+    ExceptionClass ( ControlHubReportedMalformedStatus , "Exception class to handle the case where the hardware sent a bad status packet to the ControlHub" );
+    ExceptionClass ( ControlHubUnknownErrorCode , "Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL" );
+
+
   }
 
   /**
@@ -109,7 +117,7 @@ namespace uhal
         	Function which dispatch calls when the reply is received to check that the headers are as expected
         	@return whether the returned packet is valid
         */
-      virtual bool validate ();
+      virtual  exception::exception* validate ();
 
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected
@@ -119,7 +127,7 @@ namespace uhal
       	@param aReplyEndIt an iterator to the end (one past last valid entry) of the list of memory locations in to which the reply was written
       	@return whether the returned IPbus packet is valid
       */
-      virtual bool validate ( uint8_t* aSendBufferStart ,
+      virtual  exception::exception* validate ( uint8_t* aSendBufferStart ,
                               uint8_t* aSendBufferEnd ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );

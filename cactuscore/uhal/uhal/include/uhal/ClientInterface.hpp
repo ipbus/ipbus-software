@@ -309,7 +309,7 @@ namespace uhal
         	Function which dispatch calls when the reply is received to check that the headers are as expected
         	@return whether the returned packet is valid
         */
-      virtual bool validate ();
+      virtual  exception::exception* validate ();
 
 
     protected:
@@ -321,7 +321,7 @@ namespace uhal
       	@param aReplyEndIt an iterator to the end (one past last valid entry) of the list of memory locations in to which the reply was written
       	@return whether the returned IPbus packet is valid
       */
-      virtual bool validate ( uint8_t* aSendBufferStart ,
+      virtual  exception::exception* validate ( uint8_t* aSendBufferStart ,
                               uint8_t* aSendBufferEnd ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
                               std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt ) = 0;
