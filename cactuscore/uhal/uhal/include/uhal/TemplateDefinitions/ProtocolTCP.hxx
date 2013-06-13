@@ -200,7 +200,7 @@ namespace uhal
     mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
     log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
-    boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least(4), boost::bind ( &TCP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
+    boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least ( 4 ), boost::bind ( &TCP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
   }
 
 
@@ -224,11 +224,10 @@ namespace uhal
 
       try
       {
-        ClientInterface::validate();
+        mAsynchronousException = ClientInterface::validate();
       }
       catch ( ... ) {}
 
-      mAsynchronousException = new exception::ErrorInTcpCallback();
       return;
     }
 
@@ -282,6 +281,8 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::CheckDeadline()
   {
+    // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
+
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
@@ -294,10 +295,7 @@ namespace uhal
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
       //set the error code correctly
-      //20/12/2012 - awr - wherever this is in the function, this appears to cause a race condition which results in the timeout recovery failing.
-      //mErrorCode = boost::asio::error::timed_out;
       log ( Error() , "ASIO deadline timer timed out" );
-      mAsynchronousException = new exception::TcpTimeout();
     }
 
     // Put the actor back to sleep.

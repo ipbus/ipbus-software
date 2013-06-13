@@ -84,7 +84,11 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
   {
     // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
     std::vector<uint32_t> xx;
-    std::cout << "Filling test vector..." << std::endl;
+
+    if ( N == N_1GB )
+    {
+      std::cout << "Filling 1GB test vector..." << std::endl;
+    }
 
     try
     {
@@ -101,10 +105,36 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
       return;
     }
 
-    std::cout << "Filling test vector done." << std::endl;
+    if ( N == N_1GB )
+    {
+      std::cout << "Filling test vector done." << std::endl;
+    }
+
+    if ( N == N_1GB )
+    {
+      std::cout << "Doing 1GB block write" << std::endl;
+    }
+
     hw.getNode ( "FIFO" ).writeBlock ( xx );
+
+    if ( N == N_1GB )
+    {
+      std::cout << "1GB block write done" << std::endl;
+    }
   }
+
+  if ( N == N_1GB )
+  {
+    std::cout << "Doing 1GB block read" << std::endl;
+  }
+
   ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlock ( N );
+
+  if ( N == N_1GB )
+  {
+    std::cout << "1GB block read done" << std::endl;
+  }
+
   CACTUS_CHECK ( !mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
   CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
@@ -121,16 +151,11 @@ void block_transfer_too_big ( const std::string& connection, const std::string& 
   {
     // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
     std::vector<uint32_t> xx;
-    std::cout << "Filling test vector..." << std::endl;
+    std::cout << "Filling 400MB test vector..." << std::endl;
 
     try
     {
-      xx.reserve ( 400 * N_1MB );
-
-      for ( size_t i=0; i!= 400 * N_1MB; ++i )
-      {
-        xx.push_back ( 0x00000000 );
-      }
+      xx = std::vector<uint32_t> ( 400 * N_1MB , 0x00000000 );
     }
     catch ( ... )
     {
@@ -151,16 +176,11 @@ void block_bigger_than_size_attribute ( const std::string& connection, const std
   {
     // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
     std::vector<uint32_t> xx;
-    std::cout << "Filling test vector..." << std::endl;
+    std::cout << "Filling 400MB test vector..." << std::endl;
 
     try
     {
-      xx.reserve ( 400 * N_1MB );
-
-      for ( size_t i=0; i!= 400 * N_1MB; ++i )
-      {
-        xx.push_back ( 0x00000000 );
-      }
+      xx = std::vector<uint32_t> ( 400 * N_1MB , 0x00000000 );
     }
     catch ( ... )
     {

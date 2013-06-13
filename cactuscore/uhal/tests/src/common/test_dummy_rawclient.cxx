@@ -111,9 +111,9 @@ void mem_rmw_bits ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( ( ( x1 & x2 ) | x3 ) == reg2.value() );
 
   //IPBus 1.3 bug on RMW: https://svnweb.cern.ch/trac/cactus/ticket/179
-  if ( hw.uri().find ( "ipbusudp-1.3://" ) != -1 ||
-       hw.uri().find ( "ipbustcp-1.3://" ) != -1 ||
-       hw.uri().find ( "chtcp-1.3://" ) != -1 )
+  if ( hw.uri().find ( "ipbusudp-1.3://" ) != unsigned ( -1 ) ||
+       hw.uri().find ( "ipbustcp-1.3://" ) != unsigned ( -1 ) ||
+       hw.uri().find ( "chtcp-1.3://" ) != unsigned ( -1 ) )
   {
     CACTUS_CHECK ( reg1.value() == ( ( x1 & x2 ) | x3 ) );
   }
@@ -134,9 +134,9 @@ void mem_rmw_sum ( const std::string& connection, const std::string& id )
   bool IPbus1_3;
 
   //IPBus 1.3 bug on RMW: https://svnweb.cern.ch/trac/cactus/ticket/179
-  if ( hw.uri().find ( "ipbusudp-1.3://" ) != -1 ||
-       hw.uri().find ( "ipbustcp-1.3://" ) != -1 ||
-       hw.uri().find ( "chtcp-1.3://" ) != -1 )
+  if ( hw.uri().find ( "ipbusudp-1.3://" ) != unsigned ( -1 ) ||
+       hw.uri().find ( "ipbustcp-1.3://" ) != unsigned ( -1 ) ||
+       hw.uri().find ( "chtcp-1.3://" ) != unsigned ( -1 ) )
   {
     IPbus1_3=true;
   }

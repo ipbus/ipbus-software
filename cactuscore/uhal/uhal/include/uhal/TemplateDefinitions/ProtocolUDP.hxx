@@ -124,7 +124,6 @@ namespace uhal
     mAsioSendBuffer.clear();
     mAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
-
     // log( Error() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
     mSocket.async_send_to ( mAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, aBuffers , _1 ) );
@@ -135,7 +134,6 @@ namespace uhal
   void UDP< InnerProtocol >::write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
     // log( Error() , ThisLocation() );
-
     boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
     mReplyQueue.push_back ( aBuffers );
 
@@ -185,11 +183,10 @@ namespace uhal
 
       try
       {
-        ClientInterface::validate();
+        mAsynchronousException = ClientInterface::validate();
       }
       catch ( ... ) {}
 
-      mAsynchronousException = new exception::ErrorInUdpCallback();
       return;
     }
 
@@ -259,17 +256,14 @@ namespace uhal
     // deadline before this actor had a chance to run.
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
+      // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket.close();
       // There is no longer an active deadline. The expiry is set to positive
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
-      //set the error code correctly
-      //20/12/2012 - awr - wherever this is in the function, this appears to cause a race condition which results in the timeout recovery failing.
-      //mErrorCode = boost::asio::error::timed_out;
-      log ( Error() , "ASIO deadline timer timed out" );
-      //mAsynchronousException = new exception::UdpTimeout();
+      // log ( Error() , "ASIO deadline timer timed out" );
     }
 
     // Put the actor back to sleep.

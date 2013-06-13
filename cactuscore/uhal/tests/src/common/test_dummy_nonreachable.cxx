@@ -66,11 +66,13 @@ void check_nonreachable ( const std::string& connection, const std::string& id )
     {
       hw.getNode ( "REG" ).read();
       hw.dispatch();
-      CACTUS_CHECK ( false );
+      //Make a mock "TEST_THROW error message and record the failure to throw
+      std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl;
+      uhal::tests::failedTestCount++;
     }
     catch ( uhal::exception::exception& e )
     {
-      std::cout << "Exception of type " << typeid ( e ).name() << " was thrown" << std::endl;
+      // std::cout << "Exception of type " << typeid ( e ).name() << " was thrown" << std::endl;
       CACTUS_CHECK ( ( ( typeid ( e ) ==typeid ( uhal::exception::ControlHubTargetTimeout ) ) || ( typeid ( e ) ==typeid ( uhal::exception::TcpConnectionFailure ) ) ) );
     }
   }

@@ -63,8 +63,6 @@ namespace uhal
   {
     //! Exception class to handle the case where the UDP connection timed out.
     ExceptionClass ( UdpTimeout , "Exception class to handle the case where the UDP connection timed out." );
-    //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
-    ExceptionClass ( ErrorInUdpCallback , "Exception class to handle the case where the error flag was raised in the asynchronous callback system." );
     //! Exception class to handle a failure to create a UDP socket.
     ExceptionClass ( ErrorAtUdpSocketCreation , "Exception class to handle a failure to create a UDP socket." );
   }

@@ -11,6 +11,7 @@ All options/arguments are optional:
    -c /path/to/dummy_conns.xml : Full path to dummy_connections.xml (without file:// prefix)
    -s search_string            : If specified, only sections that contain this string will be run (case-insenstive search).
                                  Otherwise, all sections will be run (see section list at end).
+   -x                          : Quit on first error
 
 E.g:
   # Limited output of all tests on installed system
@@ -32,6 +33,7 @@ import time
 import os
 import signal
 import threading
+import re
 
 SOFT_TIMEOUT_S = 570
 
@@ -383,7 +385,7 @@ def run_command(cmd, verbose=True):
 if __name__=="__main__":
     # Parse options 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hvls:c:", ["help"])
+        opts, args = getopt.getopt(sys.argv[1:], "xhvls:c:", ["help"])
     except getopt.GetoptError, err:
         print __doc__
         sys.exit(2)
@@ -392,6 +394,7 @@ if __name__=="__main__":
     verbose  = False
     conn_file = "/opt/cactus/etc/uhal/tests/dummy_connections.xml"
     section_search_str = None
+    quit_on_error = False
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
@@ -408,6 +411,8 @@ if __name__=="__main__":
             conn_file = value
         elif opt == "-s":
             section_search_str = value
+        elif opt == "-x":
+            quit_on_error = True
 
     if len(args) != 0:
         print "Incorrect usage!"
@@ -478,7 +483,18 @@ if __name__=="__main__":
                 if len(stdout) and not verbose:
                     print stdout[-1].rstrip("\n")
                 if exit_code:
-                    print "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) ***" % (exit_code, cmd_duration)
+                    split_name_list = re.split('(\.exe)',cmd)
+                    split_name = split_name_list[0]
+                    if len( split_name_list ) > 1:
+                      split_name = split_name + split_name_list[1]
+
+                    print "+ *** ERROR OCCURED (section = '%s', test = '%s', exit code = %s, time elapsed = %s seconds) ***" % (section_name, split_name , exit_code, cmd_duration)
+ 
+                    if quit_on_error:
+                      print "+ Quitting as an error was observed and the '-x' flag was specified by the user"
+                      for cmd in cleanup_cmds():
+                        run_command(cmd, False)
+                      sys.exit()
                 else:
                     print "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
 
@@ -488,6 +504,9 @@ if __name__=="__main__":
 
     except KeyboardInterrupt:
         print 
-        print "+ Ctrl-C detected. Running cleanup commands ..."
-        for cmd in cleanup_cmds():
-            run_command(cmd, False)
+        print "+ Ctrl-C detected."
+        pass
+
+        print "+ Running cleanup commands"
+    for cmd in cleanup_cmds():
+       run_command(cmd, False)

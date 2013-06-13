@@ -322,9 +322,9 @@ namespace uhal
       	@return whether the returned IPbus packet is valid
       */
       virtual  exception::exception* validate ( uint8_t* aSendBufferStart ,
-                              uint8_t* aSendBufferEnd ,
-                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
-                              std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt ) = 0;
+          uint8_t* aSendBufferEnd ,
+          std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
+          std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt ) = 0;
 
       virtual void dispatchExceptionHandler();
 

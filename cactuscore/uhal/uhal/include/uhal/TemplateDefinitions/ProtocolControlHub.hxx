@@ -121,7 +121,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-   exception::exception* ControlHub< InnerProtocol >::validate ( uint8_t* aSendBufferStart ,
+  exception::exception* ControlHub< InnerProtocol >::validate ( uint8_t* aSendBufferStart ,
       uint8_t* aSendBufferEnd ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
@@ -156,7 +156,7 @@ namespace uhal
     {
       mPreambles.pop_front();
 
-      if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 ) 
+      if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 )
       {
         log ( Error() , "The ControlHub did not receive any response from the board." );
         return new uhal::exception::ControlHubTargetTimeout();
@@ -191,7 +191,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-   exception::exception* ControlHub< InnerProtocol >::validate()
+  exception::exception* ControlHub< InnerProtocol >::validate()
   {
     return ClientInterface::validate();
   }

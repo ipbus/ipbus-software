@@ -80,10 +80,10 @@ namespace uhal
   // }
   // }
 
-   exception::exception* IPbusCore::validate ( uint8_t* aSendBufferStart ,
-                             uint8_t* aSendBufferEnd ,
-                             std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
-                             std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
+  exception::exception* IPbusCore::validate ( uint8_t* aSendBufferStart ,
+      uint8_t* aSendBufferEnd ,
+      std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
+      std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
     log ( Debug() , "IPbusCore Validation" );
     eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
@@ -281,12 +281,12 @@ namespace uhal
     {
       checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lSendBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
-      log ( Info() , std::string ( 100,'-' ) );
-      log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( & ( *mCurrentBuffers ) ) );
-      log ( Info() , "lSendBytesAvailable: " , Integer ( lSendBytesAvailable )  ,
-            " | lSendBytesAvailableForPayload (bytes): " , Integer ( lSendBytesAvailableForPayload )  ,
-            " | lSendBytesAvailableForPayload (words): " , Integer ( lSendBytesAvailableForPayload>>2 ) ,
-            " | lPayloadByteCount = " , Integer ( lPayloadByteCount ) );
+      //      log ( Info() , std::string ( 100,'-' ) );
+      //      log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( & ( *mCurrentBuffers ) ) );
+      //      log ( Info() , "lSendBytesAvailable: " , Integer ( lSendBytesAvailable )  ,
+      //            " | lSendBytesAvailableForPayload (bytes): " , Integer ( lSendBytesAvailableForPayload )  ,
+      //            " | lSendBytesAvailableForPayload (words): " , Integer ( lSendBytesAvailableForPayload>>2 ) ,
+      //            " | lPayloadByteCount = " , Integer ( lPayloadByteCount ) );
       mCurrentBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode() ) );
       mCurrentBuffers->send ( lAddr );
       mCurrentBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );

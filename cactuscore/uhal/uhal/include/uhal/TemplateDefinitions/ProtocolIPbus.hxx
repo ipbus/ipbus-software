@@ -257,7 +257,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-   exception::exception* IPbus< 2 , IPbus_minor , buffer_size >::validate ( uint8_t* aSendBufferStart ,
+  exception::exception* IPbus< 2 , IPbus_minor , buffer_size >::validate ( uint8_t* aSendBufferStart ,
       uint8_t* aSendBufferEnd ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
