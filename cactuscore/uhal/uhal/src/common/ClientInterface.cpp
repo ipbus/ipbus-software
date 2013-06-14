@@ -147,8 +147,17 @@ namespace uhal
   void ClientInterface::dispatch ()
   {
     CreateFillingBuffer ( ); //put this here to protect against users doing a dispatch with no data to send.
-    unflushedDispatch ();
-    this->Flush();
+    unflushedDispatch (); // this is protected by its own internal try-catch-handle block
+
+    try
+    {
+      this->Flush();
+    }
+    catch ( ... )
+    {
+      this->dispatchExceptionHandler();
+      throw;
+    }
   }
 
 
