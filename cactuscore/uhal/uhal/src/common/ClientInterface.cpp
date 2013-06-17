@@ -197,10 +197,10 @@ namespace uhal
     //results are valid, so mark returned data as valid
     if ( !lRet )
     {
+      mDispatchedBuffers.pop_front();
       lBuffer->validate();
     }
 
-    mDispatchedBuffers.pop_front();
     return lRet;
   }
 
