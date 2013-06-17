@@ -109,9 +109,9 @@ COMMANDS += [["DEPENDENCIES",
                "sudo yum -y groupinstall extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite"]]]
 
 CHECKOUT_CMDS = ["cd %s" % BUILD_HOME,
-                 "svn co svn+ssh://svn.cern.ch/reps/cactus/trunk",
-#                 "svn co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk",
-                 "svn co svn+ssh://svn.cern.ch/reps/cmsos/branches/l1_xaas daq/xaas"]
+                 "svn -q co svn+ssh://svn.cern.ch/reps/cactus/trunk",
+#                 "svn -q co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk",
+                 "svn -q co svn+ssh://svn.cern.ch/reps/cmsos/branches/l1_xaas daq/xaas"]
 
 L1PAGE_SED_CMDS = [""
                    ]
@@ -120,8 +120,8 @@ COMMANDS += [["CHECKOUT",
 
 
 COMMANDS += [["BUILD",
-              ["cd %s;make -k" % join(BUILD_HOME,"trunk"),
-               "cd %s;make -k rpm" % join(BUILD_HOME,"trunk")]]]
+              ["cd %s;make -sk" % join(BUILD_HOME,"trunk"),
+               "cd %s;make -sk rpm" % join(BUILD_HOME,"trunk")]]]
 
 COMMANDS += [["RELEASE",
               ["rm -rf %s" % RELEASE_RPM_DIR,
@@ -164,8 +164,6 @@ COMMANDS += [["TEST TRIGGER SUPERVISOR",
                "cp -r %s %s" % ("/afs/cern.ch/user/c/cactus/secure",BUILD_HOME),
                "sed -i 's|\(PWD_PATH=\).*$|\\1%s|' %s" % (join(BUILD_HOME,"secure"),
                                                           join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
-               "sed -i 's|\(SLIM_SERVICE_HOST=\).*$|\\1%s|' %s" % (getfqdn(),
-                                                                   join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
                "cd %s;make;make rpm;make install" % join(BUILD_HOME,"daq/xaas/slim/l1test"),
                "sudo cp %s /etc/slp.conf" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/slp.localhost.conf"),
                "sudo /sbin/service slp restart",
