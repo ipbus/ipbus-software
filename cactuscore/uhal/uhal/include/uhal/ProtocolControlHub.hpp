@@ -134,7 +134,7 @@ namespace uhal
 
       virtual uint32_t getMaxNumberOfBuffers()
       {
-        return 16;
+        return 32;
       }
 
     private:
