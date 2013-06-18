@@ -40,10 +40,10 @@
 
 using namespace uhal;
 
-#define N_4B    1
-#define N_1kB   1024/4
-#define N_1MB   1024*1024/4
-#define N_1GB   1024*1024*1024/4
+#define N_4B     1
+#define N_1kB    1024/4
+#define N_1MB    1024*1024/4
+#define N_200MB  200*1024*1024/4
 
 
 void block_write_read ( size_t N,const std::string& connection, const std::string& id )
@@ -85,9 +85,9 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
     // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
     std::vector<uint32_t> xx;
 
-    if ( N == N_1GB )
+    if ( N == N_200MB )
     {
-      std::cout << "Filling 1GB test vector..." << std::endl;
+      std::cout << "Filling 200MB test vector..." << std::endl;
     }
 
     try
@@ -105,34 +105,34 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
       return;
     }
 
-    if ( N == N_1GB )
+    if ( N == N_200MB )
     {
       std::cout << "Filling test vector done." << std::endl;
     }
 
-    if ( N == N_1GB )
+    if ( N == N_200MB )
     {
-      std::cout << "Doing 1GB block write" << std::endl;
+      std::cout << "Doing 200MB block write" << std::endl;
     }
 
     hw.getNode ( "FIFO" ).writeBlock ( xx );
 
-    if ( N == N_1GB )
+    if ( N == N_200MB )
     {
-      std::cout << "1GB block write done" << std::endl;
+      std::cout << "200MB block write done" << std::endl;
     }
   }
 
-  if ( N == N_1GB )
+  if ( N == N_200MB )
   {
-    std::cout << "Doing 1GB block read" << std::endl;
+    std::cout << "Doing 200MB block read" << std::endl;
   }
 
   ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlock ( N );
 
-  if ( N == N_1GB )
+  if ( N == N_200MB )
   {
-    std::cout << "1GB block read done" << std::endl;
+    std::cout << "200MB block read done" << std::endl;
   }
 
   CACTUS_CHECK ( !mem.valid() );
@@ -207,7 +207,7 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST ( fifo_write_read ( N_4B,connection_file,device_id ) );
   CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
   CACTUS_TEST ( fifo_write_read ( N_1MB,connection_file,device_id ) );
-  CACTUS_TEST ( fifo_write_read ( N_1GB,connection_file,device_id ) );
+  CACTUS_TEST ( fifo_write_read ( N_200MB,connection_file,device_id ) );
   //Block to big
   //CACTUS_TEST_THROW(block_bigger_than_size_attribute(connection_file,device_id ),uhal::exception::BulkTransferRequestedTooLarge);
   block_transfer_too_big ( connection_file,device_id );
