@@ -25,7 +25,8 @@ class MainApplication(wx.App):
         
         for gui in self.guilist:
             class_object = dynamic_loader(gui)[0]
-            gui_instance = class_object(None, -1, gui.__name__)
+            # First argument is the parent GUI, second argument is the ID, third argument is the GUI title
+            gui_instance = class_object(None, wx.ID_ANY, gui.__name__)
             gui_instance.Show(True)
 
         return True
