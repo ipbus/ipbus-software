@@ -272,8 +272,8 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                     true ->
                         ?CH_LOG_INFO("Reply packet got lost on way back from board."),
                         NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid}),
-                        {{2,0}, {control,Id}, End} = parse_ipbus_packet(HdrSent),
-                        gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id, End)),
+                        {{2,0}, {control,Id}, _End} = parse_ipbus_packet(HdrSent),
+                        gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id)),
                         ch_stats:udp_sent(S#state.stats),
                         if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, response); true -> void end,
                         {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
@@ -604,12 +604,9 @@ parse_ipbus_packet({status, Bin}) when is_binary(Bin) ->
 %%       End = big | little
 %% @end
 %% ------------------------------------------------------------------------------------
-resend_request_pkt(Id, End) when Id =< 16#ffff, Id >= 0 ->
+resend_request_pkt(Id) when Id =< 16#ffff, Id >= 0 ->
     Value = (2 bsl 28) + (Id bsl 8) + 16#f2,
-    case End of
-        big    -> <<Value:32/big>>;
-        little -> <<Value:32/little>>
-    end.
+    <<Value:32/big>>.
 
 
 %% ------------------------------------------------------------------------------------
