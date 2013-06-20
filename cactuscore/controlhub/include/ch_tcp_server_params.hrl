@@ -19,4 +19,4 @@
 % the front of every logically complete TCP request stream sent to the control hub.  This 32-bit
 % header simply tells Erlang how many bytes will follow in order that it can correctly receive
 % the complete TCP stream. 
--define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {reuseaddr, true}, {active, true}, {backlog, ?MAX_CONCURRENT_CLIENT_CONNECTIONS}]).
+-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {reuseaddr, true}, {nodelay, true}, {active, true}, {backlog, ?MAX_CONCURRENT_CLIENT_CONNECTIONS}]).
