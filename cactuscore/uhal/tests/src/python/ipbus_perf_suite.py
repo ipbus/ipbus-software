@@ -34,9 +34,12 @@ TARGETS = ['amc-e1a12-19-09:50001',
            'amc-e1a12-19-10:50001',
            'amc-e1a12-19-04:50001']
 
+
 ####################################################################################################
 #  EXCEPTION CLASSES
+
 class CommandHardTimeout(Exception):
+    '''Exception thrown when command spends too long running and has to be killed by the script'''
     def __init__(self, cmd, timeout):
         self.cmd = cmd
         self.timeout = timeout
@@ -44,6 +47,7 @@ class CommandHardTimeout(Exception):
         return "Command '" + self.cmd + "', timeout was " + str(self.timeout) + " seconds"
 
 class CommandBadExitCode(Exception):
+    '''Exception thrown when command returns a non-zero exit code'''
     def __init__(self, cmd, exit_code, output):
         self.cmd = cmd
         self.value = exit_code
@@ -107,12 +111,12 @@ def run_command(cmd, ssh_client=None):
   else:
     for env_var, value in CH_PC_ENV.iteritems():
         cmd = "export " + env_var + "=" + value + " ; " + cmd
-    print "Remotely running", cmd
+#    print "Remotely running", cmd
     stdin, stdout, stderr = ssh_client.exec_command(cmd)
     exit_code = stdout.channel.recv_exit_status()
     output = "".join( stdout.readlines() ) + "".join( stderr.readlines() )
    
-    print output
+#    print output
  
     if exit_code: 
         raise CommandBadExitCode(cmd, exit_code, output)
@@ -135,16 +139,27 @@ def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDisp
     m2 = re.search(r"^Average \S+ bandwidth\s+=\s*([\d\.]+)\s*KB/s", output, flags=re.MULTILINE)
     bandwidth = float(m2.group(1)) / 125.0
 
-    print "+ Parsed: Time per it =", 1000000.0/freq, "us", ", bandwidth =", bandwidth, "Mb/s"
+    print "+ Parsed: Latency =", 1000000.0/freq, "us/iteration", ", bandwidth =", bandwidth, "Mb/s"
     return (1000000.0/freq, bandwidth)
 
 
+def run_ping(targetname):
+    '''Runs unix ping command and returns average latency'''
+    #TODO
+    return -99.9
+
+
 def ssh_into(hostname, username):
-    passwd = getpass.getpass('Password for ' + username + '@' + hostname + ': ')
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname, username=username, password=passwd)
-    return client
+    try: 
+        passwd = getpass.getpass('Password for ' + username + '@' + hostname + ': ')
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(hostname, username=username, password=passwd)
+        return client
+    except paramiko.AuthenticationException, e:
+        print "Authenication exception caught. Details:", str(e)
+        print "Let's try again ...\n"
+        return ssh_into(hostname, username)
 
 
 def start_controlhub(ssh_client=None):
@@ -158,6 +173,23 @@ def stop_controlhub(ssh_client=None):
 ####################################################################################################
 #  FUNCTIONS RUNNING SEQUENCES OF TESTS
 
+def measure_latency(target, controhub_ssh_client=None):
+    '''Measures latency for single word write to given endpoint'''
+    print "\n ---> MEASURING LATENCY TO '" + target + "' <---"
+    
+    ping_latency = run_ping(target)
+    
+    udp_latency, udp_bw = run_perftester("ipbusudp-2.0://"+target, width=1, perItDispatch=True)
+    
+    start_controlhub(controlhub_ssh_client)
+    ch_latency, ch_bw = run_perftester("chtcp-2.0://"+CH_PC_NAME+":10203?target="+target, width=1, perItDispatch=True)
+    stop_controlhub(controlhub_ssh_client)    
+
+    print "Latencies for "+target
+    print "    + Ping           : " + ("%.2f" % ping_latency) + "us"
+    print "    + Direct UDP     : " + ("%.2f" % udp_latency) + "us"
+    print "    + Via ControlHub : " + ("%.2f" % ch_latency) + "us"
+
 
 ####################################################################################################
 #  MAIN
@@ -166,6 +198,11 @@ if __name__ == "__main__":
     print " Entered main!"
     
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
+
+    for target in TARGETS:
+        measure_latency(target, controlhub_ssh_client)
+
+    sys.exit(0)
 
     direct_uri = "ipbusudp-2.0://" + TARGETS[0]
     chtcp_uri  = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + TARGETS[0]
