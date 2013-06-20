@@ -154,7 +154,7 @@ def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDisp
     m2 = re.search(r"^Average \S+ bandwidth\s+=\s*([\d\.]+)\s*KB/s", output, flags=re.MULTILINE)
     bandwidth = float(m2.group(1)) / 125.0
 
-    SCRIPT_LOGGER.info("Parsed: Latency =" + str(1000000.0/freq) + "us/iteration , bandwidth =" + str(bandwidth) + "Mb/s")
+    SCRIPT_LOGGER.info("Parsed: Latency = " + str(1000000.0/freq) + "us/iteration , bandwidth = " + str(bandwidth) + "Mb/s")
     return (1000000.0/freq, bandwidth)
 
 
@@ -170,6 +170,7 @@ def ssh_into(hostname, username):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname, username=username, password=passwd)
+        print " SSH client now connected!"
         return client
     except paramiko.AuthenticationException, e:
         print "Authenication exception caught. Details:", str(e)
@@ -206,30 +207,38 @@ def measure_latency(target, controhub_ssh_client=None):
     print "    + Via ControlHub : " + ("%.2f" % ch_latency) + "us"
 
 
+def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
+    '''Measures bandwidth for block writes to given endpoint'''
+    print "\n ---> MEASURING BANDWIDTH TO '" + target + "' <---"
+    
+    depths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25,
+              50, 75, 100, 150, 200, 250, 300, 310, 320, 330, 340,
+              341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 500, 1000, 5000, 10000, 20000]
+
+    udp_uri = "ipbusudp-2.0://" + target
+    udp_bandwidths = [ x[1] for x in [run_perftester(udp_uri, perItDispatch=True, width=d, iterations=10000) for d in depths] ]
+    udp_bw_inf = run_perftester(udp_uri, perItDispatch=False, width=1000, iterations=500000)[1]
+
+    ch_uri = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
+    start_controlhub(controlhub_ssh_client)
+    ch_bandwidths = [ x[1] for x in [run_perftester(ch_uri, perItDispatch=True, width=d, iterations=10000) for d in depths] ]
+    ch_bw_inf  = run_perftester(ch_uri,  perItDispatch=False, width=1000, iterations=500000)[1]
+    stop_controlhub(controlhub_ssh_client)
+
+    for d, udp_bw, ch_bw in zip(depths, udp_bandwidths, ch_bandwidths):
+        print d, " ==> ", "%.1f" % udp_bw, " / ", "%.1f" % ch_bw, " -- ratio", "%.2f" % (ch_bw/udp_bw)
+
+    print "inf  ==> ", "%.1f" % udp_bw_inf, " / ", "%.1f" % ch_bw_inf, " -- ratio", "%.2f" % (ch_bw_inf/udp_bw_inf)
+
+
 ####################################################################################################
 #  MAIN
 
 if __name__ == "__main__":
-    print " Entered main!"
-    
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    for target in TARGETS:
-        measure_latency(target, controlhub_ssh_client)
+   for target in TARGETS:
+       measure_latency(target, controlhub_ssh_client)
 
-    sys.exit(0)
-
-    direct_uri = "ipbusudp-2.0://" + TARGETS[0]
-    chtcp_uri  = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + TARGETS[0]
-
-    run_perftester(direct_uri, width=1, perItDispatch=True)
-#    run_perftester(direct_uri, width=335, perItDispatch=True)
-#    run_perftester(direct_uri, width=335, iterations=500000, perItDispatch=False)
-
-    start_controlhub(controlhub_ssh_client)
-    run_perftester(chtcp_uri, width=1, perItDispatch=True)
-    run_perftester(chtcp_uri, width=335, perItDispatch=True)
-    run_perftester(chtcp_uri, width=335, iterations=500000, perItDispatch=False)
-    stop_controlhub(controlhub_ssh_client)
-
+    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
 
