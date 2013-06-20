@@ -19,6 +19,7 @@ import subprocess
 import sys
 import time
 
+
 ####################################################################################################
 #  GLOBAL OPTIONS
 
@@ -34,6 +35,20 @@ TARGETS = ['amc-e1a12-19-09:50001',
            'amc-e1a12-19-10:50001',
            'amc-e1a12-19-04:50001']
 
+
+###################################################################################################
+#  SETUP LOGGING
+
+import logging
+
+SCRIPT_LOGGER = logging.getLogger("ipbus_perf_suite_log")
+
+SCRIPT_LOG_HANDLER = logging.StreamHandler(sys.stdout)
+SCRIPT_LOG_FORMATTER = logging.Formatter("%(message)s")
+SCRIPT_LOG_HANDLER.setFormatter(SCRIPT_LOG_FORMATTER)
+
+SCRIPT_LOGGER.addHandler(SCRIPT_LOG_HANDLER)
+SCRIPT_LOGGER.setLevel(logging.WARNING)
 
 ####################################################################################################
 #  EXCEPTION CLASSES
@@ -68,7 +83,7 @@ def run_command(cmd, ssh_client=None):
       cmd = "sudo PATH=$PATH " + cmd[4:]
 
   if ssh_client is None:
-    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+    SCRIPT_LOGGER.info("Running (locally): "+cmd)
     t0 = time.time()
 
     p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
@@ -111,12 +126,12 @@ def run_command(cmd, ssh_client=None):
   else:
     for env_var, value in CH_PC_ENV.iteritems():
         cmd = "export " + env_var + "=" + value + " ; " + cmd
-#    print "Remotely running", cmd
+    SCRIPT_LOGGER.info("Running (remotely): "+cmd)
     stdin, stdout, stderr = ssh_client.exec_command(cmd)
     exit_code = stdout.channel.recv_exit_status()
     output = "".join( stdout.readlines() ) + "".join( stderr.readlines() )
    
-#    print output
+    SCRIPT_LOGGER.info("Output is ...\n"+output)
  
     if exit_code: 
         raise CommandBadExitCode(cmd, exit_code, output)
@@ -139,7 +154,7 @@ def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDisp
     m2 = re.search(r"^Average \S+ bandwidth\s+=\s*([\d\.]+)\s*KB/s", output, flags=re.MULTILINE)
     bandwidth = float(m2.group(1)) / 125.0
 
-    print "+ Parsed: Latency =", 1000000.0/freq, "us/iteration", ", bandwidth =", bandwidth, "Mb/s"
+    SCRIPT_LOGGER.info("Parsed: Latency =" + str(1000000.0/freq) + "us/iteration , bandwidth =" + str(bandwidth) + "Mb/s")
     return (1000000.0/freq, bandwidth)
 
 
