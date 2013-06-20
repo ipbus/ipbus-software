@@ -16,9 +16,8 @@ RELEASE_API_DIR     = join(RELEASE_BASE,"api")
 CACTUS_PREFIX       = "/opt/cactus"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 
-#xdaq.repo file name as a function of the platform, and alias dirs for the nightlies results
+#nightly symbolic link name as a function of the platform
 pseudo_platform= "unknown"
-
 
 if PLATFORM.find("i686-with-redhat-5") != -1:
     pseudo_platform="slc5_i686"
@@ -61,9 +60,7 @@ TEST_PASSED_LIST  = ["TEST PASSED",
 
 
 ####ENVIRONMENT
-environ["XDAQ_ROOT"]       = XDAQ_ROOT
 environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
-                                       join(XDAQ_ROOT,"lib"),
                                        "/lib",
                                        environ.get("LD_LIBARY_PATH","")])
 
@@ -75,7 +72,8 @@ environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin"),
 COMMANDS = []
 
 COMMANDS += [["UNINSTALL",
-              ["sudo yum -y groupremove uhal",
+              ["sudo yum clean all",
+               "sudo yum -y groupremove uhal",
                "rpm -qa| grep cactuscore- | xargs sudo rpm -ev &> /dev/null ",
                "rpm -qa| grep cactusprojects- | xargs sudo rpm -ev &> /dev/null ",
                "sudo pkill -f \"DummyHardwareTcp.exe\" &> /dev/null ",
@@ -95,7 +93,8 @@ COMMANDS += [["DEPENDENCIES",
 
 CHECKOUT_CMDS = ["cd %s" % BUILD_HOME,
                  "svn -q co svn+ssh://svn.cern.ch/reps/cactus/trunk",
-#                 "svn -q co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk"]
+#                 "svn -q co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk"
+                 ]
 
 COMMANDS += [["CHECKOUT",
               [";".join(CHECKOUT_CMDS)]]]
@@ -115,7 +114,7 @@ COMMANDS += [["RELEASE",
                "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_RPM_DIR]]]
 
 COMMANDS += [["INSTALL",
-              ["sed \"s/<platform>/%s/\" cactus.repo  | sudo tee /etc/yum.repos.d/cactus.repo > /dev/null" % PLATFORM,
+              ["sed \"s/<platform>/%s/\" uhal.nightly.repo  | sudo tee /etc/yum.repos.d/uhal.repo > /dev/null" % pseudo_platform,
                "sudo yum clean all",
                "sudo yum -y groupinstall uhal"]]]
 
