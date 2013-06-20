@@ -6,15 +6,8 @@ PACKAGES = \
         cactuscore/extern/pugixml \
         cactuscore/uhal \
         cactuscore/controlhub
-else
+else ifeq ($(Set), ts)
 PACKAGES = \
-        cactuscore/extern/binutils \
-        cactuscore/extern/boost \
-        cactuscore/extern/erlang \
-        cactuscore/extern/pugixml \
-        cactuscore/uhal \
-        cactuscore/controlhub \
-	\
         cactuscore/extern/icons \
         cactuscore/extern/dojo \
         cactuscore/ts/toolbox \
