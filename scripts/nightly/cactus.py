@@ -14,9 +14,8 @@ RELEASE_LOG_DIR     = join(RELEASE_BASE,"logs")
 RELEASE_API_DIR     = join(RELEASE_BASE,"api")
 #The log file name and path should be the same than in the one in the acrontab
 CACTUS_PREFIX       = "/opt/cactus"
-XDAQ_ROOT           = "/opt/xdaq"
-L1PAGE_ROOT	    = "/opt/l1page/tomcat/webapps/ROOT"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
+
 #xdaq.repo file name as a function of the platform, and alias dirs for the nightlies results
 pseudo_platform= "unknown"
 
@@ -28,19 +27,17 @@ elif PLATFORM.find("x86_64-with-redhat-5") != -1:
 elif PLATFORM.find("x86_64-with-redhat-6") != -1:
     pseudo_platform="slc6_x86_64"
 
-XDAQ_REPO_FILE_NAME = "xdaq.%s.repo" % pseudo_platform
 system("cd %s;rm -f %s" % (NIGHTLY_BASE,pseudo_platform),exception=False)
 system("cd %s;ln -s %s %s" % (NIGHTLY_BASE,PLATFORM,pseudo_platform),exception=False)
   
 
 ####VARIABLES: analysis of logs
-TITLE             = "CACTUS Nightlies: %s " % pseudo_platform
+TITLE             = "uHAL Nightlies: %s " % pseudo_platform
 FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
 WEB_URL           = join("http://cern.ch/cactus/nightly/",PLATFORM)
 RELEASE_LOG_FILE    = join(RELEASE_LOG_DIR,"nightly.log")
-ERROR_LIST        = ['TEST FAILED, ',
-                     'error: ',
+ERROR_LIST        = ['error: ',
                      'RPM build errors',
                      'collect2: ld returned',
                      ' ERROR ',
@@ -48,8 +45,7 @@ ERROR_LIST        = ['TEST FAILED, ',
                      'FAILED',
                      'FAIL: test', 'ERROR: test', #pycohal
                      '*failed*', #controlhub
-                     'terminate called',
-		     'L1Page ERROR']
+                     'terminate called']
 
 IGNORE_ERROR_LIST = ["sudo pkill",
                      "sudo rpm -ev"]
@@ -61,9 +57,7 @@ TEST_PASSED_LIST  = ["TEST PASSED",
                      " ... ok", #pycohal
                      "...ok", #controlhub
                      "Average read bandwidth",
-                     "Average write bandwidth",
-                     "TEST OK",
-                     "L1Page OK"]
+                     "Average write bandwidth"]
 
 
 ####ENVIRONMENT
@@ -81,17 +75,9 @@ environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin"),
 COMMANDS = []
 
 COMMANDS += [["UNINSTALL",
-              ["sudo /sbin/service xdaqd stop &> /dev/null ",
-               "sudo yum -y groupremove cactus ",
-               "rpm -qa | grep cactus- | xargs sudo rpm -ev &> /dev/null ",
-               "rpm -qa | grep daq-xaas-l1test | xargs sudo rpm -ev",
-               "sudo yum -y groupremove triggersupervisor uhal gtgmt",
-               "sudo yum -y groupremove extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite ",
-               "rpm -qa | grep l1page | xargs sudo rpm -ev &> /dev/null ",
-               "sudo pkill -f \"xdaq.exe\" ",
+              ["sudo yum -y groupremove uhal",
                "rpm -qa| grep cactuscore- | xargs sudo rpm -ev &> /dev/null ",
                "rpm -qa| grep cactusprojects- | xargs sudo rpm -ev &> /dev/null ",
-               "sudo pkill -f \"jsvc\" &> /dev/null ",
                "sudo pkill -f \"DummyHardwareTcp.exe\" &> /dev/null ",
                "sudo pkill -f \"DummyHardwareUdp.exe\" &> /dev/null ",
                "sudo pkill -f \"cactus.*erlang\" &> /dev/null ",
@@ -104,24 +90,20 @@ COMMANDS += [["ENVIRONMENT",
               ["env"]]]
 
 COMMANDS += [["DEPENDENCIES",
-              ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel graphviz graphviz-devel boost boost-devel wxPython e2fsprogs-devel qt qt-devel PyQt PyQt-devel qt-designer",
-               "sudo cp %s %s" % (XDAQ_REPO_FILE_NAME,"/etc/yum.repos.d/xdaq.repo"),
-               "sudo yum -y groupinstall extern_coretools coretools extern_powerpack powerpack database_worksuite general_worksuite hardware_worksuite"]]]
+              ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel graphviz graphviz-devel boost boost-devel wxPython e2fsprogs-devel qt qt-devel PyQt PyQt-devel qt-designer"
+               ]]]
 
 CHECKOUT_CMDS = ["cd %s" % BUILD_HOME,
                  "svn -q co svn+ssh://svn.cern.ch/reps/cactus/trunk",
-#                 "svn -q co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk",
-                 "svn -q co svn+ssh://svn.cern.ch/reps/cmsos/branches/l1_xaas daq/xaas"]
+#                 "svn -q co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk"]
 
-L1PAGE_SED_CMDS = [""
-                   ]
 COMMANDS += [["CHECKOUT",
               [";".join(CHECKOUT_CMDS)]]]
 
 
 COMMANDS += [["BUILD",
-              ["cd %s;make -sk" % join(BUILD_HOME,"trunk"),
-               "cd %s;make -sk rpm" % join(BUILD_HOME,"trunk")]]]
+              ["cd %s;make -sk Set=uhal" % join(BUILD_HOME,"trunk"),
+               "cd %s;make -sk Set=uhal rpm" % join(BUILD_HOME,"trunk")]]]
 
 COMMANDS += [["RELEASE",
               ["rm -rf %s" % RELEASE_RPM_DIR,
@@ -135,9 +117,7 @@ COMMANDS += [["RELEASE",
 COMMANDS += [["INSTALL",
               ["sed \"s/<platform>/%s/\" cactus.repo  | sudo tee /etc/yum.repos.d/cactus.repo > /dev/null" % PLATFORM,
                "sudo yum clean all",
-               "sudo yum -y groupinstall uhal",
-               "sudo yum -y groupinstall triggersupervisor",
-               "sudo yum -y groupinstall gtgmt"]]]
+               "sudo yum -y groupinstall uhal"]]]
 
 COMMANDS += [["TEST CONTROLHUB",
               ["sudo chmod +w /var/log",
@@ -167,46 +147,4 @@ COMMANDS += [["TEST uHAL TOOLS",
               ["uhal_test_suite.py -v -s tools"]
             ]]
 
-COMMANDS += [["TEST TRIGGER SUPERVISOR",             
-              ["sudo cp %s /etc/tnsnames.ora" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/tnsnames.cern.ora"),
-               "cp -r %s %s" % ("/afs/cern.ch/user/c/cactus/secure",BUILD_HOME),
-               "sed -i 's|\(PWD_PATH=\).*$|\\1%s|' %s" % (join(BUILD_HOME,"secure"),
-                                                          join(BUILD_HOME,"daq/xaas/slim/l1test/service/mf.service.settings")),
-               "cd %s;make;make rpm;make install" % join(BUILD_HOME,"daq/xaas/slim/l1test"),
-               "sudo cp %s /etc/slp.conf" % join(BUILD_HOME,"daq/xaas/slim/l1test/settings/etc/slp.localhost.conf"),
-               "sudo /sbin/service slp restart",
-               "/bin/slptool findsrvs service:directory-agennt",
-               "sudo /sbin/service xdaqd start",
-               "sleep 240",
-               "cd %s;python multicell.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
-               "cd %s;python multicell_fault.py;" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
-               "cd %s;python multicell_stress.py" % join(BUILD_HOME,"trunk/cactusprojects/subsystem/tests"),
-               "sudo /sbin/service xdaqd stop"]]]
-
-COMMANDS += [["TEST CENTRAL CELL",
-              ["sudo /sbin/service xdaqd start",
-               "sleep 30",
-               "cd %s;python central.py" % join(BUILD_HOME,"trunk/cactusprojects/central/tests"),
-               "sudo /sbin/service xdaqd stop"]]]
-
-COMMANDS += [["TEST RETRI CELL",
-              ["sudo /sbin/service xdaqd start",
-               "sleep 30",
-               "cd %s;python retri.py" % join(BUILD_HOME,"trunk/cactusprojects/retri/tests"),
-               "sudo /sbin/service xdaqd stop"]]]
-
-COMMANDS += [["TEST TTC",
-              ["sudo /sbin/service xdaqd start",
-               "sleep 30",
-               "cd %s;python ttc.py" % join(BUILD_HOME,"trunk/cactusprojects/ttc/tests"),
-               "sudo /sbin/service xdaqd stop"]]]
-
-COMMANDS += [["TEST L1PAGE",
-              ["sudo yum -y install cactusprojects-l1page-*",
-               "mkdir -p %s" % join(BUILD_HOME, "triggerpro/l1page/data"),
-               "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0/centraltspro", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
-               "sudo sed -i 's|%s|%s|g' %s" % ("/nfshome0", BUILD_HOME, join(L1PAGE_ROOT, "main/l1page.properties")),
-               "sudo sed -i 's|%s|%s|g' %s" % ("log4j.appender","#log4j.appender", join(L1PAGE_ROOT, "WEB-INF/classes/log4j.properties")),
-               "python %s" % join(L1PAGE_ROOT, "test/l1pageTest.py")]
-              ]]
 
