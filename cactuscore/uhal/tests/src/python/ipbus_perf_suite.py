@@ -10,6 +10,7 @@ N.B: You must set LD_LIBRARY_PATH and PATH appropriately before this
 
 from datetime import datetime
 import fcntl
+import getpass
 import os
 import paramiko
 import re
@@ -25,8 +26,13 @@ TEST_CMD_TIMEOUT_S = 240
 
 CH_PC_NAME = 'pc-e1x06-36-01'
 CH_PC_USER = 'tsw'
+CH_PC_ENV  = {'PATH':os.environ['PATH'],
+              'LD_LIBRARY_PATH':os.environ['LD_LIBRARY_PATH'] 
+              }
 
-TARGETS = ['amc-e1a12-19-09:50001']
+TARGETS = ['amc-e1a12-19-09:50001',
+           'amc-e1a12-19-10:50001',
+           'amc-e1a12-19-04:50001']
 
 ####################################################################################################
 #  EXCEPTION CLASSES
@@ -38,11 +44,12 @@ class CommandHardTimeout(Exception):
         return "Command '" + self.cmd + "', timeout was " + str(self.timeout) + " seconds"
 
 class CommandBadExitCode(Exception):
-    def __init__(self, cmd, exit_code):
+    def __init__(self, cmd, exit_code, output):
         self.cmd = cmd
         self.value = exit_code
+        self.output = output
     def __str__(self):
-        return "Exit code " + str(self.value) + " from command '" + self.cmd + "'"
+        return "Exit code " + str(self.value) + " from command '" + self.cmd + "'\nOutput was:\n" + self.output
 
 
 ####################################################################################################
@@ -93,17 +100,23 @@ def run_command(cmd, ssh_client=None):
 
     exit_code = p.poll()
     if exit_code:
-        raise CommandBadExitCode(cmd, exit_code)
+        raise CommandBadExitCode(cmd, exit_code, stdout)
 
     return exit_code, stdout
 
   else:
+    for env_var, value in CH_PC_ENV.iteritems():
+        cmd = "export " + env_var + "=" + value + " ; " + cmd
+    print "Remotely running", cmd
     stdin, stdout, stderr = ssh_client.exec_command(cmd)
     exit_code = stdout.channel.recv_exit_status()
-    if exit_code:
-        raise CommandBadExitCode(cmd, exit_code)
     output = "".join( stdout.readlines() ) + "".join( stderr.readlines() )
-    
+   
+    print output
+ 
+    if exit_code: 
+        raise CommandBadExitCode(cmd, exit_code, output)
+
     return exit_code, output
 
 
@@ -127,7 +140,7 @@ def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDisp
 
 
 def ssh_into(hostname, username):
-    passwd = getpass.getpass('Password for ' + username + '@' + hostname ': ')
+    passwd = getpass.getpass('Password for ' + username + '@' + hostname + ': ')
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname, username=username, password=passwd)
@@ -135,11 +148,11 @@ def ssh_into(hostname, username):
 
 
 def start_controlhub(ssh_client=None):
-    run_command("sudo PATH=$PATH controlhub_start", ssh_client=ssh_client)
+    run_command("sudo controlhub_start", ssh_client=ssh_client)
 
 
 def stop_controlhub(ssh_client=None):
-    run_command("sudo PATH=$PATH controlhub_stop", ssh_client=ssh_client)
+    run_command("sudo controlhub_stop", ssh_client=ssh_client)
 
 
 ####################################################################################################
@@ -154,17 +167,17 @@ if __name__ == "__main__":
     
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    direct_uri = "ipbusudp2.0://" + TARGETS[0]
+    direct_uri = "ipbusudp-2.0://" + TARGETS[0]
     chtcp_uri  = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + TARGETS[0]
 
     run_perftester(direct_uri, width=1, perItDispatch=True)
-    run_perftester(direct_uri, width=335, perItDispatch=True)
-    run_perftester(direct_uri, width=335, iterations=500000, perItDispatch=False)
+#    run_perftester(direct_uri, width=335, perItDispatch=True)
+#    run_perftester(direct_uri, width=335, iterations=500000, perItDispatch=False)
 
-    start_controlhub()
+    start_controlhub(controlhub_ssh_client)
     run_perftester(chtcp_uri, width=1, perItDispatch=True)
     run_perftester(chtcp_uri, width=335, perItDispatch=True)
     run_perftester(chtcp_uri, width=335, iterations=500000, perItDispatch=False)
-    stop_controlhub()
+    stop_controlhub(controlhub_ssh_client)
 
 
