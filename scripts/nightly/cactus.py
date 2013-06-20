@@ -147,8 +147,16 @@ COMMANDS += [["TEST IPBUS 1.3",
               ["uhal_test_suite.py -v -s 1.3"]
             ]]
 
-COMMANDS += [["TEST IPBUS 2.0",
-              ["uhal_test_suite.py -v -s 2.0"]
+COMMANDS += [["TEST IPBUS 2.0 - UDP",
+              ['uhal_test_suite.py -v -s "2.0 udp"']
+            ]]
+
+COMMANDS += [["TEST IPBUS 2.0 - TCP",
+              ['uhal_test_suite.py -v -s "2.0 tcp"']
+            ]]
+
+COMMANDS += [["TEST IPBUS 2.0 - ControlHub",
+              ['uhal_test_suite.py -v -s "2.0 controlhub"']
             ]]
 
 COMMANDS += [["TEST uHAL GUI",
