@@ -9,6 +9,7 @@ svn up
 #Create directory to store logs
 PLATFORM=`python -c "import platform;print platform.platform()"`
 LOG_DIR=$HOME/www/nightly/${!#}/$PLATFORM/logs
+echo $LOG_DIR
 mkdir -p $LOG_DIR
 
 #execute nightly

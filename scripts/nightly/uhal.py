@@ -72,9 +72,7 @@ environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin"),
 COMMANDS = []
 
 COMMANDS += [["UNINSTALL",
-              ["mkdir -p %s" % NIGHTLY_BASE,
-               "rm -rf %s" % join(NIGHTLY_BASE,"*"),
-               "sudo yum clean all",
+              ["sudo yum clean all",
                "sudo yum -y groupremove uhal",
                "rpm -qa| grep cactuscore- | xargs sudo rpm -ev &> /dev/null ",
                "rpm -qa| grep cactusprojects- | xargs sudo rpm -ev &> /dev/null ",
