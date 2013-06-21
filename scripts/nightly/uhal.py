@@ -5,19 +5,10 @@ from sys import argv
 from platform import platform
 from socket import getfqdn
 
-#PSEUDO PLATFORM
-pseudo_platform = "unknown"
-PLATFORM        = platform()
-if PLATFORM.find("i686-with-redhat-5") != -1:
-    pseudo_platform="slc5_i686"
-elif PLATFORM.find("x86_64-with-redhat-5") != -1:
-    pseudo_platform="slc5_x86_64"
-elif PLATFORM.find("x86_64-with-redhat-6") != -1:
-    pseudo_platform="slc6_x86_64"
-                        
 ####VARIABLES
 BUILD_HOME          = "/build/cactus"
-RELATIVE_BASE       = join("nightly",basename(argv[0]),pseudo_platform)
+PLATFORM            = platform()
+RELATIVE_BASE       = join("nightly",__name__+".py",PLATFORM)
 NIGHTLY_BASE        = join("/afs/cern.ch/user/c/cactus/www",RELATIVE_BASE)
 RELEASE_RPM_DIR     = join(NIGHTLY_BASE,"RPMS")
 RELEASE_LOG_DIR     = join(NIGHTLY_BASE,"logs")
@@ -25,6 +16,19 @@ RELEASE_API_DIR     = join(NIGHTLY_BASE,"api")
 #The log file name and path should be the same than in the one in the acrontab
 CACTUS_PREFIX       = "/opt/cactus"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
+
+#PSEUDO PLATFORM
+pseudo_platform = "unknown"
+if PLATFORM.find("i686-with-redhat-5") != -1:
+    pseudo_platform="slc5_i686"
+elif PLATFORM.find("x86_64-with-redhat-5") != -1:
+    pseudo_platform="slc5_x86_64"
+elif PLATFORM.find("x86_64-with-redhat-6") != -1:
+    pseudo_platform="slc6_x86_64"
+
+system("mkdir -p %s" % NIGHTLY_BASE,exception=False)
+system("rm -f %s" % join(NIGHTLY_BASE,"..",pseudo_platform),exception=False)
+system("ln -s %s %s" % (NIGHTLY_BASE,join(NIGHTLY_BASE,"..",pseudo_platform)),exception=False)
 
 ####VARIABLES: analysis of logs
 TITLE             = "uHAL Nightlies: %s " % pseudo_platform
