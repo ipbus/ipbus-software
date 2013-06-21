@@ -1,40 +1,36 @@
 from nutils import system
 from os import environ
-from os.path import join
+from os.path import join,basename
+from sys import argv
 from platform import platform
 from socket import getfqdn
 
-####VARIABLES
-BUILD_HOME          = "/build/cactus"
-PLATFORM            = platform()
-NIGHTLY_BASE        = "/afs/cern.ch/user/c/cactus/www/nightly"
-RELEASE_BASE        = join(NIGHTLY_BASE,PLATFORM)
-RELEASE_RPM_DIR     = join(RELEASE_BASE,"RPMS")
-RELEASE_LOG_DIR     = join(RELEASE_BASE,"logs")
-RELEASE_API_DIR     = join(RELEASE_BASE,"api")
-#The log file name and path should be the same than in the one in the acrontab
-CACTUS_PREFIX       = "/opt/cactus"
-CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
-
-#nightly symbolic link name as a function of the platform
-pseudo_platform= "unknown"
-
+#PSEUDO PLATFORM
+pseudo_platform = "unknown"
+PLATFORM        = platform()
 if PLATFORM.find("i686-with-redhat-5") != -1:
     pseudo_platform="slc5_i686"
 elif PLATFORM.find("x86_64-with-redhat-5") != -1:
     pseudo_platform="slc5_x86_64"
 elif PLATFORM.find("x86_64-with-redhat-6") != -1:
     pseudo_platform="slc6_x86_64"
-
-system("cd %s;rm -f %s" % (NIGHTLY_BASE,pseudo_platform),exception=False)
-system("cd %s;ln -s %s %s" % (NIGHTLY_BASE,PLATFORM,pseudo_platform),exception=False)
-  
+                        
+####VARIABLES
+BUILD_HOME          = "/build/cactus"
+RELATIVE_BASE       = join("nightly",basename(argv[0]),pseudo_platform)
+NIGHTLY_BASE        = join("/afs/cern.ch/user/c/cactus/www",RELATIVE_BASE)
+RELEASE_RPM_DIR     = join(NIGHTLY_BASE,"RPMS")
+RELEASE_LOG_DIR     = join(NIGHTLY_BASE,"logs")
+RELEASE_API_DIR     = join(NIGHTLY_BASE,"api")
+#The log file name and path should be the same than in the one in the acrontab
+CACTUS_PREFIX       = "/opt/cactus"
+CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
 
 ####VARIABLES: analysis of logs
 TITLE             = "uHAL Nightlies: %s " % pseudo_platform
 FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
-WEB_URL           = join("http://cern.ch/cactus/nightly/",PLATFORM)
+WEB_URL           = join("http://cern.ch/cactus",RELATIVE_BASE)
 RELEASE_LOG_FILE    = join(RELEASE_LOG_DIR,"nightly.log")
 ERROR_LIST        = ['error: ',
                      'RPM build errors',
@@ -72,7 +68,9 @@ environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin"),
 COMMANDS = []
 
 COMMANDS += [["UNINSTALL",
-              ["sudo yum clean all",
+              ["mkdir -p %s" % NIGHTLY_BASE,
+               "rm -rf %s" % join(NIGHTLY_BASE,"*"),
+               "sudo yum clean all",
                "sudo yum -y groupremove uhal",
                "rpm -qa| grep cactuscore- | xargs sudo rpm -ev &> /dev/null ",
                "rpm -qa| grep cactusprojects- | xargs sudo rpm -ev &> /dev/null ",
