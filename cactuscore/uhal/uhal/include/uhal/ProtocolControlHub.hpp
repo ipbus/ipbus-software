@@ -137,6 +137,9 @@ namespace uhal
         return 32;
       }
 
+      virtual void dispatchExceptionHandler();
+
+
     private:
       //! The IP address of the target device that is connected to the Control Hub
       uint32_t mDeviceIPaddress;
