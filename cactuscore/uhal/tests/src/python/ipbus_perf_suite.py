@@ -44,22 +44,28 @@ import logging
 SCRIPT_LOGGER = logging.getLogger("ipbus_perf_suite_log")
 
 SCRIPT_LOG_HANDLER = logging.StreamHandler(sys.stdout)
-SCRIPT_LOG_FORMATTER = logging.Formatter("%(message)s")
+SCRIPT_LOG_FORMATTER = logging.Formatter("%(asctime)-15s - %(levelname)s > %(message)s")
 SCRIPT_LOG_HANDLER.setFormatter(SCRIPT_LOG_FORMATTER)
 
 SCRIPT_LOGGER.addHandler(SCRIPT_LOG_HANDLER)
-SCRIPT_LOGGER.setLevel(logging.WARNING)
+SCRIPT_LOGGER.setLevel(logging.INFO)
+
+####################################################################################################
+#  SETUP MATPLOTLIB
+
+import matplotlib.pyplot as plt
 
 ####################################################################################################
 #  EXCEPTION CLASSES
 
 class CommandHardTimeout(Exception):
     '''Exception thrown when command spends too long running and has to be killed by the script'''
-    def __init__(self, cmd, timeout):
+    def __init__(self, cmd, timeout, output):
         self.cmd = cmd
         self.timeout = timeout
+        self.output = output
     def __str__(self):
-        return "Command '" + self.cmd + "', timeout was " + str(self.timeout) + " seconds"
+        return "Command '" + self.cmd + "', timeout was " + str(self.timeout) + " seconds, and output so far was:\n" + output
 
 class CommandBadExitCode(Exception):
     '''Exception thrown when command returns a non-zero exit code'''
@@ -110,7 +116,7 @@ def run_command(cmd, ssh_client=None):
              
               if (current-t0) > TEST_CMD_TIMEOUT_S:
                   os.killpg(p.pid, signal.SIGTERM)
-                  raise CommandHardTimeout(cmd, TEST_CMD_TIMEOUT_S)
+                  raise CommandHardTimeout(cmd, TEST_CMD_TIMEOUT_S, stdout)
 
     except KeyboardInterrupt:
         print "+ Ctrl-C detected."
@@ -131,7 +137,7 @@ def run_command(cmd, ssh_client=None):
     exit_code = stdout.channel.recv_exit_status()
     output = "".join( stdout.readlines() ) + "".join( stderr.readlines() )
    
-    SCRIPT_LOGGER.info("Output is ...\n"+output)
+    SCRIPT_LOGGER.debug("Output is ...\n"+output)
  
     if exit_code: 
         raise CommandBadExitCode(cmd, exit_code, output)
@@ -216,19 +222,28 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
               341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 500, 1000, 5000, 10000, 20000]
 
     udp_uri = "ipbusudp-2.0://" + target
-    udp_bandwidths = [ x[1] for x in [run_perftester(udp_uri, perItDispatch=True, width=d, iterations=10000) for d in depths] ]
-    udp_bw_inf = run_perftester(udp_uri, perItDispatch=False, width=1000, iterations=500000)[1]
+    udp_bandwidths = [ x[1] for x in [run_perftester(udp_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
+    udp_tx_bw_inf = run_perftester(udp_uri, test="BandwidthTx", perItDispatch=False, width=1000, iterations=100000)[1]
+    udp_rx_bw_inf = run_perftester(udp_uri, test="BandwidthRx", perItDispatch=False, width=1000, iterations=100000)[1]
 
     ch_uri = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
     start_controlhub(controlhub_ssh_client)
-    ch_bandwidths = [ x[1] for x in [run_perftester(ch_uri, perItDispatch=True, width=d, iterations=10000) for d in depths] ]
-    ch_bw_inf  = run_perftester(ch_uri,  perItDispatch=False, width=1000, iterations=500000)[1]
+    ch_bandwidths = [ x[1] for x in [run_perftester(ch_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
+    ch_tx_bw_inf  = run_perftester(ch_uri, test="BandwidthTx", perItDispatch=False, width=1000, iterations=100000)[1]
+    ch_rx_bw_inf  = run_perftester(ch_uri, test="BandwidthRx", perItDispatch=False, width=1000, iterations=100000)[1]
     stop_controlhub(controlhub_ssh_client)
 
     for d, udp_bw, ch_bw in zip(depths, udp_bandwidths, ch_bandwidths):
         print d, " ==> ", "%.1f" % udp_bw, " / ", "%.1f" % ch_bw, " -- ratio", "%.2f" % (ch_bw/udp_bw)
 
-    print "inf  ==> ", "%.1f" % udp_bw_inf, " / ", "%.1f" % ch_bw_inf, " -- ratio", "%.2f" % (ch_bw_inf/udp_bw_inf)
+    print "inf, Tx  ==> ", "%.1f" % udp_tx_bw_inf, " / ", "%.1f" % ch_tx_bw_inf, " -- ratio", "%.2f" % (ch_tx_bw_inf/udp_tx_bw_inf)
+    print "inf, Rx  ==> ", "%.1f" % udp_rx_bw_inf, " / ", "%.1f" % ch_rx_bw_inf, " -- ratio", "%.2f" % (ch_rx_bw_inf/udp_rx_bw_inf)
+
+    plt.plot(depths, udp_bandwidths)
+    plt.plot(depths, ch_bandwidths)
+    plt.xlabel("Number of words")
+    plt.ylabel("Write bandwidth")
+    plt.xscale("log")
 
 
 ####################################################################################################
@@ -237,8 +252,10 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
 if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-   for target in TARGETS:
-       measure_latency(target, controlhub_ssh_client)
+#    for target in TARGETS:
+#        measure_latency(target, controlhub_ssh_client)
 
     measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
+
+    plt.show()
 
