@@ -31,7 +31,7 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
               'LD_LIBRARY_PATH':os.environ['LD_LIBRARY_PATH'] 
               }
 
-TARGETS = ['amc-e1a12-19-09:50001',
+TARGETS = [#'amc-e1a12-19-09:50001',
            'amc-e1a12-19-10:50001',
            'amc-e1a12-19-04:50001']
 
@@ -44,7 +44,7 @@ import logging
 SCRIPT_LOGGER = logging.getLogger("ipbus_perf_suite_log")
 
 SCRIPT_LOG_HANDLER = logging.StreamHandler(sys.stdout)
-SCRIPT_LOG_FORMATTER = logging.Formatter("%(asctime)-15s - %(levelname)s > %(message)s")
+SCRIPT_LOG_FORMATTER = logging.Formatter("%(asctime)-15s [%(thread)x] %(levelname)s > %(message)s")
 SCRIPT_LOG_HANDLER.setFormatter(SCRIPT_LOG_FORMATTER)
 
 SCRIPT_LOGGER.addHandler(SCRIPT_LOG_HANDLER)
@@ -145,7 +145,7 @@ def run_command(cmd, ssh_client=None):
     return exit_code, output
 
 
-def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDispatch=True):
+def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDispatch=True, ssh_client=None):
     """Run PerfTester.exe, and return tuple of latency per iteration (us), and bandwidth (Mb/s)"""
     
     cmd = "PerfTester.exe -t " + test + " -i " + str(iterations) + " -b 0x1000" + " -w " + str(width)
@@ -153,7 +153,7 @@ def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDisp
         cmd += " -p" 
     cmd += (" -d " + uri)
 
-    exit_code, output = run_command(cmd)
+    exit_code, output = run_command(cmd, ssh_client)
 
     m1 = re.search(r"^Test iteration frequency\s+=\s*([\d\.]+)\s*Hz", output, flags=re.MULTILINE)
     freq = float(m1.group(1))
@@ -164,14 +164,31 @@ def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDisp
     return (1000000.0/freq, bandwidth)
 
 
-def run_ping(targetname):
-    '''Runs unix ping command and returns average latency'''
-    #TODO
-    return -99.9
+def run_ping(target, ssh_client=None):
+    '''Runs unix ping command, parses output and returns average latency'''
+    
+    target_dns = target.split(":")[0]
+    run_command("ping -c 2 " + target_dns, ssh_client)
+    exit_code, output = run_command("ping -c 10 " + target_dns, ssh_client)
 
+    m = re.search(r"^.+\s=\s[\d\.]+/([\d\.]+)/[\d\.]+/[\d\.]+\sms", output, flags=re.MULTILINE)
+    avg_latency_us = 1000 * float(m.group(1))
+
+    return avg_latency_us
+
+
+def start_controlhub(ssh_client=None):
+    run_command("sudo controlhub_start", ssh_client=ssh_client)
+
+
+def stop_controlhub(ssh_client=None):
+    run_command("sudo controlhub_stop", ssh_client=ssh_client)
+
+####################################################################################################
+# SSH / SFTP FUNCTIONS
 
 def ssh_into(hostname, username):
-    try: 
+    try:
         passwd = getpass.getpass('Password for ' + username + '@' + hostname + ': ')
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -184,14 +201,6 @@ def ssh_into(hostname, username):
         return ssh_into(hostname, username)
 
 
-def start_controlhub(ssh_client=None):
-    run_command("sudo controlhub_start", ssh_client=ssh_client)
-
-
-def stop_controlhub(ssh_client=None):
-    run_command("sudo controlhub_stop", ssh_client=ssh_client)
-
-
 ####################################################################################################
 #  FUNCTIONS RUNNING SEQUENCES OF TESTS
 
@@ -199,18 +208,23 @@ def measure_latency(target, controhub_ssh_client=None):
     '''Measures latency for single word write to given endpoint'''
     print "\n ---> MEASURING LATENCY TO '" + target + "' <---"
     
-    ping_latency = run_ping(target)
-    
-    udp_latency, udp_bw = run_perftester("ipbusudp-2.0://"+target, width=1, perItDispatch=True)
+    ping_localhost_ch     = run_ping(CH_PC_NAME)
+    ping_ch_target        = run_ping(target, ssh_client=controlhub_ssh_client)
+    ping_localhost_target = run_ping(target) 
+    udp_latency_localhost = run_perftester("ipbusudp-2.0://"+target, width=1, perItDispatch=True)[0]
+    udp_latency_chpc      = run_perftester("ipbusudp-2.0://"+target, width=1, perItDispatch=True, ssh_client=controlhub_ssh_client)[0]
     
     start_controlhub(controlhub_ssh_client)
-    ch_latency, ch_bw = run_perftester("chtcp-2.0://"+CH_PC_NAME+":10203?target="+target, width=1, perItDispatch=True)
+    chtcp_latency = run_perftester("chtcp-2.0://"+CH_PC_NAME+":10203?target="+target, width=1, perItDispatch=True)[0]
     stop_controlhub(controlhub_ssh_client)    
 
     print "Latencies for "+target
-    print "    + Ping           : " + ("%.2f" % ping_latency) + "us"
-    print "    + Direct UDP     : " + ("%.2f" % udp_latency) + "us"
-    print "    + Via ControlHub : " + ("%.2f" % ch_latency) + "us"
+    print "    + Ping, here -> CH    : " + ("%5.1f" % ping_localhost_ch) + "us"
+    print "    + Ping, CH -> board   : " + ("%5.1f" % ping_ch_target) + "us"
+    print "    + Ping, here -> board : " + ("%5.1f" % ping_localhost_target) + "us"
+    print "    + Direct UDP (this PC): " + ("%5.1f" % udp_latency_localhost) + "us"
+    print "    + Direct UDP (CH PC)  : " + ("%5.1f" % udp_latency_chpc) + "us"
+    print "    + Via ControlHub      : " + ("%5.1f" % chtcp_latency) + "us"
 
 
 def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
@@ -222,27 +236,31 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
               341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 500, 1000, 5000, 10000, 20000]
 
     udp_uri = "ipbusudp-2.0://" + target
-    udp_bandwidths = [ x[1] for x in [run_perftester(udp_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
+    for i in range(5):
+        udp_bandwidths = [ x[1] for x in [run_perftester(udp_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
+        plt.plot(depths, udp_bandwidths)
+
     udp_tx_bw_inf = run_perftester(udp_uri, test="BandwidthTx", perItDispatch=False, width=1000, iterations=100000)[1]
     udp_rx_bw_inf = run_perftester(udp_uri, test="BandwidthRx", perItDispatch=False, width=1000, iterations=100000)[1]
 
     ch_uri = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
     start_controlhub(controlhub_ssh_client)
-    ch_bandwidths = [ x[1] for x in [run_perftester(ch_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
+    for i in range(5):
+        ch_bandwidths = [ x[1] for x in [run_perftester(ch_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
+        plt.plot(depths, ch_bandwidths)
+
     ch_tx_bw_inf  = run_perftester(ch_uri, test="BandwidthTx", perItDispatch=False, width=1000, iterations=100000)[1]
     ch_rx_bw_inf  = run_perftester(ch_uri, test="BandwidthRx", perItDispatch=False, width=1000, iterations=100000)[1]
     stop_controlhub(controlhub_ssh_client)
 
-    for d, udp_bw, ch_bw in zip(depths, udp_bandwidths, ch_bandwidths):
-        print d, " ==> ", "%.1f" % udp_bw, " / ", "%.1f" % ch_bw, " -- ratio", "%.2f" % (ch_bw/udp_bw)
+#   for d, udp_bw, ch_bw in zip(depths, udp_bandwidths, ch_bandwidths):
+#       print d, " ==> ", "%.1f" % udp_bw, " / ", "%.1f" % ch_bw, " -- ratio", "%.2f" % (ch_bw/udp_bw)
 
     print "inf, Tx  ==> ", "%.1f" % udp_tx_bw_inf, " / ", "%.1f" % ch_tx_bw_inf, " -- ratio", "%.2f" % (ch_tx_bw_inf/udp_tx_bw_inf)
     print "inf, Rx  ==> ", "%.1f" % udp_rx_bw_inf, " / ", "%.1f" % ch_rx_bw_inf, " -- ratio", "%.2f" % (ch_rx_bw_inf/udp_rx_bw_inf)
 
-    plt.plot(depths, udp_bandwidths)
-    plt.plot(depths, ch_bandwidths)
     plt.xlabel("Number of words")
-    plt.ylabel("Write bandwidth")
+    plt.ylabel("Write bandwidth [Mb/s]")
     plt.xscale("log")
 
 
@@ -252,10 +270,9 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
 if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-#    for target in TARGETS:
-#        measure_latency(target, controlhub_ssh_client)
+    measure_latency(TARGETS[0], controlhub_ssh_client)
 
-    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
+#    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
 
-    plt.show()
+#    plt.show()
 
