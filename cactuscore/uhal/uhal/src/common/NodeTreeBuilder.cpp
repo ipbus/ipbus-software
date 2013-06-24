@@ -563,12 +563,6 @@ namespace uhal
 */
     }
 
-    //Test for overlap with parent
-    if ( aNode->mPartialAddr == 0 )
-    {
-      log ( Warning() , "The partial address of the top register in the current branch, " , Quote ( aNode->mUid ) , " , (" , Integer ( aNode->mPartialAddr , IntFmt<hex,fixed>() ) , ") overlaps with the partial address of the parent branch (" , Integer ( aAddr , IntFmt<hex,fixed>() ) , "). This might contradict the hierarchical design principal. For now this is a warning, but in the future this may be upgraded to throw an exception." );
-    }
-
     aNode->mAddr = aNode->mPartialAddr + aAddr;
 
     for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )

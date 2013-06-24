@@ -243,7 +243,7 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 2 , IPbus_minor , buffer_size >::predispatch( )
   {
-    log ( Notice() , "Big-Endian Hack included" );
+    log ( Debug() , "Big-Endian Hack included" );
     uint32_t* lPtr ( reinterpret_cast<uint32_t*> ( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
     uint32_t lSize ( ( mCurrentBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 );
 
@@ -263,7 +263,7 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
 #ifdef BIG_ENDIAN_HACK
-    log ( Notice() , "Big-Endian Hack included" );
+    log ( Debug() , "Big-Endian Hack included" );
     uint32_t* lPtr;
     uint32_t lSize;
 
