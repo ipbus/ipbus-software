@@ -283,7 +283,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
 
     cmds += [["TEST uHAL TOOLS",
               [#uhal.tools.ipbus_addr_map
-               #"python -c \"import uhal.tools.ipbus_addr_map;uhal.tools.ipbus_addr_map.main()\""
+               "python -c \"import uhal.tools;uhal.tools.test()\""
               ]
             ]]
 
