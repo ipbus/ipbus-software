@@ -43,7 +43,7 @@ def analyze_log():
 
     r_limit = re.compile(r'----\+\+\+\+(.*?)\+\+\+\+----')
 
-    fn = CONF.NIGHTL_LOG_FILE
+    fn = CONF.NIGHTLY_LOG_FILE
     current_section = "BEGIN"
     for (i, l) in enumerate(open(fn)):
         if r_limit.search(l):
