@@ -67,5 +67,5 @@ if __name__== "__main__":
     else:
         logger.info("----++++REPORTING++++----")
         nanalyzer.report(CONF)
-        system("mkdir -p %s" % CONF.RELEASE_LOG_DIR,log=True, exception=False)
-        system( "sudo cp -r %s %s" % ("/var/log/*",CONF.RELEASE_LOG_DIR),log=True, exception=False)
+        system("mkdir -p %s" % CONF.NIGHTLY_LOG_DIR,log=True, exception=False)
+        system( "sudo cp -r %s %s" % ("/var/log/*",CONF.NIGHTLY_LOG_DIR),log=True, exception=False)

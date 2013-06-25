@@ -10,9 +10,8 @@ BUILD_HOME          = "/build/cactus"
 PLATFORM            = platform()
 RELATIVE_BASE       = join("nightly",__name__+".py",PLATFORM)
 NIGHTLY_BASE        = join("/afs/cern.ch/user/c/cactus/www",RELATIVE_BASE)
-RELEASE_RPM_DIR     = join(NIGHTLY_BASE,"RPMS")
-RELEASE_LOG_DIR     = join(NIGHTLY_BASE,"logs")
-RELEASE_API_DIR     = join(NIGHTLY_BASE,"api")
+NIGHTLY_RPM_DIR     = join(NIGHTLY_BASE,"RPMS")
+NIGHTLY_LOG_DIR     = join(NIGHTLY_BASE,"logs")
 #The log file name and path should be the same than in the one in the acrontab
 CACTUS_PREFIX       = "/opt/cactus"
 CONTROLHUB_EBIN_DIR = join(CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
@@ -35,7 +34,7 @@ TITLE             = "uHAL Nightlies: %s " % pseudo_platform
 FROM_EMAIL        = "cactus.service@cern.ch"
 TO_EMAIL          = "cms-cactus@cern.ch"
 WEB_URL           = join("http://cern.ch/cactus",RELATIVE_BASE)
-RELEASE_LOG_FILE    = join(RELEASE_LOG_DIR,"nightly.log")
+NIGHTLY_LOG_FILE    = join(NIGHTLY_LOG_DIR,"nightly.log")
 ERROR_LIST        = ['error: ',
                      'RPM build errors',
                      'collect2: ld returned',
@@ -105,13 +104,12 @@ COMMANDS += [["BUILD",
                "cd %s;make -sk Set=uhal rpm" % join(BUILD_HOME,"trunk")]]]
 
 COMMANDS += [["RELEASE",
-              ["rm -rf %s" % RELEASE_RPM_DIR,
-               "mkdir -p %s" % RELEASE_RPM_DIR,
-               "mkdir -p %s" % RELEASE_LOG_DIR,
-               "mkdir -p %s" % RELEASE_API_DIR,
-               "cp %s %s" % ("yumgroups.xml",RELEASE_RPM_DIR),
-               "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,RELEASE_RPM_DIR),
-               "cd %s;createrepo -vg yumgroups.xml ." % RELEASE_RPM_DIR]]]
+              ["rm -rf %s" % NIGHTLY_RPM_DIR,
+               "mkdir -p %s" % NIGHTLY_RPM_DIR,
+               "mkdir -p %s" % NIGHTLY_LOG_DIR,
+               "cp %s %s" % ("yumgroups.xml",NIGHTLY_RPM_DIR),
+               "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,NIGHTLY_RPM_DIR),
+               "cd %s;createrepo -vg yumgroups.xml ." % NIGHTLY_RPM_DIR]]]
 
 COMMANDS += [["INSTALL",
               ["sed \"s/<platform>/%s/\" uhal.nightly.repo  | sudo tee /etc/yum.repos.d/uhal.repo > /dev/null" % pseudo_platform,

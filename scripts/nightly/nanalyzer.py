@@ -43,7 +43,7 @@ def analyze_log():
 
     r_limit = re.compile(r'----\+\+\+\+(.*?)\+\+\+\+----')
 
-    fn = CONF.RELEASE_LOG_FILE
+    fn = CONF.NIGHTL_LOG_FILE
     current_section = "BEGIN"
     for (i, l) in enumerate(open(fn)):
         if r_limit.search(l):
@@ -121,7 +121,7 @@ def render_log(result):
     
     html += "<a href='%s'>back...</a><br/><br/>" % os.path.join(CONF.WEB_URL,"index.html")
 
-    fn = CONF.RELEASE_LOG_FILE
+    fn = CONF.NIGHTLY_LOG_FILE
     keys = [i[0] for i in result]
     types = [i[1] for i in result]
     for (i, l) in enumerate(open(fn)):
@@ -134,7 +134,7 @@ def render_log(result):
         
     html += html_footer()
         
-    fn = os.path.join(CONF.RELEASE_BASE, "nightly.log.html")
+    fn = os.path.join(CONF.NIGHTLY_LOG_DIR, "nightly.log.html")
     tmp = open(fn, "w")
     tmp.write(html)
     tmp.close()
@@ -185,11 +185,11 @@ def render_main(result):
     html += report_links(result)
     html += html_footer()
 
-    fn = os.path.join(CONF.RELEASE_BASE,"index.html")
+    fn = os.path.join(CONF.NIGHTLY_BASE,"index.html")
     open(fn,"w").write(html)
 
 def send_mail():
-    fn = os.path.join(CONF.RELEASE_BASE,"index.html")
+    fn = os.path.join(CONF.NIGHTLY_BASE,"index.html")
     content = open(fn).read()
 
     msg = MIMEText(content,'html')
