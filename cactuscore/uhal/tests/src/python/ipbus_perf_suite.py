@@ -20,13 +20,14 @@ from socket import gethostname
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 
 ####################################################################################################
 #  GLOBAL OPTIONS
 
-TEST_CMD_TIMEOUT_S = 240
+TEST_CMD_TIMEOUT_S = 120
 
 CH_PC_NAME = 'pc-e1x06-36-01'
 CH_PC_USER = 'tsw'
@@ -48,11 +49,11 @@ import logging
 SCRIPT_LOGGER = logging.getLogger("ipbus_perf_suite_log")
 
 SCRIPT_LOG_HANDLER = logging.StreamHandler(sys.stdout)
-SCRIPT_LOG_FORMATTER = logging.Formatter("%(asctime)-15s [%(thread)x] %(levelname)s > %(message)s")
+SCRIPT_LOG_FORMATTER = logging.Formatter("%(asctime)-15s [0x%(thread)x] %(levelname)-7s > %(message)s")
 SCRIPT_LOG_HANDLER.setFormatter(SCRIPT_LOG_FORMATTER)
 
 SCRIPT_LOGGER.addHandler(SCRIPT_LOG_HANDLER)
-SCRIPT_LOGGER.setLevel(logging.INFO)
+SCRIPT_LOGGER.setLevel(logging.DEBUG)
 
 ####################################################################################################
 #  SETUP MATPLOTLIB
@@ -182,12 +183,118 @@ def run_ping(target, ssh_client=None):
     return avg_latency_us
 
 
+#CPU_MEM_PSAUX_REGEX = re.compile("^\\w+\\s+\\d+\\s+([\\d+\\.]+)\\s+([\\d+\\.]+)\\s+"  # USER PID CPU MEM
+#                                 "\\d+\\s+\\d+\\s+\\S+\\s+" # VSZ   RSS TTY      
+#                                 "\\S+\\s+\\S+\\s+[\\d:]+\\s+" # STAT START   TIME 
+#                                 ".+" # COMMAND
+#                                 )
+
+def cpu_mem_usage(cmd_to_check, ssh_client=None):
+    assert " " not in cmd_to_check
+
+    output = run_command("top -b -n 1 | grep "+cmd_to_check, ssh_client=ssh_client)[1]
+    cpu, mem = 0.0, 0.0    
+
+    regex = re.compile("^\\d+\\s+\\w+\\s+\\S+\\s+\\S+\\s+"        # PID USER      PR  NI  
+                       "\\w+\\s+\\w+\\s+\\w+\\s+\\S+\\s+"         # VIRT  RES  SHR S
+                       "([\\d+\\.]+)\\s+([\\d+\\.]+)\\s+"         # %CPU %MEM
+                       "[\\d:\\.]+\\s+" + re.escape(cmd_to_check) # TIME+  COMMAND
+                       )
+
+    for line in output.splitlines():
+        m = regex.search(line)
+        if m:
+            cpu += float(m.group(1))
+            mem += float(m.group(2))
+
+    return cpu, mem
+
+
 def start_controlhub(ssh_client=None):
     run_command("sudo controlhub_start", ssh_client=ssh_client)
 
 
 def stop_controlhub(ssh_client=None):
     run_command("sudo controlhub_stop", ssh_client=ssh_client)
+    
+
+class CommandRunner:
+    """
+    Class for running a set of commands in parallel - each in their own thread - whilst 
+    monitoring CPU & mem usage of some other commands in the main thread.
+    """
+    def __init__(self, monitoring_options):
+        """
+        Contructor. 
+        The monitoring_options argument must be a list of (command_to_montor, ssh_client) tuples
+        """
+        self.monitor_opts = monitoring_options
+
+    def _run_in_thread(self, cmd, ssh_client, index):
+        SCRIPT_LOGGER.debug('CommandRunner thread starting for command "' + cmd + '"')
+        try:
+            retval = run_command(cmd, ssh_client)
+            self._cmd_completed = True
+            self.cmd_results[index] = retval
+        except Exception as e:
+            SCRIPT_LOGGER.exception('Exception of type "' + str(type(e)) + '" thrown when executing the command "' + cmd + '" in this thread.')
+            self._cmd_completed = True
+            self.cmd_results[index] = e 
+
+    def run(self, cmds):
+        """
+        Runs the commands via ssh_client simultaneously in different threads, blocking until they are all finished.
+        The argument cmds is a list of commands, or (cmd, ssh_client) tuples. If ssh_client is not specified, then command is run locally.
+        Returns a 2-tuple - element 1 is list of run_command(cmd) return values; element 2 is a list of (cmd, av_cpu, av_mem) tuples.
+        """
+        self.cmd_results = [None for x in cmds]
+        self.threads = []
+        self._cmd_completed = False
+
+        monitor_results = []
+        for cmd, ssh_client in self.monitor_opts:
+            monitor_results.append( (cmd, ssh_client, [], []) )
+
+        # Set each command running
+        for i in range(len(cmds)):
+            if isinstance(cmds[i], basestring):
+                cmd = cmds[i]
+                ssh_client = None
+            else:
+                cmd, ssh_client = cmds[i]
+            t = threading.Thread(target=self._run_in_thread, args=(cmd, ssh_client, i) )
+            self.threads.append(t)
+
+        for t in self.threads:
+            t.start()
+
+        # Monitor CPU/mem usage whilst *all* commands running
+        time.sleep(0.4)
+        SCRIPT_LOGGER.debug('CommandRunner is now starting monitoring.')
+        while not self._cmd_completed:
+            for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
+                meas_cpu, meas_mem = cpu_mem_usage(cmd, ssh_client)
+                print meas_cpu, meas_mem
+                cpu_vals.append(meas_cpu)
+                mem_vals.append(meas_mem)
+            time.sleep(0.08)    
+        cpu_vals.pop()
+        mem_vals.pop() 
+
+        # Wait (w/o monitoring)
+        SCRIPT_LOGGER.debug('One of the commands has now finished. No more monitoring - just wait for rest to finish.')
+        for t in self.threads:
+            t.join()
+            SCRIPT_LOGGER.debug("Thread with ID 0x%s has now finished. It's being removed from the list of running threads." % hex(t.ident))
+            del t
+
+        # Check for async exceptions
+        for result in self.cmd_results:
+            if issubclass(type(result), Exception):
+                SCRIPT_LOGGER.error("An exception was raised in one of CommandRunner's command-running threads. Re-raising now ...")
+                raise result
+
+        return [(cmd, numpy.mean(cpu_vals), numpy.mean(mem_vals)) for cmd, ssh_client, cpu_vals, mem_vals in monitor_results], self.cmd_results
 
 
 ####################################################################################################
@@ -288,34 +395,26 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
     ch_bandwidths = dict((x, []) for x in depths)
 
     udp_uri = "ipbusudp-2.0://" + target
-    for i in range(2):
+    for i in range(5):
         for d in depths:
             udp_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i 2000 -d "+udp_uri, 
                                                   ssh_client=controlhub_ssh_client)[1] )
     udp_bws_mean, udp_bws_yerrors = calc_y_with_errors(udp_bandwidths)
     plt.errorbar(depths, udp_bws_mean, yerr=udp_bws_yerrors, label="Direct UDP (CH PC)")
 
-    udp_tx_bw_inf = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1000 -i 50000 -d "+udp_uri, ssh_client=controlhub_ssh_client)[1]
-    udp_rx_bw_inf = run_command("PerfTester.exe -t BandwidthRx -b 0x1000 -w 1000 -i 50000 -d "+udp_uri, ssh_client=controlhub_ssh_client)[1]
-
     ch_uri = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
-    for nr_in_flight in [1,4,16]:
+    for nr_in_flight in [1,4,8,16]:
         ch_bandwidths = dict((x, []) for x in depths)
 
         update_controlhub_sys_config(nr_in_flight, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
         start_controlhub(controlhub_ssh_client)
-        for i in range(2):
+        for i in range(5):
             for d in depths:
                 ch_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i 2000 -d "+ch_uri)[1] )
         ch_bws_mean, ch_bws_yerrors = calc_y_with_errors(ch_bandwidths)
         plt.errorbar(depths, ch_bws_mean, yerr=ch_bws_yerrors, label="Via CH, "+str(nr_in_flight)+" in-flight")
 
-        ch_tx_bw_inf  = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1000 -i 50000 -d "+ch_uri)[1]
-        ch_rx_bw_inf  = run_command("PerfTester.exe -t BandwidthRx -b 0x1000 -w 1000 -i 50000 -d "+ch_uri)[1]
         stop_controlhub(controlhub_ssh_client)
-
-        print "inf, Tx  ==> ", "%.1f" % udp_tx_bw_inf, " / ", "%.1f" % ch_tx_bw_inf, " -- ratio CH/udp", "%.2f" % (ch_tx_bw_inf/udp_tx_bw_inf)
-        print "inf, Rx  ==> ", "%.1f" % udp_rx_bw_inf, " / ", "%.1f" % ch_rx_bw_inf, " -- ratio CH/udp", "%.2f" % (ch_rx_bw_inf/udp_rx_bw_inf)
 
     plt.xlabel("Number of words")
     plt.ylabel("Write bandwidth [Mb/s]")
@@ -323,15 +422,51 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
     plt.legend(loc='lower right')
     plt.title(gethostname() + "  ->  " + CH_PC_NAME + "  ->  " + target)
 
+
+def measure_bw_vs_nInFlight(target, controlhub_ssh_client):
+    '''Measures continuous write/read bandwidth for block writes to given endpoint'''
+    print "\n ---> BANDWIDTH vs NR_IN_FLIGHT to '" + target + "' <---"
+
+    nrs_in_flight = [1,2,4,5,6,7,8,10,12,16]
+    cmd_base = "PerfTester.exe -b 0x1000 -w 1024 -i 10240 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
+
+    ch_tx_bws = dict((x, []) for x in nrs_in_flight)
+    ch_rx_bws  = dict((x, []) for x in nrs_in_flight)
+
+    for i in range(3):
+        for n in nrs_in_flight:
+            update_controlhub_sys_config(n, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+            start_controlhub(controlhub_ssh_client)
+            ch_tx_bws[n].append( run_command(cmd_base + " -t BandwidthTx")[1] )
+            ch_rx_bws[n].append( run_command(cmd_base + " -t BandwidthRx")[1] )
+            stop_controlhub(controlhub_ssh_client)
+
+    ch_tx_bws_mean, ch_tx_bws_yerrors = calc_y_with_errors(ch_tx_bws)
+    ch_rx_bws_mean, ch_rx_bws_yerrors = calc_y_with_errors(ch_rx_bws)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.errorbar(nrs_in_flight, ch_tx_bws_mean, yerr=ch_tx_bws_yerrors, label='Write via CH')
+    ax.errorbar(nrs_in_flight, ch_rx_bws_mean, yerr=ch_rx_bws_yerrors, label='Read via CH')
+    ax.set_xlabel('Number in flight over UDP')
+    ax.set_ylabel('Bandwidth [Mb/s]')
+    ax.legend(loc='lower right')
+    ax.set_title('40MB read/write bandwidth')
+
+
+def measure_bw_vs_nClients(targets, controlhub_ssh_client):
+    pass
+
 ####################################################################################################
 #  MAIN
 
 if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
+    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client)
     #measure_latency(TARGETS[0], controlhub_ssh_client)
 
-    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
+#    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
 
     plt.show()
 
