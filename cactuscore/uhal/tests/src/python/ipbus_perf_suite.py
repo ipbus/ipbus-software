@@ -11,12 +11,15 @@ N.B: You must set LD_LIBRARY_PATH and PATH appropriately before this
 from datetime import datetime
 import fcntl
 import getpass
+import numpy
 import os
 import paramiko
 import re
 import signal
+from socket import gethostname
 import subprocess
 import sys
+import tempfile
 import time
 
 
@@ -30,6 +33,7 @@ CH_PC_USER = 'tsw'
 CH_PC_ENV  = {'PATH':os.environ['PATH'],
               'LD_LIBRARY_PATH':os.environ['LD_LIBRARY_PATH'] 
               }
+CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.0.0/sys.config"
 
 TARGETS = [#'amc-e1a12-19-09:50001',
            'amc-e1a12-19-10:50001',
@@ -80,11 +84,13 @@ class CommandBadExitCode(Exception):
 ####################################################################################################
 #  COMMAND-RUNNING/PARSING FUNCTIONS
 
-def run_command(cmd, ssh_client=None):
+def run_command(cmd, ssh_client=None, parser=None):
   """
   Run command, returning tuple of exit code and stdout/err.
   The command will be killed if it takes longer than TEST_CMD_TIMEOUT_S
   """
+  if (parser is None) and (cmd.startswith("PerfTester.exe")):
+      parser = parse_perftester
   if cmd.startswith("sudo"):
       cmd = "sudo PATH=$PATH " + cmd[4:]
 
@@ -127,7 +133,10 @@ def run_command(cmd, ssh_client=None):
     if exit_code:
         raise CommandBadExitCode(cmd, exit_code, stdout)
 
-    return exit_code, stdout
+    if parser in [None,False]:
+        return exit_code, stdout
+    else:
+        return parser(stdout)
 
   else:
     for env_var, value in CH_PC_ENV.iteritems():
@@ -142,22 +151,18 @@ def run_command(cmd, ssh_client=None):
     if exit_code: 
         raise CommandBadExitCode(cmd, exit_code, output)
 
-    return exit_code, output
+    if parser in [None, False]:
+        return exit_code, output
+    else:
+        return parser(output)
 
 
-def run_perftester(uri, test="BandwidthTx", width=1, iterations=50000, perItDispatch=True, ssh_client=None):
-    """Run PerfTester.exe, and return tuple of latency per iteration (us), and bandwidth (Mb/s)"""
+def parse_perftester(cmd_output):
+    """Parses output of PerfTester.exe, and return tuple of latency per iteration (us), and bandwidth (Mb/s)"""
     
-    cmd = "PerfTester.exe -t " + test + " -i " + str(iterations) + " -b 0x1000" + " -w " + str(width)
-    if perItDispatch:
-        cmd += " -p" 
-    cmd += (" -d " + uri)
-
-    exit_code, output = run_command(cmd, ssh_client)
-
-    m1 = re.search(r"^Test iteration frequency\s+=\s*([\d\.]+)\s*Hz", output, flags=re.MULTILINE)
+    m1 = re.search(r"^Test iteration frequency\s+=\s*([\d\.]+)\s*Hz", cmd_output, flags=re.MULTILINE)
     freq = float(m1.group(1))
-    m2 = re.search(r"^Average \S+ bandwidth\s+=\s*([\d\.]+)\s*KB/s", output, flags=re.MULTILINE)
+    m2 = re.search(r"^Average \S+ bandwidth\s+=\s*([\d\.]+)\s*KB/s", cmd_output, flags=re.MULTILINE)
     bandwidth = float(m2.group(1)) / 125.0
 
     SCRIPT_LOGGER.info("Parsed: Latency = " + str(1000000.0/freq) + "us/iteration , bandwidth = " + str(bandwidth) + "Mb/s")
@@ -184,6 +189,7 @@ def start_controlhub(ssh_client=None):
 def stop_controlhub(ssh_client=None):
     run_command("sudo controlhub_stop", ssh_client=ssh_client)
 
+
 ####################################################################################################
 # SSH / SFTP FUNCTIONS
 
@@ -201,8 +207,51 @@ def ssh_into(hostname, username):
         return ssh_into(hostname, username)
 
 
+def update_controlhub_sys_config(max_in_flight, ssh_client, sys_config_location):
+    """Writes new ControlHub sys.config file in /tmp, and copies to remote PC via SFTP."""
+    
+    content = ('[\n'
+               '%% write log files to a particular location\n'
+               '  {sasl,\n'
+               '    [\n'
+               '      {sasl_error_logger, {file, "/var/log/controlhub.log"}},\n'
+               '      {error_logger_mf_dir, "/var/log/controlhub"},\n'
+               '      {error_logger_mf_maxbytes, 10485760},\n'
+               '      {error_logger_mf_maxfiles, 4}\n'
+               '    ]\n'
+               '  },\n'
+               '  {controlhub,\n'
+               '    [{max_in_flight, ' + str(max_in_flight) + '}]\n'
+               '  }\n'
+               '].\n')
+    
+    SCRIPT_LOGGER.info('ControlHub (remote) sys.config file at "' + sys_config_location + '" is being updated to have max_in_flight=' + str(max_in_flight) + '. New contents is ...\n' + content)
+ 
+    with tempfile.NamedTemporaryFile('w+b', suffix="__ch_sys.config") as tmp_file:
+        tmp_file.write(content)
+        tmp_file.flush()
+
+        sftp_client = ssh_client.open_sftp()
+        sftp_client.put(tmp_file.name, sys_config_location)
+        sftp_client.close()     
+
+
 ####################################################################################################
 #  FUNCTIONS RUNNING SEQUENCES OF TESTS
+
+def calc_y_with_errors(data_dict):
+    means = []
+    low_error  = []
+    high_error = []
+    for x in sorted(data_dict.keys()):
+        y_values = data_dict[x]
+        mean = numpy.mean(y_values)
+        means.append(mean)
+        low_error.append(mean - numpy.min(y_values))
+        high_error.append(numpy.max(y_values) - mean)
+
+    return means, [low_error, high_error]
+        
 
 def measure_latency(target, controhub_ssh_client=None):
     '''Measures latency for single word write to given endpoint'''
@@ -211,11 +260,11 @@ def measure_latency(target, controhub_ssh_client=None):
     ping_localhost_ch     = run_ping(CH_PC_NAME)
     ping_ch_target        = run_ping(target, ssh_client=controlhub_ssh_client)
     ping_localhost_target = run_ping(target) 
-    udp_latency_localhost = run_perftester("ipbusudp-2.0://"+target, width=1, perItDispatch=True)[0]
-    udp_latency_chpc      = run_perftester("ipbusudp-2.0://"+target, width=1, perItDispatch=True, ssh_client=controlhub_ssh_client)[0]
+    udp_latency_localhost = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 10000 -p -d ipbusudp-2.0://"+target)[0]
+    udp_latency_chpc      = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 10000 -p -d ipbusudp-2.0://"+target, ssh_client=controlhub_ssh_client)[0]
     
     start_controlhub(controlhub_ssh_client)
-    chtcp_latency = run_perftester("chtcp-2.0://"+CH_PC_NAME+":10203?target="+target, width=1, perItDispatch=True)[0]
+    chtcp_latency = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -p -d chtcp-2.0://"+CH_PC_NAME+":10203?target="+target)[0]
     stop_controlhub(controlhub_ssh_client)    
 
     print "Latencies for "+target
@@ -233,36 +282,46 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
     
     depths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25,
               50, 75, 100, 150, 200, 250, 300, 310, 320, 330, 340,
-              341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 500, 1000, 5000, 10000, 20000]
+              341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 500,
+              1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 10000, 20000]
+    udp_bandwidths = dict((x, []) for x in depths)
+    ch_bandwidths = dict((x, []) for x in depths)
 
     udp_uri = "ipbusudp-2.0://" + target
-    for i in range(5):
-        udp_bandwidths = [ x[1] for x in [run_perftester(udp_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
-        plt.plot(depths, udp_bandwidths)
+    for i in range(2):
+        for d in depths:
+            udp_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i 2000 -d "+udp_uri, 
+                                                  ssh_client=controlhub_ssh_client)[1] )
+    udp_bws_mean, udp_bws_yerrors = calc_y_with_errors(udp_bandwidths)
+    plt.errorbar(depths, udp_bws_mean, yerr=udp_bws_yerrors, label="Direct UDP (CH PC)")
 
-    udp_tx_bw_inf = run_perftester(udp_uri, test="BandwidthTx", perItDispatch=False, width=1000, iterations=100000)[1]
-    udp_rx_bw_inf = run_perftester(udp_uri, test="BandwidthRx", perItDispatch=False, width=1000, iterations=100000)[1]
+    udp_tx_bw_inf = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1000 -i 50000 -d "+udp_uri, ssh_client=controlhub_ssh_client)[1]
+    udp_rx_bw_inf = run_command("PerfTester.exe -t BandwidthRx -b 0x1000 -w 1000 -i 50000 -d "+udp_uri, ssh_client=controlhub_ssh_client)[1]
 
     ch_uri = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
-    start_controlhub(controlhub_ssh_client)
-    for i in range(5):
-        ch_bandwidths = [ x[1] for x in [run_perftester(ch_uri, perItDispatch=True, width=d, iterations=5000) for d in depths] ]
-        plt.plot(depths, ch_bandwidths)
+    for nr_in_flight in [1,4,16]:
+        ch_bandwidths = dict((x, []) for x in depths)
 
-    ch_tx_bw_inf  = run_perftester(ch_uri, test="BandwidthTx", perItDispatch=False, width=1000, iterations=100000)[1]
-    ch_rx_bw_inf  = run_perftester(ch_uri, test="BandwidthRx", perItDispatch=False, width=1000, iterations=100000)[1]
-    stop_controlhub(controlhub_ssh_client)
+        update_controlhub_sys_config(nr_in_flight, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+        start_controlhub(controlhub_ssh_client)
+        for i in range(2):
+            for d in depths:
+                ch_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i 2000 -d "+ch_uri)[1] )
+        ch_bws_mean, ch_bws_yerrors = calc_y_with_errors(ch_bandwidths)
+        plt.errorbar(depths, ch_bws_mean, yerr=ch_bws_yerrors, label="Via CH, "+str(nr_in_flight)+" in-flight")
 
-#   for d, udp_bw, ch_bw in zip(depths, udp_bandwidths, ch_bandwidths):
-#       print d, " ==> ", "%.1f" % udp_bw, " / ", "%.1f" % ch_bw, " -- ratio", "%.2f" % (ch_bw/udp_bw)
+        ch_tx_bw_inf  = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1000 -i 50000 -d "+ch_uri)[1]
+        ch_rx_bw_inf  = run_command("PerfTester.exe -t BandwidthRx -b 0x1000 -w 1000 -i 50000 -d "+ch_uri)[1]
+        stop_controlhub(controlhub_ssh_client)
 
-    print "inf, Tx  ==> ", "%.1f" % udp_tx_bw_inf, " / ", "%.1f" % ch_tx_bw_inf, " -- ratio", "%.2f" % (ch_tx_bw_inf/udp_tx_bw_inf)
-    print "inf, Rx  ==> ", "%.1f" % udp_rx_bw_inf, " / ", "%.1f" % ch_rx_bw_inf, " -- ratio", "%.2f" % (ch_rx_bw_inf/udp_rx_bw_inf)
+        print "inf, Tx  ==> ", "%.1f" % udp_tx_bw_inf, " / ", "%.1f" % ch_tx_bw_inf, " -- ratio CH/udp", "%.2f" % (ch_tx_bw_inf/udp_tx_bw_inf)
+        print "inf, Rx  ==> ", "%.1f" % udp_rx_bw_inf, " / ", "%.1f" % ch_rx_bw_inf, " -- ratio CH/udp", "%.2f" % (ch_rx_bw_inf/udp_rx_bw_inf)
 
     plt.xlabel("Number of words")
     plt.ylabel("Write bandwidth [Mb/s]")
-    plt.xscale("log")
-
+#    plt.xscale("log")
+    plt.legend(loc='lower right')
+    plt.title(gethostname() + "  ->  " + CH_PC_NAME + "  ->  " + target)
 
 ####################################################################################################
 #  MAIN
@@ -270,9 +329,9 @@ def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
 if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    measure_latency(TARGETS[0], controlhub_ssh_client)
+    #measure_latency(TARGETS[0], controlhub_ssh_client)
 
-#    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
+    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
 
-#    plt.show()
+    plt.show()
 
