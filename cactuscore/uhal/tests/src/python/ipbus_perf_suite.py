@@ -96,7 +96,7 @@ def run_command(cmd, ssh_client=None, parser=None):
       cmd = "sudo PATH=$PATH " + cmd[4:]
 
   if ssh_client is None:
-    SCRIPT_LOGGER.info("Running (locally): "+cmd)
+    SCRIPT_LOGGER.debug("Running (locally): "+cmd)
     t0 = time.time()
 
     p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
@@ -142,7 +142,7 @@ def run_command(cmd, ssh_client=None, parser=None):
   else:
     for env_var, value in CH_PC_ENV.iteritems():
         cmd = "export " + env_var + "=" + value + " ; " + cmd
-    SCRIPT_LOGGER.info("Running (remotely): "+cmd)
+    SCRIPT_LOGGER.debug("Running (remotely): "+cmd)
     stdin, stdout, stderr = ssh_client.exec_command(cmd)
     exit_code = stdout.channel.recv_exit_status()
     output = "".join( stdout.readlines() ) + "".join( stderr.readlines() )
@@ -195,7 +195,7 @@ def cpu_mem_usage(cmd_to_check, ssh_client=None):
     output = run_command("top -b -n 1 | grep "+cmd_to_check, ssh_client=ssh_client)[1]
     cpu, mem = 0.0, 0.0    
 
-    regex = re.compile("^\\d+\\s+\\w+\\s+\\S+\\s+\\S+\\s+"        # PID USER      PR  NI  
+    regex = re.compile("^\\s*\\d+\\s+\\w+\\s+\\S+\\s+\\S+\\s+"        # PID USER      PR  NI  
                        "\\w+\\s+\\w+\\s+\\w+\\s+\\S+\\s+"         # VIRT  RES  SHR S
                        "([\\d+\\.]+)\\s+([\\d+\\.]+)\\s+"         # %CPU %MEM
                        "[\\d:\\.]+\\s+" + re.escape(cmd_to_check) # TIME+  COMMAND
@@ -247,6 +247,9 @@ class CommandRunner:
         The argument cmds is a list of commands, or (cmd, ssh_client) tuples. If ssh_client is not specified, then command is run locally.
         Returns a 2-tuple - element 1 is list of run_command(cmd) return values; element 2 is a list of (cmd, av_cpu, av_mem) tuples.
         """
+        assert len(cmds)>0        
+        SCRIPT_LOGGER.info( "CommandRunner will now run the following commands simultaneously:\n     " + "\n     ".join(cmds) )
+
         self.cmd_results = [None for x in cmds]
         self.threads = []
         self._cmd_completed = False
@@ -272,11 +275,15 @@ class CommandRunner:
         time.sleep(0.4)
         SCRIPT_LOGGER.debug('CommandRunner is now starting monitoring.')
         while not self._cmd_completed:
-            for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
-                meas_cpu, meas_mem = cpu_mem_usage(cmd, ssh_client)
-                print meas_cpu, meas_mem
-                cpu_vals.append(meas_cpu)
-                mem_vals.append(meas_mem)
+            try:
+                for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
+                    meas_cpu, meas_mem = cpu_mem_usage(cmd, ssh_client)
+                    print meas_cpu, meas_mem
+                    cpu_vals.append(meas_cpu)
+                    mem_vals.append(meas_mem)
+            except CommandBadExitCode as e:
+                if not self._cmd_completed:
+                    raise
             time.sleep(0.08)    
         cpu_vals.pop()
         mem_vals.pop() 
@@ -455,7 +462,76 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client):
 
 
 def measure_bw_vs_nClients(targets, controlhub_ssh_client):
-    pass
+    '''Measures continuous block-write bandwidth from to all endpoints, varying the number of clients.'''
+    print "\n ---> BANDWIDTH vs NR_CLIENTS to", targets, "<---"
+
+    cmd_base = "PerfTester.exe -t BandwidthTx -w 1024 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
+    cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
+
+    nrs_clients = [1,2,3]#,4,5,6,8]
+    nrs_targets = range(1, len(targets)+1)
+    bws_per_board  = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
+    bws_per_client = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
+    ch_cpu_vals = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
+    ch_mem_vals = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
+    uhal_cpu_vals = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
+    uhal_mem_vals = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
+    
+    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    start_controlhub(controlhub_ssh_client)
+
+    for i in range(4):
+        for n_clients in nrs_clients:
+            for n_targets in nrs_targets:
+                cmds = [cmd_base + t + ' -i ' + str(int(25600/n_clients)) for t in targets[0:n_targets] for x in range(n_clients)]
+                monitor_results, cmd_results = cmd_runner.run(cmds)
+                bws = [x[1] for x in cmd_results]
+
+                dict_idx = (n_clients, n_targets)
+                uhal_cpu_vals[dict_idx].append( monitor_results[0][1] )
+                uhal_mem_vals[dict_idx].append( monitor_results[0][2] )
+                ch_cpu_vals[dict_idx].append( monitor_results[1][1] )
+                ch_mem_vals[dict_idx].append( monitor_results[1][2] )
+                bws_per_board[dict_idx].append( sum(bws)/n_targets )
+                bws_per_client[dict_idx].append( sum(bws)/len(bws) )
+        
+    stop_controlhub(controlhub_ssh_client)
+
+    fig = plt.figure()
+    ax_bw_board  = fig.add_subplot(231)
+    ax_bw_client = fig.add_subplot(234)
+    ax_ch_cpu = fig.add_subplot(232)
+    ax_ch_mem = fig.add_subplot(235)
+    ax_uhal_cpu = fig.add_subplot(233)
+    ax_uhal_mem = fig.add_subplot(236)
+
+    for n_targets in nrs_targets:
+        label = str(n_targets) + ' targets'
+        bws_per_board_mean , bws_per_board_errs  = calc_y_with_errors( dict(x for x in bws_per_board.items() if x[0][1]==n_targets) )
+        bws_per_client_mean, bws_per_client_errs = calc_y_with_errors( dict(x for x in bws_per_client.items() if x[0][1]==n_targets) )
+        ch_cpu_mean, ch_cpu_errs = calc_y_with_errors( dict(x for x in ch_cpu_vals.items() if x[0][1]==n_targets) )
+        ch_mem_mean, ch_mem_errs = calc_y_with_errors( dict(x for x in ch_mem_vals.items() if x[0][1]==n_targets) )
+        uhal_cpu_mean, uhal_cpu_errs = calc_y_with_errors( dict(x for x in uhal_cpu_vals.items() if x[0][1]==n_targets) )
+        uhal_mem_mean, uhal_mem_errs = calc_y_with_errors( dict(x for x in uhal_mem_vals.items() if x[0][1]==n_targets) )
+
+        ax_bw_board.errorbar(nrs_clients, bws_per_board_mean, yerr=bws_per_board_errs, label=label)
+        ax_bw_client.errorbar(nrs_clients, bws_per_client_mean, yerr=bws_per_client_errs, label=label)
+        ax_ch_cpu.errorbar(nrs_clients, ch_cpu_mean, yerr=ch_cpu_errs, label=label)
+        ax_ch_mem.errorbar(nrs_clients, ch_mem_mean, yerr=ch_mem_errs, label=label)
+        ax_uhal_cpu.errorbar(nrs_clients, uhal_cpu_mean, yerr=uhal_cpu_errs, label=label)
+        ax_uhal_mem.errorbar(nrs_clients, uhal_mem_mean, yerr=uhal_mem_errs, label=label)
+        
+    for ax in [ax_bw_board, ax_bw_client, ax_ch_cpu, ax_ch_mem, ax_uhal_cpu, ax_uhal_mem]:
+        ax.set_xlabel('Number of clients per board')
+    ax_bw_board.set_ylabel('Total bandwidth per board [Mb/s]')
+    ax_bw_client.set_ylabel('Bandwidth per client [Mb/s]')
+    ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
+    ax_ch_mem.set_ylabel('ControlHub memory usage [%]')
+    ax_uhal_cpu.set_ylabel('uHAL client CPU usage [%]')
+    ax_uhal_mem.set_ylabel('uHAL client memory usage [%]')
+    ax_ch_mem.legend(loc='lower right')
+#    ax.set_title('a title')
+
 
 ####################################################################################################
 #  MAIN
@@ -463,7 +539,9 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client)
+    measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
+
+#    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client)
     #measure_latency(TARGETS[0], controlhub_ssh_client)
 
 #    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
