@@ -74,6 +74,7 @@
 
 <packagereq type="mandatory">cactusprojects-centralcell</packagereq>
 <packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
+<packagereq type="mandatory">cactusprojects-centralcell-debuginfo</packagereq>
 
 <packagereq type="mandatory">cactusprojects-ttctsttccicell</packagereq>
 <packagereq type="mandatory">cactusprojects-ttctsttccicell-devel</packagereq>
