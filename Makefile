@@ -17,23 +17,7 @@ PACKAGES = \
         cactuscore/ts/itf \
 	cactuscore/ts/xdaqclient \
 	\
-	cactusprojects/subsystem/supervisor \
-	cactusprojects/subsystem/worker \
-	cactusprojects/subsystem/xdaq \
-	\
-        cactusprojects/central/cell \
-	\
-        cactusprojects/retri \
-	\
-        cactusprojects/ttc/ts/TTCUtils \
-        cactusprojects/ttc/ts/TTCciCell \
-        cactusprojects/ttc/ts/TTCmiCell \
-        cactusprojects/ttc/ts/TTCMonitoringCell \
-	\
-        cactusprojects/l1page \
-	\
-	cactusprojects/gt \
-	cactusprojects/gmt
+	cactusprojects
 endif
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
