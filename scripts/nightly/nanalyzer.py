@@ -90,7 +90,7 @@ def report_summary(result):
     html += "</table><br/>\n"
 
     html += "see <a href='%s'>RPMs...</a><br/>" % os.path.join(CONF.WEB_URL,"RPMS")
-    html += "see <a href='%s'>log file...</a><br/>" % os.path.join(CONF.WEB_URL,"nightly.log.html")
+    html += "see <a href='%s'>log file...</a><br/>" % os.path.join(CONF.WEB_URL,"logs","nightly.log.html")
     html += "see <a href='%s'>other logs...</a><br/>" % os.path.join(CONF.WEB_URL,"logs")
 
     return html
@@ -109,7 +109,7 @@ def report_links(result):
             elif t == TEST_PASSED:
                 pass
             else:
-                html += "<a style='text-decoration: none' href='%s'>" % os.path.join(CONF.WEB_URL, "nightly.log.html#log_" + str(c))
+                html += "<a style='text-decoration: none' href='%s'>" % os.path.join(CONF.WEB_URL, "logs","nightly.log.html#log_" + str(c))
                 html += "<pre style='" + style(t) + "'> " + d + "</pre>"
                 html += "</a>"
 
