@@ -53,7 +53,7 @@ SCRIPT_LOG_FORMATTER = logging.Formatter("%(asctime)-15s [0x%(thread)x] %(leveln
 SCRIPT_LOG_HANDLER.setFormatter(SCRIPT_LOG_FORMATTER)
 
 SCRIPT_LOGGER.addHandler(SCRIPT_LOG_HANDLER)
-SCRIPT_LOGGER.setLevel(logging.DEBUG)
+SCRIPT_LOGGER.setLevel(logging.INFO)
 
 ####################################################################################################
 #  SETUP MATPLOTLIB
@@ -271,20 +271,20 @@ class CommandRunner:
         for t in self.threads:
             t.start()
 
-        # Monitor CPU/mem usage whilst *all* commands running
+        # Monitor CPU/mem usage whilst *all* commands running (i.e. until any one of the commands exits)
         time.sleep(0.4)
         SCRIPT_LOGGER.debug('CommandRunner is now starting monitoring.')
         while not self._cmd_completed:
             try:
                 for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
                     meas_cpu, meas_mem = cpu_mem_usage(cmd, ssh_client)
-                    print meas_cpu, meas_mem
+#                    print meas_cpu, meas_mem
                     cpu_vals.append(meas_cpu)
                     mem_vals.append(meas_mem)
             except CommandBadExitCode as e:
                 if not self._cmd_completed:
                     raise
-            time.sleep(0.08)    
+            time.sleep(0.05) 
         cpu_vals.pop()
         mem_vals.pop() 
 
@@ -468,7 +468,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     cmd_base = "PerfTester.exe -t BandwidthTx -w 1024 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
     cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
 
-    nrs_clients = [1,2,3]#,4,5,6,8]
+    nrs_clients = [1,2,3,4,5,6,8]
     nrs_targets = range(1, len(targets)+1)
     bws_per_board  = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
     bws_per_client = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
@@ -480,10 +480,10 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
     start_controlhub(controlhub_ssh_client)
 
-    for i in range(4):
+    for i in range(5):
         for n_clients in nrs_clients:
             for n_targets in nrs_targets:
-                cmds = [cmd_base + t + ' -i ' + str(int(25600/n_clients)) for t in targets[0:n_targets] for x in range(n_clients)]
+                cmds = [cmd_base + t + ' -i ' + str(int(51200/n_clients)) for t in targets[0:n_targets] for x in range(n_clients)]
                 monitor_results, cmd_results = cmd_runner.run(cmds)
                 bws = [x[1] for x in cmd_results]
 
@@ -499,11 +499,11 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 
     fig = plt.figure()
     ax_bw_board  = fig.add_subplot(231)
-    ax_bw_client = fig.add_subplot(234)
-    ax_ch_cpu = fig.add_subplot(232)
-    ax_ch_mem = fig.add_subplot(235)
-    ax_uhal_cpu = fig.add_subplot(233)
-    ax_uhal_mem = fig.add_subplot(236)
+    ax_bw_client = fig.add_subplot(234, ylim=[0,300])
+    ax_ch_cpu = fig.add_subplot(232, ylim=[0,400])
+    ax_ch_mem = fig.add_subplot(235, ylim=[0,100])
+    ax_uhal_cpu = fig.add_subplot(233, ylim=[0,400])
+    ax_uhal_mem = fig.add_subplot(236, ylim=[0,100])
 
     for n_targets in nrs_targets:
         label = str(n_targets) + ' targets'
@@ -523,12 +523,14 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
         
     for ax in [ax_bw_board, ax_bw_client, ax_ch_cpu, ax_ch_mem, ax_uhal_cpu, ax_uhal_mem]:
         ax.set_xlabel('Number of clients per board')
+
     ax_bw_board.set_ylabel('Total bandwidth per board [Mb/s]')
     ax_bw_client.set_ylabel('Bandwidth per client [Mb/s]')
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
     ax_ch_mem.set_ylabel('ControlHub memory usage [%]')
     ax_uhal_cpu.set_ylabel('uHAL client CPU usage [%]')
     ax_uhal_mem.set_ylabel('uHAL client memory usage [%]')
+
     ax_ch_mem.legend(loc='lower right')
 #    ax.set_title('a title')
 
