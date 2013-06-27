@@ -170,8 +170,10 @@ namespace uhal
         uint16_t mReplyErrorCode;
       };
 
-      //! A queue of preample structs making the memory used by the preambles persistent during the dispatch
+      //! A queue of preample structs making the memory used by the preambles persistent during the dispatch. Must lock mPreamblesMutex when accessing this deque.
       std::deque< tpreamble > mPreambles;
+      //! Mutex to be used when accessing mPreambles 
+      boost::mutex mPreamblesMutex;
 
   };
 
