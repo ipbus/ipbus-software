@@ -158,7 +158,7 @@ class TestSimple(unittest.TestCase):
         self.assertTrue("SUBSYSTEM2" in buses)
 
         sroot = dict(((name,(hex32(addr),width)) for name,addr,width in m[0][1]))
-        print sroot
+        #print sroot
         self.assertTrue(len(sroot) == 6)
         self.assertTrue(sroot['REG'][0] == "0x00000000")
         self.assertTrue(sroot['REG'][1] == 0)
@@ -168,7 +168,7 @@ class TestSimple(unittest.TestCase):
         self.assertTrue(sroot['FIFO'][1] == 0)
 
         sub2 = dict(((name,(hex32(addr),width)) for name,addr,width in m[2][1]))
-        print sub2
+        #print sub2
         self.assertTrue(len(sub2) == 5)
         self.assertTrue(sub2['REG'][0] == "0x00500002")
         self.assertTrue(sub2['REG'][1] == 0)
