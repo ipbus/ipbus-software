@@ -120,8 +120,16 @@ COMMANDS += [["TEST CONTROLHUB",
               ["sudo chmod +w /var/log",
                "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(CACTUS_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR)]]]
 
-COMMANDS += [["TEST IPBUS 1.3",
-              ["uhal_test_suite.py -v -s 1.3"]
+COMMANDS += [["TEST IPBUS 1.3 - UDP",
+              ['uhal_test_suite.py -v -s "1.3 udp"']
+            ]]
+
+COMMANDS += [["TEST IPBUS 1.3 - TCP",
+              ['uhal_test_suite.py -v -s "1.3 tcp"']
+            ]]
+
+COMMANDS += [["TEST IPBUS 1.3 - ControlHub",
+              ['uhal_test_suite.py -v -s "1.3 controlhub"']
             ]]
 
 COMMANDS += [["TEST IPBUS 2.0 - UDP",
