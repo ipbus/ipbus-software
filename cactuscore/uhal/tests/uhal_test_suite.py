@@ -278,12 +278,12 @@ def get_commands(conn_file, controlhub_scripts_dir):
                 ]]
 
     cmds += [["TEST uHAL GUI",
-              ["python -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
+              ["/usr/bin/python -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
             ]]
 
     cmds += [["TEST uHAL TOOLS",
               [#uhal.tools.ipbus_addr_map
-               "python -c \"import uhal.tools;uhal.tools.test()\""
+               "/usr/bin/python -c \"import uhal.tools;uhal.tools.test()\""
               ]
             ]]
 
