@@ -172,7 +172,7 @@ namespace uhal
 
       //! A queue of preample structs making the memory used by the preambles persistent during the dispatch. Must lock mPreamblesMutex when accessing this deque.
       std::deque< tpreamble > mPreambles;
-      //! Mutex to be used when accessing mPreambles 
+      //! Mutex to be used when accessing mPreambles
       boost::mutex mPreamblesMutex;
 
   };

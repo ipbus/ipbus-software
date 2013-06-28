@@ -146,6 +146,7 @@ namespace uhal
 
   void ClientInterface::dispatch ()
   {
+    // log ( Debug() , ThisLocation() );
     CreateFillingBuffer ( ); //put this here to protect against users doing a dispatch with no data to send.
     unflushedDispatch (); // this is protected by its own internal try-catch-handle block
 
@@ -163,6 +164,7 @@ namespace uhal
 
   void ClientInterface::unflushedDispatch ()
   {
+    // log ( Debug() , ThisLocation() );
     try
     {
       this->predispatch( );
@@ -184,7 +186,7 @@ namespace uhal
 
   exception::exception* ClientInterface::validate ( )
   {
-    log ( Debug() , ThisLocation() );
+    // log ( Debug() , ThisLocation() );
     //check that the results are valid
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     //std::cout << mDispatchedBuffers.size() << std::endl;
@@ -198,9 +200,9 @@ namespace uhal
     if ( !lRet )
     {
       lBuffer->validate();
-      mDispatchedBuffers.pop_front();
     }
 
+    mDispatchedBuffers.pop_front();
     return lRet;
   }
 
@@ -225,7 +227,7 @@ namespace uhal
 
   void ClientInterface::CreateFillingBuffer ( )
   {
-    //     log ( Debug() , ThisLocation() );
+    // log ( Debug() , ThisLocation() );
     if ( mBuffers.size() )
     {
       return;
@@ -244,7 +246,7 @@ namespace uhal
 
   void ClientInterface::NextFillingBuffer ( )
   {
-    //     log ( Debug() , ThisLocation() );
+    // log ( Debug() , ThisLocation() );
     //if there are no existing buffers in the pool, create them
     CreateFillingBuffer ( );
     mCurrentBuffers++;
@@ -269,6 +271,8 @@ namespace uhal
     //we will wait if the buffer that we are expecting to fill is still waiting for dispatch and validation
     while ( true )
     {
+      //std::cout << mDispatchedBuffers.size() << std::endl;
+      //{
       boost::lock_guard<boost::mutex> lLock ( mMutex );
 
       if ( !mDispatchedBuffers.size() )
@@ -280,6 +284,9 @@ namespace uhal
       {
         break;
       }
+
+      //}
+      //sleep( 1 );
     }
 
     //     if ( lWillPause )
@@ -293,7 +300,7 @@ namespace uhal
 
   void ClientInterface::dispatchExceptionHandler()
   {
-    log ( Info() , ThisLocation() );
+    // log ( Info() , ThisLocation() );
     //mBuffers.clear();
     mDispatchedBuffers.clear();
     mCurrentBuffers->clear();

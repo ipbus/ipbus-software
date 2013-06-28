@@ -159,6 +159,8 @@ namespace uhal
         return 1;
       }
 
+      virtual void dispatchExceptionHandler();
+
       // std::vector< uint32_t > mSendPadding;
       // std::vector< uint32_t > mReplyPadding;
 

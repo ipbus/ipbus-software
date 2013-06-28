@@ -82,6 +82,12 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::implementDispatch()
   {
+    if ( mAsynchronousException )
+    {
+      log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+      mAsynchronousException->ThrowAsDerivedType();
+    }
+
     if ( ! mSocket.is_open() )
     {
       connect();

@@ -85,6 +85,12 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::implementDispatch()
   {
+    if ( mAsynchronousException )
+    {
+      log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+      mAsynchronousException->ThrowAsDerivedType();
+    }
+
     if ( ! mSocket.is_open() )
     {
       connect();
@@ -295,7 +301,7 @@ namespace uhal
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
       //set the error code correctly
-      log ( Error() , "ASIO deadline timer timed out" );
+      //log ( Error() , "ASIO deadline timer timed out" );
     }
 
     // Put the actor back to sleep.

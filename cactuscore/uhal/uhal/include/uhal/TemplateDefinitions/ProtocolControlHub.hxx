@@ -83,7 +83,7 @@ namespace uhal
     // Device Port number (2 bytes)
     // Error code (2 bytes)
     // -------------------------------------------------------------------------------------------------------------
-    boost::lock_guard<boost::mutex> lPreamblesLock( mPreamblesMutex );
+    boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
     mPreambles.push_back ( tpreamble() );
     tpreamble* lPreambles = & mPreambles.back();
     std::deque < Buffers >::iterator lCurrentFillingBuffers ( this->mCurrentBuffers );
@@ -113,8 +113,7 @@ namespace uhal
   {
     InnerProtocol::predispatch();
     //log ( Debug() , ThisLocation() );
-   
-    boost::lock_guard<boost::mutex> lPreamblesLock( mPreamblesMutex ); 
+    boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
     tpreamble& lPreambles = mPreambles.back();
     uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
     * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
@@ -136,7 +135,7 @@ namespace uhal
     {
       log ( Error() , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
             " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) );
-      boost::lock_guard<boost::mutex> lPreamblesLock( mPreamblesMutex );
+      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
       return new uhal::exception::ControlHubReturnedWrongAddress();
     }
@@ -148,7 +147,7 @@ namespace uhal
     {
       log ( Error() , "Returned Port number " , Integer ( lReplyPort ) ,
             " does not match that sent " , Integer ( mDevicePort ) );
-      boost::lock_guard<boost::mutex> lPreamblesLock( mPreamblesMutex );
+      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
       return new uhal::exception::ControlHubReturnedWrongAddress();
     }
@@ -158,7 +157,7 @@ namespace uhal
 
     if ( lErrorCode != 0 )
     {
-      boost::lock_guard<boost::mutex> lPreamblesLock( mPreamblesMutex );
+      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
 
       if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 )
@@ -188,7 +187,7 @@ namespace uhal
     //aReplyStartIt++;
     // log ( Info() , "Control Hub has validated the packet headers" );
     {
-      boost::lock_guard<boost::mutex> lPreamblesLock( mPreamblesMutex );
+      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
     }
     return InnerProtocol::validate ( ( aSendBufferStart+=12 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
@@ -208,7 +207,7 @@ namespace uhal
   void ControlHub< InnerProtocol >::dispatchExceptionHandler()
   {
     {
-      boost::lock_guard<boost::mutex> lPreamblesLock( mPreamblesMutex );
+      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.clear();
     }
     InnerProtocol::dispatchExceptionHandler();

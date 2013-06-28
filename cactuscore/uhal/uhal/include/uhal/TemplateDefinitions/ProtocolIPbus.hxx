@@ -194,6 +194,14 @@ namespace uhal
   {
     return IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
+
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
+  void IPbus< 1 , IPbus_minor , buffer_size >::dispatchExceptionHandler()
+  {
+    log ( Info() , ThisLocation() );
+    IPbusCore::dispatchExceptionHandler();
+  }
+
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
