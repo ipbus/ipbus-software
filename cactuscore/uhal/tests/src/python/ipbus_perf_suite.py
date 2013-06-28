@@ -11,6 +11,7 @@ N.B: You must set LD_LIBRARY_PATH and PATH appropriately before this
 from datetime import datetime
 import fcntl
 import getpass
+from math import sqrt
 import numpy
 import os
 import paramiko
@@ -29,6 +30,8 @@ import time
 
 TEST_CMD_TIMEOUT_S = 120
 
+UHAL_PC_NAME = gethostname()
+
 CH_PC_NAME = 'pc-e1x06-36-01'
 CH_PC_USER = 'tsw'
 CH_PC_ENV  = {'PATH':os.environ['PATH'],
@@ -36,10 +39,11 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
               }
 CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.0.0/sys.config"
 
-TARGETS = [#'amc-e1a12-19-09:50001',
+TARGETS = ['amc-e1a12-19-09:50001',
            'amc-e1a12-19-10:50001',
            'amc-e1a12-19-04:50001']
 
+DIRECT_UDP_NR_IN_FLIGHT = 16
 
 ###################################################################################################
 #  SETUP LOGGING
@@ -53,7 +57,7 @@ SCRIPT_LOG_FORMATTER = logging.Formatter("%(asctime)-15s [0x%(thread)x] %(leveln
 SCRIPT_LOG_HANDLER.setFormatter(SCRIPT_LOG_FORMATTER)
 
 SCRIPT_LOGGER.addHandler(SCRIPT_LOG_HANDLER)
-SCRIPT_LOGGER.setLevel(logging.INFO)
+SCRIPT_LOGGER.setLevel(logging.WARNING)
 
 ####################################################################################################
 #  SETUP MATPLOTLIB
@@ -164,10 +168,10 @@ def parse_perftester(cmd_output):
     m1 = re.search(r"^Test iteration frequency\s+=\s*([\d\.]+)\s*Hz", cmd_output, flags=re.MULTILINE)
     freq = float(m1.group(1))
     m2 = re.search(r"^Average \S+ bandwidth\s+=\s*([\d\.]+)\s*KB/s", cmd_output, flags=re.MULTILINE)
-    bandwidth = float(m2.group(1)) / 125.0
+    bw = float(m2.group(1)) / 125.0
 
-    SCRIPT_LOGGER.info("Parsed: Latency = " + str(1000000.0/freq) + "us/iteration , bandwidth = " + str(bandwidth) + "Mb/s")
-    return (1000000.0/freq, bandwidth)
+    SCRIPT_LOGGER.info("Parsed: Latency = " + str(1000000.0/freq) + "us/iteration , bandwidth = " + str(bw) + "Mb/s")
+    return (1000000.0/freq, bw)
 
 
 def run_ping(target, ssh_client=None):
@@ -182,12 +186,6 @@ def run_ping(target, ssh_client=None):
 
     return avg_latency_us
 
-
-#CPU_MEM_PSAUX_REGEX = re.compile("^\\w+\\s+\\d+\\s+([\\d+\\.]+)\\s+([\\d+\\.]+)\\s+"  # USER PID CPU MEM
-#                                 "\\d+\\s+\\d+\\s+\\S+\\s+" # VSZ   RSS TTY      
-#                                 "\\S+\\s+\\S+\\s+[\\d:]+\\s+" # STAT START   TIME 
-#                                 ".+" # COMMAND
-#                                 )
 
 def cpu_mem_usage(cmd_to_check, ssh_client=None):
     assert " " not in cmd_to_check
@@ -361,8 +359,9 @@ def calc_y_with_errors(data_dict):
         y_values = data_dict[x]
         mean = numpy.mean(y_values)
         means.append(mean)
-        low_error.append(mean - numpy.min(y_values))
-        high_error.append(numpy.max(y_values) - mean)
+        rms = sqrt( sum([(y-mean)**2 for y in y_values]) / len(y_values) )
+        low_error.append(rms)
+        high_error.append(rms)
 
     return means, [low_error, high_error]
         
@@ -370,12 +369,13 @@ def calc_y_with_errors(data_dict):
 def measure_latency(target, controhub_ssh_client=None):
     '''Measures latency for single word write to given endpoint'''
     print "\n ---> MEASURING LATENCY TO '" + target + "' <---"
-    
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
     ping_localhost_ch     = run_ping(CH_PC_NAME)
     ping_ch_target        = run_ping(target, ssh_client=controlhub_ssh_client)
     ping_localhost_target = run_ping(target) 
-    udp_latency_localhost = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 10000 -p -d ipbusudp-2.0://"+target)[0]
-    udp_latency_chpc      = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 10000 -p -d ipbusudp-2.0://"+target, ssh_client=controlhub_ssh_client)[0]
+    udp_latency_localhost = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 5000 -p -d ipbusudp-2.0://"+target)[0]
+    udp_latency_chpc      = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 5000 -p -d ipbusudp-2.0://"+target, ssh_client=controlhub_ssh_client)[0]
     
     start_controlhub(controlhub_ssh_client)
     chtcp_latency = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -p -d chtcp-2.0://"+CH_PC_NAME+":10203?target="+target)[0]
@@ -390,57 +390,64 @@ def measure_latency(target, controhub_ssh_client=None):
     print "    + Via ControlHub      : " + ("%5.1f" % chtcp_latency) + "us"
 
 
-def measure_bandwidth_vs_depth(target, controlhub_ssh_client):
+def measure_bw_vs_depth(target, controlhub_ssh_client):
     '''Measures bandwidth for block writes to given endpoint'''
-    print "\n ---> MEASURING BANDWIDTH TO '" + target + "' <---"
-    
+    print "\n ---> MEASURING BANDWIDTH vs DEPTH to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
     depths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25,
-              50, 75, 100, 150, 200, 250, 300, 310, 320, 330, 340,
+              100, #50, 75, 100, 150, 200, 250, 
+              300, 310, 320, 330, 340,
               341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 500,
-              1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 10000, 20000]
+              1000, 10000]#, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]#, 10000]#, 20000]
     udp_bandwidths = dict((x, []) for x in depths)
     ch_bandwidths = dict((x, []) for x in depths)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
     udp_uri = "ipbusudp-2.0://" + target
     for i in range(5):
         for d in depths:
-            udp_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i 2000 -d "+udp_uri, 
-                                                  ssh_client=controlhub_ssh_client)[1] )
+            itns = (1000, 500)[d > 999]
+            udp_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i "+str(itns)+" -d "+udp_uri)[1] )
     udp_bws_mean, udp_bws_yerrors = calc_y_with_errors(udp_bandwidths)
-    plt.errorbar(depths, udp_bws_mean, yerr=udp_bws_yerrors, label="Direct UDP (CH PC)")
+    ax.errorbar(depths, udp_bws_mean, yerr=udp_bws_yerrors, label='Direct UDP, '+str(DIRECT_UDP_NR_IN_FLIGHT)+' in-flight')
 
     ch_uri = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
-    for nr_in_flight in [1,4,8,16]:
+    for nr_in_flight in [1,16]:
         ch_bandwidths = dict((x, []) for x in depths)
 
         update_controlhub_sys_config(nr_in_flight, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
         start_controlhub(controlhub_ssh_client)
         for i in range(5):
             for d in depths:
-                ch_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i 2000 -d "+ch_uri)[1] )
+                itns = (1000, 500)[d > 999]
+                ch_bandwidths[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w "+str(d)+" -p -i "+str(itns)+" -d "+ch_uri)[1] )
         ch_bws_mean, ch_bws_yerrors = calc_y_with_errors(ch_bandwidths)
-        plt.errorbar(depths, ch_bws_mean, yerr=ch_bws_yerrors, label="Via CH, "+str(nr_in_flight)+" in-flight")
+        ax.errorbar(depths, ch_bws_mean, yerr=ch_bws_yerrors, label="Via CH, "+str(nr_in_flight)+" in-flight")
 
         stop_controlhub(controlhub_ssh_client)
 
-    plt.xlabel("Number of words")
-    plt.ylabel("Write bandwidth [Mb/s]")
+    ax.set_xlabel("Number of words")
+    ax.set_ylabel("Write bandwidth [Mb/s]")
 #    plt.xscale("log")
-    plt.legend(loc='lower right')
-    plt.title(gethostname() + "  ->  " + CH_PC_NAME + "  ->  " + target)
+    ax.legend(loc='lower right')
+    ax.set_title('Block writes, 1000 or 500 iterations')
 
 
 def measure_bw_vs_nInFlight(target, controlhub_ssh_client):
     '''Measures continuous write/read bandwidth for block writes to given endpoint'''
     print "\n ---> BANDWIDTH vs NR_IN_FLIGHT to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
-    nrs_in_flight = [1,2,4,5,6,7,8,10,12,16]
-    cmd_base = "PerfTester.exe -b 0x1000 -w 1024 -i 10240 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
+    nrs_in_flight = [1,2,3,4,6,8,10,12,16]
+    cmd_base = "PerfTester.exe -b 0x1000 -w 2560 -i 2048 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
 
     ch_tx_bws = dict((x, []) for x in nrs_in_flight)
     ch_rx_bws  = dict((x, []) for x in nrs_in_flight)
 
-    for i in range(3):
+    for i in range(5):
         for n in nrs_in_flight:
             update_controlhub_sys_config(n, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
             start_controlhub(controlhub_ssh_client)
@@ -457,15 +464,17 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client):
     ax.errorbar(nrs_in_flight, ch_rx_bws_mean, yerr=ch_rx_bws_yerrors, label='Read via CH')
     ax.set_xlabel('Number in flight over UDP')
     ax.set_ylabel('Bandwidth [Mb/s]')
+    ax.set_ylim(0)
     ax.legend(loc='lower right')
-    ax.set_title('40MB read/write bandwidth')
+    ax.set_title('20MB read/write bandwidth')
 
 
 def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     '''Measures continuous block-write bandwidth from to all endpoints, varying the number of clients.'''
     print "\n ---> BANDWIDTH vs NR_CLIENTS to", targets, "<---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
-    cmd_base = "PerfTester.exe -t BandwidthTx -w 1024 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
+    cmd_base = "PerfTester.exe -t BandwidthTx -w 2560 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
     cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
 
     nrs_clients = [1,2,3,4,5,6,8]
@@ -483,7 +492,8 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     for i in range(5):
         for n_clients in nrs_clients:
             for n_targets in nrs_targets:
-                cmds = [cmd_base + t + ' -i ' + str(int(51200/n_clients)) for t in targets[0:n_targets] for x in range(n_clients)]
+                itns = int(20480/(n_clients*n_targets))
+                cmds = [cmd_base + t + ' -i ' + str(itns) for t in targets[0:n_targets] for x in range(n_clients)]
                 monitor_results, cmd_results = cmd_runner.run(cmds)
                 bws = [x[1] for x in cmd_results]
 
@@ -504,6 +514,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     ax_ch_mem = fig.add_subplot(235, ylim=[0,100])
     ax_uhal_cpu = fig.add_subplot(233, ylim=[0,400])
     ax_uhal_mem = fig.add_subplot(236, ylim=[0,100])
+    fig.suptitle('100MB continuous write to crate')
 
     for n_targets in nrs_targets:
         label = str(n_targets) + ' targets'
@@ -526,10 +537,16 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 
     ax_bw_board.set_ylabel('Total bandwidth per board [Mb/s]')
     ax_bw_client.set_ylabel('Bandwidth per client [Mb/s]')
+    ax_bw_board.set_ylim(bottom=0)
+
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
     ax_ch_mem.set_ylabel('ControlHub memory usage [%]')
     ax_uhal_cpu.set_ylabel('uHAL client CPU usage [%]')
     ax_uhal_mem.set_ylabel('uHAL client memory usage [%]')
+    for ax in [ax_ch_cpu, ax_uhal_cpu]:
+        ax.set_ylim(0,400)
+    for ax in [ax_ch_mem, ax_uhal_mem]:
+        ax.set_ylim(0)
 
     ax_ch_mem.legend(loc='lower right')
 #    ax.set_title('a title')
@@ -541,12 +558,14 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
+    measure_latency(TARGETS[0], controlhub_ssh_client)
+
+    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client)
+
+    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client)
+
     measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
 
-#    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client)
-    #measure_latency(TARGETS[0], controlhub_ssh_client)
-
-#    measure_bandwidth_vs_depth(TARGETS[0], controlhub_ssh_client)
-
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
     plt.show()
 
