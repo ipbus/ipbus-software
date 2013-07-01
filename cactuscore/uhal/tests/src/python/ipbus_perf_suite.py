@@ -28,7 +28,7 @@ import time
 ####################################################################################################
 #  GLOBAL OPTIONS
 
-TEST_CMD_TIMEOUT_S = 120
+TEST_CMD_TIMEOUT_S = 60
 
 UHAL_PC_NAME = gethostname()
 
@@ -40,10 +40,14 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
 CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.0.0/sys.config"
 
 TARGETS = ['amc-e1a12-19-09:50001',
-           'amc-e1a12-19-10:50001',
-           'amc-e1a12-19-04:50001']
+          ]# 'amc-e1a12-19-10:50001',
+           #'amc-e1a12-19-04:50001']
 
 DIRECT_UDP_NR_IN_FLIGHT = 16
+
+CACTUS_REVISION = "xyz"
+
+CHANGES_TAG = "some changes"
 
 ###################################################################################################
 #  SETUP LOGGING
@@ -357,40 +361,65 @@ def calc_y_with_errors(data_dict):
     high_error = []
     for x in sorted(data_dict.keys()):
         y_values = data_dict[x]
-        mean = numpy.mean(y_values)
+        mean, rms = calc_mean_rms(y_values)
         means.append(mean)
-        rms = sqrt( sum([(y-mean)**2 for y in y_values]) / len(y_values) )
         low_error.append(rms)
         high_error.append(rms)
 
     return means, [low_error, high_error]
-        
+    
+def calc_mean_rms(data_list):
+    mean = numpy.mean(data_list)    
+    rms = sqrt( sum([(y-mean)**2 for y in data_list]) / len(data_list) )
+    return mean, rms
 
-def measure_latency(target, controhub_ssh_client=None):
+def measure_latency(target, controhub_ssh_client, axis):
     '''Measures latency for single word write to given endpoint'''
     print "\n ---> MEASURING LATENCY TO '" + target + "' <---"
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
-    ping_localhost_ch     = run_ping(CH_PC_NAME)
-    ping_ch_target        = run_ping(target, ssh_client=controlhub_ssh_client)
-    ping_localhost_target = run_ping(target) 
-    udp_latency_localhost = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 5000 -p -d ipbusudp-2.0://"+target)[0]
-    udp_latency_chpc      = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 5000 -p -d ipbusudp-2.0://"+target, ssh_client=controlhub_ssh_client)[0]
+    # Initialise vars to store latency measurements:
+    lats_ping_uhal_ch, lats_ping_ch_target, lats_ping_uhal_target = [], [], []
+    lats_ipbusudp_uhalpc, lats_ipbusudp_chpc = [], []
+    lats_chtcp = []
+
+    for i in range(5):
+       lats_ping_uhal_ch.append( run_ping(CH_PC_NAME) )
+       lats_ping_ch_target.append( run_ping(target, ssh_client=controlhub_ssh_client) )
+       lats_ping_uhal_target.append( run_ping(target) )
+       lats_ipbusudp_uhalpc.append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 1000 -p -d ipbusudp-2.0://"+target)[0] ) 
+       lats_ipbusudp_chpc.append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 1000 -p -d ipbusudp-2.0://"+target, ssh_client=controlhub_ssh_client)[0] )
+       start_controlhub(controlhub_ssh_client)
+       lats_chtcp.append( run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -i 1000 -p -d chtcp-2.0://"+CH_PC_NAME+":10203?target="+target)[0] )
+       stop_controlhub(controlhub_ssh_client)    
+
+    positions, vals, errs, labels = [], [], [], []
     
-    start_controlhub(controlhub_ssh_client)
-    chtcp_latency = run_command("PerfTester.exe -t BandwidthTx -b 0x1000 -w 1 -p -d chtcp-2.0://"+CH_PC_NAME+":10203?target="+target)[0]
-    stop_controlhub(controlhub_ssh_client)    
+    def analyse( latencies_list, label):
+        if len(positions) == 0:
+            positions.append( 0.5 )
+        else:
+            positions.append( positions[-1] - 1.0 )
+        mean, rms = calc_mean_rms(latencies_list)
+        vals.append( mean )
+        errs.append( rms )
+        labels.append( label )
 
-    print "Latencies for "+target
-    print "    + Ping, here -> CH    : " + ("%5.1f" % ping_localhost_ch) + "us"
-    print "    + Ping, CH -> board   : " + ("%5.1f" % ping_ch_target) + "us"
-    print "    + Ping, here -> board : " + ("%5.1f" % ping_localhost_target) + "us"
-    print "    + Direct UDP (this PC): " + ("%5.1f" % udp_latency_localhost) + "us"
-    print "    + Direct UDP (CH PC)  : " + ("%5.1f" % udp_latency_chpc) + "us"
-    print "    + Via ControlHub      : " + ("%5.1f" % chtcp_latency) + "us"
+    analyse( lats_ping_uhal_ch , 'Ping\nuHAL to CH PC')
+    analyse( lats_ping_ch_target, 'Ping\nCH PC to board')
+    analyse( lats_ping_uhal_target, 'Ping\nuHAL PC to board')
+    analyse( lats_ipbusudp_uhalpc, 'Direct UDP\nFrom uHAL PC')
+    analyse( lats_ipbusudp_chpc, 'Direct UDP\nFrom CH PC')
+    analyse( lats_chtcp, 'Via ControlHub')
+
+    axis.barh(positions, vals, xerr=errs, ecolor='black', align='center')
+    axis.set_xlabel('Latency [us]')
+    axis.set_yticks(positions)
+    axis.set_yticklabels(labels)
+    axis.grid(True) 
 
 
-def measure_bw_vs_depth(target, controlhub_ssh_client):
+def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
     '''Measures bandwidth for block writes to given endpoint'''
     print "\n ---> MEASURING BANDWIDTH vs DEPTH to '" + target + "' <---"
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
@@ -402,9 +431,6 @@ def measure_bw_vs_depth(target, controlhub_ssh_client):
               1000, 10000]#, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]#, 10000]#, 20000]
     udp_bandwidths = dict((x, []) for x in depths)
     ch_bandwidths = dict((x, []) for x in depths)
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
 
     udp_uri = "ipbusudp-2.0://" + target
     for i in range(5):
@@ -436,7 +462,7 @@ def measure_bw_vs_depth(target, controlhub_ssh_client):
     ax.set_title('Block writes, 1000 or 500 iterations')
 
 
-def measure_bw_vs_nInFlight(target, controlhub_ssh_client):
+def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
     '''Measures continuous write/read bandwidth for block writes to given endpoint'''
     print "\n ---> BANDWIDTH vs NR_IN_FLIGHT to '" + target + "' <---"
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
@@ -458,8 +484,6 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client):
     ch_tx_bws_mean, ch_tx_bws_yerrors = calc_y_with_errors(ch_tx_bws)
     ch_rx_bws_mean, ch_rx_bws_yerrors = calc_y_with_errors(ch_rx_bws)
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
     ax.errorbar(nrs_in_flight, ch_tx_bws_mean, yerr=ch_tx_bws_yerrors, label='Write via CH')
     ax.errorbar(nrs_in_flight, ch_rx_bws_mean, yerr=ch_rx_bws_yerrors, label='Read via CH')
     ax.set_xlabel('Number in flight over UDP')
@@ -558,11 +582,24 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    measure_latency(TARGETS[0], controlhub_ssh_client)
+#    (f, ((ax1, ax2), (ax3, ax4))) = plt.subplots(2, 2)
+    f = plt.figure(figsize=(12,10))
+    ax2 = f.add_subplot(222)
+    ax3 = f.add_subplot(223)
+    ax4 = f.add_subplot(224)
 
-    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client)
+    f.text(0.06, 0.9, "Measurements @ " + time.strftime('%l:%M%p %Z on %b %d, %Y'))
+    f.text(0.06, 0.85, "Version: " + CACTUS_REVISION)
+    f.text(0.06, 0.8, "Changes: " + CHANGES_TAG) 
+    f.text(0.06, 0.75, "ControlHub host: " + CH_PC_NAME)
+    f.text(0.06, 0.7, "uHAL host: " + UHAL_PC_NAME)    
+    f.text(0.06, 0.65, "Targets: \n    " + "\n    ".join(TARGETS), verticalalignment='baseline')
 
-    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client)
+    measure_latency(TARGETS[0], controlhub_ssh_client, ax2)
+
+    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client, ax2)
+
+    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client, ax3)
 
     measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
 
