@@ -52,12 +52,16 @@ namespace uhal
   TCP< InnerProtocol >::TCP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
     mIOservice (),
+#ifdef RUN_ASIO_MULTITHREADED
     mIOserviceWork ( mIOservice ),
+#endif
     mSocket ( mIOservice ),
     mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( 65536 , 0x00000000 ),
+#ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
+#endif
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
@@ -72,7 +76,9 @@ namespace uhal
     {
       mSocket.close();
       mIOservice.stop();
+#ifdef RUN_ASIO_MULTITHREADED
       mDispatchThread.join();
+#endif
     }
     catch ( const std::exception& aExc )
     {
@@ -98,7 +104,9 @@ namespace uhal
 
     {
       Buffers* lCurrentBuffer ( & ( * ( this->mCurrentBuffers ) ) );
+#ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+#endif
       mDispatchQueue.push_back ( lCurrentBuffer );
 
       if ( mDispatchQueue.size() == 1 )
@@ -125,6 +133,9 @@ namespace uhal
 
     do
     {
+#ifndef RUN_ASIO_MULTITHREADED
+      mIOservice.run_one();
+#endif
     }
     while ( lErrorCode == boost::asio::error::would_block );
 
@@ -155,7 +166,7 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::write ( Buffers* aBuffers )
   {
-    //         log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
+    //              log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
     //         std::vector<uint32_t>::const_iterator lBegin( reinterpret_cast<uint32_t*>( aBuffers->getSendBuffer() ) );
     //         std::vector<uint32_t>::const_iterator lEnd = lBegin + (aBuffers->sendCounter()>>2);
     //         std::vector<uint32_t> lData;
@@ -171,7 +182,20 @@ namespace uhal
     mAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+#ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, aBuffers , _1 ) );
+#else
+    boost::system::error_code lErrorCode = boost::asio::error::would_block;
+    boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
+
+    do
+    {
+      mIOservice.run_one();
+    }
+    while ( lErrorCode == boost::asio::error::would_block );
+
+    write_callback ( aBuffers , lErrorCode );
+#endif
   }
 
 
@@ -179,8 +203,10 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
-    //     log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
+    //          log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
+#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+#endif
     mReplyQueue.push_back ( aBuffers );
 
     if ( mReplyQueue.size() == 1 )
@@ -201,12 +227,25 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::read ( Buffers* aBuffers )
   {
-    //     log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
+    //          log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
     mAsioReplyBuffer.clear();
     mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
     log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+#ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least ( 4 ), boost::bind ( &TCP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
+#else
+    boost::system::error_code lErrorCode = boost::asio::error::would_block;
+    boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least ( 4 ), boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
+
+    do
+    {
+      mIOservice.run_one();
+    }
+    while ( lErrorCode == boost::asio::error::would_block );
+
+    read_callback ( aBuffers , lErrorCode );
+#endif
   }
 
 
@@ -214,7 +253,7 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::read_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
   {
-    //     log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
+    //          log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
@@ -275,7 +314,9 @@ namespace uhal
       return;
     }
 
+#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+#endif
     mReplyQueue.pop_front();
 
     if ( mReplyQueue.size() )
@@ -326,7 +367,9 @@ namespace uhal
         mAsynchronousException->ThrowAsDerivedType();
       }
 
+#ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( this->mTcpMutex );
+#endif
       lContinue = ( this->mDispatchedBuffers.size() );
     }
     while ( lContinue );

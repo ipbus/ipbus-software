@@ -51,8 +51,10 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
+#ifdef RUN_ASIO_MULTITHREADED
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#endif
 
 #include <string>
 
@@ -121,7 +123,9 @@ namespace uhal
       //! The boost::asio::io_service used to create the connections
       boost::asio::io_service mIOservice;
 
+#ifdef RUN_ASIO_MULTITHREADED
       boost::asio::io_service::work mIOserviceWork;
+#endif
 
       //! A shared pointer to a boost::asio udp socket through which the operation will be performed
       boost::asio::ip::udp::socket mSocket;
@@ -133,13 +137,17 @@ namespace uhal
 
       std::vector<uint8_t> mReplyMemory;
 
+#ifdef RUN_ASIO_MULTITHREADED
       boost::thread mDispatchThread;
+#endif
 
       std::vector< boost::asio::const_buffer > mAsioSendBuffer;
       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
 
       //! A MutEx lock used to make sure the access functions are thread safe
+#ifdef RUN_ASIO_MULTITHREADED
       boost::mutex mUdpMutex;
+#endif
       std::deque < Buffers* > mDispatchQueue;
       std::deque < Buffers* > mReplyQueue;
 

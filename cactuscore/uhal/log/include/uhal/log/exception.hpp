@@ -106,7 +106,7 @@ namespace uhal
         std::vector< std::string > mAdditionalInfo;
         std::vector< void* > mBacktrace;
         boost::thread::id mThreadId;
-        timeval mTime; 
+        timeval mTime;
 
       private:
         static std::string mMemory;
