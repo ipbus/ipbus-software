@@ -597,9 +597,9 @@ if __name__ == "__main__":
 
     measure_latency(TARGETS[0], controlhub_ssh_client, ax2)
 
-    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client, ax2)
+    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client, ax3)
 
-    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client, ax3)
+    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client, ax4)
 
     measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
 
