@@ -200,9 +200,9 @@ namespace uhal
     if ( !lRet )
     {
       lBuffer->validate();
+      mDispatchedBuffers.pop_front();
     }
 
-    mDispatchedBuffers.pop_front();
     return lRet;
   }
 
