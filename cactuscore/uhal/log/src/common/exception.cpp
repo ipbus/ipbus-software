@@ -56,6 +56,7 @@ namespace uhal
       mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
       mThreadId ( boost::this_thread::get_id() )
     {
+      gettimeofday ( &mTime, NULL );
       Backtrace::Backtrace ( mBacktrace );
     }
 
@@ -65,6 +66,9 @@ namespace uhal
 
     const char* exception::what() const throw()
     {
+      timeval lTime;
+      gettimeofday ( &lTime, NULL );
+
       std::stringstream lStr;
       lStr << "\n";
 #ifdef COURTEOUS_EXCEPTIONS
@@ -102,6 +106,15 @@ namespace uhal
         lStr << " * Exception occured in thread with ID: " << mThreadId << "\n";
         lStr << " * Current thread has ID: " << lThreadId << "\n";
       }
+
+      lStr << std::setfill('0');
+      char tmbuf[64];
+      strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", localtime ( &mTime.tv_sec ) );
+      lStr << " * Exception constructed at time:              " << tmbuf << '.' << std::setw(6) << mTime.tv_usec << "\n";
+
+      strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", localtime ( &lTime.tv_sec ) );
+      lStr << " * Exception's what() function called at time: " << tmbuf << '.' << std::setw(6) << lTime.tv_usec << "\n";
+
 
       lStr << " * Call stack:\n";
       std::vector< Backtrace::TracePoint > lBacktrace = Backtrace::BacktraceSymbols ( mBacktrace );

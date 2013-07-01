@@ -43,6 +43,9 @@
 #include <string>
 #include <map>
 #include <list>
+#include <sys/time.h>
+#include <time.h>
+
 #include "uhal/log/log_inserters.location.hpp"
 #include "boost/thread.hpp"
 
@@ -103,6 +106,7 @@ namespace uhal
         std::vector< std::string > mAdditionalInfo;
         std::vector< void* > mBacktrace;
         boost::thread::id mThreadId;
+        timeval mTime; 
 
       private:
         static std::string mMemory;
