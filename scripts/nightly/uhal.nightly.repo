@@ -3,7 +3,7 @@ name=CACTUS Project Software Repository
 baseurl=http://www.cern.ch/cactus/nightly/uhal.py/<platform>/RPMS
 enabled=1
 gpgcheck=0
-
+timeout=120
 
 
 
