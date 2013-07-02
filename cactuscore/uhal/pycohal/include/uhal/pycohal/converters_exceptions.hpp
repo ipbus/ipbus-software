@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "uhal/log/exception.hpp"
+#include "uhal/log/log.hpp"
 
 #include "boost/python.hpp"
 #include "boost/python/converter/rvalue_from_python_data.hpp"

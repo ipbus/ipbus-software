@@ -330,7 +330,8 @@ namespace uhal
 
     protected:
       //! A MutEx lock used to make sure the access functions are thread safe
-      boost::mutex mMutex;
+      boost::mutex mUserSideMutex;
+      boost::mutex mDispatchSideMutex;
 
       //! A memory pool of buffers which will be dispatched
       std::deque < Buffers > mBuffers;

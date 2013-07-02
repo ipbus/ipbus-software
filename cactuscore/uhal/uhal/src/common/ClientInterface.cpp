@@ -42,12 +42,14 @@ namespace uhal
     mId ( aId ),
     mUri ( aUri )
   {
+    //     log ( Warning() , ThisLocation()  );
   }
 
 
 
   ClientInterface::ClientInterface ( )
   {
+    //     log ( Warning() , ThisLocation()  );
   }
 
 
@@ -56,6 +58,7 @@ namespace uhal
     mId ( aClientInterface.mId ),
     mUri ( aClientInterface.mUri )
   {
+    //     log ( Warning() , ThisLocation()  );
   }
 
 
@@ -146,6 +149,7 @@ namespace uhal
 
   void ClientInterface::dispatch ()
   {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     // log ( Debug() , ThisLocation() );
     CreateFillingBuffer ( ); //put this here to protect against users doing a dispatch with no data to send.
     unflushedDispatch (); // this is protected by its own internal try-catch-handle block
@@ -188,7 +192,8 @@ namespace uhal
   {
     // log ( Debug() , ThisLocation() );
     //check that the results are valid
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mDispatchSideMutex );
     //std::cout << mDispatchedBuffers.size() << std::endl;
     Buffers* lBuffer ( mDispatchedBuffers.front() );
     exception::exception* lRet = this->validate ( lBuffer->getSendBuffer() ,
@@ -248,19 +253,22 @@ namespace uhal
   {
     // log ( Debug() , ThisLocation() );
     //if there are no existing buffers in the pool, create them
-    CreateFillingBuffer ( );
-    mCurrentBuffers++;
-
-    if ( mCurrentBuffers == mBuffers.end() )
     {
-      mCurrentBuffers = mBuffers.begin();
-    }
+      // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
+      boost::lock_guard<boost::mutex> lLock ( mDispatchSideMutex );
+      CreateFillingBuffer ( );
+      mCurrentBuffers++;
 
+      if ( mCurrentBuffers == mBuffers.end() )
+      {
+        mCurrentBuffers = mBuffers.begin();
+      }
+    }
     //     bool lWillPause ( false );
     //
     //     if ( LoggingIncludes ( Warning() ) )
     //     {
-    //       boost::lock_guard<boost::mutex> lLock ( mMutex );
+    //       log( Warning() , "mUserSideMutex SET AT " , ThisLocation() ); boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     //       lWillPause =  mDispatchedBuffers.size() && & ( *mCurrentBuffers ) == mDispatchedBuffers.front();
     //     }
     //     if ( lWillPause )
@@ -271,10 +279,11 @@ namespace uhal
     //we will wait if the buffer that we are expecting to fill is still waiting for dispatch and validation
     while ( true )
     {
-      //std::cout << mDispatchedBuffers.size() << std::endl;
-      //{
-      boost::lock_guard<boost::mutex> lLock ( mMutex );
+      // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
+      boost::lock_guard<boost::mutex> lLock ( mDispatchSideMutex );
 
+      //std::cout << ">>" << mDispatchedBuffers.size() << std::endl;
+      //{
       if ( !mDispatchedBuffers.size() )
       {
         break;
@@ -331,11 +340,15 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementWrite ( aAddr , aSource );
   }
 
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
     uint32_t lBitShiftedSource ( aSource << lShiftSize );
 
@@ -361,6 +374,8 @@ namespace uhal
 
   ValHeader ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementWriteBlock ( aAddr, aSource, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -370,16 +385,22 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRead ( aAddr );
   }
 
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr, const uint32_t& aMask )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRead ( aAddr, aMask );
   }
 
   ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementReadBlock ( aAddr, aSize, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -387,6 +408,8 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRMWbits ( aAddr , aANDterm , aORterm );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -395,6 +418,8 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
   {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRMWsum ( aAddr , aAddend );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

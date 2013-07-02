@@ -54,14 +54,33 @@ namespace uhal
     exception::exception ( ) :
       std::exception (),
       mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
-      mThreadId ( boost::this_thread::get_id() )
+      mThreadId ( boost::this_thread::get_id() ),
+      mString ( new std::string() )
     {
       gettimeofday ( &mTime, NULL );
       Backtrace::Backtrace ( mBacktrace );
     }
 
+
+    exception::exception ( const exception& aExc ) :
+      std::exception (),
+      mAdditionalInfo ( aExc.mAdditionalInfo ),
+      mBacktrace ( aExc.mBacktrace ),
+      mThreadId ( aExc.mThreadId ),
+      mTime ( aExc.mTime ),
+      mString ( new std::string() )
+    {
+    }
+
+
     exception::~exception() throw()
-    {}
+    {
+      if ( mString )
+      {
+        delete mString;
+        mString = NULL;
+      }
+    }
 
 
     const char* exception::what() const throw()
@@ -123,8 +142,8 @@ namespace uhal
         lStr << "          at " << lIt->file << ":" << lIt->line << "\n";
       }
 
-      mMemory = lStr.str();
-      return mMemory.c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
+      *mString = lStr.str();
+      return mString->c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
     }
 
 
@@ -132,8 +151,6 @@ namespace uhal
     {
       mAdditionalInfo.push_back ( aMessage );
     }
-
-    std::string exception::mMemory; //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
 
   }
 }

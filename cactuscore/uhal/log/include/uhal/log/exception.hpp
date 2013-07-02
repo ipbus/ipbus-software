@@ -82,6 +82,11 @@ namespace uhal
         exception ();
 
         /**
+          Copy constructor
+        */
+        exception ( const exception& );
+
+        /**
         	Destructor
         */
         virtual ~exception() throw();
@@ -108,8 +113,7 @@ namespace uhal
         boost::thread::id mThreadId;
         timeval mTime;
 
-      private:
-        static std::string mMemory;
+        std::string* mString;
     };
 
   }

@@ -73,7 +73,9 @@ void job_multiple ( const std::string& connection, const std::string& id )
 
     hw.getNode ( "MEM" ).writeBlock ( xx );
     ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+    log ( Warning() , ThisLocation() );
     hw.dispatch();
+    log ( Warning() , ThisLocation() );
     CACTUS_CHECK ( reg.valid() );
     CACTUS_CHECK ( mem.valid() );
     CACTUS_CHECK ( mem.size() == N_SIZE );
@@ -88,16 +90,20 @@ void multiple_hwinterfaces ( const std::string& connection_file,const std::strin
 
   for ( size_t i=0; i!=N_THREADS; ++i )
   {
+    log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
     jobs.push_back ( new boost::thread ( job_multiple,connection_file,device_id ) );
   }
 
   for ( size_t i=0; i!=N_THREADS; ++i )
   {
+    log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
     //boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
     //CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
     jobs[i]->join();
     delete jobs[i];
   }
+
+  log ( Warning() , ThisLocation() );
 }
 
 void job_single ( HwInterface& hw )
