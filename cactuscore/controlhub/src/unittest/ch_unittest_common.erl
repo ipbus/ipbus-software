@@ -10,7 +10,56 @@
 
 
 %% Exported Functions
--export([spawn_device_emulator/2, device_emulator_init/2, dummy_request_data_generator/1]).
+-export([spawn_device_emulator/2, device_emulator_init/2, dummy_request_data_generator/1, udp_client_loop/7, start_udp_echo_server/1]).
+
+
+
+udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,MaxInFlight}, 0) ->
+    ok;
+udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) when NrInFlight=:=MaxInFlight ; NrIterationsLeft=:=0 ->
+    receive
+        {udp, Socket, TargetIP, TargetPort, _} ->
+            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight-1, MaxInFlight}, NrIterationsLeft)%;
+%        {udp, Socket, TargetIP, TargetPort, Pkt} ->
+%            io:format("ERROR : Expected ~w , but received ~w~n", [Reply, Pkt]),
+%            fail
+    after 20 ->
+        io:format("ERROR : Did not receive reply packet in 20ms"),
+        fail
+    end;
+%    case gen_udp:recv(Socket, 0, 20) of
+%        {ok, {TargetIP, TargetPort, Pkt}} ->
+%           udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight-1, MaxInFlight}, NrIterationsLeft);
+%        {error, timeout} ->
+%           io:format("ERROR : Did not receive reply packet in 20ms, with ~w in-flight and ~w iterations left~n", [NrInFlight,NrIterationsLeft]),
+%           fail
+%    end;
+udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) ->
+    gen_udp:send(Socket, TargetIP, TargetPort, Request),
+    udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight+1, MaxInFlight}, NrIterationsLeft-1).
+
+
+start_udp_echo_server(SocketOptions) ->
+    {ok, Socket} =  gen_udp:open(0, SocketOptions),
+    {ok, Port} = inet:port(Socket),
+    io:format("~n UDP echo server is ready -- on port ~w~n", [Port]),
+    udp_echo_server_loop(Socket).
+
+
+udp_echo_server_loop(Socket) ->
+    receive
+        {udp, Socket, IP, Port, Packet} ->
+            gen_udp:send(Socket, IP, Port, Packet)
+    end,
+    udp_echo_server_loop(Socket).
+
+
+%tcp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) ->
+    
+%start_tcp_echo_server(SocketOptions) ->
+
+%tcp_echo_server_loop(Socket) ->
+
 
 
 %%% ---------------------------------------------------------------------------
