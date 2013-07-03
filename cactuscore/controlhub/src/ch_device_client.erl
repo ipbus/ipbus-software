@@ -24,11 +24,10 @@
 
 %% --------------------------------------------------------------------
 %% External exports
--export([start_link/3, enqueue_requests/3]).
+-export([start_link/3, enqueue_requests/3, increment_pkt_id/1, reset_packet_id/2, parse_ipbus_packet/1, state_as_string/1]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3,
-         reset_packet_id/2, parse_ipbus_packet/1, state_as_string/1]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -type mode() :: 'setup' | 'normal' | 'recover_lost_pkt' | 'timeout'.
 
