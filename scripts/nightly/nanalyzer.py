@@ -61,6 +61,9 @@ def analyze_log():
     return result
 
 def report_summary(result):
+    log_url = os.path.join(CONF.NIGHTLY_LOG_DIR, "nightly.log.html")
+    rep_url = os.path.join(CONF.WEB_URL,"index.html")
+    
     html ="<h3>Summary</h3>\n"
 
     html += "<table border=1>\n"
@@ -68,20 +71,25 @@ def report_summary(result):
         if mytype == LIMIT:
             errors = sum([1 for (i, t, d, s) in result if t == ERROR and s == section])
             ok = sum([1 for (i, t, d, s) in result if t == TEST_PASSED and s == section])
-            bookmark = "incidence_" + urllib.quote(section)
+
+            log_mark = log_url + "#log_" + str(i)
+            rep_mark = rep_url + "#incidence_" + section
+            
             html += "<tr>\n"
-            html += "<td><a href='#" + bookmark + "'>" + section + "</a></td>"
+            html += "<td><a href='" + log_mark + "'>" + section + "</a></td>"
             html += "<td>"
             if errors:
-                html += "<a style='text-decoration: none' href='#" + bookmark + "'>"
+                html += "<a style='text-decoration: none' href='" + rep_mark + "'>"
                 html += "<pre style='" + style(ERROR) + "'> " + str(errors) + " ERRORS </pre>"
                 html += "</a>"
             else:
+                html += "<a style='text-decoration: none' href='" + log_mark + "'>"
                 html += "<pre style='" + style(TEST_PASSED) + "'> NO ERRORS </pre>"
+                html += "</a>"
             html += "</td>"
             html += "<td>"
             if ok:
-                html += "<a style='text-decoration: none' href='#" + bookmark + "'>"
+                html += "<a style='text-decoration: none' href='" + log_mark + "'>"
                 html += "<pre style='" + style(TEST_PASSED) + "'> " + str(ok) + " OK </pre>"
                 html += "</a>"
             html += "</td>"
@@ -90,12 +98,14 @@ def report_summary(result):
     html += "</table><br/>\n"
 
     html += "see <a href='%s'>RPMs...</a><br/>" % os.path.join(CONF.WEB_URL,"RPMS")
-    html += "see <a href='%s'>log file...</a><br/>" % os.path.join(CONF.WEB_URL,"logs","nightly.log.html")
+    html += "see <a href='%s'>log file...</a><br/>" % log_url
     html += "see <a href='%s'>other logs...</a><br/>" % os.path.join(CONF.WEB_URL,"logs")
 
     return html
 
 def report_links(result):
+    log_url = os.path.join(CONF.NIGHTLY_LOG_DIR, "nightly.log.html")
+
     html ="<h3>Incidence Summary</h3>\n"
 
     sections = [section for (c, mytype, detail, section) in result if mytype==LIMIT]
@@ -104,12 +114,13 @@ def report_links(result):
         incidences.sort()
         for (c, t, d, section) in incidences:
             bookmark = "incidence_" + urllib.quote(s)
+            log_mark = log_url + "#log_" + str(c)
             if t == LIMIT:
-                html += "<a name='" + bookmark + "'><h5>" + s + "</h5></a>"
+                html += "<a name='%s' href='%s'><h5>%s</h5></a>" % (bookmark,log_mark,s)
             elif t == TEST_PASSED:
                 pass
             else:
-                html += "<a style='text-decoration: none' href='%s'>" % os.path.join(CONF.WEB_URL, "logs","nightly.log.html#log_" + str(c))
+                html += "<a style='text-decoration: none' href='%s'>" % log_mark
                 html += "<pre style='" + style(t) + "'> " + d + "</pre>"
                 html += "</a>"
 
