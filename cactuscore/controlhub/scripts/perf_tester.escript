@@ -11,8 +11,8 @@
 %-define(UDP_SOCKET_OPTIONS, [binary, {active, true}, {buffer, 100000}, {recbuf, 100000}, {read_packets, 50}]). % {active, false}
 -define(UDP_SOCKET_OPTIONS, [binary, {active, true}]).
 
-%-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}, {buffer, 100000}, {low_watermark, 50000}, {high_watermark, 100000}]).
--define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}]).
+-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}, {buffer, 100000}, {low_watermark, 50000}, {high_watermark, 100000}]).
+%-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}]).
 
 
 % ---------------------------------------------------------------------------------------
@@ -112,7 +112,8 @@ main(["tcp_echo_client" | OtherArgs]) ->
                 16#20005a1f:32,
                 0:((15#5b)*32)
               >>,
-    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop(Socket, Request, Request, {0,NrInFlight}, NrItns) end ),
+    {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
+    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Request, {0,NrInFlight}, NrItns) end ),
     gen_tcp:close(Socket),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Request));
 

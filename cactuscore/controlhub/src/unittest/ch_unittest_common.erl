@@ -46,24 +46,24 @@ udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInF
 %    end;
 
 
-tcp_client_loop(_Socket, _Request, _Reply, {0,_MaxInFlight}, 0) ->
+tcp_client_loop(_SocketTuple, _Request, _Reply, {0,_MaxInFlight}, 0) ->
     ok;
-tcp_client_loop(Socket, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) when NrItnsLeft>0, NrInFlight<MaxInFlight ->
+tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) when NrItnsLeft>0, NrInFlight<MaxInFlight ->
     SendBytes = byte_size(Request),
     gen_tcp:send(Socket, <<SendBytes:32, Request/binary>>),
-    receive
-        {tcp, Socket, _} ->
-            tcp_client_loop(Socket, Request, Reply, {NrInFlight, MaxInFlight}, NrItnsLeft-1)
-    after 0 ->
-        tcp_client_loop(Socket, Request, Reply, {NrInFlight+1, MaxInFlight}, NrItnsLeft-1)
+    case tcp_recv(Socket, ActiveVal, 0) of
+        Pkt when is_binary(Pkt) ->
+            tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight, MaxInFlight}, NrItnsLeft-1);
+        timeout ->
+            tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight+1, MaxInFlight}, NrItnsLeft-1)
     end;
-tcp_client_loop(Socket, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) ->
-    receive
-        {tcp, Socket, _} ->
-            tcp_client_loop(Socket, Request, Reply, {NrInFlight-1, MaxInFlight}, NrItnsLeft)
-    after 20 ->
-        io:format("ERROR : Did not receive reply packet in 20ms~n"),
-        fail
+tcp_client_loop({Socket, ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) ->
+    case tcp_recv(Socket, ActiveVal, 20) of
+        Pkt when is_binary(Pkt) ->
+            tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight-1, MaxInFlight}, NrItnsLeft);
+        timeout ->
+            io:format("ERROR : Did not receive reply packet in 20ms~n"),
+            fail
     end.
 
 
@@ -90,20 +90,48 @@ start_tcp_echo_server(SocketOptions, Port) ->
 tcp_echo_server_loop(LSocket, none) ->
     {ok, Socket} = gen_tcp:accept(LSocket),
     io:format("New client has connected!~n"),
-    tcp_echo_server_loop(LSocket, Socket);
-tcp_echo_server_loop(LSocket, Socket) ->
-    receive 
-        {tcp, Socket, Pkt} ->
+    {ok, [active, ActiveVal]} = inet:getopts(Socket, [active]),
+    tcp_echo_server_loop(LSocket, {Socket, ActiveVal});
+tcp_echo_server_loop(LSocket, {Socket, ActiveVal}) ->
+    case tcp_recv(Socket, ActiveVal, infinity) of 
+        Pkt when is_binary(Pkt) ->
             SendBytes = byte_size(Pkt),
             gen_tcp:send(Socket, <<SendBytes:32, Pkt/binary>>),
             tcp_echo_server_loop(LSocket, Socket);
-        {tcp_closed, Socket} ->
+        tcp_closed ->
             io:format("Client disconnected. Going back to waiting for next client~n"),
-            tcp_echo_server_loop(LSocket, none);
-        Other ->
-            io:format("ERROR : Received unexpected msg: ~p~nWill now stop~n", [Other])
+            tcp_echo_server_loop(LSocket, none)
     end.
 
+
+tcp_recv(Socket, false, Timeout) ->
+    case gen_tcp:recv(Socket, 0, Timeout) of
+        {ok, Pkt} ->
+            Pkt;
+        {error, timeout} ->
+            timeout;
+        {tcp_closed, Socket} ->
+            tcp_closed
+    end;
+tcp_recv(Socket, once, Timeout) ->
+    receive
+        {tcp, Socket, Pkt} ->
+            inet:setopts(Socket, [{active,once}]),
+            Pkt;
+        {tcp_closed, Socket} ->
+            tcp_closed
+    after Timeout ->
+        timeout
+    end;
+tcp_recv(Socket, true, Timeout) ->
+    receive
+        {tcp, Socket, Pkt} ->
+            Pkt;
+        {tcp_closed, Socket} ->
+            tcp_closed
+    after Timeout ->
+        timeout
+    end.
 
 
 %%% ---------------------------------------------------------------------------
