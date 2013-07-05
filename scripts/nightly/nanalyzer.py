@@ -116,7 +116,7 @@ def report_links(result):
             bookmark = "incidence_" + urllib.quote(s)
             log_mark = log_url + "#log_" + str(c)
             if t == LIMIT:
-                html += "<a name='%s' href='%s'><h5>%s</h5></a>" % (bookmark,log_mark,s)
+                html += "<a style='text-decoration: none' name='%s' href='%s'><h5>%s</h5></a>" % (bookmark,log_mark,s)
             elif t == TEST_PASSED:
                 pass
             else:
