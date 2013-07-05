@@ -72,7 +72,7 @@ def report_summary(result):
             errors = sum([1 for (i, t, d, s) in result if t == ERROR and s == section])
             ok = sum([1 for (i, t, d, s) in result if t == TEST_PASSED and s == section])
 
-            log_mark = log_url + "#log_" + str(i)
+            log_mark = log_url + "#log_" + str(c)
             rep_mark = rep_url + "#incidence_" + section
             
             html += "<tr>\n"
