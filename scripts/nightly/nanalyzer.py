@@ -168,8 +168,7 @@ def html_header(title):
     </head>
     <body>
     """
-    html += "<a href='https://twiki.cern.ch/twiki/bin/view/CMS/TrgSupDevGuide1dot11#10_Nightly_Builds'><img src='static/question_mark.png' height='60' width='60' style='border-style: none' align='right'/></a>"
-    html += "<h2>" + title + "</h2>\n"
+    html += "<h2><a  style='text-decoration: none' href='%s'>%s</h2>\n" % (CONF.WEB_URL,title)
     
     html += "<p><b>Date:</b> %s</p>" % time.asctime()
     html += "<p><b>Platform:</b> %s</p>" % platform.platform()
