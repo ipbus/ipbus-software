@@ -10,23 +10,33 @@
 
 
 %% Exported Functions
--export([spawn_device_emulator/2, device_emulator_init/2, dummy_request_data_generator/1, udp_client_loop/7, start_udp_echo_server/1]).
+-export([spawn_device_emulator/2, device_emulator_init/2, dummy_request_data_generator/1, 
+         udp_client_loop/7, tcp_client_loop/5, start_udp_echo_server/1, start_tcp_echo_server/2]).
 
 
 
-udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,MaxInFlight}, 0) ->
+udp_client_loop(_Socket, _TargetIP, _TargetPort, _Request, _Reply, {0,_MaxInFlight}, 0) ->
     ok;
-udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) when NrInFlight=:=MaxInFlight ; NrIterationsLeft=:=0 ->
+udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) when NrIterationsLeft>0, NrInFlight<MaxInFlight ->
+    gen_udp:send(Socket, TargetIP, TargetPort, Request),
     receive
         {udp, Socket, TargetIP, TargetPort, _} ->
-            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight-1, MaxInFlight}, NrIterationsLeft)%;
+            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight, MaxInFlight}, NrIterationsLeft-1)%;
 %        {udp, Socket, TargetIP, TargetPort, Pkt} ->
 %            io:format("ERROR : Expected ~w , but received ~w~n", [Reply, Pkt]),
 %            fail
-    after 20 ->
-        io:format("ERROR : Did not receive reply packet in 20ms"),
-        fail
+    after 0 ->
+        udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight+1,MaxInFlight}, NrIterationsLeft-1)
     end;
+udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) ->
+    receive
+        {udp, Socket, TargetIP, TargetPort, _} ->
+            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight-1, MaxInFlight}, NrIterationsLeft)
+    after 20 ->
+        io:format("ERROR : Did not receive reply packet in 20ms~n"),
+        fail
+    end.
+
 %    case gen_udp:recv(Socket, 0, 20) of
 %        {ok, {TargetIP, TargetPort, Pkt}} ->
 %           udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight-1, MaxInFlight}, NrIterationsLeft);
@@ -34,9 +44,27 @@ udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInF
 %           io:format("ERROR : Did not receive reply packet in 20ms, with ~w in-flight and ~w iterations left~n", [NrInFlight,NrIterationsLeft]),
 %           fail
 %    end;
-udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) ->
-    gen_udp:send(Socket, TargetIP, TargetPort, Request),
-    udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight+1, MaxInFlight}, NrIterationsLeft-1).
+
+
+tcp_client_loop(_Socket, _Request, _Reply, {0,_MaxInFlight}, 0) ->
+    ok;
+tcp_client_loop(Socket, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) when NrItnsLeft>0, NrInFlight<MaxInFlight ->
+    SendBytes = byte_size(Request),
+    gen_tcp:send(Socket, <<SendBytes:32, Request/binary>>),
+    receive
+        {tcp, Socket, _} ->
+            tcp_client_loop(Socket, Request, Reply, {NrInFlight, MaxInFlight}, NrItnsLeft-1)
+    after 0 ->
+        tcp_client_loop(Socket, Request, Reply, {NrInFlight+1, MaxInFlight}, NrItnsLeft-1)
+    end;
+tcp_client_loop(Socket, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) ->
+    receive
+        {tcp, Socket, _} ->
+            tcp_client_loop(Socket, Request, Reply, {NrInFlight-1, MaxInFlight}, NrItnsLeft)
+    after 20 ->
+        io:format("ERROR : Did not receive reply packet in 20ms~n"),
+        fail
+    end.
 
 
 start_udp_echo_server(SocketOptions) ->
@@ -53,12 +81,28 @@ udp_echo_server_loop(Socket) ->
     end,
     udp_echo_server_loop(Socket).
 
+   
+start_tcp_echo_server(SocketOptions, Port) ->
+    {ok, LSocket} = gen_tcp:listen(Port, SocketOptions),
+    io:format("~n TCP echo server listening on port ~w~n", [Port]),
+    tcp_echo_server_loop(LSocket, none).
 
-%tcp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) ->
-    
-%start_tcp_echo_server(SocketOptions) ->
-
-%tcp_echo_server_loop(Socket) ->
+tcp_echo_server_loop(LSocket, none) ->
+    {ok, Socket} = gen_tcp:accept(LSocket),
+    io:format("New client has connected!~n"),
+    tcp_echo_server_loop(LSocket, Socket);
+tcp_echo_server_loop(LSocket, Socket) ->
+    receive 
+        {tcp, Socket, Pkt} ->
+            SendBytes = byte_size(Pkt),
+            gen_tcp:send(Socket, <<SendBytes:32, Pkt/binary>>),
+            tcp_echo_server_loop(LSocket, Socket);
+        {tcp_closed, Socket} ->
+            io:format("Client disconnected. Going back to waiting for next client~n"),
+            tcp_echo_server_loop(LSocket, none);
+        Other ->
+            io:format("ERROR : Received unexpected msg: ~p~nWill now stop~n", [Other])
+    end.
 
 
 
