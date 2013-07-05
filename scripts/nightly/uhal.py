@@ -43,7 +43,8 @@ ERROR_LIST        = ['error: ',
                      'FAILED',
                      'FAIL: test', 'ERROR: test', #pycohal
                      '*failed*', #controlhub
-                     'terminate called']
+                     'terminate called',
+                     'Segmentation fault']
 
 IGNORE_ERROR_LIST = ["sudo pkill",
                      "sudo rpm -ev"]
