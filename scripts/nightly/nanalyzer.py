@@ -168,7 +168,7 @@ def html_header(title):
     </head>
     <body>
     """
-    html += "<h2><a  style='text-decoration: none' href='%s'>%s</h2>\n" % (CONF.WEB_URL,title)
+    html += "<h2><a  style='text-decoration: none' href='%s'>%s</a></h2>\n" % (CONF.WEB_URL,title)
     
     html += "<p><b>Date:</b> %s</p>" % time.asctime()
     html += "<p><b>Platform:</b> %s</p>" % platform.platform()
