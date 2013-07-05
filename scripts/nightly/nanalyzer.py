@@ -61,7 +61,7 @@ def analyze_log():
     return result
 
 def report_summary(result):
-    log_url = os.path.join(CONF.NIGHTLY_LOG_DIR, "nightly.log.html")
+    log_url = os.path.join(CONF.WEB_URL, "logs/nightly.log.html")
     rep_url = os.path.join(CONF.WEB_URL,"index.html")
     
     html ="<h3>Summary</h3>\n"
@@ -104,7 +104,7 @@ def report_summary(result):
     return html
 
 def report_links(result):
-    log_url = os.path.join(CONF.NIGHTLY_LOG_DIR, "nightly.log.html")
+    log_url = os.path.join(CONF.WEB_URL, "logs/nightly.log.html")
 
     html ="<h3>Incidence Summary</h3>\n"
 
