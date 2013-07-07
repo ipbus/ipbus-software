@@ -167,7 +167,7 @@ namespace uhal
       /**
       	Helper function to mark all validated memories associated with this buffer as valid
       */
-      void validate();
+      void validate ();
 
       void clear();
 

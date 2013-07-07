@@ -59,6 +59,8 @@ namespace uhal
 //!Checks if the condition is fullfilled and it does not throw.
 #define CACTUS_CHECK(cond) \
   do {	\
+    std::cout << std::dec; \
+    std::cerr << std::dec; \
     try {								\
       if (cond) { \
 	      std::cout << "CHECK PASSED: " << #cond << std::endl; \
@@ -79,12 +81,14 @@ namespace uhal
 //!Test that the expression is executed without exceptions and measures the execution time
 #define CACTUS_TEST(expr)				\
   do {						\
+    std::cout << std::dec; \
+    std::cerr << std::dec; \
     try{          \
       timeval start,end;      \
       gettimeofday ( &start, NULL );    \
       expr;         \
       gettimeofday ( &end, NULL );          \
-      std::cout << "TEST COMPLETED in " << uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
+      std::cout << "TEST COMPLETED in " <<  uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
     } catch(std::exception& e) {          \
       std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
       uhal::tests::failedTestCount++;         \
@@ -98,6 +102,8 @@ namespace uhal
 
 #define CACTUS_TEST_NOTHROW(expr)				\
   do {						\
+    std::cout << std::dec; \
+    std::cerr << std::dec; \
     try{					\
       expr;					\
       std::cout << "TEST_NOTHROW PASSED: "  << #expr << std::endl; \
@@ -114,6 +120,8 @@ namespace uhal
 //!Test that the expression throws a specific signature
 #define CACTUS_TEST_THROW(expr,signature)		\
   do {						\
+    std::cout << std::dec; \
+    std::cerr << std::dec; \
     try{					\
       expr;								\
       std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl; \
@@ -134,6 +142,8 @@ namespace uhal
 
 #define CACTUS_TEST_RESULT()  \
   do { \
+    std::cout << std::dec; \
+    std::cerr << std::dec; \
     if( uhal::tests::failedTestCount == 0 ){				\
       std::cout << "TEST PASSED, " << __FILE__ << ", ALL " << uhal::tests::passedTestCount << " TESTS PASSED." << std::endl; \
       return 0; \

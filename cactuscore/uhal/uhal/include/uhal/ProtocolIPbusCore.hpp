@@ -210,15 +210,6 @@ namespace uhal
       //! Returns the maximum value of the word count in the transaction header, for each IPbus version
       virtual uint32_t getMaxTransactionWordCount() const = 0;
 
-      /**
-      	Function which checks the available space in the currently filling buffer against requested send and receive sizes and, if there is insufficient space in the currently filling buffer, then dispatch it and create a new buffer
-      	@param aSendSize the amount of data that the current instruction wishes to send
-      	@param aReplySize the amount of data that the current instruction expects to receive
-      	@param aAvailableSendSize return the amount of space available for outgoing IPbus packets
-      	@param aAvailableReplySize return the amount of space available for incoming IPbus packets
-      */
-      virtual void checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
-
       virtual void dispatchExceptionHandler();
 
 

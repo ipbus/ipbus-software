@@ -119,7 +119,7 @@ namespace uhal
   }
 
 
-  void Buffers::validate()
+  void Buffers::validate ( )
   {
     for ( std::deque< ValHeader >::iterator lIt = mValHeaders.begin() ; lIt != mValHeaders.end() ; ++lIt )
     {

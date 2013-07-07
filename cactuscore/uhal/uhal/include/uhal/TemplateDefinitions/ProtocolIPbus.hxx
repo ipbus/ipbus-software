@@ -57,7 +57,7 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::preamble( )
+  void IPbus< 1 , IPbus_minor , buffer_size >::preamble ( Buffers* aBuffers )
   {
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
@@ -69,25 +69,25 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::predispatch( )
+  void IPbus< 1 , IPbus_minor , buffer_size >::predispatch ( Buffers* aBuffers )
   {
-    uint32_t lWords ( mCurrentBuffers->sendCounter()  >> 2 );
+    uint32_t lWords ( aBuffers->sendCounter()  >> 2 );
     //IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
     int32_t lPaddingWords ( ( 7 + this->getPreambleSize() ) - lWords );
 
     if ( lPaddingWords >  0 )
     {
-      // mCurrentBuffers->send ( ( uint8_t* ) ( & ( mSendPadding[0] ) ) , lPaddingWords<<2 );
-      // mCurrentBuffers->receive ( ( uint8_t* ) ( & ( mReplyPadding[0] ) ) , lPaddingWords<<2 );
+      // aBuffers->send ( ( uint8_t* ) ( & ( mSendPadding[0] ) ) , lPaddingWords<<2 );
+      // aBuffers->receive ( ( uint8_t* ) ( & ( mReplyPadding[0] ) ) , lPaddingWords<<2 );
       for ( int32_t lWords = 0 ; lWords != lPaddingWords ; ++lWords )
       {
         log ( Debug() , "Adding padding word." );
         // We do not need to check for space here as this condition is only met when the current filling buffer is severely underfull
-        mCurrentBuffers->send ( CalculateHeader ( B_O_T , 0 , 0 ) );
+        aBuffers->send ( CalculateHeader ( B_O_T , 0 , 0 ) );
         std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
         lReply.second->IPbusHeaders.push_back ( 0 );
-        mCurrentBuffers->add ( lReply.first );
-        mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
+        aBuffers->add ( lReply.first );
+        aBuffers->receive ( lReply.second->IPbusHeaders.back() );
       }
     }
   }
@@ -227,16 +227,16 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >:: preamble( )
+  void IPbus< 2 , IPbus_minor , buffer_size >:: preamble ( Buffers* aBuffers )
   {
     //     log ( Info() , ThisLocation() );
     mSendPacketHeader.push_back ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
 #ifndef DISABLE_PACKET_COUNTER_HACK
     mPacketCounter++;
 #endif
-    mCurrentBuffers->send ( mSendPacketHeader.back() );
+    aBuffers->send ( mSendPacketHeader.back() );
     mReceivePacketHeader.push_back ( 0x00000000 );
-    mCurrentBuffers->receive ( mReceivePacketHeader.back() );
+    aBuffers->receive ( mReceivePacketHeader.back() );
   }
 
 
@@ -249,11 +249,11 @@ namespace uhal
 
 #ifdef BIG_ENDIAN_HACK
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >::predispatch( )
+  void IPbus< 2 , IPbus_minor , buffer_size >::predispatch ( Buffers* aBuffers )
   {
     log ( Debug() , "Big-Endian Hack included" );
-    uint32_t* lPtr ( reinterpret_cast<uint32_t*> ( mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
-    uint32_t lSize ( ( mCurrentBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 );
+    uint32_t* lPtr ( reinterpret_cast<uint32_t*> ( aBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
+    uint32_t lSize ( ( aBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 );
 
     for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
     {
@@ -286,8 +286,8 @@ namespace uhal
       }
     }
 
-    lPtr = reinterpret_cast<uint32_t*> ( aSendBufferStart ); //mCurrentBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
-    lSize = reinterpret_cast<uint32_t*> ( aSendBufferEnd ) - lPtr; //( mCurrentBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 ;
+    lPtr = reinterpret_cast<uint32_t*> ( aSendBufferStart ); //aBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
+    lSize = reinterpret_cast<uint32_t*> ( aSendBufferEnd ) - lPtr; //( aBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 ;
 
     for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
     {

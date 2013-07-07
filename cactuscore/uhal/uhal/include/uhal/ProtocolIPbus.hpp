@@ -77,7 +77,7 @@ namespace uhal
       /**
        	Add a preamble to an IPbus buffer
        */
-      virtual void preamble( );
+      virtual void preamble ( Buffers* aBuffers );
 
       /**
         	Return the size of the preamble
@@ -87,7 +87,7 @@ namespace uhal
       /**
       	Finalize the buffer before it is transmitted
       */
-      virtual void predispatch( );
+      virtual void predispatch ( Buffers* aBuffers );
 
     public:
       /**
@@ -197,7 +197,7 @@ namespace uhal
       /**
       	Add a preamble to an IPbus buffer
       */
-      virtual void preamble( );
+      virtual void preamble ( Buffers* aBuffers );
 
       /**
         	Return the size of the preamble
@@ -208,7 +208,7 @@ namespace uhal
       /**
         Finalize the buffer before it is transmitted
       */
-      virtual void predispatch( );
+      virtual void predispatch ( Buffers* aBuffers );
 #endif
 
     public:

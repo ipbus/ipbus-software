@@ -96,7 +96,7 @@ namespace uhal
       	@param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
       	If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
       */
-      void implementDispatch ();
+      void implementDispatch ( Buffers* aBuffers );
 
       /**
       Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
@@ -149,8 +149,8 @@ namespace uhal
       boost::mutex mTcpMutex;
 #endif
 
-      std::deque < Buffers* > mDispatchQueue;
-      std::deque < Buffers* > mReplyQueue;
+      std::deque < Buffers* > mTcpDispatchQueue;
+      std::deque < Buffers* > mTcpReplyQueue;
 
       uhal::exception::exception* mAsynchronousException;
 

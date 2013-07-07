@@ -53,7 +53,7 @@ namespace uhal
   {}
 
 
-  // void IPbusCore::preamble( )
+  // void IPbusCore::preamble ( Buffers* lBuffers )
   // {
   //
   // log ( Debug() , "preamble" );
@@ -68,13 +68,13 @@ namespace uhal
   //
   // log ( Debug() , "Dispatch" );
 
-  // if ( mCurrentBuffers )
+  // if ( lBuffers )
   // {
-  // if ( mCurrentBuffers->sendCounter() )
+  // if ( lBuffers->sendCounter() )
   // {
-  // predispatch();
-  // mTransportProtocol->Dispatch ( mCurrentBuffers );
-  // mCurrentBuffers = NULL; //Not deleting the underlying buffer, just flagging that we need a new buffer next time
+  // predispatch ( Buffers* lBuffers );
+  // mTransportProtocol->Dispatch ( lBuffers );
+  // lBuffers = NULL; //Not deleting the underlying buffer, just flagging that we need a new buffer next time
   // mTransportProtocol->Flush();
   // }
   // }
@@ -85,7 +85,8 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    log ( Debug() , "IPbusCore Validation" );
+    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+    //    log ( Debug() , "IPbusCore Validation" );
     eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
@@ -189,18 +190,18 @@ namespace uhal
   // //            --- OR ---
   // // IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
   // // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-  // bool IPbusCore::Validate ( Buffers* aBuffers )
+  // bool IPbusCore::Validate ( Buffers* lBuffers )
   // {
   //
-  // bool lRet = Validate ( aBuffers->getSendBuffer() ,
-  // aBuffers->getSendBuffer() +aBuffers->sendCounter() ,
-  // aBuffers->getReplyBuffer().begin() ,
-  // aBuffers->getReplyBuffer().end() );
+  // bool lRet = Validate ( lBuffers->getSendBuffer() ,
+  // lBuffers->getSendBuffer() +lBuffers->sendCounter() ,
+  // lBuffers->getReplyBuffer().begin() ,
+  // lBuffers->getReplyBuffer().end() );
 
   // if ( lRet )
   // {
-  // aBuffers->validate();
-  // delete aBuffers; //We have now checked the returned data and marked as valid the underlying memory. We can, therefore, delete the local storage and from this point onward, the validated memory will only exist if the user kept their own copy
+  // lBuffers->validate ( Buffers* lBuffers );
+  // delete lBuffers; //We have now checked the returned data and marked as valid the underlying memory. We can, therefore, delete the local storage and from this point onward, the validated memory will only exist if the user kept their own copy
   // }
 
   // return lRet;
@@ -218,12 +219,12 @@ namespace uhal
     uint32_t lReplyByteCount ( 1 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( B_O_T , 0 , mTransactionCounter++ , requestTransactionInfoCode() ) );
+    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( B_O_T , 0 , mTransactionCounter++ , requestTransactionInfoCode() ) );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
     lReply.second->IPbusHeaders.push_back ( 0 );
-    mCurrentBuffers->add ( lReply.first );
-    mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->add ( lReply.first );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
     return lReply.first;
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -244,15 +245,15 @@ namespace uhal
     uint32_t lReplyByteCount ( 1 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( WRITE , 1 , mTransactionCounter++ , requestTransactionInfoCode()
-                                                     ) );
-    mCurrentBuffers->send ( aAddr );
-    mCurrentBuffers->send ( aSource );
+    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( WRITE , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    lBuffers->send ( aSource );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
     lReply.second->IPbusHeaders.push_back ( 0 );
-    mCurrentBuffers->add ( lReply.first );
-    mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->add ( lReply.first );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
     return lReply.first;
   }
 
@@ -276,20 +277,21 @@ namespace uhal
     uint8_t* lSourcePtr ( ( uint8_t* ) ( & ( aSource.at ( 0 ) ) ) );
     uint32_t lAddr ( aAddr );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
+    Buffers* lBuffers ( NULL );
 
     while ( lPayloadByteCount > 0 )
     {
-      checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+      lBuffers = checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lSendBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
       //      log ( Info() , std::string ( 100,'-' ) );
-      //      log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( & ( *mCurrentBuffers ) ) );
+      //      log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( & ( *lBuffers ) ) );
       //      log ( Info() , "lSendBytesAvailable: " , Integer ( lSendBytesAvailable )  ,
       //            " | lSendBytesAvailableForPayload (bytes): " , Integer ( lSendBytesAvailableForPayload )  ,
       //            " | lSendBytesAvailableForPayload (words): " , Integer ( lSendBytesAvailableForPayload>>2 ) ,
       //            " | lPayloadByteCount = " , Integer ( lPayloadByteCount ) );
-      mCurrentBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode() ) );
-      mCurrentBuffers->send ( lAddr );
-      mCurrentBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
+      lBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode() ) );
+      lBuffers->send ( lAddr );
+      lBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
       lSourcePtr += lSendBytesAvailableForPayload;
       lPayloadByteCount -= lSendBytesAvailableForPayload;
 
@@ -299,10 +301,10 @@ namespace uhal
       }
 
       lReply.second->IPbusHeaders.push_back ( 0 );
-      mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
+      lBuffers->receive ( lReply.second->IPbusHeaders.back() );
     }
 
-    mCurrentBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
+    lBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
     return lReply.first;
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -324,15 +326,15 @@ namespace uhal
     uint32_t lReplyByteCount ( 2 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( READ , 1 , mTransactionCounter++ , requestTransactionInfoCode()
-                                                     ) );
-    mCurrentBuffers->send ( aAddr );
+    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( READ , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 , aMask ) );
-    mCurrentBuffers->add ( lReply.first );
+    lBuffers->add ( lReply.first );
     lReply.second->IPbusHeaders.push_back ( 0 );
-    mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
-    mCurrentBuffers->receive ( lReply.second->value );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->receive ( lReply.second->value );
     return lReply.first;
   }
 
@@ -356,17 +358,18 @@ namespace uhal
     eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
     int32_t lPayloadByteCount ( aSize << 2 );
     uint32_t lAddr ( aAddr );
+    Buffers* lBuffers ( NULL );
 
     while ( lPayloadByteCount > 0 )
     {
-      checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+      lBuffers = checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lReplyBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
-      mCurrentBuffers->send ( implementCalculateHeader ( lType , lReplyBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode()
-                                                       ) );
-      mCurrentBuffers->send ( lAddr );
+      lBuffers->send ( implementCalculateHeader ( lType , lReplyBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode()
+                                                ) );
+      lBuffers->send ( lAddr );
       lReply.second->IPbusHeaders.push_back ( 0 );
-      mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
-      mCurrentBuffers->receive ( lReplyPtr , lReplyBytesAvailableForPayload );
+      lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+      lBuffers->receive ( lReplyPtr , lReplyBytesAvailableForPayload );
       lReplyPtr += lReplyBytesAvailableForPayload;
       lPayloadByteCount -= lReplyBytesAvailableForPayload;
 
@@ -376,7 +379,7 @@ namespace uhal
       }
     }
 
-    mCurrentBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
+    lBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
     return lReply.first;
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -398,17 +401,17 @@ namespace uhal
     uint32_t lReplyByteCount ( 2 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( RMW_BITS , 1 , mTransactionCounter++ , requestTransactionInfoCode()
-                                                     ) );
-    mCurrentBuffers->send ( aAddr );
-    mCurrentBuffers->send ( aANDterm );
-    mCurrentBuffers->send ( aORterm );
+    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( RMW_BITS , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    lBuffers->send ( aANDterm );
+    lBuffers->send ( aORterm );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 ) );
-    mCurrentBuffers->add ( lReply.first );
+    lBuffers->add ( lReply.first );
     lReply.second->IPbusHeaders.push_back ( 0 );
-    mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
-    mCurrentBuffers->receive ( lReply.second->value );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->receive ( lReply.second->value );
     return lReply.first;
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -428,86 +431,21 @@ namespace uhal
     uint32_t lReplyByteCount ( 2 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    mCurrentBuffers->send ( implementCalculateHeader ( RMW_SUM , 1 , mTransactionCounter++ , requestTransactionInfoCode()
-                                                     ) );
-    mCurrentBuffers->send ( aAddr );
-    mCurrentBuffers->send ( static_cast< uint32_t > ( aAddend ) );
+    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( RMW_SUM , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    lBuffers->send ( static_cast< uint32_t > ( aAddend ) );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 ) );
-    mCurrentBuffers->add ( lReply.first );
+    lBuffers->add ( lReply.first );
     lReply.second->IPbusHeaders.push_back ( 0 );
-    mCurrentBuffers->receive ( lReply.second->IPbusHeaders.back() );
-    mCurrentBuffers->receive ( lReply.second->value );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->receive ( lReply.second->value );
     return lReply.first;
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  void IPbusCore::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
-  {
-    log ( Debug() , "Checking buffer space" );
-    //if there are no existing buffers in the pool, create them
-    CreateFillingBuffer ( );
-    uint32_t lSendBufferFreeSpace ( mMaxSendSize - mCurrentBuffers->sendCounter() );
-    uint32_t lReplyBufferFreeSpace ( mMaxReplySize - mCurrentBuffers->replyCounter() );
-    // log ( Debug() , "Current buffer:\n" ,
-    // " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
-    // " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
-    // "\n" ,
-    // " mMaxSendSize " , Integer( mMaxSendSize ) ,
-    // " | mMaxReplySize " , Integer( mMaxReplySize ) ,
-    // "\n" ,
-    // " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
-    // " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
-    // "\n" ,
-    // " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
-    // " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
-    // );
-
-    if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
-    {
-      aAvailableSendSize = aRequestedSendSize;
-      aAvailableReplySize = aRequestedReplySize;
-      return;
-    }
-
-    if ( ( lSendBufferFreeSpace > 16 ) && ( lReplyBufferFreeSpace > 16 ) )
-    {
-      aAvailableSendSize = lSendBufferFreeSpace;
-      aAvailableReplySize = lReplyBufferFreeSpace;
-      return;
-    }
-
-    log ( Debug() , "Triggering automated dispatch" );
-    this->unflushedDispatch();
-    lSendBufferFreeSpace = mMaxSendSize - mCurrentBuffers->sendCounter();
-    lReplyBufferFreeSpace = mMaxReplySize - mCurrentBuffers->replyCounter();
-    // log ( Debug() , "Newly created buffer:\n" ,
-    // " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
-    // " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
-    // "\n" ,
-    // " mMaxSendSize " , Integer( mMaxSendSize ) ,
-    // " | mMaxReplySize " , Integer( mMaxReplySize ) ,
-    // "\n" ,
-    // " mCurrentBuffers->sendCounter() " , Integer( mCurrentBuffers->sendCounter() ) ,
-    // " | mCurrentBuffers->replyCounter() " , Integer( mCurrentBuffers->replyCounter() ) ,
-    // "\n" ,
-    // " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
-    // " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
-    // );
-
-    if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
-    {
-      aAvailableSendSize = aRequestedSendSize;
-      aAvailableReplySize = aRequestedReplySize;
-      return;
-    }
-
-    aAvailableSendSize = lSendBufferFreeSpace;
-    aAvailableReplySize = lReplyBufferFreeSpace;
-  }
-  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
   void IPbusCore::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )

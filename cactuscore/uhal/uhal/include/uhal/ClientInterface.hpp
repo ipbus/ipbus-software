@@ -137,12 +137,6 @@ namespace uhal
       void dispatch ();
 
       /**
-        Method to dispatch all IPbus packets which are in the queue of IPbusPacketInfo's and return immediately
-      */
-      void unflushedDispatch ();
-
-
-      /**
       	A method to modify the timeout period for any pending or future transactions
       	@param aTimeoutPeriod the desired timeout period in milliseconds
       */
@@ -225,7 +219,7 @@ namespace uhal
       /**
       Send a byte order transaction
       */
-      virtual void implementDispatch( ) = 0;
+      virtual void implementDispatch ( Buffers* aBuffers ) = 0;
 
       virtual void Flush( );
 
@@ -288,7 +282,7 @@ namespace uhal
       /**
       	Add a preamble to an IPbus buffer
       */
-      virtual void preamble( );
+      virtual void preamble ( Buffers* aBuffers );
 
       /**
         	Return the size of the preamble
@@ -298,7 +292,7 @@ namespace uhal
       /**
       	Finalize the buffer before it is transmitted
       */
-      virtual void predispatch( );
+      virtual void predispatch ( Buffers* aBuffers );
 
 
       std::pair < ValHeader , _ValHeader_* > CreateValHeader();
@@ -309,7 +303,7 @@ namespace uhal
         	Function which dispatch calls when the reply is received to check that the headers are as expected
         	@return whether the returned packet is valid
         */
-      virtual  exception::exception* validate ();
+      virtual  exception::exception* validate ( Buffers* aBuffers );
 
 
     protected:
@@ -328,29 +322,43 @@ namespace uhal
 
       virtual void dispatchExceptionHandler();
 
-    protected:
+    private:
+      void updateCurrentBuffers();
+      void deleteBuffers();
+
+
+    private:
       //! A MutEx lock used to make sure the access functions are thread safe
       boost::mutex mUserSideMutex;
+#ifdef RUN_ASIO_MULTITHREADED
       boost::mutex mDispatchSideMutex;
+#endif
+
+      boost::mutex mBufferMutex;
+
 
       //! A memory pool of buffers which will be dispatched
-      std::deque < Buffers > mBuffers;
+      std::deque < Buffers* > mBuffers;
 
-    protected:
       //! A pointer to a buffer-wrapper object
-      std::deque < Buffers >::iterator mCurrentBuffers;
-
-      //! A queue of buffers that that have been dispatched and for which we are waiting for the transportation to complete and for them to be validated
-      std::deque < Buffers* > mDispatchedBuffers;
+      Buffers* mCurrentBuffers;
 
     protected:
+
+      /**
+        Function which checks the available space in the currently filling buffer against requested send and receive sizes and, if there is insufficient space in the currently filling buffer, then dispatch it and create a new buffer
+        @param aSendSize the amount of data that the current instruction wishes to send
+        @param aReplySize the amount of data that the current instruction expects to receive
+        @param aAvailableSendSize return the amount of space available for outgoing IPbus packets
+        @param aAvailableReplySize return the amount of space available for incoming IPbus packets
+      */
+      virtual Buffers* checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
+
+
       //! the identifier of the target for this client
       std::string mId;
       //! a struct containing the full URI of the target for this client
       URI mUri;
-
-      void NextFillingBuffer ();
-      void CreateFillingBuffer ();
 
       virtual uint32_t getMaxNumberOfBuffers() = 0;
       virtual uint32_t getMaxSendSize() = 0;

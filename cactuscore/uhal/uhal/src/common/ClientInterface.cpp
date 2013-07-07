@@ -39,6 +39,7 @@ namespace uhal
 {
 
   ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) :
+    mCurrentBuffers ( NULL ),
     mId ( aId ),
     mUri ( aUri )
   {
@@ -72,6 +73,7 @@ namespace uhal
 
   ClientInterface::~ClientInterface()
   {
+    deleteBuffers();
   }
 
   const std::string& ClientInterface::id() const
@@ -149,13 +151,14 @@ namespace uhal
 
   void ClientInterface::dispatch ()
   {
+    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    // log ( Debug() , ThisLocation() );
-    CreateFillingBuffer ( ); //put this here to protect against users doing a dispatch with no data to send.
-    unflushedDispatch (); // this is protected by its own internal try-catch-handle block
 
     try
     {
+      this->predispatch ( mCurrentBuffers );
+      this->implementDispatch ( mCurrentBuffers );
+      mCurrentBuffers = NULL;
       this->Flush();
     }
     catch ( ... )
@@ -166,46 +169,34 @@ namespace uhal
   }
 
 
-  void ClientInterface::unflushedDispatch ()
-  {
-    // log ( Debug() , ThisLocation() );
-    try
-    {
-      this->predispatch( );
-      mDispatchedBuffers.push_back ( & ( *mCurrentBuffers ) ); //needs to be before the call to implementDispatch to be safe for multithreaded dispatches.
-      this->implementDispatch( );
-      NextFillingBuffer ();
-    }
-    catch ( ... )
-    {
-      this->dispatchExceptionHandler();
-      throw;
-    }
-  }
-
 
   void ClientInterface::Flush ()
   {}
 
 
-  exception::exception* ClientInterface::validate ( )
+  exception::exception* ClientInterface::validate ( Buffers* aBuffers )
   {
+    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     // log ( Debug() , ThisLocation() );
     //check that the results are valid
     // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
+#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mDispatchSideMutex );
+#endif
     //std::cout << mDispatchedBuffers.size() << std::endl;
-    Buffers* lBuffer ( mDispatchedBuffers.front() );
-    exception::exception* lRet = this->validate ( lBuffer->getSendBuffer() ,
-                                 lBuffer->getSendBuffer() + lBuffer->sendCounter() ,
-                                 lBuffer->getReplyBuffer().begin() ,
-                                 lBuffer->getReplyBuffer().end() );
+    exception::exception* lRet = this->validate ( aBuffers->getSendBuffer() ,
+                                 aBuffers->getSendBuffer() + aBuffers->sendCounter() ,
+                                 aBuffers->getReplyBuffer().begin() ,
+                                 aBuffers->getReplyBuffer().end() );
 
     //results are valid, so mark returned data as valid
     if ( !lRet )
     {
-      lBuffer->validate();
-      mDispatchedBuffers.pop_front();
+      aBuffers->validate ();
+      // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+      boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+      mBuffers.push_back ( aBuffers );
+      // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     }
 
     return lRet;
@@ -218,102 +209,152 @@ namespace uhal
   }
 
 
-  void ClientInterface::preamble()
+  void ClientInterface::preamble ( Buffers* aBuffers )
+  {}
+
+  void ClientInterface::predispatch ( Buffers* aBuffers )
+  {}
+
+
+
+  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Buffers* ClientInterface::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
   {
-    //log ( Debug() , ThisLocation() );
-  }
-
-  void ClientInterface::predispatch( )
-  {
-    //log ( Debug() , ThisLocation() );
-  }
-
-  // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-  void ClientInterface::CreateFillingBuffer ( )
-  {
-    // log ( Debug() , ThisLocation() );
-    if ( mBuffers.size() )
-    {
-      return;
-    }
-
-    log ( Debug() , "Adding new Buffers to the memory pool" );
-    Buffers lBuffers ( this->getMaxSendSize() );
-    mBuffers.insert ( mBuffers.end() , this->getMaxNumberOfBuffers() , lBuffers );
-    mCurrentBuffers = mBuffers.begin();
-    mCurrentBuffers->clear();
-    log ( Debug() , "Calling preamble() from " , ThisLocation() );
-    this->preamble();
-  }
-
-
-
-  void ClientInterface::NextFillingBuffer ( )
-  {
-    // log ( Debug() , ThisLocation() );
+    log ( Debug() , "Checking buffer space" );
     //if there are no existing buffers in the pool, create them
+    updateCurrentBuffers();
+    uint32_t lSendBufferFreeSpace ( this->getMaxSendSize() - mCurrentBuffers->sendCounter() );
+    uint32_t lReplyBufferFreeSpace ( this->getMaxReplySize() - mCurrentBuffers->replyCounter() );
+    // log ( Debug() , "Current buffer:\n" ,
+    // " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
+    // " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
+    // "\n" ,
+    // " mMaxSendSize " , Integer( mMaxSendSize ) ,
+    // " | mMaxReplySize " , Integer( mMaxReplySize ) ,
+    // "\n" ,
+    // " lBuffers->sendCounter() " , Integer( lBuffers->sendCounter() ) ,
+    // " | lBuffers->replyCounter() " , Integer( lBuffers->replyCounter() ) ,
+    // "\n" ,
+    // " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
+    // " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
+    // );
+
+    if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
     {
-      // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
-      boost::lock_guard<boost::mutex> lLock ( mDispatchSideMutex );
-      CreateFillingBuffer ( );
-      mCurrentBuffers++;
-
-      if ( mCurrentBuffers == mBuffers.end() )
-      {
-        mCurrentBuffers = mBuffers.begin();
-      }
-    }
-    //     bool lWillPause ( false );
-    //
-    //     if ( LoggingIncludes ( Warning() ) )
-    //     {
-    //       log( Warning() , "mUserSideMutex SET AT " , ThisLocation() ); boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    //       lWillPause =  mDispatchedBuffers.size() && & ( *mCurrentBuffers ) == mDispatchedBuffers.front();
-    //     }
-    //     if ( lWillPause )
-    //     {
-    //       log ( Warning() , "The fill queue has caught up with the dispatch queue - should implement a mechanism for expanding the memory pool to handle this case, but for now just wait for the dispatch queue to clear a bit" );
-    //     }
-
-    //we will wait if the buffer that we are expecting to fill is still waiting for dispatch and validation
-    while ( true )
-    {
-      // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
-      boost::lock_guard<boost::mutex> lLock ( mDispatchSideMutex );
-
-      //std::cout << ">>" << mDispatchedBuffers.size() << std::endl;
-      //{
-      if ( !mDispatchedBuffers.size() )
-      {
-        break;
-      }
-
-      if ( & ( *mCurrentBuffers ) != mDispatchedBuffers.front() )
-      {
-        break;
-      }
-
-      //}
-      //sleep( 1 );
+      aAvailableSendSize = aRequestedSendSize;
+      aAvailableReplySize = aRequestedReplySize;
+      return mCurrentBuffers;
     }
 
-    //     if ( lWillPause )
-    //     {
-    //       log ( Warning() , "Escaped pause, now clearing mCurrentBuffer (", Pointer( &( *mCurrentBuffers ) ) , ") and adding preamble." );
-    //     }
-    mCurrentBuffers->clear();
-    this->preamble();
+    if ( ( lSendBufferFreeSpace > 16 ) && ( lReplyBufferFreeSpace > 16 ) )
+    {
+      aAvailableSendSize = lSendBufferFreeSpace;
+      aAvailableReplySize = lReplyBufferFreeSpace;
+      return mCurrentBuffers;
+    }
+
+    log ( Debug() , "Triggering automated dispatch" );
+
+    try
+    {
+      this->predispatch ( mCurrentBuffers );
+      this->implementDispatch ( mCurrentBuffers );
+      mCurrentBuffers = NULL;
+      /*if ( this->getMaxNumberOfBuffers() == 1 )
+      {
+        this->Flush();
+      }*/
+    }
+    catch ( ... )
+    {
+      this->dispatchExceptionHandler();
+      throw;
+    }
+
+    updateCurrentBuffers();
+    lSendBufferFreeSpace = this->getMaxSendSize() - mCurrentBuffers->sendCounter();
+    lReplyBufferFreeSpace = this->getMaxReplySize() - mCurrentBuffers->replyCounter();
+    // log ( Debug() , "Newly created buffer:\n" ,
+    // " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
+    // " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
+    // "\n" ,
+    // " mMaxSendSize " , Integer( mMaxSendSize ) ,
+    // " | mMaxReplySize " , Integer( mMaxReplySize ) ,
+    // "\n" ,
+    // " lBuffers->sendCounter() " , Integer( lBuffers->sendCounter() ) ,
+    // " | lBuffers->replyCounter() " , Integer( lBuffers->replyCounter() ) ,
+    // "\n" ,
+    // " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
+    // " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
+    // );
+
+    if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
+    {
+      aAvailableSendSize = aRequestedSendSize;
+      aAvailableReplySize = aRequestedReplySize;
+      return mCurrentBuffers;
+    }
+
+    aAvailableSendSize = lSendBufferFreeSpace;
+    aAvailableReplySize = lReplyBufferFreeSpace;
+    return mCurrentBuffers;
+  }
+  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  void ClientInterface::updateCurrentBuffers()
+  {
+    if ( mCurrentBuffers == NULL )
+    {
+      {
+        // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+        boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+
+        if ( mBuffers.size() == 0 )
+        {
+          for ( uint32_t i=0; i!=10; ++i )
+          {
+            mBuffers.push_back ( new Buffers ( this->getMaxSendSize() ) );
+          }
+        }
+
+        mCurrentBuffers = mBuffers.front();
+        mBuffers.pop_front();
+        mCurrentBuffers->clear();
+        // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+      }
+      this->preamble ( mCurrentBuffers );
+    }
+  }
+
+  void ClientInterface::deleteBuffers()
+  {
+    // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+    boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+
+    for ( std::deque < Buffers* >::iterator lIt = mBuffers.begin(); lIt != mBuffers.end(); ++lIt )
+    {
+      if ( *lIt )
+      {
+        delete *lIt;
+        *lIt = NULL;
+      }
+    }
+
+    mBuffers.clear();
+
+    if ( mCurrentBuffers )
+    {
+      delete mCurrentBuffers;
+      mCurrentBuffers = NULL;
+    }
+
+    // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
   }
 
 
   void ClientInterface::dispatchExceptionHandler()
   {
-    // log ( Info() , ThisLocation() );
-    //mBuffers.clear();
-    mDispatchedBuffers.clear();
-    mCurrentBuffers->clear();
-    NextFillingBuffer ( );
+    deleteBuffers();
   }
 
 

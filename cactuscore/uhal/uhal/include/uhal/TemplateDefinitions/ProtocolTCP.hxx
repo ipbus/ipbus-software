@@ -89,7 +89,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::implementDispatch()
+  void TCP< InnerProtocol >::implementDispatch ( Buffers* aBuffers )
   {
     if ( mAsynchronousException )
     {
@@ -103,21 +103,15 @@ namespace uhal
     }
 
     {
-      Buffers* lCurrentBuffer ( & ( * ( this->mCurrentBuffers ) ) );
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
 #endif
-      mDispatchQueue.push_back ( lCurrentBuffer );
+      mTcpDispatchQueue.push_back ( aBuffers );
 
-      if ( mDispatchQueue.size() == 1 )
+      if ( mTcpDispatchQueue.size() == 1 )
       {
-        write ( lCurrentBuffer );
+        write ( aBuffers );
       }
-    }
-
-    if ( this->getMaxNumberOfBuffers() == 1 )
-    {
-      Flush();
     }
   }
 
@@ -207,18 +201,18 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
 #endif
-    mReplyQueue.push_back ( aBuffers );
+    mTcpReplyQueue.push_back ( aBuffers );
 
-    if ( mReplyQueue.size() == 1 )
+    if ( mTcpReplyQueue.size() == 1 )
     {
       read ( aBuffers );
     }
 
-    mDispatchQueue.pop_front();
+    mTcpDispatchQueue.pop_front();
 
-    if ( mDispatchQueue.size() )
+    if ( mTcpDispatchQueue.size() )
     {
-      write ( mDispatchQueue.front() );
+      write ( mTcpDispatchQueue.front() );
     }
   }
 
@@ -269,7 +263,7 @@ namespace uhal
 
       try
       {
-        mAsynchronousException = ClientInterface::validate();
+        mAsynchronousException = ClientInterface::validate ( aBuffers );
       }
       catch ( ... ) {}
 
@@ -301,7 +295,7 @@ namespace uhal
 
     try
     {
-      mAsynchronousException = ClientInterface::validate();
+      mAsynchronousException = ClientInterface::validate ( aBuffers );
     }
     catch ( exception::exception& aExc )
     {
@@ -317,11 +311,11 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
 #endif
-    mReplyQueue.pop_front();
+    mTcpReplyQueue.pop_front();
 
-    if ( mReplyQueue.size() )
+    if ( mTcpReplyQueue.size() )
     {
-      read ( mReplyQueue.front() );
+      read ( mTcpReplyQueue.front() );
     }
   }
 
@@ -370,7 +364,7 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( this->mTcpMutex );
 #endif
-      lContinue = ( this->mDispatchedBuffers.size() );
+      lContinue = ( mTcpDispatchQueue.size() || mTcpReplyQueue.size() );
     }
     while ( lContinue );
   }
@@ -386,8 +380,8 @@ namespace uhal
     }
 
     mSocket.close();
-    mReplyQueue.clear();
-    mDispatchQueue.clear();
+    mTcpReplyQueue.clear();
+    mTcpDispatchQueue.clear();
     InnerProtocol::dispatchExceptionHandler();
   }
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

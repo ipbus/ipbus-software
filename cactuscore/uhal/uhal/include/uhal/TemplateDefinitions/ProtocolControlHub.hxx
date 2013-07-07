@@ -66,7 +66,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::preamble( )
+  void ControlHub< InnerProtocol >::preamble ( Buffers* aBuffers )
   {
     //log ( Debug() , ThisLocation() );
     // -------------------------------------------------------------------------------------------------------------
@@ -84,19 +84,18 @@ namespace uhal
     // Error code (2 bytes)
     // -------------------------------------------------------------------------------------------------------------
     boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
-    mPreambles.push_back ( tpreamble() );
+    mPreambles.push_back ( tpreamble () );
     tpreamble* lPreambles = & mPreambles.back();
-    std::deque < Buffers >::iterator lCurrentFillingBuffers ( this->mCurrentBuffers );
-    lPreambles->mSendByteCountPtr = ( uint32_t* ) ( lCurrentFillingBuffers->send ( ( uint32_t ) ( 0 ) ) );
-    lCurrentFillingBuffers->send ( mDeviceIPaddress );
-    lCurrentFillingBuffers->send ( mDevicePort );
-    lPreambles->mSendWordCountPtr = ( uint16_t* ) ( lCurrentFillingBuffers->send ( ( uint16_t ) ( 0 ) ) );
-    lCurrentFillingBuffers->receive ( lPreambles->mReplyTotalByteCounter );
-    lCurrentFillingBuffers->receive ( lPreambles->mReplyChunkByteCounter );
-    lCurrentFillingBuffers->receive ( lPreambles->mReplyDeviceIPaddress );
-    lCurrentFillingBuffers->receive ( lPreambles->mReplyDevicePort );
-    lCurrentFillingBuffers->receive ( lPreambles->mReplyErrorCode );
-    InnerProtocol::preamble();
+    lPreambles->mSendByteCountPtr = ( uint32_t* ) ( aBuffers->send ( ( uint32_t ) ( 0 ) ) );
+    aBuffers->send ( mDeviceIPaddress );
+    aBuffers->send ( mDevicePort );
+    lPreambles->mSendWordCountPtr = ( uint16_t* ) ( aBuffers->send ( ( uint16_t ) ( 0 ) ) );
+    aBuffers->receive ( lPreambles->mReplyTotalByteCounter );
+    aBuffers->receive ( lPreambles->mReplyChunkByteCounter );
+    aBuffers->receive ( lPreambles->mReplyDeviceIPaddress );
+    aBuffers->receive ( lPreambles->mReplyDevicePort );
+    aBuffers->receive ( lPreambles->mReplyErrorCode );
+    InnerProtocol::preamble ( aBuffers );
   }
 
 
@@ -109,13 +108,13 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::predispatch( )
+  void ControlHub< InnerProtocol >::predispatch ( Buffers* aBuffers )
   {
-    InnerProtocol::predispatch();
+    InnerProtocol::predispatch ( aBuffers );
     //log ( Debug() , ThisLocation() );
     boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
     tpreamble& lPreambles = mPreambles.back();
-    uint32_t lByteCount ( this->mCurrentBuffers->sendCounter() );
+    uint32_t lByteCount ( aBuffers->sendCounter() );
     * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
     * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-12 ) >>2 );
   }
@@ -198,9 +197,9 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  exception::exception* ControlHub< InnerProtocol >::validate()
+  exception::exception* ControlHub< InnerProtocol >::validate ( Buffers* aBuffers )
   {
-    return ClientInterface::validate();
+    return ClientInterface::validate ( aBuffers );
   }
 
   template < typename InnerProtocol >
