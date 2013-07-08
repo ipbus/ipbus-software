@@ -8,8 +8,8 @@
 %    MACROS / RECORDS
 % ---------------------------------------------------------------------------------------
 
-%-define(UDP_SOCKET_OPTIONS, [binary, {active, true}, {buffer, 100000}, {recbuf, 100000}, {read_packets, 50}]). % {active, false}
--define(UDP_SOCKET_OPTIONS, [binary, {active, true}]).
+-define(UDP_SOCKET_OPTIONS, [binary, {active, true}, {buffer, 100000}, {recbuf, 100000}, {read_packets, 50}]). % {active, false}
+%-define(UDP_SOCKET_OPTIONS, [binary, {active, true}]).
 
 -define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}, {buffer, 100000}, {low_watermark, 50000}, {high_watermark, 100000}]).
 %-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}]).
@@ -63,7 +63,7 @@ print_results(NrItns, MicroSecs, ReqBytes, ReplyBytes) ->
     MicroSecsPerIt = MicroSecs / NrItns,
     MbitPerSecSent = (BytesSent * 8 / 1000000.0) / (MicroSecs / 1000000.0),
     MbitPerSecRecd = (BytesRecd * 8 / 1000000.0) / (MicroSecs / 1000000.0),
-    io:format("~nSent/rcvd ~w packets in ~w secs, time per packet = ~wus~n", [NrItns, MicroSecs/1000000.0, MicroSecsPerIt]),
+    io:format("~nSent/rcvd ~w packets (~w/~w bytes) in ~w secs, time per packet = ~wus~n", [NrItns, ReqBytes, ReplyBytes, MicroSecs/1000000.0, MicroSecsPerIt]),
     io:format("   Send B/W = ~w Mb/s~n", [MbitPerSecSent]),
     io:format("   Recv B/W = ~w Mb/s~n", [MbitPerSecRecd]).
 
@@ -73,14 +73,43 @@ main(["udp_ipbus_client" | OtherArgs]) ->
     Socket = create_udp_socket(),
     %
     Request = <<16#200000f0:32,
-                16#2cbaff1f:32,
-                0:((16#100)*32),
-                16#20005a1f:32,
-                0:((15#5b)*32)
+                16#2cbaff1f:32, % Write, 0xff deep
+                (16#1000):32,
+                0:((16#ff)*32),
+                16#2000601f:32, % Write, 0x60 deep
+                (16#1000):32,
+                0:((16#60)*32)
               >>,
     Reply = << 16#200000f0:32,
-               16#2cbaff10:32,
-               16#20005a10:32
+               16#2cbaff10:32, % Write, 0xff deep
+               16#20006010:32  % Write, 0x60 deep
+            >>,
+    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
+    print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
+
+main(["udp_ipbus_client2" | OtherArgs]) ->
+    {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
+    Socket = create_udp_socket(),
+    %
+    Request = <<16#200000f0:32,
+                16#2cbaff1f:32, % Write, 0xff deep
+                16#1000:32,
+                0:((16#ff)*32),
+                16#2abcff0f:32, % Read, 0xff deep
+                16#1000:32,
+                16#2def561f:32, % Write, 0x56 deep
+                16#1000:32,
+                0:((16#56)*32),
+                16#2fed5a0f:32, % Read, 0x5a deep
+                16#1000:32
+              >>,
+    Reply = << 16#200000f0:32,
+               16#2cbaff10:32, % Write, 0xff deep
+               16#2abcff00:32,  % Read, 0xff deep
+               0:((16#ff)*32),
+               16#2def5610:32, % Write, 0x56 deep
+               16#2fed5a00:32, % Read, 0x5a deep
+               0:((16#5a)*32)
             >>,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));

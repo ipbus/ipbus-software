@@ -20,18 +20,21 @@ udp_client_loop(_Socket, _TargetIP, _TargetPort, _Request, _Reply, {0,_MaxInFlig
 udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) when NrIterationsLeft>0, NrInFlight<MaxInFlight ->
     gen_udp:send(Socket, TargetIP, TargetPort, Request),
     receive
-        {udp, Socket, TargetIP, TargetPort, _} ->
-            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight, MaxInFlight}, NrIterationsLeft-1)%;
-%        {udp, Socket, TargetIP, TargetPort, Pkt} ->
-%            io:format("ERROR : Expected ~w , but received ~w~n", [Reply, Pkt]),
-%            fail
+        {udp, Socket, TargetIP, TargetPort, Reply} ->
+            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight, MaxInFlight}, NrIterationsLeft-1);
+        {udp, Socket, TargetIP, TargetPort, Pkt} ->
+            io:format("ERROR : Expected ~w , but received ~w~n", [Reply, Pkt]),
+            fail
     after 0 ->
         udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight+1,MaxInFlight}, NrIterationsLeft-1)
     end;
 udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) ->
     receive
-        {udp, Socket, TargetIP, TargetPort, _} ->
-            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight-1, MaxInFlight}, NrIterationsLeft)
+        {udp, Socket, TargetIP, TargetPort, Reply} ->
+            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight-1, MaxInFlight}, NrIterationsLeft);
+        {udp, Socket, TargetIP, TargetPort, Pkt} ->
+            io:format("ERROR : Expected ~w , but received ~w~n", [Reply, Pkt]),
+            fail
     after 20 ->
         io:format("ERROR : Did not receive reply packet in 20ms~n"),
         fail
