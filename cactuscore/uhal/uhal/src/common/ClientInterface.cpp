@@ -39,6 +39,7 @@ namespace uhal
 {
 
   ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) :
+    mBuffers(),
     mCurrentBuffers ( NULL ),
     mId ( aId ),
     mUri ( aUri )
@@ -49,6 +50,7 @@ namespace uhal
 
 
   ClientInterface::ClientInterface ( ) :
+    mBuffers(),
     mCurrentBuffers ( NULL ),
     mId ( ),
     mUri ( )
@@ -59,7 +61,8 @@ namespace uhal
 
 
   ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) :
-    mCurrentBuffers ( aClientInterface.mCurrentBuffers ),
+    mBuffers(),
+    mCurrentBuffers ( NULL ),
     mId ( aClientInterface.mId ),
     mUri ( aClientInterface.mUri )
   {
@@ -69,7 +72,7 @@ namespace uhal
 
   ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
   {
-    mCurrentBuffers = aClientInterface.mCurrentBuffers;
+    deleteBuffers();
     mId  = aClientInterface.mId;
     mUri = aClientInterface.mUri;
     return *this;
@@ -161,16 +164,13 @@ namespace uhal
 
     try
     {
-      if ( ! mCurrentBuffers )
+      if ( mCurrentBuffers )
       {
-        updateCurrentBuffers();
+        this->predispatch ( mCurrentBuffers );
+        this->implementDispatch ( mCurrentBuffers );
+        mCurrentBuffers = NULL;
+        this->Flush();
       }
-
-      this->predispatch ( mCurrentBuffers );
-      this->implementDispatch ( mCurrentBuffers );
-      mCurrentBuffers = NULL;
-      updateCurrentBuffers();
-      this->Flush();
     }
     catch ( ... )
     {
