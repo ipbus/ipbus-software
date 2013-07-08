@@ -48,7 +48,10 @@ namespace uhal
 
 
 
-  ClientInterface::ClientInterface ( )
+  ClientInterface::ClientInterface ( ) :
+    mCurrentBuffers ( NULL ),
+    mId ( ),
+    mUri ( )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -56,6 +59,7 @@ namespace uhal
 
 
   ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) :
+    mCurrentBuffers ( aClientInterface.mCurrentBuffers ),
     mId ( aClientInterface.mId ),
     mUri ( aClientInterface.mUri )
   {
@@ -65,6 +69,7 @@ namespace uhal
 
   ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
   {
+    mCurrentBuffers = aClientInterface.mCurrentBuffers;
     mId  = aClientInterface.mId;
     mUri = aClientInterface.mUri;
     return *this;
@@ -156,9 +161,15 @@ namespace uhal
 
     try
     {
+      if ( ! mCurrentBuffers )
+      {
+        updateCurrentBuffers();
+      }
+
       this->predispatch ( mCurrentBuffers );
       this->implementDispatch ( mCurrentBuffers );
       mCurrentBuffers = NULL;
+      updateCurrentBuffers();
       this->Flush();
     }
     catch ( ... )
@@ -180,9 +191,6 @@ namespace uhal
     // log ( Debug() , ThisLocation() );
     //check that the results are valid
     // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
-#ifdef RUN_ASIO_MULTITHREADED
-    boost::lock_guard<boost::mutex> lLock ( mDispatchSideMutex );
-#endif
     //std::cout << mDispatchedBuffers.size() << std::endl;
     exception::exception* lRet = this->validate ( aBuffers->getSendBuffer() ,
                                  aBuffers->getSendBuffer() + aBuffers->sendCounter() ,
@@ -194,7 +202,9 @@ namespace uhal
     {
       aBuffers->validate ();
       // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+#ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
       mBuffers.push_back ( aBuffers );
       // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     }
@@ -307,7 +317,9 @@ namespace uhal
     {
       {
         // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+#ifdef RUN_ASIO_MULTITHREADED
         boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
 
         if ( mBuffers.size() == 0 )
         {
@@ -329,7 +341,9 @@ namespace uhal
   void ClientInterface::deleteBuffers()
   {
     // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
 
     for ( std::deque < Buffers* >::iterator lIt = mBuffers.begin(); lIt != mBuffers.end(); ++lIt )
     {

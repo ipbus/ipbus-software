@@ -331,10 +331,10 @@ namespace uhal
       //! A MutEx lock used to make sure the access functions are thread safe
       boost::mutex mUserSideMutex;
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::mutex mDispatchSideMutex;
+      boost::mutex mBufferMutex;
 #endif
 
-      boost::mutex mBufferMutex;
+
 
 
       //! A memory pool of buffers which will be dispatched
