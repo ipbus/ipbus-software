@@ -108,12 +108,12 @@ COMMANDS += [["RELEASE",
               ["rm -rf %s" % NIGHTLY_RPM_DIR,
                "mkdir -p %s" % NIGHTLY_RPM_DIR,
                "mkdir -p %s" % NIGHTLY_LOG_DIR,
-               "cp %s %s" % ("yumgroups.xml",NIGHTLY_RPM_DIR),
+               "cp %s %s" % ("~/nightly/yumgroups.xml",NIGHTLY_RPM_DIR),
                "find %s -name '*.rpm' -exec cp {} %s \;" % (BUILD_HOME,NIGHTLY_RPM_DIR),
                "cd %s;createrepo -vg yumgroups.xml ." % NIGHTLY_RPM_DIR]]]
 
 COMMANDS += [["INSTALL",
-              ["sed \"s/<platform>/%s/\" uhal.nightly.repo  | sudo tee /etc/yum.repos.d/uhal.repo > /dev/null" % pseudo_platform,
+              ["sed \"s/<platform>/%s/\" ~/nightly/uhal.nightly.repo  | sudo tee /etc/yum.repos.d/uhal.repo > /dev/null" % pseudo_platform,
                "sudo yum clean all",
                "sudo yum -y groupinstall uhal"]]]
 
