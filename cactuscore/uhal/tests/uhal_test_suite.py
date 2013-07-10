@@ -241,6 +241,43 @@ def get_commands(conn_file, controlhub_scripts_dir):
                controlhub_stop]
                 ]]
 
+      
+      
+    cmds += [["TEST VALGRIND",
+              [ # UDP 2
+               "DummyHardwareUdp.exe --version 1 --port 50001",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",      
+                # TCP 2
+               "DummyHardwareTcp.exe --version 1 --port 50002",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+                # ControlHub 2
+               "DummyHardwareUdp.exe --version 1 --port 50001",
+               controlhub_start,
+               controlhub_status,
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               controlhub_stats,
+               controlhub_stop,
+                # UDP 2
+               "DummyHardwareUdp.exe --version 2 --port 60001",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",      
+                # TCP 2
+               "DummyHardwareTcp.exe --version 2 --port 60002",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+                # ControlHub 2
+               "DummyHardwareUdp.exe --version 2 --port 60001",
+               controlhub_start,
+               controlhub_status,
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               controlhub_stats,
+               controlhub_stop]
+                ]]     
+      
     cmds += [["TEST IPBUS 2.0 CONTROLHUB with packet loss",
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
@@ -396,6 +433,11 @@ if __name__=="__main__":
     conn_file = "/opt/cactus/etc/uhal/tests/dummy_connections.xml"
     section_search_str = None
     quit_on_error = False
+    
+    stdout = []
+    exit_code = 0
+    cmd_duration = 0
+    
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
