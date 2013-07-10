@@ -15,6 +15,40 @@
 %-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}]).
 
 
+-define(IPBUS_TXFULL_REQ, <<16#200000f0:32,
+                             16#2cbaff1f:32, % Write, 0xff deep
+                             (16#1000):32,
+                             0:((16#ff)*32),
+                             16#2000601f:32, % Write, 0x60 deep
+                             (16#1000):32,
+                             0:((16#60)*32)
+                           >>).
+-define(IPBUS_TXFULL_REP, <<16#200000f0:32,
+                             16#2cbaff10:32, % Write, 0xff deep
+                             16#20006010:32  % Write, 0x60 deep
+                           >>).
+
+-define(IPBUS_BOTHFULL_REQ, <<16#200000f0:32,
+                              16#2cbaff1f:32, % Write, 0xff deep
+                              16#1000:32,
+                              0:((16#ff)*32),
+                              16#2abcff0f:32, % Read, 0xff deep
+                              16#1000:32,
+                              16#2def561f:32, % Write, 0x56 deep
+                              16#1000:32,
+                              0:((16#56)*32),
+                              16#2fed5a0f:32, % Read, 0x5a deep
+                              16#1000:32
+                            >>).
+-define(IPBUS_BOTHFULL_REP, <<16#200000f0:32,
+                              16#2cbaff10:32, % Write, 0xff deep
+                              16#2abcff00:32,  % Read, 0xff deep
+                              0:((16#ff)*32),
+                              16#2def5610:32, % Write, 0x56 deep
+                              16#2fed5a00:32, % Read, 0x5a deep
+                              0:((16#5a)*32)
+                            >>).
+
 % ---------------------------------------------------------------------------------------
 %    MAIN, USAGE & OPTION PARSING
 % ---------------------------------------------------------------------------------------
@@ -72,18 +106,8 @@ main(["udp_ipbus_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
     %
-    Request = <<16#200000f0:32,
-                16#2cbaff1f:32, % Write, 0xff deep
-                (16#1000):32,
-                0:((16#ff)*32),
-                16#2000601f:32, % Write, 0x60 deep
-                (16#1000):32,
-                0:((16#60)*32)
-              >>,
-    Reply = << 16#200000f0:32,
-               16#2cbaff10:32, % Write, 0xff deep
-               16#20006010:32  % Write, 0x60 deep
-            >>,
+    Request = ?IPBUS_TXFULL_REQ,
+    Reply = ?IPBUS_TXFULL_REP,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
 
@@ -91,26 +115,8 @@ main(["udp_ipbus_client2" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
     %
-    Request = <<16#200000f0:32,
-                16#2cbaff1f:32, % Write, 0xff deep
-                16#1000:32,
-                0:((16#ff)*32),
-                16#2abcff0f:32, % Read, 0xff deep
-                16#1000:32,
-                16#2def561f:32, % Write, 0x56 deep
-                16#1000:32,
-                0:((16#56)*32),
-                16#2fed5a0f:32, % Read, 0x5a deep
-                16#1000:32
-              >>,
-    Reply = << 16#200000f0:32,
-               16#2cbaff10:32, % Write, 0xff deep
-               16#2abcff00:32,  % Read, 0xff deep
-               0:((16#ff)*32),
-               16#2def5610:32, % Write, 0x56 deep
-               16#2fed5a00:32, % Read, 0x5a deep
-               0:((16#5a)*32)
-            >>,
+    Request = ?IPBUS_BOTHFULL_REQ,
+    Reply = ?IPBUS_BOTHFULL_REP,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
 
@@ -118,12 +124,7 @@ main(["udp_echo_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
     %
-    Request = <<16#200000f0:32,
-                16#2cbaff1f:32,
-                0:((16#100)*32),
-                16#20005a1f:32,
-                0:((15#5b)*32)
-              >>,
+    Request = ?IPBUS_TXFULL_REQ,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Request, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Request));
 
@@ -135,12 +136,7 @@ main(["tcp_echo_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = tcp_connect(TargetIP, TargetPort),
     %
-    Request = <<16#200000f0:32,
-                16#2cbaff1f:32,
-                0:((16#100)*32),
-                16#20005a1f:32,
-                0:((15#5b)*32)
-              >>,
+    Request = ?IPBUS_TXFULL_REQ,
     {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Request, {0,NrInFlight}, NrItns) end ),
     gen_tcp:close(Socket),
@@ -151,6 +147,26 @@ main(["tcp_echo_server", ArgPort]) ->
     io:format("Starting TCP echo server with options: ~p~n", [?TCP_SOCKET_OPTIONS]),
     ch_unittest_common:start_tcp_echo_server(?TCP_SOCKET_OPTIONS, Port);
     
+main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
+    {ok, ControlHubIP} = inet_parse:address(ArgControlHubIP),
+    {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
+    Socket = tcp_connect(ControlHubIP, 10203),
+    %
+    TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
+                    + (element(3,TargetIP) bsl 8) + element(4,TargetIP),
+    Request = <<TargetIPU32:32,
+                TargetPort:16, (byte_size(?IPBUS_TXFULL_REQ) div 4):16,
+                (?IPBUS_TXFULL_REQ)/binary
+              >>,
+    Reply = <<TargetIPU32:32,
+              TargetPort:16, 0:16,
+              (?IPBUS_TXFULL_REP)/binary>>,
+    %
+    {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
+    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Reply, {0,NrInFlight}, NrItns) end ),
+    gen_tcp:close(Socket),
+    print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
+
 main(_) ->
     io:format("Incorrect usage!~n"),
     usage().
