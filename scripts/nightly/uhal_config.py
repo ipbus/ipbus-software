@@ -157,4 +157,8 @@ COMMANDS += [["TEST uHAL TOOLS",
               ["uhal_test_suite.py -v -s tools"]
             ]]
 
+COMMANDS += [["TEST uHAL FOR MEMORY LEAKS",
+              ['uhal_test_suite.py -v -s "VALGRIND"']
+            ]]
+
 
