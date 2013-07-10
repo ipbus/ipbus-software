@@ -326,7 +326,6 @@ namespace uhal
       void returnBufferToPool ( Buffers* aBuffers );
       void returnBufferToPool ( std::deque< Buffers* >& aBuffers );
 
-
     private:
       void updateCurrentBuffers();
       void deleteBuffers();
