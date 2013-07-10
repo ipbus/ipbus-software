@@ -306,6 +306,7 @@ namespace uhal
       virtual  exception::exception* validate ( Buffers* aBuffers );
 
 
+
     protected:
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected
@@ -322,6 +323,10 @@ namespace uhal
 
       virtual void dispatchExceptionHandler();
 
+      void returnBufferToPool ( Buffers* aBuffers );
+      void returnBufferToPool ( std::deque< Buffers* >& aBuffers );
+
+
     private:
       void updateCurrentBuffers();
       void deleteBuffers();
@@ -334,11 +339,13 @@ namespace uhal
       boost::mutex mBufferMutex;
 #endif
 
-
-
-
       //! A memory pool of buffers which will be dispatched
       std::deque < Buffers* > mBuffers;
+
+#ifdef NO_PREEMPTIVE_DISPATCH
+      std::deque < Buffers* > mNoPreemptiveDispatchBuffers;
+#endif
+
 
       //! A pointer to a buffer-wrapper object
       Buffers* mCurrentBuffers;

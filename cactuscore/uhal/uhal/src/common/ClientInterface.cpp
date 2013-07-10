@@ -40,6 +40,9 @@ namespace uhal
 
   ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) :
     mBuffers(),
+#ifdef NO_PREEMPTIVE_DISPATCH
+    mNoPreemptiveDispatchBuffers(),
+#endif
     mCurrentBuffers ( NULL ),
     mId ( aId ),
     mUri ( aUri )
@@ -51,6 +54,9 @@ namespace uhal
 
   ClientInterface::ClientInterface ( ) :
     mBuffers(),
+#ifdef NO_PREEMPTIVE_DISPATCH
+    mNoPreemptiveDispatchBuffers(),
+#endif
     mCurrentBuffers ( NULL ),
     mId ( ),
     mUri ( )
@@ -62,6 +68,9 @@ namespace uhal
 
   ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) :
     mBuffers(),
+#ifdef NO_PREEMPTIVE_DISPATCH
+    mNoPreemptiveDispatchBuffers(),
+#endif
     mCurrentBuffers ( NULL ),
     mId ( aClientInterface.mId ),
     mUri ( aClientInterface.mUri )
@@ -157,6 +166,7 @@ namespace uhal
   }
 
 
+
   void ClientInterface::dispatch ()
   {
     // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
@@ -164,10 +174,23 @@ namespace uhal
 
     try
     {
+#ifdef NO_PREEMPTIVE_DISPATCH
+
+      for ( std::deque < Buffers* >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
+      {
+        this->predispatch ( *lIt );
+        this->implementDispatch ( *lIt ); //responsibility for *lIt passed to the implementDispatch function
+        *lIt = NULL;
+      }
+
+      mNoPreemptiveDispatchBuffers.clear();
+      this->Flush();
+#endif
+
       if ( mCurrentBuffers )
       {
         this->predispatch ( mCurrentBuffers );
-        this->implementDispatch ( mCurrentBuffers );
+        this->implementDispatch ( mCurrentBuffers ); //responsibility for mCurrentBuffers passed to the implementDispatch function
         mCurrentBuffers = NULL;
         this->Flush();
       }
@@ -201,14 +224,9 @@ namespace uhal
     if ( !lRet )
     {
       aBuffers->validate ();
-      // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-#ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
-      mBuffers.push_back ( aBuffers );
-      // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     }
 
+    returnBufferToPool ( aBuffers );
     return lRet;
   }
 
@@ -226,6 +244,31 @@ namespace uhal
   {}
 
 
+
+  void ClientInterface::returnBufferToPool ( Buffers* aBuffers )
+  {
+    // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
+    mBuffers.push_back ( aBuffers );
+    // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
+  }
+
+
+  void ClientInterface::returnBufferToPool ( std::deque< Buffers* >& aBuffers )
+  {
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
+
+    for ( std::deque < Buffers* >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
+    {
+      mBuffers.push_back ( *lIt );
+    }
+
+    aBuffers.clear();
+  }
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   Buffers* ClientInterface::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
@@ -264,16 +307,16 @@ namespace uhal
     }
 
     log ( Debug() , "Triggering automated dispatch" );
+#ifdef NO_PREEMPTIVE_DISPATCH
+    mNoPreemptiveDispatchBuffers.push_back ( mCurrentBuffers );
+    mCurrentBuffers = NULL;
+#else
 
     try
     {
       this->predispatch ( mCurrentBuffers );
       this->implementDispatch ( mCurrentBuffers );
       mCurrentBuffers = NULL;
-      /*if ( this->getMaxNumberOfBuffers() == 1 )
-      {
-        this->Flush();
-      }*/
     }
     catch ( ... )
     {
@@ -281,6 +324,7 @@ namespace uhal
       throw;
     }
 
+#endif
     updateCurrentBuffers();
     lSendBufferFreeSpace = this->getMaxSendSize() - mCurrentBuffers->sendCounter();
     lReplyBufferFreeSpace = this->getMaxReplySize() - mCurrentBuffers->replyCounter();
@@ -313,7 +357,7 @@ namespace uhal
 
   void ClientInterface::updateCurrentBuffers()
   {
-    if ( mCurrentBuffers == NULL )
+    if ( ! mCurrentBuffers )
     {
       {
         // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
@@ -338,6 +382,9 @@ namespace uhal
     }
   }
 
+
+
+
   void ClientInterface::deleteBuffers()
   {
     // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
@@ -355,6 +402,20 @@ namespace uhal
     }
 
     mBuffers.clear();
+    //
+#ifdef NO_PREEMPTIVE_DISPATCH
+
+    for ( std::deque < Buffers* >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
+    {
+      if ( *lIt )
+      {
+        delete *lIt;
+        *lIt = NULL;
+      }
+    }
+
+    mNoPreemptiveDispatchBuffers.clear();
+#endif
 
     if ( mCurrentBuffers )
     {
@@ -364,6 +425,9 @@ namespace uhal
 
     // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
   }
+
+
+
 
 
   void ClientInterface::dispatchExceptionHandler()
