@@ -276,6 +276,41 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
                controlhub_stop]
+              ]]
+
+    cmds += [["TEST VALGRIND2",
+              [# UDP 2 with ASYNC EXCEPTION
+               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 100",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",      
+                # TCP 2 with ASYNC EXCEPTION
+               "DummyHardwareTcp.exe --version 1 --port 50002 --delay 100",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+                # ControlHub 2 with ASYNC EXCEPTION
+               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 100",
+               controlhub_start,
+               controlhub_status,
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               controlhub_stats,
+               controlhub_stop,
+                # UDP 2 with ASYNC EXCEPTION
+               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 100",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",      
+                # TCP 2 with ASYNC EXCEPTION
+               "DummyHardwareTcp.exe --version 2 --port 60002 --delay 100",
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+                # ControlHub 2 with ASYNC EXCEPTION
+               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 100",
+               controlhub_start,
+               controlhub_status,
+               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               controlhub_stats,
+               controlhub_stop]
                 ]]     
       
     cmds += [["TEST IPBUS 2.0 CONTROLHUB with packet loss",

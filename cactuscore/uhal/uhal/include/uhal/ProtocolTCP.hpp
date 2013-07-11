@@ -159,6 +159,8 @@ namespace uhal
 
       std::deque < Buffers* > mTcpDispatchQueue;
       std::deque < Buffers* > mTcpReplyQueue;
+
+      uint32_t mPacketsInFlight;
 #endif
 
       Buffers* mTcpDispatchBuffers;

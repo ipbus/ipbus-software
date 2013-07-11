@@ -61,6 +61,7 @@ namespace uhal
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mTcpDispatchQueue(),
     mTcpReplyQueue(),
+    mPacketsInFlight( 0 ),
 #endif
     mTcpDispatchBuffers ( NULL ),
     mTcpReplyBuffers ( NULL ),
@@ -85,6 +86,7 @@ namespace uhal
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mTcpDispatchQueue(),
     mTcpReplyQueue(),
+    mPacketsInFlight( 0 ),
 #endif
     mTcpDispatchBuffers ( NULL ),
     mTcpReplyBuffers ( NULL ),
@@ -106,6 +108,7 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     ClientInterface::returnBufferToPool ( mTcpDispatchQueue );
     ClientInterface::returnBufferToPool ( mTcpReplyQueue );
+    mPacketsInFlight = 0;
 #endif
     //    ClientInterface::returnBufferToPool ( mTcpDispatchBuffers );
     //    mTcpDispatchBuffers = NULL;
@@ -178,7 +181,7 @@ namespace uhal
       while ( lContinue )
       {
         boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
-        lContinue = ( mTcpDispatchQueue.size() +mTcpReplyQueue.size() >= lMaxPacketsInFlight );
+        lContinue = ( mPacketsInFlight >= lMaxPacketsInFlight );
       }
 
       boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
@@ -260,6 +263,7 @@ namespace uhal
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, _1 ) );
+    mPacketsInFlight++;
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
@@ -379,9 +383,6 @@ namespace uhal
     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
     {
       //      log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( lIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( lIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( lIt->second ) );
-#ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
-#endif
       memcpy ( lIt->first, lReplyBuf, lIt->second );
       lReplyBuf += lIt->second;
     }
@@ -425,7 +426,7 @@ namespace uhal
     {
       mTcpReplyBuffers = NULL;
     }
-
+    mPacketsInFlight--;
 #else
     mTcpReplyBuffers = NULL;
 #endif
