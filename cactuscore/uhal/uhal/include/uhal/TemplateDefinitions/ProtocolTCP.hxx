@@ -36,9 +36,7 @@
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
 
-
 #include "uhal/IPbusInspector.hpp"
-
 
 #include <sys/time.h>
 
@@ -51,7 +49,7 @@ namespace uhal
   template < typename InnerProtocol >
   TCP< InnerProtocol >::TCP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
-    mIOservice (),
+    mIOservice ( ),
 #ifdef RUN_ASIO_MULTITHREADED
     mIOserviceWork ( mIOservice ),
 #endif
@@ -61,7 +59,11 @@ namespace uhal
     mReplyMemory ( 65536 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
+    mTcpDispatchQueue(),
+    mTcpReplyQueue(),
 #endif
+    mTcpDispatchBuffers ( NULL ),
+    mTcpReplyBuffers ( NULL ),
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
@@ -70,14 +72,77 @@ namespace uhal
 
 
   template < typename InnerProtocol >
+  TCP< InnerProtocol >::TCP ( const TCP< InnerProtocol >& aTCP ) :
+    mIOservice ( ),
+#ifdef RUN_ASIO_MULTITHREADED
+    mIOserviceWork ( mIOservice ),
+#endif
+    mSocket ( mIOservice ),
+    mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aTCP.mUri.mHostname , aTCP.mUri.mPort ) ) ),
+    mDeadlineTimer ( mIOservice ),
+    mReplyMemory ( 65536 , 0x00000000 ),
+#ifdef RUN_ASIO_MULTITHREADED
+    mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
+    mTcpDispatchQueue(),
+    mTcpReplyQueue(),
+#endif
+    mTcpDispatchBuffers ( NULL ),
+    mTcpReplyBuffers ( NULL ),
+    mAsynchronousException ( NULL )
+  {
+    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
+  }
+
+
+  template < typename InnerProtocol >
+  TCP< InnerProtocol >& TCP< InnerProtocol >::operator= ( const TCP< InnerProtocol >& aTCP )
+  {
+    mEndpoint =  boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aTCP.mUri.mHostname , aTCP.mUri.mPort ) );
+    mSocket.close();
+
+    while ( mSocket.is_open() )
+      {}
+
+#ifdef RUN_ASIO_MULTITHREADED
+    ClientInterface::returnBufferToPool ( mTcpDispatchQueue );
+    ClientInterface::returnBufferToPool ( mTcpReplyQueue );
+#endif
+    //    ClientInterface::returnBufferToPool ( mTcpDispatchBuffers );
+    //    mTcpDispatchBuffers = NULL;
+    //    ClientInterface::returnBufferToPool ( mTcpReplyBuffers );
+    //    mTcpReplyBuffers = NULL;
+
+    if ( mAsynchronousException )
+    {
+      delete mAsynchronousException;
+      mAsynchronousException = NULL;
+    }
+
+    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
+  }
+
+
+
+
+  template < typename InnerProtocol >
   TCP< InnerProtocol >::~TCP()
   {
     try
     {
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+#endif
+      //log( Warning() , "Closing Socket" );
       mSocket.close();
+
+      while ( mSocket.is_open() )
+        {}
+
       mIOservice.stop();
 #ifdef RUN_ASIO_MULTITHREADED
       mDispatchThread.join();
+      ClientInterface::returnBufferToPool ( mTcpDispatchQueue );
+      ClientInterface::returnBufferToPool ( mTcpReplyQueue );
 #endif
     }
     catch ( const std::exception& aExc )
@@ -91,6 +156,7 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::implementDispatch ( Buffers* aBuffers )
   {
+    //     std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     if ( mAsynchronousException )
     {
       log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
@@ -104,14 +170,34 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
-#endif
-      mTcpDispatchQueue.push_back ( aBuffers );
+      //       std::cout << this->getMaxNumberOfBuffers() << " : " << mTcpDispatchQueue.size() << " : " << mTcpReplyQueue.size() << std::endl;
+      //block the next write operation if we are currently waiting for lMaxPacketsInFlight replies
+      bool lContinue ( true );
+      uint32_t lMaxPacketsInFlight ( this->getMaxNumberOfBuffers() );
 
-      if ( mTcpDispatchQueue.size() == 1 )
+      while ( lContinue )
       {
-        write ( aBuffers );
+        boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+        lContinue = ( mTcpDispatchQueue.size() +mTcpReplyQueue.size() >= lMaxPacketsInFlight );
       }
+
+      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+
+      if ( mTcpDispatchBuffers )
+      {
+        mTcpDispatchQueue.push_back ( aBuffers );
+        //   std::cout << "extended mTcpDispatchQueue" << std::endl;
+      }
+      else
+      {
+        mTcpDispatchBuffers = aBuffers;
+        write ( );
+      }
+
+#else
+      mTcpDispatchBuffers = aBuffers;
+      write ( );
+#endif
     }
   }
 
@@ -156,28 +242,24 @@ namespace uhal
   }
 
 
-
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::write ( Buffers* aBuffers )
+  void TCP< InnerProtocol >::write ( )
   {
-    //              log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
-    //         std::vector<uint32_t>::const_iterator lBegin( reinterpret_cast<uint32_t*>( aBuffers->getSendBuffer() ) );
-    //         std::vector<uint32_t>::const_iterator lEnd = lBegin + (aBuffers->sendCounter()>>2);
-    //         std::vector<uint32_t> lData;
-    //         for( ; lBegin!=lEnd ; ++lBegin )
-    //         {
-    //           lData.push_back( ntohl ( *lBegin ) );
-    //               std::cout << std::setfill('0') << std::hex << std::setw(8) << ntohl ( *lBegin ) << std::endl;
-    //         }
-    //         lBegin = lData.begin();
-    //         lEnd = lData.end();
-    //         HostToTargetInspector< 2 , 0 >().analyze ( lBegin , lEnd );
+    /*    std::vector<uint32_t>::const_iterator lBegin ( reinterpret_cast<uint32_t*> ( aBuffers->getSendBuffer() ) );
+        std::vector<uint32_t>::const_iterator lEnd = lBegin + ( aBuffers->sendCounter() >>2 );
+        std::vector<uint32_t> lData;
+
+        for ( ; lBegin!=lEnd ; ++lBegin )
+        {
+          std::cout << std::setfill ( '0' ) << std::hex << std::setw ( 8 ) <<  *lBegin << std::endl;
+        }*/
     mAsioSendBuffer.clear();
-    mAsioSendBuffer.push_back ( boost::asio::const_buffer ( aBuffers->getSendBuffer() , aBuffers->sendCounter() ) );
-    log ( Debug() , "Sending " , Integer ( aBuffers->sendCounter() ) , " bytes" );
+    mAsioSendBuffer.push_back ( boost::asio::const_buffer ( mTcpDispatchBuffers->getSendBuffer() , mTcpDispatchBuffers->sendCounter() ) );
+    log ( Debug() , "Sending " , Integer ( mTcpDispatchBuffers->sendCounter() ) , " bytes" );
+    // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, aBuffers , _1 ) );
+    boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, _1 ) );
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
@@ -188,46 +270,61 @@ namespace uhal
     }
     while ( lErrorCode == boost::asio::error::would_block );
 
-    write_callback ( aBuffers , lErrorCode );
+    write_callback ( lErrorCode );
 #endif
   }
 
 
-
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
+  void TCP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode )
   {
-    //          log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
-#endif
-    mTcpReplyQueue.push_back ( aBuffers );
-
-    if ( mTcpReplyQueue.size() == 1 )
     {
-      read ( aBuffers );
-    }
+      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
 
-    mTcpDispatchQueue.pop_front();
+      if ( mTcpReplyBuffers )
+      {
+        mTcpReplyQueue.push_back ( mTcpDispatchBuffers );
+        //   std::cout << "extended mTcpReplyQueue" << std::endl;
+      }
+      else
+      {
+        mTcpReplyBuffers = mTcpDispatchBuffers;
+        read ( );
+      }
+    }
 
     if ( mTcpDispatchQueue.size() )
     {
-      write ( mTcpDispatchQueue.front() );
+      mTcpDispatchBuffers = mTcpDispatchQueue.front();
+      mTcpDispatchQueue.pop_front();
+      //std::cout << "reduced mTcpDispatchQueue" << std::endl;
+      write();
     }
+    else
+    {
+      mTcpDispatchBuffers = NULL;
+    }
+
+#else
+    mTcpReplyBuffers = mTcpDispatchBuffers;
+    mTcpDispatchBuffers = NULL;
+    read ( );
+#endif
   }
 
 
-
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::read ( Buffers* aBuffers )
+  void TCP< InnerProtocol >::read ( )
   {
-    //          log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
     mAsioReplyBuffer.clear();
-    mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , aBuffers->replyCounter() ) );
-    log ( Debug() , "Expecting " , Integer ( aBuffers->replyCounter() ) , " bytes in reply" );
+    mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mTcpReplyBuffers->replyCounter() ) );
+    log ( Debug() , "Expecting " , Integer ( mTcpReplyBuffers->replyCounter() ) , " bytes in reply" );
+    boost::asio::ip::tcp::endpoint lEndpoint;
+    // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least ( 4 ), boost::bind ( &TCP< InnerProtocol >::read_callback, this, aBuffers , _1 ) );
+    boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least ( 4 ), boost::bind ( &TCP< InnerProtocol >::read_callback, this, _1 ) );
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::async_read ( mSocket , mAsioReplyBuffer ,  boost::asio::transfer_at_least ( 4 ), boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
@@ -238,16 +335,14 @@ namespace uhal
     }
     while ( lErrorCode == boost::asio::error::would_block );
 
-    read_callback ( aBuffers , lErrorCode );
+    read_callback ( lErrorCode );
 #endif
   }
 
 
-
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::read_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode )
+  void TCP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode )
   {
-    //          log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( aBuffers ) );
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
@@ -263,18 +358,30 @@ namespace uhal
 
       try
       {
-        mAsynchronousException = ClientInterface::validate ( aBuffers );
+        mAsynchronousException = ClientInterface::validate ( mTcpReplyBuffers ); //Control of the pointer has been passed back to the client interface
+        mTcpReplyBuffers = NULL;
       }
       catch ( ... ) {}
 
       return;
     }
 
-    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( aBuffers->getReplyBuffer() );
+    /*
+        TargetToHostInspector< 2 , 0 > lT2HInspector;
+        std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
+        std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
+        lT2HInspector.analyze ( lBegin2 , lEnd2 );
+    */
+    //  std::cout << "Filling reply buffer : " << mTcpReplyBuffers << std::endl;
+    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mTcpReplyBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
     {
+      //      log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( lIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( lIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( lIt->second ) );
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+#endif
       memcpy ( lIt->first, lReplyBuf, lIt->second );
       lReplyBuf += lIt->second;
     }
@@ -292,51 +399,57 @@ namespace uhal
     }
     }
     */
+    //log ( Debug() , ThisLocation() );
 
     try
     {
-      mAsynchronousException = ClientInterface::validate ( aBuffers );
+      mAsynchronousException = ClientInterface::validate ( mTcpReplyBuffers ); //Control of the pointer has been passed back to the client interface
     }
     catch ( exception::exception& aExc )
     {
-      log ( Error() , "Validation function reported an error when processing buffer: " , Pointer ( aBuffers ) );
       mAsynchronousException = new exception::ValidationError ();
-    }
-
-    if ( mAsynchronousException )
-    {
       return;
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
-#endif
-    mTcpReplyQueue.pop_front();
 
     if ( mTcpReplyQueue.size() )
     {
-      read ( mTcpReplyQueue.front() );
+      mTcpReplyBuffers = mTcpReplyQueue.front();
+      mTcpReplyQueue.pop_front();
+      // std::cout << "reduced mTcpReplyQueue" << std::endl;
+      read();
     }
+    else
+    {
+      mTcpReplyBuffers = NULL;
+    }
+
+#else
+    mTcpReplyBuffers = NULL;
+#endif
   }
+
+
 
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::CheckDeadline()
   {
-    // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
-
+    // log( Warning() , ThisLocation() );
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
+      // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket.close();
       // There is no longer an active deadline. The expiry is set to positive
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
-      //set the error code correctly
-      //log ( Error() , "ASIO deadline timer timed out" );
+      // log ( Error() , "ASIO deadline timer timed out" );
     }
 
     // Put the actor back to sleep.
@@ -344,46 +457,56 @@ namespace uhal
   }
 
 
-
-
-
-
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::Flush( )
   {
+    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     bool lContinue ( true );
 
-    do
+    while ( lContinue )
     {
       if ( mAsynchronousException )
       {
-        log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
         mAsynchronousException->ThrowAsDerivedType();
       }
 
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( this->mTcpMutex );
+      boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
 #endif
-      lContinue = ( mTcpDispatchQueue.size() || mTcpReplyQueue.size() );
+      //log ( Warning() , "mTcpDispatchBuffers = " , Pointer ( mTcpDispatchBuffers ) , " mTcpReplyBuffers = " , Pointer ( mTcpReplyBuffers ) );
+      lContinue = ( mTcpDispatchBuffers || mTcpReplyBuffers );
     }
-    while ( lContinue );
   }
+
 
 
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::dispatchExceptionHandler()
   {
+    log ( Warning() , "Closing Socket" );
+    mSocket.close();
+
+    while ( mSocket.is_open() )
+      {}
+
     if ( mAsynchronousException )
     {
       delete mAsynchronousException;
       mAsynchronousException = NULL;
     }
 
-    mSocket.close();
-    mTcpReplyQueue.clear();
-    mTcpDispatchQueue.clear();
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mTcpMutex );
+    ClientInterface::returnBufferToPool ( mTcpDispatchQueue );
+    ClientInterface::returnBufferToPool ( mTcpReplyQueue );
+#endif
+    //    ClientInterface::returnBufferToPool ( mTcpDispatchBuffers );
+    //    mTcpDispatchBuffers = NULL;
+    //    ClientInterface::returnBufferToPool ( mTcpReplyBuffers );
+    //    mTcpReplyBuffers = NULL;
     InnerProtocol::dispatchExceptionHandler();
   }
+
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

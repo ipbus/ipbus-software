@@ -84,6 +84,12 @@ namespace uhal
       */
       UDP ( const std::string& aId, const URI& aUri );
 
+
+      UDP ( const UDP& aUDP );
+
+      UDP& operator= ( const UDP& aUDP );
+
+
       /**
       	Destructor
       */
@@ -110,10 +116,10 @@ namespace uhal
 
       void connect();
 
-      void write ( Buffers* aBuffers );
-      void write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode );
-      void read ( Buffers* aBuffers );
-      void read_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode );
+      void write ( );
+      void write_callback ( const boost::system::error_code& aErrorCode );
+      void read ( );
+      void read_callback ( const boost::system::error_code& aErrorCode );
 
 
       void CheckDeadline();
@@ -147,9 +153,14 @@ namespace uhal
       //! A MutEx lock used to make sure the access functions are thread safe
 #ifdef RUN_ASIO_MULTITHREADED
       boost::mutex mUdpMutex;
-#endif
+
       std::deque < Buffers* > mUdpDispatchQueue;
       std::deque < Buffers* > mUdpReplyQueue;
+#endif
+
+      Buffers* mUdpDispatchBuffers;
+      Buffers* mUdpReplyBuffers;
+
 
       uhal::exception::exception* mAsynchronousException;
 

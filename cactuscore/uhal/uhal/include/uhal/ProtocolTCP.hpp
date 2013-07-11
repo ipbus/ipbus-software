@@ -61,6 +61,7 @@
 namespace uhal
 {
 
+
   namespace exception
   {
     //! Exception class to handle the case where the TCP connection timed out.
@@ -69,7 +70,6 @@ namespace uhal
     ExceptionClass ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." );
     //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
     ExceptionClass ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." );
-
   }
 
   //! Transport protocol to transfer an IPbus buffer via TCP
@@ -78,6 +78,7 @@ namespace uhal
   {
 
     public:
+      //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
 
       /**
       	Constructor
@@ -85,6 +86,12 @@ namespace uhal
       	@param aUri a struct containing the full URI of the target.
       */
       TCP ( const std::string& aId, const URI& aUri );
+
+
+      TCP ( const TCP& aTCP );
+
+      TCP& operator= ( const TCP& aTCP );
+
 
       /**
       	Destructor
@@ -103,23 +110,25 @@ namespace uhal
        */
       virtual void Flush( );
 
+
     protected:
       virtual void dispatchExceptionHandler();
+
 
     private:
 
       void connect();
 
-      void write ( Buffers* aBuffers );
-      void write_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode );
-      void read ( Buffers* aBuffers );
-      void read_callback ( Buffers* aBuffers , const boost::system::error_code& aErrorCode );
+      void write ( );
+      void write_callback ( const boost::system::error_code& aErrorCode );
+      void read ( );
+      void read_callback ( const boost::system::error_code& aErrorCode );
 
 
       void CheckDeadline();
 
-    private:
 
+    private:
       //! The boost::asio::io_service used to create the connections
       boost::asio::io_service mIOservice;
 
@@ -127,9 +136,10 @@ namespace uhal
       boost::asio::io_service::work mIOserviceWork;
 #endif
 
-      //! A shared pointer to a boost::asio udp socket through which the operation will be performed
+      //! A shared pointer to a boost::asio tcp socket through which the operation will be performed
       boost::asio::ip::tcp::socket mSocket;
 
+      //! A shared pointer to a boost::asio tcp endpoint stored as a member as TCP as no concept of a connection
       boost::asio::ip::tcp::resolver::iterator mEndpoint;
 
       boost::asio::deadline_timer mDeadlineTimer;
@@ -143,14 +153,17 @@ namespace uhal
       std::vector< boost::asio::const_buffer > mAsioSendBuffer;
       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
 
-
-#ifdef RUN_ASIO_MULTITHREADED
       //! A MutEx lock used to make sure the access functions are thread safe
+#ifdef RUN_ASIO_MULTITHREADED
       boost::mutex mTcpMutex;
-#endif
 
       std::deque < Buffers* > mTcpDispatchQueue;
       std::deque < Buffers* > mTcpReplyQueue;
+#endif
+
+      Buffers* mTcpDispatchBuffers;
+      Buffers* mTcpReplyBuffers;
+
 
       uhal::exception::exception* mAsynchronousException;
 

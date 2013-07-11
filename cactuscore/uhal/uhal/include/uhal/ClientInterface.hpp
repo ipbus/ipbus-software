@@ -76,6 +76,9 @@ namespace uhal
 
     //! Exception class to handle the case where we were unable to validate the packet.
     ExceptionClass ( ValidationError , "Exception class to handle the case where we were unable to validate the packet." );
+
+    ExceptionClass ( NullBufferException , "Exception class to handle a NULL buffer being passed to the transport class." );
+
   }
 
   //! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing funcationality

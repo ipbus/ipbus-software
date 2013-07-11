@@ -169,12 +169,12 @@ namespace uhal
 
   void ClientInterface::dispatch ()
   {
-    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
 
     try
     {
 #ifdef NO_PREEMPTIVE_DISPATCH
+      log ( Info() , "mNoPreemptiveDispatchBuffers.size() = " , Integer ( mNoPreemptiveDispatchBuffers.size() ) );
 
       for ( std::deque < Buffers* >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
       {
@@ -183,7 +183,13 @@ namespace uhal
         *lIt = NULL;
       }
 
-      mNoPreemptiveDispatchBuffers.clear();
+      {
+#ifdef RUN_ASIO_MULTITHREADED
+        boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
+        mNoPreemptiveDispatchBuffers.clear();
+      }
+
       this->Flush();
 #endif
 
@@ -251,7 +257,12 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 #endif
-    mBuffers.push_back ( aBuffers );
+
+    if ( aBuffers )
+    {
+      mBuffers.push_back ( aBuffers );
+    }
+
     // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
   }
 
@@ -264,7 +275,10 @@ namespace uhal
 
     for ( std::deque < Buffers* >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
     {
-      mBuffers.push_back ( *lIt );
+      if ( *lIt )
+      {
+        mBuffers.push_back ( *lIt );
+      }
     }
 
     aBuffers.clear();
@@ -306,11 +320,15 @@ namespace uhal
       return mCurrentBuffers;
     }
 
-    log ( Debug() , "Triggering automated dispatch" );
 #ifdef NO_PREEMPTIVE_DISPATCH
+    //     if ( !mCurrentBuffers )
+    //     {
+    //       std::cout << "Buffer is NULL" << std::endl;
+    //     }
     mNoPreemptiveDispatchBuffers.push_back ( mCurrentBuffers );
     mCurrentBuffers = NULL;
 #else
+    log ( Debug() , "Triggering automated dispatch" );
 
     try
     {
@@ -454,7 +472,6 @@ namespace uhal
     ValVector<uint32_t> lReply ( aSize );
     return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
   }
-
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
