@@ -19,7 +19,7 @@
 udp_client_loop(_Socket, _TargetIP, _TargetPort, _Request, _Reply, {0,_MaxInFlight}, 0) ->
     ok;
 udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInFlight}, NrIterationsLeft) when NrIterationsLeft>0, NrInFlight<MaxInFlight ->
-    gen_udp:send(Socket, TargetIP, TargetPort, Request),
+    udp_async_send(Socket, TargetIP, TargetPort, Request),
     receive
         {udp, Socket, TargetIP, TargetPort, Reply} ->
             udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight, MaxInFlight}, NrIterationsLeft-1);
@@ -107,7 +107,12 @@ start_udp_echo_server(SocketOptions) ->
 udp_echo_server_loop(Socket) ->
     receive
         {udp, Socket, IP, Port, Packet} ->
-            gen_udp:send(Socket, IP, Port, Packet)
+            udp_async_send(Socket, IP, Port, Packet);
+        {inet_reply,Socket,ok} ->
+            void;
+        {inet_reply,Socket,Other} ->
+            io:format("ERROR in async udp send confirmation msg: ~p~n", [Other]),
+            force_quit = yes
     end,
     udp_echo_server_loop(Socket).
 
@@ -160,6 +165,11 @@ dummy_device_client_loop(TargetIP, TargetPort, Queue) ->
     after 0 ->
         dummy_device_client_loop(TargetIP, TargetPort, NewQ)
     end.
+
+% Must receive corresponding {inet_reply,S,Reply} later; Reply = ok, NOT {error, Reason}
+udp_async_send(Socket, {IP1,IP2,IP3,IP4}, Port, Data) ->
+    true = erlang:port_command(Socket, [[((Port) bsr 8) band 16#ff, (Port) band 16#ff], [IP1 band 16#ff, IP2 band 16#ff, IP3 band 16#ff, IP4 band 16#ff], Data]),
+    void.
 
 
 tcp_recv(Socket, false, Timeout) ->
