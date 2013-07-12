@@ -67,6 +67,8 @@ namespace uhal
     ExceptionClass ( UdpTimeout , "Exception class to handle the case where the UDP connection timed out." );
     //! Exception class to handle a failure to create a UDP socket.
     ExceptionClass ( ErrorAtUdpSocketCreation , "Exception class to handle a failure to create a UDP socket." );
+    //! Exception class to handle the case where ASIO returned an error.
+    ExceptionClass ( ASIOUdpError , "Exception class to handle the case where ASIO returned an error." );
   }
 
   //! Transport protocol to transfer an IPbus buffer via UDP
@@ -152,16 +154,16 @@ namespace uhal
 
       //! A MutEx lock used to make sure the access functions are thread safe
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::mutex mUdpMutex;
+      boost::mutex mTransportLayerMutex;
 
-      std::deque < Buffers* > mUdpDispatchQueue;
-      std::deque < Buffers* > mUdpReplyQueue;
+      std::deque < Buffers* > mDispatchQueue;
+      std::deque < Buffers* > mReplyQueue;
 
-      uint32_t mPacketsInFlight;
+      //       uint32_t mPacketsInFlight;
 #endif
 
-      Buffers* mUdpDispatchBuffers;
-      Buffers* mUdpReplyBuffers;
+      Buffers* mDispatchBuffers;
+      Buffers* mReplyBuffers;
 
 
       uhal::exception::exception* mAsynchronousException;

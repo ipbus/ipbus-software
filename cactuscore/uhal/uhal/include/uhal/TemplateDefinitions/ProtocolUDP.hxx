@@ -37,6 +37,7 @@
 #include <boost/asio/read.hpp>
 
 #include "uhal/IPbusInspector.hpp"
+// #include "uhal/logo.hpp"
 
 #include <sys/time.h>
 
@@ -59,12 +60,12 @@ namespace uhal
     mReplyMemory ( 65536 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
-    mUdpDispatchQueue(),
-    mUdpReplyQueue(),
-    mPacketsInFlight( 0 ),
+    mDispatchQueue(),
+    mReplyQueue(),
+    // mPacketsInFlight( 0 ),
 #endif
-    mUdpDispatchBuffers ( NULL ),
-    mUdpReplyBuffers ( NULL ),
+    mDispatchBuffers ( NULL ),
+    mReplyBuffers ( NULL ),
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
@@ -84,12 +85,12 @@ namespace uhal
     mReplyMemory ( 65536 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
-    mUdpDispatchQueue(),
-    mUdpReplyQueue(),
-    mPacketsInFlight( 0 ),
+    mDispatchQueue(),
+    mReplyQueue(),
+    // mPacketsInFlight( 0 ),
 #endif
-    mUdpDispatchBuffers ( NULL ),
-    mUdpReplyBuffers ( NULL ),
+    mDispatchBuffers ( NULL ),
+    mReplyBuffers ( NULL ),
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
@@ -106,14 +107,14 @@ namespace uhal
       {}
 
 #ifdef RUN_ASIO_MULTITHREADED
-    ClientInterface::returnBufferToPool ( mUdpDispatchQueue );
-    ClientInterface::returnBufferToPool ( mUdpReplyQueue );
-    mPacketsInFlight = 0;
+    ClientInterface::returnBufferToPool ( mDispatchQueue );
+    ClientInterface::returnBufferToPool ( mReplyQueue );
+    // mPacketsInFlight = 0;
 #endif
-    //    ClientInterface::returnBufferToPool ( mUdpDispatchBuffers );
-    //    mUdpDispatchBuffers = NULL;
-    //    ClientInterface::returnBufferToPool ( mUdpReplyBuffers );
-    //    mUdpReplyBuffers = NULL;
+    //    ClientInterface::returnBufferToPool ( mDispatchBuffers );
+    //    mDispatchBuffers = NULL;
+    //    ClientInterface::returnBufferToPool ( mReplyBuffers );
+    //    mReplyBuffers = NULL;
 
     if ( mAsynchronousException )
     {
@@ -133,7 +134,7 @@ namespace uhal
     try
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
       //log( Warning() , "Closing Socket" );
       mSocket.close();
@@ -144,8 +145,8 @@ namespace uhal
       mIOservice.stop();
 #ifdef RUN_ASIO_MULTITHREADED
       mDispatchThread.join();
-      ClientInterface::returnBufferToPool ( mUdpDispatchQueue );
-      ClientInterface::returnBufferToPool ( mUdpReplyQueue );
+      ClientInterface::returnBufferToPool ( mDispatchQueue );
+      ClientInterface::returnBufferToPool ( mReplyQueue );
 #endif
     }
     catch ( const std::exception& aExc )
@@ -159,7 +160,6 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::implementDispatch ( Buffers* aBuffers )
   {
-    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     if ( mAsynchronousException )
     {
       log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
@@ -173,32 +173,33 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      //       std::cout << this->getMaxNumberOfBuffers() << " : " << mUdpDispatchQueue.size() << " : " << mUdpReplyQueue.size() << std::endl;
       //block the next write operation if we are currently waiting for lMaxPacketsInFlight replies
       bool lContinue ( true );
-      uint32_t lMaxPacketsInFlight ( this->getMaxNumberOfBuffers() );
+      uint32_t lMaxPacketsInFlight ( this->getMaxNumberOfBuffers() - 1 );
 
+      // logo lLogo;
       while ( lContinue )
       {
-        boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
-        lContinue = ( mPacketsInFlight >= lMaxPacketsInFlight );
+        //lLogo++;
+        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+        lContinue = ( ( mDispatchQueue.size() + mReplyQueue.size() ) >= lMaxPacketsInFlight );
       }
 
-      boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
-      if ( mUdpDispatchBuffers )
+      if ( mDispatchBuffers )
       {
-        mUdpDispatchQueue.push_back ( aBuffers );
-        //   std::cout << "extended mUdpDispatchQueue" << std::endl;
+        mDispatchQueue.push_back ( aBuffers );
+        //   std::cout << "extended mDispatchQueue" << std::endl;
       }
       else
       {
-        mUdpDispatchBuffers = aBuffers;
+        mDispatchBuffers = aBuffers;
         write ( );
       }
 
 #else
-      mUdpDispatchBuffers = aBuffers;
+      mDispatchBuffers = aBuffers;
       write ( );
 #endif
     }
@@ -221,6 +222,11 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::write ( )
   {
+    if ( !mDispatchBuffers )
+    {
+      return;
+    }
+
     /*    std::vector<uint32_t>::const_iterator lBegin ( reinterpret_cast<uint32_t*> ( aBuffers->getSendBuffer() ) );
         std::vector<uint32_t>::const_iterator lEnd = lBegin + ( aBuffers->sendCounter() >>2 );
         std::vector<uint32_t> lData;
@@ -230,13 +236,13 @@ namespace uhal
           std::cout << std::setfill ( '0' ) << std::hex << std::setw ( 8 ) <<  *lBegin << std::endl;
         }*/
     mAsioSendBuffer.clear();
-    mAsioSendBuffer.push_back ( boost::asio::const_buffer ( mUdpDispatchBuffers->getSendBuffer() , mUdpDispatchBuffers->sendCounter() ) );
-    log ( Debug() , "Sending " , Integer ( mUdpDispatchBuffers->sendCounter() ) , " bytes" );
+    mAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
+    log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
     // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_send_to ( mAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, _1 ) );
-    mPacketsInFlight++;
+    // mPacketsInFlight++;
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     mSocket.async_send_to ( mAsioSendBuffer , mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
@@ -256,36 +262,40 @@ namespace uhal
   void UDP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode )
   {
 #ifdef RUN_ASIO_MULTITHREADED
+    //     if( !mDispatchBuffers)
+    //     {
+    //       return;
+    //     }
     {
-      boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
-      if ( mUdpReplyBuffers )
+      if ( mReplyBuffers )
       {
-        mUdpReplyQueue.push_back ( mUdpDispatchBuffers );
-        //   std::cout << "extended mUdpReplyQueue" << std::endl;
+        mReplyQueue.push_back ( mDispatchBuffers );
+        //   std::cout << "extended mReplyQueue" << std::endl;
       }
       else
       {
-        mUdpReplyBuffers = mUdpDispatchBuffers;
+        mReplyBuffers = mDispatchBuffers;
         read ( );
       }
     }
 
-    if ( mUdpDispatchQueue.size() )
+    if ( mDispatchQueue.size() )
     {
-      mUdpDispatchBuffers = mUdpDispatchQueue.front();
-      mUdpDispatchQueue.pop_front();
-      //std::cout << "reduced mUdpDispatchQueue" << std::endl;
+      mDispatchBuffers = mDispatchQueue.front();
+      mDispatchQueue.pop_front();
+      //std::cout << "reduced mDispatchQueue" << std::endl;
       write();
     }
     else
     {
-      mUdpDispatchBuffers = NULL;
+      mDispatchBuffers = NULL;
     }
 
 #else
-    mUdpReplyBuffers = mUdpDispatchBuffers;
-    mUdpDispatchBuffers = NULL;
+    mReplyBuffers = mDispatchBuffers;
+    mDispatchBuffers = NULL;
     read ( );
 #endif
   }
@@ -294,9 +304,14 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::read ( )
   {
+    if ( !mReplyBuffers )
+    {
+      return;
+    }
+
     mAsioReplyBuffer.clear();
-    mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mUdpReplyBuffers->replyCounter() ) );
-    log ( Debug() , "Expecting " , Integer ( mUdpReplyBuffers->replyCounter() ) , " bytes in reply" );
+    mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
+    log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
     // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
@@ -320,6 +335,11 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode )
   {
+    if ( !mReplyBuffers )
+    {
+      return;
+    }
+
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
@@ -331,15 +351,13 @@ namespace uhal
         return;
       }
 
-      log ( Error() , "ASIO reported an error: " , Quote ( aErrorCode.message() ) , ". Attempting validation to see if we can get any more info." );
-
-      try
-      {
-        mAsynchronousException = ClientInterface::validate ( mUdpReplyBuffers ); //Control of the pointer has been passed back to the client interface
-        mUdpReplyBuffers = NULL;
-      }
-      catch ( ... ) {}
-
+      log ( Error() , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+      mAsynchronousException = new exception::ASIOUdpError();
+      //       try
+      //       {
+      //         mAsynchronousException = ClientInterface::validate ( mReplyBuffers ); //Control of the pointer has been passed back to the client interface
+      //       }
+      //       catch ( ... ) {}
       return;
     }
 
@@ -349,8 +367,8 @@ namespace uhal
         std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
         lT2HInspector.analyze ( lBegin2 , lEnd2 );
     */
-    //  std::cout << "Filling reply buffer : " << mUdpReplyBuffers << std::endl;
-    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mUdpReplyBuffers->getReplyBuffer() );
+    //  std::cout << "Filling reply buffer : " << mReplyBuffers << std::endl;
+    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
@@ -377,7 +395,7 @@ namespace uhal
 
     try
     {
-      mAsynchronousException = ClientInterface::validate ( mUdpReplyBuffers ); //Control of the pointer has been passed back to the client interface
+      mAsynchronousException = ClientInterface::validate ( mReplyBuffers ); //Control of the pointer has been passed back to the client interface
     }
     catch ( exception::exception& aExc )
     {
@@ -386,22 +404,23 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
-    if ( mUdpReplyQueue.size() )
+    if ( mReplyQueue.size() )
     {
-      mUdpReplyBuffers = mUdpReplyQueue.front();
-      mUdpReplyQueue.pop_front();
-      // std::cout << "reduced mUdpReplyQueue" << std::endl;
+      mReplyBuffers = mReplyQueue.front();
+      mReplyQueue.pop_front();
+      // std::cout << "reduced mReplyQueue" << std::endl;
       read();
     }
     else
     {
-      mUdpReplyBuffers = NULL;
+      mReplyBuffers = NULL;
     }
-    mPacketsInFlight--;
+
+    // mPacketsInFlight--;
 #else
-    mUdpReplyBuffers = NULL;
+    mReplyBuffers = NULL;
 #endif
   }
 
@@ -437,18 +456,20 @@ namespace uhal
     // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     bool lContinue ( true );
 
+    //     logo lLogo;
     while ( lContinue )
     {
+      //       lLogo++;
       if ( mAsynchronousException )
       {
         mAsynchronousException->ThrowAsDerivedType();
       }
 
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
-      //log ( Warning() , "mUdpDispatchBuffers = " , Pointer ( mUdpDispatchBuffers ) , " mUdpReplyBuffers = " , Pointer ( mUdpReplyBuffers ) );
-      lContinue = ( mUdpDispatchBuffers || mUdpReplyBuffers );
+      //log ( Warning() , "mDispatchBuffers = " , Pointer ( mDispatchBuffers ) , " mReplyBuffers = " , Pointer ( mReplyBuffers ) );
+      lContinue = ( mDispatchBuffers || mReplyBuffers );
     }
   }
 
@@ -470,14 +491,15 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::lock_guard<boost::mutex> lLock ( mUdpMutex );
-    ClientInterface::returnBufferToPool ( mUdpDispatchQueue );
-    ClientInterface::returnBufferToPool ( mUdpReplyQueue );
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    ClientInterface::returnBufferToPool ( mDispatchQueue );
+    ClientInterface::returnBufferToPool ( mReplyQueue );
+    // mPacketsInFlight = 0;
 #endif
-    //    ClientInterface::returnBufferToPool ( mUdpDispatchBuffers );
-    //    mUdpDispatchBuffers = NULL;
-    //    ClientInterface::returnBufferToPool ( mUdpReplyBuffers );
-    //    mUdpReplyBuffers = NULL;
+    ClientInterface::returnBufferToPool ( mDispatchBuffers );
+    mDispatchBuffers = NULL;
+    ClientInterface::returnBufferToPool ( mReplyBuffers );
+    mReplyBuffers = NULL;
     InnerProtocol::dispatchExceptionHandler();
   }
 

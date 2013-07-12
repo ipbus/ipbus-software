@@ -70,6 +70,8 @@ namespace uhal
     ExceptionClass ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." );
     //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
     ExceptionClass ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." );
+    //! Exception class to handle the case where ASIO returned an error.
+    ExceptionClass ( ASIOTcpError , "Exception class to handle the case where ASIO returned an error." );
   }
 
   //! Transport protocol to transfer an IPbus buffer via TCP
@@ -155,16 +157,16 @@ namespace uhal
 
       //! A MutEx lock used to make sure the access functions are thread safe
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::mutex mTcpMutex;
+      boost::mutex mTransportLayerMutex;
 
-      std::deque < Buffers* > mTcpDispatchQueue;
-      std::deque < Buffers* > mTcpReplyQueue;
+      std::deque < Buffers* > mDispatchQueue;
+      std::deque < Buffers* > mReplyQueue;
 
-      uint32_t mPacketsInFlight;
+      //       uint32_t mPacketsInFlight;
 #endif
 
-      Buffers* mTcpDispatchBuffers;
-      Buffers* mTcpReplyBuffers;
+      Buffers* mDispatchBuffers;
+      Buffers* mReplyBuffers;
 
 
       uhal::exception::exception* mAsynchronousException;
