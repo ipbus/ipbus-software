@@ -1,6 +1,6 @@
 #!/bin/env escript
 %% -*- erlang -*-
-%%! -C -pa ebin/unittest +zdbbl 2097151
+%%! -C -pa ebin ebin/unittest +zdbbl 2097151 +sbt db +scl false +swt very_low
 
 
 
@@ -73,6 +73,7 @@ parse_args(_) ->
     usage(),
     halt(1).
 
+
 create_udp_socket() ->
     io:format("Creating UDP socket with options: ~w ~n", [?UDP_SOCKET_OPTIONS]),
     {ok, Socket} = gen_udp:open(0, ?UDP_SOCKET_OPTIONS),
@@ -105,7 +106,6 @@ print_results(NrItns, MicroSecs, ReqBytes, ReplyBytes) ->
 main(["udp_ipbus_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
-    %
     Request = ?IPBUS_TXFULL_REQ,
     Reply = ?IPBUS_TXFULL_REP,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
@@ -114,7 +114,6 @@ main(["udp_ipbus_client" | OtherArgs]) ->
 main(["udp_ipbus_client2" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
-    %
     Request = ?IPBUS_BOTHFULL_REQ,
     Reply = ?IPBUS_BOTHFULL_REP,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
@@ -123,7 +122,6 @@ main(["udp_ipbus_client2" | OtherArgs]) ->
 main(["udp_echo_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
-    %
     Request = ?IPBUS_TXFULL_REQ,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Request, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Request));
@@ -135,7 +133,6 @@ main(["udp_echo_server"]) ->
 main(["tcp_echo_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = tcp_connect(TargetIP, TargetPort),
-    %
     Request = ?IPBUS_TXFULL_REQ,
     {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Request, {0,NrInFlight}, NrItns) end ),
@@ -151,7 +148,6 @@ main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
     {ok, ControlHubIP} = inet_parse:address(ArgControlHubIP),
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = tcp_connect(ControlHubIP, 10203),
-    %
     TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
                     + (element(3,TargetIP) bsl 8) + element(4,TargetIP),
     Request = <<TargetIPU32:32,
@@ -161,11 +157,47 @@ main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
     Reply = <<TargetIPU32:32,
               TargetPort:16, 0:16,
               (?IPBUS_TXFULL_REP)/binary>>,
-    %
     {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Reply, {0,NrInFlight}, NrItns) end ),
     gen_tcp:close(Socket),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
+
+main(["device_client_bw" | OtherArgs]) ->
+    {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
+    TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
+                    + (element(3,TargetIP) bsl 8) + element(4,TargetIP),
+    RequestBin = ?IPBUS_TXFULL_REQ,
+    RequestMsg = {send, RequestBin, self()},
+    ReplyBin = ?IPBUS_TXFULL_REP,
+    ReplyMsg = {device_client_response, TargetIPU32, TargetPort, 0, ReplyBin},
+    % 
+    application:set_env(controlhub, max_in_flight, 16),
+    io:format("~ncontrolhub max_in_flight is ~w~n", [application:get_env(controlhub, max_in_flight)]),
+    ch_stats:start_link(),
+    ch_device_client_registry:start_link(),
+    {ok, DeviceClientPid} = ch_device_client_registry:get_pid(TargetIPU32, TargetPort),
+    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:gencast_msg_client_loop(DeviceClientPid, RequestMsg, ReplyMsg, {0,NrInFlight}, NrItns) end ),
+    ch_stats:stop(),
+    ch_device_client_registry:stop(),
+    print_results(NrItns, MicroSecs, byte_size(RequestBin), byte_size(ReplyBin));
+
+main(["dummy_hw", ArgPort]) ->
+    Port = list_to_integer(ArgPort),
+    io:format("~nStarting dummy hardware on port ~w~n", [Port]),
+    ch_unittest_common:device_emulator_init({2,0}, Port);
+
+main(["trans_manager_server"]) ->
+    TargetIPU32 = 16#0,
+    TargetPort = 1,
+    % Setup dummy device client & device_client_registry ets table
+    DevClientPid = spawn_link(ch_unittest_common, dummy_device_client_loop, [TargetIPU32, TargetPort]),
+    DevClientTbl = ets:new(device_client_index, [named_table, protected, {read_concurrency, true}]),
+    ets:insert(DevClientTbl, {{TargetIPU32,TargetPort}, DevClientPid}),
+    % Start TCP listener
+    ch_stats:start_link(),
+    ch_tcp_listener:start_link(),
+    io:format("~n ControlHub TCP listener ready on port 10203 as usual~n"),
+    timer:sleep(infinity);
 
 main(_) ->
     io:format("Incorrect usage!~n"),

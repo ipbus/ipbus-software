@@ -11,7 +11,8 @@
 
 %% Exported Functions
 -export([spawn_device_emulator/2, device_emulator_init/2, dummy_request_data_generator/1, 
-         udp_client_loop/7, tcp_client_loop/5, start_udp_echo_server/1, start_tcp_echo_server/2]).
+         udp_client_loop/7, tcp_client_loop/5, gencast_msg_client_loop/5, 
+         dummy_device_client_loop/2, start_udp_echo_server/1, start_tcp_echo_server/2]).
 
 
 
@@ -52,8 +53,8 @@ udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInF
 tcp_client_loop(_SocketTuple, _Request, _Reply, {0,_MaxInFlight}, 0) ->
     ok;
 tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) when NrItnsLeft>0, NrInFlight<MaxInFlight ->
-    SendBytes = byte_size(Request),
-    gen_tcp:send(Socket, <<SendBytes:32, Request/binary>>),
+%    SendBytes = byte_size(Request),
+    gen_tcp:send(Socket, Request),
     case tcp_recv(Socket, ActiveVal, 0) of
         Pkt when is_binary(Pkt) ->
             tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight, MaxInFlight}, NrItnsLeft-1);
@@ -67,6 +68,32 @@ tcp_client_loop({Socket, ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, N
         timeout ->
             io:format("ERROR : Did not receive reply packet in 20ms~n"),
             fail
+    end.
+
+
+gencast_msg_client_loop(_TargetPid, _RequestMsg, _ReplyMsg, {0, _MaxInFlight}, 0) ->
+    ok;
+gencast_msg_client_loop(TargetPid, RequestMsg, ReplyMsg, {NrInFlight,MaxInFlight}, NrItnsLeft) when NrItnsLeft>0, NrInFlight<MaxInFlight ->
+    gen_server:cast(TargetPid, RequestMsg),
+    receive
+        Any ->
+            gencast_msg_client_loop(TargetPid, RequestMsg, ReplyMsg, {NrInFlight, MaxInFlight}, NrItnsLeft-1);
+        Other ->
+            io:format("ERROR : Expecting reply msg \"~w\", but received \"~w\"", [ReplyMsg, Other]),
+            fail
+    after 0 ->
+        gencast_msg_client_loop(TargetPid, RequestMsg, ReplyMsg, {NrInFlight+1, MaxInFlight}, NrItnsLeft-1)
+    end;
+gencast_msg_client_loop(TargetPid, _RequestMsg, ReplyMsg, {NrInFlight,MaxInFlight}, NrItnsLeft) ->
+    receive
+        Any ->
+            gencast_msg_client_loop(TargetPid, _RequestMsg, ReplyMsg, {NrInFlight-1,MaxInFlight}, NrItnsLeft);
+        Other ->
+            io:format("ERROR : Expecting reply msg \"~w\", but received \"~w\"", [ReplyMsg, Other]),
+            fail
+    after 100 ->
+        io:format("ERROR : Did not receive reply packet in 100ms~n"),
+        fail
     end.
 
 
@@ -93,17 +120,45 @@ start_tcp_echo_server(SocketOptions, Port) ->
 tcp_echo_server_loop(LSocket, none) ->
     {ok, Socket} = gen_tcp:accept(LSocket),
     io:format("New client has connected!~n"),
-    {ok, [active, ActiveVal]} = inet:getopts(Socket, [active]),
+    {ok, [{active, ActiveVal}]} = inet:getopts(Socket, [active]),
     tcp_echo_server_loop(LSocket, {Socket, ActiveVal});
 tcp_echo_server_loop(LSocket, {Socket, ActiveVal}) ->
     case tcp_recv(Socket, ActiveVal, infinity) of 
         Pkt when is_binary(Pkt) ->
             SendBytes = byte_size(Pkt),
             gen_tcp:send(Socket, <<SendBytes:32, Pkt/binary>>),
-            tcp_echo_server_loop(LSocket, Socket);
+            tcp_echo_server_loop(LSocket, {Socket,ActiveVal});
         tcp_closed ->
             io:format("Client disconnected. Going back to waiting for next client~n"),
             tcp_echo_server_loop(LSocket, none)
+    end.
+
+
+dummy_device_client_loop(TargetIP, TargetPort) ->
+    dummy_device_client_loop(TargetIP, TargetPort, queue:new()).
+
+
+dummy_device_client_loop(TargetIP, TargetPort, Queue) ->
+    NewQ = case queue:is_empty(Queue) of
+               false ->
+                   {value, {TimeRcvd,Bin,TargetPid}} = queue:peek(Queue),
+                   TimeNow = os:timestamp(),
+                   MicroSecDiff = timer:now_diff(TimeNow, TimeRcvd),
+                   if
+                     MicroSecDiff > 100 ->
+                       TargetPid ! {device_client_response, TargetIP, TargetPort, 0, Bin},
+                       queue:drop(Queue);
+                     true ->
+                       Queue
+                   end;
+               true ->
+                   Queue
+           end,
+    receive
+        {'$gen_cast', {send, Pkt, Pid}} ->
+            dummy_device_client_loop(TargetIP, TargetPort, queue:in({os:timestamp(),Pkt, Pid}, NewQ))
+    after 0 ->
+        dummy_device_client_loop(TargetIP, TargetPort, NewQ)
     end.
 
 
@@ -157,7 +212,7 @@ spawn_device_emulator(Ver, PortU16) ->
 
 %% The start-point for the dummy hardware
 device_emulator_init(Ver, PortU16) ->
-    {ok, Socket} = gen_udp:open(PortU16, [binary]),
+    {ok, Socket} = gen_udp:open(PortU16, [binary, {active, true}, {buffer, 100000}, {recbuf, 100000}, {read_packets, 50}]),
     case Ver of
         {1, _} ->
             device_emulator_loop(Ver, Socket);
@@ -207,10 +262,10 @@ device_emulator_loop({2, 0} = Ver, {Socket, NextId, LastResponse} = State) ->
                     gen_udp:send(Socket, IP, Port, Packet),
                     device_emulator_loop(Ver, {Socket, NextId, Packet});
                 % Status packet
-                <<2:4, 0:20, 16#f1:8, 0:(15*32)>> ->
+                <<2:4, 0:20, 16#f1:8>> ->
                     StatusResponse = <<2:4, 0:20, 16#f1:8,          % Header
                                        0:32,                        % MTU
-                                       1:32,                        % nResponseBuffers
+                                       16:32,                        % nResponseBuffers
                                        16#20:8, NextId:16, 16#f0:8, % Next expected control header
                                        0:(32*12)>>,
                     gen_udp:send(Socket, IP, Port, StatusResponse),
