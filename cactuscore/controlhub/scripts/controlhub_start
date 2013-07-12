@@ -25,7 +25,7 @@ fi
 
 if [ $CONTROLHUBSTATUS != 0 ]; then
   echo -n "Starting Control Hub... "
-  ${DIR}/erl_controlhub +sbt db +scl false +swt very_low -sname controlhub -setcookie ch_cookie -boot ${CONTROLHUB_ROOTDIR}/releases/2.0.0/start -config ${CONTROLHUB_ROOTDIR}/releases/2.0.0/sys -pa /opt/cactus/lib/erlang/lib/*/ebin/ -detached
+  ${DIR}/erl_controlhub +zdbbl 2097151 +sbt db +scl false +swt very_low -sname controlhub -setcookie ch_cookie -boot ${CONTROLHUB_ROOTDIR}/releases/2.0.0/start -config ${CONTROLHUB_ROOTDIR}/releases/2.0.0/sys  -pa /opt/cactus/lib/erlang/lib/*/ebin/ -detached
   sleep 1
   ${DIR}/controlhub_status > /dev/null
   if [ $? = 0 ]; then
