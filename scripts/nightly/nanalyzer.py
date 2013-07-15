@@ -19,6 +19,7 @@ import platform
 from socket import getfqdn
 from email.MIMEText import MIMEText
 import urllib
+import cgi
 LIMIT, ERROR, TEST_PASSED = range(3)
 
 def style(type):
@@ -144,7 +145,8 @@ def render_log(result):
         html += "<pre style='" + style(mytype) + "'>" + l + "</pre>\n"
         
     html += html_footer()
-        
+    html = cgi.escape(html,quote=True)
+
     fn = os.path.join(CONF.NIGHTLY_LOG_DIR, "nightly.log.html")
     tmp = open(fn, "w")
     tmp.write(html)
