@@ -142,10 +142,9 @@ def render_log(result):
             mytype = types[keys.index(i)]
             html += "<a name='log_" + str(i) + "'></a>"
 
-        html += "<pre style='" + style(mytype) + "'>" + l + "</pre>\n"
+        html += "<pre style='" + style(mytype) + "'>" + cgi.escape(l,quote=True) + "</pre>\n"
         
     html += html_footer()
-    html = cgi.escape(html,quote=True)
 
     fn = os.path.join(CONF.NIGHTLY_LOG_DIR, "nightly.log.html")
     tmp = open(fn, "w")
