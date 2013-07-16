@@ -10,7 +10,7 @@ PACKAGE_RELEASE = 0
 export CACTUS_ROOT 
 export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
 
-
+PYTHON_VERSION = $(shell python -c "import platform;print platform.python_version()")
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall 
 
@@ -30,7 +30,7 @@ all:
 rpm: _rpmall
 _rpmall:
 	rm -rf /var/tmp/cactus* 
-	python setup.py bdist_rpm --release ${PACKAGE_RELEASE} --binary-only
+	python setup.py bdist_rpm --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} --binary-only
 
 install: _install
 _install:

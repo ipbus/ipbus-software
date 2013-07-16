@@ -2,8 +2,7 @@ import os
 import sys
 from distutils.core import setup
 
-VERSION_STRING = ( os.environ['PACKAGE_VER_MAJOR'] + '.' + os.environ['PACKAGE_VER_MINOR'] + '.' + os.environ['PACKAGE_VER_PATCH'] +
-'_python' + str(sys.version_info[0]) + '.' + str(sys.version_info[1]) )
+VERSION_STRING = ( os.environ['PACKAGE_VER_MAJOR'] + '.' + os.environ['PACKAGE_VER_MINOR'] + '.' + os.environ['PACKAGE_VER_PATCH'] )
 
 
 setup(name = 'cactuscore-uhal-tools',

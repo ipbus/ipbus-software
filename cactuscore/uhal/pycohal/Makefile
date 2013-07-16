@@ -6,6 +6,7 @@ PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 0
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 0
+PYTHON_VERSION = $(shell python -c "import platform;print platform.python_version()")
 
 export CACTUS_ROOT
 export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
@@ -80,6 +81,6 @@ ${BINDINGS_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 rpm: _rpmall
 _rpmall: ${BINDINGS_LIB}
 	rm -rf /var/tmp/cactus*
-	python setup.py bdist_rpm --release ${PACKAGE_RELEASE} --binary-only --force-arch=`uname -m`
+	python setup.py bdist_rpm --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} --binary-only --force-arch=`uname -m`
 
 
