@@ -66,7 +66,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::preamble ( Buffers* aBuffers )
+  void ControlHub< InnerProtocol >::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     //log ( Debug() , ThisLocation() );
     // -------------------------------------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::predispatch ( Buffers* aBuffers )
+  void ControlHub< InnerProtocol >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     InnerProtocol::predispatch ( aBuffers );
     //log ( Debug() , ThisLocation() );
@@ -197,7 +197,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  exception::exception* ControlHub< InnerProtocol >::validate ( Buffers* aBuffers )
+  exception::exception* ControlHub< InnerProtocol >::validate ( boost::shared_ptr< Buffers > aBuffers )
   {
     return ClientInterface::validate ( aBuffers );
   }

@@ -104,20 +104,20 @@ namespace uhal
       /**
       	Add a preamble to an IPbus buffer
       */
-      virtual void preamble ( Buffers* aBuffers );
+      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
 
       virtual uint32_t getPreambleSize();
 
       /**
       	Finalize an IPbus buffer before it is transmitted
       */
-      virtual void predispatch ( Buffers* aBuffers );
+      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
 
       /**
         	Function which dispatch calls when the reply is received to check that the headers are as expected
         	@return whether the returned packet is valid
         */
-      virtual  exception::exception* validate ( Buffers* aBuffers );
+      virtual  exception::exception* validate ( boost::shared_ptr< Buffers > aBuffers );
 
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected

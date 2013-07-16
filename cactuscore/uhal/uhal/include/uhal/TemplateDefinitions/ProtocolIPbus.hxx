@@ -57,7 +57,7 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::preamble ( Buffers* aBuffers )
+  void IPbus< 1 , IPbus_minor , buffer_size >::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
@@ -69,7 +69,7 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::predispatch ( Buffers* aBuffers )
+  void IPbus< 1 , IPbus_minor , buffer_size >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     uint32_t lWords ( aBuffers->sendCounter()  >> 2 );
     //IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
@@ -227,7 +227,7 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >:: preamble ( Buffers* aBuffers )
+  void IPbus< 2 , IPbus_minor , buffer_size >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     //     log ( Info() , ThisLocation() );
     mSendPacketHeader.push_back ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
@@ -249,7 +249,7 @@ namespace uhal
 
 #ifdef BIG_ENDIAN_HACK
   template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >::predispatch ( Buffers* aBuffers )
+  void IPbus< 2 , IPbus_minor , buffer_size >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     log ( Debug() , "Big-Endian Hack included" );
     uint32_t* lPtr ( reinterpret_cast<uint32_t*> ( aBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );

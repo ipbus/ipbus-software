@@ -53,7 +53,7 @@ namespace uhal
   {}
 
 
-  // void IPbusCore::preamble ( Buffers* lBuffers )
+  // void IPbusCore::preamble ( boost::shared_ptr< Buffers > lBuffers )
   // {
   //
   // log ( Debug() , "preamble" );
@@ -72,7 +72,7 @@ namespace uhal
   // {
   // if ( lBuffers->sendCounter() )
   // {
-  // predispatch ( Buffers* lBuffers );
+  // predispatch ( boost::shared_ptr< Buffers > lBuffers );
   // mTransportProtocol->Dispatch ( lBuffers );
   // lBuffers = NULL; //Not deleting the underlying buffer, just flagging that we need a new buffer next time
   // mTransportProtocol->Flush();
@@ -190,7 +190,7 @@ namespace uhal
   // //            --- OR ---
   // // IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
   // // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-  // bool IPbusCore::Validate ( Buffers* lBuffers )
+  // bool IPbusCore::Validate ( boost::shared_ptr< Buffers > lBuffers )
   // {
   //
   // bool lRet = Validate ( lBuffers->getSendBuffer() ,
@@ -200,7 +200,7 @@ namespace uhal
 
   // if ( lRet )
   // {
-  // lBuffers->validate ( Buffers* lBuffers );
+  // lBuffers->validate ( boost::shared_ptr< Buffers > lBuffers );
   // delete lBuffers; //We have now checked the returned data and marked as valid the underlying memory. We can, therefore, delete the local storage and from this point onward, the validated memory will only exist if the user kept their own copy
   // }
 
@@ -219,7 +219,7 @@ namespace uhal
     uint32_t lReplyByteCount ( 1 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
     lBuffers->send ( implementCalculateHeader ( B_O_T , 0 , mTransactionCounter++ , requestTransactionInfoCode() ) );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
     lReply.second->IPbusHeaders.push_back ( 0 );
@@ -245,7 +245,7 @@ namespace uhal
     uint32_t lReplyByteCount ( 1 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
     lBuffers->send ( implementCalculateHeader ( WRITE , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -277,7 +277,7 @@ namespace uhal
     uint8_t* lSourcePtr ( ( uint8_t* ) ( & ( aSource.at ( 0 ) ) ) );
     uint32_t lAddr ( aAddr );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
-    Buffers* lBuffers ( NULL );
+    boost::shared_ptr< Buffers > lBuffers;
 
     while ( lPayloadByteCount > 0 )
     {
@@ -326,7 +326,7 @@ namespace uhal
     uint32_t lReplyByteCount ( 2 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
     lBuffers->send ( implementCalculateHeader ( READ , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -358,7 +358,7 @@ namespace uhal
     eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
     int32_t lPayloadByteCount ( aSize << 2 );
     uint32_t lAddr ( aAddr );
-    Buffers* lBuffers ( NULL );
+    boost::shared_ptr< Buffers > lBuffers;
 
     while ( lPayloadByteCount > 0 )
     {
@@ -401,7 +401,7 @@ namespace uhal
     uint32_t lReplyByteCount ( 2 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
     lBuffers->send ( implementCalculateHeader ( RMW_BITS , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -431,7 +431,7 @@ namespace uhal
     uint32_t lReplyByteCount ( 2 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    Buffers* lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
     lBuffers->send ( implementCalculateHeader ( RMW_SUM , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );

@@ -43,7 +43,7 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
     mNoPreemptiveDispatchBuffers(),
 #endif
-    mCurrentBuffers ( NULL ),
+    //    mCurrentBuffers ( NULL ),
     mId ( aId ),
     mUri ( aUri )
   {
@@ -57,7 +57,7 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
     mNoPreemptiveDispatchBuffers(),
 #endif
-    mCurrentBuffers ( NULL ),
+    //    mCurrentBuffers ( NULL ),
     mId ( ),
     mUri ( )
   {
@@ -71,7 +71,7 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
     mNoPreemptiveDispatchBuffers(),
 #endif
-    mCurrentBuffers ( NULL ),
+    //    mCurrentBuffers ( NULL ),
     mId ( aClientInterface.mId ),
     mUri ( aClientInterface.mUri )
   {
@@ -176,11 +176,11 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
       log ( Info() , "mNoPreemptiveDispatchBuffers.size() = " , Integer ( mNoPreemptiveDispatchBuffers.size() ) );
 
-      for ( std::deque < Buffers* >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
+      for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
       {
         this->predispatch ( *lIt );
         this->implementDispatch ( *lIt ); //responsibility for *lIt passed to the implementDispatch function
-        *lIt = NULL;
+        lIt->reset();
       }
 
       {
@@ -197,7 +197,7 @@ namespace uhal
       {
         this->predispatch ( mCurrentBuffers );
         this->implementDispatch ( mCurrentBuffers ); //responsibility for mCurrentBuffers passed to the implementDispatch function
-        mCurrentBuffers = NULL;
+        mCurrentBuffers.reset();
         this->Flush();
       }
     }
@@ -214,7 +214,7 @@ namespace uhal
   {}
 
 
-  exception::exception* ClientInterface::validate ( Buffers* aBuffers )
+  exception::exception* ClientInterface::validate ( boost::shared_ptr< Buffers > aBuffers )
   {
     // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     // log ( Debug() , ThisLocation() );
@@ -243,15 +243,15 @@ namespace uhal
   }
 
 
-  void ClientInterface::preamble ( Buffers* aBuffers )
+  void ClientInterface::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {}
 
-  void ClientInterface::predispatch ( Buffers* aBuffers )
+  void ClientInterface::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {}
 
 
 
-  void ClientInterface::returnBufferToPool ( Buffers* aBuffers )
+  void ClientInterface::returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers )
   {
     // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
 #ifdef RUN_ASIO_MULTITHREADED
@@ -261,19 +261,20 @@ namespace uhal
     if ( aBuffers )
     {
       mBuffers.push_back ( aBuffers );
+      aBuffers.reset();
     }
 
     // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
   }
 
 
-  void ClientInterface::returnBufferToPool ( std::deque< Buffers* >& aBuffers )
+  void ClientInterface::returnBufferToPool ( std::deque< boost::shared_ptr< Buffers > >& aBuffers )
   {
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 #endif
 
-    for ( std::deque < Buffers* >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
+    for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
     {
       if ( *lIt )
       {
@@ -285,7 +286,7 @@ namespace uhal
   }
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  Buffers* ClientInterface::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
+  boost::shared_ptr< Buffers > ClientInterface::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
   {
     log ( Debug() , "Checking buffer space" );
     //if there are no existing buffers in the pool, create them
@@ -326,7 +327,7 @@ namespace uhal
     //       std::cout << "Buffer is NULL" << std::endl;
     //     }
     mNoPreemptiveDispatchBuffers.push_back ( mCurrentBuffers );
-    mCurrentBuffers = NULL;
+    mCurrentBuffers.reset();
 #else
     log ( Debug() , "Triggering automated dispatch" );
 
@@ -334,7 +335,7 @@ namespace uhal
     {
       this->predispatch ( mCurrentBuffers );
       this->implementDispatch ( mCurrentBuffers );
-      mCurrentBuffers = NULL;
+      mCurrentBuffers.reset();
     }
     catch ( ... )
     {
@@ -387,7 +388,7 @@ namespace uhal
         {
           for ( uint32_t i=0; i!=10; ++i )
           {
-            mBuffers.push_back ( new Buffers ( this->getMaxSendSize() ) );
+            mBuffers.push_back ( boost::shared_ptr< Buffers > ( new Buffers ( this->getMaxSendSize() ) ) );
           }
         }
 
@@ -409,36 +410,32 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 #endif
-
-    for ( std::deque < Buffers* >::iterator lIt = mBuffers.begin(); lIt != mBuffers.end(); ++lIt )
-    {
-      if ( *lIt )
-      {
-        delete *lIt;
-        *lIt = NULL;
-      }
-    }
-
+    /*    for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = mBuffers.begin(); lIt != mBuffers.end(); ++lIt )
+        {
+          if ( *lIt )
+          {
+            delete *lIt;
+            *lIt = NULL;
+          }
+        }*/
     mBuffers.clear();
     //
 #ifdef NO_PREEMPTIVE_DISPATCH
-
-    for ( std::deque < Buffers* >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
-    {
-      if ( *lIt )
-      {
-        delete *lIt;
-        *lIt = NULL;
-      }
-    }
-
+    /*    for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
+        {
+          if ( *lIt )
+          {
+            delete *lIt;
+            *lIt = NULL;
+          }
+        }*/
     mNoPreemptiveDispatchBuffers.clear();
 #endif
 
     if ( mCurrentBuffers )
     {
-      delete mCurrentBuffers;
-      mCurrentBuffers = NULL;
+      //      delete mCurrentBuffers;
+      mCurrentBuffers.reset();
     }
 
     // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;

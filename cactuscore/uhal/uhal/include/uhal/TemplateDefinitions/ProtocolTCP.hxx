@@ -64,8 +64,8 @@ namespace uhal
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
 #endif
-    mDispatchBuffers ( NULL ),
-    mReplyBuffers ( NULL ),
+    //    mDispatchBuffers ( NULL ),
+    //    mReplyBuffers ( NULL ),
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
@@ -89,8 +89,8 @@ namespace uhal
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
 #endif
-    mDispatchBuffers ( NULL ),
-    mReplyBuffers ( NULL ),
+    //    mDispatchBuffers ( NULL ),
+    //    mReplyBuffers ( NULL ),
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
@@ -154,7 +154,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void TCP< InnerProtocol >::implementDispatch ( Buffers* aBuffers )
+  void TCP< InnerProtocol >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     if ( mAsynchronousException )
     {
@@ -310,12 +310,12 @@ namespace uhal
     }
     else
     {
-      mDispatchBuffers = NULL;
+      mDispatchBuffers.reset();
     }
 
 #else
     mReplyBuffers = mDispatchBuffers;
-    mDispatchBuffers = NULL;
+    mDispatchBuffers.reset();
     read ( );
 #endif
   }
@@ -438,7 +438,7 @@ namespace uhal
     }
     else
     {
-      mReplyBuffers = NULL;
+      mReplyBuffers.reset();
     }
 
     mPacketsInFlight--;
@@ -453,7 +453,7 @@ namespace uhal
 
     // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
 #else
-    mReplyBuffers = NULL;
+    mReplyBuffers.reset();
 #endif
   }
 
@@ -534,9 +534,9 @@ namespace uhal
       mPacketsInFlight = 0;
 #endif
       ClientInterface::returnBufferToPool ( mDispatchBuffers );
-      mDispatchBuffers = NULL;
+      mDispatchBuffers.reset();
       ClientInterface::returnBufferToPool ( mReplyBuffers );
-      mReplyBuffers = NULL;
+      mReplyBuffers.reset();
       // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
     }
 

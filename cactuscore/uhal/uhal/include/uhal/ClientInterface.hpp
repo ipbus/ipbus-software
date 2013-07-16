@@ -222,7 +222,7 @@ namespace uhal
       /**
       Send a byte order transaction
       */
-      virtual void implementDispatch ( Buffers* aBuffers ) = 0;
+      virtual void implementDispatch ( boost::shared_ptr< Buffers > aBuffers ) = 0;
 
       virtual void Flush( );
 
@@ -285,7 +285,7 @@ namespace uhal
       /**
       	Add a preamble to an IPbus buffer
       */
-      virtual void preamble ( Buffers* aBuffers );
+      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
 
       /**
         	Return the size of the preamble
@@ -295,7 +295,7 @@ namespace uhal
       /**
       	Finalize the buffer before it is transmitted
       */
-      virtual void predispatch ( Buffers* aBuffers );
+      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
 
 
       std::pair < ValHeader , _ValHeader_* > CreateValHeader();
@@ -306,7 +306,7 @@ namespace uhal
         	Function which dispatch calls when the reply is received to check that the headers are as expected
         	@return whether the returned packet is valid
         */
-      virtual  exception::exception* validate ( Buffers* aBuffers );
+      virtual  exception::exception* validate ( boost::shared_ptr< Buffers > aBuffers );
 
 
 
@@ -326,8 +326,8 @@ namespace uhal
 
       virtual void dispatchExceptionHandler();
 
-      void returnBufferToPool ( Buffers* aBuffers );
-      void returnBufferToPool ( std::deque< Buffers* >& aBuffers );
+      void returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers );
+      void returnBufferToPool ( std::deque< boost::shared_ptr< Buffers > >& aBuffers );
 
     private:
       void updateCurrentBuffers();
@@ -342,15 +342,15 @@ namespace uhal
 #endif
 
       //! A memory pool of buffers which will be dispatched
-      std::deque < Buffers* > mBuffers;
+      std::deque < boost::shared_ptr< Buffers > > mBuffers;
 
 #ifdef NO_PREEMPTIVE_DISPATCH
-      std::deque < Buffers* > mNoPreemptiveDispatchBuffers;
+      std::deque < boost::shared_ptr< Buffers > > mNoPreemptiveDispatchBuffers;
 #endif
 
 
       //! A pointer to a buffer-wrapper object
-      Buffers* mCurrentBuffers;
+      boost::shared_ptr< Buffers > mCurrentBuffers;
 
     protected:
 
@@ -361,7 +361,7 @@ namespace uhal
         @param aAvailableSendSize return the amount of space available for outgoing IPbus packets
         @param aAvailableReplySize return the amount of space available for incoming IPbus packets
       */
-      virtual Buffers* checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
+      virtual boost::shared_ptr< Buffers > checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 
 
       //! the identifier of the target for this client

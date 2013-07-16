@@ -102,7 +102,7 @@ namespace uhal
       	@param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
       	If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
       */
-      void implementDispatch ( Buffers* aBuffers );
+      void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
 
       /**
       Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
@@ -156,14 +156,14 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
       boost::mutex mTransportLayerMutex;
 
-      std::deque < Buffers* > mDispatchQueue;
-      std::deque < Buffers* > mReplyQueue;
+      std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
+      std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
 
       uint32_t mPacketsInFlight;
 #endif
 
-      Buffers* mDispatchBuffers;
-      Buffers* mReplyBuffers;
+      boost::shared_ptr< Buffers > mDispatchBuffers;
+      boost::shared_ptr< Buffers > mReplyBuffers;
 
 
       uhal::exception::exception* mAsynchronousException;
