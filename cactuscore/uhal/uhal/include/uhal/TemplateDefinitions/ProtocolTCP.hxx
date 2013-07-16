@@ -62,7 +62,7 @@ namespace uhal
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
     mReplyQueue(),
-    // mPacketsInFlight( 0 ),
+    mPacketsInFlight ( 0 ),
 #endif
     mDispatchBuffers ( NULL ),
     mReplyBuffers ( NULL ),
@@ -87,7 +87,7 @@ namespace uhal
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
     mReplyQueue(),
-    // mPacketsInFlight( 0 ),
+    mPacketsInFlight ( 0 ),
 #endif
     mDispatchBuffers ( NULL ),
     mReplyBuffers ( NULL ),
@@ -109,12 +109,8 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     ClientInterface::returnBufferToPool ( mDispatchQueue );
     ClientInterface::returnBufferToPool ( mReplyQueue );
-    // mPacketsInFlight = 0;
+    mPacketsInFlight = 0;
 #endif
-    //    ClientInterface::returnBufferToPool ( mDispatchBuffers );
-    //    mDispatchBuffers = NULL;
-    //    ClientInterface::returnBufferToPool ( mReplyBuffers );
-    //    mReplyBuffers = NULL;
 
     if ( mAsynchronousException )
     {
@@ -133,9 +129,6 @@ namespace uhal
   {
     try
     {
-#ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
       //log( Warning() , "Closing Socket" );
       mSocket.close();
 
@@ -145,8 +138,11 @@ namespace uhal
       mIOservice.stop();
 #ifdef RUN_ASIO_MULTITHREADED
       mDispatchThread.join();
+      // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
+      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
 #endif
     }
     catch ( const std::exception& aExc )
@@ -173,21 +169,10 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      //block the next write operation if we are currently waiting for lMaxPacketsInFlight replies
-      bool lContinue ( true );
-      uint32_t lMaxPacketsInFlight ( this->getMaxNumberOfBuffers() - 1 );
-
-      // logo lLogo;
-      while ( lContinue )
-      {
-        //lLogo++;
-        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-        lContinue = ( ( mDispatchQueue.size() + mReplyQueue.size() ) >= lMaxPacketsInFlight );
-      }
-
+      // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
-      if ( mDispatchBuffers )
+      if ( mDispatchBuffers || mPacketsInFlight == this->getMaxNumberOfBuffers() )
       {
         mDispatchQueue.push_back ( aBuffers );
         //   std::cout << "extended mDispatchQueue" << std::endl;
@@ -198,6 +183,7 @@ namespace uhal
         write ( );
       }
 
+      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
 #else
       mDispatchBuffers = aBuffers;
       write ( );
@@ -251,6 +237,7 @@ namespace uhal
   {
     if ( !mDispatchBuffers )
     {
+      log ( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
       return;
     }
 
@@ -269,7 +256,7 @@ namespace uhal
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, _1 ) );
-    // mPacketsInFlight++;
+    mPacketsInFlight++;
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::async_write ( mSocket , mAsioSendBuffer , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
@@ -291,9 +278,12 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     //     if( !mDispatchBuffers)
     //     {
+    //       log( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
     //       return;
     //     }
     {
+      // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
+
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
       if ( mReplyBuffers )
@@ -306,9 +296,12 @@ namespace uhal
         mReplyBuffers = mDispatchBuffers;
         read ( );
       }
+      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
+
+
     }
 
-    if ( mDispatchQueue.size() )
+    if ( mDispatchQueue.size() && mPacketsInFlight != this->getMaxNumberOfBuffers() )
     {
       mDispatchBuffers = mDispatchQueue.front();
       mDispatchQueue.pop_front();
@@ -333,6 +326,7 @@ namespace uhal
   {
     if ( !mReplyBuffers )
     {
+      log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
       return;
     }
 
@@ -364,6 +358,7 @@ namespace uhal
   {
     if ( !mReplyBuffers )
     {
+      log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
       return;
     }
 
@@ -431,6 +426,7 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
+    // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
     if ( mReplyQueue.size() )
@@ -445,7 +441,17 @@ namespace uhal
       mReplyBuffers = NULL;
     }
 
-    // mPacketsInFlight--;
+    mPacketsInFlight--;
+
+    if ( !mDispatchBuffers && mDispatchQueue.size() && mPacketsInFlight != this->getMaxNumberOfBuffers() )
+    {
+      mDispatchBuffers = mDispatchQueue.front();
+      mDispatchQueue.pop_front();
+      //std::cout << "reduced mDispatchQueue" << std::endl;
+      write();
+    }
+
+    // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
 #else
     mReplyBuffers = NULL;
 #endif
@@ -493,10 +499,12 @@ namespace uhal
       }
 
 #ifdef RUN_ASIO_MULTITHREADED
+      //             log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
       //log ( Warning() , "mDispatchBuffers = " , Pointer ( mDispatchBuffers ) , " mReplyBuffers = " , Pointer ( mReplyBuffers ) );
       lContinue = ( mDispatchBuffers || mReplyBuffers );
+      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
     }
   }
 
@@ -517,16 +525,21 @@ namespace uhal
       mAsynchronousException = NULL;
     }
 
+    {
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-    ClientInterface::returnBufferToPool ( mDispatchQueue );
-    ClientInterface::returnBufferToPool ( mReplyQueue );
-    // mPacketsInFlight = 0;
+      // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      ClientInterface::returnBufferToPool ( mDispatchQueue );
+      ClientInterface::returnBufferToPool ( mReplyQueue );
+      mPacketsInFlight = 0;
 #endif
-    ClientInterface::returnBufferToPool ( mDispatchBuffers );
-    mDispatchBuffers = NULL;
-    ClientInterface::returnBufferToPool ( mReplyBuffers );
-    mReplyBuffers = NULL;
+      ClientInterface::returnBufferToPool ( mDispatchBuffers );
+      mDispatchBuffers = NULL;
+      ClientInterface::returnBufferToPool ( mReplyBuffers );
+      mReplyBuffers = NULL;
+      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
+    }
+
     InnerProtocol::dispatchExceptionHandler();
   }
 

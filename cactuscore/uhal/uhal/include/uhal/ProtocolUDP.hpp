@@ -159,7 +159,7 @@ namespace uhal
       std::deque < Buffers* > mDispatchQueue;
       std::deque < Buffers* > mReplyQueue;
 
-      //       uint32_t mPacketsInFlight;
+      uint32_t mPacketsInFlight;
 #endif
 
       Buffers* mDispatchBuffers;

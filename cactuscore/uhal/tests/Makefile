@@ -19,25 +19,6 @@ LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 
 EXECUTABLE_SOURCES = $(wildcard src/common/*.cxx)
-#		src/common/DummyHardwareUdp.cxx \
-#		src/common/DummyHardwareTcp.cxx \
-#		src/common/WiresharkParser.cxx \
-#		src/common/test_log.cxx \
-#		src/common/test_dummy_single.cxx \
-#		src/common/test_dummy_masking.cxx \
-#		src/common/test_dummy_check_permissions.cxx \
-#		src/common/test_dummy_docu_examples.cxx \
-#		src/common/test_dummy_block.cxx \
-#		src/common/test_dummy_hierarchy.cxx \
-#		src/common/test_dummy_multithreaded.cxx \
-#		src/common/test_dummy_timeout.cxx \
-#		src/common/test_dummy_nonreachable.cxx \
-#		src/common/test_dummy_metainfo.cxx \
-#		src/common/test_dummy_navigation.cxx \
-#		src/common/test_dummy_rawclient.cxx \
-#		src/common/test_random.cxx \
-#		src/common/PerfTester.cxx
-
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
