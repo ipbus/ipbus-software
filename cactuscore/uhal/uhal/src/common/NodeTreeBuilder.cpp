@@ -40,6 +40,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/filesystem.hpp>
 
 namespace uhal
 {
@@ -719,10 +720,22 @@ namespace uhal
 
     if ( lReport.tellp() )
     {
+      boost::filesystem::path lDir ( "/tmp/uhal" );
+      lDir.make_preferred();
+
+      if ( !boost::filesystem::is_directory ( lDir ) )
+      {
+        if ( !boost::filesystem::create_directory ( lDir ) )
+        {
+          log ( Error() , "Address overlaps observed - attempted and failed to create directory " , Quote ( "/tmp/uhal" ) );
+          return;
+        }
+      }
+
       std::string lFilename ( aPath.string() );
       boost::replace_all ( lFilename , "/" , "-" );
-      lFilename = "/tmp/OverlapReport" + lFilename + ".txt";
-      std::ofstream lReportFile ( lFilename.c_str() );
+      lDir /= ( "OverlapReport" + lFilename + ".txt" );
+      std::ofstream lReportFile ( lDir.c_str() );
 
       if ( lReportFile.is_open() )
       {
@@ -731,11 +744,11 @@ namespace uhal
         lReportFile << std::endl;
         lReportFile << lReport.rdbuf();
         lReportFile.close();
-        log ( Warning() , "Address overlaps observed - report file written at " , Quote ( lFilename ) );
+        log ( Warning() , "Address overlaps observed - report file written at " , Quote ( lDir.string() ) );
       }
       else
       {
-        log ( Error() , "Address overlaps observed - failed to open report file " , Quote ( lFilename ) );
+        log ( Error() , "Address overlaps observed - failed to create report file " , Quote ( lDir.string() ) );
       }
     }
   }
