@@ -85,7 +85,6 @@
 #include <demangle.h>
 #include <stdlib.h>
 
-
 #include <cstddef>
 #include <vector>
 #include <string>
@@ -161,7 +160,7 @@ namespace Backtrace
     {
       if ( !strncmp ( lFunction,"_Z",2 ) )
       {
-        lFindAddress->tracepoint.function = cplus_demangle ( lFunction,DMGL_PARAMS|DMGL_ANSI|DMGL_TYPES );
+        lFindAddress->tracepoint.function = cplus_demangle_v3 ( lFunction,DMGL_PARAMS|DMGL_ANSI|DMGL_TYPES );
       }
       else
       {

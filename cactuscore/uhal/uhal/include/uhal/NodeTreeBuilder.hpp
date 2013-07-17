@@ -159,7 +159,8 @@ namespace uhal
       */
       void calculateHierarchicalAddresses ( Node* aNode , const uint32_t& aAddr );
 
-      void checkForAddressCollisions ( Node* aNode );
+
+      void checkForAddressCollisions ( Node* aNode , const boost::filesystem::path& aPath );
 
 
       Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );

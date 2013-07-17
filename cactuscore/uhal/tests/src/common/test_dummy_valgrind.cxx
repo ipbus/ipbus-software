@@ -46,20 +46,26 @@ using namespace uhal;
 
 int main ( int argc,char* argv[] )
 {
-  std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
-  std::string connection_file = params["connection_file"];
-  std::string device_id = params["device_id"];
-  ConnectionManager manager ( connection_file );
-  HwInterface hw=manager.getDevice ( device_id );
-  std::vector<uint32_t> xx;
-  xx.reserve ( N_10MB );
+  try{
+    std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
+    std::string connection_file = params["connection_file"];
+    std::string device_id = params["device_id"];
+    ConnectionManager manager ( connection_file );
+    HwInterface hw=manager.getDevice ( device_id );
+    std::vector<uint32_t> xx;
+    xx.reserve ( N_10MB );
 
-  for ( size_t i=0; i!= N_10MB; ++i )
-  {
-    xx.push_back ( static_cast<uint32_t> ( rand() ) );
+    for ( size_t i=0; i!= N_10MB; ++i )
+    {
+      xx.push_back ( static_cast<uint32_t> ( rand() ) );
+    }
+
+    hw.getNode ( "LARGE_MEM" ).writeBlock ( xx );
+    ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock ( N_10MB );
+    hw.dispatch();
   }
-
-  hw.getNode ( "LARGE_MEM" ).writeBlock ( xx );
-  ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock ( N_10MB );
-  hw.dispatch();
+  catch(std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
 }

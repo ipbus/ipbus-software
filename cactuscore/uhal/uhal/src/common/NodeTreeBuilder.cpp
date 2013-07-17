@@ -38,6 +38,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 namespace uhal
 {
@@ -201,7 +202,7 @@ namespace uhal
       Node* lNode ( mTopLevelNodeParser ( lXmlNode ) );
       mFileCallStack.pop_back( );
       calculateHierarchicalAddresses ( lNode , 0x00000000 );
-      checkForAddressCollisions ( lNode );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
+      checkForAddressCollisions ( lNode , aPath );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
       mNodes.insert ( std::make_pair ( lName , lNode ) );
       aNodes.push_back ( lNode );
       return;
@@ -573,8 +574,13 @@ namespace uhal
 
 
 
-  void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode )
+  void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode , const boost::filesystem::path& aPath )
   {
+
+    std::stringstream lReport;
+    lReport << std::hex << std::setfill('0');
+
+
     boost::unordered_map< std::string , Node* >::iterator lIt, lIt2;
     Node* lNode1, *lNode2;
 
@@ -601,12 +607,11 @@ namespace uhal
 
             if ( ( ( lTop2 >= lBottom1 ) && ( lTop2 <= lTop1 ) ) || ( ( lTop1 >= lBottom2 ) && ( lTop1 <= lTop2 ) ) )
             {
-              log ( Error() , "Branch " , Quote ( lIt->first ) ,
-                    " has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
-                    "] which overlaps with branch " , Quote ( lIt2->first ) ,
-                    " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) ,
-                    "]."
-                  );
+             lReport << "Branch '" << lIt->first
+                     << "' has address range [0x" << std::setw(8) << lBottom1 << " - 0x" << std::setw(8) <<  lTop1
+                     << "] which overlaps with branch '" << lIt2->first
+                     << "' which has address range [0x"  << std::setw(8)  <<  lBottom2  << " - 0x" << std::setw(8) <<  lTop2
+                     << "]." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
               throw exception::AddressSpaceOverlap();
 #endif
@@ -619,11 +624,11 @@ namespace uhal
 
             if ( ( lAddr2 >= lBottom1 ) && ( lAddr2 <= lTop1 ) )
             {
-              log ( Error() , "Branch " , Quote ( lIt->first ) ,
-                    " has address range [" , Integer ( lBottom1 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop1 , IntFmt<hex,fixed>() ) ,
-                    "] which overlaps with branch " , Quote ( lIt2->first ) ,
-                    " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) , "]."
-                  );
+              lReport << "Branch '" << lIt->first 
+                      << "' has address range [0x"  << std::setw(8) << lBottom1 << " - 0x"  << std::setw(8) << lTop1 
+                     << "] which overlaps with branch '" << lIt2->first
+                     << "' which has address 0x"  << std::setw(8) << lAddr2 
+                     << "." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
               throw exception::AddressSpaceOverlap();
 #endif
@@ -647,11 +652,12 @@ namespace uhal
 
             if ( ( lAddr1 >= lBottom2 ) && ( lAddr1 <= lTop2 ) )
             {
-              log ( Error() , "Branch " , Quote ( lIt->first ) ,
-                    " has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
-                    "] which overlaps with branch " , Quote ( lIt2->first ) ,
-                    " which has address range [" , Integer ( lBottom2 , IntFmt<hex,fixed>() ) , " - " , Integer ( lTop2 , IntFmt<hex,fixed>() ) , "]."
-                  );
+              lReport <<  "Branch '" << lIt->first
+                     <<"' has address 0x"  << std::setw(8) << lAddr1 
+                     <<" which overlaps with branch '" << lIt2->first
+                     <<"' which has address range [0x"   << std::setw(8) << lBottom2 << " - 0x"   << std::setw(8) << lTop2
+                    << "]."<< std::endl;
+                 
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
               throw exception::AddressSpaceOverlap();
 #endif
@@ -696,13 +702,13 @@ namespace uhal
 
                 if ( lShouldThrow )
                 {
-                  log ( Error() , "Branch " , Quote ( lIt->first ) ,
-                        " has address " , Integer ( lAddr1 , IntFmt<hex,fixed>() ) ,
-                        " and mask " , Integer ( lNode1->mMask , IntFmt<hex,fixed>() ) ,
-                        " which overlaps with branch " , Quote ( lIt2->first ) ,
-                        " which has address " , Integer ( lAddr2 , IntFmt<hex,fixed>() ) ,
-                        " and mask " , Integer ( lNode2->mMask , IntFmt<hex,fixed>() )
-                      );
+                  lReport <<  "Branch '" << lIt->first
+                        << "' has address 0x" << std::setw(8) << lAddr1
+                        << " and mask 0x" << std::setw(8) << lNode1->mMask 
+                        << " which overlaps with branch '" << lIt2->first
+                        << "' which has address 0x" << std::setw(8) << lAddr2 
+                        << " and mask 0x" << std::setw(8) << lNode2->mMask 
+                        << "." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
                   throw exception::AddressSpaceOverlap();
 #endif
@@ -713,6 +719,27 @@ namespace uhal
         }
       }
     }
+
+
+    if( lReport.tellp() )
+    {
+      std::string lFilename( aPath.string() + ".OverlapReport.txt" );
+      std::ofstream lReportFile( lFilename.c_str() );
+    
+      if (lReportFile.is_open())
+      {  
+         lReportFile << "Overlap report for " << aPath << ". Written at " << boost::posix_time::microsec_clock::local_time() << "." << std::endl; 
+         lReportFile << lReport.rdbuf();
+         lReportFile.close();
+         log( Warning() , "Address overlaps observed - report file written at " , Quote( lFilename ) );
+      }else{
+         log( Warning() , "Address overlaps observed - failed to open report file " , Quote( lFilename ) );
+      }
+
+    }
+    
+
+
   }
 
 
