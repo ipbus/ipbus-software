@@ -38,7 +38,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 namespace uhal
 {
@@ -576,11 +577,8 @@ namespace uhal
 
   void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode , const boost::filesystem::path& aPath )
   {
-
     std::stringstream lReport;
-    lReport << std::hex << std::setfill('0');
-
-
+    lReport << std::hex << std::setfill ( '0' );
     boost::unordered_map< std::string , Node* >::iterator lIt, lIt2;
     Node* lNode1, *lNode2;
 
@@ -607,11 +605,11 @@ namespace uhal
 
             if ( ( ( lTop2 >= lBottom1 ) && ( lTop2 <= lTop1 ) ) || ( ( lTop1 >= lBottom2 ) && ( lTop1 <= lTop2 ) ) )
             {
-             lReport << "Branch '" << lIt->first
-                     << "' has address range [0x" << std::setw(8) << lBottom1 << " - 0x" << std::setw(8) <<  lTop1
-                     << "] which overlaps with branch '" << lIt2->first
-                     << "' which has address range [0x"  << std::setw(8)  <<  lBottom2  << " - 0x" << std::setw(8) <<  lTop2
-                     << "]." << std::endl;
+              lReport << "Branch '" << lIt->first
+                      << "' has address range [0x" << std::setw ( 8 ) << lBottom1 << " - 0x" << std::setw ( 8 ) <<  lTop1
+                      << "] which overlaps with branch '" << lIt2->first
+                      << "' which has address range [0x"  << std::setw ( 8 )  <<  lBottom2  << " - 0x" << std::setw ( 8 ) <<  lTop2
+                      << "]." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
               throw exception::AddressSpaceOverlap();
 #endif
@@ -624,11 +622,11 @@ namespace uhal
 
             if ( ( lAddr2 >= lBottom1 ) && ( lAddr2 <= lTop1 ) )
             {
-              lReport << "Branch '" << lIt->first 
-                      << "' has address range [0x"  << std::setw(8) << lBottom1 << " - 0x"  << std::setw(8) << lTop1 
-                     << "] which overlaps with branch '" << lIt2->first
-                     << "' which has address 0x"  << std::setw(8) << lAddr2 
-                     << "." << std::endl;
+              lReport << "Branch '" << lIt->first
+                      << "' has address range [0x"  << std::setw ( 8 ) << lBottom1 << " - 0x"  << std::setw ( 8 ) << lTop1
+                      << "] which overlaps with branch '" << lIt2->first
+                      << "' which has address 0x"  << std::setw ( 8 ) << lAddr2
+                      << "." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
               throw exception::AddressSpaceOverlap();
 #endif
@@ -653,11 +651,10 @@ namespace uhal
             if ( ( lAddr1 >= lBottom2 ) && ( lAddr1 <= lTop2 ) )
             {
               lReport <<  "Branch '" << lIt->first
-                     <<"' has address 0x"  << std::setw(8) << lAddr1 
-                     <<" which overlaps with branch '" << lIt2->first
-                     <<"' which has address range [0x"   << std::setw(8) << lBottom2 << " - 0x"   << std::setw(8) << lTop2
-                    << "]."<< std::endl;
-                 
+                      <<"' has address 0x"  << std::setw ( 8 ) << lAddr1
+                      <<" which overlaps with branch '" << lIt2->first
+                      <<"' which has address range [0x"   << std::setw ( 8 ) << lBottom2 << " - 0x"   << std::setw ( 8 ) << lTop2
+                      << "]."<< std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
               throw exception::AddressSpaceOverlap();
 #endif
@@ -703,12 +700,12 @@ namespace uhal
                 if ( lShouldThrow )
                 {
                   lReport <<  "Branch '" << lIt->first
-                        << "' has address 0x" << std::setw(8) << lAddr1
-                        << " and mask 0x" << std::setw(8) << lNode1->mMask 
-                        << " which overlaps with branch '" << lIt2->first
-                        << "' which has address 0x" << std::setw(8) << lAddr2 
-                        << " and mask 0x" << std::setw(8) << lNode2->mMask 
-                        << "." << std::endl;
+                          << "' has address 0x" << std::setw ( 8 ) << lAddr1
+                          << " and mask 0x" << std::setw ( 8 ) << lNode1->mMask
+                          << " which overlaps with branch '" << lIt2->first
+                          << "' which has address 0x" << std::setw ( 8 ) << lAddr2
+                          << " and mask 0x" << std::setw ( 8 ) << lNode2->mMask
+                          << "." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
                   throw exception::AddressSpaceOverlap();
 #endif
@@ -720,26 +717,27 @@ namespace uhal
       }
     }
 
-
-    if( lReport.tellp() )
+    if ( lReport.tellp() )
     {
-      std::string lFilename( aPath.string() + ".OverlapReport.txt" );
-      std::ofstream lReportFile( lFilename.c_str() );
-    
-      if (lReportFile.is_open())
-      {  
-         lReportFile << "Overlap report for " << aPath << ". Written at " << boost::posix_time::microsec_clock::local_time() << "." << std::endl; 
-         lReportFile << lReport.rdbuf();
-         lReportFile.close();
-         log( Warning() , "Address overlaps observed - report file written at " , Quote( lFilename ) );
-      }else{
-         log( Warning() , "Address overlaps observed - failed to open report file " , Quote( lFilename ) );
+      std::string lFilename ( aPath.string() );
+      boost::replace_all ( lFilename , "/" , "-" );
+      lFilename = "/tmp/OverlapReport" + lFilename + ".txt";
+      std::ofstream lReportFile ( lFilename.c_str() );
+
+      if ( lReportFile.is_open() )
+      {
+        lReportFile << "Overlap report for " << aPath << "." << std::endl;
+        lReportFile << "Written at " << boost::posix_time::microsec_clock::local_time() << "." << std::endl;
+        lReportFile << std::endl;
+        lReportFile << lReport.rdbuf();
+        lReportFile.close();
+        log ( Warning() , "Address overlaps observed - report file written at " , Quote ( lFilename ) );
       }
-
+      else
+      {
+        log ( Error() , "Address overlaps observed - failed to open report file " , Quote ( lFilename ) );
+      }
     }
-    
-
-
   }
 
 

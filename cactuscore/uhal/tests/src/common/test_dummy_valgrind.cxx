@@ -46,7 +46,8 @@ using namespace uhal;
 
 int main ( int argc,char* argv[] )
 {
-  try{
+  try
+  {
     std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
     std::string connection_file = params["connection_file"];
     std::string device_id = params["device_id"];
@@ -64,7 +65,7 @@ int main ( int argc,char* argv[] )
     ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock ( N_10MB );
     hw.dispatch();
   }
-  catch(std::exception& e)
+  catch ( std::exception& e )
   {
     std::cerr << e.what() << std::endl;
   }
