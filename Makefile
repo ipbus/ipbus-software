@@ -8,16 +8,15 @@ PACKAGES = \
         cactuscore/controlhub
 else ifeq ($(Set), ts)
 PACKAGES = \
-        cactuscore/extern/icons \
-        cactuscore/extern/dojo \
-        cactuscore/ts/toolbox \
-        cactuscore/ts/ajaxell \
-        cactuscore/ts/framework \
-        cactuscore/ts/l1ce \
-        cactuscore/ts/itf \
-	cactuscore/ts/xdaqclient \
-	\
-	cactusprojects
+        cactuscore/ts \
+	cactusprojects/subsystem \
+	cactusprojects/retri \
+	cactusprojects/central \
+	cactusprojects/ttc \
+	cactusprojects/l1page \
+	cactusprojects/gt \
+	cactusprojects/gmt \
+	cactusprojects/dtsc
 endif
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
