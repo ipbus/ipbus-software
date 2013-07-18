@@ -392,13 +392,13 @@ namespace uhal
     //Tags is an optional attribute to allow the user to add a description to a node
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mDescriptionAttribute , lStr );
 
-    if ( lStr.size() && aNode->mTags.size() )
+    if ( lStr.size() && aNode->mDescription.size() )
     {
       aNode->mDescription += "[";
       aNode->mDescription += lStr;
       aNode->mDescription += "]";
     }
-    else if ( lStr.size() && !aNode->mTags.size() )
+    else if ( lStr.size() && !aNode->mDescription.size() )
     {
       aNode->mDescription = lStr;
     }
