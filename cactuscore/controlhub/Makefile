@@ -167,7 +167,7 @@ controlhub.rel: ebin/controlhub.app Makefile
 	 "ok = application:load(controlhub), \
 	 {ok, ControlHubVsn} = application:get_key(controlhub, vsn), \
 	 {ok, Apps} = application:get_key(controlhub, applications), \
-	 {ok, F} = file:open("$@", [write]), \
+	 {ok, F} = file:open(\"$@\", [write]), \
 	 io:format(F, \"~p.~n\", [{release, {\"controlhub\", ControlHubVsn}, \
 	 {erts, erlang:system_info(version)}, \
 	 lists:map(fun (App) -> application:load(App), \
