@@ -2,12 +2,12 @@
 """
 Usage: uhal_test_suite.py [-v] [-l] [-c <path to xml connections file>] [-s <search string for sections to run>]
 
-This script runs all of the IPbus/uHAL tests (either on an installed system or using checked-out source code).
+This script runs the IPbus/uHAL unit tests (either on an installed system or using checked-out source code).
 The tests for different IPbus versions / different uHAL components are separated into different sections.
 
 All options/arguments are optional:
    -l                          : Just list commands (i.e. don't run them)
-   -v                          : Print all output of tests (if omitted, only the results summary for each test command is printed)
+   -v                          : Print all output of tests (if omitted, only the last stderr/out line from each test command is printed)
    -c /path/to/dummy_conns.xml : Full path to dummy_connections.xml (without file:// prefix)
    -s search_string            : If specified, only sections that contain this string will be run (case-insenstive search).
                                  Otherwise, all sections will be run (see section list at end).
@@ -241,8 +241,6 @@ def get_commands(conn_file, controlhub_scripts_dir):
                controlhub_stop]
                 ]]
 
-      
-      
     cmds += [["TEST VALGRIND",
               [ # UDP 2
                "DummyHardwareUdp.exe --version 1 --port 50001",
@@ -373,9 +371,16 @@ def cleanup_cmds():
     return cmds
 
 
+def run_cleanup_commands():
+    """Runs the cleanup commands"""
+    print
+    for cmd in cleanup_cmds():
+       print "+ Running cleanup command: ", cmd
+       run_command(cmd, False)
+
+
 def get_sections():
     """Return list of all sections of commands defined in this test suite"""
-
     return [section for section, cmds in get_commands("", "")]
 
 
@@ -393,7 +398,7 @@ def background_run_command(cmd , Pid):
       exit_code = p.poll()
       cmd_duration = time.time()-t0
       if exit_code == -15:
-        print "+ Background command '%s' was terminated (time elapsed = %s seconds)" % (cmd , cmd_duration)
+        print "+ Background command was terminated '%s' (time elapsed = %s seconds)" % (cmd , cmd_duration)
       elif exit_code:
         print "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) IN BACKGROUND COMMAND '%s' ***" % (exit_code, cmd_duration, cmd)
       else:
@@ -414,10 +419,10 @@ def run_command(cmd, verbose=True):
 
     if cmd.startswith("sudo"):
       cmd = "sudo PATH=$PATH " + cmd[4:]
-    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+#    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
     t0 = time.time()
 
-    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
+    p  = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
     try:
       f1 = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
       fcntl.fcntl(p.stdout, fcntl.F_SETFL, f1 | os.O_NONBLOCK)
@@ -450,6 +455,8 @@ def run_command(cmd, verbose=True):
     except KeyboardInterrupt:
         print "+ Ctrl-C detected."
         os.killpg(p.pid, signal.SIGTERM)
+        print "  Press Ctrl-C again in next 5 seconds to stop script."
+        time.sleep(5)
         return stdout, -2, time.time()-t0
 
     return stdout, p.poll(), time.time()-t0
@@ -497,51 +504,50 @@ if __name__=="__main__":
         print __doc__
         sys.exit(1)
 
-    print "Parsed options are:"
-    print "   verbose   :",  verbose
-    print "   conn_file :",  conn_file
-    if section_search_str is None:
-        print "All sections will be run"
-    else:
-        print 'Only sections whose names contain "'+section_search_str+'" will be run'
-
-    # Display env vars
-    print
-    if run_cmds:
-        print "Environment variables ..."
-        run_command("echo $PATH")
-        run_command("echo $LD_LIBRARY_PATH")
-    else:
-        print "N.B: Commands will only be listed, not run"
+    print "Configuration ... "
+    print "  connections file:       ",  conn_file
 
     # Find directory for controlhub commands
-    print
     which_controlhub_status = run_command("which controlhub_status", False)
     if which_controlhub_status[1]:
         controlhub_scripts_dir = "/opt/cactus/bin"
     else:
-        controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") ) 
-    print 'Using dir "'+controlhub_scripts_dir+'" for controlhub scripts ...'
+        controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") )
+    print '  ControlHub scripts dir: ', controlhub_scripts_dir 
+
+    def skip_section(name):
+        if (section_search_str is None):
+            return False
+        elif section_search_str.lower() in name.lower():
+            return False
+        else:
+            return True
+    sections_cmds_to_run = [(name, cmds) for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir) if not skip_section(name)]
+    sections_skipped     = [name for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir) if skip_section(name)]
+
+    if run_cmds:
+        for env_var in ["PATH", "LD_LIBRARY_PATH"]:
+            value = run_command("echo $" + env_var, verbose=False)[0][0]
+            print " $", env_var, "is: ", value.strip("\n")
+
+        if len(sections_cmds_to_run) != 0:
+            print "\nThe following sections will be skipped:"
+            for name in sections_skipped:
+                print "   ", name
+        else:
+            print "No sections matched the search string \"" + section_search_str + "\""
+
+    else:
+        print "\nN.B: Commands will only be listed, not run"
 
     BackgroundPid = []
 
     # Run the commands
     try:
-        for section_name, cmds in get_commands(conn_file, controlhub_scripts_dir):
-            if section_search_str is None:
-               skip_section = False
-            else:
-               skip_section = not (section_search_str.lower() in section_name.lower())
-
-            print
-            print "======================================================================================================================="
+        for section_name, cmds in sections_cmds_to_run:
+            print "\n\n======================================================================================================================="
             print "-----------------------------------------------------------------------------------------------------------------------"
-            if skip_section:
-                print " SKIPPING section:", section_name
-                continue
-            else:
-                print " Entering section:", section_name 
-            print
+            print "  --> Section:", section_name
 
             for cmd in cmds:
                 if run_cmds == False:
@@ -554,8 +560,8 @@ if __name__=="__main__":
                     
                 if cmd.startswith( "DummyHardware" ):
                   background_run_command( cmd , BackgroundPid )
-                  
                 else:
+                  print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
                   stdout, exit_code, cmd_duration = run_command(cmd, verbose)
 
                 if len(stdout) and not verbose:
@@ -570,9 +576,8 @@ if __name__=="__main__":
  
                     if quit_on_error:
                       print "+ Quitting as an error was observed and the '-x' flag was specified by the user"
-                      for cmd in cleanup_cmds():
-                        run_command(cmd, False)
-                      sys.exit()
+                      run_cleanup_commands()
+                      sys.exit(exit_code)
                 else:
                     print "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
 
@@ -581,10 +586,13 @@ if __name__=="__main__":
                     time.sleep(0.5)
 
     except KeyboardInterrupt:
-        print 
-        print "+ Ctrl-C detected."
-        pass
+        print "\n+ Ctrl-C detected."
+        run_cleanup_commands()
+        sys.exit()
 
-        print "+ Running cleanup commands"
-    for cmd in cleanup_cmds():
-       run_command(cmd, False)
+    if run_cmds:
+       run_cleanup_commands()
+
+       if quit_on_error:
+           print "\n   TEST SUITE COMPLETED SUCCESSFULLY!  "
+
