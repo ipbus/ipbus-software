@@ -544,8 +544,8 @@ if __name__=="__main__":
     # Run the commands
     try:
         for section_name, cmds in sections_cmds_to_run:
-            print "\n\n======================================================================================================================="
-            print "-----------------------------------------------------------------------------------------------------------------------"
+            print "\n\n" + ("=" * 120)
+            print "-" * 120
             print "  --> Section:", section_name
 
             for cmd in cmds:
@@ -555,7 +555,7 @@ if __name__=="__main__":
 
                 print
                 if verbose:
-                    print "-----------------------------------------------------------------------------------------------------------------------"
+                    print "-" * 120
                     
                 if cmd.startswith( "DummyHardware" ):
                   background_run_command( cmd , BackgroundPid )
