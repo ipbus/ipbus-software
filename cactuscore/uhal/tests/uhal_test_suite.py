@@ -2,12 +2,12 @@
 """
 Usage: uhal_test_suite.py [-v] [-l] [-c <path to xml connections file>] [-s <search string for sections to run>]
 
-This script runs the IPbus/uHAL unit tests (either on an installed system or using checked-out source code).
-The tests for different IPbus versions / different uHAL components are separated into different sections.
+This script runs the IPbus/uHAL unit tests. The tests for different IPbus versions / uHAL components are separated into different sections.
+N.B: All env variables have to be correctly set before running the script.
 
 All options/arguments are optional:
    -l                          : Just list commands (i.e. don't run them)
-   -v                          : Print all output of tests (if omitted, only the last stderr/out line from each test command is printed)
+   -v                          : Print full output of tests (if omitted, only the last stderr/out line from each test command is printed)
    -c /path/to/dummy_conns.xml : Full path to dummy_connections.xml (without file:// prefix)
    -s search_string            : If specified, only sections that contain this string will be run (case-insenstive search).
                                  Otherwise, all sections will be run (see section list at end).
@@ -19,7 +19,6 @@ E.g:
   # Full output of IPbus 1.3 tests on developer source code
   ./uhal_test_suite.py -v -c /path/to/dummy_connections.xml -s 1.3
 
-N.B: All env variables have to be correctly set before running the script.
 """
 
 from os.path import join
