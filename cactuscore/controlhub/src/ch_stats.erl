@@ -389,6 +389,7 @@ handle_info({'ETS-TRANSFER', T1, Pid, no_data}, S) ->
                    {udp_timeout,status}
                    ]),
     NewTablesList = lists:keydelete(Pid, 1, S#state.current_udp_stats_tables),
+    ets:delete(T1),
     {noreply, S#state{current_udp_stats_tables=NewTablesList}};
 
 handle_info(_Info, State) ->
