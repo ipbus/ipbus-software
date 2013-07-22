@@ -50,7 +50,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
     cmds = []
     cmds += [["TEST IPBUS 1.3 UDP",
               [# SERVER NOT REACHABLE TEST
-               "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
+"eccho",               "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
                # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.udp" % (conn_file),
@@ -529,7 +529,9 @@ if __name__=="__main__":
             value = run_command("echo $" + env_var, verbose=False)[0][0]
             print " $", env_var, "is: ", value.strip("\n")
 
-        if len(sections_cmds_to_run) != 0:
+        if section_search_str is None:
+            print "\nAll sections will be run."
+        elif len(sections_cmds_to_run) != 0:
             print "\nThe following sections will be skipped:"
             for name in sections_skipped:
                 print "   ", name
