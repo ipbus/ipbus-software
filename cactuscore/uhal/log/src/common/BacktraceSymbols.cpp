@@ -160,14 +160,19 @@ namespace Backtrace
     {
       if ( !strncmp ( lFunction,"_Z",2 ) )
       {
-        int lStatus ( 0 );
-        std::size_t lSize ( 1024 );
-        char lDemangled[lSize];
-        lFindAddress->tracepoint.function = abi::__cxa_demangle ( lFunction , lDemangled , &lSize , &lStatus );
+        //We have mutex locked the top-level call, so make this static to prevent unnecessary memory allocations
+        static int lStatus ( 0 );
+        static std::size_t lSize ( 65536 );
+        static char lDemangled[ 65536 ];
+        abi::__cxa_demangle ( lFunction , lDemangled , &lSize , &lStatus );
 
         if ( lStatus )
         {
           lFindAddress->tracepoint.function = lFunction;
+        }
+        else
+        {
+          lFindAddress->tracepoint.function = lDemangled;
         }
       }
       else
