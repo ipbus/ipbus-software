@@ -740,6 +740,7 @@ state_as_string(S) when is_record(S, state) ->
 udp_proc_init() ->
     receive
         {start, Socket, TargetIP, TargetPort, ParentPid} ->
+            link(ParentPid),
             udp_proc_loop(Socket, TargetIP, TargetPort, ParentPid)
     end.
 

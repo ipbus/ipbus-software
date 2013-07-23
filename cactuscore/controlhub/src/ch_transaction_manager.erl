@@ -88,6 +88,7 @@ tcp_acceptor(TcpListenSocket) ->
 tcp_proc_init() ->
     receive
         {start, Socket, ParentPid} ->
+            link(ParentPid),
             %inet:setopts(Socket, [{active,once}]),
             tcp_proc_loop(Socket, ParentPid)
     end.
