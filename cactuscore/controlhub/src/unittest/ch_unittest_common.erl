@@ -67,15 +67,21 @@ tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, Nr
 %    SendBytes = byte_size(Request),
     gen_tcp:send(Socket, Request),
     case tcp_recv(Socket, ActiveVal, 0) of
-        Pkt when is_binary(Pkt) ->
+        Reply ->
             tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight, MaxInFlight}, NrItnsLeft-1);
+        Pkt when is_binary(Pkt) ->
+            io:format("ERROR : Expecting reply packet: ~p~n But received: ~p~n", [Reply, Pkt]),
+            fail;
         timeout ->
             tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight+1, MaxInFlight}, NrItnsLeft-1)
     end;
 tcp_client_loop({Socket, ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) ->
     case tcp_recv(Socket, ActiveVal, 20) of
-        Pkt when is_binary(Pkt) ->
+        Reply ->
             tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight-1, MaxInFlight}, NrItnsLeft);
+        Pkt when is_binary(Pkt) ->
+            io:format("ERROR : Expecting reply packet: ~p~n But received: ~p~n", [Reply, Pkt]),
+            fail;
         timeout ->
             io:format("ERROR : Did not receive reply packet in 20ms~n"),
             fail
