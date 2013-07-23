@@ -79,7 +79,7 @@ usage() ->
 
 
 parse_args([ArgIP, ArgPort, ArgItns, ArgInFlight]) ->
-    {ok, IP} = inet_parse:address(ArgIP),
+    {ok, IP} = inet:getaddr(ArgIP, inet),
     Port = list_to_integer(ArgPort),
     Itns = list_to_integer(ArgItns),
     NrInFlight = list_to_integer(ArgInFlight),
@@ -166,7 +166,7 @@ main(["tcp_echo_server", ArgPort]) ->
     ch_unittest_common:start_tcp_echo_server(?TCP_SOCKET_OPTIONS, Port);
     
 main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
-    {ok, ControlHubIP} = inet_parse:address(ArgControlHubIP),
+    {ok, ControlHubIP} = inet:getaddr(ArgControlHubIP, inet),
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = tcp_connect(ControlHubIP, 10203),
     TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
