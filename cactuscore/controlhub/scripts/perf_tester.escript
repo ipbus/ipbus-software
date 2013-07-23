@@ -1,6 +1,6 @@
 #!/bin/env escript
 %% -*- erlang -*-
-%%! -C -pa ebin ebin/unittest +zdbbl 2097151 +sbt db +scl false +swt very_low
+%%! -C -pa /cactusbuild/trunk/cactuscore/controlhub/ebin/unittest +zdbbl 2097151 +sbt db +scl false +swt very_low
 
 
 
@@ -48,6 +48,27 @@
                               16#2fed5a00:32, % Read, 0x5a deep
                               0:((16#5a)*32)
                             >>).
+
+
+-define(IPBUS_TXFULL_PRAM_REQ, <<16#200000f0:32,
+                                 16#2000011f:32, % 1-word write for PRAM 
+                                 16#00002000:32,
+                                 16#00000000:32,
+                                 16#2000ff3f:32, % NI write, 0xff deep
+                                 16#00002001:32,
+                                 0:(32*(16#ff)),
+                                 16#2000673f:32, % NI write, 0xff deep
+                                 16#00002001:32,
+                                 0:((16#67)*32)
+                               >>).
+-define(IPBUS_TXFULL_PRAM_REP, <<16#200000f0:32,
+                                 16#20000110:32,
+                                 16#2000ff30:32,
+                                 16#20006730:32
+                               >>).
+
+
+-define(DUMMY_JUMBO, <<0:(8*8000)>>).
 
 % ---------------------------------------------------------------------------------------
 %    MAIN, USAGE & OPTION PARSING
@@ -151,12 +172,13 @@ main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
     TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
                     + (element(3,TargetIP) bsl 8) + element(4,TargetIP),
     Request = <<TargetIPU32:32,
-                TargetPort:16, (byte_size(?IPBUS_TXFULL_REQ) div 4):16,
-                (?IPBUS_TXFULL_REQ)/binary
+                TargetPort:16, (byte_size(?IPBUS_TXFULL_PRAM_REQ) div 4):16,
+                (?IPBUS_TXFULL_PRAM_REQ)/binary
               >>,
-    Reply = <<TargetIPU32:32,
+    Reply = <<(byte_size(?IPBUS_TXFULL_PRAM_REP)+8):32 ,
+              TargetIPU32:32,
               TargetPort:16, 0:16,
-              (?IPBUS_TXFULL_REP)/binary>>,
+              (?IPBUS_TXFULL_PRAM_REP)/binary>>,
     {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Reply, {0,NrInFlight}, NrItns) end ),
     gen_tcp:close(Socket),
