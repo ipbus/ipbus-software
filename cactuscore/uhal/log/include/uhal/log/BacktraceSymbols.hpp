@@ -50,6 +50,8 @@ namespace Backtrace
 {
   struct TracePoint
   {
+    TracePoint() : file ( "" ) , function ( "" ) , line ( 0 ) {}
+
     std::string file;
     std::string function;
     uint32_t line;

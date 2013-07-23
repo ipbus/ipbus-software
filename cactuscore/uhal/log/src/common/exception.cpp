@@ -96,7 +96,9 @@ namespace uhal
 #ifdef __GNUG__
       // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
       int lStatus ( 0 );
-      lStr << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
+      std::size_t lSize ( 1024 );
+      char lDemangled[lSize];
+      lStr << abi::__cxa_demangle ( typeid ( *this ).name() , lDemangled , &lSize , &lStatus );
 #else
       lStr << typeid ( *this ).name();
 #endif

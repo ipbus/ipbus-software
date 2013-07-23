@@ -82,7 +82,7 @@
 #include <libiberty.h>
 #include <dlfcn.h>
 #include <link.h>
-#include <demangle.h>
+#include <cxxabi.h>
 #include <stdlib.h>
 
 #include <cstddef>
@@ -160,7 +160,15 @@ namespace Backtrace
     {
       if ( !strncmp ( lFunction,"_Z",2 ) )
       {
-        lFindAddress->tracepoint.function = cplus_demangle_v3 ( lFunction,DMGL_PARAMS|DMGL_ANSI|DMGL_TYPES );
+        int lStatus ( 0 );
+        std::size_t lSize ( 1024 );
+        char lDemangled[lSize];
+        lFindAddress->tracepoint.function = abi::__cxa_demangle ( lFunction , lDemangled , &lSize , &lStatus );
+
+        if ( lStatus )
+        {
+          lFindAddress->tracepoint.function = lFunction;
+        }
       }
       else
       {
