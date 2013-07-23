@@ -46,9 +46,9 @@
 
 using namespace uhal;
 
-#define N_THREADS     20
+#define N_THREADS     5
 #define N_ITERATIONS  5
-#define N_SIZE        1024*1024/4
+#define N_SIZE        10*1024/4
 #define TIMEOUT_S     50
 
 void job_multiple ( const std::string& connection, const std::string& id )
@@ -196,14 +196,9 @@ int main ( int argc,char* argv[] )
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-  timeval lStart, lEnd;
-  gettimeofday ( &lStart, NULL );
   CACTUS_TEST ( multiple_hwinterfaces ( connection_file,device_id ) );
   CACTUS_TEST ( single_hwinterface ( connection_file,device_id ) );
   CACTUS_TEST ( single_copied_hwinterface ( connection_file,device_id ) );
-  gettimeofday ( &lEnd, NULL );
-  time_t sec = lEnd.tv_sec - lStart.tv_sec;
-  suseconds_t usec = lEnd.tv_usec - lStart.tv_usec;
-  std::cout << static_cast<double> ( sec + usec/1000000. ) << "s" << std::endl;
+
   CACTUS_TEST_RESULT();
 }
