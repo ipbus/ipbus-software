@@ -56,10 +56,14 @@ tcp_acceptor(TcpListenSocket) ->
             ch_stats:client_connected(),
             case inet:peername(ClientSocket) of
                 {ok, {_ClientAddr, _ClientPort}} ->
+                    TcpPid = spawn_link(fun tcp_proc_init/0),
+                    put(tcp_pid, TcpPid),
+                    gen_tcp:controlling_process(ClientSocket, TcpPid),
+                    TcpPid ! {start, ClientSocket, self()},
                     ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p~n"
                                  "Socket options: ~w~n",
-                                 [_ClientAddr, _ClientPort, inet:getopts(TcpListenSocket, [buffer,low_watermark,high_watermark, recbuf, sndbuf])]),
-                    tcp_receive_handler_loop(ClientSocket, queue:new(), 0);
+                                 [_ClientAddr, _ClientPort, inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
+                    tcp_receive_handler_loop(TcpPid, ClientSocket, queue:new(), 0);
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?CH_LOG_ERROR("Socket error whilst getting peername.")
@@ -81,8 +85,32 @@ tcp_acceptor(TcpListenSocket) ->
 %%% Internal functions
 %%% --------------------------------------------------------------------
 
+tcp_proc_init() ->
+    receive
+        {start, Socket, ParentPid} ->
+            %inet:setopts(Socket, [{active,once}]),
+            tcp_proc_loop(Socket, ParentPid)
+    end.
+
+tcp_proc_loop(Socket, ParentPid) ->
+    receive
+        {tcp, Socket, Packet} ->
+            %inet:setopts(Socket, [{active,once}]),
+            ParentPid ! {tcp, Socket, Packet}
+    after 0 ->
+        receive
+            {send, Pkt} ->
+                gen_tcp:send(Socket, Pkt);
+            Other ->
+                %inet:setopts(Socket,[{active,once}]),
+                ParentPid ! Other
+        end
+    end,
+    tcp_proc_loop(Socket, ParentPid).
+
+
 %% Receive loop the incoming TCP requests; if socket closes the function exits the receive loop.
-tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
+tcp_receive_handler_loop(TcpPid, ClientSocket, RequestTimesQueue, QueueLen) ->
     TargetIPaddr = get(target_ip_addr),
     TargetPort   = get(target_port),
     NewTimeout = case queue:is_empty(RequestTimesQueue) of
@@ -104,9 +132,9 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
         {tcp, ClientSocket, RequestBin} ->
 %            inet:setopts(ClientSocket,[{activve,once}]),
             ?CH_LOG_DEBUG("Received a request from client (QueueLen=~w).", [QueueLen]),
-            ch_stats:client_request_in(),
+%            ch_stats:client_request_in(),
             forward_request(RequestBin),
-            tcp_receive_handler_loop(ClientSocket, queue:in({os:timestamp(),binary_part(RequestBin,8,4)},RequestTimesQueue), QueueLen+1);
+            tcp_receive_handler_loop(TcpPid, ClientSocket, queue:in({os:timestamp(),binary_part(RequestBin,8,4)},RequestTimesQueue), QueueLen+1);
         {device_client_response, TargetIPaddr, TargetPort, ErrorCode, TargetResponseBin} ->
             ?CH_LOG_DEBUG("Received device client response from target IPaddr=~w, Port=~w",
                           [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
@@ -114,11 +142,11 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
             if 
               byte_size(TargetResponseBin) >= 4 ->
                 << _:32, Body/binary>> = TargetResponseBin,
-                reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, Hdr/binary, Body/binary>>);
+                reply_to_client(TcpPid, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, Hdr/binary, Body/binary>>);
               true -> 
-                reply_to_client(ClientSocket, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>)
+                reply_to_client(TcpPid, <<(byte_size(TargetResponseBin) + 8):32, TargetIPaddr:32, TargetPort:16, ErrorCode:16, TargetResponseBin/binary>>)
             end,
-            tcp_receive_handler_loop(ClientSocket, NewQ, QueueLen-1 );
+            tcp_receive_handler_loop(TcpPid, ClientSocket, NewQ, QueueLen-1 );
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
             ?CH_LOG_INFO("TCP socket closed.");
@@ -128,12 +156,12 @@ tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen) ->
             ?CH_LOG_WARN("TCP socket error (~p).", [_Reason]);
         _Else ->
             ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [_Else]),
-            tcp_receive_handler_loop(ClientSocket, RequestTimesQueue, QueueLen)
+            tcp_receive_handler_loop(TcpPid, ClientSocket, RequestTimesQueue, QueueLen)
     after NewTimeout ->
         ?CH_LOG_WARN("Timeout whilst awaiting response from device client for target IPaddr=~w, Port=~p."
                      " Generating timeout error response for this target so we can continue.", [ch_utils:ipv4_u32_addr_to_tuple(TargetIPaddr), TargetPort]),
-        reply_to_client(ClientSocket, <<8:32, TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>),
-        tcp_receive_handler_loop(ClientSocket, queue:drop(RequestTimesQueue), QueueLen-1 )
+        reply_to_client(TcpPid, <<8:32, TargetIPaddr:32, TargetPort:16, ?ERRCODE_CH_DEVICE_CLIENT_TIMEOUT:16>>),
+        tcp_receive_handler_loop(TcpPid, ClientSocket, queue:drop(RequestTimesQueue), QueueLen-1 )
     end.
 
 
@@ -176,8 +204,9 @@ unpack_target_request(RequestBin) ->
 
 
 %% Sends reply back to TCP client
-reply_to_client(ClientSocket, ResponseBin) ->
+reply_to_client(TcpPid, ResponseBin) ->
     ?CH_LOG_DEBUG("Sending response to TCP client"),
     ?PACKET_TRACE(ResponseBin, "~n  Sending the following response to the TCP client:"),
-    gen_tcp:send(ClientSocket, ResponseBin),
-    ch_stats:client_response_sent().
+    TcpPid ! {send, ResponseBin}.
+%    gen_tcp:send(ClientSocket, ResponseBin).
+%    ch_stats:client_response_sent().

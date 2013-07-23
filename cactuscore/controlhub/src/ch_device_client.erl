@@ -43,6 +43,7 @@
                 socket,              % Holds network socket to target device 
                 target_ip_tuple     :: tuple(),
                 target_port         :: non_neg_integer(),
+                udp_pid             :: pid(),
                 ipbus_v = unknown   :: ipbus_version(), 
                 next_id             :: non_neg_integer(),
                 max_in_flight       :: non_neg_integer(),
@@ -124,13 +125,17 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
                  [ChMaxInFlight]),
 
     % Try opening ephemeral port and we want data delivered as a binary.
-    case gen_udp:open(0, [binary]) of   
+    case gen_udp:open(0, [binary, {active, true}, {buffer, 100000}, {recbuf, 100000}, {read_packets, 50}]) of   
         {ok, Socket} ->
             put(socket, Socket),
             put(abs_max_in_flight, ChMaxInFlight),
             StatsTable = ch_stats:new_device_client_table(IPTuple,PortU16),
             put(stats, StatsTable),
-            {ok, #state{ mode=setup, socket=Socket, target_ip_tuple=IPTuple, target_port=PortU16, stats=StatsTable} };
+            UdpPid = spawn_link(fun udp_proc_init/0),
+            put(udp_pid, UdpPid),
+            gen_udp:controlling_process(Socket, UdpPid),
+            UdpPid ! {start, Socket, IPTuple, PortU16, self()},
+            {ok, #state{ mode=setup, socket=Socket, target_ip_tuple=IPTuple, target_port=PortU16, udp_pid=UdpPid, stats=StatsTable} };
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             get(targetSummary),
@@ -260,7 +265,8 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 NewQ = queue:join( queue:from_list(DroppedRequests), S#state.queue ),
                 NewInFlight = [{HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid}],
                 % Re-send original packet
-                gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
+                S#state.udp_pid ! {send, PktSent},
+%                gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
                 ch_stats:udp_sent(S#state.stats),
                 if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, request); true -> void end,
                 {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt, next_id=increment_pkt_id(HwNextId), queue=NewQ}, ?UDP_RESPONSE_TIMEOUT};
@@ -272,7 +278,8 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                         ?CH_LOG_INFO("Reply packet got lost on way back from board."),
                         NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid}),
                         {{2,0}, {control,Id}, _End} = parse_ipbus_packet(HdrSent),
-                        gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id)),
+                        S#state.udp_pid ! {send, resend_request_pkt(Id)},
+%                        gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id)),
                         ch_stats:udp_sent(S#state.stats),
                         if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, response); true -> void end,
                         {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
@@ -390,7 +397,8 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
             ClientPid ! MsgForClient,
             {noreply, S#state{ipbus_v=unknown, next_id=unknown} };
         {IPbusVer, ModPkt, PktId} ->
-            gen_udp:send(Socket, TargetIPTuple, TargetPort, ModPkt),
+            S#state.udp_pid ! {send, ModPkt},           
+%            gen_udp:send(Socket, TargetIPTuple, TargetPort, ModPkt),
             NewInFlightList = lists:append( S#state.in_flight, [{binary_part(ModPkt,0,4), os:timestamp(), ModPkt, 0, ClientPid}] ),
             ch_stats:udp_sent(S#state.stats),
             NewS = if
@@ -402,7 +410,7 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
            ?CH_LOG_DEBUG("Request packet sent. New state  ...", [], NewS),
            send_requests_to_board(NewS)
     end.
-
+    
 
 %% ---------------------------------------------------------------------
 %% @doc
@@ -649,6 +657,7 @@ get_device_status(IPbusVer, NrAttemptsLeft) when is_integer(NrAttemptsLeft), NrA
 get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrAttemptsLeft), NrAttemptsLeft > 0 ->
     AttemptNr = TotNrAttempts - NrAttemptsLeft + 1,
     Socket = get(socket),
+    UdpPid = get(udp_pid),
     {TargetIPTuple, TargetPort} = target_ip_port(),
     StatusReq13 = binary:copy(<<16#100000f8:32/native>>, 10),
     StatusReq20 = <<16#200000f1:32/big, 0:(15*32)>>,
@@ -656,17 +665,21 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
                  [AttemptNr, TotNrAttempts]),
     case IPbusVer of
          {1,3} when NrAttemptsLeft=:=TotNrAttempts ->
-             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
+             UdpPid ! {send, StatusReq13},
+%             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
              ch_stats:udp_sent(get(stats));
          {1,3} ->
              void;
          {2,0} ->
-             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
+             UdpPid ! {send, StatusReq20},
+%             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
              ch_stats:udp_sent(get(stats));
          unknown ->
-             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
+             UdpPid ! {send, StatusReq20},
+%             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq20 ),
              timer:sleep(2),
-             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
+             UdpPid ! {send, StatusReq13},
+%             gen_udp:send(Socket, TargetIPTuple, TargetPort, StatusReq13 ),
              ch_stats:udp_sent(get(stats))
     end,
     receive
@@ -722,3 +735,25 @@ state_as_string(S) when is_record(S, state) ->
                    length(S#state.in_flight), S#state.max_in_flight,
                    queue:len(S#state.queue)]
                   ).
+
+
+udp_proc_init() ->
+    receive
+        {start, Socket, TargetIP, TargetPort, ParentPid} ->
+            udp_proc_loop(Socket, TargetIP, TargetPort, ParentPid)
+    end.
+
+udp_proc_loop(Socket, TargetIP, TargetPort, ParentPid) ->
+    receive
+        {udp, Socket, TargetIP, TargetPort, Packet} ->
+            ParentPid ! {udp, Socket, TargetIP, TargetPort, Packet}
+    after 0 ->
+        receive 
+            {send, Pkt} ->
+                gen_udp:send(Socket, TargetIP, TargetPort, Pkt);
+            Other ->
+                ParentPid ! Other
+        end 
+    end,
+    udp_proc_loop(Socket, TargetIP, TargetPort, ParentPid).
+
