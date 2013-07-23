@@ -243,7 +243,7 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
 
 % handle_info callback for device response timeout
 handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort, next_id=NextId}) when length(S#state.in_flight)=/=0 ->
-    {HdrSent, TimeSent, PktSent, RetryCount, ClientPid} = lists:nth(1, S#state.in_flight),
+    {HdrSent, TimeSent, IoDataSent, RetryCount, ClientPid} = lists:nth(1, S#state.in_flight),
     ?CH_LOG_DEBUG("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
                   "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
     case RetryCount of
@@ -261,11 +261,11 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 % Add request packets that would have been dropped, back to front of state's queue
                 ?CH_LOG_INFO("Request packet got lost on way to board."),
                 InFlightTail = lists:nthtail(1, S#state.in_flight),
-                DroppedRequests = [{ModReq, Pid} || {_, _, <<_:4/binary, ModReq/binary>>, _, Pid} <- lists:reverse(InFlightTail)],
+                DroppedRequests = [{<<ModHdr/binary, ModBody/binary>>, Pid} || {_, _, [ModHdr, ModBody], _, Pid} <- lists:reverse(InFlightTail)],
                 NewQ = queue:join( queue:from_list(DroppedRequests), S#state.queue ),
-                NewInFlight = [{HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid}],
+                NewInFlight = [{HdrSent, TimeSent, IoDataSent, RetryCount+1, ClientPid}],
                 % Re-send original packet
-                S#state.udp_pid ! {send, PktSent},
+                S#state.udp_pid ! {send, IoDataSent},
 %                gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
                 ch_stats:udp_sent(S#state.stats),
                 if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, request); true -> void end,
@@ -276,7 +276,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
                 case lists:member(HwNextId, LostResponseNextIds) of
                     true ->
                         ?CH_LOG_INFO("Reply packet got lost on way back from board."),
-                        NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid}),
+                        NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, IoDataSent, RetryCount+1, ClientPid}),
                         {{2,0}, {control,Id}, _End} = parse_ipbus_packet(HdrSent),
                         S#state.udp_pid ! {send, resend_request_pkt(Id)},
 %                        gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id)),
@@ -299,7 +299,7 @@ handle_info(timeout, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, ta
       RetryCount<3 ->
          ?CH_LOG_WARN("Timeout nr. ~w when waiting for response from target; not IPbus 2.0 and so will just wait for another ~wms ... ", 
                       [RetryCount+1, ?UDP_RESPONSE_TIMEOUT], S),
-         NewInFlight = [{HdrSent, TimeSent, PktSent, RetryCount+1, ClientPid}],
+         NewInFlight = [{HdrSent, TimeSent, IoDataSent, RetryCount+1, ClientPid}],
          {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
       % Clause for ultimate irrecoverable timeout
       true ->
@@ -399,7 +399,7 @@ send_requests_to_board({Packet, ClientPid}, S = #state{socket=Socket, target_ip_
         {IPbusVer, ModPkt, PktId} ->
             S#state.udp_pid ! {send, ModPkt},           
 %            gen_udp:send(Socket, TargetIPTuple, TargetPort, ModPkt),
-            NewInFlightList = lists:append( S#state.in_flight, [{binary_part(ModPkt,0,4), os:timestamp(), ModPkt, 0, ClientPid}] ),
+            NewInFlightList = lists:append( S#state.in_flight, [{hd(ModPkt), os:timestamp(), ModPkt, 0, ClientPid}] ),
             ch_stats:udp_sent(S#state.stats),
             NewS = if
                      is_integer(PktId) ->
@@ -470,7 +470,7 @@ forward_pending_replies( L ) when is_list(L) ->
 
 reset_header(Packet, NewHdr) when is_binary(Packet), size(Packet)>3, is_binary(NewHdr), size(NewHdr)>3 ->
     <<_:4/binary, Body/binary>> = Packet,
-    <<NewHdr/binary, Body/binary>>.
+    [NewHdr, Body].
 
 
 %% ---------------------------------------------------------------------
