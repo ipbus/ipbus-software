@@ -27,7 +27,7 @@ udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInF
             io:format("ERROR : Expected ~w , but received ~w~n", [Reply, Pkt]),
             fail;
         {inet_reply,Socket,ok} ->
-            void;
+            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight+1, MaxInFlight}, NrIterationsLeft-1);
         {inet_reply,Socket,Other} ->
             io:format("ERROR in async udp send confirmation msg: ~p~n", [Other]),
             force_quit = yes
@@ -42,7 +42,7 @@ udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight,MaxInF
             io:format("ERROR : Expected ~w , but received ~w~n", [Reply, Pkt]),
             fail;
         {inet_reply,Socket,ok} ->
-            void;
+            udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {NrInFlight, MaxInFlight}, NrIterationsLeft);
         {inet_reply,Socket,Other} ->
             io:format("ERROR in async udp send confirmation msg: ~p~n", [Other]),
             force_quit = yes
