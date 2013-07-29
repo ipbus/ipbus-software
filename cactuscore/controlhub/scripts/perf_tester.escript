@@ -1,6 +1,8 @@
 #!/bin/env escript
 %% -*- erlang -*-
-%%! -C -pa /cactusbuild/trunk/cactuscore/controlhub/ebin/unittest +zdbbl 2097151 +sbt db +scl false +swt very_low
+%%! -C -pa /cactusbuild/trunk/cactuscore/controlhub/ebin/unittest +zdbbl 2097151 
+
+% +sbt db +scl false +swt very_low
 
 
 
@@ -11,8 +13,7 @@
 -define(UDP_SOCKET_OPTIONS, [binary, {active, true}, {buffer, 100000}, {recbuf, 100000}, {read_packets, 50}]). % {active, false}
 %-define(UDP_SOCKET_OPTIONS, [binary, {active, true}]).
 
--define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}, {buffer, 100000}, {low_watermark, 50000}, {high_watermark, 100000}]).
-%-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}]).
+-define(TCP_SOCKET_OPTIONS, [binary, {packet, 4}, {nodelay, true}, {active, true}, {backlog, 256}, {buffer, 200000}, {low_watermark, 200000}, {high_watermark, 400000}, {recbuf, 200000}, {sndbuf, 200000}]).
 
 
 -define(IPBUS_TXFULL_REQ, <<16#200000f0:32,
@@ -57,15 +58,46 @@
                                  16#2000ff3f:32, % NI write, 0xff deep
                                  16#00002001:32,
                                  0:(32*(16#ff)),
-                                 16#2000673f:32, % NI write, 0xff deep
+                                 16#20005c3f:32, % NI write, 0x5c deep
                                  16#00002001:32,
-                                 0:((16#67)*32)
+                                  0:((16#5c)*32)
                                >>).
 -define(IPBUS_TXFULL_PRAM_REP, <<16#200000f0:32,
                                  16#20000110:32,
                                  16#2000ff30:32,
-                                 16#20006730:32
+                                 16#20005c30:32 % 16#20005c30:32
                                >>).
+
+
+-define(IPBUS_BOTHFULL_PRAM_REQ, <<16#200000f0:32,
+                                   16#2000011f:32, % 1-word write for PRAM 
+                                   16#00002000:32,
+                                   16#00000000:32,
+                                   16#2000ff3f:32, % NI write, 0xff deep
+                                   16#00002001:32,
+                                   0:(32*(16#ff)),
+                                   16#2000553f:32, % NI write, 0x58 deep
+                                   16#00002001:32,
+                                   0:((16#55)*32),
+                                   16#2000011f:32, % 1-word write for PRAM
+                                   16#00002000:32,
+                                   16#00000000:32,
+                                   16#2000ff2f:32, % NI read, 0xff deep
+                                   16#20002001:32,
+                                   16#20005c2f:32, % NI read, 0x62 deep
+                                   16#00002001:32
+                                 >>).
+-define(IPBUS_BOTHFULL_PRAM_REP, <<16#200000f0:32,
+                                   16#20000110:32,
+                                   16#2000ff30:32,
+                                   16#20005530:32,
+                                   16#20000110:32,
+                                   16#2000ff20:32,
+                                   0:((16#ff)*32),
+                                   16#20005c20:32,
+                                   0:((16#5c)*32)
+                                 >>).
+
 
 
 -define(DUMMY_JUMBO, <<0:(8*8000)>>).
@@ -121,7 +153,9 @@ print_results(NrItns, MicroSecs, ReqBytes, ReplyBytes) ->
     MbitPerSecRecd = (BytesRecd * 8 / 1000000.0) / (MicroSecs / 1000000.0),
     io:format("~nSent/rcvd ~w packets (~w/~w bytes) in ~w secs, time per packet = ~wus~n", [NrItns, ReqBytes, ReplyBytes, MicroSecs/1000000.0, MicroSecsPerIt]),
     io:format("   Send B/W = ~w Mb/s~n", [MbitPerSecSent]),
-    io:format("   Recv B/W = ~w Mb/s~n", [MbitPerSecRecd]).
+    io:format("   Recv B/W = ~w Mb/s~n", [MbitPerSecRecd]),
+    io:format("Test iteration frequency = ~w Hz~n", [1000000.0 * NrItns / MicroSecs]),
+    io:format("Average rw bandwidth = ~w KB/s~n", [max(MbitPerSecSent,MbitPerSecRecd) * 125.0]).
 
 
 main(["udp_ipbus_client" | OtherArgs]) ->
@@ -143,7 +177,7 @@ main(["udp_ipbus_client2" | OtherArgs]) ->
 main(["udp_echo_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
-    Request = ?IPBUS_TXFULL_REQ,
+    Request = ?IPBUS_TXFULL_PRAM_REQ,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Request, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Request));
 
@@ -154,7 +188,8 @@ main(["udp_echo_server"]) ->
 main(["tcp_echo_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = tcp_connect(TargetIP, TargetPort),
-    Request = ?IPBUS_TXFULL_REQ,
+%    Request = <<0:(8*1430)>>,
+    Request = <<0:(8*5*1430)>>,
     {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Request, {0,NrInFlight}, NrItns) end ),
     gen_tcp:close(Socket),
@@ -179,6 +214,7 @@ main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
               TargetIPU32:32,
               TargetPort:16, 0:16,
               (?IPBUS_TXFULL_PRAM_REP)/binary>>,
+    io:format("Request: ~w bytes~nReply: ~w bytes~n", [byte_size(Request), byte_size(Reply)]),
     {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Reply, {0,NrInFlight}, NrItns) end ),
     gen_tcp:close(Socket),
