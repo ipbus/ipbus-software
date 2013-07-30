@@ -199,6 +199,5 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST ( multiple_hwinterfaces ( connection_file,device_id ) );
   CACTUS_TEST ( single_hwinterface ( connection_file,device_id ) );
   CACTUS_TEST ( single_copied_hwinterface ( connection_file,device_id ) );
-
   CACTUS_TEST_RESULT();
 }

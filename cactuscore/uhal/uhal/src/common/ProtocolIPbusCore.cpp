@@ -259,6 +259,11 @@ namespace uhal
 
   ValHeader IPbusCore::implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
+    if ( aSource.size() == 0 )
+    {
+      throw exception::IPbusCoreZeroSizeTransaction();
+    }
+
     log ( Debug() , "Write block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -340,6 +345,11 @@ namespace uhal
 
   ValVector< uint32_t > IPbusCore::implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
+    if ( aSize == 0 )
+    {
+      throw exception::IPbusCoreZeroSizeTransaction();
+    }
+
     log ( Debug() , "Read unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
