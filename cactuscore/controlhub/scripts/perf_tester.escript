@@ -17,17 +17,18 @@
 
 
 -define(IPBUS_TXFULL_REQ, <<16#200000f0:32,
-                             16#2cbaff1f:32, % Write, 0xff deep
-                             (16#1000):32,
-                             0:((16#ff)*32),
-                             16#2000601f:32, % Write, 0x60 deep
-                             (16#1000):32,
-                             0:((16#60)*32)
-                           >>).
+                            16#2cbaff1f:32, % Write, 0xff deep
+                            (16#1000):32,
+                            0:((16#ff)*32),
+                            16#20006c1f:32, % Write, 0x66 deep
+                            (16#1000):32,
+                            0:((16#6c)*32)
+                          >>).
 -define(IPBUS_TXFULL_REP, <<16#200000f0:32,
-                             16#2cbaff10:32, % Write, 0xff deep
-                             16#20006010:32  % Write, 0x60 deep
-                           >>).
+                            16#2cbaff10:32, % Write, 0xff deep
+                            16#20006c10:32  % Write, 0x66 deep
+                          >>).
+ 
 
 -define(IPBUS_BOTHFULL_REQ, <<16#200000f0:32,
                               16#2cbaff1f:32, % Write, 0xff deep
@@ -174,6 +175,14 @@ main(["udp_ipbus_client2" | OtherArgs]) ->
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
 
+main(["udp_ipbus_client_pram" | OtherArgs]) ->
+    {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
+    Socket = create_udp_socket(),
+    Request = ?IPBUS_TXFULL_PRAM_REQ,
+    Reply = ?IPBUS_TXFULL_PRAM_REP,
+    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
+    print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
+
 main(["udp_echo_client" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
@@ -219,6 +228,7 @@ main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Reply, {0,NrInFlight}, NrItns) end ),
     gen_tcp:close(Socket),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
+
 
 main(["device_client_bw" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
