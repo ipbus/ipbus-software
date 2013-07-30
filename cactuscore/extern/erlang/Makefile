@@ -10,7 +10,7 @@ PackageName = cactuscore-extern-erlang
 Packager = Robert Frazier
 
 # ErlangOTP version numbers.  Erlang is versioned like so: R14B, R14B01, R14B02, .., R15B, etc etc.
-PACKAGE_VER_MAJOR = 15
+PACKAGE_VER_MAJOR = 16
 # If no minor version number, leave blank rather than "00"
 PACKAGE_VER_MINOR = 01
 
