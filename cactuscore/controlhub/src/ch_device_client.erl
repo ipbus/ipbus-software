@@ -194,11 +194,11 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
                 ?CH_LOG_INFO("Device client is entering new logic."),
                 <<_Hdr:32, Body/binary>> = RequestPacket,
                 S#state.udp_pid ! {send, [<<16#200000f0:32>>, Body]},
-                device_client_loop(send, 1, ClientPid, S#state{mode = normal,
-                                                          ipbus_v = {2,0},
-                                                          max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
-                                                          next_id = NextExpdId
-                                                          });
+                device_client_loop(send, 1, queue:from_list([ClientPid]), S#state{mode = normal,
+                                                                                ipbus_v = {2,0},
+                                                                                max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
+                                                                                next_id = NextExpdId
+                                                                                });
 %                send_requests_to_board({RequestPacket, ClientPid}, S#state{mode = normal,
 %                                                                           ipbus_v = {2,0},
 %                                                                           max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
@@ -225,7 +225,7 @@ handle_cast(_Msg, State) ->
     {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
 
-device_client_loop(send, NrInFlight, TransManPid, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
+device_client_loop(send, NrInFlight, TransManPidQ, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
     receive
         {'$gen_cast', {send, Pkt, Pid}} ->
             <<_Hdr:32, Body/binary>> = Pkt,
@@ -233,35 +233,38 @@ device_client_loop(send, NrInFlight, TransManPid, S = #state{socket=Socket, targ
 %            ?CH_LOG_INFO("~p in flight", [NrInFlight+1]),
             if 
               (NrInFlight+1) < S#state.max_in_flight ->
-                device_client_loop(recv_nb, NrInFlight+1, Pid, S);
+                device_client_loop(recv_nb, NrInFlight+1, queue:in(Pid, TransManPidQ), S);
               true ->
-                device_client_loop(recv_b, NrInFlight+1, Pid, S)
+                device_client_loop(recv_b, NrInFlight+1, queue:in(Pid, TransManPidQ), S)
             end;
         {udp, Socket, TargetIPTuple, TargetPort, Reply} ->
-            TransManPid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
-            device_client_loop(send, NrInFlight-1, TransManPid, S);
+            {{value, Pid}, NewQ} = queue:out(TransManPidQ),
+            Pid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
+            device_client_loop(send, NrInFlight-1, NewQ, S);
         Other ->
             ?CH_LOG_ERROR("Unexpected message received : ~p", [Other]),
-            device_client_loop(send, NrInFlight, TransManPid, S)
+            device_client_loop(send, NrInFlight, TransManPidQ, S)
     after ?DEVICE_CLIENT_SHUTDOWN_AFTER ->
         ?CH_LOG_INFO("No communication has passed through this device client in ~pms ; shutting down now", [?DEVICE_CLIENT_SHUTDOWN_AFTER], S),
         {stop, normal, S}
     end;
 
-device_client_loop(recv_nb, NrInFlight, TransManPid, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
+device_client_loop(recv_nb, NrInFlight, TransManPidQ, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
     receive
         {udp, Socket, TargetIPTuple, TargetPort, Reply} ->
-            TransManPid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
-            device_client_loop(recv_nb, NrInFlight-1, TransManPid, S)
+            {{value, Pid}, NewQ} = queue:out(TransManPidQ),
+            Pid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
+            device_client_loop(recv_nb, NrInFlight-1, NewQ, S)
     after 0 ->
-        device_client_loop(send, NrInFlight, TransManPid, S)
+        device_client_loop(send, NrInFlight, TransManPidQ, S)
     end;
 
-device_client_loop(recv_b, NrInFlight, TransManPid, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
+device_client_loop(recv_b, NrInFlight, TransManPidQ, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
     receive
         {udp, Socket, TargetIPTuple, TargetPort, Reply} ->
-            TransManPid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
-            device_client_loop(send, NrInFlight-1, TransManPid, S)
+            {{value, Pid}, NewQ} = queue:out(TransManPidQ),
+            Pid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
+            device_client_loop(send, NrInFlight-1, NewQ, S)
     after ?UDP_RESPONSE_TIMEOUT ->
         ?CH_LOG_ERROR("TIMEOUT when waiting for response from board."),
         {stop, udp_timeout, S}
