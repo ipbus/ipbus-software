@@ -56,14 +56,15 @@ tcp_acceptor(TcpListenSocket) ->
             ch_stats:client_connected(),
             case inet:peername(ClientSocket) of
                 {ok, {_ClientAddr, _ClientPort}} ->
-                    TcpPid = spawn_link(fun tcp_proc_init/0),
+                    TcpPid = proc_lib:spawn_link(fun tcp_proc_init/0),
                     put(tcp_pid, TcpPid),
                     gen_tcp:controlling_process(ClientSocket, TcpPid),
                     TcpPid ! {start, ClientSocket, self()},
                     ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p~n"
                                  "Socket options: ~w~n",
                                  [_ClientAddr, _ClientPort, inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
-                    tcp_receive_handler_loop(TcpPid, ClientSocket, queue:new(), 0);
+                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, unknown, unknown, unknown, 1);
+%                    tcp_receive_handler_loop(TcpPid, ClientSocket, queue:new(), 0);
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?CH_LOG_ERROR("Socket error whilst getting peername.")
@@ -101,13 +102,67 @@ tcp_proc_loop(Socket, ParentPid) ->
     after 0 ->
         receive
             {send, Pkt} ->
-                gen_tcp:send(Socket, Pkt);
+%                gen_tcp:send(Socket, Pkt);
+                true = erlang:port_command(Socket, Pkt, []);
+            {inet_reply, Socket, ok} ->
+                void;
+            {inet_reply, Socket, SendError} ->
+                throw({tcp_send_error,SendError});
             Other ->
                 %inet:setopts(Socket,[{active,once}]),
                 ParentPid ! Other
         end
     end,
     tcp_proc_loop(Socket, ParentPid).
+
+
+minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight) ->
+%    ?CH_LOG_INFO("In minimal logic loop"),
+    receive
+        {tcp, ClientSocket, RequestBin} ->
+%            ?CH_LOG_INFO("Recvd tcp"),
+%            <<TargetIPAddr:32,
+%              TargetPort:16, _NumInstructions:16,
+%              IPbusPkt/binary>> = RequestBin,
+%            RetPid = enqueue_requests(TargetIPAddr, TargetPort, DevClientPid, IPbusPkt),
+%            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddr, TargetPort, RetPid, NrInFlight+1);
+            {RetPid, TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, DevClientPid, 0),
+            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs);
+
+        {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, <<_:32, Body/binary>>} ->
+            TcpPid ! {send, [<<(byte_size(Body) + 12):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>>, Body]},
+            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1);
+
+        {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, Bin} ->
+            TcpPid ! {send, [<<(byte_size(Bin) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>>, Bin]},
+            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1);
+
+        Else ->
+            ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [Else]),
+            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight)
+    end.
+            
+unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TheRest/binary>>, Pid, NrSent) ->
+    NrBytes = NrInstructions*4,
+%    ?CH_LOG_INFO("Unpacking request"),
+    <<IPbusReq:NrBytes/binary, Tail/binary>> = TheRest,
+%    ?CH_LOG_INFO("Enqueueing request"),
+    RetPid = enqueue_requests(TargetIPAddr, TargetPort, Pid, IPbusReq),
+    if
+      byte_size(Tail) > 0 ->
+%        ?CH_LOG_INFO("Looping back"),
+        unpack_and_enqueue(Tail, RetPid, NrSent+1);
+      true ->
+%        ?CH_LOG_INFO("Returning"),
+        {RetPid, TargetIPAddr, TargetPort, NrSent}
+    end.
+
+enqueue_requests(IPaddrU32, PortU16, DestPid, IPbusRequest) when is_pid(DestPid) ->
+    gen_server:cast(DestPid, {send, IPbusRequest, self()}),
+    DestPid;
+enqueue_requests(IPaddrU32, PortU16, NotPid, IPbusRequest) ->
+    {ok, Pid} = ch_device_client_registry:get_pid(IPaddrU32, PortU16),
+    enqueue_requests(IPaddrU32, PortU16, Pid, IPbusRequest).
 
 
 %% Receive loop the incoming TCP requests; if socket closes the function exits the receive loop.

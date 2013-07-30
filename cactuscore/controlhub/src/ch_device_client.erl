@@ -42,6 +42,7 @@
 -record(state, {mode = normal       :: mode(), 
                 socket,              % Holds network socket to target device 
                 target_ip_tuple     :: tuple(),
+                target_ip_u32       :: non_neg_integer(),
                 target_port         :: non_neg_integer(),
                 udp_pid             :: pid(),
                 ipbus_v = unknown   :: ipbus_version(), 
@@ -135,7 +136,7 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
             put(udp_pid, UdpPid),
             gen_udp:controlling_process(Socket, UdpPid),
             UdpPid ! {start, Socket, IPTuple, PortU16, self()},
-            {ok, #state{ mode=setup, socket=Socket, target_ip_tuple=IPTuple, target_port=PortU16, udp_pid=UdpPid, stats=StatsTable} };
+            {ok, #state{ mode=setup, socket=Socket, target_ip_tuple=IPTuple, target_ip_u32=IPaddrU32, target_port=PortU16, udp_pid=UdpPid, stats=StatsTable} };
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             get(targetSummary),
@@ -190,11 +191,19 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
                 send_requests_to_board({RequestPacket, ClientPid}, S#state{ mode=normal, ipbus_v={1,3}, max_in_flight=1 });
             {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
                 ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
-                send_requests_to_board({RequestPacket, ClientPid}, S#state{mode = normal,
-                                                                           ipbus_v = {2,0},
-                                                                           max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
-                                                                           next_id = NextExpdId
-                                                                           });
+                ?CH_LOG_INFO("Device client is entering new logic."),
+                <<_Hdr:32, Body/binary>> = RequestPacket,
+                S#state.udp_pid ! {send, [<<16#200000f0:32>>, Body]},
+                device_client_loop(send, 1, ClientPid, S#state{mode = normal,
+                                                          ipbus_v = {2,0},
+                                                          max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
+                                                          next_id = NextExpdId
+                                                          });
+%                send_requests_to_board({RequestPacket, ClientPid}, S#state{mode = normal,
+%                                                                           ipbus_v = {2,0},
+%                                                                           max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
+%                                                                           next_id = NextExpdId
+%                                                                           });
             {error, _, MsgForTransManager} ->
                 ?CH_LOG_ERROR("Target didn't respond correctly to status request in ch_device_client:init/1."),
                 ClientPid ! MsgForTransManager,
@@ -214,6 +223,50 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
 handle_cast(_Msg, State) -> 
     ?CH_LOG_ERROR("Unexpected cast received : ~p", [_Msg], State),
     {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
+
+
+device_client_loop(send, NrInFlight, TransManPid, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
+    receive
+        {'$gen_cast', {send, Pkt, Pid}} ->
+            <<_Hdr:32, Body/binary>> = Pkt,
+            S#state.udp_pid ! {send, [<<16#200000f0:32>>, Body]},
+%            ?CH_LOG_INFO("~p in flight", [NrInFlight+1]),
+            if 
+              (NrInFlight+1) < S#state.max_in_flight ->
+                device_client_loop(recv_nb, NrInFlight+1, Pid, S);
+              true ->
+                device_client_loop(recv_b, NrInFlight+1, Pid, S)
+            end;
+        {udp, Socket, TargetIPTuple, TargetPort, Reply} ->
+            TransManPid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
+            device_client_loop(send, NrInFlight-1, TransManPid, S);
+        Other ->
+            ?CH_LOG_ERROR("Unexpected message received : ~p", [Other]),
+            device_client_loop(send, NrInFlight, TransManPid, S)
+    after ?DEVICE_CLIENT_SHUTDOWN_AFTER ->
+        ?CH_LOG_INFO("No communication has passed through this device client in ~pms ; shutting down now", [?DEVICE_CLIENT_SHUTDOWN_AFTER], S),
+        {stop, normal, S}
+    end;
+
+device_client_loop(recv_nb, NrInFlight, TransManPid, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
+    receive
+        {udp, Socket, TargetIPTuple, TargetPort, Reply} ->
+            TransManPid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
+            device_client_loop(recv_nb, NrInFlight-1, TransManPid, S)
+    after 0 ->
+        device_client_loop(send, NrInFlight, TransManPid, S)
+    end;
+
+device_client_loop(recv_b, NrInFlight, TransManPid, S = #state{socket=Socket, target_ip_tuple=TargetIPTuple, target_port=TargetPort}) ->
+    receive
+        {udp, Socket, TargetIPTuple, TargetPort, Reply} ->
+            TransManPid ! {device_client_response, S#state.target_ip_u32, S#state.target_port, ?ERRCODE_SUCCESS, Reply},
+            device_client_loop(send, NrInFlight-1, TransManPid, S)
+    after ?UDP_RESPONSE_TIMEOUT ->
+        ?CH_LOG_ERROR("TIMEOUT when waiting for response from board."),
+        {stop, udp_timeout, S}
+    end.
+
 
 
 %% --------------------------------------------------------------------
@@ -751,7 +804,13 @@ udp_proc_loop(Socket, TargetIP, TargetPort, ParentPid) ->
     after 0 ->
         receive 
             {send, Pkt} ->
-                gen_udp:send(Socket, TargetIP, TargetPort, Pkt);
+                {IP1, IP2, IP3, IP4} = TargetIP,
+                true = erlang:port_command(Socket, [[((TargetPort) bsr 8) band 16#ff, (TargetPort) band 16#ff], [IP1 band 16#ff, IP2 band 16#ff, IP3 band 16#ff, IP4 band 16#ff], Pkt]);
+%                gen_udp:send(Socket, TargetIP, TargetPort, Pkt);
+            {inet_reply, Socket, ok} ->
+                void;
+            {inet_reply, Socket, Other} ->
+                throw({udp_send_error, Other});
             Other ->
                 ParentPid ! Other
         end 
