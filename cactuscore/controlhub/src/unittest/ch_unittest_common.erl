@@ -65,7 +65,7 @@ tcp_client_loop(_SocketTuple, _Request, _Reply, {0,_MaxInFlight}, 0) ->
     ok;
 tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) when NrItnsLeft>0, NrInFlight<MaxInFlight ->
 %    SendBytes = byte_size(Request),
-    gen_tcp:send(Socket, Request),
+    async_tcp_send(Socket, Request),
     case tcp_recv(Socket, ActiveVal, 0) of
         Reply ->
             tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight, MaxInFlight}, NrItnsLeft-1);
@@ -76,7 +76,7 @@ tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, Nr
             tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight+1, MaxInFlight}, NrItnsLeft-1)
     end;
 tcp_client_loop({Socket, ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, NrItnsLeft) ->
-    case tcp_recv(Socket, ActiveVal, 20) of
+    case tcp_recv(Socket, ActiveVal, 200) of
         Reply ->
             tcp_client_loop({Socket,ActiveVal}, Request, Reply, {NrInFlight-1, MaxInFlight}, NrItnsLeft);
         Pkt when is_binary(Pkt) ->
@@ -85,6 +85,18 @@ tcp_client_loop({Socket, ActiveVal}, Request, Reply, {NrInFlight,MaxInFlight}, N
         timeout ->
             io:format("ERROR : Did not receive reply packet in 20ms~n"),
             fail
+    end.
+
+
+async_tcp_send(Socket, IoData) ->
+    true = erlang:port_command(Socket, IoData, []),
+    receive
+        {inet_reply, Socket, ok} ->
+            void;
+        {inet_reply, Socket, SendError} ->
+            throw({tcp_send_error,SendError})
+    after 0 ->
+        void
     end.
 
 
@@ -148,7 +160,7 @@ tcp_echo_server_loop(LSocket, {Socket, ActiveVal}) ->
     case tcp_recv(Socket, ActiveVal, infinity) of 
         Pkt when is_binary(Pkt) ->
             SendBytes = byte_size(Pkt),
-            gen_tcp:send(Socket, <<SendBytes:32, Pkt/binary>>),
+            gen_tcp:send(Socket, Pkt),
             tcp_echo_server_loop(LSocket, {Socket,ActiveVal});
         tcp_closed ->
             io:format("Client disconnected. Going back to waiting for next client~n"),
