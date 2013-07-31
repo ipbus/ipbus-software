@@ -69,7 +69,7 @@ namespace uhal
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.
     ExceptionClass ( IPbusCoreUnparsableTransactionHeader , "Exception class to handle the case where the IPbus transaction header could not be parsed." );
-    ExceptionClass ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." );
+    //     ExceptionClass ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." );
 
     ExceptionClass ( IPbusCoreResponseCodeSet , "Exception class to handle the case where the IPbus transaction header response code indicated an error." );
     ExceptionClass ( IPbusTransactionTypeIncorrect , "Exception class to handle the case where the IPbus transaction type came back as the wrong type." );

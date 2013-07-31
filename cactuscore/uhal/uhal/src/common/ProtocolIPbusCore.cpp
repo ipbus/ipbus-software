@@ -261,7 +261,11 @@ namespace uhal
   {
     if ( aSource.size() == 0 )
     {
-      throw exception::IPbusCoreZeroSizeTransaction();
+      log ( Warning() , "Zero-sized block transaction requested. uHAL has made the executive decision to ignore this: the instruction will not be sent and the returned header is >>assumed<< to be validated." );
+      ValHeader lReply ( CreateValHeader().first );
+      lReply.valid ( true );
+      return lReply;
+      //throw exception::IPbusCoreZeroSizeTransaction();
     }
 
     log ( Debug() , "Write block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
@@ -347,7 +351,11 @@ namespace uhal
   {
     if ( aSize == 0 )
     {
-      throw exception::IPbusCoreZeroSizeTransaction();
+      log ( Warning() , "Zero-sized block transaction requested. uHAL has made the executive decision to ignore this: the instruction will not be sent and the returned packet is >>assumed<< to be validated." );
+      ValVector<uint32_t> lReply ( CreateValVector ( aSize ).first );
+      lReply.valid ( true );
+      return lReply;
+      //       throw exception::IPbusCoreZeroSizeTransaction();
     }
 
     log ( Debug() , "Read unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );

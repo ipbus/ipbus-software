@@ -30,7 +30,6 @@
 */
 
 #include "uhal/uhal.hpp"
-#include "uhal/ProtocolIPbusCore.hpp"
 
 #include "uhal/tests/tools.hpp"
 
@@ -52,13 +51,12 @@ void block_write_read ( size_t N,const std::string& connection, const std::strin
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-
   std::vector<uint32_t> empty_vector;
-  CACTUS_TEST_THROW ( hw.getNode ( "LARGE_MEM" ).writeBlock ( empty_vector ) , uhal::exception::IPbusCoreZeroSizeTransaction );
-  CACTUS_TEST_THROW ( hw.getNode ( "LARGE_MEM" ).readBlock ( 0 ) , uhal::exception::IPbusCoreZeroSizeTransaction );
-
+  CACTUS_TEST ( hw.getNode ( "LARGE_MEM" ).writeBlock ( empty_vector ) );
+  CACTUS_TEST ( hw.getNode ( "LARGE_MEM" ).readBlock ( 0 ) );
   std::vector<uint32_t> xx;
   xx.reserve ( N );
+
   for ( size_t i=0; i!= N; ++i )
   {
     xx.push_back ( static_cast<uint32_t> ( rand() ) );
