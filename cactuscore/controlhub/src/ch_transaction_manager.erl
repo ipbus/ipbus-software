@@ -63,7 +63,7 @@ tcp_acceptor(TcpListenSocket) ->
                     ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p~n"
                                  "Socket options: ~w~n",
                                  [_ClientAddr, _ClientPort, inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
-                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, unknown, unknown, unknown, 1);
+                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, unknown, unknown, unknown, 1, queue:new(), []);
 %                    tcp_receive_handler_loop(TcpPid, ClientSocket, queue:new(), 0);
                 _Else ->
                     ch_stats:client_disconnected(),
@@ -116,7 +116,7 @@ tcp_proc_loop(Socket, ParentPid) ->
     tcp_proc_loop(Socket, ParentPid).
 
 
-minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight) ->
+minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList) ->
 %    ?CH_LOG_INFO("In minimal logic loop"),
     receive
         {tcp, ClientSocket, RequestBin} ->
@@ -127,19 +127,32 @@ minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPo
 %            RetPid = enqueue_requests(TargetIPAddr, TargetPort, DevClientPid, IPbusPkt),
 %            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddr, TargetPort, RetPid, NrInFlight+1);
             {RetPid, TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, DevClientPid, 0),
-            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs);
+            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs, queue:in(NrReqs, NrReqsQ), ReplyIoList);
 
         {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, <<_:32, Body/binary>>} ->
-            TcpPid ! {send, [<<(byte_size(Body) + 12):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>>, Body]},
-            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1);
+            NrRepliesToSend = element(2, queue:peek(NrReqsQ)),
+            case ((lists:flatlength(ReplyIoList) + 2) div 2) of
+                NrRepliesToSend ->
+%                    ?CH_LOG_INFO("Sending over TCP: ~p", [lists:reverse([Body, <<(byte_size(Body) + 12):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>> | ReplyAcc])]),
+                    TcpPid ! {send, [ReplyIoList, <<(byte_size(Body) + 12):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>>, Body]},
+                    NewQ = queue:drop(NrReqsQ),
+                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, queue:drop(NrReqsQ), []);
+                _ ->
+%                    ?CH_LOG_INFO("Accumulating for TCP send"),
+                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, NrReqsQ, 
+                                                     [ReplyIoList, <<(byte_size(Body) + 12):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>>, Body])
+            end;
+%            TcpPid ! {send, [<<(byte_size(Body) + 12):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>>, Body]},
+%            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, NrReqsQ, ReplyAcc);
 
         {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, Bin} ->
+            ?CH_LOG_INFO("In 2nd device_client_response clause"),
             TcpPid ! {send, [<<(byte_size(Bin) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16, 16#200000f0:32>>, Bin]},
-            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1);
+            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, NrReqsQ, ReplyIoList);
 
         Else ->
             ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [Else]),
-            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight)
+            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList)
     end.
             
 unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TheRest/binary>>, Pid, NrSent) ->
@@ -154,7 +167,7 @@ unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TheRest/
         unpack_and_enqueue(Tail, RetPid, NrSent+1);
       true ->
 %        ?CH_LOG_INFO("Returning"),
-        {RetPid, TargetIPAddr, TargetPort, NrSent}
+        {RetPid, TargetIPAddr, TargetPort, NrSent+1}
     end.
 
 enqueue_requests(IPaddrU32, PortU16, DestPid, IPbusRequest) when is_pid(DestPid) ->
