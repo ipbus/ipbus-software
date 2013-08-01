@@ -553,7 +553,8 @@ reset_packet_id(RawRequest, NewId) ->
                    reset_packet_id(RawRequest, IdFromStatus)
              end;
         _ ->
-             {Ver, RawRequest, notset}
+             <<Hdr:4/binary, Body/binary>> = RawRequest,
+             {Ver, [Hdr,Body], notset}
     end.
 
 
