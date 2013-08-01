@@ -230,6 +230,61 @@ main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
 
 
+main(["tcp_ch_client2", ArgControlHubIP | OtherArgs]) ->
+    {ok, ControlHubIP} = inet:getaddr(ArgControlHubIP, inet),
+    {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
+    Socket = tcp_connect(ControlHubIP, 10203),
+    TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
+                    + (element(3,TargetIP) bsl 8) + element(4,TargetIP),
+    PartialReq = <<TargetIPU32:32,
+                   TargetPort:16, (byte_size(?IPBUS_TXFULL_PRAM_REQ) div 4):16,
+                   (?IPBUS_TXFULL_PRAM_REQ)/binary
+                 >>,
+    PartialReply = <<(byte_size(?IPBUS_TXFULL_PRAM_REP)+8):32 ,
+                     TargetIPU32:32,
+                     TargetPort:16, 0:16,
+                     (?IPBUS_TXFULL_PRAM_REP)/binary
+                   >>,
+    Request = <<PartialReq/binary,
+                PartialReq/binary,
+                PartialReq/binary,
+                PartialReq/binary,
+                PartialReq/binary, PartialReq/binary,
+                PartialReq/binary, PartialReq/binary,
+                PartialReq/binary, PartialReq/binary%,
+%                % 10 above here
+%                PartialReq/binary, PartialReq/binary,
+%                PartialReq/binary, PartialReq/binary,
+%                PartialReq/binary,
+%                % 15 above here
+%                PartialReq/binary, PartialReq/binary,
+%                PartialReq/binary, PartialReq/binary,
+%                PartialReq/binary
+              >>,
+    Reply = <<PartialReply/binary,
+              PartialReply/binary,
+              PartialReply/binary,
+              PartialReply/binary,
+              PartialReply/binary, PartialReply/binary,
+              PartialReply/binary, PartialReply/binary,
+              PartialReply/binary, PartialReply/binary%,
+              % 10 above here
+%              PartialReply/binary, PartialReply/binary,
+%              PartialReply/binary, PartialReply/binary,
+%              PartialReply/binary,
+%              % 15 above here
+%              PartialReply/binary, PartialReply/binary,
+%              PartialReply/binary, PartialReply/binary,
+%              PartialReply/binary
+            >>,
+    io:format("Request: ~w bytes~nReply: ~w bytes~n", [byte_size(Request), byte_size(Reply)]),
+    {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
+    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Reply, {0,NrInFlight}, NrItns) end ),
+    gen_tcp:close(Socket),
+    print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
+
+
+
 main(["device_client_bw" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
