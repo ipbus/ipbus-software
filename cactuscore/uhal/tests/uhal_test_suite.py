@@ -383,6 +383,28 @@ def get_sections():
     return [section for section, cmds in get_commands("", "")]
 
 
+def get_controlhub_status( cmd ):
+  if ("dummy.controlhub" in cmd) or ("chtcp" in cmd ):
+    StdOut, ExitCode , Time = run_command("sudo controlhub_status", False)
+    if ExitCode:
+      return "controlhub_status failed, "
+    else:
+      return StdOut + ", "
+  else:
+    return ""
+
+def get_dummyhardware_status( cmd ):
+  if ("dummy.controlhub" in cmd) or ("chtcp" in cmd ) or ("dummy.udp" in cmd) or ("ipbusudp" in cmd ):
+    StdOut, ExitCode , Time = run_command( 'ps aux | grep -ce "[D]ummyHardwareUdp"' , False)
+  else:  
+    StdOut, ExitCode , Time = run_command( 'ps aux | grep -ce "[D]ummyHardwareTcp"' , False)
+    
+  StdOut = StdOut[0].strip()
+  if StdOut == '1':
+    return "1 DummyHardware running" 
+  else:
+    return StdOut+" DummyHardwares running" 
+
 def background_run_command(cmd , Pid):
     """
     Run command in separate thread, ignoring stdout and stderr
@@ -555,6 +577,7 @@ if __name__=="__main__":
                     print cmd
                     continue
 
+
                 print
                 if verbose:
                     print "-" * 120
@@ -573,7 +596,7 @@ if __name__=="__main__":
                     if len( split_name_list ) > 1:
                       split_name = split_name + split_name_list[1]
 
-                    print "+ *** ERROR OCCURED (section = '%s', test = '%s', exit code = %s, time elapsed = %s seconds) ***" % (section_name, split_name , exit_code, cmd_duration)
+                    print "+ *** ERROR OCCURED (section = '%s', test = '%s', exit code = %s, time elapsed = %s seconds, %s%s ) ***" % (section_name, split_name , exit_code, cmd_duration , get_controlhub_status( cmd ) , get_dummyhardware_status( cmd ) )
  
                     if quit_on_error:
                       print "+ Quitting as an error was observed and the '-x' flag was specified by the user"
