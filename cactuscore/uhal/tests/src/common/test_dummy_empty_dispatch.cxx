@@ -36,20 +36,28 @@
 
 using namespace uhal;
 
-void dispatch ( const std::string& connection, const std::string& id )
+void empty_dispatch ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  CACTUS_TEST ( hw.dispatch() );
+  hw.dispatch();
 }
 
-
+void empty_dispatch_after_read ( const std::string& connection, const std::string& id )
+{
+  ConnectionManager manager ( connection );
+  HwInterface hw=manager.getDevice ( id );
+ValWord< uint32_t > r = hw.getNode ( "REG" ).read();
+  hw.dispatch();
+  hw.dispatch();
+}
 
 int main ( int argc,char* argv[] )
 {
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
   std::string connection_file = params["connection_file"];
   std::string device_id = params["device_id"];
-  CACTUS_TEST ( dispatch ( connection_file,device_id ) );
+  CACTUS_TEST ( empty_dispatch ( connection_file,device_id ) );
+  CACTUS_TEST ( empty_dispatch_after_read ( connection_file,device_id ) );
   CACTUS_TEST_RESULT();
 }
