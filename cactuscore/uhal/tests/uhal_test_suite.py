@@ -395,7 +395,7 @@ def get_controlhub_status( cmd ):
     if ExitCode:
       return "controlhub_status failed, "
     else:
-      return StdOut + ", "
+      return StdOut[0].strip() + ", "
   else:
     return ""
 
