@@ -54,6 +54,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.udp" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001",
@@ -83,6 +84,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                # TIMEOUT TESTS
                "DummyHardwareTcp.exe --version 1 --port 50002 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.tcp" % (conn_file),
+              "test_dummy_empty_dispatch.exe -c %s -d dummy.tcp" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
                # NORMAL TESTS
                "DummyHardwareTcp.exe --version 1 --port 50002",
@@ -117,6 +119,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                controlhub_start,
                controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.controlhub" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stop,
                #CONTROL HUB TESTS
@@ -150,6 +153,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                # TIMEOUT TEST
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.udp2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 2 --port 60001",
@@ -178,6 +182,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                # TIMEOUT TESTS
                "DummyHardwareTcp.exe --version 2 --port 60002 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.tcp2" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.tcp2" % (conn_file),
                "pkill -f \"DummyHardwareTcp.exe\"",
                # NORMAL TESTS
                "DummyHardwareTcp.exe --version 2 --port 60002",
@@ -212,6 +217,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                controlhub_start,
                controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.controlhub2" % (conn_file),
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stop,
                #CONTROL HUB TESTS
