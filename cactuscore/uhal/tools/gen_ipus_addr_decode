@@ -119,7 +119,7 @@ def main():
     try:
         bus = int(bus)
         if bus < 0 or bus >= len(m):
-            log_and_exit("ERROR: Incorrect bus number '%d', it should be between 0 and %d" % (bus,len(m)))
+            log_and_exit("ERROR: Incorrect bus number '%d', it should be between 0 and %d" % (bus,len(m)-1))
             
         uhal_slaves = m[bus][1]
         bus = m[bus][0]

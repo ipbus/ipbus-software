@@ -76,8 +76,12 @@ def isSlave(node):
     else:
         return False
         
-def getChildren(n):
-    return n.getNodes("[^.]*")
+def getChildren(d,name):
+    if name:
+        nodes = d.getNode(name).getNodes("[^.]*")
+        return map(lambda x: "%s.%s" % (name,x) ,nodes)
+    else:
+        return d.getNodes("[^.]*")
 
 def hex32(num):
     return "0x%08x" % num
@@ -107,16 +111,17 @@ def ipbus_addr_map(fn,verbose=False):
     addrs = set()
     while (buses):
         bus = buses.pop(0)
+        
         if bus == "__root__":
-            parent = d
+            parent = ""
         else:
-            parent = parent.getNode(bus)
+            parent = bus
             
-        children = getChildren(parent)
+        children = getChildren(d,parent)
         slaves = []
         while (children):
             name = children.pop(0)
-            child = parent.getNode(name)
+            child = d.getNode(name)
             if isBus(child):
                 if isSlave(child):
                     raise Exception("Node '%s' is tagged as slave and bus at the same time" % name)
@@ -137,7 +142,7 @@ def ipbus_addr_map(fn,verbose=False):
                 slaves.append((name,child.getAddress(),width))
                 
             elif isModule(child):
-                children += map(lambda x: "%s.%s" % (name,x),getChildren(child))
+                children += getChildren(d,child)
 
         #sort by address        
         slaves.sort(lambda x,y: cmp(d.getNode(x[0]).getAddress(),d.getNode(y[0]).getAddress()))
@@ -203,7 +208,7 @@ class TestSimple(unittest.TestCase):
         self.assertTrue(len(buses) == 3)
         self.assertTrue("__root__" in buses)
         self.assertTrue("SUBSYSTEM1" in buses)
-        self.assertTrue("SUBSYSTEM2" in buses)
+        self.assertTrue("SUBSYSTEM1.SUBSYSTEM2" in buses)
 
         sroot = dict(((name,(hex32(addr),width)) for name,addr,width in m[0][1]))
         #print sroot
@@ -218,8 +223,8 @@ class TestSimple(unittest.TestCase):
         sub2 = dict(((name,(hex32(addr),width)) for name,addr,width in m[2][1]))
         #print sub2
         self.assertTrue(len(sub2) == 5)
-        self.assertTrue(sub2['REG'][0] == "0x00500002")
-        self.assertTrue(sub2['REG'][1] == 0)
+        self.assertTrue(sub2['SUBSYSTEM1.SUBSYSTEM2.REG'][0] == "0x00500002")
+        self.assertTrue(sub2['SUBSYSTEM1.SUBSYSTEM2.REG'][1] == 0)
         
 def test():
      suite = unittest.TestLoader().loadTestsFromTestCase(TestSimple)
