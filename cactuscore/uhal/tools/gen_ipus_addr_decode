@@ -115,7 +115,7 @@ def main():
 
     #select slaves and bus id either from a number or id
     if len(m[0]) == 0:
-        slog_and_exit("ERROR: file '%s' does not have any slave defined" % args[0])
+        log_and_exit("ERROR: file '%s' does not have any slave defined" % args[0])
     try:
         bus = int(bus)
         if bus < 0 or bus >= len(m):

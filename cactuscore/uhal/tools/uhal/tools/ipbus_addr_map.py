@@ -8,36 +8,36 @@ import re
 BUS_REGEX = re.compile("(^|[,])\s*bus\s*([,]|$)");
 SLAVE_REGEX = re.compile("(^|[,])\s*slave\s*([,]|$)");
 
-def __isFIFO(node):
+def isFIFO(node):
     if str(node.getMode()) == "NON_INCREMENTAL":
         return True
     else:
         return False
 
-def __isMemory(node):
+def isMemory(node):
     if str(node.getMode()) == "INCREMENTAL":
         return True
     else:
         return False
 
-def __isRegister(node):
+def isRegister(node):
     if str(node.getMode()) == "SINGLE":
         return True
     else:
         return False
     
-def __getWidth(node):
-    if __isFIFO(node) or __isRegister(node):
+def getWidth(node):
+    if isFIFO(node) or isRegister(node):
         return 0
-    elif __isMemory(node):
+    elif isMemory(node):
         return int(math.ceil(math.log(node.getSize(),2)))
-    elif __isModule(node):
+    elif isModule(node):
         result = 0
         children = node.getNodes()
         minaddr = None
         maxaddr = None
         for name in children:
-            if __isSlave(node.getNode(name)):
+            if isSlave(node.getNode(name)):
                 raise Exception("Slave '%s' inside '%s' slave" % (name,node.getId()))
             addr = node.getNode(name).getAddress()
             if not minaddr or minaddr>addr:
@@ -48,26 +48,35 @@ def __getWidth(node):
         return int(math.ceil(math.log(maxaddr-minaddr+1,2)))
     else:
         return 0
+
+def getAddresses(node):
+    init_addr = node.getAddress()
+    width = getWidth(node)
+    addrs = set()
+    for i in range(2**width):
+        addrs.add(init_addr+i)
     
-def __isModule(node):
+    return addrs
+       
+def isModule(node):
     if node.getNodes():
         return True
     else:
         return False
 
-def __isBus(node):
+def isBus(node):
     if BUS_REGEX.search(node.getTags()):
         return True
     else:
         return False
     
-def __isSlave(node):
+def isSlave(node):
     if SLAVE_REGEX.search(node.getTags()):
         return True
     else:
         return False
         
-def __getChildren(n):
+def getChildren(n):
     return n.getNodes("[^.]*")
 
 def hex32(num):
@@ -77,7 +86,7 @@ def hex32(num):
 
 def ipbus_addr_map(fn,verbose=False):
     '''
-    Returns a vector with all the slaves, addresses, and addresses with for each bus.
+    Returns a vector with all the slaves, addresses, and addresses for each bus.
     '''
     if verbose:
         uhal.setLogLevelTo(uhal.LogLevel.DEBUG)
@@ -103,33 +112,32 @@ def ipbus_addr_map(fn,verbose=False):
         else:
             parent = parent.getNode(bus)
             
-        children = __getChildren(parent)
+        children = getChildren(parent)
         slaves = []
         while (children):
             name = children.pop(0)
             child = parent.getNode(name)
-            if __isBus(child):
-                if __isSlave(child):
+            if isBus(child):
+                if isSlave(child):
                     raise Exception("Node '%s' is tagged as slave and bus at the same time" % name)
-                elif not __isModule(child):
+                elif not isModule(child):
                     raise Exception("Node '%s' is tagged as bus but it does not have children" % name)
                 else:
                     buses.append(name)
-            elif __isSlave(child):
-                addr = child.getAddress()
+            elif isSlave(child):
+                slv_addrs = getAddresses(child)
 
-                #remove duplicates (e.g. masks)
-                if addr in addrs:
-                    if verbose:
-                        print "WARNING: Node '%s' has duplicate address %s. Ignoring slave..." % (name, hex32(addr))
-                    continue
-                addrs.add(addr)
-                width = __getWidth(child)
+                #Duplicate slaves are not allowed
+                if slv_addrs & addrs:
+                    raise Exception("Slave '%s' address %s is duplicated" % (name, hex32(child.getAddress())))
+                                    
+                addrs = addrs | slv_addrs
+                width = getWidth(child)
 
-                slaves.append((name,addr,width))
+                slaves.append((name,child.getAddress(),width))
                 
-            elif __isModule(child):
-                children += map(lambda x: "%s.%s" % (name,x),__getChildren(child))
+            elif isModule(child):
+                children += map(lambda x: "%s.%s" % (name,x),getChildren(child))
 
         #sort by address        
         slaves.sort(lambda x,y: cmp(d.getNode(x[0]).getAddress(),d.getNode(y[0]).getAddress()))
@@ -145,11 +153,51 @@ def get_vhdl_template(fn=None):
     return open(fn).read()
 
 class TestSimple(unittest.TestCase):
-    def test_simple(self):
+    def test_uhal(self):
+        #uHAL address table parsing  
+        this_dir, this_filename = os.path.split(__file__)
+        simplefn = os.path.join(this_dir, "test_data","simple.xml")
+        d = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345","file://" + simplefn)
+        
+        x = d.getNode("REG")
+        self.assertTrue(isRegister(x) and isSlave(x) and not isModule(x))
+        
+        x =  d.getNode("REG_UPPER_MASK")
+        self.assertTrue(isRegister(x) and isSlave(x) and not isModule(x))
+        
+        x =  d.getNode("REG_LOWER_MASK")
+        self.assertTrue(isRegister(x) and not isSlave(x) and not isModule(x))
+
+        x =  d.getNode("MASKED_REG")
+        self.assertTrue(isSlave(x) and isModule(x))
+
+        x =  d.getNode("MASKED_REG.REG_UPPER_MASK")
+        self.assertTrue(not isSlave(x) and isRegister(x))
+
+        x =  d.getNode("MASKED_REG.REG_LOWER_MASK")
+        self.assertTrue(not isSlave(x) and isRegister(x))
+
+        x =  d.getNode("MULTIPLE_REGS")
+        self.assertTrue(isSlave(x) and isModule(x))
+        
+        x =  d.getNode("MULTIPLE_REGS.REG1")
+        self.assertTrue(not isSlave(x) and isRegister(x))
+
+        x =  d.getNode("MULTIPLE_REGS.REG2")
+        self.assertTrue(not isSlave(x) and isRegister(x))
+
+        x =  d.getNode("FIFO")
+        self.assertTrue(isSlave(x) and isFIFO(x) and not isModule(x) and not isMemory(x))
+
+        x =  d.getNode("MEM")
+        self.assertTrue(isSlave(x) and not isFIFO(x) and not isModule(x) and isMemory(x))
+
+
+    def test_ipbus_addr_map(self):
         this_dir, this_filename = os.path.split(__file__)
         simplefn = os.path.join(this_dir, "test_data","simple.xml")
         m = ipbus_addr_map(simplefn)
-
+ 
         #just a smoke test
         buses = [bus for bus,slaves in m]
         self.assertTrue(len(buses) == 3)
