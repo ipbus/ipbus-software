@@ -40,16 +40,16 @@ void empty_dispatch ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  hw.dispatch();
+  CACTUS_TEST ( hw.dispatch() );
 }
 
 void empty_dispatch_after_read ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-ValWord< uint32_t > r = hw.getNode ( "REG" ).read();
-  hw.dispatch();
-  hw.dispatch();
+  CACTUS_TEST ( ValWord< uint32_t > r = hw.getNode ( "REG" ).read() );
+  CACTUS_TEST ( hw.dispatch() );
+  CACTUS_TEST ( hw.dispatch() );
 }
 
 int main ( int argc,char* argv[] )

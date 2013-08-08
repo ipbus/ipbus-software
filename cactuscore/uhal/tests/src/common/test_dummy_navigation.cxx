@@ -101,6 +101,15 @@ void write_read ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( reg.value() == x );
 }
 
+
+void empty_node_id ( const std::string& connection, const std::string& id )
+{
+  ConnectionManager manager ( connection );
+  HwInterface hw=manager.getDevice ( id );
+  CACTUS_CHECK ( &hw.getNode ( "" ) == &hw.getNode() );
+  CACTUS_CHECK ( &hw.getNode ( "SUBSYSTEM1" ).getNode ( "" ) == & hw.getNode ( "SUBSYSTEM1" ) );
+}
+
 int main ( int argc,char* argv[] )
 {
   std::map<std::string,std::string> params = tests::default_arg_parsing ( argc,argv );
@@ -108,5 +117,6 @@ int main ( int argc,char* argv[] )
   std::string device_id = params["device_id"];
   CACTUS_TEST ( navigation_and_traversal ( connection_file,device_id ) );
   CACTUS_TEST ( write_read ( connection_file,device_id ) );
+  CACTUS_TEST ( empty_node_id ( connection_file,device_id ) );
   CACTUS_TEST_RESULT();
 }

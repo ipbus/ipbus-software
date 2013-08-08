@@ -128,7 +128,7 @@ namespace uhal
       	@param aId a full-stop delimeted name path to a node, relative to the current node
       	@return the Node given by the identifier
       */
-      Node& getNode ( const std::string& aId ) const;
+      Node& getNode ( const std::string& aId );
 
 
       /**
@@ -137,7 +137,7 @@ namespace uhal
       	@return the Node given by the identifier
       */
       template< typename T>
-      T& getNode ( const std::string& aId ) const;
+      T& getNode ( const std::string& aId );
 
 
       /**

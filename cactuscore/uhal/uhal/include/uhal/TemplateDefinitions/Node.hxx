@@ -36,7 +36,7 @@ namespace uhal
 {
 
   template< typename T>
-  T& Node::getNode ( const std::string& aId ) const
+  T& Node::getNode ( const std::string& aId )
   {
     try
     {

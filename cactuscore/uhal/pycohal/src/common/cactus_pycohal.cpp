@@ -223,7 +223,7 @@ BOOST_PYTHON_MODULE ( _core )
   ;
   // Wrap uhal::Node
   class_<uhal::Node, boost::noncopyable /*since no copy CTOR*/ > ( "Node", no_init )
-  .def ( "getNode",   static_cast<uhal::Node& ( uhal::Node::* ) ( const std::string& ) const> ( &uhal::Node::getNode ), pycohal::norm_ref_return_policy() )
+  .def ( "getNode",   static_cast<uhal::Node& ( uhal::Node::* ) ( const std::string& )> ( &uhal::Node::getNode ), pycohal::norm_ref_return_policy() )
   .def ( "getNodes", ( std::vector<std::string> ( uhal::Node::* ) ( const std::string& ) ) 0, uhal_Node_getNodes_overloads() )
   .def ( "getId",         &uhal::Node::getId,         pycohal::const_ref_return_policy() )
   .def ( "getAddress",    &uhal::Node::getAddress,    pycohal::const_ref_return_policy() )

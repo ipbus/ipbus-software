@@ -72,24 +72,6 @@ namespace uhal
 
 
 
-void HowDidIGetHere ( const std::string& aStr )
-{
-  /*
-    std::vector< void* > lBacktracePtrs ( 100 , static_cast<void*> ( NULL ) );
-    Backtrace::Backtrace ( lBacktracePtrs );
-    std::vector< Backtrace::TracePoint > lBacktrace( Backtrace::BacktraceSymbols ( lBacktracePtrs ) );
-
-    std::cout << "------------------------------------------------------------------" << std::endl;
-    std::cout << "ID = \"" << aStr << "\"" << std::endl;
-    for ( std::vector< Backtrace::TracePoint >::iterator lIt = lBacktrace.begin()+2 ; lIt != lBacktrace.end(); ++lIt  )
-    {
-      std::cout << lIt->function << " : " << lIt->file << " : " << lIt->line << std::endl;
-    }
-    std::cout << "------------------------------------------------------------------" << std::endl;
-  */
-}
-
-
 
 
 
@@ -114,7 +96,6 @@ namespace uhal
     mChildren ( ),
     mChildrenMap ( )
   {
-    HowDidIGetHere ( mUid );
   }
 
 
@@ -132,8 +113,6 @@ namespace uhal
     mChildren ( ),
     mChildrenMap ( )
   {
-    HowDidIGetHere ( mUid );
-
     for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
       mChildren.push_back ( ( **lIt ).clone() );
@@ -207,8 +186,6 @@ namespace uhal
 
   Node::~Node()
   {
-    HowDidIGetHere ( mUid );
-
     for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       if ( *lIt )
@@ -341,8 +318,13 @@ namespace uhal
   }
 
 
-  Node& Node::getNode ( const std::string& aId ) const
+  Node& Node::getNode ( const std::string& aId )
   {
+    if ( aId.size() == 0 )
+    {
+      return *this;
+    }
+
     boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
 
     if ( lIt==mChildrenMap.end() )
