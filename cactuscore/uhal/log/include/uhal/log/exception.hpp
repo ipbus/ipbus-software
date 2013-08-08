@@ -87,6 +87,11 @@ namespace uhal
         exception ( const exception& );
 
         /**
+          Assignment operator
+        */
+        exception& operator= ( const exception& );
+
+        /**
         	Destructor
         */
         virtual ~exception() throw();
@@ -113,7 +118,7 @@ namespace uhal
         boost::thread::id mThreadId;
         timeval mTime;
 
-        std::string* mString;
+        char* mString;
     };
 
   }

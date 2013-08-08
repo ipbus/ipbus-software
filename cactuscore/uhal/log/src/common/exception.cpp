@@ -55,7 +55,7 @@ namespace uhal
       std::exception (),
       mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
       mThreadId ( boost::this_thread::get_id() ),
-      mString ( new std::string() )
+      mString ( ( char* ) malloc ( 65536 ) )
     {
       gettimeofday ( &mTime, NULL );
       Backtrace::Backtrace ( mBacktrace );
@@ -68,16 +68,24 @@ namespace uhal
       mBacktrace ( aExc.mBacktrace ),
       mThreadId ( aExc.mThreadId ),
       mTime ( aExc.mTime ),
-      mString ( new std::string() )
+      mString ( ( char* ) malloc ( 65536 ) )
     {
     }
 
+    exception& exception::operator= ( const exception& aExc )
+    {
+      mAdditionalInfo = aExc.mAdditionalInfo;
+      mBacktrace = aExc.mBacktrace;
+      mThreadId = aExc.mThreadId;
+      mTime = aExc.mTime;
+      return *this;
+    }
 
     exception::~exception() throw()
     {
       if ( mString )
       {
-        delete mString;
+        free ( mString );
         mString = NULL;
       }
     }
@@ -85,6 +93,12 @@ namespace uhal
 
     const char* exception::what() const throw()
     {
+      if ( mString == NULL )
+      {
+        std::cout << "Could not allocate memory for exception message" << std::endl;
+        return mString;
+      }
+
       timeval lTime;
       gettimeofday ( &lTime, NULL );
       std::stringstream lStr;
@@ -144,8 +158,15 @@ namespace uhal
         lStr << "          at " << lIt->file << ":" << lIt->line << "\n";
       }
 
-      *mString = lStr.str();
-      return mString->c_str(); //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
+      std::string lString ( lStr.str() );
+      strncpy ( mString , lString.c_str() , 65536 );
+
+      if ( lString.size() > 65536 )
+      {
+        strcpy ( mString+65530 , "..." );
+      }
+
+      return mString; //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
     }
 
 
