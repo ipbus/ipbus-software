@@ -253,6 +253,7 @@ namespace uhal
     setAddr ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
+    setModule ( aXmlNode , lNode );
     setPermissions ( aXmlNode , lNode );
     //setMask( aXmlNode , lNode );
     setModeAndSize ( aXmlNode , lNode );
@@ -292,6 +293,7 @@ namespace uhal
     setAddr ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
+    setModule ( aXmlNode , lNode );
     setPermissions ( aXmlNode , lNode );
     //setMask( aXmlNode , lNode );
     setModeAndSize ( aXmlNode , lNode );
@@ -310,6 +312,7 @@ namespace uhal
     setAddr ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
+    setModule ( aXmlNode , lNode );
     //setPermissions( aXmlNode , lNode );
     //setMask( aXmlNode , lNode );
     //setModeAndSize( aXmlNode , lNode );
@@ -332,6 +335,7 @@ namespace uhal
     setAddr ( aXmlNode , lNode ); //was commented out, see https://svnweb.cern.ch/trac/cactus/ticket/92
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
+    setModule ( aXmlNode , lNode );
     setPermissions ( aXmlNode , lNode );
     setMask ( aXmlNode , lNode );
     //setModeAndSize( aXmlNode , lNode );
@@ -402,6 +406,11 @@ namespace uhal
     {
       aNode->mDescription = lStr;
     }
+  }
+
+  void NodeTreeBuilder::setModule ( const pugi::xml_node& aXmlNode , Node* aNode )
+  {
+    aNode->mModule = mFileCallStack.back( ).string();
   }
 
   void NodeTreeBuilder::setPermissions ( const pugi::xml_node& aXmlNode , Node* aNode )

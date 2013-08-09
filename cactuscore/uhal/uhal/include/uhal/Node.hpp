@@ -203,6 +203,11 @@ namespace uhal
       */
       const std::string& getDescription() const;
 
+      /**
+        Return the name of the module in which the current node resides
+        @return the name of the module in which the current node resides
+      */
+      const std::string& getModule() const;
 
       /**
       	A streaming helper function to create pretty, indented tree diagrams
@@ -364,6 +369,9 @@ namespace uhal
 
       //! Optional string which the user can specify
       std::string mDescription;
+
+      //! The name of the module in which the current node resides
+      std::string mModule;
 
       //! The direct children of the node
       std::deque< Node* > mChildren;

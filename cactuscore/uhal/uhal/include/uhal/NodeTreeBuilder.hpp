@@ -172,6 +172,7 @@ namespace uhal
       void setAddr ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setTags ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setDescription ( const pugi::xml_node& aXmlNode , Node* aNode );
+      void setModule ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setPermissions ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setMask ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setModeAndSize ( const pugi::xml_node& aXmlNode , Node* aNode );

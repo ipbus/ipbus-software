@@ -93,6 +93,7 @@ namespace uhal
     mSize ( 0x00000001 ),
     mTags ( "" ),
     mDescription ( "" ),
+    mModule ( "" ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -110,6 +111,7 @@ namespace uhal
     mSize ( aNode.mSize ),
     mTags ( aNode.mTags ),
     mDescription ( aNode.mDescription ),
+    mModule ( aNode.mModule ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -144,6 +146,7 @@ namespace uhal
     mSize = aNode.mSize;
     mTags = aNode.mTags;
     mDescription = aNode.mDescription;
+    mModule = aNode.mModule;
 
     for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
@@ -252,6 +255,12 @@ namespace uhal
   }
 
 
+  const std::string& Node::getModule() const
+  {
+    return mModule;
+  }
+
+
   void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
   {
     aStream << std::setfill ( '0' ) << std::uppercase;
@@ -309,6 +318,11 @@ namespace uhal
     if ( mDescription.size() )
     {
       aStream << ", Description \"" << mDescription << "\"";
+    }
+
+    if ( mModule.size() )
+    {
+      aStream << ", Module \"" << mModule << "\"";
     }
 
     for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
