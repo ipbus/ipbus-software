@@ -288,7 +288,7 @@ namespace uhal
 
   //! A class which wraps a block of data and marks whether or not it is valid
   template< typename T >
-  class ValVector : public ValHeader
+  class ValVector
   {
       //! Make ClientInterface a friend so that it can access the members to get the info associated with the raw data space
       friend class ClientInterface;

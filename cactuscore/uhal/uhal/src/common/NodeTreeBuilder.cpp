@@ -410,7 +410,7 @@ namespace uhal
 
   void NodeTreeBuilder::setModule ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    if( mFileCallStack.size() )
+    if ( mFileCallStack.size() )
     {
       aNode->mModule = mFileCallStack.back( ).string();
     }
