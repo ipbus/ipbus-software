@@ -72,9 +72,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
                "test_pycohal -c %s -v" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
-               "DummyHardwareUdp.exe --version 1 --port 50001",
-               "test_random.exe -c %s -d dummy.udp -t 5" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-1.3://localhost:50001",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
@@ -101,9 +99,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
-               "DummyHardwareTcp.exe --version 1 --port 50002",
-               "test_random.exe -c %s -d dummy.tcp -t 5" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-1.3://localhost:50002",
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
@@ -139,9 +135,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
-               "DummyHardwareUdp.exe --version 1 --port 50001",
-               "test_random.exe -c %s -d dummy.controlhub -t 5" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-1.3://localhost:10203?target=localhost:50001",
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
                controlhub_stop]
@@ -170,9 +164,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
-               "DummyHardwareUdp.exe --version 2 --port 60001",
-               "test_random.exe -c %s -d dummy.udp2 -t 5" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-2.0://localhost:60001",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
@@ -199,9 +191,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
-               "DummyHardwareTcp.exe --version 2 --port 60002",
-               "test_random.exe -c %s -d dummy.tcp2 -t 5" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-2.0://localhost:60002",
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
@@ -237,10 +227,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
-               "sleep 30", 
-               "DummyHardwareUdp.exe --version 2 --port 60001",
-               "test_random.exe -c %s -d dummy.controlhub2 -t 5" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
                controlhub_stop]
