@@ -749,16 +749,53 @@ void uhal::tests::PerfTester::validationTest()
           break;
         }
       case 2:
-        // RMW-bits
+        {// RMW-bits
+          lTemp1 = rand();
+          lTemp2 = rand();
+          lIt1 = lRegisters.begin() + (lAddress - m_baseAddr);
 
-        break;
+          if ( lProtocol == 1 )
+          {
+            *lIt1 &= lTemp1;
+            *lIt1 |= lTemp2;
+          }
+
+          ValWord<uint32_t> result = client->rmw_bits ( lAddress, lTemp1, lTemp2 );
+          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedRmwBits( lAddress, lTemp1, lTemp2, result, *lIt1 ) ) );
+          lQueuedWords += 1;
+
+          if ( lProtocol == 2 )
+          {
+            *lIt1 &= lTemp1;
+            *lIt1 |= lTemp2;
+          }
+
+          break;
+        }
       case 3:
-        // RMW-sum
+        {// RMW-sum
+          lTemp1 = rand();
+          lIt1 = lRegisters.begin() + (lAddress - m_baseAddr);
 
-        break;
+          if ( lProtocol == 1)
+          {
+            *lIt1 += lTemp1;
+          }
+
+          ValWord<uint32_t> result = client->rmw_sum ( lAddress, lTemp1 );
+          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedRmwSum( lAddress, lTemp1, result, *lIt1 ) ) );
+          lQueuedWords += 1;
+
+          if ( lProtocol == 2 )
+          {
+            *lIt1 += lTemp1;
+          }
+
+          break;
+        }
     }
     
-    if ( m_perIterationDispatch || (lQueuedWords > 1000) || ( (i+1) == m_iterations ) )
+    if ( m_perIterationDispatch || (lQueuedWords > 10000) || ( (i+1) == m_iterations ) )
     {
       if ( m_verbose )
         cout << "Dispatching" << endl;

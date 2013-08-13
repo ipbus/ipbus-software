@@ -230,7 +230,8 @@ namespace uhal
             if ( verbose )
               log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
 
-            if ( ! m_valHeader.valid() ){
+            if ( ! m_valHeader.valid() )
+            {
               log ( Error(), "TEST FAILED: Incrementing write unsuccessful.");
               return false;
             }
@@ -241,6 +242,67 @@ namespace uhal
           // PRIVATE MEMBER DATA
           uint32_t m_depth, m_addr;
           ValHeader m_valHeader;
+        };
+
+        class QueuedRmwBits : public QueuedTransaction
+        {
+        public:
+          QueuedRmwBits(const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected) : 
+            m_addr(addr),
+            m_and(a),
+            m_or(b),
+            m_valWord(valWord),
+            m_expected(expected)
+          {}
+          ~QueuedRmwBits() {}
+
+          virtual bool check_values(bool verbose = false)
+          {
+            if ( verbose )
+              log ( Notice(), "TEST PASSED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
+            
+            if ( m_valWord.value() != m_expected )
+            {
+              log ( Error(), "TEST FAILED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " (AND=", Integer (m_and, IntFmt<hex,fixed>() ), ", OR=", Integer (m_or, IntFmt<hex,fixed>() ), "). Transaction returned ", Integer ( m_valWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( m_expected, IntFmt<hex,fixed>() ) );
+              return false;
+            }
+            return true;
+          }
+
+        private:
+          const uint32_t m_addr, m_and, m_or;
+          ValWord<uint32_t> m_valWord;
+          const uint32_t m_expected;
+        };
+
+        class QueuedRmwSum : public QueuedTransaction
+        {
+        public:
+          QueuedRmwSum(const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected) :
+            m_addr(addr),
+            m_addend(a),
+            m_valWord(valWord),
+            m_expected(expected)
+          {}
+          ~QueuedRmwSum() {}
+
+          virtual bool check_values(bool verbose = false)
+          {
+            if ( verbose )
+              log ( Notice(), "TEST PASSED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
+
+            if ( m_valWord.value() != m_expected )
+            {
+              log ( Error(), "TEST FAILED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ), ", ADDEND=", Integer (m_addend, IntFmt<hex,fixed>() ), ". Transaction returned ", Integer (m_valWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( m_expected, IntFmt<>() ) );
+              return false;
+            }
+            return true;
+          }
+
+        private:
+          const uint32_t m_addr, m_addend;
+          ValWord<uint32_t> m_valWord;
+          const uint32_t m_expected;
         };
 
     }; /* End of class PerfTester */
