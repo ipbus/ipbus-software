@@ -296,6 +296,178 @@ bool uhal::tests::PerfTester::buffersEqual ( const U32Vec& writeBuffer, const U3
 }
 
 
+// Validation test -- single-register write/read-back
+bool uhal::tests::PerfTester::validation_test_single_write_read(ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch) const
+{
+  std::ostringstream oss_details;
+  oss_details << "Single-register write-read @ 0x" << std::hex << addr << (perTransactionDispatch ? " (multiple dispatches)" : " (single dispatch)" );
+  if( m_verbose )
+    cout << oss_details.str() << endl;
+
+  const uint32_t x = rand();
+
+  try
+  {
+    c->write(addr, x);
+    if( perTransactionDispatch )
+      c->dispatch();
+    
+    ValWord<uint32_t> reg = c->read(addr);
+    c->dispatch();
+
+    if (x != reg.value())
+    {
+      cout << "\nTEST FAILED: " << oss_details.str() << ". Wrote value 0x" << std::hex << x << " but read-back 0x" << reg.value() << std::dec << endl;
+      return false;
+    }
+  }
+  catch (const std::exception& e)
+  {
+    cout << "\nTEST FAILED: " << oss_details.str() << ". Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
+    return false;
+  }
+  return true;
+}
+
+
+// Validation test -- block write/read-back
+bool uhal::tests::PerfTester::validation_test_block_write_read(ClientPtr& c, const uint32_t addr, const uint32_t depth, const bool perTransactionDispatch) const
+{
+  std::ostringstream oss_details; 
+  oss_details << depth << "-word write-read @ 0x" << std::hex << addr;
+  if ( depth>1 )
+    oss_details << " to 0x" << addr+depth-1 << std::dec;
+  oss_details << (perTransactionDispatch ? " (multiple dispatches)" : " (single dispatch)" );
+
+  if( m_verbose )
+    cout << "Running test: " << oss_details.str() << endl;
+
+  const U32Vec xx = getRandomBuffer(depth);
+
+  try
+  {
+    c->writeBlock(addr, xx);
+    if( perTransactionDispatch )
+      c->dispatch();
+
+    U32ValVec ram = c->readBlock(addr, depth);
+    c->dispatch();
+
+    if ( ! buffersEqual(xx, ram) )
+    {
+      cout << "\nTEST FAILED: " << oss_details.str() << "! Values written do not match those read back." << endl;
+      return false;
+    }
+  }
+  catch (const std::exception& e)
+  {
+    cout << "\nTEST FAILED by THROWING: " << oss_details.str() << "! Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
+    return false;
+  }
+  return true;
+}
+
+
+// Validation test -- write, RMW bits, read
+bool uhal::tests::PerfTester::validation_test_write_rmwbits_read(ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch) const
+{
+  std::ostringstream oss_details;
+  oss_details << "RMW-bits @ 0x" << std::hex << addr << (perTransactionDispatch ? " (multiple dispatches)" : " (single dispatch)" );
+
+  if( m_verbose )
+    cout << "TESTING: " << oss_details.str() << endl;
+  const uint32_t x0 = rand();
+  const uint32_t a = rand();
+  const uint32_t b = rand();
+  const uint32_t x1 = (x0 & a) | b;
+  std::ostringstream oss_values;
+  oss_values << "Wrote value 0x" << std::hex << x0 << ", then did RMW-bits with AND-term 0x" << a << ", OR-term 0x" << b;
+
+  const bool ipbus2 = ( (c->uri().find("ipbusudp-2.0") != string::npos) || (c->uri().find("ipbustcp-2.0") != string::npos) || (c->uri().find("chtcp-2.0") != string::npos) );
+
+  try
+  {
+    c->write(addr, x0);
+    if( perTransactionDispatch )
+      c->dispatch();
+
+    ValWord<uint32_t> reg_rmw = c->rmw_bits(addr, a, b);
+    c->dispatch();
+
+    if ( ipbus2 ? (x0 != reg_rmw.value()) : (x1 != reg_rmw.value()) )
+    {
+      cout << "\nTEST FAILED: " << oss_details.str() << " ... RMW-bits returned value 0x" << std::hex << reg_rmw.value() << ", but expected 0x" << (ipbus2 ? x0 : x1) << std::dec << endl << oss_values.str() << endl;
+      return false;
+    }
+
+    ValWord<uint32_t> reg_read = c->read(addr);
+    c->dispatch();
+
+    if( x1 != reg_read.value() )
+    {
+      cout << "\nTEST FAILED: " << oss_details.str() << " ... Read after RMW-bits returned value 0x" << std::hex << reg_rmw.value() << ", but expected 0x" << std::dec << x1 << endl << oss_values.str() << endl;
+      return false;
+    }
+  }
+  catch (const std::exception& e)
+  {
+    cout << "TEST FAILED: " << oss_values.str() << ". Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
+    return false;
+  }
+
+  return true;
+}
+
+// Validation test -- write, RMW sum, read
+bool uhal::tests::PerfTester::validation_test_write_rmwsum_read(ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch) const
+{
+  std::ostringstream oss_details;
+  oss_details << "RMW-sum @ 0x" << std::hex << addr << (perTransactionDispatch ? " (multiple dispatches)" : " (single dispatch)" );
+
+  if( m_verbose )
+    cout << "TESTING: " << oss_details.str() << endl;
+  const uint32_t x0 = rand();
+  const uint32_t a = rand();
+  const uint32_t x1 = x0 + a;
+  std::ostringstream oss_values;
+  oss_values << "Wrote value 0x" << std::hex << x0 << ", then did RMW-sum with ADDEND 0x" << a;
+
+  const bool ipbus2 = ( (c->uri().find("ipbusudp-2.0") != string::npos) || (c->uri().find("ipbustcp-2.0") != string::npos) || (c->uri().find("chtcp-2.0") != string::npos) );
+
+  try
+  {
+    c->write(addr, x0);
+    if( perTransactionDispatch )
+      c->dispatch();
+
+    ValWord<uint32_t> reg_sum = c->rmw_sum(addr, a);
+    c->dispatch();
+
+    if ( ipbus2 ? (x0 != reg_sum.value()) : (x1 != reg_sum.value()) )
+    {
+      cout << "\nTEST FAILED: " << oss_details.str() << " ... RMW-sum returned value 0x" << std::hex << reg_sum.value() << ", but expected 0x" << (ipbus2 ? x0 : x1) << std::dec << endl << oss_values.str() << endl;
+      return false;
+    }
+
+    ValWord<uint32_t> reg_read = c->read(addr);
+    c->dispatch();
+
+    if( x1 != reg_read.value() )
+    {
+      cout << "\nTEST FAILED: " << oss_details.str() << " ... Read after RMW-sum returned value 0x" << std::hex << reg_sum.value() << ", but expected 0x" << x1 << std::dec << endl << oss_values.str() << endl;
+      return false;
+    }
+  }
+  catch (const std::exception& e)
+  {
+    cout << "\nTEST FAILED: " << oss_values.str() << ". Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
+    return false;
+  }
+
+  return true;
+}
+
+
 // PRIVATE MEMBER FUNCTIONS - IPbus test functions that users can run
 
 void uhal::tests::PerfTester::bandwidthRxTest()
@@ -397,403 +569,214 @@ void uhal::tests::PerfTester::validationTest()
   ostringstream summary;
   unsigned iDepth = 1; // For variable depth transaction tests.
   const unsigned maxTestDepth = 380;  // Needs to be bigger than the max size that will fit into a standard frame UDP packet (i.e >368)
-  cout << "\n1) No-throw test: Single unmasked register read:" << endl;
 
-  try
+  unsigned nrTestsFailed = 0;
+  unsigned nrTestsTotal  = 0;
+
+  assert(m_clients.size() == 1);
+  ClientPtr client = m_clients.at(0);
+  
+  cout << "\nWRITE READ-BACK TESTS" << endl;
+  vector<uint32_t> addr_vec;
+  addr_vec.push_back(m_baseAddr);
+  addr_vec.push_back(m_baseAddr + m_bandwidthTestDepth - 1);
+  for ( unsigned i = 0; i < 48; i++ )
+    addr_vec.push_back(m_baseAddr + (rand() % m_bandwidthTestDepth) );
+
+  cout << "\n 1. Single-register write/read (" << addr_vec.size() * 2 << " tests)" << endl;
+  for (unsigned i = 0; i < addr_vec.size(); i++)
   {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
+    nrTestsTotal++;
+    if ( ! validation_test_single_write_read(client, addr_vec.at(i), true) )
     {
-      iClient->read ( m_baseAddr );
-    }
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->dispatch();
-    }
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n2) No-throw test: Single unmasked register write:" << endl;
-
-  try
-  {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->write ( m_baseAddr, 0xdeadbeef );
-    }
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->dispatch();
-    }
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n3) No-throw test: Single masked register read:" << endl;
-
-  try
-  {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->read ( m_baseAddr, 0xf000000f );
-    }
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->dispatch();
-    }
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n4) No-throw test: Single masked register write:" << endl;
-
-  try
-  {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->write ( m_baseAddr, 0x90000009, 0xf000000f );
-    }
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->dispatch();
-    }
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n5) No-throw test: Read transaction, depths 1 - " << maxTestDepth << ":" << endl;
-
-  try
-  {
-    for ( iDepth = 1 ; iDepth <= maxTestDepth ; ++iDepth )
-    {
-      if ( m_verbose )
-      {
-        cout << "Performing read transaction, depth = " << iDepth << endl;
-      }
-
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->readBlock ( m_baseAddr, iDepth );
-      }
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->dispatch();
-      }
+      nrTestsFailed++;
     }
 
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL at depth = " << iDepth << "!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n6) No-throw test: Non-incr. read transaction, depths 1 - " << maxTestDepth << ":" << endl;
-
-  try
-  {
-    for ( iDepth = 1 ; iDepth <= maxTestDepth ; ++iDepth )
+    nrTestsTotal++;
+    if ( ! validation_test_single_write_read(client, addr_vec.at(i), false || m_perIterationDispatch) )
     {
-      if ( m_verbose )
-      {
-        cout << "Performing non-incr. read transaction, depth = " << iDepth << endl;
-      }
+      nrTestsFailed++;
+    }
+  }
+  
+  cout << "\n 2. Block write/read (" << addr_vec.size() * 2 << " tests)" << endl;
+  for (unsigned i = 0; i < addr_vec.size(); i++)
+  {
+    uint32_t addr = addr_vec.at(i);
+    uint32_t max_depth = m_baseAddr + m_bandwidthTestDepth - addr;
+    uint32_t depth = rand() % (max_depth + 1);
+    // Remove 0-word write/read tests until bug solved -- https://svnweb.cern.ch/trac/cactus/ticket/343
+    if ( depth == 0 )
+       depth = max_depth;
 
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->readBlock ( m_baseAddr, iDepth, defs::NON_INCREMENTAL );
-      }
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->dispatch();
-      }
+    nrTestsTotal++;
+    if ( ! validation_test_block_write_read(client, addr, depth, true) )
+    {
+      nrTestsFailed++;
     }
 
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL at depth = " << iDepth << "!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n7) No-throw test: Write transaction, depths 1 - " << maxTestDepth << ":" << endl;
-
-  try
-  {
-    for ( iDepth = 1 ; iDepth <= maxTestDepth ; ++iDepth )
+    nrTestsTotal++;
+    if ( ! validation_test_block_write_read(client, addr, depth, false || m_perIterationDispatch) )
     {
-      if ( m_verbose )
-      {
-        cout << "Performing write transaction, depth = " << iDepth << endl;
-      }
+      nrTestsFailed++;
+    }
+  }
 
-      U32Vec dataToWrite ( iDepth, 0xdeadcafe );
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->writeBlock ( m_baseAddr, dataToWrite );
-      }
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->dispatch();
-      }
+  cout << "\n 3. Testing RMW-bits (write, RMWbits, read; " << addr_vec.size() * 2 << " tests)" << endl;
+  for (std::vector<uint32_t>::const_iterator it = addr_vec.begin(); it != addr_vec.end(); it++)
+  {
+    nrTestsTotal++;
+    if ( ! validation_test_write_rmwbits_read(client, *it, true) )
+    {
+      nrTestsFailed++;
     }
 
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL at depth = " << iDepth << "!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n8) No-throw test: Non-incr. write transaction, depths 1 - " << maxTestDepth << ":" << endl;
-
-  try
-  {
-    for ( iDepth = 1 ; iDepth <= maxTestDepth ; ++iDepth )
+    nrTestsTotal++;
+    if ( ! validation_test_write_rmwbits_read(client, *it, false || m_perIterationDispatch) )
     {
-      if ( m_verbose )
-      {
-        cout << "Performing non-incr. write transaction, depth = " << iDepth << endl;
-      }
+      nrTestsFailed++;
+    }
+  }
 
-      U32Vec dataToWrite ( iDepth, 0xdeafbabe );
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->writeBlock ( m_baseAddr, dataToWrite, defs::NON_INCREMENTAL );
-      }
-      BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-      {
-        iClient->dispatch();
-      }
+  cout << "\n 4. Testing RMW-sum (write, RMW-sum, read; " << addr_vec.size() * 2 << " tests)" << endl;
+  for (std::vector<uint32_t>::const_iterator it = addr_vec.begin(); it != addr_vec.end(); it++)
+  {
+    nrTestsTotal++;
+    if ( ! validation_test_write_rmwsum_read(client, *it, true) )
+    {
+      nrTestsFailed++;
     }
 
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL at depth = " << iDepth << "!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n9) No-throw test: RMW-bits transaction:" << endl;
-
-  try
-  {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
+    nrTestsTotal++;
+    if ( ! validation_test_write_rmwsum_read(client, *it, false || m_perIterationDispatch) )
     {
-      iClient->rmw_bits ( m_baseAddr, 0x000fffff, 0x9ba11 );
+      nrTestsFailed++;
     }
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->dispatch();
-    }
-    cout << "\tOK" << endl;
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
   }
 
-  cout << "\n10) No-throw test: RMW-sum transaction:" << endl;
 
-  try
+  if ( nrTestsFailed == 0 )
+    cout << "\nBASIC TESTS SUMMARY: All " << nrTestsTotal << " tests passed!" << endl;
+  else
   {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->rmw_sum ( m_baseAddr, 1 );
-    }
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->dispatch();
-    }
-    cout << "\tOK" << endl;
+    cout << "\nBASIC TESTS SUMMARY: Total of " << nrTestsTotal << " tests run -- " << nrTestsFailed << " tests FAILED , " << (nrTestsTotal - nrTestsFailed) << " tests PASSED" << endl;
+    return;
   }
-  catch ( const std::exception& e )
+  
+  cout << "\n\nSOAK TEST\n   Random sequence of " << m_iterations << " transactions sent to hardware" << endl << endl;
+  
+  // Initialise 
+  uint32_t lProtocol;
+  size_t found = client->uri().find ( "-1.3" );
+
+  if ( found!=std::string::npos )
   {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
+    lProtocol = 1;
   }
-
-  cout << "\n11) Write read-back test: Random value to single register:" << endl;
-  tempWord = getRandomBuffer ( 1 ).at ( 0 );
-
-  try
+  else
   {
-    bool testFail = false;
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->write ( m_baseAddr, tempWord );
-      ValWord<uint32_t> result = iClient->read ( m_baseAddr );
-      iClient->dispatch();
+    found = client->uri().find ( "-2.0" );
 
-      if ( tempWord != result.value() )
-      {
-        testFail = true;
-      }
-    }
-
-    if ( !testFail )
+    if ( found!=std::string::npos )
     {
-      cout << "\tOK" << endl;
+      lProtocol = 2;
     }
     else
     {
-      cout << "\tFAIL!  <----- PROBLEM!" << endl;
-      ++nFail;
+      log ( Error() , "Cannot deduce protocol from URI " , Quote ( client->uri() ) );
+      throw 0;
     }
   }
-  catch ( const std::exception& e )
+
+  std::vector<uint32_t> lRandom;
+  lRandom.reserve ( 50000 );
+
+  for ( uint32_t i=0; i!= 50000 ; ++i )
   {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
+    lRandom.push_back ( rand() );
   }
 
-  cout << "\n12) Write read-back test: Random values, depth = 500:" << endl;
-  tempBuffer = getRandomBuffer ( 500 );
+  std::vector< uint32_t > lRegisters ( m_bandwidthTestDepth , 0x00000000 );
 
-  try
+  client->writeBlock(m_baseAddr, lRegisters);
+  client->dispatch();
+
+  uint32_t lType;
+  uint32_t lAddress, lAddrIdx;
+  uint32_t lSize , lPosition;
+  uint32_t lTemp1, lTemp2;
+  std::vector< boost::shared_ptr<QueuedTransaction> > lQueuedTransactions;
+  uint32_t lQueuedWords = 0;
+  ValVector< uint32_t >::const_iterator lValIt;
+  std::vector<uint32_t> lData;
+  std::vector<uint32_t>::iterator lIt1 , lIt2;
+
+  for(unsigned i = 0; i < m_iterations; i++)
   {
-    bool testFail = false;
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->writeBlock ( m_baseAddr, tempBuffer );
-      U32ValVec result = iClient->readBlock ( m_baseAddr, 500 );
-      iClient->dispatch();
+    lType = ( rand() % 4 );
+    lAddress = m_baseAddr + ( rand() % m_bandwidthTestDepth );
 
-      if ( !buffersEqual ( tempBuffer, result ) )
+    switch ( lType )
+    {
+      case 0:
+        {// read
+          lSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - lAddress) );
+          if ( lSize == 0 ) // Remove 0-word reads until bug fixed
+            lSize = 1;
+          if ( m_verbose )
+            cout << "Queueing: " << lSize << "-word read @ 0x" << std::hex << lAddress << std::dec << endl;
+
+          ValVector<uint32_t> result = client->readBlock ( lAddress, lSize, defs::INCREMENTAL );
+          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedBlockRead( lAddress, result, lRegisters.begin() + (lAddress - m_baseAddr) ) ) );
+          lQueuedWords += lSize;
+
+          break;
+        }
+      case 1:
+        {// write
+          lSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - lAddress) );
+          if ( lSize == 0 ) // Remove 0-word writes until bug fixed
+            lSize = 1;
+          if ( m_verbose )
+            cout << "Queueing: " << lSize << "-word write @ 0x" << std::hex << lAddress << std::dec << endl;
+
+          vector<uint32_t> randomData = getRandomBuffer(lSize);
+          ValHeader result = client->writeBlock ( lAddress, randomData, defs::INCREMENTAL );
+          std::copy(randomData.begin(), randomData.end(), lRegisters.begin() + (lAddress - m_baseAddr));
+          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedBlockWrite( lAddress, lSize, result) ) );
+          lQueuedWords += lSize;
+
+          break;
+        }
+      case 2:
+        // RMW-bits
+
+        break;
+      case 3:
+        // RMW-sum
+
+        break;
+    }
+    
+    if ( m_perIterationDispatch || (lQueuedWords > 1000) || ( (i+1) == m_iterations ) )
+    {
+      if ( m_verbose )
+        cout << "Dispatching" << endl;
+      client->dispatch();
+      for(vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = lQueuedTransactions.begin(); it != lQueuedTransactions.end(); it++)
       {
-        testFail = true;
+        if ( ! (*it)->check_values( m_verbose ) )
+        {
+          cout << "ERROR OCCURED IN SOAK TEST (after " << i << " successful transactions)" << endl;
+          return;
+        }
       }
+      lQueuedTransactions.clear();
+      lQueuedWords = 0;
     }
 
-    if ( !testFail )
-    {
-      cout << "\tOK" << endl;
-    }
-    else
-    {
-      cout << "\tFAIL!  <----- PROBLEM!" << endl;
-      ++nFail;
-    }
   }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n13) RMW-bits test:" << endl;
-
-  try
-  {
-    bool testFail = false;
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->write ( m_baseAddr, 0xf6e5d4c3 ); // Write a start value of 0xf6e5d4c3 into the test register
-      ValWord<uint32_t> result1 = iClient->rmw_bits ( m_baseAddr, 0xffff0000, 0x5e6f );
-      ValWord<uint32_t> result2 = iClient->rmw_bits ( m_baseAddr, 0x0000ffff, 0x3c4d0000 );
-      ValWord<uint32_t> result3 = iClient->read ( m_baseAddr ); // Read back the result normally to double-check.
-      iClient->dispatch();
-
-      if ( result1.value() != 0xf6e55e6f )
-      {
-        testFail = true;
-      }
-
-      if ( result2.value() != 0x3c4d5e6f )
-      {
-        testFail = true;
-      }
-
-      if ( result3.value() != 0x3c4d5e6f )
-      {
-        testFail = true;
-      }
-    }
-
-    if ( testFail )
-    {
-      cout << "\tFAIL!  <----- PROBLEM!" << endl;
-      ++nFail;
-    }
-    else
-    {
-      cout << "\tOK" << endl;
-    }
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n14) RMW-sum test:" << endl;
-
-  try
-  {
-    bool testFail = false;
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->write ( m_baseAddr, 0x00000000 ); // Write a start value of 0x00000000 into the test register
-      ValWord<uint32_t> result1 = iClient->rmw_sum ( m_baseAddr, 0xabcd ); // Add 0xabcd to 0...
-      ValWord<uint32_t> result2 = iClient->rmw_sum ( m_baseAddr, 0xffff5434 ); // Add 0xffff5434 to 0xabcd... this should overflow past the 32-bit max value and result in a 1.
-      ValWord<uint32_t> result3 = iClient->read ( m_baseAddr ); // Read back the result normally to double-check.
-      iClient->dispatch();
-
-      if ( result1 != 0x0000abcd )
-      {
-        testFail = true;
-      }
-
-      if ( result2 != 0x00000001 )
-      {
-        testFail = true;
-      }
-
-      if ( result3 != 0x00000001 )
-      {
-        testFail = true;
-      }
-    }
-
-    if ( testFail )
-    {
-      cout << "\tFAIL!  <----- PROBLEM!" << endl;
-      ++nFail;
-    }
-    else
-    {
-      cout << "\tOK" << endl;
-    }
-  }
-  catch ( const std::exception& e )
-  {
-    cout << "\tFAIL!  <----- PROBLEM!\n" << e.what() << endl;
-    ++nFail;
-  }
-
-  cout << "\n----\nValidation test summary: " << nFail << " test(s) failed." << endl;
+  cout << "Reached end of soak test successfully!" << endl;
 }
 
 

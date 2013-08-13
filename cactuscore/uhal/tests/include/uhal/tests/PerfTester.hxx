@@ -36,9 +36,6 @@
 * \class PerfTester
 * \brief Generate custom IPbus/uHAL tests from the command line
 *
-*  See the following link for more details on this data type:
-*  http://cmsdoc.cern.ch/cms/TRIDAS/horizontal/RUWG/DAQ_IF_guide/DAQ_IF_guide.html#CDF
-*
 * \author Robert Frazier
 * \date July 2012
 */
@@ -148,6 +145,17 @@ namespace uhal
         /// Compares a write buffer with one or more ValVec read responses
         bool buffersEqual ( const U32Vec& writeBuffer, const U32ValVec& readBuffer ) const;
 
+        /// Validation test -- single-register write/read-back
+        bool validation_test_single_write_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch) const;
+        
+        /// Validation test -- block write/read-back
+        bool validation_test_block_write_read ( ClientPtr& c, const uint32_t addr, const uint32_t depth, const bool perTransactionDispatch ) const;
+
+        /// Validation test -- write, RMW bits, read
+        bool validation_test_write_rmwbits_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch ) const;
+
+        /// Validation test -- write, RMW sum, read
+        bool validation_test_write_rmwsum_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch ) const;
 
         // PRIVATE MEMBER FUNCTIONS - IPbus test functions that users can run
 
@@ -155,6 +163,85 @@ namespace uhal
         void bandwidthTxTest();  ///< Write bandwidth test
         void validationTest();   ///< Historic basic firmware/software validation test
         void sandbox();          ///< An area for a user-definable test
+
+        // PRIVATE CLASSES
+        class QueuedTransaction
+        {
+        public:
+          QueuedTransaction() {  }
+          virtual ~QueuedTransaction() {  }
+
+          virtual bool check_values(bool verbose = false) = 0;
+        };
+
+        class QueuedBlockRead : public QueuedTransaction
+        {
+        public:
+          QueuedBlockRead(const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt) :
+            m_depth(valVector.size()),
+            m_addr(addr),
+            m_valVector(valVector)
+          {
+            m_expected.assign(expectedValuesIt, expectedValuesIt + m_depth);
+          }
+          ~QueuedBlockRead() {}
+
+          virtual bool check_values(bool verbose = false)
+          {
+            std::vector<uint32_t>::const_iterator valVecIt = m_valVector.begin();
+            std::vector<uint32_t>::const_iterator expdIt = m_expected.begin();
+
+            for(; valVecIt != m_valVector.end(); valVecIt++, expdIt++)
+            {
+              if ( (*valVecIt) != (*expdIt) )
+              {
+                uint32_t addr = m_addr + (valVecIt - m_valVector.begin());
+                log( Error(), "TEST FAILED: In ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), ", register ", Integer( addr, IntFmt<hex,fixed>()), " has value ", Integer(*valVecIt, IntFmt<hex,fixed>() ), ", but expected value ", Integer(*expdIt, IntFmt<hex,fixed>() ) );
+                return false;
+              }
+            }
+            
+            if ( verbose )
+            {
+              log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
+            }
+          return true;
+          }
+
+        private:
+          // PRIVATE MEMBER DATA
+          uint32_t m_depth, m_addr;
+          ValVector<uint32_t> m_valVector;
+          std::vector<uint32_t> m_expected;
+        };
+
+        class QueuedBlockWrite : public QueuedTransaction
+        {
+        public:
+          QueuedBlockWrite(const uint32_t addr, const uint32_t depth, const ValHeader& valHeader) : 
+            m_depth(depth),
+            m_addr(addr),
+            m_valHeader(valHeader)
+          {}
+          ~QueuedBlockWrite() {}
+          
+          virtual bool check_values(bool verbose = false)
+          {
+            if ( verbose )
+              log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
+
+            if ( ! m_valHeader.valid() ){
+              log ( Error(), "TEST FAILED: Incrementing write unsuccessful.");
+              return false;
+            }
+            return true;
+          }
+
+        private:
+          // PRIVATE MEMBER DATA
+          uint32_t m_depth, m_addr;
+          ValHeader m_valHeader;
+        };
 
     }; /* End of class PerfTester */
 
