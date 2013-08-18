@@ -24,7 +24,6 @@ import tempfile
 import threading
 import time
 
-
 ####################################################################################################
 #  GLOBAL OPTIONS
 
@@ -40,14 +39,14 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
 CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.0.0/sys.config"
 
 TARGETS = ['amc-e1a12-19-09:50001',
-          ]# 'amc-e1a12-19-10:50001',
-           #'amc-e1a12-19-04:50001']
+           'amc-e1a12-19-10:50001',
+           'amc-e1a12-19-04:50001']
 
 DIRECT_UDP_NR_IN_FLIGHT = 16
 
-CACTUS_REVISION = "xyz"
+CACTUS_REVISION = "uHAL @ r21438, ControlHub @ r22319"
 
-CHANGES_TAG = "some changes"
+CHANGES_TAG = "No changes"
 
 ###################################################################################################
 #  SETUP LOGGING
@@ -98,7 +97,7 @@ def run_command(cmd, ssh_client=None, parser=None):
   Run command, returning tuple of exit code and stdout/err.
   The command will be killed if it takes longer than TEST_CMD_TIMEOUT_S
   """
-  if (parser is None) and (cmd.startswith("PerfTester.exe")):
+  if (parser is None) and (cmd.startswith("PerfTester.exe") or cmd.startswith("perf_tester.escript")):
       parser = parse_perftester
   if cmd.startswith("sudo"):
       cmd = "sudo PATH=$PATH " + cmd[4:]
@@ -458,7 +457,7 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
     ax.set_xlabel("Number of words")
     ax.set_ylabel("Write bandwidth [Mb/s]")
 #    plt.xscale("log")
-    ax.legend(loc='lower right')
+    ax.legend(loc='upper left')
     ax.set_title('Block writes, 1000 or 500 iterations')
 
 
@@ -467,25 +466,26 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
     print "\n ---> BANDWIDTH vs NR_IN_FLIGHT to '" + target + "' <---"
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
-    nrs_in_flight = [1,2,3,4,6,8,10,12,16]
-    cmd_base = "PerfTester.exe -b 0x1000 -w 2560 -i 2048 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
+    nrs_in_flight = [1,2,3,4,6,8,10,12,14,16]
+#    cmd_base = "perf_tester.escript tcp_ch_client2 " + CH_PC_NAME + " " + target.replace(":"," ") + " 1600 6"
+    cmd_base = "perf_tester.escript tcp_ch_client " + CH_PC_NAME + " " + target.replace(":"," ") + " 16000 50"
 
     ch_tx_bws = dict((x, []) for x in nrs_in_flight)
-    ch_rx_bws  = dict((x, []) for x in nrs_in_flight)
+#    ch_rx_bws  = dict((x, []) for x in nrs_in_flight)
 
     for i in range(5):
         for n in nrs_in_flight:
             update_controlhub_sys_config(n, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
             start_controlhub(controlhub_ssh_client)
-            ch_tx_bws[n].append( run_command(cmd_base + " -t BandwidthTx")[1] )
-            ch_rx_bws[n].append( run_command(cmd_base + " -t BandwidthRx")[1] )
+            ch_tx_bws[n].append( run_command(cmd_base)[1] )  #  + " -t BandwidthTx")[1] )
+#            ch_rx_bws[n].append( run_command(cmd_base + " -t BandwidthRx")[1] )
             stop_controlhub(controlhub_ssh_client)
 
     ch_tx_bws_mean, ch_tx_bws_yerrors = calc_y_with_errors(ch_tx_bws)
-    ch_rx_bws_mean, ch_rx_bws_yerrors = calc_y_with_errors(ch_rx_bws)
+#    ch_rx_bws_mean, ch_rx_bws_yerrors = calc_y_with_errors(ch_rx_bws)
     
     ax.errorbar(nrs_in_flight, ch_tx_bws_mean, yerr=ch_tx_bws_yerrors, label='Write via CH')
-    ax.errorbar(nrs_in_flight, ch_rx_bws_mean, yerr=ch_rx_bws_yerrors, label='Read via CH')
+#    ax.errorbar(nrs_in_flight, ch_rx_bws_mean, yerr=ch_rx_bws_yerrors, label='Read via CH')
     ax.set_xlabel('Number in flight over UDP')
     ax.set_ylabel('Bandwidth [Mb/s]')
     ax.set_ylim(0)
@@ -498,13 +498,18 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     print "\n ---> BANDWIDTH vs NR_CLIENTS to", targets, "<---"
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
-    cmd_base = "PerfTester.exe -t BandwidthTx -w 2560 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
-    cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
+#    cmd_base = "PerfTester.exe -t BandwidthTx -w 2560 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
+    cmd_base = "perf_tester.escript tcp_ch_client2 " + CH_PC_NAME + " "
+    cmd_base = "perf_tester.escript tcp_ch_client " + CH_PC_NAME + " "
+#    cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
+    cmd_runner = CommandRunner( [('beam.smp',None), ('beam.smp',controlhub_ssh_client)] )
 
     nrs_clients = [1,2,3,4,5,6,8]
     nrs_targets = range(1, len(targets)+1)
+
     bws_per_board  = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
     bws_per_client = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
+    total_bws      = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
     ch_cpu_vals = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
     ch_mem_vals = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
     uhal_cpu_vals = dict( ((x,z), []) for x in nrs_clients for z in nrs_targets )
@@ -516,8 +521,11 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     for i in range(5):
         for n_clients in nrs_clients:
             for n_targets in nrs_targets:
-                itns = int(20480/(n_clients*n_targets))
-                cmds = [cmd_base + t + ' -i ' + str(itns) for t in targets[0:n_targets] for x in range(n_clients)]
+#                itns = int(20480/(n_clients*n_targets))
+#                cmds = [cmd_base + t + ' -i ' + str(itns) for t in targets[0:n_targets] for x in range(n_clients)]
+#               itns = int(25000/(n_clients*n_targets))
+                itns = int(250000/(n_clients*n_targets))
+                cmds = [cmd_base + t.replace(":"," ") + ' ' + str(itns) + " 50" for t in targets[0:n_targets] for x in range(n_clients)]
                 monitor_results, cmd_results = cmd_runner.run(cmds)
                 bws = [x[1] for x in cmd_results]
 
@@ -528,10 +536,11 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
                 ch_mem_vals[dict_idx].append( monitor_results[1][2] )
                 bws_per_board[dict_idx].append( sum(bws)/n_targets )
                 bws_per_client[dict_idx].append( sum(bws)/len(bws) )
+                total_bws[dict_idx].append( sum(bws) )
         
     stop_controlhub(controlhub_ssh_client)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(18,10))
     ax_bw_board  = fig.add_subplot(231)
     ax_bw_client = fig.add_subplot(234, ylim=[0,300])
     ax_ch_cpu = fig.add_subplot(232, ylim=[0,400])
@@ -544,13 +553,19 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
         label = str(n_targets) + ' targets'
         bws_per_board_mean , bws_per_board_errs  = calc_y_with_errors( dict(x for x in bws_per_board.items() if x[0][1]==n_targets) )
         bws_per_client_mean, bws_per_client_errs = calc_y_with_errors( dict(x for x in bws_per_client.items() if x[0][1]==n_targets) )
+        total_bws_mean, total_bws_errs           = calc_y_with_errors( dict(x for x in total_bws.items() if x[0][1]==n_targets) )
         ch_cpu_mean, ch_cpu_errs = calc_y_with_errors( dict(x for x in ch_cpu_vals.items() if x[0][1]==n_targets) )
         ch_mem_mean, ch_mem_errs = calc_y_with_errors( dict(x for x in ch_mem_vals.items() if x[0][1]==n_targets) )
         uhal_cpu_mean, uhal_cpu_errs = calc_y_with_errors( dict(x for x in uhal_cpu_vals.items() if x[0][1]==n_targets) )
         uhal_mem_mean, uhal_mem_errs = calc_y_with_errors( dict(x for x in uhal_mem_vals.items() if x[0][1]==n_targets) )
 
+        print label
+        for cpu in ch_cpu_mean:
+            print "ControlHub cpu:", cpu
+
         ax_bw_board.errorbar(nrs_clients, bws_per_board_mean, yerr=bws_per_board_errs, label=label)
-        ax_bw_client.errorbar(nrs_clients, bws_per_client_mean, yerr=bws_per_client_errs, label=label)
+#        ax_bw_client.errorbar(nrs_clients, bws_per_client_mean, yerr=bws_per_client_errs, label=label)
+        ax_bw_client.errorbar(nrs_clients, total_bws_mean, yerr=total_bws_errs, label=label)
         ax_ch_cpu.errorbar(nrs_clients, ch_cpu_mean, yerr=ch_cpu_errs, label=label)
         ax_ch_mem.errorbar(nrs_clients, ch_mem_mean, yerr=ch_mem_errs, label=label)
         ax_uhal_cpu.errorbar(nrs_clients, uhal_cpu_mean, yerr=uhal_cpu_errs, label=label)
@@ -560,8 +575,10 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
         ax.set_xlabel('Number of clients per board')
 
     ax_bw_board.set_ylabel('Total bandwidth per board [Mb/s]')
-    ax_bw_client.set_ylabel('Bandwidth per client [Mb/s]')
-    ax_bw_board.set_ylim(bottom=0)
+#    ax_bw_client.set_ylabel('Bandwidth per client [Mb/s]')
+    ax_bw_client.set_ylabel('Total bandwidth [Mb/s]')
+    for ax in [ax_bw_board, ax_bw_client]:
+        ax.set_ylim(0, 900)
 
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
     ax_ch_mem.set_ylabel('ControlHub memory usage [%]')
@@ -589,8 +606,8 @@ if __name__ == "__main__":
     ax4 = f.add_subplot(224)
 
     f.text(0.06, 0.9, "Measurements @ " + time.strftime('%l:%M%p %Z on %b %d, %Y'))
-    f.text(0.06, 0.85, "Version: " + CACTUS_REVISION)
-    f.text(0.06, 0.8, "Changes: " + CHANGES_TAG) 
+    f.text(0.06, 0.85, "Version:\n    " + CACTUS_REVISION)
+    f.text(0.06, 0.8, "Changes:\n    " + CHANGES_TAG) 
     f.text(0.06, 0.75, "ControlHub host: " + CH_PC_NAME)
     f.text(0.06, 0.7, "uHAL host: " + UHAL_PC_NAME)    
     f.text(0.06, 0.65, "Targets: \n    " + "\n    ".join(TARGETS), verticalalignment='baseline')
@@ -599,7 +616,7 @@ if __name__ == "__main__":
 
     measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client, ax3)
 
-    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client, ax4)
+#    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client, ax4)
 
     measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
 
