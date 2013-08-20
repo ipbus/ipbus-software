@@ -52,19 +52,18 @@ start_link(TcpListenSocket) ->
 tcp_acceptor(TcpListenSocket) ->
     ?CH_LOG_DEBUG("Transaction manager born. Waiting for TCP connection..."),
     case gen_tcp:accept(TcpListenSocket) of
-        {ok, ClientSocket} ->
+        {ok, Socket} ->
             ch_tcp_listener:connection_accept_completed(),
             ch_stats:client_connected(),
-            case inet:peername(ClientSocket) of
-                {ok, {_ClientAddr, _ClientPort}} ->
+            case inet:peername(Socket) of
+                {ok, {ClientAddr, ClientPort}} ->
                     TcpPid = proc_lib:spawn_link(fun tcp_proc_init/0),
                     put(tcp_pid, TcpPid),
-                    gen_tcp:controlling_process(ClientSocket, TcpPid),
-                    TcpPid ! {start, ClientSocket, self()},
-                    ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p~n"
-                                 "Socket options: ~w~n",
-                                 [_ClientAddr, _ClientPort, inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
-                    transaction_manager_loop(TcpPid, ClientSocket, unknown, unknown, unknown, 1, queue:new(), []);
+                    gen_tcp:controlling_process(Socket, TcpPid),
+                    TcpPid ! {start, Socket, self()},
+                    ?CH_LOG_INFO("TCP socket accepted from client at ~s. Socket options: ~w~n",
+                                 [ch_utils:ip_port_string(ClientAddr, ClientPort), inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
+                    transaction_manager_loop(TcpPid, Socket, unknown, unknown, unknown, 1, queue:new(), []);
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?CH_LOG_ERROR("Socket error whilst getting peername.")
@@ -122,51 +121,55 @@ tcp_proc_loop(Socket, ParentPid) ->
 %% Main transaction_manager operation loop (tail-recursive)
 %%   - entered when accept off TCP socket
 %%   - if socket closes, then this function exits
-transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList) ->
+transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, QNrReqsPerTcp, ReplyIoList) ->
     receive
-        {tcp, ClientSocket, RequestBin} ->
+        {tcp, Socket, RequestBin} ->
             if
               (byte_size(RequestBin) rem 4) =:= 0 ->
                 ?CH_LOG_DEBUG("Received TCP chunk."),
                 {RetPid, TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, DevClientPid, 0),
-                transaction_manager_loop(TcpPid, ClientSocket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs, queue:in(NrReqs, NrReqsQ), ReplyIoList);
+                transaction_manager_loop(TcpPid, Socket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs, queue:in(NrReqs, QNrReqsPerTcp), ReplyIoList);
               true ->
                 ?CH_LOG_ERROR("Each TCP chunk should be an integer number of 32-bit words, but received chunk of length ~w bytes for ~s. This TCP chunk will be ignored.", [byte_size(RequestBin), ch_utils:ip_port_string(TargetIPAddrArg, TargetPortArg)]),
                 ch_stats:client_request_malformed(),
-                transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList)
+                transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, QNrReqsPerTcp, ReplyIoList)
             end;
 
-        {device_client_response, TargetIPAddrArg, TargetPortArg, 0, ReplyPkt} ->
-            ErrorCode = 0,
-            NrRepliesToSend = element(2, queue:peek(NrReqsQ)),
+        {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, ReplyPkt} ->
+            NrRepliesToSend = element(2, queue:peek(QNrReqsPerTcp)),
             case ((lists:flatlength(ReplyIoList) + 2) div 2) of
                 NrRepliesToSend ->
                     ?CH_LOG_DEBUG("Sending ~w IPbus response packets over TCP.", []),
                     TcpPid ! {send, [ReplyIoList, <<(byte_size(ReplyPkt) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyPkt]},
-                    transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, queue:drop(NrReqsQ), []);
+                    transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, queue:drop(QNrReqsPerTcp), []);
                 _NrRepliesAccumulated ->
                     ?CH_LOG_DEBUG("IPbus response packet received. Accumulating for TCP send (~w needed for next TCP chunk, ~w now accumulated).", [NrRepliesToSend, _NrRepliesAccumulated]),
-                    transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, NrReqsQ, 
+                    transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, QNrReqsPerTcp, 
                                              [ReplyIoList, <<(byte_size(ReplyPkt) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyPkt])
             end;
 
-        {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, Bin} ->
-            ?CH_LOG_DEBUG("Received IPbus response with ErrorCode ~w. Sending directly onto TCP stream."),
-            TcpPid ! {send, [<<(byte_size(Bin) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, Bin]},
-            transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, unknown, NrInFlight-1, NrReqsQ, ReplyIoList);
-
-        {tcp_closed, ClientSocket} ->
+        {tcp_closed, Socket} ->
             ch_stats:client_disconnected(),
-            ?CH_LOG_INFO("TCP socket closed.");
+            if
+              NrInFlight > 0 ->
+                ?CH_LOG_WARN("TCP socket from ~s was closed early - there is still ~w replies pending for that socket. Presumably the socket was closed by the TCP client.", [ch_utils:tcp_peeername_string(Socket), NrInFlight]);
+              true ->
+                ?CH_LOG_INFO("TCP socket closed.")
+            end;
 
-        {tcp_error, ClientSocket, _Reason} ->
+        {tcp_error, Socket, _Reason} ->
             % Assume this ends up with the socket closed from a stats standpoint
             ch_stats:client_disconnected(),
-            ?CH_LOG_WARN("TCP socket error (~p).", [_Reason]);
+            if
+              NrInFlight > 0 ->
+                ?CH_LOG_ERROR("TCP socket error (~p). The ~w pending IPbus reply packets will not be forwarded.", [_Reason, NrInFlight]);
+              true ->
+                ?CH_LOG_WARN("TCP socket error (~p). Currenly no pending IPbus reply packets.", [_Reason])
+            end;
 
         Else ->
             ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [Else]),
-            transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList)
+            transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, QNrReqsPerTcp, ReplyIoList)
     end.
 
 

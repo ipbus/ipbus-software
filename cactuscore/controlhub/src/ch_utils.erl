@@ -14,7 +14,7 @@
 
 
 %% Exported Functions
--export([log/5, log/4, log/3, ip_port_string/2,
+-export([log/5, log/4, log/3, ip_port_string/2, tcp_peername_string/1,
          print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1]).
 
 
@@ -83,11 +83,23 @@ log(Level, Module, MsgString) ->
 %% -------------------------------------------------------------------------------------
 
 ip_port_string(IP, Port) when is_tuple(IP) ->
-    io_lib:format("~w:~w", [inet_parse:ntoa(IP), Port]);
+    io_lib:format("~s:~w", [inet_parse:ntoa(IP), Port]);
 ip_port_string(IP, Port) when is_integer(IP) ->
     ip_port_string( ipv4_u32_addr_to_tuple(IP), Port );
 ip_port_string(IP, Port) ->
     io_lib:format("invalid_ip(~w):~w", [IP, Port]).
+
+
+%% -------------------------------------------------------------------------------------
+%% @doc Returns IP & port at other end of TCP socket in format ip1.ip2.ip3.ip4:port
+%%
+%% @spec tcp_peername_string(Socket :: socket()) -> string()
+%% @end
+%% -------------------------------------------------------------------------------------
+
+tcp_peername_string( Socket ) when is_port(Socket) ->
+    {ok, {IP, Port}} = inet:peername(Socket),
+    ip_port_string(IP, Port).
 
 
 %% -------------------------------------------------------------------------------------
