@@ -86,7 +86,7 @@ connection_accept_completed() ->
 init([]) ->
     ?CH_LOG_DEBUG("Initialising the TCP listener."),
     process_flag(trap_exit, true),
-    case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, ?TCP_SOCKET_OPTIONS) of
+    case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, lists:keyreplace(active, 1, ?TCP_SOCKET_OPTIONS, {active,false}) ) of
         {ok, TcpListenSocket} ->
             {ok, spawn_acceptor(#state{socket = TcpListenSocket})};
         {error, eaddrinuse} ->

@@ -16,6 +16,7 @@
 %%
 -include("ch_global.hrl").
 -include("ch_timeouts.hrl").
+-include("ch_tcp_server_params.hrl").
 -include("ch_error_codes.hrl").
 
 %%
@@ -63,7 +64,7 @@ tcp_acceptor(TcpListenSocket) ->
                     ?CH_LOG_INFO("TCP socket accepted from client at IP addr=~w, port=~p~n"
                                  "Socket options: ~w~n",
                                  [_ClientAddr, _ClientPort, inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
-                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, unknown, unknown, unknown, 1, queue:new(), []);
+                    transaction_manager_loop(TcpPid, ClientSocket, unknown, unknown, unknown, 1, queue:new(), []);
                 _Else ->
                     ch_stats:client_disconnected(),
                     ?CH_LOG_ERROR("Socket error whilst getting peername.")
@@ -91,6 +92,7 @@ tcp_proc_init() ->
     receive
         {start, Socket, ParentPid} ->
             link(ParentPid),
+            inet:setopts(Socket, [lists:keyfind(active, 1, ?TCP_SOCKET_OPTIONS)]),
             tcp_proc_loop(Socket, ParentPid)
     end.
 
@@ -117,15 +119,22 @@ tcp_proc_loop(Socket, ParentPid) ->
     tcp_proc_loop(Socket, ParentPid).
 
 
-%% Main transaction_manager operation loop
+%% Main transaction_manager operation loop (tail-recursive)
 %%   - entered when accept off TCP socket
 %%   - if socket closes, then this function exits
-minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList) ->
+transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList) ->
     receive
         {tcp, ClientSocket, RequestBin} ->
-            ?CH_LOG_DEBUG("Received TCP chunk."),
-            {RetPid, TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, DevClientPid, 0),
-            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs, queue:in(NrReqs, NrReqsQ), ReplyIoList);
+            if
+              (byte_size(RequestBin) rem 4) =:= 0 ->
+                ?CH_LOG_DEBUG("Received TCP chunk."),
+                {RetPid, TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, DevClientPid, 0),
+                transaction_manager_loop(TcpPid, ClientSocket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs, queue:in(NrReqs, NrReqsQ), ReplyIoList);
+              true ->
+                ?CH_LOG_ERROR("Each TCP chunk should be an integer number of 32-bit words, but received chunk of length ~w bytes for ~s. This TCP chunk will be ignored.", [byte_size(RequestBin), ch_utils:ip_port_string(TargetIPAddrArg, TargetPortArg)]),
+                ch_stats:client_request_malformed(),
+                transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList)
+            end;
 
         {device_client_response, TargetIPAddrArg, TargetPortArg, 0, ReplyPkt} ->
             ErrorCode = 0,
@@ -134,17 +143,17 @@ minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPo
                 NrRepliesToSend ->
                     ?CH_LOG_DEBUG("Sending ~w IPbus response packets over TCP.", []),
                     TcpPid ! {send, [ReplyIoList, <<(byte_size(ReplyPkt) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyPkt]},
-                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, queue:drop(NrReqsQ), []);
+                    transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, queue:drop(NrReqsQ), []);
                 _NrRepliesAccumulated ->
                     ?CH_LOG_DEBUG("IPbus response packet received. Accumulating for TCP send (~w needed for next TCP chunk, ~w now accumulated).", [NrRepliesToSend, _NrRepliesAccumulated]),
-                    minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, NrReqsQ, 
-                                                     [ReplyIoList, <<(byte_size(ReplyPkt) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyPkt])
+                    transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, NrReqsQ, 
+                                             [ReplyIoList, <<(byte_size(ReplyPkt) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyPkt])
             end;
 
         {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, Bin} ->
             ?CH_LOG_DEBUG("Received IPbus response with ErrorCode ~w. Sending directly onto TCP stream."),
             TcpPid ! {send, [<<(byte_size(Bin) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, Bin]},
-            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, unknown, NrInFlight-1, NrReqsQ, ReplyIoList);
+            transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, unknown, NrInFlight-1, NrReqsQ, ReplyIoList);
 
         {tcp_closed, ClientSocket} ->
             ch_stats:client_disconnected(),
@@ -157,10 +166,10 @@ minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPo
 
         Else ->
             ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [Else]),
-            minimal_tcp_receive_handler_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList)
+            transaction_manager_loop(TcpPid, ClientSocket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, NrReqsQ, ReplyIoList)
     end.
 
-            
+
 unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, IPbusReq:NrInstructions/binary-unit:32, Tail/binary>>, Pid, NrSent) ->
     RetPid = enqueue_request(TargetIPAddr, TargetPort, Pid, IPbusReq),
     if
@@ -169,7 +178,15 @@ unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, IPbusReq
       true ->
         ?CH_LOG_DEBUG("~w IPbus packets in last TCP chunk", [(NrSent+1)]),
         {RetPid, TargetIPAddr, TargetPort, NrSent+1}
-    end.
+    end;
+unpack_and_enqueue(Binary, Pid, NrSent) when byte_size(Binary) < 12 ->
+    ?CH_LOG_ERROR("Binary nr ~w unpacked from TCP chunk (~w) contained less than three 32-bit words, which is invalid according to uHAL-ControlHub protocol. Ignoring remainder of this chunk and continuing.", [NrSent+1, Binary]),
+    ch_stats:client_request_malformed(),
+    {Pid, unknown, unknown, NrSent};
+unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TailBin/binary>>, Pid, NrSent) ->
+    ?CH_LOG_ERROR("Not enough bytes (only ~w) left in TCP chunk to unpack IPbus packet of length ~w bytes for ~s (binary nr ~w in this TCP chunk). Ignoring remainder of this chunk and continuing.", [byte_size(TailBin), 4*NrInstructions, ch_utils:ip_port_string(TargetIPAddr, TargetPort), NrSent+1]),
+    ch_stats:client_request_malformed(),
+    {Pid, TargetIPAddr, TargetPort, NrSent}.
 
 
 enqueue_request(_IPaddrU32, _PortU16, DestPid, IPbusRequest) when is_pid(DestPid) ->
@@ -179,4 +196,3 @@ enqueue_request(_IPaddrU32, _PortU16, DestPid, IPbusRequest) when is_pid(DestPid
 enqueue_request(IPaddrU32, PortU16, _NotPid, IPbusRequest) ->
     {ok, Pid} = ch_device_client_registry:get_pid(IPaddrU32, PortU16),
     enqueue_request(IPaddrU32, PortU16, Pid, IPbusRequest).
-

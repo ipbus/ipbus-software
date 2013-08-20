@@ -85,7 +85,9 @@ log(Level, Module, MsgString) ->
 ip_port_string(IP, Port) when is_tuple(IP) ->
     io_lib:format("~w:~w", [inet_parse:ntoa(IP), Port]);
 ip_port_string(IP, Port) when is_integer(IP) ->
-    ip_port_string( ipv4_u32_addr_to_tuple(IP), Port ).
+    ip_port_string( ipv4_u32_addr_to_tuple(IP), Port );
+ip_port_string(IP, Port) ->
+    io_lib:format("invalid_ip(~w):~w", [IP, Port]).
 
 
 %% -------------------------------------------------------------------------------------
