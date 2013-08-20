@@ -14,7 +14,7 @@
 
 
 %% Exported Functions
--export([log/5, log/4, log/3,
+-export([log/5, log/4, log/3, ip_port_string/2,
          print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1]).
 
 
@@ -71,6 +71,21 @@ log(Level, Module, MsgFmtString, State) when is_tuple(State) ->
 
 log(Level, Module, MsgString) ->
     log(Level, Module, MsgString, []).
+
+
+%% -------------------------------------------------------------------------------------
+%% @doc Converts IP address (either U32 integer, or 4-tuple) and port into string of 
+%%      standard format ip1.ip2.ip3.ip4:port
+%%
+%% @spec ip_port_string(IP :: (tuple() || integer() >= 0), Port :: (integer() >= 0) ) -> string()
+%%
+%% @end
+%% -------------------------------------------------------------------------------------
+
+ip_port_string(IP, Port) when is_tuple(IP) ->
+    io_lib:format("~w:~w", [inet_parse:ntoa(IP), Port]);
+ip_port_string(IP, Port) when is_integer(IP) ->
+    ip_port_string( ipv4_u32_addr_to_tuple(IP), Port ).
 
 
 %% -------------------------------------------------------------------------------------
