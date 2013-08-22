@@ -317,13 +317,13 @@ bool uhal::tests::PerfTester::validation_test_single_write_read(ClientPtr& c, co
 
     if (x != reg.value())
     {
-      cout << "\nTEST FAILED: " << oss_details.str() << ". Wrote value 0x" << std::hex << x << " but read-back 0x" << reg.value() << std::dec << endl;
+      cout << "TEST FAILED: " << oss_details.str() << ". Wrote value 0x" << std::hex << x << " but read-back 0x" << reg.value() << std::dec << endl;
       return false;
     }
   }
   catch (const std::exception& e)
   {
-    cout << "\nTEST FAILED: " << oss_details.str() << ". Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
+    cout << "TEST FAILED: " << oss_details.str() << ". Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
     return false;
   }
   return true;
@@ -355,13 +355,13 @@ bool uhal::tests::PerfTester::validation_test_block_write_read(ClientPtr& c, con
 
     if ( ! buffersEqual(xx, ram) )
     {
-      cout << "\nTEST FAILED: " << oss_details.str() << "! Values written do not match those read back." << endl;
+      cout << "TEST FAILED: " << oss_details.str() << "! Values written do not match those read back." << endl;
       return false;
     }
   }
   catch (const std::exception& e)
   {
-    cout << "\nTEST FAILED by THROWING: " << oss_details.str() << "! Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
+    cout << "TEST FAILED: " << oss_details.str() << "! EXCEPTION of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
     return false;
   }
   return true;
@@ -396,7 +396,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwbits_read(ClientPtr& c, c
 
     if ( ipbus2 ? (x0 != reg_rmw.value()) : (x1 != reg_rmw.value()) )
     {
-      cout << "\nTEST FAILED: " << oss_details.str() << " ... RMW-bits returned value 0x" << std::hex << reg_rmw.value() << ", but expected 0x" << (ipbus2 ? x0 : x1) << std::dec << endl << oss_values.str() << endl;
+      cout << "TEST FAILED: " << oss_details.str() << " ... RMW-bits returned value 0x" << std::hex << reg_rmw.value() << ", but expected 0x" << (ipbus2 ? x0 : x1) << std::dec << endl << oss_values.str() << endl;
       return false;
     }
 
@@ -405,7 +405,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwbits_read(ClientPtr& c, c
 
     if( x1 != reg_read.value() )
     {
-      cout << "\nTEST FAILED: " << oss_details.str() << " ... Read after RMW-bits returned value 0x" << std::hex << reg_rmw.value() << ", but expected 0x" << std::dec << x1 << endl << oss_values.str() << endl;
+      cout << "TEST FAILED: " << oss_details.str() << " ... Read after RMW-bits returned value 0x" << std::hex << reg_rmw.value() << ", but expected 0x" << std::dec << x1 << endl << oss_values.str() << endl;
       return false;
     }
   }
@@ -445,7 +445,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read(ClientPtr& c, co
 
     if ( ipbus2 ? (x0 != reg_sum.value()) : (x1 != reg_sum.value()) )
     {
-      cout << "\nTEST FAILED: " << oss_details.str() << " ... RMW-sum returned value 0x" << std::hex << reg_sum.value() << ", but expected 0x" << (ipbus2 ? x0 : x1) << std::dec << endl << oss_values.str() << endl;
+      cout << "TEST FAILED: " << oss_details.str() << " ... RMW-sum returned value 0x" << std::hex << reg_sum.value() << ", but expected 0x" << (ipbus2 ? x0 : x1) << std::dec << endl << oss_values.str() << endl;
       return false;
     }
 
@@ -454,13 +454,13 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read(ClientPtr& c, co
 
     if( x1 != reg_read.value() )
     {
-      cout << "\nTEST FAILED: " << oss_details.str() << " ... Read after RMW-sum returned value 0x" << std::hex << reg_sum.value() << ", but expected 0x" << x1 << std::dec << endl << oss_values.str() << endl;
+      cout << "TEST FAILED: " << oss_details.str() << " ... Read after RMW-sum returned value 0x" << std::hex << reg_sum.value() << ", but expected 0x" << x1 << std::dec << endl << oss_values.str() << endl;
       return false;
     }
   }
   catch (const std::exception& e)
   {
-    cout << "\nTEST FAILED: " << oss_values.str() << ". Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
+    cout << "TEST FAILED: " << oss_values.str() << ". Exception of type '" << typeid(e).name() << "' thrown ..." << endl << e.what() << endl;
     return false;
   }
 
@@ -800,6 +800,11 @@ void uhal::tests::PerfTester::validationTest()
       if ( m_verbose )
         cout << "Dispatching" << endl;
       client->dispatch();
+
+      if ( m_verbose )
+        cout << "Empty dispatch" << endl;
+      client->dispatch();
+
       for(vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = lQueuedTransactions.begin(); it != lQueuedTransactions.end(); it++)
       {
         if ( ! (*it)->check_values( m_verbose ) )
