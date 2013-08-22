@@ -654,9 +654,10 @@ void uhal::tests::PerfTester::validationTest()
     return;
   }
   
+  // SOAK TEST - SETUP
+
   cout << "\n\nSOAK TEST\n   Random sequence of " << m_iterations << " transactions sent to hardware" << endl << endl;
-  
-  // Initialise 
+
   uint32_t ipbus_vsn;
   size_t found = client->uri().find ( "-1.3" );
 
@@ -679,10 +680,14 @@ void uhal::tests::PerfTester::validationTest()
     }
   }
 
+
   std::vector< uint32_t > registers ( m_bandwidthTestDepth , 0x00000000 );
 
+  // Initialise registers to 0x0 
   client->writeBlock(m_baseAddr, registers);
   client->dispatch();
+
+  // SOAK TEST - RUNNING IT
 
   uint32_t type, addr, blockSize;
   uint32_t tempUInt1, tempUInt2;
