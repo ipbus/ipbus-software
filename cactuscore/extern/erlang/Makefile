@@ -61,7 +61,7 @@ _rpmall:
 		--define "sources_dir ${RPMBUILD_DIR}/SOURCES" \
 		--define "name ${PackageName}" \
 		--define "version R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}" \
-		--define "release ${PACKAGE_RELEASE}" \
+		--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}" \
 		--define "packager ${Packager}" \
 		${PackageName}.spec
 
