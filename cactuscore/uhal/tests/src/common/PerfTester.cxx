@@ -353,11 +353,19 @@ bool uhal::tests::PerfTester::validation_test_block_write_read(ClientPtr& c, con
     U32ValVec ram = c->readBlock(addr, depth);
     c->dispatch();
 
-    if ( ! buffersEqual(xx, ram) )
+    std::vector<uint32_t>::const_iterator valVecIt = ram.begin();
+    std::vector<uint32_t>::const_iterator xxIt = xx.begin();
+    for(; valVecIt != ram.end(); valVecIt++, xxIt++)
     {
-      cout << "TEST FAILED: " << oss_details.str() << "! Values written do not match those read back." << endl;
-      return false;
+      if ( (*valVecIt) != (*xxIt) )
+      {
+        uint32_t reg_addr = addr + (valVecIt - ram.begin());
+        cout << "TEST FAILED: " << oss_details.str() << ". Wrote value Ox" << std::hex << *xxIt << " to register 0x" << reg_addr << " but read-back 0x" << *valVecIt << std::dec << std::endl;
+        return false;
+      }
     }
+
+    log ( Notice(), "TEST PASSED: ", oss_details.str() );
   }
   catch (const std::exception& e)
   {
@@ -703,11 +711,10 @@ void uhal::tests::PerfTester::validationTest()
     {
       case 0:
         {// read
+          log ( Notice(), "Soak test - queueing: ", Integer (blockSize), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
           blockSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - addr) );
           if ( blockSize == 0 ) // Remove 0-word reads until bug fixed
             blockSize = 1;
-          if ( m_verbose )
-            cout << "Queueing: " << blockSize << "-word read @ 0x" << std::hex << addr << std::dec << endl;
 
           ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
           queuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedBlockRead( addr, result, registers.begin() + (addr - m_baseAddr) ) ) );
@@ -717,11 +724,10 @@ void uhal::tests::PerfTester::validationTest()
         }
       case 1:
         {// write
+          log ( Notice(), "Soak test - queueing: ", Integer (blockSize), "-word write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
           blockSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - addr) );
           if ( blockSize == 0 ) // Remove 0-word writes until bug fixed
             blockSize = 1;
-          if ( m_verbose )
-            cout << "Queueing: " << blockSize << "-word write @ 0x" << std::hex << addr << std::dec << endl;
 
           vector<uint32_t> randomData = getRandomBuffer(blockSize);
           ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
@@ -733,6 +739,7 @@ void uhal::tests::PerfTester::validationTest()
         }
       case 2:
         {// RMW-bits
+          log ( Notice(), "Soak test - queueing: RMW-bits at ", Integer ( addr, IntFmt<hex,fixed>() ) );
           tempUInt1 = rand();
           tempUInt2 = rand();
           vector<uint32_t>::iterator regIt = registers.begin() + (addr - m_baseAddr);
@@ -757,6 +764,7 @@ void uhal::tests::PerfTester::validationTest()
         }
       case 3:
         {// RMW-sum
+          log ( Notice(), "Soak test - queueing: RMW-sum at ", Integer ( addr, IntFmt<hex,fixed>() ) );
           tempUInt1 = rand();
           vector<uint32_t>::iterator regIt = registers.begin() + (addr - m_baseAddr);
 
@@ -780,12 +788,10 @@ void uhal::tests::PerfTester::validationTest()
     
     if ( m_perIterationDispatch || (nrQueuedWords > 10000) || ( (i+1) == m_iterations ) )
     {
-      if ( m_verbose )
-        cout << "Dispatching" << endl;
+      log ( Notice(), "Soak test - issuing dispatch" );
       client->dispatch();
 
-      if ( m_verbose )
-        cout << "Empty dispatch" << endl;
+      log ( Notice(), "Soak test - issuing empty dispatch" );
       client->dispatch();
 
       for(vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++)
