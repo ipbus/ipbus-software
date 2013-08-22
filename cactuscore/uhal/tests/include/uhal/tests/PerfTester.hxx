@@ -171,7 +171,7 @@ namespace uhal
           QueuedTransaction() {  }
           virtual ~QueuedTransaction() {  }
 
-          virtual bool check_values(bool verbose = false) = 0;
+          virtual bool check_values() = 0;
         };
 
         class QueuedBlockRead : public QueuedTransaction
@@ -186,7 +186,7 @@ namespace uhal
           }
           ~QueuedBlockRead() {}
 
-          virtual bool check_values(bool verbose = false)
+          virtual bool check_values()
           {
             std::vector<uint32_t>::const_iterator valVecIt = m_valVector.begin();
             std::vector<uint32_t>::const_iterator expdIt = m_expected.begin();
@@ -201,11 +201,8 @@ namespace uhal
               }
             }
             
-            if ( verbose )
-            {
-              log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
-            }
-          return true;
+            log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
+            return true;
           }
 
         private:
@@ -225,16 +222,15 @@ namespace uhal
           {}
           ~QueuedBlockWrite() {}
           
-          virtual bool check_values(bool verbose = false)
+          virtual bool check_values()
           {
-            if ( verbose )
-              log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
-
             if ( ! m_valHeader.valid() )
             {
-              log ( Error(), "TEST FAILED: Incrementing write unsuccessful.");
+              log ( Error(), "TEST FAILED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " unsuccessful.");
               return false;
             }
+
+            log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
             return true;
           }
 
@@ -256,16 +252,15 @@ namespace uhal
           {}
           ~QueuedRmwBits() {}
 
-          virtual bool check_values(bool verbose = false)
+          virtual bool check_values()
           {
-            if ( verbose )
-              log ( Notice(), "TEST PASSED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
-            
             if ( m_valWord.value() != m_expected )
             {
               log ( Error(), "TEST FAILED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " (AND=", Integer (m_and, IntFmt<hex,fixed>() ), ", OR=", Integer (m_or, IntFmt<hex,fixed>() ), "). Transaction returned ", Integer ( m_valWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( m_expected, IntFmt<hex,fixed>() ) );
               return false;
             }
+
+            log ( Notice(), "TEST PASSED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
             return true;
           }
 
@@ -286,16 +281,15 @@ namespace uhal
           {}
           ~QueuedRmwSum() {}
 
-          virtual bool check_values(bool verbose = false)
+          virtual bool check_values()
           {
-            if ( verbose )
-              log ( Notice(), "TEST PASSED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
-
             if ( m_valWord.value() != m_expected )
             {
-              log ( Error(), "TEST FAILED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ), ", ADDEND=", Integer (m_addend, IntFmt<hex,fixed>() ), ". Transaction returned ", Integer (m_valWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( m_expected, IntFmt<>() ) );
+              log ( Error(), "TEST FAILED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ), ", ADDEND=", Integer (m_addend, IntFmt<hex,fixed>() ), ". Transaction returned ", Integer (m_valWord.value(), IntFmt<hex,fixed>() ), ", but I expected ", Integer ( m_expected, IntFmt<>() ) );
               return false;
             }
+
+            log ( Notice(), "TEST PASSED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
             return true;
           }
 

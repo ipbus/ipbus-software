@@ -796,7 +796,7 @@ void uhal::tests::PerfTester::validationTest()
 
       for(vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++)
       {
-        if ( ! (*it)->check_values( m_verbose ) )
+        if ( ! (*it)->check_values() )
         {
           cout << "ERROR OCCURED IN SOAK TEST - after " << i << " successful transactions" << endl;
           return;
