@@ -561,15 +561,6 @@ void uhal::tests::PerfTester::bandwidthTxTest()
 
 void uhal::tests::PerfTester::validationTest()
 {
-  // Historic basic firmware/software validation test
-  uint32_t tempWord;  // A single word buffer for holding temporary test data
-  U32Vec tempBuffer;  // A buffer for holding temporary test data
-  unsigned nFail = 0;
-  string tmpStr;
-  ostringstream summary;
-  unsigned iDepth = 1; // For variable depth transaction tests.
-  const unsigned maxTestDepth = 380;  // Needs to be bigger than the max size that will fit into a standard frame UDP packet (i.e >368)
-
   unsigned nrTestsFailed = 0;
   unsigned nrTestsTotal  = 0;
 
@@ -702,8 +693,8 @@ void uhal::tests::PerfTester::validationTest()
   client->dispatch();
 
   uint32_t lType;
-  uint32_t lAddress, lAddrIdx;
-  uint32_t lSize , lPosition;
+  uint32_t lAddress;
+  uint32_t lSize;
   uint32_t lTemp1, lTemp2;
   std::vector< boost::shared_ptr<QueuedTransaction> > lQueuedTransactions;
   uint32_t lQueuedWords = 0;
