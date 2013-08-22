@@ -657,12 +657,12 @@ void uhal::tests::PerfTester::validationTest()
   cout << "\n\nSOAK TEST\n   Random sequence of " << m_iterations << " transactions sent to hardware" << endl << endl;
   
   // Initialise 
-  uint32_t lProtocol;
+  uint32_t ipbus_vsn;
   size_t found = client->uri().find ( "-1.3" );
 
   if ( found!=std::string::npos )
   {
-    lProtocol = 1;
+    ipbus_vsn = 1;
   }
   else
   {
@@ -670,123 +670,110 @@ void uhal::tests::PerfTester::validationTest()
 
     if ( found!=std::string::npos )
     {
-      lProtocol = 2;
+      ipbus_vsn = 2;
     }
     else
     {
-      log ( Error() , "Cannot deduce protocol from URI " , Quote ( client->uri() ) );
+      log ( Error() , "Cannot deduce protocol from URI " , Quote ( client->uri() ), "  Exiting before performing soak test." );
       throw 0;
     }
   }
 
-  std::vector<uint32_t> lRandom;
-  lRandom.reserve ( 50000 );
+  std::vector< uint32_t > registers ( m_bandwidthTestDepth , 0x00000000 );
 
-  for ( uint32_t i=0; i!= 50000 ; ++i )
-  {
-    lRandom.push_back ( rand() );
-  }
-
-  std::vector< uint32_t > lRegisters ( m_bandwidthTestDepth , 0x00000000 );
-
-  client->writeBlock(m_baseAddr, lRegisters);
+  client->writeBlock(m_baseAddr, registers);
   client->dispatch();
 
-  uint32_t lType;
-  uint32_t lAddress;
-  uint32_t lSize;
-  uint32_t lTemp1, lTemp2;
-  std::vector< boost::shared_ptr<QueuedTransaction> > lQueuedTransactions;
-  uint32_t lQueuedWords = 0;
-  ValVector< uint32_t >::const_iterator lValIt;
-  std::vector<uint32_t> lData;
-  std::vector<uint32_t>::iterator lIt1 , lIt2;
+  uint32_t type, addr, blockSize;
+  uint32_t tempUInt1, tempUInt2;
+  vector< boost::shared_ptr<QueuedTransaction> > queuedTransactions;
+  uint32_t nrQueuedWords = 0;
 
   for(unsigned i = 0; i < m_iterations; i++)
   {
-    lType = ( rand() % 4 );
-    lAddress = m_baseAddr + ( rand() % m_bandwidthTestDepth );
+    type = ( rand() % 4 );
+    addr = m_baseAddr + ( rand() % m_bandwidthTestDepth );
 
-    switch ( lType )
+    switch ( type )
     {
       case 0:
         {// read
-          lSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - lAddress) );
-          if ( lSize == 0 ) // Remove 0-word reads until bug fixed
-            lSize = 1;
+          blockSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - addr) );
+          if ( blockSize == 0 ) // Remove 0-word reads until bug fixed
+            blockSize = 1;
           if ( m_verbose )
-            cout << "Queueing: " << lSize << "-word read @ 0x" << std::hex << lAddress << std::dec << endl;
+            cout << "Queueing: " << blockSize << "-word read @ 0x" << std::hex << addr << std::dec << endl;
 
-          ValVector<uint32_t> result = client->readBlock ( lAddress, lSize, defs::INCREMENTAL );
-          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedBlockRead( lAddress, result, lRegisters.begin() + (lAddress - m_baseAddr) ) ) );
-          lQueuedWords += lSize;
+          ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
+          queuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedBlockRead( addr, result, registers.begin() + (addr - m_baseAddr) ) ) );
+          nrQueuedWords += blockSize;
 
           break;
         }
       case 1:
         {// write
-          lSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - lAddress) );
-          if ( lSize == 0 ) // Remove 0-word writes until bug fixed
-            lSize = 1;
+          blockSize = ( rand() % (m_baseAddr + m_bandwidthTestDepth - addr) );
+          if ( blockSize == 0 ) // Remove 0-word writes until bug fixed
+            blockSize = 1;
           if ( m_verbose )
-            cout << "Queueing: " << lSize << "-word write @ 0x" << std::hex << lAddress << std::dec << endl;
+            cout << "Queueing: " << blockSize << "-word write @ 0x" << std::hex << addr << std::dec << endl;
 
-          vector<uint32_t> randomData = getRandomBuffer(lSize);
-          ValHeader result = client->writeBlock ( lAddress, randomData, defs::INCREMENTAL );
-          std::copy(randomData.begin(), randomData.end(), lRegisters.begin() + (lAddress - m_baseAddr));
-          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedBlockWrite( lAddress, lSize, result) ) );
-          lQueuedWords += lSize;
+          vector<uint32_t> randomData = getRandomBuffer(blockSize);
+          ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
+          std::copy(randomData.begin(), randomData.end(), registers.begin() + (addr - m_baseAddr));
+          queuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedBlockWrite( addr, blockSize, result) ) );
+          nrQueuedWords += blockSize;
 
           break;
         }
       case 2:
         {// RMW-bits
-          lTemp1 = rand();
-          lTemp2 = rand();
-          lIt1 = lRegisters.begin() + (lAddress - m_baseAddr);
+          tempUInt1 = rand();
+          tempUInt2 = rand();
+          vector<uint32_t>::iterator regIt = registers.begin() + (addr - m_baseAddr);
 
-          if ( lProtocol == 1 )
+          if ( ipbus_vsn == 1 )
           {
-            *lIt1 &= lTemp1;
-            *lIt1 |= lTemp2;
+            *regIt &= tempUInt1;
+            *regIt |= tempUInt2;
           }
 
-          ValWord<uint32_t> result = client->rmw_bits ( lAddress, lTemp1, lTemp2 );
-          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedRmwBits( lAddress, lTemp1, lTemp2, result, *lIt1 ) ) );
-          lQueuedWords += 1;
+          ValWord<uint32_t> result = client->rmw_bits ( addr, tempUInt1, tempUInt2 );
+          queuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedRmwBits( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
+          nrQueuedWords += 1;
 
-          if ( lProtocol == 2 )
+          if ( ipbus_vsn == 2 )
           {
-            *lIt1 &= lTemp1;
-            *lIt1 |= lTemp2;
+            *regIt &= tempUInt1;
+            *regIt |= tempUInt2;
           }
 
           break;
         }
       case 3:
         {// RMW-sum
-          lTemp1 = rand();
-          lIt1 = lRegisters.begin() + (lAddress - m_baseAddr);
+          tempUInt1 = rand();
+          vector<uint32_t>::iterator regIt = registers.begin() + (addr - m_baseAddr);
 
-          if ( lProtocol == 1)
+          if ( ipbus_vsn == 1)
           {
-            *lIt1 += lTemp1;
+            *regIt += tempUInt1;
           }
 
-          ValWord<uint32_t> result = client->rmw_sum ( lAddress, lTemp1 );
-          lQueuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedRmwSum( lAddress, lTemp1, result, *lIt1 ) ) );
-          lQueuedWords += 1;
+          ValWord<uint32_t> result = client->rmw_sum ( addr, tempUInt1 );
+          queuedTransactions.push_back( boost::shared_ptr<QueuedTransaction>( new QueuedRmwSum( addr, tempUInt1, result, *regIt ) ) );
+          nrQueuedWords += 1;
 
-          if ( lProtocol == 2 )
+          if ( ipbus_vsn == 2 )
           {
-            *lIt1 += lTemp1;
+            *regIt += tempUInt1;
           }
 
           break;
         }
     }
     
-    if ( m_perIterationDispatch || (lQueuedWords > 10000) || ( (i+1) == m_iterations ) )
+    if ( m_perIterationDispatch || (nrQueuedWords > 10000) || ( (i+1) == m_iterations ) )
     {
       if ( m_verbose )
         cout << "Dispatching" << endl;
@@ -796,16 +783,16 @@ void uhal::tests::PerfTester::validationTest()
         cout << "Empty dispatch" << endl;
       client->dispatch();
 
-      for(vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = lQueuedTransactions.begin(); it != lQueuedTransactions.end(); it++)
+      for(vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++)
       {
         if ( ! (*it)->check_values( m_verbose ) )
         {
-          cout << "ERROR OCCURED IN SOAK TEST (after " << i << " successful transactions)" << endl;
+          cout << "ERROR OCCURED IN SOAK TEST - after " << i << " successful transactions" << endl;
           return;
         }
       }
-      lQueuedTransactions.clear();
-      lQueuedWords = 0;
+      queuedTransactions.clear();
+      nrQueuedWords = 0;
     }
 
   }
