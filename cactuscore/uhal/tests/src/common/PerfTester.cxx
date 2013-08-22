@@ -833,6 +833,116 @@ void uhal::tests::PerfTester::sandbox()
 // END OF PerfTester MEMBER FUNCTIONS
 
 
+
+// PerfTester::QueuedBlockRead MEMBER FUNCTIONS
+
+uhal::tests::PerfTester::QueuedBlockRead::QueuedBlockRead(const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt) :
+  m_depth(valVector.size()),
+  m_addr(addr),
+  m_valVector(valVector)
+{
+  m_expected.assign(expectedValuesIt, expectedValuesIt + m_depth);
+}
+
+uhal::tests::PerfTester::QueuedBlockRead::~QueuedBlockRead()
+{ }
+
+bool uhal::tests::PerfTester::QueuedBlockRead::check_values()
+{
+  std::vector<uint32_t>::const_iterator valVecIt = m_valVector.begin();
+  std::vector<uint32_t>::const_iterator expdIt = m_expected.begin();
+
+  for(; valVecIt != m_valVector.end(); valVecIt++, expdIt++)
+  {
+    if ( (*valVecIt) != (*expdIt) )
+    {
+      uint32_t addr = m_addr + (valVecIt - m_valVector.begin());
+      log( Error(), "TEST FAILED: In ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), ", register ", Integer( addr, IntFmt<hex,fixed>()), " has value ", Integer(*valVecIt, IntFmt<hex,fixed>() ), ", but expected value ", Integer(*expdIt, IntFmt<hex,fixed>() ) );
+      return false;
+    }
+  }
+
+  log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
+  return true;
+}
+
+
+// PerfTester::QueuedBlockWrite MEMBER FUNCTIONS
+
+uhal::tests::PerfTester::QueuedBlockWrite::QueuedBlockWrite(const uint32_t addr, const uint32_t depth, const ValHeader& valHeader) :
+  m_depth(depth),
+  m_addr(addr),
+  m_valHeader(valHeader)
+{ }
+
+uhal::tests::PerfTester::QueuedBlockWrite::~QueuedBlockWrite()
+{ }
+
+bool uhal::tests::PerfTester::QueuedBlockWrite::check_values()
+{
+  if ( ! m_valHeader.valid() )
+  {
+    log ( Error(), "TEST FAILED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " unsuccessful.");
+    return false;
+  }
+
+  log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
+  return true;
+}
+
+
+// PerfTester::QueuedRmwBits MEMBER FUNCTIONS
+
+uhal::tests::PerfTester::QueuedRmwBits::QueuedRmwBits(const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected) :
+  m_addr(addr),
+  m_and(a),
+  m_or(b),
+  m_valWord(valWord),
+  m_expected(expected)
+{ }
+
+uhal::tests::PerfTester::QueuedRmwBits::~QueuedRmwBits()
+{ }
+
+bool uhal::tests::PerfTester::QueuedRmwBits::check_values()
+{
+  if ( m_valWord.value() != m_expected )
+  {
+    log ( Error(), "TEST FAILED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " (AND=", Integer (m_and, IntFmt<hex,fixed>() ), ", OR=", Integer (m_or, IntFmt<hex,fixed>() ), "). Transaction returned ", Integer ( m_valWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( m_expected, IntFmt<hex,fixed>() ) );
+    return false;
+  }
+
+  log ( Notice(), "TEST PASSED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
+  return true;
+}
+
+
+// PerfTester::QueuedRmwSum MEMBER FUNCTIONS
+
+uhal::tests::PerfTester::QueuedRmwSum::QueuedRmwSum(const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected) :
+  m_addr(addr),
+  m_addend(a),
+  m_valWord(valWord),
+  m_expected(expected)
+{ }
+
+uhal::tests::PerfTester::QueuedRmwSum::~QueuedRmwSum()
+{ }
+
+bool uhal::tests::PerfTester::QueuedRmwSum::check_values()
+{
+  if ( m_valWord.value() != m_expected )
+  {
+    log ( Error(), "TEST FAILED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ), ", ADDEND=", Integer (m_addend, IntFmt<hex,fixed>() ), ". Transaction returned ", Integer (m_valWord.value(), IntFmt<hex,fixed>() ), ", but I expected ", Integer ( m_expected, IntFmt<>() ) );
+    return false;
+  }
+
+  log ( Notice(), "TEST PASSED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
+  return true;
+}
+
+
+
 // The main() func...
 int main ( int argc, char* argv[] )
 {

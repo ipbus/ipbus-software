@@ -165,6 +165,7 @@ namespace uhal
         void sandbox();          ///< An area for a user-definable test
 
         // PRIVATE CLASSES
+
         class QueuedTransaction
         {
         public:
@@ -174,36 +175,14 @@ namespace uhal
           virtual bool check_values() = 0;
         };
 
+
         class QueuedBlockRead : public QueuedTransaction
         {
         public:
-          QueuedBlockRead(const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt) :
-            m_depth(valVector.size()),
-            m_addr(addr),
-            m_valVector(valVector)
-          {
-            m_expected.assign(expectedValuesIt, expectedValuesIt + m_depth);
-          }
-          ~QueuedBlockRead() {}
+          QueuedBlockRead(const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt);
+          ~QueuedBlockRead();
 
-          virtual bool check_values()
-          {
-            std::vector<uint32_t>::const_iterator valVecIt = m_valVector.begin();
-            std::vector<uint32_t>::const_iterator expdIt = m_expected.begin();
-
-            for(; valVecIt != m_valVector.end(); valVecIt++, expdIt++)
-            {
-              if ( (*valVecIt) != (*expdIt) )
-              {
-                uint32_t addr = m_addr + (valVecIt - m_valVector.begin());
-                log( Error(), "TEST FAILED: In ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), ", register ", Integer( addr, IntFmt<hex,fixed>()), " has value ", Integer(*valVecIt, IntFmt<hex,fixed>() ), ", but expected value ", Integer(*expdIt, IntFmt<hex,fixed>() ) );
-                return false;
-              }
-            }
-            
-            log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
-            return true;
-          }
+          virtual bool check_values();
 
         private:
           // PRIVATE MEMBER DATA
@@ -212,27 +191,14 @@ namespace uhal
           std::vector<uint32_t> m_expected;
         };
 
+
         class QueuedBlockWrite : public QueuedTransaction
         {
         public:
-          QueuedBlockWrite(const uint32_t addr, const uint32_t depth, const ValHeader& valHeader) : 
-            m_depth(depth),
-            m_addr(addr),
-            m_valHeader(valHeader)
-          {}
-          ~QueuedBlockWrite() {}
-          
-          virtual bool check_values()
-          {
-            if ( ! m_valHeader.valid() )
-            {
-              log ( Error(), "TEST FAILED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " unsuccessful.");
-              return false;
-            }
+          QueuedBlockWrite(const uint32_t addr, const uint32_t depth, const ValHeader& valHeader);
+          ~QueuedBlockWrite();
 
-            log ( Notice(), "TEST PASSED: Incrementing ", Integer (m_depth), "-word write @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " --> ", Integer(m_addr + m_depth - 1, IntFmt<hex,fixed>()) );
-            return true;
-          }
+          virtual bool check_values();
 
         private:
           // PRIVATE MEMBER DATA
@@ -240,29 +206,13 @@ namespace uhal
           ValHeader m_valHeader;
         };
 
+
         class QueuedRmwBits : public QueuedTransaction
         {
         public:
-          QueuedRmwBits(const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected) : 
-            m_addr(addr),
-            m_and(a),
-            m_or(b),
-            m_valWord(valWord),
-            m_expected(expected)
-          {}
-          ~QueuedRmwBits() {}
-
-          virtual bool check_values()
-          {
-            if ( m_valWord.value() != m_expected )
-            {
-              log ( Error(), "TEST FAILED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ), " (AND=", Integer (m_and, IntFmt<hex,fixed>() ), ", OR=", Integer (m_or, IntFmt<hex,fixed>() ), "). Transaction returned ", Integer ( m_valWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( m_expected, IntFmt<hex,fixed>() ) );
-              return false;
-            }
-
-            log ( Notice(), "TEST PASSED: RMW-bits @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
-            return true;
-          }
+          QueuedRmwBits(const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected);
+          ~QueuedRmwBits();
+          virtual bool check_values();
 
         private:
           const uint32_t m_addr, m_and, m_or;
@@ -270,28 +220,13 @@ namespace uhal
           const uint32_t m_expected;
         };
 
+
         class QueuedRmwSum : public QueuedTransaction
         {
         public:
-          QueuedRmwSum(const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected) :
-            m_addr(addr),
-            m_addend(a),
-            m_valWord(valWord),
-            m_expected(expected)
-          {}
-          ~QueuedRmwSum() {}
-
-          virtual bool check_values()
-          {
-            if ( m_valWord.value() != m_expected )
-            {
-              log ( Error(), "TEST FAILED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ), ", ADDEND=", Integer (m_addend, IntFmt<hex,fixed>() ), ". Transaction returned ", Integer (m_valWord.value(), IntFmt<hex,fixed>() ), ", but I expected ", Integer ( m_expected, IntFmt<>() ) );
-              return false;
-            }
-
-            log ( Notice(), "TEST PASSED: RMW-sum @ ", Integer (m_addr, IntFmt<hex,fixed>() ) );
-            return true;
-          }
+          QueuedRmwSum(const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected);
+          ~QueuedRmwSum();
+          virtual bool check_values();
 
         private:
           const uint32_t m_addr, m_addend;
