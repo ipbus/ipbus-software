@@ -18,7 +18,7 @@ PACKAGE_VER_MINOR = 01
 # According to RPM spec-file docs, first time a given software version (as above) is packaged up,
 # the release number should start at 1.  Each time the same software version is repackaged, you
 # increment this number.
-PACKAGE_RELEASE = 2
+PACKAGE_RELEASE = 0
 
 TARBALL_DIR = otp_src_R${PACKAGE_VER_MAJOR}B${PACKAGE_VER_MINOR}
 TARBALL_FILE = ${TARBALL_DIR}.tar.gz
