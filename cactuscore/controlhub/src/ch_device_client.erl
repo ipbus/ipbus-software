@@ -180,7 +180,7 @@ handle_call(_Request, _From, State) ->
 %% --------------------------------------------------------------------
 
 % handle_cast callback for enqueue_requests API call.
-handle_cast({send, RequestPacket, ClientPid}, S = #state{in_flight={_NrInFlight,InFlightQ}, queue=Queue}) ->
+handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
     ?CH_LOG_DEBUG("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
     ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
                   "Manager with PID = ~w.", [ClientPid]),
@@ -194,16 +194,12 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{in_flight={_NrInFlight,
             {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
                 ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
                 ?CH_LOG_INFO("Device client is entering new logic."),
-                <<_Hdr:32, Body/binary>> = RequestPacket,
-                S#state.udp_pid ! {send, [<<16#200000f0:32>>, Body]},
-                NewInFlightQ = queue:in(ClientPid, InFlightQ),
                 NewS = S#state{mode = normal,
                                ipbus_v = {2,0},
                                max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
-                               next_id = NextExpdId,
-                               in_flight = {1, NewInFlightQ}
+                               next_id = NextExpdId
                                },
-                device_client_loop(send, NewS);
+                device_client_loop(send, send_request(RequestPacket, ClientPid, NewS) );
 %                send_requests_to_board({RequestPacket, ClientPid}, S#state{mode = normal,
 %                                                                           ipbus_v = {2,0},
 %                                                                           max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
@@ -232,22 +228,18 @@ handle_cast(_Msg, State) ->
 
 % Send/receive clause
 %   Takes messages from front
-device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight, InFlightQ} }) ->
+device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight, _} }) ->
     Timeout = if
                 NrInFlight =/= 0 -> ?UDP_RESPONSE_TIMEOUT;
                 true -> ?DEVICE_CLIENT_SHUTDOWN_AFTER
               end,
     receive
         {'$gen_cast', {send, Pkt, Pid}} ->
-            ?CH_LOG_DEBUG("IPbus 2.0 request packet from PID ~w is being forwarded to board at ~s.", [Pid, ip_port_string(IP, Port)]),
-            <<_Hdr:32, Body/binary>> = Pkt,
-            S#state.udp_pid ! {send, [<<16#200000f0:32>>, Body]},
-            device_client_loop(recv, S#state{ in_flight={NrInFlight+1, queue:in(Pid, InFlightQ)} });
-        {udp, Socket, IP, Port, Reply} ->
-            {{value, Pid}, NewQ} = queue:out(InFlightQ),
-            ?CH_LOG_DEBUG("IPbus 2.0 reply from ~s is being forwarded to PID ~w.", [ip_port_string(IP,Port), Pid]),
-            Pid ! {device_client_response, S#state.ip_u32, Port, ?ERRCODE_SUCCESS, Reply},
-            device_client_loop(send, S#state{ in_flight={NrInFlight-1,NewQ} });
+            NewS = send_request(Pkt, Pid, S),
+            device_client_loop(recv, NewS);
+        {udp, Socket, IP, Port, Pkt} ->
+            NewS = forward_reply(Pkt, S),
+            device_client_loop(send, NewS);
         Other ->
             ?CH_LOG_WARN("Unexpected message received : ~p", [Other]),
             device_client_loop(send, S)
@@ -263,26 +255,22 @@ device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_f
 
 % Non-blocking receive clause
 %   Looks through msg queue
-device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight,InFlightQ} }) when NrInFlight =< S#state.max_in_flight ->
+device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight,_} }) when NrInFlight =< S#state.max_in_flight ->
     receive
-        {udp, Socket, IP, Port, Reply} ->
-            {{value, Pid}, NewQ} = queue:out(InFlightQ),
-            ?CH_LOG_DEBUG("IPbus 2.0 reply from ~s is being forwarded to PID ~w (NON-blocking receive)", [ip_port_string(IP,Port), Pid]),
-            Pid ! {device_client_response, S#state.ip_u32, Port, ?ERRCODE_SUCCESS, Reply},
-            device_client_loop(recv, S#state{ in_flight={NrInFlight-1,NewQ} })
+        {udp, Socket, IP, Port, Pkt} ->
+            NewS = forward_reply(Pkt, S),
+            device_client_loop(recv, NewS)
     after 0 ->
         device_client_loop(send, S)
     end;
 
 % Blocking receive clause
 %   Looks through msg queue
-device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight,InFlightQ} }) ->
+device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port }) ->
     receive
-        {udp, Socket, IP, Port, Reply} ->
-            {{value, Pid}, NewQ} = queue:out(InFlightQ),
-            ?CH_LOG_DEBUG("IPbus 2.0 reply from ~s is being forwarded to PID ~w (blocking receive)", [ip_port_string(IP,Port), Pid]),
-            Pid ! {device_client_response, S#state.ip_u32, Port, ?ERRCODE_SUCCESS, Reply},
-            device_client_loop(send, S#state{ in_flight={NrInFlight-1,NewQ} })
+        {udp, Socket, IP, Port, Pkt} ->
+            NewS  = forward_reply(Pkt, S),
+            device_client_loop(send, NewS)
     after ?UDP_RESPONSE_TIMEOUT ->
         device_client_loop(timeout, S)
     end;
@@ -291,6 +279,35 @@ device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_f
 device_client_loop(timeout, S) ->
     ?CH_LOG_ERROR("TIMEOUT when waiting for response from board. Packet-loss recovery not yet added back in."),
     {stop, udp_timeout, S}.
+
+
+send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}}) ->
+    case parse_ipbus_control_pkt(ReqPkt) of
+        {{2,0}, Endness} ->
+            ?CH_LOG_DEBUG("IPbus 2.0 request packet from PID ~w is being forwarded to board at ~s.", [Pid, ch_utils:ip_port_string(S#state.ip_tuple, S#state.port)]),
+            <<OrigHdr:4/binary, Body/binary>> = ReqPkt,
+            NewHdr = ipbus2_pkt_header(NextId, Endness),
+            S#state.udp_pid ! {send, [NewHdr, Body]},
+            S#state{ next_id=increment_pkt_id(NextId), in_flight={NrInFlight+1, queue:in({Pid, OrigHdr, NewHdr}, InFlightQ)} };
+        Other ->
+            ?CH_LOG_WARN("IPbus 2.0 request packet from PID ~w is invalid - parse_ipbus_control_pkt returned ~w", [Pid, Other]), 
+            Pid ! {device_client_response, S#state.ip_u32, S#state.port, 42, <<>>},
+            S
+    end.
+
+
+forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) ->
+    {{value, {Pid,OrigHdr,SentHdr}}, NewQ} = queue:out(InFlightQ),
+    case Pkt of 
+        <<SentHdr:4/binary, ReplyBody/binary>> ->
+            ?CH_LOG_DEBUG("IPbus 2.0 reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), Pid]),
+            Pid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, [OrigHdr, ReplyBody]},
+            S#state{ in_flight={NrInFlight-1,NewQ} };
+        _ ->
+            ?CH_LOG_WARN("Ignoring received packet with incorrect header (expecting header ~w, could just be genuine out-of-order reply): ~w", [SentHdr, Pkt]),
+            S
+    end.
+
 
 
 %% --------------------------------------------------------------------
@@ -319,10 +336,10 @@ handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socke
     end;
 
 % handle_info callback for device response timeout
-handle_info(timeout, S = #state{port=TargetPort, next_id=NextId}) when length(S#state.in_flight)=/=0 ->
+handle_info(timeout, S = #state{ip_tuple=_TargetIPTuple, port=TargetPort, next_id=NextId}) when length(S#state.in_flight)=/=0 ->
     {HdrSent, TimeSent, IoDataSent, RetryCount, ClientPid} = lists:nth(1, S#state.in_flight),
     ?CH_LOG_DEBUG("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
-                  "Checking on status of hardware...", [TargetIPTuple, TargetPort]),
+                  "Checking on status of hardware...", [_TargetIPTuple, TargetPort]),
     case RetryCount of
          0 -> ch_stats:udp_timeout(S#state.stats, normal);
          _ -> ch_stats:udp_timeout(S#state.stats, resend)
@@ -548,6 +565,38 @@ forward_pending_replies( L ) when is_list(L) ->
 reset_header(Packet, NewHdr) when is_binary(Packet), size(Packet)>3, is_binary(NewHdr), size(NewHdr)>3 ->
     <<_:4/binary, Body/binary>> = Packet,
     [NewHdr, Body].
+
+
+%% ---------------------------------------------------------------------
+%% @doc Returns version and endianness of an IPbus 1.3/2.0 control packet
+%% @spec parse_ipbus_control_pkt( Pkt :: binary() ) -> {ipbus_version(), (big || little)} || invalid
+%%
+%% @end
+%% ---------------------------------------------------------------------
+
+parse_ipbus_control_pkt( <<16#20:8, _Id:16/big, 16#f0:8, _/binary>> ) ->
+    {{2,0}, big};
+parse_ipbus_control_pkt( <<16#f0:8, _Id:16/little, 16#20:8, _/binary>> ) ->
+    {{2,0}, little};
+parse_ipbus_control_pkt( <<1:4, _:12, 0:8, 16#1f:5, _:1, 0:2, _/binary>> ) ->
+    {{1,3}, big};
+parse_ipbus_control_pkt( <<16#1f:5, _:1, 0:2, 0:8, _:8, 1:4, _:4, _/binary>> ) ->
+    {{1,3}, little};
+parse_ipbus_control_pkt( _ ) ->
+    invalid.
+
+
+%% ---------------------------------------------------------------------
+%% @doc Returns IPbus 2.0 control packet header as binary
+%% @spec ipbus2_pkt_header(Id :: integer(), Endness :: (big || little) ) -> binary()
+%%
+%% @end
+%% ---------------------------------------------------------------------
+
+ipbus2_pkt_header(Id, big) ->
+    <<16#20:8, Id:16/big, 16#f0>>;
+ipbus2_pkt_header(Id, little) ->
+    <<16#f0:8, Id:16/little, 16#f0>>.
 
 
 %% ---------------------------------------------------------------------

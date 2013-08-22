@@ -135,17 +135,17 @@ transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClie
                 transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight, QNrReqsPerTcp, ReplyIoList)
             end;
 
-        {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, ReplyPkt} ->
+        {device_client_response, TargetIPAddrArg, TargetPortArg, ErrorCode, ReplyIoData} ->
             NrRepliesToSend = element(2, queue:peek(QNrReqsPerTcp)),
-            case ((lists:flatlength(ReplyIoList) + 2) div 2) of
+            case ((lists:flatlength(ReplyIoList) + 3) div 3) of
                 NrRepliesToSend ->
-                    ?CH_LOG_DEBUG("Sending ~w IPbus response packets over TCP.", []),
-                    TcpPid ! {send, [ReplyIoList, <<(byte_size(ReplyPkt) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyPkt]},
+                    ?CH_LOG_DEBUG("Sending ~w IPbus response packets over TCP.", [NrRepliesToSend]),
+                    TcpPid ! {send, [ReplyIoList, <<(iolist_size(ReplyIoData) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyIoData]},
                     transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, queue:drop(QNrReqsPerTcp), []);
                 _NrRepliesAccumulated ->
                     ?CH_LOG_DEBUG("IPbus response packet received. Accumulating for TCP send (~w needed for next TCP chunk, ~w now accumulated).", [NrRepliesToSend, _NrRepliesAccumulated]),
                     transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClientPid, NrInFlight-1, QNrReqsPerTcp, 
-                                             [ReplyIoList, <<(byte_size(ReplyPkt) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyPkt])
+                                             [ReplyIoList, <<(iolist_size(ReplyIoData) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyIoData])
             end;
 
         {tcp_closed, Socket} ->
@@ -193,7 +193,7 @@ unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TailBin/
 
 
 enqueue_request(_IPaddrU32, _PortU16, DestPid, IPbusRequest) when is_pid(DestPid) ->
-    ?CH_LOG_DEBUG("Enqueueing IPbus request packet for ~w to PID ~w", [ch_utils:ip_port_string(_IPaddrU32,_PortU16), DestPid]),
+    ?CH_LOG_DEBUG("Enqueueing IPbus request packet for ~s to PID ~w", [ch_utils:ip_port_string(_IPaddrU32,_PortU16), DestPid]),
     gen_server:cast(DestPid, {send, IPbusRequest, self()}),
     DestPid;
 enqueue_request(IPaddrU32, PortU16, _NotPid, IPbusRequest) ->
