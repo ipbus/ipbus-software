@@ -255,7 +255,7 @@ device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_f
 
 % Non-blocking receive clause
 %   Looks through msg queue
-device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight,_} }) when NrInFlight =< S#state.max_in_flight ->
+device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight,_} }) when NrInFlight < S#state.max_in_flight ->
     receive
         {udp, Socket, IP, Port, Pkt} ->
             NewS = forward_reply(Pkt, S),
@@ -297,7 +297,7 @@ send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFli
 
 
 forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) ->
-    {{value, {Pid,OrigHdr,SentHdr,_}}, NewQ} = queue:out(InFlightQ),
+    {{value, SentPktInfo = {Pid,OrigHdr,SentHdr,_}}, NewQ} = queue:out(InFlightQ),
     case Pkt of 
         <<SentHdr:4/binary, ReplyBody/binary>> ->
             ?CH_LOG_DEBUG("IPbus 2.0 reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), Pid]),
@@ -305,7 +305,7 @@ forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) ->
             S#state{ in_flight={NrInFlight-1,NewQ} };
         _ ->
             ?CH_LOG_WARN("Ignoring received packet with incorrect header (expecting header ~w, could just be genuine out-of-order reply): ~w", [SentHdr, Pkt]),
-            S
+            S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, InFlightQ)} }
     end.
 
 
