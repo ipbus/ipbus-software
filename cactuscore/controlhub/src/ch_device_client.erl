@@ -281,7 +281,7 @@ device_client_loop(timeout, S) ->
     {stop, udp_timeout, S}.
 
 
-send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}}) ->
+send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}}) when S#state.ipbus_v == {2,0} ->
     case parse_ipbus_control_pkt(ReqPkt) of
         {{2,0}, Endness} ->
             ?CH_LOG_DEBUG("IPbus 2.0 request packet from PID ~w is being forwarded to board at ~s.", [Pid, ch_utils:ip_port_string(S#state.ip_tuple, S#state.port)]),
@@ -291,13 +291,25 @@ send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFli
             ch_stats:udp_sent(S#state.stats),
             S#state{ next_id=increment_pkt_id(NextId), in_flight={NrInFlight+1, queue:in({Pid, OrigHdr, NewHdr, Body}, InFlightQ)} };
         Other ->
-            ?CH_LOG_WARN("IPbus 2.0 request packet from PID ~w is invalid - parse_ipbus_control_pkt returned ~w", [Pid, Other]), 
+            ?CH_LOG_WARN("Request packet from PID ~w is invalid for an IPbus 2.0 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]), 
+            Pid ! {device_client_response, S#state.ip_u32, S#state.port, 42, <<>>},
+            S
+    end;
+send_request(ReqPkt, Pid, S) when S#state.ipbus_v == {1,3} ->
+    case parse_ipbus_control_pkt(ReqPkt) of
+        {{1,3}, _} ->
+            ?CH_LOG_DEBUG("IPbus 1.3 request packet from PID ~w is being forwarded to board at ~s.", [Pid, ch_utils:ip_port_string(S#state.ip_tuple, S#state.port)]),
+            S#state.udp_pid ! {send, ReqPkt},
+            ch_stats:udp_sent(S#state.stats),
+            S#state{in_flight=Pid};
+        Other ->
+            ?CH_LOG_WARN("Request packet from PID ~w is invalid for an IPbus 1.3 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]),
             Pid ! {device_client_response, S#state.ip_u32, S#state.port, 42, <<>>},
             S
     end.
 
 
-forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) ->
+forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.ipbus_v == {2,0} ->
     {{value, SentPktInfo = {Pid,OrigHdr,SentHdr,_}}, NewQ} = queue:out(InFlightQ),
     case Pkt of 
         <<SentHdr:4/binary, ReplyBody/binary>> ->
@@ -308,7 +320,13 @@ forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) ->
         _ ->
             ?CH_LOG_WARN("Ignoring received packet with incorrect header (expecting header ~w, could just be genuine out-of-order reply): ~w", [SentHdr, Pkt]),
             S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, InFlightQ)} }
-    end.
+    end;
+forward_reply(Pkt, S) when S#state.ipbus_v == {1,3} ->
+    ?CH_LOG_DEBUG("IPbus reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), Pid]),
+    S#state.in_flight ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, [<<>>, Pkt]},
+    ch_stats:udp_rcvd(S#state.stats),
+    S.
+
 
 
 
