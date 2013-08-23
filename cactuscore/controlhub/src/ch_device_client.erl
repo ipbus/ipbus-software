@@ -322,8 +322,9 @@ forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.
             S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, InFlightQ)} }
     end;
 forward_reply(Pkt, S) when S#state.ipbus_v == {1,3} ->
-    ?CH_LOG_DEBUG("IPbus reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), Pid]),
-    S#state.in_flight ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, [<<>>, Pkt]},
+    TransManagerPid = #state.in_flight,
+    ?CH_LOG_DEBUG("IPbus reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), TransManagerPid]),
+    TransManagerPid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, [<<>>, Pkt]},
     ch_stats:udp_rcvd(S#state.stats),
     S.
 

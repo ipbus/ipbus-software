@@ -127,8 +127,8 @@ transaction_manager_loop(TcpPid, Socket, TargetIPAddrArg, TargetPortArg, DevClie
             if
               (byte_size(RequestBin) rem 4) =:= 0 ->
                 ?CH_LOG_DEBUG("Received TCP chunk."),
-                {RetPid, TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, DevClientPid, 0),
-                transaction_manager_loop(TcpPid, Socket, TargetIPU32, TargetPort, RetPid, NrInFlight+NrReqs, queue:in(NrReqs, QNrReqsPerTcp), ReplyIoList);
+                {TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, pid_unknown, 0),
+                transaction_manager_loop(TcpPid, Socket, TargetIPU32, TargetPort, none, NrInFlight+NrReqs, queue:in(NrReqs, QNrReqsPerTcp), ReplyIoList);
               true ->
                 ?CH_LOG_ERROR("Each TCP chunk should be an integer number of 32-bit words, but received chunk of length ~w bytes for ~s. This TCP chunk will be ignored.", [byte_size(RequestBin), ch_utils:ip_port_string(TargetIPAddrArg, TargetPortArg)]),
                 ch_stats:client_request_malformed(),
@@ -180,16 +180,16 @@ unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, IPbusReq
         unpack_and_enqueue(Tail, RetPid, NrSent+1);
       true ->
         ?CH_LOG_DEBUG("~w IPbus packets in last TCP chunk", [(NrSent+1)]),
-        {RetPid, TargetIPAddr, TargetPort, NrSent+1}
+        {TargetIPAddr, TargetPort, NrSent+1}
     end;
-unpack_and_enqueue(Binary, Pid, NrSent) when byte_size(Binary) < 12 ->
+unpack_and_enqueue(Binary, _Pid, NrSent) when byte_size(Binary) < 12 ->
     ?CH_LOG_ERROR("Binary nr ~w unpacked from TCP chunk (~w) contained less than three 32-bit words, which is invalid according to uHAL-ControlHub protocol. Ignoring remainder of this chunk and continuing.", [NrSent+1, Binary]),
     ch_stats:client_request_malformed(),
-    {Pid, unknown, unknown, NrSent};
-unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TailBin/binary>>, Pid, NrSent) ->
+    {unknown, unknown, NrSent};
+unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TailBin/binary>>, _Pid, NrSent) ->
     ?CH_LOG_ERROR("Not enough bytes (only ~w) left in TCP chunk to unpack IPbus packet of length ~w bytes for ~s (binary nr ~w in this TCP chunk). Ignoring remainder of this chunk and continuing.", [byte_size(TailBin), 4*NrInstructions, ch_utils:ip_port_string(TargetIPAddr, TargetPort), NrSent+1]),
     ch_stats:client_request_malformed(),
-    {Pid, TargetIPAddr, TargetPort, NrSent}.
+    {TargetIPAddr, TargetPort, NrSent}.
 
 
 enqueue_request(_IPaddrU32, _PortU16, DestPid, IPbusRequest) when is_pid(DestPid) ->
@@ -197,5 +197,6 @@ enqueue_request(_IPaddrU32, _PortU16, DestPid, IPbusRequest) when is_pid(DestPid
     gen_server:cast(DestPid, {send, IPbusRequest, self()}),
     DestPid;
 enqueue_request(IPaddrU32, PortU16, _NotPid, IPbusRequest) ->
+    ?CH_LOG_DEBUG("Looking up device_client PID"),
     {ok, Pid} = ch_device_client_registry:get_pid(IPaddrU32, PortU16),
     enqueue_request(IPaddrU32, PortU16, Pid, IPbusRequest).
