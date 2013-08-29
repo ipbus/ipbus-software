@@ -16,12 +16,11 @@ PACKAGE_RELEASE = 0
 
 LIBRARY = lib/libcactus_uhal_log.so
 
-FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp) src/common/exception.cpp src/common/BacktraceSymbols.cpp src/common/GccOutputCleaner.cpp
-
+#FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp) src/common/exception.cpp src/common/BacktraceSymbols.cpp src/common/GccOutputCleaner.cpp
 #BACKEND_SOURCES = $(wildcard src/common/log_backend.files.cpp)
-BACKEND_SOURCES = $(wildcard src/common/log_backend.colour_terminal.cpp)
+#BACKEND_SOURCES = $(wildcard src/common/log_backend.colour_terminal.cpp)
 
-LIBRARY_SOURCES = ${FRONTEND_SOURCES} ${BACKEND_SOURCES}
+LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
 

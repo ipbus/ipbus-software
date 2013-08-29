@@ -41,17 +41,18 @@ namespace uhal
 {
 
   template< typename T >
-  void log_inserter ( const _Type< T >& aType )
+  std::ostream& operator<< ( std::ostream& aStr ,  const _Type< T >& aType )
   {
 #ifdef __GNUG__
     // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
     int lStatus ( 0 );
-    std::size_t lSize ( 1024 );
-    char lDemangled[lSize];
-    put ( abi::__cxa_demangle ( typeid ( T ).name() , lDemangled , &lSize , &lStatus ) );
+    static std::size_t lSize ( 1024 );
+    static char lDemangled[lSize];
+    aStr << ( abi::__cxa_demangle ( typeid ( T ).name() , lDemangled , &lSize , &lStatus ) );
 #else
-    put ( typeid ( T ).name() );
+    aStr << ( typeid ( T ).name() );
 #endif
+    return aStr;
   }
 
   template< typename T >

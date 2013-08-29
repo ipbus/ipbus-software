@@ -385,6 +385,8 @@ namespace uhal
 
 }
 
+std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode );
+
 #include "uhal/TemplateDefinitions/Node.hxx"
 
 #endif

@@ -32,7 +32,7 @@
 
 
 #include <uhal/log/log_inserters.location.hpp>
-#include <uhal/log/log_inserters.integer.hpp>
+#include <uhal/log/log_inserters.quote.hpp>
 
 #include <uhal/log/log.hpp>
 
@@ -45,16 +45,11 @@ namespace uhal
     mLine ( aLine )
   {}
 
-  template<>
-  void log_inserter< Location > ( const Location& aLocation )
+
+  std::ostream& operator<< ( std::ostream& aStr , const Location& aLocation )
   {
-    put ( "function \"" );
-    put ( aLocation.mFunction );
-    put ( "\" in " );
-    put ( aLocation.mFile );
-    put ( ", line " );
-    log_inserter ( Integer ( aLocation.mLine ) );
-    put ( '.' );
+    aStr << "function " << Quote ( aLocation.mFunction ) << " in " << aLocation.mFile << ", line " << aLocation.mLine << '.';
+    return aStr;
   }
 
 }

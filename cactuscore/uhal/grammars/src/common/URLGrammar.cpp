@@ -34,7 +34,7 @@
 
 #include <boost/spirit/include/qi.hpp>
 
-#include "uhal/log/log.hpp"
+// #include "uhal/log/log.hpp"
 
 std::ostream& operator<< ( std::ostream& aStream , const uhal::URI& aURI )
 {
@@ -56,37 +56,37 @@ std::ostream& operator<< ( std::ostream& aStream , const uhal::URI& aURI )
 
 
 
-namespace uhal
-{
-  /**
-  	The log_inserter function to add a URI object to a log entry
-  	@param aURI a URI object to format and print to log
-  */
-  template < >
-  void log_inserter< URI > ( const URI& aURI )
-  {
-    log_inserter ( " > protocol : " );
-    log_inserter ( aURI.mProtocol );
-    log_inserter ( "\n > hostname : " );
-    log_inserter ( aURI.mHostname );
-    log_inserter ( "\n > port : " );
-    log_inserter ( aURI.mPort );
-    log_inserter ( "\n > path : " );
-    log_inserter ( aURI.mPath );
-    log_inserter ( "\n > extension : " );
-    log_inserter ( aURI.mExtension );
-    log_inserter ( "\n > arguments :\n" );
-
-    for ( NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin() ; lIt != aURI.mArguments.end() ; ++lIt )
-    {
-      log_inserter ( "   > " );
-      log_inserter ( lIt->first.data() );
-      log_inserter ( " = " );
-      log_inserter ( lIt->second.data() );
-      log_inserter ( '\n' );
-    }
-  }
-}
+// namespace uhal
+// {
+//   /**
+//   	The log_inserter function to add a URI object to a log entry
+//   	@param aURI a URI object to format and print to log
+//   */
+//   template < >
+//   void log_inserter< URI > ( const URI& aURI )
+//   {
+//     log_inserter ( " > protocol : " );
+//     log_inserter ( aURI.mProtocol );
+//     log_inserter ( "\n > hostname : " );
+//     log_inserter ( aURI.mHostname );
+//     log_inserter ( "\n > port : " );
+//     log_inserter ( aURI.mPort );
+//     log_inserter ( "\n > path : " );
+//     log_inserter ( aURI.mPath );
+//     log_inserter ( "\n > extension : " );
+//     log_inserter ( aURI.mExtension );
+//     log_inserter ( "\n > arguments :\n" );
+//
+//     for ( NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin() ; lIt != aURI.mArguments.end() ; ++lIt )
+//     {
+//       log_inserter ( "   > " );
+//       log_inserter ( lIt->first.data() );
+//       log_inserter ( " = " );
+//       log_inserter ( lIt->second.data() );
+//       log_inserter ( '\n' );
+//     }
+//   }
+// }
 
 
 

@@ -37,6 +37,7 @@
 #include <uhal/log/log_inserter_helper.hpp>
 
 #include <stdint.h>
+#include <iostream>
 
 namespace uhal
 {
@@ -58,34 +59,116 @@ namespace uhal
   static const integer_base DefaultIntegerBase ( dec );
   static const integer_format DefaultIntegerFormat ( variable );
 
-  template< typename T , typename FORMAT > struct IntegerFactory;
-
   template< integer_base BASE = DefaultIntegerBase , integer_format FORMAT = DefaultIntegerFormat , uint32_t WIDTH = 0 > struct IntFmt {};
 
+  template< typename T , typename FORMAT >
+  class _Integer;
+
+  template< typename T > _Integer< T , IntFmt<> > Integer ( const T& aT );
+  template< typename T , integer_base BASE , integer_format FORMAT , uint32_t WIDTH > _Integer< T , IntFmt<BASE , FORMAT , WIDTH> > Integer ( const T& aT , const IntFmt<BASE , FORMAT , WIDTH>& aFmt );
+
+  template< typename T >
+  void sign_helper ( std::ostream& aStr, const T& aInt );
+  template<>
+  void sign_helper ( std::ostream& aStr, const int8_t& aInt );
+  template<>
+  void sign_helper ( std::ostream& aStr, const int16_t& aInt );
+  template<>
+  void sign_helper ( std::ostream& aStr, const int32_t& aInt );
+  template<>
+  void sign_helper ( std::ostream& aStr, const int64_t& aInt );
 
   template< typename T , typename FORMAT >
   class _Integer : public RefWrapper< T >
   {
-      friend class IntegerFactory< T , FORMAT >;
-      _Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
+    public:
+      _Integer ( const T& aT );
+      void print ( std::ostream& aStr ) const;
   };
 
-  template< typename T > void SignHelper ( const T& aInt );
 
-  template< > void SignHelper< int8_t > ( const int8_t& aInt );
-  template< > void SignHelper< int16_t > ( const int16_t& aInt );
-  template< > void SignHelper< int32_t > ( const int32_t& aInt );
-  template< > void SignHelper< int64_t > ( const int64_t& aInt );
+  template< typename T , uint32_t WIDTH >
+  class _Integer< T , IntFmt<bin , fixed , WIDTH> > : public RefWrapper< T >
+  {
+    public:
+
+      _Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
+      void print ( std::ostream& aStr ) const;
+  };
+
+  template< typename T , uint32_t WIDTH >
+  class _Integer< T , IntFmt<bin , variable , WIDTH> > : public RefWrapper< T >
+  {
+    public:
+
+      _Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
+      void print ( std::ostream& aStr ) const;
+  };
 
 
+  template< typename T , uint32_t WIDTH >
+  class _Integer< T , IntFmt<dec , fixed , WIDTH> > : public RefWrapper< T >
+  {
+    public:
 
+      _Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
+      void print ( std::ostream& aStr ) const;
+  };
 
-  template< typename T > _Integer< T , IntFmt<> > Integer ( const T& aT );
+  template< typename T , uint32_t WIDTH >
+  class _Integer< T , IntFmt<dec , variable , WIDTH> > : public RefWrapper< T >
+  {
+    public:
 
-  template< typename T , typename FORMAT > _Integer< T , FORMAT >Integer ( const T& aT , const FORMAT& aFmt );
+      _Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
+      void print ( std::ostream& aStr ) const;
+  };
 
+  template< typename T , uint32_t WIDTH >
+  class _Integer< T , IntFmt<hex , fixed , WIDTH> > : public RefWrapper< T >
+  {
+    public:
+
+      _Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
+      void print ( std::ostream& aStr ) const;
+  };
+
+  template< typename T , uint32_t WIDTH >
+  class _Integer< T , IntFmt<hex , variable , WIDTH> > : public RefWrapper< T >
+  {
+    public:
+
+      _Integer ( const T& aT ) : RefWrapper< T > ( aT ) {}
+      void print ( std::ostream& aStr ) const;
+  };
 
 }
+
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint8_t , FORMAT >& aInt );
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int8_t , FORMAT >& aInt );
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint16_t , FORMAT >& aInt );
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int16_t , FORMAT >& aInt );
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint32_t , FORMAT >& aInt );
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int32_t , FORMAT >& aInt );
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint64_t , FORMAT >& aInt );
+
+template< typename FORMAT >
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int64_t , FORMAT >& aInt );
+
 
 #include <uhal/log/log_inserters.integer.hxx>
 

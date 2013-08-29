@@ -37,6 +37,8 @@
 #include <uhal/log/log_inserter_helper.hpp>
 
 #include <stdint.h>
+#include <iostream>
+
 
 namespace uhal
 {
@@ -45,6 +47,9 @@ namespace uhal
 
   template< typename T > _Type< T > Type ( );
   template< typename T > _Type< T > Type ( const T& aT );
+
+  template< typename T >
+  std::ostream& operator<< ( std::ostream& aStr ,  const _Type< T >& aType );
 
   template< typename T >
   class _Type

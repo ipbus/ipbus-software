@@ -49,25 +49,15 @@
 #include <cxxabi.h>
 #endif
 
-namespace uhal
-{
-  /**
-  	The log_inserter function to add the node object to a log entry
-  	@param aNode a node to format and print to log
-  */
-  template < >
-  void log_inserter< uhal::Node > ( const uhal::Node& aNode )
-  {
-    std::stringstream lStream;
-    aNode.stream ( lStream );
-    std::istreambuf_iterator<char> lEnd;
-    std::istreambuf_iterator<char> lIt ( lStream.rdbuf() );
 
-    while ( lIt!=lEnd )
-    {
-      put ( *lIt++ );
-    }
-  }
+/**
+	The log_inserter function to add the node object to a log entry
+	@param aNode a node to format and print to log
+*/
+std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode )
+{
+  aNode.stream ( aStr );
+  return aStr;
 }
 
 

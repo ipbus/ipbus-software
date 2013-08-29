@@ -55,26 +55,29 @@ namespace uhal
       std::exception (),
       mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
       mThreadId ( boost::this_thread::get_id() ),
-      mString ( ( char* ) malloc ( 65536 ) )
+      mString ( ( char* ) malloc ( 65536 ) ),
+      mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
     {
       gettimeofday ( &mTime, NULL );
       Backtrace::Backtrace ( mBacktrace );
+      mAdditionalInfo[0] = '\0'; //malloc is not required to initialize to null, so do it manually, just in case
     }
 
 
     exception::exception ( const exception& aExc ) :
       std::exception (),
-      mAdditionalInfo ( aExc.mAdditionalInfo ),
       mBacktrace ( aExc.mBacktrace ),
       mThreadId ( aExc.mThreadId ),
       mTime ( aExc.mTime ),
-      mString ( ( char* ) malloc ( 65536 ) )
+      mString ( ( char* ) malloc ( 65536 ) ),
+      mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
     {
+      strcpy ( mAdditionalInfo , aExc.mAdditionalInfo );
     }
 
     exception& exception::operator= ( const exception& aExc )
     {
-      mAdditionalInfo = aExc.mAdditionalInfo;
+      strcpy ( mAdditionalInfo , aExc.mAdditionalInfo );
       mBacktrace = aExc.mBacktrace;
       mThreadId = aExc.mThreadId;
       mTime = aExc.mTime;
@@ -87,6 +90,12 @@ namespace uhal
       {
         free ( mString );
         mString = NULL;
+      }
+
+      if ( mAdditionalInfo )
+      {
+        free ( mAdditionalInfo );
+        mAdditionalInfo = NULL;
       }
     }
 
@@ -119,14 +128,10 @@ namespace uhal
       lStr << "\n";
       lStr << " * Description: " << description() << "\n";
 
-      if ( mAdditionalInfo.size() )
+      if ( strlen ( mAdditionalInfo ) )
       {
         lStr << " * Additional Information:\n";
-
-        for ( std::vector< std::string >::const_iterator lIt = mAdditionalInfo.begin() ; lIt != mAdditionalInfo.end(); ++lIt )
-        {
-          lStr << "   - " << *lIt << "\n";
-        }
+        lStr << mAdditionalInfo;
       }
 
       boost::thread::id lThreadId ( boost::this_thread::get_id() );
@@ -170,9 +175,9 @@ namespace uhal
     }
 
 
-    void exception::append ( const std::string& aMessage ) throw()
+    void exception::append ( const char* aCStr ) throw()
     {
-      mAdditionalInfo.push_back ( aMessage );
+      strncat ( mAdditionalInfo, aCStr , 65536-strlen ( mAdditionalInfo ) );
     }
 
   }

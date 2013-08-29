@@ -146,8 +146,8 @@ namespace uhal
         bool buffersEqual ( const U32Vec& writeBuffer, const U32ValVec& readBuffer ) const;
 
         /// Validation test -- single-register write/read-back
-        bool validation_test_single_write_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch) const;
-        
+        bool validation_test_single_write_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch ) const;
+
         /// Validation test -- block write/read-back
         bool validation_test_block_write_read ( ClientPtr& c, const uint32_t addr, const uint32_t depth, const bool perTransactionDispatch ) const;
 
@@ -168,70 +168,70 @@ namespace uhal
 
         class QueuedTransaction
         {
-        public:
-          QueuedTransaction() {  }
-          virtual ~QueuedTransaction() {  }
+          public:
+            QueuedTransaction() {  }
+            virtual ~QueuedTransaction() {  }
 
-          virtual bool check_values() = 0;
+            virtual bool check_values() = 0;
         };
 
 
         class QueuedBlockRead : public QueuedTransaction
         {
-        public:
-          QueuedBlockRead(const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt);
-          ~QueuedBlockRead();
+          public:
+            QueuedBlockRead ( const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt );
+            ~QueuedBlockRead();
 
-          virtual bool check_values();
+            virtual bool check_values();
 
-        private:
-          // PRIVATE MEMBER DATA
-          uint32_t m_depth, m_addr;
-          ValVector<uint32_t> m_valVector;
-          std::vector<uint32_t> m_expected;
+          private:
+            // PRIVATE MEMBER DATA
+            uint32_t m_depth, m_addr;
+            ValVector<uint32_t> m_valVector;
+            std::vector<uint32_t> m_expected;
         };
 
 
         class QueuedBlockWrite : public QueuedTransaction
         {
-        public:
-          QueuedBlockWrite(const uint32_t addr, const uint32_t depth, const ValHeader& valHeader);
-          ~QueuedBlockWrite();
+          public:
+            QueuedBlockWrite ( const uint32_t addr, const uint32_t depth, const ValHeader& valHeader );
+            ~QueuedBlockWrite();
 
-          virtual bool check_values();
+            virtual bool check_values();
 
-        private:
-          // PRIVATE MEMBER DATA
-          uint32_t m_depth, m_addr;
-          ValHeader m_valHeader;
+          private:
+            // PRIVATE MEMBER DATA
+            uint32_t m_depth, m_addr;
+            ValHeader m_valHeader;
         };
 
 
         class QueuedRmwBits : public QueuedTransaction
         {
-        public:
-          QueuedRmwBits(const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected);
-          ~QueuedRmwBits();
-          virtual bool check_values();
+          public:
+            QueuedRmwBits ( const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected );
+            ~QueuedRmwBits();
+            virtual bool check_values();
 
-        private:
-          const uint32_t m_addr, m_and, m_or;
-          ValWord<uint32_t> m_valWord;
-          const uint32_t m_expected;
+          private:
+            const uint32_t m_addr, m_and, m_or;
+            ValWord<uint32_t> m_valWord;
+            const uint32_t m_expected;
         };
 
 
         class QueuedRmwSum : public QueuedTransaction
         {
-        public:
-          QueuedRmwSum(const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected);
-          ~QueuedRmwSum();
-          virtual bool check_values();
+          public:
+            QueuedRmwSum ( const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected );
+            ~QueuedRmwSum();
+            virtual bool check_values();
 
-        private:
-          const uint32_t m_addr, m_addend;
-          ValWord<uint32_t> m_valWord;
-          const uint32_t m_expected;
+          private:
+            const uint32_t m_addr, m_addend;
+            ValWord<uint32_t> m_valWord;
+            const uint32_t m_expected;
         };
 
     }; /* End of class PerfTester */

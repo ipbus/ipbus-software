@@ -41,6 +41,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include <iostream>
+
 namespace uhal
 {
 
@@ -59,22 +61,6 @@ namespace uhal
     usec	/**< microseconds past the second formatted as exactly six digits e.g. 012345 */
   };
 
-  //! Forward declaration
-  template< typename T , typename FORMAT > class _Time;
-
-  //! A helper struct to allow us to do template specialization if necessary
-  template< typename T , typename FORMAT >
-  struct TimeFactory
-  {
-    /**
-    	A factory function
-    	@param aTime a time object we will wrap as a _Time
-    	@return the time wrapper with templated format
-    */
-    static _Time< T , FORMAT > Construct ( const T& aTime );
-  };
-
-
   //! A struct whose template parameters represent a time format
   template< time_element T0 , char D0 = ' ' ,
   time_element T1 = null, char D1 = ' ' ,
@@ -87,55 +73,196 @@ namespace uhal
   //! Typedef the most commonly used time format (day/month/year hour:minut:second) for convenience
   typedef TimeFmt<day,'/',mth,'/',year,' ',hr,':',min,':',sec> DefaultTimeFmt;
 
+
+  //! Forward declaration
+  template< typename FORMAT > class _Time;
+
+  /**
+    Helper function which wrap the template uglyness in a pretty package
+    @param aTime a time object to be formatted and logged
+    @return a time wrapper object whose template parameters fully encapsulate the default formatting
+  */
+  _Time< DefaultTimeFmt > Time ( const timeval& aTime );
+
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 , char D3 ,
+          time_element T4 , char D4 ,
+          time_element T5 , char D5 ,
+          time_element T6 >
+  _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,D5,T6> > Time ( const timeval& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 , char D3 ,
+          time_element T4 , char D4 ,
+          time_element T5 >
+  _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,' ',null> > Time ( const timeval& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 , char D3 ,
+          time_element T4 >
+  _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,' ',null,' ',null> > Time ( const timeval& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 >
+  _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 >
+  _Time< TimeFmt<T0,D0,T1,D1,T2,' ',null,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 >
+  _Time< TimeFmt<T0,D0,T1,' ',null,' ',null,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+  template< time_element T0 >
+  _Time< TimeFmt<T0,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+
+
+  /**
+    Helper function which wrap the template uglyness in a pretty package
+    @param aTime a time object to be formatted and logged
+    @param aFmt a time format object whose template parameters fully encapsulate the desired formatting
+    @return a time wrapper object whose template parameters fully encapsulate the desired formatting
+  */
+  template< typename FORMAT > _Time< FORMAT > Time ( const timeval& aTime , const FORMAT& aFmt );
+
+
+
+
   /**
   	A private class whose template parameters fully encapsulate the formatting and which is used to wrap a reference to an underlying type. A log_inserter function must be available to handle this type.
   	The first parameter (the type) was templated so that we could overload for multiple time types but, so far, only timeval has been implemented
   */
-  template< typename T , typename FORMAT >
-  class _Time : public RefWrapper< T >
+  template< typename FORMAT >
+  class _Time : public RefWrapper< timeval >
   {
-      //! Make the helper struct our friend
-      friend class TimeFactory< T , FORMAT >;
+      friend _Time< DefaultTimeFmt > Time ( const timeval& aTime );
+      friend _Time< FORMAT > Time<> ( const timeval& aTime , const FORMAT& aFmt );
+
+      template< time_element T0, char D0 ,
+              time_element T1 , char D1 ,
+              time_element T2 , char D2 ,
+              time_element T3 , char D3 ,
+              time_element T4 , char D4 ,
+              time_element T5 , char D5 ,
+              time_element T6 >
+      friend _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,D5,T6> > Time ( const timeval& aTime );
+
+      template< time_element T0, char D0 ,
+              time_element T1 , char D1 ,
+              time_element T2 , char D2 ,
+              time_element T3 , char D3 ,
+              time_element T4 , char D4 ,
+              time_element T5 >
+      friend _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,' ',null> > Time ( const timeval& aTime );
+
+      template< time_element T0, char D0 ,
+              time_element T1 , char D1 ,
+              time_element T2 , char D2 ,
+              time_element T3 , char D3 ,
+              time_element T4 >
+      friend _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,' ',null,' ',null> > Time ( const timeval& aTime );
+
+      template< time_element T0, char D0 ,
+              time_element T1 , char D1 ,
+              time_element T2 , char D2 ,
+              time_element T3 >
+      friend _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+      template< time_element T0, char D0 ,
+              time_element T1 , char D1 ,
+              time_element T2 >
+      friend _Time< TimeFmt<T0,D0,T1,D1,T2,' ',null,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+      template< time_element T0, char D0 ,
+              time_element T1 >
+      friend _Time< TimeFmt<T0,D0,T1,' ',null,' ',null,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+      template< time_element T0 >
+      friend _Time< TimeFmt<T0,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
+
+
+
       /**
       	Constructor
       	@param aT an object for which we will are wrapping a reference
       */
-      _Time ( const T& aT ) : RefWrapper< T > ( aT ) {}
+      _Time ( const timeval& aTime ) : RefWrapper< timeval > ( aTime ) {}
+
+
   };
 
 
-  //! A helper struct to allow us to do template specialization when formatting the time for sending to the log
+
+  /**
+    Format a time element for for sending to the log
+    @param aTm a tm struct containing the time to be formatted (down to the second)
+    @param aUsec the number of microseconds past the second
+  */
   template< time_element T >
-  struct TimeSpecializationHelper
-  {
-    /**
-    	Format a time element for for sending to the log
-    	@param aTm a tm struct containing the time to be formatted (down to the second)
-    	@param aUsec the number of microseconds past the second
-    */
-    static void print ( const tm* aTm , const uint32_t& aUsec );
-  };
+  void print ( std::ostream& aStr , const tm* aTm , const uint32_t& aUsec );
 
-  /**
-  	Helper function which wrap the template uglyness in a pretty package
-  	@param aT a time object to be formatted and logged
-  	@return a time wrapper object whose template parameters fully encapsulate the default formatting
-  */
-  template< typename T > _Time< T , DefaultTimeFmt > Time ( const T& aT );
-
-  /**
-  	Helper function which wrap the template uglyness in a pretty package
-  	@param aT a time object to be formatted and logged
-  	@param aFmt a time format object whose template parameters fully encapsulate the desired formatting
-  	@return a time wrapper object whose template parameters fully encapsulate the desired formatting
-  */
-  template< typename T , typename FORMAT > _Time< T , FORMAT > Time ( const T& aT , const FORMAT& aFmt );
 
   /**
   	A helper function to return the current time
   	@return the current time
   */
   timeval Now();
+
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 , char D3 ,
+          time_element T4 , char D4 ,
+          time_element T5 , char D5 ,
+          time_element T6 >
+  std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,D5,T6> >& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 , char D3 ,
+          time_element T4 , char D4 ,
+          time_element T5 >
+  std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,D4,T5,' ',null> >& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 , char D3 ,
+          time_element T4 >
+  std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,D3,T4,' ',null,' ',null> >& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 , char D2 ,
+          time_element T3 >
+  std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,D0,T1,D1,T2,D2,T3,' ',null,' ',null,' ',null> >& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 , char D1 ,
+          time_element T2 >
+  std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,D0,T1,D1,T2,' ',null,' ',null,' ',null,' ',null> >& aTime );
+
+  template< time_element T0, char D0 ,
+          time_element T1 >
+  std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,D0,T1,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime );
+
+  template< time_element T0 >
+  std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime );
+
 
 }
 

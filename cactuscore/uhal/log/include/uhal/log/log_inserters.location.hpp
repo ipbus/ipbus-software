@@ -37,6 +37,7 @@
 #define ThisLocation() uhal::Location( __PRETTY_FUNCTION__ , __FILE__ , __LINE__ )
 
 #include <stdint.h>
+#include <iostream>
 
 namespace uhal
 {
@@ -62,6 +63,7 @@ namespace uhal
       const uint32_t mLine;
   };
 
+  std::ostream& operator<< ( std::ostream& aStr , const Location& aLocation );
 
 }
 

@@ -60,9 +60,9 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "#ifndef _log_hpp_\n"
             << "#define _log_hpp_\n"
             << "\n"
-            << "#include <uhal/log/log_backend.hpp>\n"
+            << "#include <uhal/log/LogLevels.hpp>\n"
+            << "#include <uhal/log/exception.hpp>\n"
             << "#include <uhal/log/log_inserters.hpp>\n"
-            << "//#include <boost/thread/thread.hpp>\n"
             << "#include <boost/thread/mutex.hpp>\n"
             << "\n"
             //            << "#define logging() logger log( ThisLocation() );\n"
@@ -79,6 +79,7 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "\n";
   aCppFile	<< "\n"
             << "#include <uhal/log/log.hpp>\n"
+            << "#include <uhal/log/log_inserters.quote.hpp>\n"
             << "\n"
             << "namespace uhal{\n"
             << "\n"
@@ -164,13 +165,20 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
     lIfDefs2 << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << " // A waste of time to change any level below this if it is going to disabled by compile-time checking anyway... \n"
              << "\t\tlog_configuration::mLoggingIncludes" << *lIt << " = true;\n";
     lEndIfs << "\t#endif\n";
-    aHppFile << "//! Helper struct representing the " << *lIt << " log level to allow us to specialize functions according to their log level\n"
-             << "struct " << *lIt << " {};\n";
+    //     aHppFile << "//! Helper struct representing the " << *lIt << " log level to allow us to specialize functions according to their log level\n"
+    //              << "class " << *lIt << "Level : public BaseLogLevel\n"
+    //              << "\t{\n"
+    //              << "\t\tpublic:\n"
+    //              << "\t\t\t"<< *lIt << "Level( std::ostream& aStr ) : BaseLogLevel( aStr ){}\n"
+    //              << "\t\t\t"<< *lIt << "Level& operator() (){ return *this; }\n"
+    //              << "\t};\n"
+    //              << "\n"
+    //              << *lIt << "Level " << *lIt << "( std::cout );\n";
     aHppFile << "/**\n"
              << "\tFunction to specify, at runtime, that only messages with a severity level above " << *lIt << " should be logged\n"
              << "*/\n"
-             << "void setLogLevelTo ( const " << *lIt << "& /**< a dummy parameter to choose the specialization of the function for the " << *lIt << " level */ );\n";
-    aCppFile << "void setLogLevelTo ( const " << *lIt << "& )\n"
+             << "void setLogLevelTo ( const " << *lIt << "Level& /**< a dummy parameter to choose the specialization of the function for the " << *lIt << " level */ );\n";
+    aCppFile << "void setLogLevelTo ( const " << *lIt << "Level& )\n"
              << "{\n"
              << lIfDefs2.str();
 
@@ -186,9 +194,9 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
              << "\tFunction to check at runtime whether the level " << *lIt << " is to be included in the log output\n"
              << "\t@return whether the level " << *lIt << " is to be included in the log output\n"
              << "*/\n"
-             << "const bool& LoggingIncludes ( const " << *lIt << "& /**< a dummy parameter to choose the specialization of the function for the " << *lIt << " level */ );\n"
+             << "const bool& LoggingIncludes ( const " << *lIt << "Level& /**< a dummy parameter to choose the specialization of the function for the " << *lIt << " level */ );\n"
              << "\n";
-    aCppFile << "const bool& LoggingIncludes ( const " << *lIt << "& )\n"
+    aCppFile << "const bool& LoggingIncludes ( const " << *lIt << "Level& )\n"
              << "{\n"
              << lIfDefs.str()
              << "\t\treturn log_configuration::mLoggingIncludes" << *lIt << ";\n"
@@ -230,9 +238,9 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
     }
 
     aHppFile << "\t//!Make setLogLevelTo function a friend so it can access our private members\n"
-             << "\tfriend void setLogLevelTo ( const " << *lIt << "& );\n"
+             << "\tfriend void setLogLevelTo ( const " << *lIt << "Level& );\n"
              << "\t//!Make LoggingIncludes function a friend so it can access our private members\n"
-             << "\tfriend const bool& LoggingIncludes ( const " << *lIt << "& );\n"
+             << "\tfriend const bool& LoggingIncludes ( const " << *lIt << "Level& );\n"
              << "\n";
   }
 
@@ -277,25 +285,6 @@ std::string suffix ( uint32_t i )
 void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
   std::stringstream lIfDefs , lEndIfs;
-  //   aHppFile << "class logger\n"
-  //            << "{\n"
-  //            << "public:\n"
-  //            //          << "\tlogger( const Location& aLocation );\n"
-  //            << "\tlogger();\n"
-  //            << "\tvirtual ~logger();\n"
-  //            //           << "private:\n"
-  //            //           << "\tLocation mLocation;\n"
-  //            << "public:\n";
-  //   aCppFile //<< "logger::logger( const Location& aLocation ) : mLocation( aLocation ) {}\n"
-  //       << "logger::logger( ) {}\n"
-  //       << "\n"
-  //       << "logger::~logger()\n"
-  //       << "{\n"
-  //       /*          << "\tif (std::uncaught_exception())\n"
-  //                 << "\t{\n"
-  //                 << "\t\tthis->operator()( Error() , \"Exception spotted at \" , mLocation );\n"
-  //                 << "\t}\n"*/
-  //       << "}\n";
 
   for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
   {
@@ -316,27 +305,26 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
       lArgs << " const T" << i << "& aArg" << i << " ,";
       std::string lArgsStr ( lArgs.str() );
       lArgsStr.resize ( lArgsStr.size()-1 );
-      lInstructions << "\t\t\tlog_inserter( aArg" << i << " );\n";
+      lInstructions << "\t\t\tinsert( lStr , aArg" << i << " );\n";
       lDoxygen << "\t\t@param aArg" << i << " a templated argument to be added to the log " << ( i+1 ) << suffix ( i+1 ) <<"\n";
       aHppFile << "\t/**\n"
                << lDoxygen.str()
                << "\t*/\n"
                << "\ttemplate<" << lTemplatesStr << ">\n"
                //               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
-               << "\tvoid log ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
+               << "\tvoid log ( " <<*lIt << "Level& a" << *lIt << " ," << lArgsStr << ");\n"
                << "\n";
       aHxxFile << "template<" << lTemplatesStr << ">\n"
                //               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
-               << "void log ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
+               << "void log (  " <<*lIt << "Level& a" << *lIt << " ," << lArgsStr << " )\n"
                << "{\n"
                << lIfDefs.str()
                << "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
                << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
-               //               << "\t\t\tlog_head< " << *lIt << " >();\n"
-               << "\t\t\tlog_head_" << *lIt << "();\n"
+               << "\t\t\tstd::ostream& lStr( a" << *lIt << ".stream() );\n"
+               << "\t\t\ta" << *lIt << ".head();\n"
                << lInstructions.str()
-               //               << "\t\t\tlog_tail< " << *lIt << " >();\n"
-               << "\t\t\tlog_tail_" << *lIt << "();\n"
+               << "\t\t\ta" << *lIt << ".tail();\n"
                << "\t\t}\n"
                << lEndIfs.str()
                << "}\n"
@@ -346,6 +334,88 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
     aHppFile	<< gDivider
               << "\n";
     aHxxFile	<< gDivider
+              << "\n";
+  }
+
+  {
+    std::stringstream lTemplates;
+    std::stringstream lArgs;
+    std::stringstream lInstructions;
+    std::stringstream lDoxygen;
+
+    for ( uint32_t i = 0 ; i!=MAX_NUM_ARGS ; ++i )
+    {
+      lTemplates << " typename T" << i << " ,";
+      std::string lTemplatesStr ( lTemplates.str() );
+      lTemplatesStr.resize ( lTemplatesStr.size()-1 );
+      lArgs << " const T" << i << "& aArg" << i << " ,";
+      std::string lArgsStr ( lArgs.str() );
+      lArgsStr.resize ( lArgsStr.size()-1 );
+      lInstructions << "\t\t\tinsert( lStr , aArg" << i << " );\n";
+      lDoxygen << "\t\t@param aArg" << i << " a templated argument to be added to the log " << ( i+1 ) << suffix ( i+1 ) <<"\n";
+      aHppFile << "\t/**\n"
+               << lDoxygen.str()
+               << "\t*/\n"
+               << "\ttemplate<" << lTemplatesStr << ">\n"
+               //               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
+               << "\tvoid log ( exception::exception& aExc ," << lArgsStr << ");\n"
+               << "\n";
+      aHxxFile << "template<" << lTemplatesStr << ">\n"
+               //               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
+               << "void log (  exception::exception& aExc ," << lArgsStr << " )\n"
+               << "{\n"
+               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
+               << "\t\t\tstd::stringstream lStr;\n"
+               << lInstructions.str()
+               << "\t\t\tlStr<<std::endl;\n"
+               << "\t\t\taExc.append( lStr.str().c_str() );\n"
+               << "}\n"
+               << "\n";
+    }
+
+    aHppFile  << gDivider
+              << "\n";
+    aHxxFile  << gDivider
+              << "\n";
+  }
+
+  {
+    std::stringstream lTemplates;
+    std::stringstream lArgs;
+    std::stringstream lInstructions;
+    std::stringstream lDoxygen;
+
+    for ( uint32_t i = 0 ; i!=MAX_NUM_ARGS ; ++i )
+    {
+      lTemplates << " typename T" << i << " ,";
+      std::string lTemplatesStr ( lTemplates.str() );
+      lTemplatesStr.resize ( lTemplatesStr.size()-1 );
+      lArgs << " const T" << i << "& aArg" << i << " ,";
+      std::string lArgsStr ( lArgs.str() );
+      lArgsStr.resize ( lArgsStr.size()-1 );
+      lInstructions << "\t\t\tinsert( aStr , aArg" << i << " );\n";
+      lDoxygen << "\t\t@param aArg" << i << " a templated argument to be added to the log " << ( i+1 ) << suffix ( i+1 ) <<"\n";
+      aHppFile << "\t/**\n"
+               << lDoxygen.str()
+               << "\t*/\n"
+               << "\ttemplate<" << lTemplatesStr << ">\n"
+               //               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
+               << "\tvoid log ( std::ostream& aStr ," << lArgsStr << ");\n"
+               << "\n";
+      aHxxFile << "template<" << lTemplatesStr << ">\n"
+               //               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
+               << "void log (  std::ostream& aStr ," << lArgsStr << " )\n"
+               << "{\n"
+               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
+               << lInstructions.str()
+               << "\t\t\taStr << std::endl;\n"
+               << "}\n"
+               << "\n";
+    }
+
+    aHppFile  << gDivider
+              << "\n";
+    aHxxFile  << gDivider
               << "\n";
   }
 
@@ -405,7 +475,7 @@ int main ( int argc , char* argv[] )
   }
   catch ( const std::exception& aExc )
   {
-    std::cerr << "ERROR: Caught Exception : " << aExc.what() << std::endl;
+    std::cerr << "ERROR: Caught exception : " << aExc.what() << std::endl;
     exit ( 1 );
   }
 }

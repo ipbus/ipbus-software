@@ -32,18 +32,15 @@
 
 
 #include <uhal/log/log.hpp>
-#include <uhal/log/log_inserters.string.hpp>
-
 
 namespace uhal
 {
 
   template< typename T >
-  void log_inserter ( const _Quote< T >& aQuote )
+  std::ostream& operator<< ( std::ostream& aStr , const _Quote< T >& aQuote )
   {
-    put ( 0x22 );
-    log_inserter ( aQuote.value() );
-    put ( 0x22 );
+    aStr << '"' << aQuote.value() << '"';
+    return aStr;
   }
 
 

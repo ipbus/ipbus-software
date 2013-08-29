@@ -64,6 +64,8 @@ namespace uhal
   };
 }
 
+
+
 std::ostream& operator<< ( std::ostream& aStream , const uhal::URI& aURI );
 
 

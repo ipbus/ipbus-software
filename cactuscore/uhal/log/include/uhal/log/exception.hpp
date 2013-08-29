@@ -46,7 +46,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "uhal/log/log_inserters.location.hpp"
+// #include "uhal/log/log_inserters.location.hpp"
 #include "boost/thread.hpp"
 
 
@@ -107,18 +107,20 @@ namespace uhal
 
         virtual exception* clone() = 0;
 
-        virtual void append ( const std::string& aMessage ) throw();
+
+        void append ( const char* aCStr ) throw();
+
 
       protected:
         virtual std::string description() const throw() = 0;
 
       private:
-        std::vector< std::string > mAdditionalInfo;
         std::vector< void* > mBacktrace;
         boost::thread::id mThreadId;
         timeval mTime;
 
         char* mString;
+        char* mAdditionalInfo;
     };
 
   }

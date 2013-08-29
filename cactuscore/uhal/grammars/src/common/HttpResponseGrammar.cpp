@@ -32,53 +32,53 @@
 
 #include "uhal/grammars/HttpResponseGrammar.hpp"
 
-#include "uhal/log/log.hpp"
+// #include "uhal/log/log.hpp"
 
 #include <boost/spirit/include/qi.hpp>
 
-// std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse )
-// {
-// aStream << " > method = " << aHttpResponse.method << "\n";
-// aStream << " > version = " << aHttpResponse.version << "\n";
-// aStream << " > status = " << aHttpResponse.status << "\n";
-// aStream << " > status_string = " << aHttpResponse.status_string << "\n";
-// aStream << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
-// aStream << " > Content =\n";
-
-// for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
-// {
-// aStream << char ( *lIt );
-// }
-
-// aStream << std::endl;
-// return aStream;
-// }
-
-
-
-namespace uhal
+std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse )
 {
-  /**
-  	The log_inserter function to add an HttpResponseType object to a log entry
-  	@param aHttpResponse an HttpResponseType object to format and print to log
-  */
-  template < >
-  void log_inserter< HttpResponseType > ( const HttpResponseType& aHttpResponse )
+  aStream << " > method = " << aHttpResponse.method << "\n";
+  aStream << " > version = " << aHttpResponse.version << "\n";
+  aStream << " > status = " << aHttpResponse.status << "\n";
+  aStream << " > status_string = " << aHttpResponse.status_string << "\n";
+  aStream << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
+  aStream << " > Content =\n";
+
+  for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
   {
-    log_inserter ( " > method = " );
-    log_inserter ( aHttpResponse.method );
-    log_inserter ( "\n > version = " );
-    log_inserter ( Real ( aHttpResponse.version ) );
-    log_inserter ( "\n > status = " );
-    log_inserter ( Integer ( aHttpResponse.status ) );
-    log_inserter ( "\n > status_string = " );
-    log_inserter ( aHttpResponse.status_string );
-    log_inserter ( "\n > NameValuePairs =\n" );
-    log_inserter ( aHttpResponse.headers );
-    log_inserter ( "\n > Content =\n" );
-    put ( ( const char* ) ( & ( aHttpResponse.content[0] ) ) , aHttpResponse.content.size() );
+    aStream << char ( *lIt );
   }
+
+  aStream << std::endl;
+  return aStream;
 }
+
+
+
+// namespace uhal
+// {
+//   /**
+//   	The log_inserter function to add an HttpResponseType object to a log entry
+//   	@param aHttpResponse an HttpResponseType object to format and print to log
+//   */
+//   template < >
+//   void log_inserter< HttpResponseType > ( const HttpResponseType& aHttpResponse )
+//   {
+//     log_inserter ( " > method = " );
+//     log_inserter ( aHttpResponse.method );
+//     log_inserter ( "\n > version = " );
+//     log_inserter ( Real ( aHttpResponse.version ) );
+//     log_inserter ( "\n > status = " );
+//     log_inserter ( Integer ( aHttpResponse.status ) );
+//     log_inserter ( "\n > status_string = " );
+//     log_inserter ( aHttpResponse.status_string );
+//     log_inserter ( "\n > NameValuePairs =\n" );
+//     log_inserter ( aHttpResponse.headers );
+//     log_inserter ( "\n > Content =\n" );
+//     put ( ( const char* ) ( & ( aHttpResponse.content[0] ) ) , aHttpResponse.content.size() );
+//   }
+// }
 
 
 namespace grammars

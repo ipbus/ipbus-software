@@ -37,6 +37,7 @@
 #include <uhal/log/log_inserter_helper.hpp>
 
 #include <stdint.h>
+#include <iostream>
 
 namespace uhal
 {
@@ -61,6 +62,9 @@ namespace uhal
       friend _Quote< const char* > Quote ( const char* aStr );
       _Quote ( const char* aStr ) : RefWrapper< const char* > ( aStr ) {}
   };
+
+  template< typename T >
+  std::ostream& operator<< ( std::ostream& aStr , const _Quote< T >& aQuote );
 
 }
 
