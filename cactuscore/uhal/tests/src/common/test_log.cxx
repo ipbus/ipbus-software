@@ -35,6 +35,8 @@
 	@date 2012
 */
 
+
+#include "uhal/Utilities.hpp"
 #include "uhal/log/log.hpp"
 #include <iostream>
 
@@ -137,6 +139,19 @@ int main ( int argc,char* argv[] )
     //     log ( Notice() , "Pointer : " , Pointer ( &lTest ) );
     //     log ( Notice() , "Pointer : " , Pointer ( argv ) );
     //     log ( Notice() , "Pointer : " , Pointer ( *argv ) );
+
+
+    log ( std::cout , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
+
+    exception::FileNotFound lExc;
+    log ( lExc , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
+    log ( lExc , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
+    log ( lExc , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
+    std::cout << lExc.what() << std::endl;
+
+
+
+
     // Test setting logging levels
     setLogLevelTo ( Error() );
     log ( Notice() , std::string ( "setLogLevelTo ( Error() ) : IF YOU >>DO<< SEE THIS, THEN THERE IS AN ERROR" ) );
