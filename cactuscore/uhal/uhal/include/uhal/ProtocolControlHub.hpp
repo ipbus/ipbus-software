@@ -55,6 +55,12 @@ namespace uhal
 
   namespace exception
   {
+    //! Exception class to handle the case where parsing the target URL failed.
+    ExceptionClass ( ParsingTargetURLfailed , "Exception class to handle the case where parsing the target URL failed." );
+
+    //! Exception class to handle the case where hostname to IP lookup failed
+    ExceptionClass ( HostnameToIPlookupFailed , "Exception class to handle the case where hostname to IP lookup failed." );
+
     //! Exception class to handle the case where the received header does not match the expected header.
     ExceptionClass ( XMLfileMissingRequiredParameters , "Exception class to handle the case where the received header does not match the expected header." );
 

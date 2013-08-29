@@ -212,17 +212,18 @@ namespace uhal
     if ( lErrorCode )
     {
       mSocket.close();
+      exception::TcpConnectionFailure lExc;
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        log ( Error() , "ASIO TCP connection timed out" );
+        log ( lExc , "ASIO TCP connection timed out" );
       }
       else
       {
-        log ( Error() , "ASIO reported an error: " , lErrorCode.message() );
+        log ( lExc , "ASIO reported an error: " , lErrorCode.message() );
       }
 
-      throw exception::TcpConnectionFailure();
+      throw lExc;
     }
 
     mSocket.set_option ( boost::asio::ip::tcp::no_delay ( true ) );

@@ -44,8 +44,9 @@ namespace uhal
     }
     catch ( const std::exception& aExc )
     {
-      log ( Error() , "Invalid cast of Node " , Quote ( getNode ( aId ).getId() ) , " from type ", Quote ( Type ( *this ) ), " to " ,  Quote ( Type<T>() ) );
-      throw exception::BadNodeCast();
+      exception::BadNodeCast lExc;
+      log ( lExc , "Invalid cast of Node " , Quote ( getNode ( aId ).getId() ) , " from type ", Quote ( Type ( *this ) ), " to " ,  Quote ( Type<T>() ) );
+      throw lExc;
     }
   }
 

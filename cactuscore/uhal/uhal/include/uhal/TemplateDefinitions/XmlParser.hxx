@@ -101,8 +101,9 @@ namespace uhal
   {
     if ( mForbidden.find ( aStr ) != mForbidden.end() )
     {
-      log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
-      throw exception::ContradictoryParserRule();
+      exception::ContradictoryParserRule lExc;
+      log ( lExc , "Contradictory rule for attribute ", Quote ( aStr ) );
+      throw lExc;
     }
 
     mRequired.insert ( aStr );
@@ -114,8 +115,9 @@ namespace uhal
   {
     if ( mRequired.find ( aStr ) != mRequired.end() )
     {
-      log ( Error() , "Contradictory rule for attribute ", Quote ( aStr ) );
-      throw exception::ContradictoryParserRule();
+      exception::ContradictoryParserRule lExc;
+      log ( lExc , "Contradictory rule for attribute ", Quote ( aStr ) );
+      throw lExc;
     }
 
     mForbidden.insert ( aStr );
@@ -210,8 +212,9 @@ namespace uhal
     }
     else
     {
-      log ( Error() , "No action specified!" );
-      throw exception::NoActionSpecified();
+      exception::NoActionSpecified lExc;
+      log ( lExc , "No action specified!" );
+      throw lExc;
     }
   }
 
@@ -246,8 +249,9 @@ namespace uhal
       {
         if ( mNextHash == 0x0000000000000000 )
         {
-          log ( Error() , "Too many attributes" );
-          throw exception::TooManyAttributes();
+          exception::TooManyAttributes lExc;
+          log ( lExc , "Too many attributes" );
+          throw lExc;
         }
 
         lRule.mRequiredHash |= mNextHash;
@@ -268,8 +272,9 @@ namespace uhal
       {
         if ( mNextHash == 0x0000000000000000 )
         {
-          log ( Error() , "Too many attributes" );
-          throw exception::TooManyAttributes();
+          exception::TooManyAttributes lExc;
+          log ( lExc , "Too many attributes" );
+          throw lExc;
         }
 
         lRule.mForbiddenHash |= mNextHash;
@@ -290,8 +295,9 @@ namespace uhal
       {
         if ( mNextHash == 0x0000000000000000 )
         {
-          log ( Error() , "Too many attributes" );
-          throw exception::TooManyAttributes();
+          exception::TooManyAttributes lExc;
+          log ( lExc , "Too many attributes" );
+          throw lExc;
         }
 
         mHashes.insert ( std::make_pair ( *lIt , mNextHash ) );
@@ -315,8 +321,9 @@ namespace uhal
 
       if ( lIt2 == mHashes.end() )
       {
-        log ( Error() , "Parser failed because of unknown attribute ", Quote ( lAttr.name() ) );
-        throw exception::UnknownAttribute();
+        exception::UnknownAttribute lExc;
+        log ( lExc , "Parser failed because of unknown attribute ", Quote ( lAttr.name() ) );
+        throw lExc;
       }
 
       lHash |= lIt2->second;
@@ -370,8 +377,9 @@ namespace uhal
 
       if ( !lMostStringent )
       {
-        log ( Error() , "Ambiguity remains! Multiple rules passed " , Integer ( lCounter ) , " requirements." );
-        throw exception::AmbiguousParserRules();
+        exception::AmbiguousParserRules lExc;
+        log ( lExc , "Ambiguity remains! Multiple rules passed " , Integer ( lCounter ) , " requirements." );
+        throw lExc;
       }
 
       log ( Warning() , "In ambiguous case, selected " , lMostStringent->description() );
@@ -387,7 +395,8 @@ namespace uhal
 
     std::string lString ( lStr.str() );
     lString.resize ( lString.size() - 2 );
-    log ( Error() , "Node with attributes : " , lString , " failed all parser rules because : " );
+    exception::NoRulesPassed lExc;
+    log ( lExc , "Node with attributes : " , lString , " failed all parser rules because : " );
 
     for ( typename std::deque< Rule<R>* >::iterator lIt = lFailedRequired.begin() ; lIt != lFailedRequired.end(); ++lIt )
     {
@@ -404,7 +413,7 @@ namespace uhal
 
       std::string lString ( lStr.str() );
       lString.resize ( lString.size() - 2 );
-      log ( Error() , " > Rule " ,  Integer ( ( **lIt ).mRuleId ) , " requires attributes : " , lString );
+      log ( lExc , "Rule " ,  Integer ( ( **lIt ).mRuleId ) , " requires attributes : " , lString );
     }
 
     for ( typename std::deque< Rule<R>* >::iterator lIt = lFailedForbidden.begin() ; lIt != lFailedForbidden.end(); ++lIt )
@@ -422,10 +431,10 @@ namespace uhal
 
       std::string lString ( lStr.str() );
       lString.resize ( lString.size() - 2 );
-      log ( Error() , " > Rule " ,  Integer ( ( **lIt ).mRuleId ) , " forbids attributes : " , lString );
+      log ( lExc , "Rule " ,  Integer ( ( **lIt ).mRuleId ) , " forbids attributes : " , lString );
     }
 
-    throw exception::NoRulesPassed();
+    throw lExc;
   }
 
 }

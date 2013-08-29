@@ -148,8 +148,9 @@ namespace uhal
 
     if ( lAddressFiles.size() != 1 )
     {
-      log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( aFilenameExpr ) , " contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
-      throw exception::IncorrectAddressTableFileCount();
+      exception::IncorrectAddressTableFileCount lExc;
+      log ( lExc , "Exactly one address table file must be specified. The expression " , Quote ( aFilenameExpr ) , " contains " , Integer ( lAddressFiles.size() ) , " valid file expressions." );
+      throw lExc;
     }
 
     std::vector< const Node* > lNodes;
@@ -157,8 +158,9 @@ namespace uhal
 
     if ( lNodes.size() != 1 )
     {
-      log ( Error() , "Exactly one address table file must be specified. The expression " , Quote ( lAddressFiles[0].second ) , " refers to " , Integer ( lNodes.size() ) , " valid files." );
-      throw exception::IncorrectAddressTableFileCount();
+      exception::IncorrectAddressTableFileCount lExc;
+      log ( lExc , "Exactly one address table file must be specified. The expression " , Quote ( lAddressFiles[0].second ) , " refers to " , Integer ( lNodes.size() ) , " valid files." );
+      throw lExc;
     }
 
     Node* lNode ( lNodes[0]->clone() );
@@ -278,14 +280,15 @@ namespace uhal
 
     if ( lIt == mCreators.end() )
     {
-      log ( Error() , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory. Known types are:" );
+      exception::LabelUnknownToClassFactory lExc;
+      log ( lExc , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory. Known types are:" );
 
       for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
       {
-        log ( Error() , " > " , lIt->first );
+        log ( lExc , "    > " , lIt->first );
       }
 
-      throw exception::LabelUnknownToClassFactory();
+      throw lExc;
     }
 
     Node* lNode ( lIt->second->create ( lClass.mArguments ) );
@@ -326,8 +329,9 @@ namespace uhal
   {
     if ( aXmlNode.child ( "node" ) )
     {
-      log ( Error() , "Bit-masked nodes are not allowed to have child nodes" );
-      throw exception::MaskedNodeCannotHaveChild();
+      exception::MaskedNodeCannotHaveChild lExc;
+      log ( lExc , "Bit-masked nodes are not allowed to have child nodes" );
+      throw lExc;
     }
 
     Node* lNode ( new Node() );
@@ -461,8 +465,9 @@ namespace uhal
         //If a block is incremental it requires a size attribute
         if ( ! uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mSizeAttribute , aNode->mSize ) )
         {
-          log ( Error() , "Node " , Quote ( aNode->mUid ) , " has type " , Quote ( "INCREMENTAL" ) , ", which requires a " , Quote ( NodeTreeBuilder::mSizeAttribute ) , " attribute" );
-          throw exception::IncrementalNodeRequiresSizeAttribute();
+          exception::IncrementalNodeRequiresSizeAttribute lExc;
+          log ( lExc , "Node " , Quote ( aNode->mUid ) , " has type " , Quote ( "INCREMENTAL" ) , ", which requires a " , Quote ( NodeTreeBuilder::mSizeAttribute ) , " attribute" );
+          throw lExc;
         }
       }
       else if ( aNode->mMode == defs::NON_INCREMENTAL )
@@ -486,8 +491,9 @@ namespace uhal
     {
       if ( lXmlNode )
       {
-        log ( Error() , "Block access nodes are not allowed to have child nodes" );
-        throw exception::BlockAccessNodeCannotHaveChild();
+        exception::BlockAccessNodeCannotHaveChild lExc;
+        log ( lExc , "Block access nodes are not allowed to have child nodes" );
+        throw lExc;
       }
     }
     else
@@ -556,8 +562,9 @@ namespace uhal
       //Check that the requested block size does not extend outside register space
       if ( lTopAddr >> 32 )
       {
-        log ( Error() , "A block size of " , Integer ( aNode->mSize ) , " and a base address of " , Integer ( aNode->mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
-        throw exception::ArraySizeExceedsRegisterBound();
+        exception::ArraySizeExceedsRegisterBound lExc;
+        log ( lExc , "A block size of " , Integer ( aNode->mSize ) , " and a base address of " , Integer ( aNode->mAddr , IntFmt<hex,fixed>() ) , " exceeds bounds of address space" );
+        throw lExc;
       }
 
       /*

@@ -211,10 +211,10 @@ namespace uhal
 
       /**
       	A streaming helper function to create pretty, indented tree diagrams
-      	@param aStream a stream to write to
+      	@param aStr a stream to write to
       	@param aIndent size of the indentation
       */
-      void stream ( std::ostream& aStream , std::size_t aIndent = 0 ) const;
+      void stream ( std::ostream& aStr , std::size_t aIndent = 0 ) const;
 
 
       /**

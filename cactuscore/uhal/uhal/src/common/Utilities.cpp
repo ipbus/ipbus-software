@@ -49,15 +49,16 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        log ( Error() , "Expression " , Quote ( aSemicolonDelimitedUriList ) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
-        throw exception::UriListParsingError();
+        exception::UriListParsingError lExc;
+        log ( lExc , "Expression " , Quote ( aSemicolonDelimitedUriList ) , " must be a semicolon delimeted list and all files must be in the form " , Quote ( "protocol://address" ) );
+        throw lExc;
       }
 
       log ( Debug() , "Parsed " , Quote ( aSemicolonDelimitedUriList ) , " to:" );
 
       for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
       {
-        log ( Debug() , " > [" , lIt->first , "] " , Quote ( lIt->second ) );
+        log ( Debug() , "    > [" , lIt->first , "] " , Quote ( lIt->second ) );
       }
     }
 
@@ -155,19 +156,21 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
-        throw aExc;
+        uhal::exception::ExpandingShellExpressionFailed lExc;
+        log ( lExc , "Caught exception: " , Quote ( aExc.what() ) );
+        throw lExc;
       }
-
-      log ( Debug() , "Shell expansion of " , Quote ( aFilenameExpr.c_str() ) , " returned:" );
 
       if ( ! aFiles.size() )
       {
-        log ( Error() , " > No matching files for expression " , Quote ( aFilenameExpr ) , " with parent path " , Quote ( aParentPath.c_str() ) );
-        throw uhal::exception::FileNotFound();
+        uhal::exception::FileNotFound lExc;
+        log ( lExc , "No matching files for expression " , Quote ( aFilenameExpr ) , " with parent path " , Quote ( aParentPath.c_str() ) );
+        throw lExc;
       }
       else
       {
+        log ( Debug() , "Shell expansion of " , Quote ( aFilenameExpr.c_str() ) , " returned:" );
+
         for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles.begin() ; lIt !=  aFiles.end() ; ++lIt )
         {
           log ( Debug() , " > [file] " , lIt->c_str() );

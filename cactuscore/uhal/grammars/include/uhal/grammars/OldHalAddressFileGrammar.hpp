@@ -67,16 +67,16 @@
 // };
 
 
-// std::ostream& operator<< ( std::ostream& aStream , const OldHalEntryType& aOldHalEntry )
+// std::ostream& operator<< ( std::ostream& aStr , const OldHalEntryType& aOldHalEntry )
 // {
-// aStream << " > key = '" << aOldHalEntry.key << "'\n";
-// aStream << " > AM = '" << aOldHalEntry.AM << "'\n";
-// aStream << " > width = '" << aOldHalEntry.width << "'\n";
-// aStream << " > address = '" << aOldHalEntry.address << "'\n";
-// aStream << " > mask = '" << aOldHalEntry.mask << "'\n";
-// //aStream << " > permissions = " << (aOldHalEntry.read?"r":"") << (aOldHalEntry.write?"w":"") << "\n";
-// aStream << " > description = '" << aOldHalEntry.description << "'" << std::endl;
-// return aStream;
+// aStr << " > key = '" << aOldHalEntry.key << "'\n";
+// aStr << " > AM = '" << aOldHalEntry.AM << "'\n";
+// aStr << " > width = '" << aOldHalEntry.width << "'\n";
+// aStr << " > address = '" << aOldHalEntry.address << "'\n";
+// aStr << " > mask = '" << aOldHalEntry.mask << "'\n";
+// //aStr << " > permissions = " << (aOldHalEntry.read?"r":"") << (aOldHalEntry.write?"w":"") << "\n";
+// aStr << " > description = '" << aOldHalEntry.description << "'" << std::endl;
+// return aStr;
 // }
 
 // }

@@ -36,22 +36,22 @@
 
 // #include "uhal/log/log.hpp"
 
-std::ostream& operator<< ( std::ostream& aStream , const uhal::URI& aURI )
+std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI )
 {
-  aStream << " > protocol : " << aURI.mProtocol << "\n";
-  aStream << " > hostname : " << aURI.mHostname << "\n";
-  aStream << " > port : " << aURI.mPort << "\n";
-  aStream << " > path : " << aURI.mPath << "\n";
-  aStream << " > extension : " << aURI.mExtension << "\n";
-  aStream << " > arguments :\n";
+  aStr << " > protocol : " << aURI.mProtocol << "\n";
+  aStr << " > hostname : " << aURI.mHostname << "\n";
+  aStr << " > port : " << aURI.mPort << "\n";
+  aStr << " > path : " << aURI.mPath << "\n";
+  aStr << " > extension : " << aURI.mExtension << "\n";
+  aStr << " > arguments :\n";
 
   for ( uhal::NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin() ; lIt != aURI.mArguments.end() ; ++lIt )
   {
-    aStream << "   > " << lIt->first << " = " << lIt->second << "\n";
+    aStr << "   > " << lIt->first << " = " << lIt->second << "\n";
   }
 
-  aStream << std::flush;
-  return aStream;
+  aStr << std::flush;
+  return aStr;
 }
 
 

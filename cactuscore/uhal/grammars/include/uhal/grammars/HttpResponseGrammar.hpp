@@ -65,7 +65,7 @@ namespace uhal
   };
 }
 
-std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse );
+std::ostream& operator<< ( std::ostream& aStr , const uhal::HttpResponseType& aHttpResponse );
 
 
 // Call to BOOST_FUSION_ADAPT_STRUCT must be at global scope

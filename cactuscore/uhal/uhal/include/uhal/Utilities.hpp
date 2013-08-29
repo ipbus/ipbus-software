@@ -112,9 +112,14 @@ namespace uhal
     ExceptionClass ( StringNumberWillNotFitInto32BitNumber , "Exception class to handle the case where the string will not fit into a 32-bit number." );
     //! Exception class to handle the case where the string is not a comma-delimiter list of URIs.
     ExceptionClass ( UriListParsingError , "Exception class to handle the case where the string is not a comma-delimiter list of URIs." );
-    ExceptionClass ( NonSupportedUriPotocol , "Exception class to handle the case where a URI contains a non-supported protocol." );
+    //! Exception class to handle the case where a URI contains a non-supported protocol.
+    ExceptionClass ( NonSupportedUriProtocol , "Exception class to handle the case where a URI contains a non-supported protocol." );
+    //! Exception class to handle the case where a URI can not be opened.
     ExceptionClass ( CannotOpenFile , "Exception class to handle the case where a URI can not be opened." );
+    //! Exception class to handle the case where a URI using the 'file://' protocol can not be expanded.
     ExceptionClass ( FileNotFound , "Exception class to handle the case where a URI using the 'file://' protocol can not be expanded." );
+    //!Exception class to handle the case where expanding a shell expression failed.
+    ExceptionClass ( ExpandingShellExpressionFailed , "Exception class to handle the case where expanding a shell expression failed." );
   }
 
   namespace utilities
@@ -337,8 +342,9 @@ namespace uhal
 
         if ( !lStr.is_open() )
         {
-          log ( Error() , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
-          throw  uhal::exception::CannotOpenFile();
+          uhal::exception::CannotOpenFile lExc;
+          log ( lExc , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
+          throw lExc ;
         }
         else
         {
@@ -366,8 +372,9 @@ namespace uhal
 
       if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
       {
-        log ( Error() , "Failed to download file " , aURL , ". Continuing for now but be aware!" );
-        throw  uhal::exception::CannotOpenFile();
+        uhal::exception::CannotOpenFile lExc;
+        log ( lExc , "Failed to download file " , aURL , ". Continuing for now but be aware!" );
+        throw lExc;
       }
 
       boost::filesystem::path lFilePath = boost::filesystem::path ( aURL );
@@ -395,7 +402,7 @@ namespace uhal
       }
       else
       {
-        throw uhal::exception::NonSupportedUriPotocol();
+        throw uhal::exception::NonSupportedUriProtocol();
       }
     }
 
@@ -553,8 +560,9 @@ namespace uhal
 
         if ( ss.str().size() > 10 )
         {
-          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw exception::StringNumberWillNotFitInto32BitNumber();
+          exception::StringNumberWillNotFitInto32BitNumber lExc;
+          log ( lExc , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw lExc;
         }
 
         int64_t lTarget;
@@ -562,8 +570,9 @@ namespace uhal
 
         if ( lTarget>>32 )
         {
-          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw exception::StringNumberWillNotFitInto32BitNumber();
+          exception::StringNumberWillNotFitInto32BitNumber lExc;
+          log ( lExc , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw lExc;
         }
 
         aTarget = ( int32_t ) ( lTarget );
@@ -630,8 +639,9 @@ namespace uhal
 
         if ( ss.str().size() > 10 )
         {
-          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw exception::StringNumberWillNotFitInto32BitNumber();
+          exception::StringNumberWillNotFitInto32BitNumber lExc;
+          log ( lExc , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw lExc;
         }
 
         uint64_t lTarget;
@@ -639,8 +649,9 @@ namespace uhal
 
         if ( lTarget>>32 )
         {
-          log ( Error() , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
-          throw exception::StringNumberWillNotFitInto32BitNumber();
+          exception::StringNumberWillNotFitInto32BitNumber lExc;
+          log ( lExc , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 32-bit number" );
+          throw lExc;
         }
 
         aTarget = ( uint32_t ) ( lTarget );

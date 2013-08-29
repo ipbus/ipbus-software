@@ -91,8 +91,9 @@ namespace uhal
     }
     catch ( const std::exception& aExc )
     {
-      log ( Error() , "Failed to parse URI " , Quote ( aUri ) );
-      throw aExc;
+      exception::FailedToParseURI lExc;
+      log ( lExc , "Failed to parse URI " , Quote ( aUri ) );
+      throw lExc;
     }
 
     log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
@@ -107,8 +108,9 @@ namespace uhal
         lStr << "\n > " << lIt->first << "\t: " << lIt->second;
       }
 
-      log ( Error() , "Protocol " , Quote ( lUri.mProtocol ) , " does not exists in map of creators. Options are:" , lStr.str() );
-      throw exception::ProtocolDoesNotExist();
+      exception::ProtocolDoesNotExist lExc;
+      log ( lExc , "Protocol " , Quote ( lUri.mProtocol ) , " does not exists in map of creators. Options are:" , lStr.str() );
+      throw lExc;
     }
 
     return lIt->second->create ( aId , lUri );

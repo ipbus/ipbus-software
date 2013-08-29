@@ -487,19 +487,21 @@ namespace uhal
 
     if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
     {
-      log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
-      throw exception::BitsSetWhichAreForbiddenByBitMask();
+      exception::BitsSetWhichAreForbiddenByBitMask lExc;
+      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
+      throw lExc;
     }
 
     uint32_t lOverlap ( lBitShiftedSource & ~aMask );
 
     if ( lOverlap )
     {
-      log ( Error() , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ")"
+      exception::BitsSetWhichAreForbiddenByBitMask lExc;
+      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ")"
             " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
             Integer ( lOverlap , IntFmt<hex,fixed>() )
           );
-      throw exception::BitsSetWhichAreForbiddenByBitMask();
+      throw lExc;
     }
 
     return ( ValHeader ) ( implementRMWbits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );

@@ -36,22 +36,22 @@
 
 #include <boost/spirit/include/qi.hpp>
 
-std::ostream& operator<< ( std::ostream& aStream , const uhal::HttpResponseType& aHttpResponse )
+std::ostream& operator<< ( std::ostream& aStr , const uhal::HttpResponseType& aHttpResponse )
 {
-  aStream << " > method = " << aHttpResponse.method << "\n";
-  aStream << " > version = " << aHttpResponse.version << "\n";
-  aStream << " > status = " << aHttpResponse.status << "\n";
-  aStream << " > status_string = " << aHttpResponse.status_string << "\n";
-  aStream << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
-  aStream << " > Content =\n";
+  aStr << " > method = " << aHttpResponse.method << "\n";
+  aStr << " > version = " << aHttpResponse.version << "\n";
+  aStr << " > status = " << aHttpResponse.status << "\n";
+  aStr << " > status_string = " << aHttpResponse.status_string << "\n";
+  aStr << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
+  aStr << " > Content =\n";
 
   for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
   {
-    aStream << char ( *lIt );
+    aStr << char ( *lIt );
   }
 
-  aStream << std::endl;
-  return aStream;
+  aStr << std::endl;
+  return aStr;
 }
 
 

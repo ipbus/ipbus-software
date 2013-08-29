@@ -251,73 +251,73 @@ namespace uhal
   }
 
 
-  void Node::stream ( std::ostream& aStream , std::size_t aIndent ) const
+  void Node::stream ( std::ostream& aStr , std::size_t aIndent ) const
   {
-    aStream << std::setfill ( '0' ) << std::uppercase;
-    aStream << '\n' << std::string ( aIndent , ' ' ) << "+ ";
-    aStream << "Node \"" << mUid << "\", ";
+    aStr << std::setfill ( '0' ) << std::uppercase;
+    aStr << '\n' << std::string ( aIndent , ' ' ) << "+ ";
+    aStr << "Node \"" << mUid << "\", ";
 
     if ( &typeid ( *this ) != &typeid ( Node ) )
     {
-      aStream << "of type \"";
+      aStr << "of type \"";
 #ifdef __GNUG__
       // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
       int lStatus ( 0 );
-      aStream << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
+      aStr << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
 #else
-      aStream << typeid ( *this ).name();
+      aStr << typeid ( *this ).name();
 #endif
-      aStream << "\", ";
+      aStr << "\", ";
     }
 
     switch ( mMode )
     {
       case defs::SINGLE:
-        aStream << "SINGLE register, "
-                << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
-                << std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", "
-                << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+        aStr << "SINGLE register, "
+             << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
+             << std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", "
+             << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
         break;
       case defs::INCREMENTAL:
-        aStream << "INCREMENTAL block, "
-                << std::dec << "Size " << mSize << ", "
-                << std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << ( mAddr+mSize-1 ) << "], "
-                << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+        aStr << "INCREMENTAL block, "
+             << std::dec << "Size " << mSize << ", "
+             << std::hex << "Addresses [0x" << std::setw ( 8 ) << mAddr << "-" << std::setw ( 8 ) << ( mAddr+mSize-1 ) << "], "
+             << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
         break;
       case defs::NON_INCREMENTAL:
-        aStream << "NON-INCREMENTAL block, ";
+        aStr << "NON-INCREMENTAL block, ";
 
         if ( mSize != 1 )
         {
-          aStream << std::dec << "Size " << mSize << ", ";
+          aStr << std::dec << "Size " << mSize << ", ";
         }
 
-        aStream << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", "
-                << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
+        aStr << std::hex << "Address 0x"  << std::setw ( 8 ) << mAddr << ", "
+             << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
         break;
       case defs::HIERARCHICAL:
-        aStream << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr;
+        aStr << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr;
         break;
     }
 
     if ( mTags.size() )
     {
-      aStream << ", Tags \"" << mTags << "\"";
+      aStr << ", Tags \"" << mTags << "\"";
     }
 
     if ( mDescription.size() )
     {
-      aStream << ", Description \"" << mDescription << "\"";
+      aStr << ", Description \"" << mDescription << "\"";
     }
 
     if ( mModule.size() )
     {
-      aStream << ", Module \"" << mModule << "\"";
+      aStr << ", Module \"" << mModule << "\"";
     }
 
     for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
-      ( **lIt ).stream ( aStream , aIndent+2 );
+      ( **lIt ).stream ( aStr , aIndent+2 );
     }
   }
 
@@ -333,7 +333,8 @@ namespace uhal
 
     if ( lIt==mChildrenMap.end() )
     {
-      log ( Error() , "No branch found with ID-path " ,  Quote ( aId ) );
+      exception::NoBranchFoundWithGivenUID lExc;
+      log ( lExc , "No branch found with ID-path " ,  Quote ( aId ) );
       std::size_t lPos ( std::string::npos );
       bool lPartialMatch ( false );
 
@@ -350,8 +351,8 @@ namespace uhal
 
         if ( lIt!=mChildrenMap.end() )
         {
-          log ( Error() , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) );
-          log ( Error() , "Tree structure of partial match is:" , * ( lIt->second ) );
+          log ( lExc , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) );
+          log ( lExc , "Tree structure of partial match is:" , * ( lIt->second ) );
           lPartialMatch = true;
           break;
         }
@@ -361,10 +362,10 @@ namespace uhal
 
       if ( !lPartialMatch )
       {
-        log ( Error() , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
+        log ( lExc , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
       }
 
-      throw exception::NoBranchFoundWithGivenUID();
+      throw lExc;
     }
 
     return * ( lIt->second );
@@ -421,8 +422,9 @@ namespace uhal
     }
     else
     {
-      log ( Error() , "Node permissions denied write access" );
-      throw exception::WriteAccessDenied();
+      exception::WriteAccessDenied lExc;
+      log ( lExc , "Node permissions denied write access" );
+      throw lExc;
     }
   }
 
@@ -431,16 +433,18 @@ namespace uhal
   {
     if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
-      log ( Error() , "Bulk Transfer requested on single register node" );
-      log ( Error() , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-      throw exception::BulkTransferOnSingleRegister();
+      exception::BulkTransferOnSingleRegister lExc;
+      log ( lExc , "Bulk Transfer requested on single register node" );
+      log ( lExc , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
+      throw lExc;
     }
     else
     {
       if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
       {
-        log ( Error() , "Requested bulk write of greater size than the specified endpoint size" );
-        throw exception::BulkTransferRequestedTooLarge();
+        exception::BulkTransferRequestedTooLarge lExc;
+        log ( lExc , "Requested bulk write of greater size than the specified endpoint size" );
+        throw lExc;
       }
 
       if ( mPermission & defs::WRITE )
@@ -449,8 +453,9 @@ namespace uhal
       }
       else
       {
-        log ( Error() , "Node permissions denied write access" );
-        throw exception::WriteAccessDenied();
+        exception::WriteAccessDenied lExc;
+        log ( lExc , "Node permissions denied write access" );
+        throw lExc;
       }
     }
   }
@@ -471,7 +476,8 @@ namespace uhal
     }
     else
     {
-      log ( Error() , "Node permissions denied read access" );
+      exception::ReadAccessDenied lExc;
+      log ( lExc , "Node permissions denied read access" );
       throw exception::ReadAccessDenied();
     }
   }
@@ -481,16 +487,18 @@ namespace uhal
   {
     if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
-      log ( Error() , "Bulk Transfer requested on single register node" );
-      log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-      throw exception::BulkTransferOnSingleRegister();
+      exception::BulkTransferOnSingleRegister lExc;
+      log ( lExc , "Bulk Transfer requested on single register node" );
+      log ( lExc , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
+      throw lExc;
     }
     else
     {
       if ( ( mSize != 1 ) && ( aSize>mSize ) )
       {
-        log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-        throw exception::BulkTransferRequestedTooLarge();
+        exception::BulkTransferRequestedTooLarge lExc;
+        log ( lExc , "Requested bulk read of greater size than the specified endpoint size" );
+        throw lExc;
       }
 
       if ( mPermission & defs::READ )
@@ -499,8 +507,9 @@ namespace uhal
       }
       else
       {
-        log ( Error() , "Node permissions denied read access" );
-        throw exception::ReadAccessDenied();
+        exception::ReadAccessDenied lExc;
+        log ( lExc , "Node permissions denied read access" );
+        throw lExc;
       }
     }
   }
