@@ -3,7 +3,7 @@
 #define _loglevels_hpp_
 
 #include <iostream>
-
+#include <stdint.h>
 
 
 
