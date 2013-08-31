@@ -190,7 +190,13 @@ handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
         case get_device_status(ReqIPbusVer) of
             {ok, {1,3}, {}} ->
                 ?CH_LOG_INFO("Target speaks IPbus v1.3"),
-                send_requests_to_board({RequestPacket, ClientPid}, S#state{ mode=normal, ipbus_v={1,3}, max_in_flight=1 });
+                NewS = S#state{mode = normal,
+                               ipbus_v = {1,3},
+                               max_in_flight = 1,
+                               next_id = void
+                              },
+                device_client_loop(recv, send_request(RequestPacket, ClientPid, NewS) );
+%                send_requests_to_board({RequestPacket, ClientPid}, S#state{ mode=normal, ipbus_v={1,3}, max_in_flight=1 });
             {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
                 ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
                 ?CH_LOG_INFO("Device client is entering new logic."),
@@ -301,7 +307,7 @@ send_request(ReqPkt, Pid, S) when S#state.ipbus_v == {1,3} ->
             ?CH_LOG_DEBUG("IPbus 1.3 request packet from PID ~w is being forwarded to board at ~s.", [Pid, ch_utils:ip_port_string(S#state.ip_tuple, S#state.port)]),
             S#state.udp_pid ! {send, ReqPkt},
             ch_stats:udp_sent(S#state.stats),
-            S#state{in_flight=Pid};
+            S#state{in_flight={1,Pid}};
         Other ->
             ?CH_LOG_WARN("Request packet from PID ~w is invalid for an IPbus 1.3 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]),
             Pid ! {device_client_response, S#state.ip_u32, S#state.port, 42, <<>>},
@@ -322,9 +328,9 @@ forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.
             S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, InFlightQ)} }
     end;
 forward_reply(Pkt, S) when S#state.ipbus_v == {1,3} ->
-    TransManagerPid = #state.in_flight,
+    {1, TransManagerPid} = S#state.in_flight,
     ?CH_LOG_DEBUG("IPbus reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), TransManagerPid]),
-    TransManagerPid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, [<<>>, Pkt]},
+    TransManagerPid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, Pkt},
     ch_stats:udp_rcvd(S#state.stats),
     S.
 
