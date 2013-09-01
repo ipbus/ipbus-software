@@ -30,7 +30,8 @@
                 nr_in_flight    :: non_neg_integer(),
                 q_nr_reqs_per_tcp :: queue(),
                 reply_io_list   :: list(),
-                nr_replies_acc  :: non_neg_integer()
+                nr_replies_acc  :: non_neg_integer(),
+                stats_table
                }
        ).
 
@@ -85,7 +86,8 @@ tcp_acceptor(TcpListenSocket) ->
                                           nr_in_flight = 0,
                                           q_nr_reqs_per_tcp = queue:new(),
                                           reply_io_list = [],
-                                          nr_replies_acc = 0
+                                          nr_replies_acc = 0,
+                                          stats_table = ch_stats:new_transaction_manager_table(ClientAddr, ClientPort)
                                          },
                     transaction_manager_loop( InitialState );
                 _Else ->
@@ -153,11 +155,12 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
             if
               (byte_size(RequestBin) rem 4) =:= 0 ->
                 ?CH_LOG_DEBUG("Received TCP chunk."),
-                {TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, pid_unknown, 0),
+                {TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, pid_unknown, 0, S#state.stats_table),
+                ch_stats:client_requests_in(S#state.stats_table, NrReqs),
                 transaction_manager_loop( S#state{target_ip_u32=TargetIPU32, target_port=TargetPort, nr_in_flight=(NrInFlight+NrReqs), q_nr_reqs_per_tcp=queue:in(NrReqs,QNrReqsPerTcp)} );
               true ->
                 ?CH_LOG_ERROR("Each TCP chunk should be an integer number of 32-bit words, but received chunk of length ~w bytes for ~s. This TCP chunk will be ignored.", [byte_size(RequestBin), ch_utils:ip_port_string(TargetIPAddrArg, TargetPortArg)]),
-                ch_stats:client_request_malformed(),
+                ch_stats:client_request_malformed(S#state.stats_table),
                 transaction_manager_loop( S )
             end;
 
@@ -167,6 +170,7 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
                 NrRepliesToSend ->
                     ?CH_LOG_DEBUG("Sending ~w IPbus response packets over TCP.", [NrRepliesToSend]),
                     S#state.tcp_pid ! {send, [ReplyIoList, <<(iolist_size(ReplyIoData) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyIoData]},
+                    ch_stats:client_responses_sent(S#state.stats_table, NrRepliesToSend),
                     transaction_manager_loop( S#state{nr_in_flight=(NrInFlight-1), q_nr_reqs_per_tcp=queue:drop(QNrReqsPerTcp), reply_io_list=[], nr_replies_acc=0} );
                 NrRepliesAccumulated ->
                     ?CH_LOG_DEBUG("IPbus response packet received. Accumulating for TCP send (~w needed for next TCP chunk, ~w now accumulated).", [NrRepliesToSend, NrRepliesAccumulated]),
@@ -199,22 +203,22 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
     end.
 
 
-unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, IPbusReq:NrInstructions/binary-unit:32, Tail/binary>>, Pid, NrSent) ->
+unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, IPbusReq:NrInstructions/binary-unit:32, Tail/binary>>, Pid, NrSent, StatsTable) ->
     RetPid = enqueue_request(TargetIPAddr, TargetPort, Pid, IPbusReq),
     if
       byte_size(Tail) > 0 ->
-        unpack_and_enqueue(Tail, RetPid, NrSent+1);
+        unpack_and_enqueue(Tail, RetPid, NrSent+1, StatsTable);
       true ->
         ?CH_LOG_DEBUG("~w IPbus packets in last TCP chunk", [(NrSent+1)]),
         {TargetIPAddr, TargetPort, NrSent+1}
     end;
-unpack_and_enqueue(Binary, _Pid, NrSent) when byte_size(Binary) < 12 ->
+unpack_and_enqueue(Binary, _Pid, NrSent, StatsTable) when byte_size(Binary) < 12 ->
     ?CH_LOG_ERROR("Binary nr ~w unpacked from TCP chunk (~w) contained less than three 32-bit words, which is invalid according to uHAL-ControlHub protocol. Ignoring remainder of this chunk and continuing.", [NrSent+1, Binary]),
-    ch_stats:client_request_malformed(),
+    ch_stats:client_request_malformed(StatsTable),
     {unknown, unknown, NrSent};
-unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TailBin/binary>>, _Pid, NrSent) ->
+unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, TailBin/binary>>, _Pid, NrSent, StatsTable) ->
     ?CH_LOG_ERROR("Not enough bytes (only ~w) left in TCP chunk to unpack IPbus packet of length ~w bytes for ~s (binary nr ~w in this TCP chunk). Ignoring remainder of this chunk and continuing.", [byte_size(TailBin), 4*NrInstructions, ch_utils:ip_port_string(TargetIPAddr, TargetPort), NrSent+1]),
-    ch_stats:client_request_malformed(),
+    ch_stats:client_request_malformed(StatsTable),
     {TargetIPAddr, TargetPort, NrSent}.
 
 

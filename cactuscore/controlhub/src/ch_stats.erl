@@ -18,9 +18,10 @@
          stop/0,
          client_connected/0,
          client_disconnected/0,
-         client_request_in/0,
-         client_request_malformed/0,
-         client_response_sent/0,
+         client_requests_in/2,
+         client_request_malformed/1,
+         client_responses_sent/2,
+         new_transaction_manager_table/2,
          new_device_client_table/2,
          udp_sent/1,
          udp_rcvd/1,
@@ -29,9 +30,6 @@
          get_active_clients/0,
          get_max_active_clients/0,
          get_cumulative_client_count/0,
-         get_total_client_requests/0,
-         get_total_client_malformed_requests/0,
-         get_total_client_responses/0,
          report_to_console/0,
          report_to_string/0]).
 
@@ -42,9 +40,8 @@
 -record(state, {active_clients = 0 :: integer(),
                 max_active_clients = 0 :: integer(),
                 cumulative_client_count = 0 :: integer(),
-                request_count = 0 :: integer(),
-                malformed_request_count = 0 :: integer(),
-                response_count = 0 :: integer(),
+                previous_client_stats_table,
+                current_client_stats_tables = [],
                 previous_udp_stats_table,
                 current_udp_stats_tables = []
                 }).
@@ -95,33 +92,50 @@ client_disconnected() -> gen_server:cast(?MODULE, client_disconnected).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a user-client request has arrived.
-%%      Note: this is for registering that a user-client request of
-%%      some type - valid or malformed - has arrived at the Control Hub.
+%% @doc Increment requests_in counter in transaction_manager stats table
 %%
-%% @spec client_request_in() -> ok
+%% @spec client_request_in(T, N :: non_neg_integer()) -> ok
 %% @end
 %% ---------------------------------------------------------------------
-client_request_in() -> gen_server:cast(?MODULE, client_request_in).
+client_requests_in(T, N) ->
+    ets:update_counter(T, requests_in, N).
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a user-client request was determined
-%%      to be malformed.
+%% @doc Increment request_malformed counter in transaction_manager stats table
 %%
-%% @spec client_request_malformed() -> ok
+%% @spec client_request_malformed(T) -> ok
 %% @end
 %% ---------------------------------------------------------------------
-client_request_malformed() -> gen_server:cast(?MODULE, client_request_malformed).
+client_request_malformed(T) -> 
+    ets:update_counter(T, requests_malformed, 1).
 
 
 %% ---------------------------------------------------------------------
-%% @doc Inform the stats server that a response has been sent to a
-%%      user-client by the Control Hub.
+%% @doc Increment responses_sent counter in transaction_manager stats table
 %%
-%% @spec client_response_sent() -> ok
+%% @spec client_responses_sent(T, N :: non_neg_integer()) -> ok
 %% @end
 %% ---------------------------------------------------------------------
-client_response_sent() -> gen_server:cast(?MODULE, client_response_sent).
+client_responses_sent(T, N) -> 
+    ets:update_counter(T, responses_sent, N).
+
+
+%% ------------------------------------------------------------------------------------
+%% @doc Returns a fresh ETS table for collating transaction_manager stats, with all counters
+%%      already inserted, and set to 0
+%%
+%% @spec new_transaction_manager_table(ClientIPTuple, ClientPort) -> NewStatsTable
+%% @end
+%% ------------------------------------------------------------------------------------
+
+new_transaction_manager_table(ClientIPTuple, ClientPort) ->
+    T = new_transaction_manager_table(),
+    ets:insert(T, {start, os:timestamp()}),
+    ets:insert(T, {client_ip, ClientIPTuple}),
+    ets:insert(T, {client_port, ClientPort}),
+    ets:setopts(T, [{heir, whereis(ch_stats), no_data}]),
+    ch_stats ! {new_transaction_manager_table, self(), T},
+    T.
 
 
 %% ------------------------------------------------------------------------------------
@@ -216,38 +230,6 @@ get_max_active_clients() -> gen_server:call(?MODULE, get_max_active_clients).
 get_cumulative_client_count() -> gen_server:call(?MODULE, get_cumulative_client_count).
 
 
-%% ---------------------------------------------------------------------
-%% @doc Returns the total number of client requests that have been
-%%      received. Note that this total does not differentiate between
-%%      valid/malformed requests, it's just the total number of requests
-%%      that have arrived at the Control Hub.
-%%
-%% @spec get_total_client_requests() -> integer()
-%% @end
-%% ---------------------------------------------------------------------
-get_total_client_requests() -> gen_server:call(?MODULE, get_total_client_requests).
-
-
-%% ----------------------------------------------------------------------------
-%% @doc Returns the total number of client requests that have arrived but have
-%%      been determined to be malformed.
-%%
-%% @spec get_total_client_malformed_requests() -> integer()
-%% @end
-%% ----------------------------------------------------------------------------
-get_total_client_malformed_requests() -> gen_server:call(?MODULE, get_total_client_malformed_requests).
-
-
-%% ----------------------------------------------------------------------------
-%% @doc Returns the total number of responses that have been sent to user
-%%      clients by the Control Hub.
-%%
-%% @spec get_total_client_responses() -> integer()
-%% @end
-%% ----------------------------------------------------------------------------
-get_total_client_responses() -> gen_server:call(?MODULE, get_total_client_responses).
-
-
 %% ----------------------------------------------------------------------------
 %% @doc Prints a report of all the current stats to the console.
 %%
@@ -282,7 +264,9 @@ report_to_string() -> gen_server:call(?MODULE, report_to_string).
 %% --------------------------------------------------------------------
 init([]) ->
     ?CH_LOG_DEBUG("Initialising the stats server."),
-    State = #state{previous_udp_stats_table=new_device_client_table()},
+    State = #state{previous_udp_stats_table=new_device_client_table(),
+                   previous_client_stats_table=new_transaction_manager_table()
+                  },
     {ok, State}.
 
 %% --------------------------------------------------------------------
@@ -303,12 +287,6 @@ handle_call(get_max_active_clients, _From,  State) ->
 
 handle_call(get_cumulative_client_count, _From,  State) ->
     {reply, State#state.cumulative_client_count, State};
-
-handle_call(get_total_client_requests, _From,  State) ->
-    {reply, State#state.request_count, State};
-
-handle_call(get_total_client_malformed_requests, _From,  State) ->
-    {reply, State#state.malformed_request_count, State};
 
 handle_call(report_to_string, _From, State) ->
     {reply, report_to_string(State), State};
@@ -342,18 +320,6 @@ handle_cast(client_disconnected, State = #state{active_clients = Clients}) ->
     NewState = State#state{active_clients = Clients-1},
     {noreply, NewState};
 
-handle_cast(client_request_in, State = #state{request_count = Requests}) ->
-    NewState = State#state{request_count = Requests+1},
-    {noreply, NewState};
-
-handle_cast(client_request_malformed, State = #state{malformed_request_count = BadRequests}) ->
-    NewState = State#state{malformed_request_count = BadRequests+1},
-    {noreply, NewState};
-
-handle_cast(client_response_sent, State = #state{response_count = Responses}) ->
-    NewState = State#state{response_count = Responses+1},
-    {noreply, NewState};
-
 handle_cast(report_to_console, State) ->
     io:format("~n~s~n", [report_to_string(State)]),
     {noreply, State};
@@ -376,21 +342,39 @@ handle_info({new_device_client_table, DeviceClientPid, TableId}, S) ->
     NewTablesList = [ {DeviceClientPid,TableId} | S#state.current_udp_stats_tables ],
     {noreply, S#state{current_udp_stats_tables=NewTablesList}};
 
+handle_info({new_transaction_manager_table, Pid, TableId}, S) ->
+    NewTablesList = [ {Pid,TableId} | S#state.current_client_stats_tables ],
+    {noreply, S#state{current_client_stats_tables=NewTablesList}};
+
 handle_info({'ETS-TRANSFER', T1, Pid, no_data}, S) ->
-    T0 = S#state.previous_udp_stats_table,
-    lists:foreach(fun(X) -> ets:update_counter(T0, X, ets:lookup_element(T1, X, 2)) end,
-                  [udp_sent,
-                   udp_rcvd,
-                   {udp_timeout,normal},
-                   {udp_lost,request},
-                   {udp_lost,response},
-                   {udp_timeout,recovered},
-                   {udp_timeout,resend},
-                   {udp_timeout,status}
-                   ]),
-    NewTablesList = lists:keydelete(Pid, 1, S#state.current_udp_stats_tables),
-    ets:delete(T1),
-    {noreply, S#state{current_udp_stats_tables=NewTablesList}};
+    NewS = case ets:info(T1, name) of
+               device_client_stats ->
+                   T0 = S#state.previous_udp_stats_table,
+                   lists:foreach(fun(X) -> ets:update_counter(T0, X, ets:lookup_element(T1, X, 2)) end,
+                                 [udp_sent,
+                                  udp_rcvd,
+                                  {udp_timeout,normal},
+                                  {udp_lost,request},
+                                  {udp_lost,response},
+                                  {udp_timeout,recovered},
+                                  {udp_timeout,resend},
+                                  {udp_timeout,status}
+                                 ]),
+                   NewTablesList = lists:keydelete(Pid, 1, S#state.current_udp_stats_tables),
+                   ets:delete(T1),
+                   S#state{current_udp_stats_tables=NewTablesList};
+               transaction_manager_stats ->
+                   T0 = S#state.previous_client_stats_table,
+                   lists:foreach(fun(X) -> ets:update_counter(T0, X, ets:lookup_element(T1, X, 2)) end,
+                                 [requests_in,
+                                  requests_malformed,
+                                  responses_sent
+                                 ]),
+                   NewTablesList = lists:keydelete(Pid, 1, S#state.current_client_stats_tables),
+                   ets:delete(T1),
+                   S#state{current_client_stats_tables=NewTablesList}
+            end,
+    {noreply, NewS};
 
 handle_info(_Info, State) ->
     {noreply, State}.
@@ -423,19 +407,33 @@ report_to_string(State) ->
     lists:flatten([io_lib:format("Control Hub Stats Report~n"
                                 "------------------------~n~n"
                                 "CLIENT  All-time connections: ~p~n"  
-                                "          Active connections: ~p (peak: ~p)~n"
-                                "           Requests received: ~p (of which ~p were malformed)~n"
-                                "              Responses sent: ~p~n",
+                                "          Active connections: ~p (peak: ~p)~n",
                                 [State#state.cumulative_client_count,
                                  State#state.active_clients,
-                                 State#state.max_active_clients,
-                                 State#state.request_count,
-                                 State#state.malformed_request_count,
-                                 State#state.response_count
+                                 State#state.max_active_clients
                                 ]),
+                   lists:flatten([stats_table_to_string(T,"") || {_, T} <- State#state.current_client_stats_tables]),
+                   stats_table_to_string(State#state.previous_client_stats_table, "Old clients"),
                    lists:flatten([stats_table_to_string(T,"") || {_, T} <- State#state.current_udp_stats_tables]),
-                   stats_table_to_string(State#state.previous_udp_stats_table, "Other UDP")
+                   stats_table_to_string(State#state.previous_udp_stats_table, "Old UDP")
                    ]).
+
+
+%% ------------------------------------------------------------------------------------
+%% @doc Returns a fresh ETS table for collating transaction_manager stats, with all 
+%%      counters already inserted, and set to 0
+%%
+%%
+%% @spec new_transaction_manager_table() -> NewStatsTable
+%% @end
+%% ------------------------------------------------------------------------------------
+
+new_transaction_manager_table() ->
+    T = ets:new(transaction_manager_stats, [ordered_set,protected]),
+    ets:insert(T, {requests_in, 0}),
+    ets:insert(T, {requests_malformed, 0}),
+    ets:insert(T, {responses_sent, 0}),
+    T.
 
 
 %% ------------------------------------------------------------------------------------
@@ -461,30 +459,49 @@ new_device_client_table() ->
 
 %% Returns stats table results in string form
 stats_table_to_string(T, DefaultText) ->
-    io_lib:format("~n~s~n"
-                  "              Packets Out: ~p~n"
-                  "               Packets In: ~p~n"
-                  "                 Timeouts: ~p in normal operation (of which ~p were recovered)~n"
-                  "                             (~p request packets got lost, ~p reply packet)~n"
-                  "           Other timeouts: ~p (status), ~p (in resends)~n",
-                  [case ets:member(T, target_ip) of
-                       true -> 
-                           {IP1,IP2,IP3,IP4} = ets:lookup_element(T, target_ip, 2),
-                           TS = {_,_,Micro} = ets:lookup_element(T, start, 2),
-                           {{Yr,Month,Day}, {Hr,Min,Sec}} = calendar:now_to_universal_time(TS),
-                           io_lib:format("UDP to/from ~w.~w.~w.~w:~w"
-                                         "  since ~2w:~2..0w:~2..0w.~3..0w, ~2..0w-~2..0w-~4w UTC",
-                                         [IP1,IP2,IP3,IP4,ets:lookup_element(T,target_port,2),
-                                          Hr,Min,Sec,Micro div 1000, Day,Month,Yr]);
-                       false ->
-                           DefaultText
-                   end,
-                   ets:lookup_element(T, udp_sent, 2),
-                   ets:lookup_element(T, udp_rcvd, 2),
-                   ets:lookup_element(T, {udp_timeout,normal}, 2),
-                   ets:lookup_element(T, {udp_timeout,recovered}, 2),
-                   ets:lookup_element(T, {udp_lost, request}, 2),
-                   ets:lookup_element(T, {udp_lost, response}, 2),
-                   ets:lookup_element(T, {udp_timeout,status}, 2),
-                   ets:lookup_element(T, {udp_timeout,resend}, 2)
-                  ]).
+    case ets:info(T, name) of
+        transaction_manager_stats ->
+            io_lib:format("  ~s~n"
+                          "           Requests received: ~p (of which ~p were malformed)~n"
+                          "              Responses sent: ~p~n",
+                          [case ets:member(T, client_ip) of 
+                               true ->
+                                   ClientIP = ets:lookup_element(T, client_ip, 2),
+                                   ClientPort = ets:lookup_element(T, client_port, 2),
+                                   io_lib:format("@ ~s", [ch_utils:ip_port_string(ClientIP, ClientPort)]);
+                               false ->
+                                   DefaultText
+                           end,
+                           ets:lookup_element(T, requests_in, 2),
+                           ets:lookup_element(T, requests_malformed, 2),
+                           ets:lookup_element(T, responses_sent, 2)
+                          ]);
+        device_client_stats ->
+            io_lib:format("~n~s~n"
+                          "              Packets Out: ~p~n"
+                          "               Packets In: ~p~n"
+                          "                 Timeouts: ~p in normal operation (of which ~p were recovered)~n"
+                          "                             (~p request packets got lost, ~p reply packet)~n"
+                          "           Other timeouts: ~p (status), ~p (in resends)~n",
+                          [case ets:member(T, target_ip) of
+                               true -> 
+                                   {IP1,IP2,IP3,IP4} = ets:lookup_element(T, target_ip, 2),
+                                   TS = {_,_,Micro} = ets:lookup_element(T, start, 2),
+                                   {{Yr,Month,Day}, {Hr,Min,Sec}} = calendar:now_to_universal_time(TS),
+                                   io_lib:format("Board @ ~w.~w.~w.~w:~w"
+                                                 ", since ~2w:~2..0w:~2..0w.~3..0w, ~2..0w-~2..0w-~4w UTC",
+                                                 [IP1,IP2,IP3,IP4,ets:lookup_element(T,target_port,2),
+                                                  Hr,Min,Sec,Micro div 1000, Day,Month,Yr]);
+                                   false ->
+                                       DefaultText
+                           end,
+                           ets:lookup_element(T, udp_sent, 2),
+                           ets:lookup_element(T, udp_rcvd, 2),
+                           ets:lookup_element(T, {udp_timeout,normal}, 2),
+                           ets:lookup_element(T, {udp_timeout,recovered}, 2),
+                           ets:lookup_element(T, {udp_lost, request}, 2),
+                           ets:lookup_element(T, {udp_lost, response}, 2),
+                           ets:lookup_element(T, {udp_timeout,status}, 2),
+                           ets:lookup_element(T, {udp_timeout,resend}, 2)
+                           ])
+    end.
