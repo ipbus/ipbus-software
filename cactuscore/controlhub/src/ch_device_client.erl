@@ -283,8 +283,16 @@ device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port }) ->
 
 % Response timeout clause
 device_client_loop(timeout, S) ->
-    ?CH_LOG_ERROR("TIMEOUT when waiting for response from board. Packet-loss recovery not yet added back in."),
-    {stop, udp_timeout, S}.
+    try recover_from_timeout(0, S) of
+        {ok, NewState} ->
+            ?CH_LOG_INFO("Timeout recovered!"),
+            device_client_loop(send, NewState)
+    catch
+        throw:{recovery_failed, ErrorCode} ->
+            ?CH_LOG_ERROR("Irrecoverable TIMEOUT when waiting for response from board. Packet-loss recovery not yet added back in."),
+            ErrorCode, %TODO: Send back exit code for each packet in-flight, and each packet queued.
+            {stop, udp_timeout, S}
+    end.
 
 
 send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}}) when S#state.ipbus_v == {2,0} ->
@@ -298,7 +306,7 @@ send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFli
             S#state{ next_id=increment_pkt_id(NextId), in_flight={NrInFlight+1, queue:in({Pid, OrigHdr, NewHdr, Body}, InFlightQ)} };
         Other ->
             ?CH_LOG_WARN("Request packet from PID ~w is invalid for an IPbus 2.0 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]), 
-            Pid ! {device_client_response, S#state.ip_u32, S#state.port, 42, <<>>},
+            Pid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_WRONG_PROTOCOL_VERSION, <<>>},
             S
     end;
 send_request(ReqPkt, Pid, S) when S#state.ipbus_v == {1,3} ->
@@ -310,7 +318,7 @@ send_request(ReqPkt, Pid, S) when S#state.ipbus_v == {1,3} ->
             S#state{in_flight={1,Pid}};
         Other ->
             ?CH_LOG_WARN("Request packet from PID ~w is invalid for an IPbus 1.3 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]),
-            Pid ! {device_client_response, S#state.ip_u32, S#state.port, 42, <<>>},
+            Pid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_WRONG_PROTOCOL_VERSION, <<>>},
             S
     end.
 
@@ -335,6 +343,64 @@ forward_reply(Pkt, S) when S#state.ipbus_v == {1,3} ->
     S.
 
 
+recover_from_timeout(NrFailedAttempts, S) when NrFailedAttempts == 3 ->
+    throw({recovery_failed, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}});
+
+recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {1,3} ->
+    receive
+        {udp, Socket, IP, Port, Pkt} ->
+            NewS = forward_reply(Pkt, S),
+            {ok, NewS}
+    after ?UDP_RESPONSE_TIMEOUT ->
+        recover_from_timeout(NrFailedAttempts + 1, S)
+    end;
+
+recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}, socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {2,0} ->
+    ?CH_LOG_WARN("Timeout when waiting for response from ~s. "
+                 "Starting packet-loss recovery (attempt ~w) ...", 
+                 [ch_utils:ip_port_string(S#state.ip_tuple, S#state.port) , NrFailedAttempts+1]),
+    NextIdMinusN = decrement_pkt_id(NextId, NrInFlight),
+    RequestsInFlight = [[NewHdr, Body] || {_Pid, _OrigHdr, NewHdr, Body} <- queue:to_list(InFlightQ)],
+    % Take recovery action
+    Type = case get_device_status(S#state.ipbus_v) of
+               {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
+                   ?CH_LOG_INFO("Request packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is ~w instead). "
+                                "Re-sending ~w request packets.", [NrInFlight, NextId, HwNextId, NrInFlight]),
+                   lists:foreach(fun(RequestIoData) -> S#state.udp_pid ! {send, RequestIoData}, 
+                                                       ch_stats:udp_sent(S#state.stats) end, 
+                                 RequestsInFlight
+                                ),
+                   request;
+               {ok, {2,0}, {_, _, HwNextId}} ->
+                   ?CH_LOG_INFO("Response packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is in fact ~w). "
+                                "Requesting re-send of last ~w response packets.", [NrInFlight, NextId, HwNextId, NrInFlight]),
+                   lists:foreach(fun([ReqHdr, _ReqBody]) -> S#state.udp_pid ! {send, resend_request_pkt(ReqHdr)},
+                                                            ch_stats:udp_sent(S#state.stats) end, 
+                                 RequestsInFlight
+                                ),
+                   response;
+                {error, _Type, MsgForTransManager} ->
+                    ?CH_LOG_ERROR("Status request failed."),
+                    throw({recovery_failed, MsgForTransManager})
+           end,
+    % Update stats counters
+    if
+      NrFailedAttempts==0 ->
+        ch_stats:udp_timeout(S#state.stats, normal),
+        ch_stats:udp_lost(S#state.stats, Type);
+      true -> 
+        ch_stats:udp_timeout(S#state.stats, resend)
+    end,
+    % Check whether recovered from timeout or not
+    {value, {_, _, ExpdHdr, _}} = queue:peek(InFlightQ),
+    receive
+        {udp, Socket, IP, Port, Pkt = <<ExpdHdr:4/binary, _/binary>>} ->
+            NewS = forward_reply(Pkt, S), 
+            ch_stats:udp_timeout(S#state.stats, recovered),
+            {ok, NewS}
+    after ?UDP_RESPONSE_TIMEOUT ->
+        recover_from_timeout(NrFailedAttempts+1, S)
+    end.
 
 
 %% --------------------------------------------------------------------
@@ -765,6 +831,10 @@ parse_ipbus_packet({status, Bin}) when is_binary(Bin) ->
 %%       End = big | little
 %% @end
 %% ------------------------------------------------------------------------------------
+resend_request_pkt(<<16#20:8, Id:16/big, 16#f0:8, _/binary>>) ->
+    resend_request_pkt(Id);
+resend_request_pkt(<<16#f0:8, Id:16/little, 16#20:8, _/binary>>) ->
+    resend_request_pkt(Id);
 resend_request_pkt(Id) when Id =< 16#ffff, Id >= 0 ->
     Value = (2 bsl 28) + (Id bsl 8) + 16#f2,
     <<Value:32/big>>.
