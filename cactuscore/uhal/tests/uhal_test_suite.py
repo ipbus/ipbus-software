@@ -387,7 +387,7 @@ def get_controlhub_status( cmd ):
     return ""
 
 def get_dummyhardware_status( cmd ):
-  if ("dummy.controlhub" in cmd) or ("chtcp" in cmd ) or ("dummy.udp" in cmd) or ("ipbusudp" in cmd ):
+  if ("dummy.controlhub" in cmd) or ("chtcp" in cmd) or ("dummy.udp" in cmd) or ("ipbusudp" in cmd) or ("test_pycohal" in cmd):
     StdOut, ExitCode , Time = run_command( 'ps aux | grep -ce "[D]ummyHardwareUdp"' , False)
   else:  
     StdOut, ExitCode , Time = run_command( 'ps aux | grep -ce "[D]ummyHardwareTcp"' , False)
