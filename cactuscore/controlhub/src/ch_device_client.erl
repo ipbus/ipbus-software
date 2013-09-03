@@ -289,7 +289,7 @@ device_client_loop(timeout, S) ->
             device_client_loop(send, NewState)
     catch
         throw:{recovery_failed, ErrorCode} ->
-            ?CH_LOG_ERROR("Irrecoverable TIMEOUT when waiting for response from board. Packet-loss recovery not yet added back in."),
+            ?CH_LOG_ERROR("Irrecoverable TIMEOUT when waiting for response from board."),
             ErrorCode, %TODO: Send back exit code for each packet in-flight, and each packet queued.
             {stop, udp_timeout, S}
     end.
@@ -340,13 +340,14 @@ forward_reply(Pkt, S) when S#state.ipbus_v == {1,3} ->
     ?CH_LOG_DEBUG("IPbus reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), TransManagerPid]),
     TransManagerPid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, Pkt},
     ch_stats:udp_rcvd(S#state.stats),
-    S.
+    S#state{in_flight={0,void}}.
 
 
 recover_from_timeout(NrFailedAttempts, S) when NrFailedAttempts == 3 ->
     throw({recovery_failed, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}});
 
 recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {1,3} ->
+    ?CH_LOG_INFO("IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [?UDP_RESPONSE_TIMEOUT]),
     receive
         {udp, Socket, IP, Port, Pkt} ->
             NewS = forward_reply(Pkt, S),
@@ -909,7 +910,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     receive
         {udp, Socket, TargetIPTuple, TargetPort, <<16#100000fc:32/native, _/binary>>} ->
             ?CH_LOG_INFO("Received an IPbus 1.3 'status response' from target, on attempt ~w of ~w.",
-                         [TargetIPTuple, TargetPort, AttemptNr, TotNrAttempts]),
+                         [AttemptNr, TotNrAttempts]),
             ch_stats:udp_rcvd(get(stats)),
             {ok, {1,3}, {}};
         {udp, Socket, TargetIPTuple, TargetPort, <<16#200000f1:32/big, _/binary>> = ReplyBin} ->
