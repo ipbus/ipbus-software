@@ -180,56 +180,37 @@ handle_call(_Request, _From, State) ->
 %% --------------------------------------------------------------------
 
 % handle_cast callback for enqueue_requests API call.
-handle_cast({send, RequestPacket, ClientPid}, S = #state{queue=Queue}) ->
+handle_cast({send, RequestPacket, ClientPid}, S) ->
     ?CH_LOG_DEBUG("IPbus request packet received from Transaction Manager with PID = ~w.", [ClientPid]),
-    ?PACKET_TRACE(RequestPacket, "The following IPbus request have been received from Transaction "
-                  "Manager with PID = ~w.", [ClientPid]),
-    if
-      S#state.mode =:= setup ->
-        {ReqIPbusVer, _Type, _End} = parse_ipbus_packet(RequestPacket),
-        case get_device_status(ReqIPbusVer) of
-            {ok, {1,3}, {}} ->
-                ?CH_LOG_INFO("Target speaks IPbus v1.3"),
-                NewS = S#state{mode = normal,
-                               ipbus_v = {1,3},
-                               max_in_flight = 1,
-                               next_id = void
-                              },
-                device_client_loop(recv, send_request(RequestPacket, ClientPid, NewS) );
-%                send_requests_to_board({RequestPacket, ClientPid}, S#state{ mode=normal, ipbus_v={1,3}, max_in_flight=1 });
-            {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
-                ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
-                ?CH_LOG_INFO("Device client is entering new logic."),
-                NewS = S#state{mode = normal,
-                               ipbus_v = {2,0},
-                               max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
-                               next_id = NextExpdId
-                               },
-                device_client_loop(send, send_request(RequestPacket, ClientPid, NewS) );
-%                send_requests_to_board({RequestPacket, ClientPid}, S#state{mode = normal,
-%                                                                           ipbus_v = {2,0},
-%                                                                           max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
-%                                                                           next_id = NextExpdId
-%                                                                           });
-            {error, _, MsgForTransManager} ->
-                ?CH_LOG_ERROR("Target didn't respond correctly to status request in ch_device_client:init/1."),
-                ClientPid ! MsgForTransManager,
-                {stop, "Target didn't respond correctly to status request in device client setup.", S}
-        end;
-      
-      length(S#state.in_flight) < S#state.max_in_flight ->
-        send_requests_to_board({RequestPacket, ClientPid}, S);
-      true ->
-        {_HdrSent, TimeSent, _, RetryCount, _Pid} = lists:nth(1, S#state.in_flight),
-        NewTimeout = updated_timeout( (?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent),
-        ?CH_LOG_DEBUG("Request packet from ~w is being queued (~w packets already in-flight (max nr), new queue length ~w, new timeout ~wms).", [ClientPid, length(S#state.in_flight), queue:len(Queue)+1, NewTimeout]),
-        {noreply, S#state{queue=queue:in({RequestPacket, ClientPid}, Queue)}, NewTimeout}
+    {ReqIPbusVer, _Type, _End} = parse_ipbus_packet(RequestPacket),
+    case get_device_status(ReqIPbusVer) of
+        {ok, {1,3}, {}} ->
+            ?CH_LOG_INFO("Target speaks IPbus v1.3"),
+            NewS = S#state{mode = normal,
+                           ipbus_v = {1,3},
+                           max_in_flight = 1,
+                           next_id = void
+                          },
+            device_client_loop(recv, send_request(RequestPacket, ClientPid, NewS) );
+        {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
+            ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
+            ?CH_LOG_INFO("Device client is entering new logic."),
+            NewS = S#state{mode = normal,
+                           ipbus_v = {2,0},
+                           max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
+                           next_id = NextExpdId
+                          },
+            device_client_loop(send, send_request(RequestPacket, ClientPid, NewS) );
+        {error, _, MsgForTransManager} ->
+            ?CH_LOG_ERROR("Target didn't respond correctly to status request in ch_device_client:init/1."),
+            ClientPid ! MsgForTransManager,
+            {stop, "Target didn't respond correctly to status request in device client setup.", S}
     end;
 
 %% Default handle cast
 handle_cast(_Msg, State) -> 
     ?CH_LOG_ERROR("Unexpected cast received : ~p", [_Msg], State),
-    {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
+    {nostop, wrong_clause, State}.
 
 
 % Send/receive clause
@@ -412,104 +393,10 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 
-% handle_info callback for udp packets from device
-handle_info({udp, Socket, TargetIPTuple, TargetPort, ReplyBin}, S = #state{socket=Socket, ip_tuple=TargetIPTuple, port=TargetPort}) when length(S#state.in_flight)=/=0 ->
-    ?CH_LOG_DEBUG("Received response from target hardware; passing it to originating Transaction Manager..."),
-    ch_stats:udp_rcvd(S#state.stats),
-    ReplyHdr = binary_part(ReplyBin, 0, 4),
-    case {S#state.ipbus_v, lists:keymember(ReplyHdr, 1, S#state.in_flight)} of
-        {{2, 0}, true} ->
-            forward_replies_to_transaction_manager(ReplyBin, S#state{mode=normal});
-        {{2, 0}, _} ->
-            ?CH_LOG_WARN("Received UDP response packet with wrong header - either a slightly delayed reply packet that I requested re-send of, or an error!~n"
-                         "Received packet is: ~w", [ReplyBin], S),
-            [{_HdrSent, TimeSent, _, RetryCount, _ClientPid} | _] = S#state.in_flight,
-            {noreply, S, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent) };
-        _ ->
-            forward_replies_to_transaction_manager(ReplyBin, S#state{mode=normal})
-    end;
-
-% handle_info callback for device response timeout
-handle_info(timeout, S = #state{ip_tuple=_TargetIPTuple, port=TargetPort, next_id=NextId}) when length(S#state.in_flight)=/=0 ->
-    {HdrSent, TimeSent, IoDataSent, RetryCount, ClientPid} = lists:nth(1, S#state.in_flight),
-    ?CH_LOG_DEBUG("TIMEOUT! No response from target hardware at IP addr=~w, port=~w. "
-                  "Checking on status of hardware...", [_TargetIPTuple, TargetPort]),
-    case RetryCount of
-         0 -> ch_stats:udp_timeout(S#state.stats, normal);
-         _ -> ch_stats:udp_timeout(S#state.stats, resend)
-    end,
-    if
-      % Packet-loss recovery for IPbus 2.0
-      (S#state.ipbus_v=:={2,0}) and (RetryCount<3) ->
-        ?CH_LOG_WARN("Timeout when waiting for response from target; starting packet loss recovery (attempt ~w) ... ",[RetryCount+1], S),
-        NextIdMinusN = decrement_pkt_id(NextId, length(S#state.in_flight)),
-        case get_device_status(S#state.ipbus_v) of 
-            % Request packet lost => re-send
-            {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
-                % Add request packets that would have been dropped, back to front of state's queue
-                ?CH_LOG_INFO("Request packet got lost on way to board."),
-                InFlightTail = lists:nthtail(1, S#state.in_flight),
-                DroppedRequests = [{<<ModHdr/binary, ModBody/binary>>, Pid} || {_, _, [ModHdr, ModBody], _, Pid} <- lists:reverse(InFlightTail)],
-                NewQ = queue:join( queue:from_list(DroppedRequests), S#state.queue ),
-                NewInFlight = [{HdrSent, TimeSent, IoDataSent, RetryCount+1, ClientPid}],
-                % Re-send original packet
-                S#state.udp_pid ! {send, IoDataSent},
-%                gen_udp:send(Socket, TargetIPTuple, TargetPort, PktSent),
-                ch_stats:udp_sent(S#state.stats),
-                if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, request); true -> void end,
-                {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt, next_id=increment_pkt_id(HwNextId), queue=NewQ}, ?UDP_RESPONSE_TIMEOUT};
-            % Response packet lost => Ask board to re-send
-            {ok, {2,0}, {_, _, HwNextId}} ->
-                LostResponseNextIds = [increment_pkt_id(NextIdMinusN, X) || X <- lists:seq(1,length(S#state.in_flight))],
-                case lists:member(HwNextId, LostResponseNextIds) of
-                    true ->
-                        ?CH_LOG_INFO("Reply packet got lost on way back from board."),
-                        NewInFlight = lists:keyreplace(HdrSent, 1, S#state.in_flight, {HdrSent, TimeSent, IoDataSent, RetryCount+1, ClientPid}),
-                        {{2,0}, {control,Id}, _End} = parse_ipbus_packet(HdrSent),
-                        S#state.udp_pid ! {send, resend_request_pkt(Id)},
-%                        gen_udp:send(Socket, TargetIPTuple, TargetPort, resend_request_pkt(Id)),
-                        ch_stats:udp_sent(S#state.stats),
-                        if RetryCount=:=0 -> ch_stats:udp_lost(S#state.stats, response); true -> void end,
-                        {noreply, S#state{in_flight=NewInFlight, mode=recover_lost_pkt}, ?UDP_RESPONSE_TIMEOUT};
-                    false ->
-                        Msg = io_lib:format("Target board's next expected ID has unexpected value of ~w. Another client (ControlHub or uHAL) is probably communicating with this target at the same time. "
-                                      "I've experienced timeout, with ~w request packets already in-flight, and I think board's next ID should now lie in the range ~w to ~w (incl.) in case of packet loss.",
-                                      [ HwNextId, length(S#state.in_flight), NextIdMinusN, lists:last(LostResponseNextIds) ]),                     
-                        ?CH_LOG_ERROR(Msg, [], S),
-                        {stop, Msg}
-                end;
-            % Error in getting device status
-            {error, _Type, MsgForTransManager} ->
-                ClientPid ! MsgForTransManager,
-                {noreply, S#state{in_flight=[], mode=timeout}}
-        end;
-      % Workaround for softer timeout with non-IPbus 2.0 packets
-      RetryCount<3 ->
-         ?CH_LOG_WARN("Timeout nr. ~w when waiting for response from target; not IPbus 2.0 and so will just wait for another ~wms ... ", 
-                      [RetryCount+1, ?UDP_RESPONSE_TIMEOUT], S),
-         NewInFlight = [{HdrSent, TimeSent, IoDataSent, RetryCount+1, ClientPid}],
-         {noreply, S#state{in_flight=NewInFlight}, ?UDP_RESPONSE_TIMEOUT};
-      % Clause for ultimate irrecoverable timeout
-      true ->
-        ?CH_LOG_ERROR("TIMEOUT! No response from target. Generating and sending a timeout response to originating Transaction Manager...", [], S),
-        ClientPid ! { device_client_response, get(target_ip_u32), TargetPort, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>> },
-        case queue:is_empty(S#state.queue) of
-            true ->
-                {noreply, S#state{in_flight=[], mode=timeout}, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
-            false ->
-                send_requests_to_board(S#state{in_flight=[], mode=timeout})
-        end
-    end;
-
-% handle_info for when no communication through through this device client in given time
-handle_info(timeout, State) -> 
-    ?CH_LOG_INFO("No communication has passed through this device client in ~pms ; shutting down now", [?DEVICE_CLIENT_SHUTDOWN_AFTER], State),
-    {stop, normal, State};
-
-% Default handle_info callback
+% Dummy handle_info callback
 handle_info(_Info, State) ->
     ?CH_LOG_ERROR("Unexpected handle_info message received : ~p", [_Info], State),
-    {noreply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
+    {stop, wrong_clause, State}.
 
 
 %% --------------------------------------------------------------------
@@ -535,118 +422,6 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions (private)
 %%% --------------------------------------------------------------------
 
-
-%% ------------------------------------------------------------------------------
-%% @spec updated_timeout( OrigTimeout :: pos_integer(), TimeSent ) -> NewTimeout
-%% @end
-%% ------------------------------------------------------------------------------
-
-updated_timeout(OrigTimeout, TimeSent) when is_integer(OrigTimeout), OrigTimeout>0 ->
-    TimeSinceSent = ( timer:now_diff(os:timestamp(),TimeSent) div 1000 ),
-    max(0, (OrigTimeout - TimeSinceSent)).
-
-
-%% ------------------------------------------------------------------------------
-%% @doc Send control request packet from front of queue to the board, returning
-%%      the new return value for the handle_{call,cast,info} function that it's 
-%%      called from
-%% @spec send_requests_to_board( S :: state() ) -> {noreply, NewState}
-%%                                               | {noreply, NewState, Timeout}
-%% @end
-%% ------------------------------------------------------------------------------
-
-send_requests_to_board( S = #state{queue = Q, in_flight = InFlightList} ) ->
-    case queue:is_empty(Q) of
-        false when length(InFlightList) < S#state.max_in_flight ->
-            send_requests_to_board(queue:get(Q), S#state{queue=queue:drop(Q)} );
-        true when length(InFlightList) =:= 0 ->
-            {noreply, S, ?DEVICE_CLIENT_SHUTDOWN_AFTER};
-        _ ->
-            {_, TimeSent, _, RetryCount, _} = lists:nth(1, InFlightList),
-            {noreply, S, updated_timeout((?UDP_RESPONSE_TIMEOUT * (RetryCount+1)), TimeSent)}
-    end.
-
-
-%% ------------------------------------------------------------------------------
-%% @doc Sends a control request packet to the board, returning the 
-%%      new return value for the handle_{call,cast,info} function that 
-%%      it's called from
-%% @spec send_requests_to_board({Packet::binary(), ClientPid::pid()}, S::state())
-%%                         -> {noreply, NewState}
-%%                          | {noreply, NewState, Timeout}
-%% @end
-%% ------------------------------------------------------------------------------
-
-send_requests_to_board({Packet, ClientPid}, S = #state{ipbus_v=IPbusVer}) when is_binary(Packet), is_pid(ClientPid) ->
-    ?CH_LOG_DEBUG("Request packet from PID ~w is being forwarded to the board.", [ClientPid]),
-    case reset_packet_id(Packet, S#state.next_id) of
-        {error, _Type, MsgForClient} ->
-            ?CH_LOG_DEBUG("ERROR encountered in resetting packet ID - returning following message to Transaction Manager (PID ~w): ~w", [ClientPid, MsgForClient]),
-            ClientPid ! MsgForClient,
-            {noreply, S#state{ipbus_v=unknown, next_id=unknown} };
-        {IPbusVer, ModPkt, PktId} ->
-            S#state.udp_pid ! {send, ModPkt},           
-%            gen_udp:send(Socket, TargetIPTuple, TargetPort, ModPkt),
-            NewInFlightList = lists:append( S#state.in_flight, [{hd(ModPkt), os:timestamp(), ModPkt, 0, ClientPid}] ),
-            ch_stats:udp_sent(S#state.stats),
-            NewS = if
-                     is_integer(PktId) ->
-                       S#state{in_flight=NewInFlightList, next_id = increment_pkt_id(PktId)};
-                     true ->
-                       S#state{in_flight=NewInFlightList}
-                   end,
-           ?CH_LOG_DEBUG("Request packet sent. New state  ...", [], NewS),
-           send_requests_to_board(NewS)
-    end.
-    
-
-%% ---------------------------------------------------------------------
-%% @doc
-%%
-%%
-%% @spec
-%%
-%% @end
-%% ---------------------------------------------------------------------
-
-forward_replies_to_transaction_manager(ReplyBin, S) when is_binary(ReplyBin), is_record(S,state) ->
-    [H | T] = S#state.in_flight,
-    ReplyHdr = binary_part(ReplyBin, 0, 4),
-    case H of
-        {ClientPid, Bin} ->
-            ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, Bin},
-            forward_replies_to_transaction_manager(ReplyBin, S#state{in_flight=T});
-        _ when S#state.ipbus_v =:= {1,3} ->
-            element(5,H) ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, ReplyBin},
-            send_requests_to_board(S#state{in_flight=[]});
-        {ReplyHdr, _TimeSent, _, NrRetries, ClientPid} ->
-            ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, ReplyBin},
-            if
-              NrRetries>0 ->
-                ?CH_LOG_INFO( "Recovered lost packet!", [], S),
-                ch_stats:udp_timeout(S#state.stats, recovered);
-              true -> void
-            end,
-            send_requests_to_board( S#state{in_flight=forward_pending_replies(T)} );
-        _ ->
-            {ReplyHdr, _TimeSent, _, _NrRetries, ClientPid} = lists:keyfind(ReplyHdr, 1, S#state.in_flight),
-            send_requests_to_board(S#state{ in_flight = lists:keyreplace(ReplyHdr, 1, S#state.in_flight, {ClientPid,ReplyBin} ) })
-    end.
-
-
-%% ---------------------------------------------------------------------
-%% @doc
-%%
-%% @spec
-%% 
-%% @end
-%% ---------------------------------------------------------------------
-
-forward_pending_replies( [{ClientPid, ReplyBin} | T] ) when is_pid(ClientPid), is_binary(ReplyBin) ->
-    ClientPid ! { device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_SUCCESS, ReplyBin},
-    forward_pending_replies(T);
-forward_pending_replies( L ) when is_list(L) ->
-    L.
 
 
 %% ---------------------------------------------------------------------
@@ -762,18 +537,6 @@ increment_pkt_id(Id) when is_integer(Id), Id>0 ->
       true ->
         Id + 1
     end.
-
-
-%% ---------------------------------------------------------------------
-%% @doc Increments packet ID N times, loooping round fom 0xffff to 1
-%% @spec increment_pkt_id( Id::pos_integer(), N::pos_integer() ) -> IdPlusN::pos_integer()
-%% @end
-%% ---------------------------------------------------------------------
-
-increment_pkt_id(Id, 0) when is_integer(Id), Id>0 ->
-    Id;
-increment_pkt_id(Id, N) when is_integer(Id), Id>0, is_integer(N), N>0 ->
-    increment_pkt_id( increment_pkt_id(Id), N-1 ).
 
 
 %% ---------------------------------------------------------------------
