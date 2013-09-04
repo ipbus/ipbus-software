@@ -132,11 +132,12 @@ namespace uhal
 
     if ( lReplyIPaddress != mDeviceIPaddress )
     {
-      log ( Error() , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
+      uhal::exception::ControlHubReturnedWrongAddress* lExc = new uhal::exception::ControlHubReturnedWrongAddress();
+      log ( *lExc , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
             " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) );
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
-      return new uhal::exception::ControlHubReturnedWrongAddress();
+      return lExc;
     }
 
     aReplyStartIt++;
@@ -144,11 +145,12 @@ namespace uhal
 
     if ( lReplyPort != mDevicePort )
     {
-      log ( Error() , "Returned Port number " , Integer ( lReplyPort ) ,
+      uhal::exception::ControlHubReturnedWrongAddress* lExc = new uhal::exception::ControlHubReturnedWrongAddress();
+      log ( *lExc , "Returned Port number " , Integer ( lReplyPort ) ,
             " does not match that sent " , Integer ( mDevicePort ) );
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
-      return new uhal::exception::ControlHubReturnedWrongAddress();
+      return lExc;
     }
 
     aReplyStartIt++;
@@ -161,23 +163,27 @@ namespace uhal
 
       if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 )
       {
-        log ( Error() , "The ControlHub did not receive any response from the board." );
-        return new uhal::exception::ControlHubTargetTimeout();
+        uhal::exception::ControlHubTargetTimeout* lExc = new uhal::exception::ControlHubTargetTimeout();
+        log ( *lExc , "The ControlHub did not receive any response from the board." );
+        return lExc ;
       }
       else if ( lErrorCode == 2 )
       {
-        log ( Error(), "Internal timeout within the ControlHub." );
-        return new uhal::exception::ControlHubInternalTimeout();
+        uhal::exception::ControlHubInternalTimeout* lExc = new uhal::exception::ControlHubInternalTimeout();
+        log ( *lExc, "Internal timeout within the ControlHub." );
+        return lExc;
       }
       else if ( lErrorCode == 5 )
       {
-        log ( Error() , "ControlHub received malformed status packet from target" );
-        return new uhal::exception::ControlHubReportedMalformedStatus();
+        uhal::exception::ControlHubReportedMalformedStatus* lExc = new uhal::exception::ControlHubReportedMalformedStatus();
+        log ( *lExc , "ControlHub received malformed status packet from target" );
+        return lExc;
       }
       else
       {
-        log ( Error() , "Control Hub reported an unknown error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ), ". Please report this at https://svnweb.cern.ch/trac/cactus/newticket" );
-        return new uhal::exception::ControlHubUnknownErrorCode();
+        uhal::exception::ControlHubUnknownErrorCode* lExc = new uhal::exception::ControlHubUnknownErrorCode();
+        log ( *lExc , "Control Hub reported an unknown error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ), ". Please report this at https://svnweb.cern.ch/trac/cactus/newticket" );
+        return lExc;
       }
 
       return false;
@@ -205,6 +211,7 @@ namespace uhal
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::dispatchExceptionHandler()
   {
+    log ( Info ,  ThisLocation() );
     {
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.clear();

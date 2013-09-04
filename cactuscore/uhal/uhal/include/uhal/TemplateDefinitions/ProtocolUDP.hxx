@@ -137,12 +137,10 @@ namespace uhal
       mIOservice.stop();
 #ifdef RUN_ASIO_MULTITHREADED
       mDispatchThread.join();
-      // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
 #endif
-      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
     }
     catch ( const std::exception& aExc )
     {
@@ -157,7 +155,7 @@ namespace uhal
   {
     if ( mAsynchronousException )
     {
-      log ( Error() , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
       mAsynchronousException->ThrowAsDerivedType();
     }
 
@@ -168,7 +166,6 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
       if ( mDispatchBuffers || mPacketsInFlight == this->getMaxNumberOfBuffers() )
@@ -182,7 +179,6 @@ namespace uhal
         write ( );
       }
 
-      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
 #else
       mDispatchBuffers = aBuffers;
       write ( );
@@ -301,7 +297,6 @@ namespace uhal
     mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
-    // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_receive_from ( mAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP< InnerProtocol >::read_callback, this, _1 ) );
@@ -335,52 +330,43 @@ namespace uhal
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        log ( Error() , "ASIO reported a Timeout in UDP callback" );
-        mAsynchronousException = new exception::UdpTimeout();
+        exception::UdpTimeout* lExc = new exception::UdpTimeout();
+        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+        log ( *lExc , "ASIO reported a Timeout in UDP callback" );
+        mAsynchronousException = lExc;
         return;
       }
 
-      log ( Error() , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
-      mAsynchronousException = new exception::ASIOUdpError();
-      //       try
-      //       {
-      //         mAsynchronousException = ClientInterface::validate ( mReplyBuffers ); //Control of the pointer has been passed back to the client interface
-      //       }
-      //       catch ( ... ) {}
+      exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
+      log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+      mAsynchronousException = lExc;
       return;
     }
 
-    /*
-        TargetToHostInspector< 2 , 0 > lT2HInspector;
-        std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
-        std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
-        lT2HInspector.analyze ( lBegin2 , lEnd2 );
-    */
+    //     uint32_t lCounter(0);
+    //     for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
+    //     {
+    //     uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
+    //     uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
+    //
+    //     for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
+    //     {
+    //     log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
+    //     }
+    //     }
+    //         TargetToHostInspector< 2 , 0 > lT2HInspector;
+    //         std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
+    //         std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
+    //         lT2HInspector.analyze ( lBegin2 , lEnd2 );
     //  std::cout << "Filling reply buffer : " << mReplyBuffers << std::endl;
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
     {
-      //      log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( lIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( lIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( lIt->second ) );
       memcpy ( lIt->first, lReplyBuf, lIt->second );
       lReplyBuf += lIt->second;
     }
-
-    /*
-    uint32_t lCounter(0);
-    for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
-    {
-    uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
-    uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
-
-    for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
-    {
-    log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
-    }
-    }
-    */
-    //log ( Debug() , ThisLocation() );
 
     try
     {
@@ -389,11 +375,14 @@ namespace uhal
     catch ( exception::exception& aExc )
     {
       mAsynchronousException = new exception::ValidationError ();
+    }
+
+    if ( mAsynchronousException )
+    {
       return;
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
     if ( mReplyQueue.size() )
@@ -418,7 +407,6 @@ namespace uhal
       write();
     }
 
-    // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
 #else
     mReplyBuffers.reset();
 #endif
@@ -471,7 +459,6 @@ namespace uhal
 #endif
       //log ( Warning() , "mDispatchBuffers = " , Pointer ( mDispatchBuffers ) , " mReplyBuffers = " , Pointer ( mReplyBuffers ) );
       lContinue = ( mDispatchBuffers || mReplyBuffers );
-      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
     }
   }
 
@@ -494,7 +481,6 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      // log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
@@ -504,7 +490,6 @@ namespace uhal
       mDispatchBuffers.reset();
       ClientInterface::returnBufferToPool ( mReplyBuffers );
       mReplyBuffers.reset();
-      // log( Warning() , "Mutex UNLOCKED @ " , ThisLocation() );
     }
 
     InnerProtocol::dispatchExceptionHandler();
