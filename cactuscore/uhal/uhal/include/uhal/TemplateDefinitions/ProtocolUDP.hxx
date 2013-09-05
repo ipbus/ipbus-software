@@ -57,7 +57,7 @@ namespace uhal
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
-    mReplyMemory ( 65536 , 0x00000000 ),
+    //     mReplyMemory ( 65536 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
@@ -82,7 +82,7 @@ namespace uhal
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUDP.mUri.mHostname , aUDP.mUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
-    mReplyMemory ( 65536 , 0x00000000 ),
+    //     mReplyMemory ( 65536 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
@@ -217,17 +217,18 @@ namespace uhal
         {
           std::cout << std::setfill ( '0' ) << std::hex << std::setw ( 8 ) <<  *lBegin << std::endl;
         }*/
-    mAsioSendBuffer.clear();
-    mAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
+    //     mAsioSendBuffer.clear();
+    std::vector< boost::asio::const_buffer > lAsioSendBuffer;
+    lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
     // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
-    mSocket.async_send_to ( mAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, _1 ) );
+    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, _1 ) );
     mPacketsInFlight++;
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
-    mSocket.async_send_to ( mAsioSendBuffer , mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
+    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
 
     do
     {
@@ -293,16 +294,26 @@ namespace uhal
       return;
     }
 
-    mAsioReplyBuffer.clear();
-    mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
+    //     mAsioReplyBuffer.clear();
+    //    mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
+    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
+    std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
+    lAsioReplyBuffer.reserve ( lReplyBuffers.size() +1 );
+
+    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    {
+      lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
+    }
+
+    lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( mReplyBuffers->getSpareSpace() , Buffers::mSpareSpaceSize ) );
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
 #ifdef RUN_ASIO_MULTITHREADED
-    mSocket.async_receive_from ( mAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP< InnerProtocol >::read_callback, this, _1 ) );
+    mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP< InnerProtocol >::read_callback, this, _1 ) );
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
-    mSocket.async_receive_from ( mAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
+    mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
 
     do
     {
@@ -359,14 +370,14 @@ namespace uhal
     //         std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
     //         lT2HInspector.analyze ( lBegin2 , lEnd2 );
     //  std::cout << "Filling reply buffer : " << mReplyBuffers << std::endl;
-    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
-    uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
-
-    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-    {
-      memcpy ( lIt->first, lReplyBuf, lIt->second );
-      lReplyBuf += lIt->second;
-    }
+    //     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
+    //     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
+    //
+    //     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    //     {
+    //       memcpy ( lIt->first, lReplyBuf, lIt->second );
+    //       lReplyBuf += lIt->second;
+    //     }
 
     try
     {

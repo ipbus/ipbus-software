@@ -146,14 +146,14 @@ namespace uhal
 
       boost::asio::deadline_timer mDeadlineTimer;
 
-      std::vector<uint8_t> mReplyMemory;
+      //       std::vector<uint8_t> mReplyMemory;
 
 #ifdef RUN_ASIO_MULTITHREADED
       boost::thread mDispatchThread;
 #endif
 
-      std::vector< boost::asio::const_buffer > mAsioSendBuffer;
-      std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
+      //       std::vector< boost::asio::const_buffer > mAsioSendBuffer;
+      //       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
 
       //! A MutEx lock used to make sure the access functions are thread safe
 #ifdef RUN_ASIO_MULTITHREADED

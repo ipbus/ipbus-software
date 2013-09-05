@@ -43,7 +43,8 @@ namespace uhal
   Buffers::Buffers ( const uint32_t& aMaxSendSize ) :
     mSendCounter ( 0 ),
     mReplyCounter ( 0 ),
-    mSendBuffer ( aMaxSendSize , 0x00 )
+    mSendBuffer ( aMaxSendSize , 0x00 ),
+    mSpareSpace ( mSpareSpaceSize , 0x00 )
   {
   }
 
@@ -157,6 +158,12 @@ namespace uhal
     // mSignedValWords.clear();
     mUnsignedValVectors.clear();
     // mSignedValVectors.clear();
+  }
+
+
+  uint8_t* Buffers::getSpareSpace()
+  {
+    return & ( mSpareSpace[0] );
   }
 
 }

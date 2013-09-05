@@ -53,6 +53,9 @@ namespace uhal
   class Buffers
   {
     public:
+
+      static const uint32_t mSpareSpaceSize = 256;
+
       /**
       	Constructor
       	@param aMaxSendSize The size of the buffer (in bytes) in the target device for receiving IPbus data packets from uhal.
@@ -159,6 +162,12 @@ namespace uhal
       uint8_t* getSendBuffer();
 
       /**
+        Get a pointer to the start of the spare space buffer
+        @return a pointer to the start of the spare space buffer
+      */
+      uint8_t* getSpareSpace();
+
+      /**
       	Get a reference to the reply queue
       	@return a reference to the reply queue
       */
@@ -181,6 +190,8 @@ namespace uhal
       std::vector<uint8_t> mSendBuffer;
       //! The queue of reply destinations
       std::deque< std::pair< uint8_t* , uint32_t > > mReplyBuffer;
+
+      std::vector< uint8_t > mSpareSpace;
 
       //! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
       std::deque< ValHeader > mValHeaders;
