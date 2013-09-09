@@ -9,6 +9,7 @@ PACKAGES = \
 else ifeq ($(Set), ts)
 PACKAGES = \
         cactuscore/ts \
+	cactuscore/confdb \
 	cactusprojects/subsystem \
 	cactusprojects/retri \
 	cactusprojects/central \
