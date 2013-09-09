@@ -70,14 +70,12 @@ namespace uhal
   {
     //log ( Debug() , ThisLocation() );
     // -------------------------------------------------------------------------------------------------------------
-    // 12 bytes form the preamble:
-    // Byte-count (4 bytes) will be updated before transmission in predispatch
+    // 8 bytes form the preamble:
     // Device IP address (4 bytes)
     // Device Port number (2 bytes)
     // Word-count (2 bytes) will be updated before transmission in predispatch
     // -------------------------------------------------------------------------------------------------------------
-    // 16 bytes form the preamble reply:
-    // Total Byte-count (4 bytes)
+    // 12 bytes form the preamble reply:
     // Chunk Byte-count (4 bytes)
     // Device IP address (4 bytes)
     // Device Port number (2 bytes)
@@ -86,11 +84,11 @@ namespace uhal
     boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
     mPreambles.push_back ( tpreamble () );
     tpreamble* lPreambles = & mPreambles.back();
-    lPreambles->mSendByteCountPtr = ( uint32_t* ) ( aBuffers->send ( ( uint32_t ) ( 0 ) ) );
+    //     lPreambles->mSendByteCountPtr = ( uint32_t* ) ( aBuffers->send ( ( uint32_t ) ( 0 ) ) );
     aBuffers->send ( mDeviceIPaddress );
     aBuffers->send ( mDevicePort );
     lPreambles->mSendWordCountPtr = ( uint16_t* ) ( aBuffers->send ( ( uint16_t ) ( 0 ) ) );
-    aBuffers->receive ( lPreambles->mReplyTotalByteCounter );
+    //     aBuffers->receive ( lPreambles->mReplyTotalByteCounter );
     aBuffers->receive ( lPreambles->mReplyChunkByteCounter );
     aBuffers->receive ( lPreambles->mReplyDeviceIPaddress );
     aBuffers->receive ( lPreambles->mReplyDevicePort );
@@ -103,7 +101,7 @@ namespace uhal
   template < typename InnerProtocol >
   uint32_t ControlHub< InnerProtocol >::getPreambleSize()
   {
-    return InnerProtocol::getPreambleSize() +3;
+    return InnerProtocol::getPreambleSize() +2;
   }
 
 
@@ -115,8 +113,8 @@ namespace uhal
     boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
     tpreamble& lPreambles = mPreambles.back();
     uint32_t lByteCount ( aBuffers->sendCounter() );
-    * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
-    * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-12 ) >>2 );
+    //     * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
+    * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-8 ) >>2 );
   }
 
 
@@ -126,7 +124,7 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    aReplyStartIt++;
+    //     aReplyStartIt++;
     aReplyStartIt++;
     uint32_t lReplyIPaddress ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) );
 
@@ -195,7 +193,7 @@ namespace uhal
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
     }
-    return InnerProtocol::validate ( ( aSendBufferStart+=12 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
+    return InnerProtocol::validate ( ( aSendBufferStart+=8 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
   }
 
 
@@ -207,6 +205,7 @@ namespace uhal
   {
     return ClientInterface::validate ( aBuffers );
   }
+
 
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::dispatchExceptionHandler()

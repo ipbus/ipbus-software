@@ -36,6 +36,41 @@
 
 #include <cstring>
 
+
+std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType )
+{
+  switch ( aIPbusTransactionType )
+  {
+    case uhal::B_O_T:
+      aStr << "\"Byte Order Transaction\"";
+      break;
+    case uhal::R_A_I:
+      aStr << "\"Reserved Address Information\"";
+      break;
+    case uhal::NI_READ:
+      aStr << "\"Non-incrementing Read\"";
+      break;
+    case uhal::READ:
+      aStr << "\"Incrementing Read\"";
+      break;
+    case uhal::NI_WRITE:
+      aStr << "\"Non-incrementing Write\"";
+      break;
+    case uhal::WRITE:
+      aStr << "\"Incrementing Write\"";
+      break;
+    case uhal::RMW_SUM:
+      aStr << "\"Read-Modify-Write Sum\"";
+      break;
+    case uhal::RMW_BITS:
+      aStr << "\"Read-Modify-Write Bits\"";
+      break;
+  }
+
+  return aStr;
+}
+
+
 namespace uhal
 {
 
@@ -85,54 +120,52 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-    //    log ( Debug() , "IPbusCore Validation" );
     eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
     uint8_t lSendResponseGood , lReplyResponseGood;
+    uint32_t lCounter ( 0 );
 
-    // log ( Debug() , ThisLocation() );
     do
     {
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
       {
-        log ( Error() , "Unable to parse send header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) );
-        return new uhal::exception::IPbusCoreUnparsableTransactionHeader();
+        uhal::exception::IPbusCoreUnparsableTransactionHeader* lExc = new uhal::exception::IPbusCoreUnparsableTransactionHeader();
+        log ( *lExc , "Unable to parse send header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) );
+        return lExc;
       }
 
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
       {
-        log ( Error() , "Unable to parse reply header " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) );
-        return new uhal::exception::IPbusCoreUnparsableTransactionHeader();
+        uhal::exception::IPbusCoreUnparsableTransactionHeader* lExc = new uhal::exception::IPbusCoreUnparsableTransactionHeader();
+        log ( *lExc , "Unable to parse reply header " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) );
+        return lExc;
       }
 
       if ( lReplyResponseGood )
       {
-        log ( Error() , "Returned Header, " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ),
+        uhal::exception::IPbusCoreResponseCodeSet* lExc = new uhal::exception::IPbusCoreResponseCodeSet();
+        log ( *lExc , "Returned Header, " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ),
               " ( transaction id = " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
               ", transaction type = " , Integer ( ( uint8_t ) ( ( lReplyIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) ,
               ", word count = " , Integer ( lReplyWordCount ) ,
               " ) had response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicating an error" );
-        return new uhal::exception::IPbusCoreResponseCodeSet();
+        return lExc;
       }
 
       if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
       {
-        log ( Error() , "Returned Transaction Type " , Integer ( ( uint8_t ) ( ( lReplyIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) ,
-              " does not match that sent " , Integer ( ( uint8_t ) ( ( lSendIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) );
-        log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
-              " whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
-        return new uhal::exception::IPbusTransactionTypeIncorrect();
+        uhal::exception::IPbusTransactionTypeIncorrect* lExc = new uhal::exception::IPbusTransactionTypeIncorrect();
+        log ( *lExc , "Returned Transaction Type " , lReplyIPbusTransactionType , " does not match that sent " , lSendIPbusTransactionType );
+        return lExc;
       }
 
       if ( lSendTransactionId != lReplyTransactionId )
       {
-        log ( Error() , "Returned Transaction Id " , Integer ( lReplyTransactionId ) ,
-              " does not match that sent " , Integer ( lSendTransactionId ) );
-        log ( Error() , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
+        uhal::exception::IPbusTransactionIdIncorrect* lExc = new uhal::exception::IPbusTransactionIdIncorrect();
+        log ( *lExc , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
               " whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
-        return new uhal::exception::IPbusTransactionIdIncorrect();
+        return lExc;
       }
 
       switch ( lSendIPbusTransactionType )

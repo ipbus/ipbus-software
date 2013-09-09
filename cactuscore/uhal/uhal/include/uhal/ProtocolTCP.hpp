@@ -72,6 +72,7 @@ namespace uhal
     ExceptionClass ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." );
     //! Exception class to handle the case where ASIO returned an error.
     ExceptionClass ( ASIOTcpError , "Exception class to handle the case where ASIO returned an error." );
+
   }
 
   //! Transport protocol to transfer an IPbus buffer via TCP
@@ -164,6 +165,9 @@ namespace uhal
 
       uint32_t mPacketsInFlight;
 #endif
+
+      uint32_t mSendByteCounter;
+      uint32_t mReplyByteCounter;
 
       boost::shared_ptr< Buffers > mDispatchBuffers;
       boost::shared_ptr< Buffers > mReplyBuffers;

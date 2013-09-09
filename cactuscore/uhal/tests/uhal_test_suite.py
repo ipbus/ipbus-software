@@ -71,7 +71,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
-               "test_pycohal -c %s -v" % (conn_file),
+#               "test_pycohal -c %s -v" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-1.3://localhost:50001",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]

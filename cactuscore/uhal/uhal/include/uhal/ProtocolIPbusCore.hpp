@@ -63,8 +63,13 @@ namespace uhal
     NI_READ,
     NI_WRITE
   };
+}
+
+std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType );
 
 
+namespace uhal
+{
   namespace exception
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.

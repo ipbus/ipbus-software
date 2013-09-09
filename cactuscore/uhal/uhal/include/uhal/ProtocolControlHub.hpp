@@ -159,13 +159,13 @@ namespace uhal
       //! A struct representing the preamble which will be prepended to an IPbus buffer for the benefit of the Control Hub
       struct tpreamble
       {
-        //! The total number of bytes that follow (outgoing) forming a logical packet (IDs + IPbus packet)
-        uint32_t* mSendByteCountPtr;
+        // The total number of bytes that follow (outgoing) forming a logical packet (IDs + IPbus packet)
+        //         uint32_t* mSendByteCountPtr;
         //! The number of 32-bit words in the IPbus packet (legacy and could be removed)
         uint16_t* mSendWordCountPtr;
 
-        //! The total number of bytes that follow (incoming) forming a logical packet (IDs + IPbus packet)
-        uint32_t mReplyTotalByteCounter;
+        // The total number of bytes that follow (incoming) forming a logical packet (IDs + IPbus packet)
+        //         uint32_t mReplyTotalByteCounter;
         //! A legacy counter
         uint32_t mReplyChunkByteCounter;
         //! The returned target device ID (IP address)

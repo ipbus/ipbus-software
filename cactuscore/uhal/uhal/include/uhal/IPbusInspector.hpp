@@ -84,7 +84,7 @@ namespace uhal
 
     public:
 
-      bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError = true )
       {
         // log ( Notice() , Pointer(&(*aIt)) , " : " , Pointer(&(*aEnd)) , "(", Integer((&(*aEnd)-&(*aIt))*4)  ,")" );
         uint32_t lAddress , lAddend , lAndTerm , lOrTerm ;
@@ -125,9 +125,15 @@ namespace uhal
 
                 if ( IPbus_major != 1 )
                 {
+                  if ( ! aContinueOnError )
+                  {
+                    aIt--;
+                    return true;
+                  }
+
                   log ( Warning() , "Attempting to see if it is because the bad header was, in fact, a packet header" );
                   aIt--;
-                  return analyze ( aIt , aEnd );
+                  return this->analyze ( aIt , aEnd );
                 }
                 else
                 {
@@ -280,7 +286,7 @@ namespace uhal
 
       virtual bool control_packet_header ()
       {
-        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , Packet Counter " , Integer ( mPacketCounter ) );
         return true;
       }
 
@@ -335,7 +341,7 @@ namespace uhal
 
     public:
 
-      bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
+      bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError = true )
       {
         uint32_t lNewValue;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
@@ -372,7 +378,23 @@ namespace uhal
                  )
               {
                 log ( Error() , "Unable to parse reply header " , Integer ( mHeader, IntFmt<hex,fixed>() ) );
-                return false;
+
+                if ( IPbus_major != 1 )
+                {
+                  if ( ! aContinueOnError )
+                  {
+                    aIt--;
+                    return true;
+                  }
+
+                  log ( Warning() , "Attempting to see if it is because the bad header was, in fact, a packet header" );
+                  aIt--;
+                  return this->analyze ( aIt , aEnd );
+                }
+                else
+                {
+                  return false;
+                }
               }
 
               switch ( mType )
@@ -495,7 +517,7 @@ namespace uhal
 
       virtual bool control_packet_header ()
       {
-        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , transaction ID " , Integer ( mTransactionId ) );
+        log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , Packet Counter " , Integer ( mPacketCounter ) );
         return true;
       }
 

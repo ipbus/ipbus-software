@@ -300,9 +300,10 @@ namespace uhal
     //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
     {
-      log ( Error() , "Returned Packet Header " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) , IntFmt<hex,fixed>() ) ,
+      uhal::exception::IPbus2PacketHeaderMismatch* lExc = new uhal::exception::IPbus2PacketHeaderMismatch();
+      log ( *lExc , "Returned Packet Header " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) , IntFmt<hex,fixed>() ) ,
             " does not match that sent " , Integer ( * ( uint32_t* ) ( aSendBufferStart ) , IntFmt<hex,fixed>() ) );
-      return new uhal::exception::IPbus2PacketHeaderMismatch();
+      return lExc;
     }
 
     // log ( Info() , "IPbus 2.0 has validated the packet header" );
