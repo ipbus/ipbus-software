@@ -855,7 +855,7 @@ void uhal::tests::PerfTester::validationTest()
         if ( ! ( *it )->check_values() )
         {
           cout << "ERROR OCCURED IN SOAK TEST - after " << i << " successful transactions" << endl;
-          return;
+          std::exit(1);
         }
       }
 
