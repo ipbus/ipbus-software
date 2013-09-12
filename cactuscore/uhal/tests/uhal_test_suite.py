@@ -414,7 +414,6 @@ def background_run_command(cmd , Pid):
       if exit_code == -15:
         print "+ Background command was terminated '%s' (time elapsed = %s seconds)" % (cmd , cmd_duration)
       elif exit_code:
-        print "ERROR IN BACKGROUND COMMAND"
         msg = "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) IN BACKGROUND COMMAND '%s' ***\n" % (exit_code, cmd_duration, cmd)
         msg += "  ----- START OF STDOUT -----\n"
         msg += p.stdout.read()
