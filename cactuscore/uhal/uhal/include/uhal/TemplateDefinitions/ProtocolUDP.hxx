@@ -194,8 +194,8 @@ namespace uhal
     log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
     //mSocket = boost::asio::ip::udp::socket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) );
     mSocket.open ( boost::asio::ip::udp::v4() );
-    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
-    mSocket.io_control ( lNonBlocking );
+//    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
+//    mSocket.io_control ( lNonBlocking );
     log ( Info() , "UDP socket created successfully." );
   }
 
