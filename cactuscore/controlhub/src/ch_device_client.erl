@@ -215,7 +215,7 @@ handle_cast(_Msg, State) ->
 
 % Send/receive clause
 %   Takes messages from front
-device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight, _} }) ->
+device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_flight={NrInFlight, _} }) when NrInFlight < S#state.max_in_flight ->
     Timeout = if
                 NrInFlight =/= 0 -> ?UDP_RESPONSE_TIMEOUT;
                 true -> ?DEVICE_CLIENT_SHUTDOWN_AFTER
@@ -239,6 +239,9 @@ device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_f
             {stop, normal, S}
         end
     end;
+
+device_client_loop(send, S) ->
+    device_client_loop(recv, S);
 
 % Non-blocking receive clause
 %   Looks through msg queue
@@ -272,7 +275,7 @@ device_client_loop(timeout, S) ->
         throw:{recovery_failed, ErrorCode} ->
             ?CH_LOG_ERROR("Irrecoverable TIMEOUT when waiting for response from board."),
             ErrorCode, %TODO: Send back exit code for each packet in-flight, and each packet queued.
-            {stop, udp_timeout, S}
+            {stop, normal, S}
     end.
 
 
@@ -304,7 +307,7 @@ send_request(ReqPkt, Pid, S) when S#state.ipbus_v == {1,3} ->
     end.
 
 
-forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.ipbus_v == {2,0} ->
+forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.ipbus_v == {2,0}, NrInFlight>0 ->
     {{value, SentPktInfo = {Pid,OrigHdr,SentHdr,_}}, NewQ} = queue:out(InFlightQ),
     case Pkt of 
         <<SentHdr:4/binary, ReplyBody/binary>> ->
@@ -314,14 +317,16 @@ forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.
             S#state{ in_flight={NrInFlight-1,NewQ} };
         _ ->
             ?CH_LOG_WARN("Ignoring received packet with incorrect header (expecting header ~w, could just be genuine out-of-order reply): ~w", [SentHdr, Pkt]),
-            S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, InFlightQ)} }
+            S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, NewQ)} }
     end;
-forward_reply(Pkt, S) when S#state.ipbus_v == {1,3} ->
-    {1, TransManagerPid} = S#state.in_flight,
+forward_reply(Pkt, S = #state{ in_flight={1,TransManagerPid} }) when S#state.ipbus_v == {1,3} ->
     ?CH_LOG_DEBUG("IPbus reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), TransManagerPid]),
     TransManagerPid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, Pkt},
     ch_stats:udp_rcvd(S#state.stats),
-    S#state{in_flight={0,void}}.
+    S#state{in_flight={0,void}};
+forward_reply(Pkt, S) ->
+    ?CH_LOG_ERROR("Not expecting any response from board, but received: ~w", [Pkt]),
+    S.
 
 
 recover_from_timeout(NrFailedAttempts, S) when NrFailedAttempts == 3 ->
