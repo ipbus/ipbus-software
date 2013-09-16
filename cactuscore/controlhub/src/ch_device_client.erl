@@ -272,9 +272,16 @@ device_client_loop(timeout, S) ->
             ?CH_LOG_INFO("Timeout recovered!"),
             device_client_loop(send, NewState)
     catch
-        throw:{recovery_failed, ErrorCode} ->
+        throw:{recovery_failed, MsgForTransactionManager} ->
             ?CH_LOG_ERROR("Irrecoverable TIMEOUT when waiting for response from board."),
-            ErrorCode, %TODO: Send back exit code for each packet in-flight, and each packet queued.
+            Pids = [Pid || {Pid, _, _, _} <- queue:to_list(element(2,S#state.in_flight))],
+            lists:foreach(fun(Pid) -> Pid ! MsgForTransactionManager end, Pids),
+            receive 
+                {'$gen_cast', {send, _Pkt, Pid}} ->
+                    Pid ! MsgForTransactionManager
+            after 0 ->
+                void
+            end,
             {stop, normal, S}
     end.
 
