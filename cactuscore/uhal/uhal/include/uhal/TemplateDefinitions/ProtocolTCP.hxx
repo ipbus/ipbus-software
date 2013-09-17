@@ -277,20 +277,21 @@ namespace uhal
   void TCP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode )
   {
 #ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+
+    if ( mAsynchronousException )
     {
+      return;
+    }
 
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-
-      if ( mReplyBuffers )
-      {
-        mReplyQueue.push_back ( mDispatchBuffers );
-      }
-      else
-      {
-        mReplyBuffers = mDispatchBuffers;
-        read ( );
-      }
-
+    if ( mReplyBuffers )
+    {
+      mReplyQueue.push_back ( mDispatchBuffers );
+    }
+    else
+    {
+      mReplyBuffers = mDispatchBuffers;
+      read ( );
     }
 
     if ( mDispatchQueue.size() && mPacketsInFlight != this->getMaxNumberOfBuffers() )
@@ -357,6 +358,11 @@ namespace uhal
   template < typename InnerProtocol >
   void TCP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode )
   {
+    if ( mAsynchronousException )
+    {
+      return;
+    }
+
     if ( !mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );

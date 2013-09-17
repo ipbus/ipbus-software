@@ -250,19 +250,23 @@ namespace uhal
     //       log( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
     //       return;
     //     }
-    {
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
-      if ( mReplyBuffers )
-      {
-        mReplyQueue.push_back ( mDispatchBuffers );
-        //   std::cout << "extended mReplyQueue" << std::endl;
-      }
-      else
-      {
-        mReplyBuffers = mDispatchBuffers;
-        read ( );
-      }
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+
+    if ( mAsynchronousException )
+    {
+      return;
+    }
+
+    if ( mReplyBuffers )
+    {
+      mReplyQueue.push_back ( mDispatchBuffers );
+      //   std::cout << "extended mReplyQueue" << std::endl;
+    }
+    else
+    {
+      mReplyBuffers = mDispatchBuffers;
+      read ( );
     }
 
     if ( mDispatchQueue.size() && mPacketsInFlight != this->getMaxNumberOfBuffers() )
@@ -329,6 +333,11 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode )
   {
+    if ( mAsynchronousException )
+    {
+       return;
+    }
+
     if ( !mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
@@ -401,6 +410,7 @@ namespace uhal
       mReplyBuffers = mReplyQueue.front();
       mReplyQueue.pop_front();
       // std::cout << "reduced mReplyQueue" << std::endl;
+      assert ( mReplyBuffers );
       read();
     }
     else
