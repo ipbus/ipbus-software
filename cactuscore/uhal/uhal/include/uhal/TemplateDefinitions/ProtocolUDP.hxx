@@ -410,7 +410,6 @@ namespace uhal
       mReplyBuffers = mReplyQueue.front();
       mReplyQueue.pop_front();
       // std::cout << "reduced mReplyQueue" << std::endl;
-      assert ( mReplyBuffers );
       read();
     }
     else
