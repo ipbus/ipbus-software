@@ -149,6 +149,10 @@ COMMANDS += [["TEST IPBUS 2.0 - ControlHub (with packet loss)",
               ['uhal_test_suite.py -v -s "2.0 controlhub with packet loss"']
             ]]
 
+COMMANDS += [["TEST PYCOHAL",
+              ["uhal_test_suite.py -v -s pycohal"]
+            ]]
+
 COMMANDS += [["TEST uHAL GUI",
               ["uhal_test_suite.py -v -s gui"]
             ]]
