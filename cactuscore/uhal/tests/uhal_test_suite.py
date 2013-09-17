@@ -71,7 +71,6 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
-#               "test_pycohal -c %s -v" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-1.3://localhost:50001",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
@@ -349,6 +348,12 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "cat /var/log/controlhub.log",
                controlhub_stop]
                 ]]
+
+    cmds += [["TEST PYCOHAL",
+              ["DummyHardwareUdp.exe --version 1 --port 50001",
+               "test_pycohal -c %s -v" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\""]
+            ]]
 
     cmds += [["TEST uHAL GUI",
               ["/usr/bin/python -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]

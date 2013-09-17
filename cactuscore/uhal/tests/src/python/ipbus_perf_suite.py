@@ -44,7 +44,7 @@ TARGETS = ['amc-e1a12-19-09:50001',
 
 DIRECT_UDP_NR_IN_FLIGHT = 16
 
-CACTUS_REVISION = "uHAL @ r21438, ControlHub @ r22319"
+CACTUS_REVISION = "uHAL @ r21438, ControlHub @ r22892"
 
 CHANGES_TAG = "No changes"
 
@@ -540,7 +540,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
         
     stop_controlhub(controlhub_ssh_client)
 
-    fig = plt.figure(figsize=(18,10))
+    fig = plt.figure(figsize=(13.5,7.5)) #(18,10))
     ax_bw_board  = fig.add_subplot(231)
     ax_bw_client = fig.add_subplot(234, ylim=[0,300])
     ax_ch_cpu = fig.add_subplot(232, ylim=[0,400])
@@ -600,7 +600,7 @@ if __name__ == "__main__":
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
 #    (f, ((ax1, ax2), (ax3, ax4))) = plt.subplots(2, 2)
-    f = plt.figure(figsize=(12,10))
+    f = plt.figure(figsize=(12,7.5)) # (12,10))
     ax2 = f.add_subplot(222)
     ax3 = f.add_subplot(223)
     ax4 = f.add_subplot(224)
