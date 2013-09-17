@@ -49,9 +49,13 @@
 -endif.
 
 
--define( CH_LOG_INFO(MESSAGE), ch_utils:log(info, ?MODULE, MESSAGE) ).
--define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA) ).
--define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
+%-define( CH_LOG_INFO(MESSAGE), ch_utils:log(info, ?MODULE, MESSAGE) ).
+%-define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA) ).
+%-define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
+
+-define( CH_LOG_INFO(MESSAGE), void ).
+-define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA), void ).
+-define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA, STATE), void ).
 
 -define( CH_LOG_WARN(MESSAGE), ch_utils:log(warning, ?MODULE, MESSAGE) ).
 -define( CH_LOG_WARN(MESSAGE, MESSAGE_DATA), ch_utils:log(warning, ?MODULE, MESSAGE, MESSAGE_DATA) ).
