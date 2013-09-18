@@ -103,17 +103,17 @@ namespace uhal
       */
       virtual ~IPbusCore();
 
-      /**
-      	A method to modify the timeout period for any pending or future transactions
-      	@param aTimeoutPeriod the desired timeout period in milliseconds
-      */
-      virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod  = 0 ) ;
-
-      /**
-      	A method to retrieve the timeout period currently being used
-      	@return the timeout period currently being used in milliseconds
-      */
-      virtual uint64_t getTimeoutPeriod();
+      //       /*
+      //       	A method to modify the timeout period for any pending or future transactions
+      //       	@param aTimeoutPeriod the desired timeout period in milliseconds
+      //       */
+      //       virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod  = 0 ) ;
+      //
+      //       /*
+      //       	A method to retrieve the timeout period currently being used
+      //       	@return the timeout period currently being used in milliseconds
+      //       */
+      //       virtual uint64_t getTimeoutPeriod();
 
     protected:
 
@@ -218,18 +218,17 @@ namespace uhal
 
       virtual void dispatchExceptionHandler();
 
+    private:
 
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint32_t mTransactionCounter;
 
-
       //! The size of the buffer in the target device for receiving IPbus data packets from uhal
       uint32_t mMaxSendSize;
+
       //! The size of the buffer in the target device for sending IPbus data packets to uhal
       uint32_t mMaxReplySize;
 
-      //! Timeout period for transactions
-      boost::posix_time::time_duration mTimeoutPeriod;
 
   };
 

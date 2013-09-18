@@ -38,14 +38,15 @@
 namespace uhal
 {
 
-  ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri ) :
+  ClientInterface::ClientInterface ( const std::string& aId, const URI& aUri,  const boost::posix_time::time_duration& aTimeoutPeriod ) :
     mBuffers(),
 #ifdef NO_PREEMPTIVE_DISPATCH
     mNoPreemptiveDispatchBuffers(),
 #endif
     //    mCurrentBuffers ( NULL ),
     mId ( aId ),
-    mUri ( aUri )
+    mUri ( aUri ),
+    mTimeoutPeriod ( aTimeoutPeriod )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -59,7 +60,8 @@ namespace uhal
 #endif
     //    mCurrentBuffers ( NULL ),
     mId ( ),
-    mUri ( )
+    mUri ( ),
+    mTimeoutPeriod ( boost::posix_time::pos_infin )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -73,7 +75,8 @@ namespace uhal
 #endif
     //    mCurrentBuffers ( NULL ),
     mId ( aClientInterface.mId ),
-    mUri ( aClientInterface.mUri )
+    mUri ( aClientInterface.mUri ),
+    mTimeoutPeriod ( aClientInterface.mTimeoutPeriod )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -84,6 +87,7 @@ namespace uhal
     deleteBuffers();
     mId  = aClientInterface.mId;
     mUri = aClientInterface.mUri;
+    mTimeoutPeriod = aClientInterface.mTimeoutPeriod;
     return *this;
   }
 
@@ -559,5 +563,28 @@ namespace uhal
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+  void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
+  {
+    if ( aTimeoutPeriod == 0 )
+    {
+      mTimeoutPeriod = boost::posix_time::pos_infin;
+    }
+    else
+    {
+      mTimeoutPeriod = boost::posix_time::milliseconds ( aTimeoutPeriod );
+    }
+  }
+
+  uint64_t ClientInterface::getTimeoutPeriod()
+  {
+    return mTimeoutPeriod.total_milliseconds();
+  }
+
+
+  const boost::posix_time::time_duration& ClientInterface::getBoostTimeoutPeriod()
+  {
+    return mTimeoutPeriod;
+  }
 
 }

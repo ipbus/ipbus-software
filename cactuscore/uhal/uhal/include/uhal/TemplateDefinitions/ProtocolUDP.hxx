@@ -194,8 +194,8 @@ namespace uhal
     log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
     //mSocket = boost::asio::ip::udp::socket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) );
     mSocket.open ( boost::asio::ip::udp::v4() );
-//    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
-//    mSocket.io_control ( lNonBlocking );
+    //    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
+    //    mSocket.io_control ( lNonBlocking );
     log ( Info() , "UDP socket created successfully." );
   }
 
@@ -222,7 +222,7 @@ namespace uhal
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
     // log( Warning() , ThisLocation() );
-    mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+    mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 #ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, _1 ) );
     mPacketsInFlight++;
@@ -250,7 +250,6 @@ namespace uhal
     //       log( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
     //       return;
     //     }
-
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
@@ -312,7 +311,7 @@ namespace uhal
     lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( mReplyBuffers->getSpareSpace() , Buffers::mSpareSpaceSize ) );
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
-    mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+    mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 #ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP< InnerProtocol >::read_callback, this, _1 ) );
 #else
@@ -335,7 +334,7 @@ namespace uhal
   {
     if ( mAsynchronousException )
     {
-       return;
+      return;
     }
 
     if ( !mReplyBuffers )
@@ -352,7 +351,7 @@ namespace uhal
       {
         exception::UdpTimeout* lExc = new exception::UdpTimeout();
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
-        log ( *lExc , "ASIO reported a Timeout in UDP callback" );
+        log ( *lExc , "ASIO reported a getBoostTimeoutPeriod() in UDP callback" );
         mAsynchronousException = lExc;
         return;
       }
@@ -443,7 +442,7 @@ namespace uhal
     // deadline before this actor had a chance to run.
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
-      // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
+      // SETTING THE EXCEPTION HERE CAN APPEAR AS A getBoostTimeoutPeriod() WHEN NONE ACTUALLY EXISTS
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket.close();

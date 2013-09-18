@@ -90,7 +90,7 @@ namespace uhal
       	@param aId the uinique identifier that the client will be given.
       	@param aUri a struct containing the full URI of the target.
       */
-      ClientInterface ( const std::string& aId, const URI& aUri );
+      ClientInterface ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod = boost::posix_time::pos_infin );
 
     private:
       /**
@@ -143,13 +143,16 @@ namespace uhal
       	A method to modify the timeout period for any pending or future transactions
       	@param aTimeoutPeriod the desired timeout period in milliseconds
       */
-      virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod  = 0 ) = 0;
+      void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod  = 0 );
 
       /**
       	A method to retrieve the timeout period currently being used
       	@return the timeout period currently being used in milliseconds
       */
-      virtual uint64_t getTimeoutPeriod() = 0;
+      uint64_t getTimeoutPeriod();
+
+
+      const boost::posix_time::time_duration& getBoostTimeoutPeriod();
 
 
       /**
@@ -352,6 +355,16 @@ namespace uhal
       //! A pointer to a buffer-wrapper object
       boost::shared_ptr< Buffers > mCurrentBuffers;
 
+      //! the identifier of the target for this client
+      std::string mId;
+
+      //! a struct containing the full URI of the target for this client
+      URI mUri;
+
+      //! Timeout period for transactions
+      boost::posix_time::time_duration mTimeoutPeriod;
+
+
     protected:
 
       /**
@@ -364,14 +377,10 @@ namespace uhal
       virtual boost::shared_ptr< Buffers > checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 
 
-      //! the identifier of the target for this client
-      std::string mId;
-      //! a struct containing the full URI of the target for this client
-      URI mUri;
-
       virtual uint32_t getMaxNumberOfBuffers() = 0;
       virtual uint32_t getMaxSendSize() = 0;
       virtual uint32_t getMaxReplySize() = 0;
+
 
   };
 

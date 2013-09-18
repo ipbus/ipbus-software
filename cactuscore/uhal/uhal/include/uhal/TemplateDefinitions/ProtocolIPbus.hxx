@@ -229,14 +229,15 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size >
   void IPbus< 2 , IPbus_minor , buffer_size >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
-    //     log ( Info() , ThisLocation() );
-    mSendPacketHeader.push_back ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
+    aBuffers->send ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
 #ifndef DISABLE_PACKET_COUNTER_HACK
     mPacketCounter++;
 #endif
-    aBuffers->send ( mSendPacketHeader.back() );
-    mReceivePacketHeader.push_back ( 0x00000000 );
-    aBuffers->receive ( mReceivePacketHeader.back() );
+    {
+      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      mReceivePacketHeader.push_back ( 0x00000000 );
+      aBuffers->receive ( mReceivePacketHeader.back() );
+    }
   }
 
 
@@ -306,9 +307,16 @@ namespace uhal
       return lExc;
     }
 
+    {
+      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      mReceivePacketHeader.pop_front();
+    }
+
     // log ( Info() , "IPbus 2.0 has validated the packet header" );
     return IPbusCore::validate ( ( aSendBufferStart+=4 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
   }
+
+
 
 
   template< uint8_t IPbus_minor , uint32_t buffer_size >
@@ -419,7 +427,6 @@ namespace uhal
 #else
     mPacketCounter = 0;
 #endif
-    mSendPacketHeader.clear();
     mReceivePacketHeader.clear();
     IPbusCore::dispatchExceptionHandler();
   }

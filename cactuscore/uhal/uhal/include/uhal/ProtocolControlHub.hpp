@@ -153,9 +153,6 @@ namespace uhal
       //! The port number of the target device that is connected to the Control Hub
       uint16_t mDevicePort;
 
-      //! The transaction counter which will be incremented in the sent IPbus headers
-      uint32_t mTransactionCounter;
-
       //! A struct representing the preamble which will be prepended to an IPbus buffer for the benefit of the Control Hub
       struct tpreamble
       {

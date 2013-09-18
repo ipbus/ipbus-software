@@ -301,7 +301,7 @@ namespace uhal
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint16_t mPacketCounter;
 
-      std::deque< uint32_t > mSendPacketHeader;
+      boost::mutex mReceivePacketMutex;
       std::deque< uint32_t > mReceivePacketHeader;
 
   };

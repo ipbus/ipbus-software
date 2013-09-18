@@ -86,6 +86,11 @@ namespace uhal
 
       bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError = true )
       {
+        for ( std::vector<uint32_t>::const_iterator lIt ( aIt ); lIt != aEnd; ++lIt )
+        {
+          log ( Debug , Integer ( *lIt, IntFmt<hex,fixed>() ) );
+        }
+
         // log ( Notice() , Pointer(&(*aIt)) , " : " , Pointer(&(*aEnd)) , "(", Integer((&(*aEnd)-&(*aIt))*4)  ,")" );
         uint32_t lAddress , lAddend , lAndTerm , lOrTerm ;
         std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;

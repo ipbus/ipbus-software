@@ -48,8 +48,7 @@ namespace uhal
   ControlHub< InnerProtocol >::ControlHub ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
     mDeviceIPaddress ( 0 ),
-    mDevicePort ( 0 ),
-    mTransactionCounter ( 0 )
+    mDevicePort ( 0 )
   {
     std::pair< uint32_t , uint16_t > lPair ( ExtractTargetID ( aUri ) );
     mDeviceIPaddress = htonl ( lPair.first );
@@ -81,18 +80,20 @@ namespace uhal
     // Device Port number (2 bytes)
     // Error code (2 bytes)
     // -------------------------------------------------------------------------------------------------------------
-    boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
-    mPreambles.push_back ( tpreamble () );
-    tpreamble* lPreambles = & mPreambles.back();
-    //     lPreambles->mSendByteCountPtr = ( uint32_t* ) ( aBuffers->send ( ( uint32_t ) ( 0 ) ) );
-    aBuffers->send ( mDeviceIPaddress );
-    aBuffers->send ( mDevicePort );
-    lPreambles->mSendWordCountPtr = ( uint16_t* ) ( aBuffers->send ( ( uint16_t ) ( 0 ) ) );
-    //     aBuffers->receive ( lPreambles->mReplyTotalByteCounter );
-    aBuffers->receive ( lPreambles->mReplyChunkByteCounter );
-    aBuffers->receive ( lPreambles->mReplyDeviceIPaddress );
-    aBuffers->receive ( lPreambles->mReplyDevicePort );
-    aBuffers->receive ( lPreambles->mReplyErrorCode );
+    {
+      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+      mPreambles.push_back ( tpreamble () );
+      tpreamble* lPreambles = & mPreambles.back();
+      //     lPreambles->mSendByteCountPtr = ( uint32_t* ) ( aBuffers->send ( ( uint32_t ) ( 0 ) ) );
+      aBuffers->send ( mDeviceIPaddress );
+      aBuffers->send ( mDevicePort );
+      lPreambles->mSendWordCountPtr = ( uint16_t* ) ( aBuffers->send ( ( uint16_t ) ( 0 ) ) );
+      //     aBuffers->receive ( lPreambles->mReplyTotalByteCounter );
+      aBuffers->receive ( lPreambles->mReplyChunkByteCounter );
+      aBuffers->receive ( lPreambles->mReplyDeviceIPaddress );
+      aBuffers->receive ( lPreambles->mReplyDevicePort );
+      aBuffers->receive ( lPreambles->mReplyErrorCode );
+    }
     InnerProtocol::preamble ( aBuffers );
   }
 

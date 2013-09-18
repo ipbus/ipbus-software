@@ -198,7 +198,7 @@ namespace uhal
   void TCP< InnerProtocol >::connect()
   {
     log ( Info() , "Attempting to create TCP connection to '" , mEndpoint->host_name() , "' port " , mEndpoint->service_name() , "." );
-    mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+    mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::async_connect ( mSocket , mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
 
@@ -232,8 +232,8 @@ namespace uhal
     }
 
     mSocket.set_option ( boost::asio::ip::tcp::no_delay ( true ) );
-//    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
-//    mSocket.io_control ( lNonBlocking );
+    //    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
+    //    mSocket.io_control ( lNonBlocking );
     log ( Info() , "TCP connection succeeded" );
   }
 
@@ -253,7 +253,7 @@ namespace uhal
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( &mSendByteCounter , 4 ) );
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
-    mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+    mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, _1 ) );
     mPacketsInFlight++;
@@ -334,7 +334,7 @@ namespace uhal
     lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &mReplyByteCounter , 4 ) );
     log ( Debug() , "Getting reply byte counter" );
     boost::asio::ip::tcp::endpoint lEndpoint;
-    mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+    mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol >::read_callback, this, _1 ) );
 #else
@@ -415,7 +415,7 @@ namespace uhal
     }
 
     //     lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( mReplyBuffers->getSpareSpace() , Buffers::mSpareSpaceSize ) );
-    //     mDeadlineTimer.expires_from_now ( this->mTimeoutPeriod );
+    //     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( mReplyByteCounter ), lErrorCode );
     //     do

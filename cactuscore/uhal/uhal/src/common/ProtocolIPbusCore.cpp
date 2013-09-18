@@ -79,8 +79,7 @@ namespace uhal
     ClientInterface ( aId , aUri ),
     mTransactionCounter ( 0x00000000 ),
     mMaxSendSize ( aMaxSendSize<<2 ),
-    mMaxReplySize ( aMaxReplySize<<2 ),
-    mTimeoutPeriod ( aTimeoutPeriod )
+    mMaxReplySize ( aMaxReplySize<<2 )
   {}
 
 
@@ -124,7 +123,6 @@ namespace uhal
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
     uint8_t lSendResponseGood , lReplyResponseGood;
-    uint32_t lCounter ( 0 );
 
     do
     {
@@ -497,24 +495,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-
-  void IPbusCore::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
-  {
-    if ( aTimeoutPeriod == 0 )
-    {
-      mTimeoutPeriod = boost::posix_time::pos_infin;
-    }
-    else
-    {
-      mTimeoutPeriod = boost::posix_time::milliseconds ( aTimeoutPeriod );
-    }
-  }
-
-  uint64_t IPbusCore::getTimeoutPeriod()
-  {
-    return mTimeoutPeriod.total_milliseconds();
-  }
 
 
   uint32_t IPbusCore::getMaxSendSize()
