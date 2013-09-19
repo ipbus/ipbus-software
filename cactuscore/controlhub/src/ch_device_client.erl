@@ -732,7 +732,7 @@ state_as_string(S) when is_record(S, state) ->
                   "         number queued    = ~w~n",
                   [S#state.mode, S#state.ipbus_v, S#state.next_id, 
                    S#state.ip_tuple, S#state.port,
-                   length(S#state.in_flight), S#state.max_in_flight,
+                   element(1, S#state.in_flight), S#state.max_in_flight,
                    queue:len(S#state.queue)]
                   ).
 
@@ -741,6 +741,8 @@ udp_proc_init() ->
     receive
         {start, Socket, IP, Port, ParentPid} ->
             link(ParentPid),
+            put(target_ip_tuple, IP),
+            put(target_port, Port),
             udp_proc_loop(Socket, IP, Port, ParentPid)
     end.
 
@@ -757,8 +759,8 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
             {inet_reply, Socket, ok} ->
                 void;
             {inet_reply, Socket, SendError} ->
-                ?CH_LOG_ERROR("Error in TCP async send: ~w", [SendError]),
-                throw({udp_send_error, SendError});
+                ?CH_LOG_ERROR("Error in UDP async send: ~w", [SendError]);%,
+                %throw({udp_send_error, SendError});
             Other ->
                 ParentPid ! Other
         end 
