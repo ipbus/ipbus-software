@@ -391,7 +391,7 @@ namespace uhal
       {
         exception::TcpTimeout* lExc = new exception::TcpTimeout();
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
-        log ( *lExc , "ASIO reported a Timeout in TCP callback" );
+        log ( *lExc , "ASIO reported a timeout in TCP callback" );
         mAsynchronousException = lExc;
         return;
       }
@@ -435,7 +435,7 @@ namespace uhal
       {
         exception::TcpTimeout* lExc = new exception::TcpTimeout();
         log ( *lExc , "ASIO reported an error: " , Quote ( lErrorCode.message() ) );
-        log ( *lExc , "ASIO reported a Timeout in TCP callback" );
+        log ( *lExc , "ASIO reported a timeout in TCP callback" );
         mAsynchronousException = lExc;
         return;
       }

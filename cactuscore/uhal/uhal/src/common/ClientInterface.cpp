@@ -566,6 +566,7 @@ namespace uhal
 
   void ClientInterface::setTimeoutPeriod ( const uint32_t& aTimeoutPeriod )
   {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     if ( aTimeoutPeriod == 0 )
     {
       mTimeoutPeriod = boost::posix_time::pos_infin;
@@ -578,6 +579,7 @@ namespace uhal
 
   uint64_t ClientInterface::getTimeoutPeriod()
   {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return mTimeoutPeriod.total_milliseconds();
   }
 

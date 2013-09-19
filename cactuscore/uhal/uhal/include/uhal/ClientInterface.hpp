@@ -151,9 +151,10 @@ namespace uhal
       */
       uint64_t getTimeoutPeriod();
 
-
+    protected:
       const boost::posix_time::time_duration& getBoostTimeoutPeriod();
 
+    public:
 
       /**
       	Write a single, unmasked word to a register

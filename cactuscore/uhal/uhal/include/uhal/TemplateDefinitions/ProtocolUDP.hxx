@@ -351,7 +351,7 @@ namespace uhal
       {
         exception::UdpTimeout* lExc = new exception::UdpTimeout();
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
-        log ( *lExc , "ASIO reported a getBoostTimeoutPeriod() in UDP callback" );
+        log ( *lExc , "ASIO reported a timeout in UDP callback" );
         mAsynchronousException = lExc;
         return;
       }
