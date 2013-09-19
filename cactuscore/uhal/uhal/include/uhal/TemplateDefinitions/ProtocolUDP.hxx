@@ -257,6 +257,25 @@ namespace uhal
       return;
     }
 
+    if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
+    {
+      mSocket.close();
+
+      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+      {
+        exception::UdpTimeout* lExc = new exception::UdpTimeout();
+        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+        log ( *lExc , "ASIO reported a timeout in UDP callback" );
+        mAsynchronousException = lExc;
+        return;
+      }
+
+      exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
+      log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+      mAsynchronousException = lExc;
+      return;
+    }
+
     if ( mReplyBuffers )
     {
       mReplyQueue.push_back ( mDispatchBuffers );

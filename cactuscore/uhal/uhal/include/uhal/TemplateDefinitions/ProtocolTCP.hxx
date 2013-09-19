@@ -284,6 +284,39 @@ namespace uhal
       return;
     }
 
+    if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
+    {
+      try
+      {
+        mSocket.close();
+
+        while ( mSocket.is_open() )
+          {}
+      }
+      catch ( const std::exception& aExc )
+      {
+        exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
+        log ( *lExc , "Error closing socket" );
+        log ( *lExc , "ASIO reported " , Quote ( aExc.what() ) );
+        mAsynchronousException = lExc;
+        return;
+      }
+
+      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+      {
+        exception::TcpTimeout* lExc = new exception::TcpTimeout();
+        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+        log ( *lExc , "ASIO reported a timeout in TCP callback" );
+        mAsynchronousException = lExc;
+        return;
+      }
+
+      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
+      log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+      mAsynchronousException = lExc;
+      return;
+    }
+
     if ( mReplyBuffers )
     {
       mReplyQueue.push_back ( mDispatchBuffers );
