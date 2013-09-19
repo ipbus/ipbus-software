@@ -84,7 +84,8 @@ namespace uhal
 
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
-        //         std::cout << aByteCount << " bytes received" << std::endl;
+        std::cout << aByteCount << " bytes received" << std::endl;
+
 #ifdef BIG_ENDIAN_HACK
         if ( IPbus_major == 2 )
         {
