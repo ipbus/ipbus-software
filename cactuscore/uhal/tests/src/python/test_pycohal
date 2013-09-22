@@ -345,6 +345,7 @@ class TestRawClient(unittest.TestCase):
     """
 
     def setUp(self):
+        uhal.setLogLevelTo(uhal.LogLevel.NOTICE)
         manager = uhal.ConnectionManager(CONNECTIONS_FILE)
         self.hw = manager.getDevice(DEVICE_ID)
 
@@ -409,7 +410,7 @@ class TestRawClient(unittest.TestCase):
         self.assertEqual( reg1.value(), ( (x1 & x2) | x3 ) )
 
     def test_mem_rmw_sum(self):
-        N = 1024
+        N = 512 # 1024
         client = self.hw.getClient()
 
         total = 0

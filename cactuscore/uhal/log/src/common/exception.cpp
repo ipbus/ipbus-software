@@ -152,7 +152,7 @@ namespace uhal
       lStr << " * Exception constructed at time:              " << tmbuf << '.' << std::setw ( 6 ) << mTime.tv_usec << "\n";
       strftime ( tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", localtime ( &lTime.tv_sec ) );
       lStr << " * Exception's what() function called at time: " << tmbuf << '.' << std::setw ( 6 ) << lTime.tv_usec << "\n";
-      lStr << " * Call stack:\n";
+      /*lStr << " * Call stack:\n";
       std::vector< Backtrace::TracePoint > lBacktrace = Backtrace::BacktraceSymbols ( mBacktrace );
       uint32_t lCounter ( 0 );
       GccOutputCleaner lOutputCleaner ( 12 , &GccOutputCleaner::TStyle );
@@ -161,7 +161,7 @@ namespace uhal
       {
         lStr << "   [ " << std::setw ( 2 ) << lCounter << " ] " << lOutputCleaner ( lIt->function ) << "\n";
         lStr << "          at " << lIt->file << ":" << lIt->line << "\n";
-      }
+      }*/
 
       std::string lString ( lStr.str() );
       strncpy ( mString , lString.c_str() , 65536 );
