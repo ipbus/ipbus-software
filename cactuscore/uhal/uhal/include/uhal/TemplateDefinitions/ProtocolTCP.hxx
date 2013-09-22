@@ -254,9 +254,11 @@ namespace uhal
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    if ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(900) )
-      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now() );
-
+    while ( ( mDeadlineTimer.expires_from_now() < ( this->getBoostTimeoutPeriod() - boost::posix_time::microseconds(50) ) ) )
+    {
+      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
+      mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
+    }
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol >::write_callback, this, _1 ) );
     mPacketsInFlight++;
@@ -370,8 +372,11 @@ namespace uhal
     log ( Debug() , "Getting reply byte counter" );
     boost::asio::ip::tcp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    if ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(900) )
-      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now() );
+    while ( ( mDeadlineTimer.expires_from_now() < ( this->getBoostTimeoutPeriod() - boost::posix_time::microseconds(50) ) ) )
+    {
+      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
+      mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
+    }
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol >::read_callback, this, _1 ) );
 #else
