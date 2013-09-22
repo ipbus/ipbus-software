@@ -223,6 +223,9 @@ namespace uhal
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
     // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
+    if ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(900) )
+      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now() );
+
 #ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, _1 ) );
     mPacketsInFlight++;
@@ -334,6 +337,8 @@ namespace uhal
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
+    if ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(900) )
+      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now() );
 #ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP< InnerProtocol >::read_callback, this, _1 ) );
 #else

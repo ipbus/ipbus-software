@@ -38,7 +38,7 @@ NIGHTLY_LOG_FILE    = join(NIGHTLY_LOG_DIR,"nightly.log")
 ERROR_LIST        = ['error: ',
                      'RPM build errors',
                      'collect2: ld returned',
-                     ' ERROR ',
+                     ' ERROR ', ' FATAL ',
                      ' Error ',
                      'FAILED',
                      'FAIL: test', 'ERROR: test', #pycohal
