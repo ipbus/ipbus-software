@@ -223,7 +223,7 @@ namespace uhal
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
     // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    while ( ( mDeadlineTimer.expires_from_now() < ( this->getBoostTimeoutPeriod() - boost::posix_time::microseconds(50) ) ) )
+    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(600) )
     {
       log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
@@ -339,7 +339,7 @@ namespace uhal
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    while ( ( mDeadlineTimer.expires_from_now() < ( this->getBoostTimeoutPeriod() - boost::posix_time::microseconds(50) ) ) )
+    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(600) )
     {
       log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
