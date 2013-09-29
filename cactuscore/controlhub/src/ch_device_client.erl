@@ -477,7 +477,7 @@ parse_ipbus_control_pkt( _ ) ->
 ipbus2_pkt_header(Id, big) ->
     <<16#20:8, Id:16/big, 16#f0>>;
 ipbus2_pkt_header(Id, little) ->
-    <<16#f0:8, Id:16/little, 16#f0>>.
+    <<16#f0:8, Id:16/little, 16#20>>.
 
 
 %% ---------------------------------------------------------------------
