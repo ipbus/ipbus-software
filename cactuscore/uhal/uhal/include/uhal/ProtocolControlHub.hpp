@@ -140,7 +140,7 @@ namespace uhal
 
       virtual uint32_t getMaxNumberOfBuffers()
       {
-        return 32;
+        return 60;
       }
 
       virtual void dispatchExceptionHandler();
