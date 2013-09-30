@@ -518,7 +518,6 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read ( ClientPtr& c, 
 
 void uhal::tests::PerfTester::bandwidthRxTest()
 {
-  log ( Warning() , "PerfTester: Start timer" );
   Timer myTimer;
 
   for ( unsigned i = 0; i < m_iterations ; ++i )
@@ -550,8 +549,6 @@ void uhal::tests::PerfTester::bandwidthRxTest()
     }
   }
 
-  log ( Warning() , "PerfTester: Stop timer" );
-
   double totalSeconds = myTimer.elapsedSeconds();
   double totalPayloadKB = m_deviceURIs.size() * m_iterations * m_bandwidthTestDepth * 4. / 1024.;
   double dataRateKB_s = totalPayloadKB/totalSeconds;
@@ -566,7 +563,6 @@ void uhal::tests::PerfTester::bandwidthTxTest()
 {
   // Send buffer - lots of "cafebabe" (in little-endian)
   U32Vec sendBuffer ( m_bandwidthTestDepth, 0xbebafeca );
-  log ( Warning() , "PerfTester: Start timer" );
   Timer myTimer;
 
   for ( unsigned i = 0; i < m_iterations ; ++i )
@@ -598,8 +594,6 @@ void uhal::tests::PerfTester::bandwidthTxTest()
       iClient->dispatch();
     }
   }
-
-  log ( Warning() , "PerfTester: Stop timer" );
 
   double totalSeconds = myTimer.elapsedSeconds();
   double totalPayloadKB = m_deviceURIs.size() * m_iterations * m_bandwidthTestDepth * 4. / 1024.;
