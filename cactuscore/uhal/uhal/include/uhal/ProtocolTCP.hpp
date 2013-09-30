@@ -167,7 +167,6 @@ namespace uhal
 
       uint32_t mPacketsInFlight;
 #endif
-      size_t mNrBuffersPerSend;
 
       uint32_t mSendByteCounter;
       uint32_t mReplyByteCounter;

@@ -64,7 +64,6 @@ namespace uhal
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
 #endif
-    mNrBuffersPerSend ( nr_buffers_per_send ),
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
@@ -230,7 +229,7 @@ namespace uhal
         mDispatchQueue.pop_front();
       }*/
 
-      if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= mNrBuffersPerSend ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+      if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
       {
         write ( );
       }
@@ -300,7 +299,7 @@ namespace uhal
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( &mSendByteCounter , 4 ) );
     mSendByteCounter = 0;
 
-    size_t lNrBuffersToSend = std::min(mDispatchQueue.size(), mNrBuffersPerSend);
+    size_t lNrBuffersToSend = std::min(mDispatchQueue.size(), nr_buffers_per_send);
     for ( size_t i = 0; i < lNrBuffersToSend; i++ )
     {
       mDispatchBuffers.push_back( mDispatchQueue.front() );
@@ -408,7 +407,7 @@ namespace uhal
 
     mDispatchBuffers.clear();
 
-    if ( ( mDispatchQueue.size() >= mNrBuffersPerSend ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+    if ( ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
     {
       write();
     }
@@ -619,7 +618,7 @@ namespace uhal
       mReplyBuffers.clear();
     }
 
-    if ( mDispatchBuffers.empty() && (mDispatchQueue.size() > mNrBuffersPerSend) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+    if ( mDispatchBuffers.empty() && (mDispatchQueue.size() > nr_buffers_per_send) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
     {
       write();
     }
