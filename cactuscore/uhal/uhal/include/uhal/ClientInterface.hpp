@@ -332,6 +332,8 @@ namespace uhal
 
       void returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers );
       void returnBufferToPool ( std::deque< boost::shared_ptr< Buffers > >& aBuffers );
+      void returnBufferToPool ( std::vector< boost::shared_ptr< Buffers > >& aBuffers );
+      void returnBufferToPool ( std::deque< std::vector< boost::shared_ptr< Buffers > > >& aBuffers );
 
     private:
       void updateCurrentBuffers();

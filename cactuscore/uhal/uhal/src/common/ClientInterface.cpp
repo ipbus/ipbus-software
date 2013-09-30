@@ -289,6 +289,46 @@ namespace uhal
     aBuffers.clear();
   }
 
+  
+  void ClientInterface::returnBufferToPool ( std::vector< boost::shared_ptr<Buffers> >& aBuffers )
+  {
+  #ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
+
+    for ( std::vector < boost::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
+    {
+      if ( *lIt )
+      {
+        mBuffers.push_back ( *lIt );
+      }
+    }
+
+    aBuffers.clear();
+  }
+
+
+  void ClientInterface::returnBufferToPool ( std::deque< std::vector< boost::shared_ptr<Buffers> > >& aBuffers )
+  {
+  #ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
+#endif
+
+    for ( std::deque < std::vector < boost::shared_ptr< Buffers > > >::iterator lIt1 = aBuffers.begin(); lIt1 != aBuffers.end(); ++lIt1 )
+    {
+      for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt2 = lIt1->begin(); lIt2 != lIt1->end(); ++lIt2 )
+      {
+        if ( *lIt2 )
+        {
+          mBuffers.push_back ( *lIt2 );
+        }
+      }
+    }
+
+    aBuffers.clear();
+  }
+
+
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   boost::shared_ptr< Buffers > ClientInterface::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
   {

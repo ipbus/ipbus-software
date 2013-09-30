@@ -116,23 +116,12 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     ClientInterface::returnBufferToPool ( mDispatchQueue );
     mDispatchQueue.clear();
-    for ( std::deque< std::vector< boost::shared_ptr<Buffers> > >::iterator lIt1 = mReplyQueue.begin(); lIt1 != mReplyQueue.end(); lIt1++)
-    {
-      for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt2 = lIt1->begin(); lIt2 != lIt1->end(); lIt2++)
-      {
-        ClientInterface::returnBufferToPool ( *lIt2 );
-      }
-    }
+    ClientInterface::returnBufferToPool ( mReplyQueue );
     mReplyQueue.clear();
-    for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt = mDispatchBuffers.begin(); lIt != mDispatchBuffers.end(); lIt++ )
-    {
-      ClientInterface::returnBufferToPool ( *lIt );
-    }
+
+    ClientInterface::returnBufferToPool ( mDispatchBuffers );
     mDispatchBuffers.clear();
-    for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt = mReplyBuffers.begin(); lIt != mReplyBuffers.end(); lIt++ )
-    {
-      ClientInterface::returnBufferToPool ( *lIt );
-    }
+    ClientInterface::returnBufferToPool ( mReplyBuffers );
     mReplyBuffers.clear();
     mPacketsInFlight = 0;
 #endif
@@ -165,23 +154,12 @@ namespace uhal
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       mDispatchQueue.clear();
-      for ( std::deque< std::vector< boost::shared_ptr<Buffers> > >::iterator lIt1 = mReplyQueue.begin(); lIt1 != mReplyQueue.end(); lIt1++)
-      {
-        for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt2 = lIt1->begin(); lIt2 != lIt1->end(); lIt2++)
-        {
-          ClientInterface::returnBufferToPool ( *lIt2 );
-        }
-      }
+      ClientInterface::returnBufferToPool ( mReplyQueue );
       mReplyQueue.clear();
-      for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt = mDispatchBuffers.begin(); lIt != mDispatchBuffers.end(); lIt++ )
-      {
-        ClientInterface::returnBufferToPool ( *lIt );
-      }
+
+      ClientInterface::returnBufferToPool ( mDispatchBuffers );
       mDispatchBuffers.clear();
-      for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt = mReplyBuffers.begin(); lIt != mReplyBuffers.end(); lIt++ )
-      {
-        ClientInterface::returnBufferToPool ( *lIt );
-      }
+      ClientInterface::returnBufferToPool ( mReplyBuffers );
       mReplyBuffers.clear();
 #endif
     }
@@ -719,24 +697,12 @@ namespace uhal
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       mDispatchQueue.clear();
-      for ( std::deque< std::vector< boost::shared_ptr<Buffers> > >::iterator lIt1 = mReplyQueue.begin(); lIt1 != mReplyQueue.end(); lIt1++)
-      {
-        for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt2 = lIt1->begin(); lIt2 != lIt1->end(); lIt2++)
-        {
-          ClientInterface::returnBufferToPool ( *lIt2 );
-        }
-      }
+      ClientInterface::returnBufferToPool ( mReplyQueue );
       mReplyQueue.clear();
       mPacketsInFlight = 0;
-      for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt = mDispatchBuffers.begin(); lIt != mDispatchBuffers.end(); lIt++ )
-      {
-        ClientInterface::returnBufferToPool ( *lIt );
-      }
+      ClientInterface::returnBufferToPool ( mDispatchBuffers );
       mDispatchBuffers.clear();
-      for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt = mReplyBuffers.begin(); lIt != mReplyBuffers.end(); lIt++ )
-      {
-        ClientInterface::returnBufferToPool ( *lIt );
-      }
+      ClientInterface::returnBufferToPool ( mReplyBuffers );
       mReplyBuffers.clear();
 #else
       mDispatchBuffers.reset();
