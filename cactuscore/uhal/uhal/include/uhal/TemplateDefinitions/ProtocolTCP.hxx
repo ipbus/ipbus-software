@@ -190,12 +190,6 @@ namespace uhal
 
       mDispatchQueue.push_back ( aBuffers );
 
-      /*if ( mDispatchQueue.size() > 2 * this->getMaxNumberOfBuffers() )
-      {
-        this->returnBufferToPool( mDispatchQueue.front() );
-        mDispatchQueue.pop_front();
-      }*/
-
       if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
       {
         write ( );
