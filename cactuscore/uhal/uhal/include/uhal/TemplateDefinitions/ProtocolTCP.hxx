@@ -191,17 +191,6 @@ namespace uhal
     }
   }
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
-  void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( const std::deque<boost::shared_ptr<Buffers> >& aBuffersDeque )
-  {
-    log ( Warning() , __func__ );
-#ifdef RUN_ASIO_MULTITHREADED
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-    assert ( mDispatchQueue.empty() );
-    mDispatchQueue = aBuffersDeque;
-#endif
-  }
-
 
   template < typename InnerProtocol , size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )

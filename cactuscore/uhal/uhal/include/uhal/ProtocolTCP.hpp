@@ -101,8 +101,6 @@ namespace uhal
       */
       virtual ~TCP();
 
-      void implementDispatch ( const std::deque<boost::shared_ptr<Buffers> >& aBuffersDeque );
-
       /**
       	Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
       	@param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
