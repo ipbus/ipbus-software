@@ -76,7 +76,7 @@ namespace uhal
   }
 
   //! Transport protocol to transfer an IPbus buffer via TCP
-  template < typename InnerProtocol >
+  template < typename InnerProtocol , size_t nr_buffers_per_send >
   class TCP : public InnerProtocol
   {
 
@@ -100,6 +100,8 @@ namespace uhal
       	Destructor
       */
       virtual ~TCP();
+
+      void implementDispatch ( const std::deque<boost::shared_ptr<Buffers> >& aBuffersDeque );
 
       /**
       	Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
@@ -161,17 +163,22 @@ namespace uhal
       boost::mutex mTransportLayerMutex;
 
       std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
-      std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
+      std::deque < std::vector< boost::shared_ptr< Buffers > > > mReplyQueue;
 
       uint32_t mPacketsInFlight;
 #endif
+      size_t mNrBuffersPerSend;
 
       uint32_t mSendByteCounter;
       uint32_t mReplyByteCounter;
 
+#ifdef RUN_ASIO_MULTITHREADED
+      std::vector< boost::shared_ptr< Buffers > > mDispatchBuffers;
+      std::vector< boost::shared_ptr< Buffers > > mReplyBuffers;
+#else
       boost::shared_ptr< Buffers > mDispatchBuffers;
       boost::shared_ptr< Buffers > mReplyBuffers;
-
+#endif
 
       uhal::exception::exception* mAsynchronousException;
 
