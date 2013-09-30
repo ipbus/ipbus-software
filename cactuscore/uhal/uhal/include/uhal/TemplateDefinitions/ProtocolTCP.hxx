@@ -267,12 +267,13 @@ namespace uhal
     mSendByteCounter = 0;
 
     size_t lNrBuffersToSend = std::min(mDispatchQueue.size(), nr_buffers_per_send);
+    mDispatchBuffers.reserve(lNrBuffersToSend);
     for ( size_t i = 0; i < lNrBuffersToSend; i++ )
     {
       mDispatchBuffers.push_back( mDispatchQueue.front() );
       mDispatchQueue.pop_front();
-      const boost::shared_ptr<Buffers>& lBuffer = mDispatchBuffers.back();
 
+      const boost::shared_ptr<Buffers>& lBuffer = mDispatchBuffers.back();
       mSendByteCounter += lBuffer->sendCounter();
       lAsioSendBuffer.push_back ( boost::asio::const_buffer ( lBuffer->getSendBuffer() , lBuffer->sendCounter() ) );
     }
