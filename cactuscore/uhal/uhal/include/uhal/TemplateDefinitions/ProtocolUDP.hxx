@@ -64,6 +64,7 @@ namespace uhal
     mDispatchQueue(),
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
+    mFlushDone ( true ),
 #endif
     //    mDispatchBuffers ( NULL ),
     //    mReplyBuffers ( NULL ),
@@ -204,6 +205,8 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::write ( )
   {
+    NotifyConditionalVariable ( false );
+
     if ( !mDispatchBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
@@ -262,6 +265,7 @@ namespace uhal
 
     if ( mAsynchronousException )
     {
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -276,6 +280,7 @@ namespace uhal
       }
 
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -285,6 +290,7 @@ namespace uhal
       exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
       log ( *lExc , "ASIO reported an error in write_callback:" , Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -325,6 +331,7 @@ namespace uhal
     if ( !mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -372,6 +379,7 @@ namespace uhal
   {
     if ( mAsynchronousException )
     {
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -392,6 +400,7 @@ namespace uhal
       }
 
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -401,6 +410,7 @@ namespace uhal
       exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
       log ( *lExc , "ASIO reported an error in read_callback: " , Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -440,6 +450,7 @@ namespace uhal
 
     if ( mAsynchronousException )
     {
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -466,6 +477,11 @@ namespace uhal
       mDispatchQueue.pop_front();
       //std::cout << "reduced mDispatchQueue" << std::endl;
       write();
+    }
+
+    if ( !mDispatchBuffers && !mReplyBuffers )
+    {
+      NotifyConditionalVariable ( true );
     }
 
 #else
@@ -503,25 +519,19 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::Flush( )
   {
-    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-    bool lContinue ( true );
-
-    //     logo lLogo;
-    while ( lContinue )
-    {
-      //       lLogo++;
-      if ( mAsynchronousException )
-      {
-        mAsynchronousException->ThrowAsDerivedType();
-      }
-
+    WaitOnConditionalVariable();
 #ifdef RUN_ASIO_MULTITHREADED
-      //             log( Warning() , "Mutex LOCKED @ " , ThisLocation() );
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
-      //log ( Warning() , "mDispatchBuffers = " , Pointer ( mDispatchBuffers ) , " mReplyBuffers = " , Pointer ( mReplyBuffers ) );
-      lContinue = ( mDispatchBuffers || mReplyBuffers );
+
+    if ( mAsynchronousException )
+    {
+      mAsynchronousException->ThrowAsDerivedType();
     }
+
+    //     assert ( !mDispatchBuffers );
+    assert ( mDispatchQueue.empty() );
+    //     assert ( !mReplyBuffers );
+    assert ( mReplyQueue.empty() );
+#endif
   }
 
 
@@ -529,11 +539,22 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::dispatchExceptionHandler()
   {
-    log ( Warning() , "Closing Socket" );
-    mSocket.close();
+    log ( Warning() , "Closing Socket since exception detected." );
 
-    while ( mSocket.is_open() )
-      {}
+    if ( mSocket.is_open() )
+    {
+      try
+      {
+        mSocket.close();
+
+        while ( mSocket.is_open() )
+          {}
+      }
+      catch ( ... )
+        {}
+    }
+
+    NotifyConditionalVariable ( true );
 
     if ( mAsynchronousException )
     {
@@ -559,6 +580,34 @@ namespace uhal
 
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+  template < typename InnerProtocol  >
+  void UDP< InnerProtocol >::NotifyConditionalVariable ( const bool& aValue )
+  {
+#ifdef RUN_ASIO_MULTITHREADED
+    {
+      boost::lock_guard<boost::mutex> lLock ( mConditionalVariableMutex );
+      mFlushDone = aValue;
+    }
+    mConditionalVariable.notify_one();
+#endif
+  }
+
+
+  template < typename InnerProtocol  >
+  void UDP< InnerProtocol >::WaitOnConditionalVariable()
+  {
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::unique_lock<boost::mutex> lLock ( mConditionalVariableMutex );
+
+    while ( !mFlushDone )
+    {
+      mConditionalVariable.wait ( lLock );
+    }
+
+#endif
+  }
 
 }
 

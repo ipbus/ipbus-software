@@ -89,7 +89,8 @@ namespace uhal
         if ( IPbus_major == 2 )
         {
           bool is_status_request = ( *mReceive.begin() == 0xF1000020 );
-          bool is_resend_request = ( (*mReceive.begin() & 0xFF0000FF) == 0xF2000020 );
+          bool is_resend_request = ( ( *mReceive.begin() & 0xFF0000FF ) == 0xF2000020 );
+
           if ( mBigEndianHack || is_status_request || is_resend_request )
           {
             for ( std::vector<uint32_t>::iterator lIt ( mReceive.begin() ) ; lIt != mReceive.begin() + ( aByteCount>>2 ) ; ++lIt )

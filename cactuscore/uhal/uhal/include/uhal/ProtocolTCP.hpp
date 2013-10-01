@@ -132,6 +132,10 @@ namespace uhal
       void CheckDeadline();
 
 
+      void NotifyConditionalVariable ( const bool& aValue );
+      void WaitOnConditionalVariable();
+
+
     private:
       //! The boost::asio::io_service used to create the connections
       boost::asio::io_service mIOservice;

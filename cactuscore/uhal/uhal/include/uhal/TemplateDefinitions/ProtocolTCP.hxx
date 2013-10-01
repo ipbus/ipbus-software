@@ -65,6 +65,7 @@ namespace uhal
     mDispatchQueue(),
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
+    mFlushDone ( true ),
 #endif
     mAsynchronousException ( NULL )
   {
@@ -142,6 +143,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol , nr_buffers_per_send >::~TCP()
   {
+    // log( Warning , ThisLocation() );
     try
     {
       mSocket.close();
@@ -173,6 +175,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
+    // log( Warning , ThisLocation() );
     if ( mAsynchronousException )
     {
       log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
@@ -186,8 +189,10 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-      mDispatchQueue.push_back ( aBuffers );
+      {
+        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+        mDispatchQueue.push_back ( aBuffers );
+      }
 
       if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
       {
@@ -206,6 +211,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::connect()
   {
+    // log( Warning , ThisLocation() );
     log ( Info() , "Attempting to create TCP connection to '" , mEndpoint->host_name() , "' port " , mEndpoint->service_name() , "." );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
@@ -251,6 +257,8 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::write ( )
   {
+    // log( Warning , ThisLocation() );
+    NotifyConditionalVariable ( false );
 #ifdef RUN_ASIO_MULTITHREADED
     assert ( mDispatchBuffers.empty() );
     assert ( ! mDispatchQueue.empty() );
@@ -316,11 +324,13 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::write_callback ( const boost::system::error_code& aErrorCode )
   {
+    // log( Warning , ThisLocation() );
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
     {
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -329,6 +339,7 @@ namespace uhal
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
       log ( *lExc , "ASIO reported a timeout in TCP write callback. Error code message is: ", Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -347,12 +358,14 @@ namespace uhal
         log ( *lExc , "Error closing socket" );
         log ( *lExc , "ASIO reported " , Quote ( aExc.what() ) );
         mAsynchronousException = lExc;
+        NotifyConditionalVariable ( true );
         return;
       }
 
       exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
       log ( *lExc , "ASIO reported a write error: " , Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -384,6 +397,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read ( )
   {
+    // log( Warning , ThisLocation() );
 #ifdef RUN_ASIO_MULTITHREADED
     assert ( ! mReplyBuffers.empty() );
 #else
@@ -438,8 +452,10 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read_callback ( const boost::system::error_code& aErrorCode )
   {
+    // log( Warning , ThisLocation() );
     if ( mAsynchronousException )
     {
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -460,6 +476,7 @@ namespace uhal
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
       log ( *lExc , "ASIO reported a timeout in TCP read callback. Error code message is: ", Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -478,12 +495,14 @@ namespace uhal
         log ( *lExc , "Error closing socket" );
         log ( *lExc , "ASIO reported " , Quote ( aExc.what() ) );
         mAsynchronousException = lExc;
+        NotifyConditionalVariable ( true );
         return;
       }
 
       exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
       log ( *lExc , "ASIO reported a read error : " , Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -545,12 +564,14 @@ namespace uhal
         log ( *lExc , "ASIO reported an error: " , Quote ( lErrorCode.message() ) );
         log ( *lExc , "ASIO reported a timeout in TCP callback" );
         mAsynchronousException = lExc;
+        NotifyConditionalVariable ( true );
         return;
       }
 
       exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
       log ( *lExc , "ASIO reported an error: " , Quote ( lErrorCode.message() ) );
       mAsynchronousException = lExc;
+      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -569,6 +590,7 @@ namespace uhal
 
       if ( mAsynchronousException )
       {
+        NotifyConditionalVariable ( true );
         return;
       }
     }
@@ -590,6 +612,11 @@ namespace uhal
     if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() > nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
     {
       write();
+    }
+
+    if ( mDispatchBuffers.empty() && mReplyBuffers.empty() )
+    {
+      NotifyConditionalVariable ( true );
     }
 
 #else
@@ -638,28 +665,24 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::Flush( )
   {
+    // log( Warning , ThisLocation() );
 #ifdef RUN_ASIO_MULTITHREADED
-    bool lContinue ( true );
-
-    while ( lContinue )
+    while ( true )
     {
+      WaitOnConditionalVariable();
+
       if ( mAsynchronousException )
       {
         mAsynchronousException->ThrowAsDerivedType();
       }
 
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-
-      if ( mDispatchBuffers.empty() && mReplyBuffers.empty() )
+      if ( mDispatchQueue.size() )
       {
-        if ( mDispatchQueue.size() )
-        {
-          write();
-        }
-        else
-        {
-          lContinue = false;
-        }
+        write();
+      }
+      else
+      {
+        break;
       }
     }
 
@@ -690,6 +713,8 @@ namespace uhal
         {}
     }
 
+    NotifyConditionalVariable ( true );
+
     if ( mAsynchronousException )
     {
       delete mAsynchronousException;
@@ -719,8 +744,36 @@ namespace uhal
     InnerProtocol::dispatchExceptionHandler();
   }
 
+
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
+  void TCP< InnerProtocol , nr_buffers_per_send >::NotifyConditionalVariable ( const bool& aValue )
+  {
+#ifdef RUN_ASIO_MULTITHREADED
+    {
+      boost::lock_guard<boost::mutex> lLock ( mConditionalVariableMutex );
+      mFlushDone = aValue;
+    }
+    mConditionalVariable.notify_one();
+#endif
+  }
+
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
+  void TCP< InnerProtocol , nr_buffers_per_send >::WaitOnConditionalVariable()
+  {
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::unique_lock<boost::mutex> lLock ( mConditionalVariableMutex );
+
+    while ( !mFlushDone )
+    {
+      mConditionalVariable.wait ( lLock );
+    }
+
+#endif
+  }
 
 }
 
