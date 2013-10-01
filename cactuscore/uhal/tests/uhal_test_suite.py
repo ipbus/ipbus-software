@@ -194,7 +194,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
-    cmds += [["TEST IPBUS 2.0 CONTROLHUB (normal)",
+    cmds += [["TEST IPBUS 2.0 CONTROLHUB - normal",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
                controlhub_start,
@@ -232,7 +232,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                controlhub_stop]
                 ]]
 
-    cmds += [["TEST BIGENDIAN IPBUS 2.0 UDP",
+    cmds += [["TEST IPBUS 2.0 BIGENDIAN UDP",
               [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp2bigendian" % (conn_file),
                # TIMEOUT TEST
@@ -259,7 +259,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
 
-    cmds += [["TEST BIGENDIAN IPBUS 2.0 TCP",
+    cmds += [["TEST IPBUS 2.0 BIGENDIAN TCP",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
                # TIMEOUT TESTS
@@ -286,7 +286,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
 
-    cmds += [["TEST BIGENDIAN IPBUS 2.0 CONTROLHUB (normal)",
+    cmds += [["TEST IPBUS 2.0 BIGENDIAN CONTROLHUB - normal",
               [# SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
                controlhub_start,
@@ -394,7 +394,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                controlhub_stop]
                 ]]     
       
-    cmds += [["TEST IPBUS 2.0 CONTROLHUB with packet loss",
+    cmds += [["TEST IPBUS 2.0 CONTROLHUB - light packet loss",
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
                "sudo /sbin/tc qdisc del dev lo root ; sudo /sbin/tc -s qdisc ls dev lo",

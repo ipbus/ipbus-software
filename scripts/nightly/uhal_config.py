@@ -121,33 +121,48 @@ COMMANDS += [["TEST CONTROLHUB",
               ["sudo chmod +w /var/log",
                "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(CACTUS_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR)]]]
 
-COMMANDS += [["TEST IPBUS 1.3 - UDP",
+COMMANDS += [["TEST IPbus 1.3 - UDP",
               ['uhal_test_suite.py -v -s "1.3 udp"']
             ]]
 
-COMMANDS += [["TEST IPBUS 1.3 - TCP",
+COMMANDS += [["TEST IPbus 1.3 - TCP",
               ['uhal_test_suite.py -v -s "1.3 tcp"']
             ]]
 
-COMMANDS += [["TEST IPBUS 1.3 - ControlHub",
+COMMANDS += [["TEST IPbus 1.3 - ControlHub",
               ['uhal_test_suite.py -v -s "1.3 controlhub"']
             ]]
 
-COMMANDS += [["TEST IPBUS 2.0 - UDP",
+
+COMMANDS += [["TEST IPbus 2.0 - UDP",
               ['uhal_test_suite.py -v -s "2.0 udp"']
             ]]
 
-COMMANDS += [["TEST IPBUS 2.0 - TCP",
+COMMANDS += [["TEST IPbus 2.0 - TCP",
               ['uhal_test_suite.py -v -s "2.0 tcp"']
             ]]
 
-COMMANDS += [["TEST IPBUS 2.0 - ControlHub (no packet loss)",
-              ['uhal_test_suite.py -v -s "2.0 controlhub (normal)"']
+COMMANDS += [["TEST IPbus 2.0 - ControlHub (no packet loss)",
+              ['uhal_test_suite.py -v -s "2.0 controlhub - normal"']
             ]]
 
-COMMANDS += [["TEST IPBUS 2.0 - ControlHub (with packet loss)",
-              ['uhal_test_suite.py -v -s "2.0 controlhub with packet loss"']
+COMMANDS += [["TEST IPbus 2.0 - ControlHub (with packet loss)",
+              ['uhal_test_suite.py -v -s "2.0 controlhub - light packet loss"']
             ]]
+
+
+COMMANDS += [["TEST IPbus 2.0 big-endian - UDP",
+              ['uhal_test_suite.py -v -s "2.0 bigendian udp"']
+            ]]
+
+COMMANDS += [["TEST IPbus 2.0 big-endian - TCP",
+              ['uhal_test_suite.py -v -s "2.0 bigendian tcp"']
+            ]]
+
+COMMANDS += [["TEST IPbus 2.0 big-endian - ControlHub (no packet loss)",
+              ['uhal_test_suite.py -v -s "2.0 bigendian controlhub - normal"']
+            ]]
+
 
 COMMANDS += [["TEST PYCOHAL",
               ["uhal_test_suite.py -v -s pycohal"]
