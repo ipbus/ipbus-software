@@ -174,6 +174,7 @@ namespace uhal
         lStr << "          at " << lIt->file << ":" << lIt->line << "\n";
       }
 
+#endif
       std::string lString ( lStr.str() );
       strncpy ( mString , lString.c_str() , 65536 );
 
@@ -182,7 +183,6 @@ namespace uhal
         strcpy ( mString+65530 , "..." );
       }
 
-#endif
       return mString; //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
     }
 
