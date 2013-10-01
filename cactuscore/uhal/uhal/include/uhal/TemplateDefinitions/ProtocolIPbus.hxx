@@ -323,13 +323,15 @@ namespace uhal
   uint32_t IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
-    exception::ValidationError lExc;
 
     switch ( aType )
     {
       case B_O_T :
+      {
+        exception::ValidationError lExc;
         log ( lExc , "Byte-Order-Transaction undefined in IPbus version 2" );
         throw lExc;
+      }
       case READ :
         lType = 0x00;
         break;
@@ -349,8 +351,11 @@ namespace uhal
         lType = 0x50;
         break;
       case R_A_I :
+      {  
+        exception::ValidationError lExc;
         log ( lExc , "Byte-Order-Transaction undefined in IPbus version 2" );
         throw lExc;
+      }
     }
 
     return ( 0x20000000 | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType | ( aInfoCode&0xF ) );
