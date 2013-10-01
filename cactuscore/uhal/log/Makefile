@@ -1,3 +1,10 @@
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# SET TO EITHER TRUE OR FALSE, DEPENDING ON WHETHER YOU WANT TO COMPILE CMSSW INTO CODE
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+USE_BACKTRACE = FALSE
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 BUILD_HOME = $(shell pwd)/../../..
 
 include $(BUILD_HOME)/config/Makefile.macros
@@ -16,10 +23,6 @@ PACKAGE_RELEASE = 0
 
 LIBRARY = lib/libcactus_uhal_log.so
 
-#FRONTEND_SOURCES = $(wildcard src/common/log_inserters.*.cpp) src/common/exception.cpp src/common/BacktraceSymbols.cpp src/common/GccOutputCleaner.cpp
-#BACKEND_SOURCES = $(wildcard src/common/log_backend.files.cpp)
-#BACKEND_SOURCES = $(wildcard src/common/log_backend.colour_terminal.cpp)
-
 LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 
 LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
@@ -29,24 +32,41 @@ EXECUTABLE_SOURCES = 	src/common/generator.cxx
 EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
 EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
-LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}\
-								-L$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd\
-								-L$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/libiberty 
+ifeq ($(USE_BACKTRACE),TRUE)
+
+	LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}\
+									-L$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd\
+									-L$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/libiberty 
+	
+	LIBRARIES = -lpthread \
+			-lboost_thread \
+			-Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive\
+	
+	INCLUDE_PATH = 	-Iinclude  \
+			-I${EXTERN_BOOST_INCLUDE_PREFIX} \
+			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/include/\
+			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/binutils/\
+			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd/
+	
+	CPP_FLAGS = -g  -Wall -O0 -rdynamic -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE
+
+else
+
+	LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}
+	
+	LIBRARIES = -lpthread \
+			-lboost_thread
+	
+	INCLUDE_PATH = 	-Iinclude  \
+			-I${EXTERN_BOOST_INCLUDE_PREFIX}
+	
+	CPP_FLAGS = -g  -Wall -O0 -rdynamic -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS
+
+endif		
 
 
-LIBRARIES = -lpthread \
-		-lboost_thread \
-    -Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive\
 
 
-
-INCLUDE_PATH = 	-Iinclude  \
-		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
-		-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/include/\
-		-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/binutils/\
-		-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd/
-
-CPP_FLAGS = -g  -Wall -O0 -rdynamic -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
 

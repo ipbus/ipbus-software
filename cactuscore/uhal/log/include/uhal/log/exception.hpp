@@ -62,8 +62,10 @@
 
 #define ThrowAsDerivedType() ThrowAsDerivedType_(); throw 0;
 
-#define MaxExceptionHistoryLength 100
 
+#ifdef USE_BACKTRACE
+#define MaxExceptionHistoryLength 100
+#endif
 
 namespace uhal
 {
@@ -115,7 +117,9 @@ namespace uhal
         virtual std::string description() const throw() = 0;
 
       private:
+#ifdef USE_BACKTRACE
         std::vector< void* > mBacktrace;
+#endif
         boost::thread::id mThreadId;
         timeval mTime;
 

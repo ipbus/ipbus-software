@@ -36,8 +36,10 @@
 	@date 2012
 */
 
+#ifdef USE_BACKTRACE
 #include "uhal/log/BacktraceSymbols.hpp"
 #include "uhal/log/GccOutputCleaner.hpp"
+#endif
 
 #include "uhal/log/exception.hpp"
 #include "boost/lexical_cast.hpp"
@@ -53,20 +55,26 @@ namespace uhal
 
     exception::exception ( ) :
       std::exception (),
+#ifdef USE_BACKTRACE
       mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
+#endif
       mThreadId ( boost::this_thread::get_id() ),
       mString ( ( char* ) malloc ( 65536 ) ),
       mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
     {
       gettimeofday ( &mTime, NULL );
+#ifdef USE_BACKTRACE
       Backtrace::Backtrace ( mBacktrace );
+#endif
       mAdditionalInfo[0] = '\0'; //malloc is not required to initialize to null, so do it manually, just in case
     }
 
 
     exception::exception ( const exception& aExc ) :
       std::exception (),
+#ifdef USE_BACKTRACE
       mBacktrace ( aExc.mBacktrace ),
+#endif
       mThreadId ( aExc.mThreadId ),
       mTime ( aExc.mTime ),
       mString ( ( char* ) malloc ( 65536 ) ),
@@ -78,7 +86,9 @@ namespace uhal
     exception& exception::operator= ( const exception& aExc )
     {
       strcpy ( mAdditionalInfo , aExc.mAdditionalInfo );
+#ifdef USE_BACKTRACE
       mBacktrace = aExc.mBacktrace;
+#endif
       mThreadId = aExc.mThreadId;
       mTime = aExc.mTime;
       return *this;
@@ -152,6 +162,7 @@ namespace uhal
       lStr << " * Exception constructed at time:              " << tmbuf << '.' << std::setw ( 6 ) << mTime.tv_usec << "\n";
       strftime ( tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", localtime ( &lTime.tv_sec ) );
       lStr << " * Exception's what() function called at time: " << tmbuf << '.' << std::setw ( 6 ) << lTime.tv_usec << "\n";
+#ifdef USE_BACKTRACE
       lStr << " * Call stack:\n";
       std::vector< Backtrace::TracePoint > lBacktrace = Backtrace::BacktraceSymbols ( mBacktrace );
       uint32_t lCounter ( 0 );
@@ -171,6 +182,7 @@ namespace uhal
         strcpy ( mString+65530 , "..." );
       }
 
+#endif
       return mString; //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
     }
 
