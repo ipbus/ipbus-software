@@ -616,7 +616,7 @@ void uhal::tests::PerfTester::validationTest()
   addr_vec.push_back ( m_baseAddr );
   addr_vec.push_back ( m_baseAddr + m_bandwidthTestDepth - 1 );
 
-  for ( unsigned i = 0; i < 498; i++ )
+  for ( unsigned i = 0; i < 48; i++ )
   {
     addr_vec.push_back ( m_baseAddr + ( rand() % m_bandwidthTestDepth ) );
   }
