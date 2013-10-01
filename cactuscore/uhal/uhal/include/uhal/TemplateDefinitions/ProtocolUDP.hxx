@@ -224,11 +224,13 @@ namespace uhal
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
     // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(600) )
+
+    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds ( 600 ) )
     {
       log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
+
 #ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, _1 ) );
     mPacketsInFlight++;
@@ -267,10 +269,12 @@ namespace uhal
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
       log ( *lExc , "ASIO reported a timeout in UDP write callback" );
+
       if ( aErrorCode )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
+
       mAsynchronousException = lExc;
       return;
     }
@@ -278,7 +282,6 @@ namespace uhal
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
-
       exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
       log ( *lExc , "ASIO reported an error in write_callback:" , Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
@@ -340,7 +343,8 @@ namespace uhal
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(600) )
+
+    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds ( 600 ) )
     {
       log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
@@ -381,19 +385,19 @@ namespace uhal
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
       log ( *lExc , "ASIO reported a timeout in UDP read callback" );
+
       if ( aErrorCode )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
+
       mAsynchronousException = lExc;
       return;
     }
 
-
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
-
       exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
       log ( *lExc , "ASIO reported an error in read_callback: " , Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
@@ -477,7 +481,6 @@ namespace uhal
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
-
     boost::lock_guard<boost::mutex> lLock ( this->mTransportLayerMutex );
 
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
@@ -486,7 +489,6 @@ namespace uhal
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket.close();
-
       // There is no longer an active deadline. The expiry is set to positive
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );

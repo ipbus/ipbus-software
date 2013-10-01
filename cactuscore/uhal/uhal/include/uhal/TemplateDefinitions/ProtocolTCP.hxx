@@ -120,7 +120,6 @@ namespace uhal
     mDispatchQueue.clear();
     ClientInterface::returnBufferToPool ( mReplyQueue );
     mReplyQueue.clear();
-
     ClientInterface::returnBufferToPool ( mDispatchBuffers );
     mDispatchBuffers.clear();
     ClientInterface::returnBufferToPool ( mReplyBuffers );
@@ -158,7 +157,6 @@ namespace uhal
       mDispatchQueue.clear();
       ClientInterface::returnBufferToPool ( mReplyQueue );
       mReplyQueue.clear();
-
       ClientInterface::returnBufferToPool ( mDispatchBuffers );
       mDispatchBuffers.clear();
       ClientInterface::returnBufferToPool ( mReplyBuffers );
@@ -189,7 +187,6 @@ namespace uhal
     {
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-
       mDispatchQueue.push_back ( aBuffers );
 
       if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
@@ -257,46 +254,46 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     assert ( mDispatchBuffers.empty() );
     assert ( ! mDispatchQueue.empty() );
- 
     std::vector< boost::asio::const_buffer > lAsioSendBuffer;
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( &mSendByteCounter , 4 ) );
     mSendByteCounter = 0;
+    std::size_t lNrBuffersToSend = std::min ( mDispatchQueue.size(), nr_buffers_per_send );
+    mDispatchBuffers.reserve ( lNrBuffersToSend );
 
-    std::size_t lNrBuffersToSend = std::min(mDispatchQueue.size(), nr_buffers_per_send);
-    mDispatchBuffers.reserve(lNrBuffersToSend);
     for ( std::size_t i = 0; i < lNrBuffersToSend; i++ )
     {
-      mDispatchBuffers.push_back( mDispatchQueue.front() );
+      mDispatchBuffers.push_back ( mDispatchQueue.front() );
       mDispatchQueue.pop_front();
-
       const boost::shared_ptr<Buffers>& lBuffer = mDispatchBuffers.back();
       mSendByteCounter += lBuffer->sendCounter();
       lAsioSendBuffer.push_back ( boost::asio::const_buffer ( lBuffer->getSendBuffer() , lBuffer->sendCounter() ) );
     }
 
     assert ( ! mDispatchBuffers.empty() );
-
     log ( Debug() , "Sending " , Integer ( mSendByteCounter ) , " bytes from ", Integer ( mDispatchBuffers.size() ), " buffers" );
     mSendByteCounter = htonl ( mSendByteCounter );
 #else
+
     if ( ! mDispatchBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
       return;
     }
+
     std::vector< boost::asio::const_buffer > lAsioSendBuffer;
     mSendByteCounter = htonl ( mDispatchBuffers->sendCounter() );
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( &mSendByteCounter , 4 ) );
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
 #endif
-
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(600) )
+
+    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds ( 600 ) )
     {
       log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
+
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::write_callback, this, _1 ) );
     mPacketsInFlight += mDispatchBuffers.size();
@@ -390,13 +387,14 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     assert ( ! mReplyBuffers.empty() );
 #else
+
     if ( ! mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
       return;
     }
-#endif
 
+#endif
     //     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     //     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
     //     lAsioReplyBuffer.reserve ( lReplyBuffers.size() +1 );
@@ -410,11 +408,13 @@ namespace uhal
     log ( Debug() , "Getting reply byte counter" );
     boost::asio::ip::tcp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds(600) )
+
+    while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds ( 600 ) )
     {
       log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
+
 #ifdef RUN_ASIO_MULTITHREADED
     boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::read_callback, this, _1 ) );
 #else
@@ -446,11 +446,13 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
     assert ( ! mReplyBuffers.empty() );
 #else
+
     if ( ! mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
       return;
     }
+
 #endif
 
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
@@ -487,38 +489,41 @@ namespace uhal
 
     mReplyByteCounter = ntohl ( mReplyByteCounter );
     log ( Debug() , "Byte Counter says " , Integer ( mReplyByteCounter ) , " bytes are coming" );
-
     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
 #ifdef RUN_ASIO_MULTITHREADED
     std::size_t lNrReplyBuffers = 1;
     uint32_t lExpectedReplyBytes = 0;
+
     for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.begin(); lBufIt != mReplyBuffers.end(); lBufIt++ )
     {
-      lNrReplyBuffers += (*lBufIt)->getReplyBuffer().size();
-      lExpectedReplyBytes += (*lBufIt)->replyCounter();
+      lNrReplyBuffers += ( *lBufIt )->getReplyBuffer().size();
+      lExpectedReplyBytes += ( *lBufIt )->replyCounter();
     }
+
     lAsioReplyBuffer.reserve ( lNrReplyBuffers );
     log ( Debug() , "Expecting " , Integer ( lExpectedReplyBytes ) , " bytes in reply, for ", Integer ( mReplyBuffers.size() ), " buffers" );
 
     for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.begin(); lBufIt != mReplyBuffers.end(); lBufIt++ )
     {
-      std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( (*lBufIt)->getReplyBuffer() );
+      std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( ( *lBufIt )->getReplyBuffer() );
+
       for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
       {
         lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
       }
     }
+
 #else
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     lAsioReplyBuffer.reserve ( lReplyBuffers.size() +1 );
-    
+
     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
     {
       lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
     }
-#endif
 
+#endif
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( mReplyByteCounter ), lErrorCode );
     //     do
@@ -550,6 +555,7 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
+
     for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.begin(); lBufIt != mReplyBuffers.end(); lBufIt++ )
     {
       try
@@ -568,7 +574,6 @@ namespace uhal
     }
 
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-
     mPacketsInFlight -= mReplyBuffers.size();
 
     if ( mReplyQueue.size() )
@@ -582,12 +587,13 @@ namespace uhal
       mReplyBuffers.clear();
     }
 
-    if ( mDispatchBuffers.empty() && (mDispatchQueue.size() > nr_buffers_per_send) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+    if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() > nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
     {
       write();
     }
 
 #else
+
     try
     {
       mAsynchronousException = ClientInterface::validate ( mReplyBuffers ); //Control of the pointer has been passed back to the client interface
@@ -596,6 +602,7 @@ namespace uhal
     {
       mAsynchronousException = new exception::ValidationError ();
     }
+
     if ( mAsynchronousException )
     {
       return;
@@ -619,7 +626,6 @@ namespace uhal
       log ( Warning() , "Closing socket since deadline has passed" );
       // The deadline has passed. The socket is closed so that any outstanding asynchronous operations are cancelled.
       mSocket.close();
-
       // There is no longer an active deadline. The expiry is set to positive infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
     }
@@ -643,10 +649,11 @@ namespace uhal
       }
 
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+
       if ( mDispatchBuffers.empty() && mReplyBuffers.empty() )
       {
         if ( mDispatchQueue.size() )
-        { 
+        {
           write();
         }
         else

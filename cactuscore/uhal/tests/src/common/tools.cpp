@@ -96,7 +96,7 @@ std::map<std::string,std::string> uhal::tests::default_arg_parsing ( int argc,ch
   }
   else
   {
-    uhal::setLogLevelTo( Fatal() );
+    uhal::setLogLevelTo ( Fatal() );
     result["very_verbose"] = "false";
     result["verbose"] = "false";
   }

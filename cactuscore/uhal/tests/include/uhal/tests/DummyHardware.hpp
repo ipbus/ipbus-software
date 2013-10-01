@@ -73,7 +73,7 @@ namespace uhal
         mTrafficHistory ( 16, 0x00 ),
         mReceivedControlPacketHeaderHistory ( 4 , 0x00000000 ),
         mSentControlPacketHeaderHistory ( 4 , 0x00000000 ),
-        mBigEndianHack( aBigEndianHack )
+        mBigEndianHack ( aBigEndianHack )
       {
       }
 
@@ -85,8 +85,7 @@ namespace uhal
 
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
-//        std::cout << aByteCount << " bytes received" << std::endl;
-
+        //        std::cout << aByteCount << " bytes received" << std::endl;
         if ( mBigEndianHack )
         {
           if ( IPbus_major == 2 )
@@ -153,14 +152,13 @@ namespace uhal
         if ( mBigEndianHack )
         {
           if ( IPbus_major == 2 )
-          { 
+          {
             for ( std::vector<uint32_t>::iterator lIt ( mReply.begin() ) ; lIt != mReply.end() ; ++lIt )
             {
               *lIt = htonl ( *lIt );
             }
           }
         }
-
       }
 
     private:
@@ -495,14 +493,12 @@ namespace uhal
       lResult.delay = vm["delay"].as<uint32_t>();
       lResult.port = vm["port"].as<uint16_t>();
       lResult.version = vm["version"].as<uint32_t>();
+      lResult.bigendian = bool ( vm.count ( "big-endian" ) );
 
-      lResult.bigendian = bool( vm.count ( "big-endian" ) );
-
-      if( (lResult.version == 1) && (lResult.bigendian) )
+      if ( ( lResult.version == 1 ) && ( lResult.bigendian ) )
       {
-        log( Error , "-big-endian flag does nothing with version set to 1" );
+        log ( Error , "-big-endian flag does nothing with version set to 1" );
       }
-
 
       if ( vm.count ( "verbose" ) )
       {

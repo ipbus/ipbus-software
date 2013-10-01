@@ -215,25 +215,22 @@ namespace uhal
 #endif
     )
   {
-    
-    if( BigEndianHack )
+    if ( BigEndianHack )
     {
-      boost::gregorian::date lExpiryDate( 2014, boost::gregorian::Apr , 1 );
-      boost::gregorian::date lUTCtoday( boost::gregorian::day_clock::universal_day() );
+      boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::Apr , 1 );
+      boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
+      boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
 
-      boost::gregorian::date_duration lTimeToExpiry( lExpiryDate - lUTCtoday );
-
-      if( lTimeToExpiry.is_negative() )
+      if ( lTimeToExpiry.is_negative() )
       {
-        log( Error , "Support for the big-endian hack expired on 1st April 2014. Please update either your software, your firmware or both to use the native-endian variant." );
-        sleep( 60 );
+        log ( Error , "Support for the big-endian hack expired on 1st April 2014. Please update either your software, your firmware or both to use the native-endian variant." );
+        sleep ( 60 );
       }
       else
       {
-        log( Warning , "Support for the big-endian hack will expire on 1st April 2014. Please update either your software, your firmware or both to use the native-endian variant. Functionality will be limited after this expiry date." );
-      } 
-    } 
-
+        log ( Warning , "Support for the big-endian hack will expire on 1st April 2014. Please update either your software, your firmware or both to use the native-endian variant. Functionality will be limited after this expiry date." );
+      }
+    }
   }
 
 
@@ -267,11 +264,11 @@ namespace uhal
   template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
   void IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
-    if( BigEndianHack )
+    if ( BigEndianHack )
     {
       uint32_t* lPtr ( reinterpret_cast<uint32_t*> ( aBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
       uint32_t lSize ( ( aBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 );
-  
+
       for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
       {
         *lPtr = htonl ( *lPtr );
@@ -287,33 +284,31 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    if( BigEndianHack )
+    if ( BigEndianHack )
     {
-
       uint32_t* lPtr;
       uint32_t lSize;
-  
+
       for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt ( aReplyStartIt ) ; lIt != aReplyEndIt ; ++lIt )
       {
         lPtr = reinterpret_cast<uint32_t*> ( lIt->first );
         lSize = ( lIt->second >> 2 );
-  
+
         for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
         {
           *lPtr = ntohl ( *lPtr );
         }
       }
-  
+
       lPtr = reinterpret_cast<uint32_t*> ( aSendBufferStart ); //aBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
       lSize = reinterpret_cast<uint32_t*> ( aSendBufferEnd ) - lPtr; //( aBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 ;
-  
+
       for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
       {
         *lPtr = ntohl ( *lPtr );
       }
-
-
     }
+
     //log ( Debug() , ThisLocation() );
     //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
@@ -368,7 +363,7 @@ namespace uhal
         lType = 0x50;
         break;
       case R_A_I :
-      {  
+      {
         exception::ValidationError lExc;
         log ( lExc , "Byte-Order-Transaction undefined in IPbus version 2" );
         throw lExc;

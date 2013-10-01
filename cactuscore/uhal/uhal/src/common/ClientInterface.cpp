@@ -289,10 +289,10 @@ namespace uhal
     aBuffers.clear();
   }
 
-  
+
   void ClientInterface::returnBufferToPool ( std::vector< boost::shared_ptr<Buffers> >& aBuffers )
   {
-  #ifdef RUN_ASIO_MULTITHREADED
+#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 #endif
 
@@ -310,7 +310,7 @@ namespace uhal
 
   void ClientInterface::returnBufferToPool ( std::deque< std::vector< boost::shared_ptr<Buffers> > >& aBuffers )
   {
-  #ifdef RUN_ASIO_MULTITHREADED
+#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 #endif
 

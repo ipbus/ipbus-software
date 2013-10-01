@@ -714,7 +714,7 @@ void uhal::tests::PerfTester::validationTest()
   else
   {
     cout << "\nBASIC TESTS SUMMARY: Total of " << nrTestsTotal << " tests run -- " << nrTestsFailed << " tests FAILED , " << ( nrTestsTotal - nrTestsFailed ) << " tests PASSED" << endl;
-    std::exit(1);
+    std::exit ( 1 );
   }
 
   // SOAK TEST - SETUP
@@ -737,7 +737,7 @@ void uhal::tests::PerfTester::validationTest()
     else
     {
       log ( Error() , "Cannot deduce protocol from URI " , Quote ( client->uri() ), "  Exiting before performing soak test." );
-      std::exit(1);
+      std::exit ( 1 );
     }
   }
 
@@ -855,7 +855,7 @@ void uhal::tests::PerfTester::validationTest()
         if ( ! ( *it )->check_values() )
         {
           cout << "ERROR OCCURED IN SOAK TEST - after " << i << " successful transactions" << endl;
-          std::exit(1);
+          std::exit ( 1 );
         }
       }
 
