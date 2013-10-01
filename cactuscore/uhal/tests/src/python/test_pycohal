@@ -280,7 +280,6 @@ class TestBlock(unittest.TestCase):
         self.hw.getNode("MEM").writeBlock( xx )
         memVals = self.hw.getNode("MEM").readBlock(N)
         # Pre-dispatch tests
-        t0 = time.time()
         self.assertEqual( memVals.valid(), False )
         self.assertEqual( memVals.size(), N )
         self.assertEqual( len(memVals), N )
@@ -290,12 +289,8 @@ class TestBlock(unittest.TestCase):
         self.assertRaises( uhal.NonValidatedMemory, memVals.__iter__ )
         self.assertRaises( IndexError , memVals.__getitem__ , (-N-1) )
         self.assertRaises( IndexError , memVals.__getitem__ , (N) )
-        print "       + Pre-dispatch took", time.time()-t0, "s"
         # Dispatch & check values
-        t0 = time.time()
         self.hw.dispatch()
-        print "       + Dispatch took", time.time()-t0, "s"
-        t0 = time.time()
         self.assertTrue( memVals.valid() )
         self.assertEqual( memVals.size(), N )
         self.assertEqual( len(memVals), N )
@@ -306,29 +301,12 @@ class TestBlock(unittest.TestCase):
             self.assertEqual( xx[i], memVals[i-N] )
         # Test ValVector_uint32 iteration
         self.assertEqual( xx, [x for x in memVals] )
-        print "       + Post-dispatch took", time.time()-t0, "s"
 
     def test_block_write_read(self):
-        t0 = time.time()
-        print 
-        print "Block write-read tests ..."
-        
-        print "   * depth=1 test ..."
         self.exe_test_block_write_read(1)           #4B
-        t1 = time.time()
-        print "     Total time:", t1-t0, "seconds"
-#      print "   * depth=256 test ..."
-#       self.exe_test_block_write_read(1024/4)      #1kB
-#       t2 = time.time()
-#       print "     Total time:", t2-t1, "seconds"
-#       print "   * depth=1024 test ..."
-#       self.exe_test_block_write_read( 1024 )      #4kB
-#       t3 = time.time()
-#       print "     Total time:", t3-t2, "seconds"
-#       print "   * depth=256*1024 test ..."
-#       self.exe_test_block_write_read(1024*1024/4) #1MB
-#       t4 = time.time()
-#       print "     Total time:", t4-t3, "seconds"
+        self.exe_test_block_write_read(1024/4)      #1kB
+        self.exe_test_block_write_read( 1024 )      #4kB
+        self.exe_test_block_write_read(1024*1024/4) #1MB
 
     def test_block_bigger_than_size(self):
         xx = []
