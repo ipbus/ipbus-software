@@ -43,8 +43,8 @@ class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
   public:
     typedef DummyHardware< IPbus_major , IPbus_minor > base_type;
 
-    TCPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay ) :
-      DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay ) ,
+    TCPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
+      DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay , aBigEndianHack ) ,
       mIOservice(),
       mAcceptor ( mIOservice , tcp::endpoint ( tcp::v4() , aPort ) )
     {
@@ -121,7 +121,7 @@ int main ( int argc, char* argv[] )
 
   if ( lOptions.version == 1 )
   {
-    TCPdummyHardware<1,3> lDummyHardware ( lOptions.port , lOptions.delay );
+    TCPdummyHardware<1,3> lDummyHardware ( lOptions.port , lOptions.delay , false );
 
     while ( true )
     {
@@ -130,7 +130,7 @@ int main ( int argc, char* argv[] )
   }
   else if ( lOptions.version == 2 )
   {
-    TCPdummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay );
+    TCPdummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay, lOptions.bigendian );
 
     while ( true )
     {

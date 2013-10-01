@@ -232,6 +232,98 @@ def get_commands(conn_file, controlhub_scripts_dir):
                controlhub_stop]
                 ]]
 
+    cmds += [["TEST BIGENDIAN IPBUS 2.0 UDP",
+              [# SERVER NOT REACHABLE TEST
+               "test_dummy_nonreachable.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               # TIMEOUT TEST
+               "DummyHardwareUdp.exe --version 2 --big-endian --port 60001 --delay 2",
+               "test_dummy_timeout.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               # NORMAL TESTS
+               "DummyHardwareUdp.exe --version 2 --big-endian --port 60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0-bigendian://localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-2.0-bigendian://localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0-bigendian://localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-2.0-bigendian://localhost:60001",
+               "test_dummy_single.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.udp2bigendian" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-2.0-bigendian://localhost:60001",
+               "pkill -f \"DummyHardwareUdp.exe\""]
+            ]]
+
+    cmds += [["TEST BIGENDIAN IPBUS 2.0 TCP",
+              [# SERVER NOT REACHABLE TESTS
+               "test_dummy_nonreachable.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               # TIMEOUT TESTS
+               "DummyHardwareTcp.exe --version 2 --big-endian --port 60002 --delay 2",
+               "test_dummy_timeout.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "pkill -f \"DummyHardwareTcp.exe\"",
+               # NORMAL TESTS
+               "DummyHardwareTcp.exe --version 2 --big-endian --port 60002",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0-bigendian://localhost:60002",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-2.0-bigendian://localhost:60002",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0-bigendian://localhost:60002",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-2.0-bigendian://localhost:60002",
+               "test_dummy_single.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.tcp2bigendian" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.tcp2bigendian"  % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-2.0-bigendian://localhost:60002",
+               "pkill -f \"DummyHardwareTcp.exe\""]
+             ]]
+
+    cmds += [["TEST BIGENDIAN IPBUS 2.0 CONTROLHUB (normal)",
+              [# SERVER NOT REACHABLE TESTS
+               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               controlhub_start,
+               controlhub_status,
+               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               controlhub_stop,
+               # TIMEOUT TESTS
+               "DummyHardwareUdp.exe --version 2 --big-endian --port 60001 --delay 2",
+               controlhub_start,
+               controlhub_status,
+               "test_dummy_timeout.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_empty_dispatch.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               controlhub_stop,
+               #CONTROL HUB TESTS
+               "DummyHardwareUdp.exe --version 2 --big-endian --port 60001",
+               controlhub_start,
+               controlhub_status,
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0-bigendian://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d chtcp-2.0-bigendian://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0-bigendian://localhost:10203?target=localhost:60001",
+               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d chtcp-2.0-bigendian://localhost:10203?target=localhost:60001",
+               "test_dummy_single.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_block.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub2bigendian" % (conn_file),
+               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_metainfo.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_navigation.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_rawclient.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-2.0-bigendian://localhost:10203?target=localhost:60001",
+               "pkill -f \"DummyHardwareUdp.exe\"",
+               controlhub_stats,
+               controlhub_stop]
+                ]]      
+      
     cmds += [["TEST VALGRIND",
               [ # UDP 2
                "DummyHardwareUdp.exe --version 1 --port 50001",

@@ -63,7 +63,7 @@ namespace uhal
       typedef HostToTargetInspector< IPbus_major , IPbus_minor > base_type;
 
     public:
-      DummyHardware ( const uint32_t& aReplyDelay ) : HostToTargetInspector< IPbus_major , IPbus_minor >() ,
+      DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) : HostToTargetInspector< IPbus_major , IPbus_minor >() ,
         mMemory ( ADDRESSMASK+1 , 0x00000000 ),
         mReplyDelay ( aReplyDelay ),
         mReceive ( BUFFER_SIZE , 0x00000000 ),
@@ -72,7 +72,8 @@ namespace uhal
         mLastPacketHeader ( 0x200000f0 ),
         mTrafficHistory ( 16, 0x00 ),
         mReceivedControlPacketHeaderHistory ( 4 , 0x00000000 ),
-        mSentControlPacketHeaderHistory ( 4 , 0x00000000 )
+        mSentControlPacketHeaderHistory ( 4 , 0x00000000 ),
+        mBigEndianHack( aBigEndianHack )
       {
       }
 
@@ -86,21 +87,17 @@ namespace uhal
       {
 //        std::cout << aByteCount << " bytes received" << std::endl;
 
-#ifdef BIG_ENDIAN_HACK
-        if ( IPbus_major == 2 )
+        if ( mBigEndianHack )
         {
-          if ( LoggingIncludes ( Debug() ) )
+          if ( IPbus_major == 2 )
           {
-            log ( Notice() , "Big-Endian Hack included" );
-          }
-
-          for ( std::vector<uint32_t>::iterator lIt ( mReceive.begin() ) ; lIt != mReceive.begin() + ( aByteCount>>2 ) ; ++lIt )
-          {
-            *lIt = ntohl ( *lIt );
+            for ( std::vector<uint32_t>::iterator lIt ( mReceive.begin() ) ; lIt != mReceive.begin() + ( aByteCount>>2 ) ; ++lIt )
+            {
+              *lIt = ntohl ( *lIt );
+            }
           }
         }
 
-#endif
         std::vector<uint32_t>::const_iterator lBegin, lEnd;
 
         //
@@ -152,22 +149,18 @@ namespace uhal
 
         //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
         //
-#ifdef BIG_ENDIAN_HACK
 
-        if ( IPbus_major == 2 )
+        if ( mBigEndianHack )
         {
-          if ( LoggingIncludes ( Debug() ) )
-          {
-            log ( Notice() , "Big-Endian Hack included" );
-          }
-
-          for ( std::vector<uint32_t>::iterator lIt ( mReply.begin() ) ; lIt != mReply.end() ; ++lIt )
-          {
-            *lIt = htonl ( *lIt );
+          if ( IPbus_major == 2 )
+          { 
+            for ( std::vector<uint32_t>::iterator lIt ( mReply.begin() ) ; lIt != mReply.end() ; ++lIt )
+            {
+              *lIt = htonl ( *lIt );
+            }
           }
         }
 
-#endif
       }
 
     private:
@@ -453,6 +446,8 @@ namespace uhal
       std::deque< uint32_t > mReceivedControlPacketHeaderHistory;
       std::deque< uint32_t > mSentControlPacketHeaderHistory;
 
+    private:
+      bool mBigEndianHack;
 
   };
 
@@ -466,6 +461,7 @@ namespace uhal
   {
     uint32_t delay;
     uint16_t port;
+    bool bigendian;
     uint32_t version;
   };
 
@@ -477,6 +473,7 @@ namespace uhal
     ( "help,h", "Produce this help message" )
     ( "delay,d", boost::program_options::value<uint32_t>()->default_value ( 0 ) , "Reply delay for first packet (in seconds) - optional" )
     ( "port,p", boost::program_options::value<uint16_t>() , "Port number to listen on - required" )
+    ( "big-endian,b", "Include the big-endian hack (version 2 only)" )
     ( "version,v", boost::program_options::value<uint32_t>() , "IPbus Major version (1 or 2) - required" )
     ( "verbose,V", "Produce verbose output" )
     ;
@@ -498,6 +495,14 @@ namespace uhal
       lResult.delay = vm["delay"].as<uint32_t>();
       lResult.port = vm["port"].as<uint16_t>();
       lResult.version = vm["version"].as<uint32_t>();
+
+      lResult.bigendian = bool( vm.count ( "big-endian" ) );
+
+      if( (lResult.version == 1) && (lResult.bigendian) )
+      {
+        log( Error , "-big-endian flag does nothing with version set to 1" );
+      }
+
 
       if ( vm.count ( "verbose" ) )
       {

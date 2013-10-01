@@ -54,6 +54,7 @@
 #ifdef RUN_ASIO_MULTITHREADED
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/condition_variable.hpp>
 #endif
 
 #include <string>
@@ -76,7 +77,7 @@ namespace uhal
   }
 
   //! Transport protocol to transfer an IPbus buffer via TCP
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   class TCP : public InnerProtocol
   {
 
@@ -164,6 +165,10 @@ namespace uhal
       std::deque < std::vector< boost::shared_ptr< Buffers > > > mReplyQueue;
 
       uint32_t mPacketsInFlight;
+
+      boost::mutex mConditionalVariableMutex;
+      boost::condition_variable mConditionalVariable;
+      bool mFlushDone;
 #endif
 
       uint32_t mSendByteCounter;

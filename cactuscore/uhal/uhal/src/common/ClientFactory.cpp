@@ -52,12 +52,15 @@ namespace uhal
       // ---------------------------------------------------------------------
       mInstance->add< UDP< IPbus< 1 , 3 , 350 > > > ( "ipbusudp-1.3" , "Direct access to hardware via UDP, using IPbus version 1.3" );
       mInstance->add< UDP< IPbus< 2 , 0 , 350 > > > ( "ipbusudp-2.0" , "Direct access to hardware via UDP, using IPbus version 2.0" );
+      mInstance->add< UDP< IPbus< 2 , 0 , 350 , true > > > ( "ipbusudp-2.0-bigendian" , "Direct access to hardware via UDP, using IPbus version 2.0, with the big-endian hack" );
       // ---------------------------------------------------------------------
       mInstance->add< TCP< IPbus< 1 , 3 , 350 > , 1 > > ( "ipbustcp-1.3" , "Direct access to hardware via TCP, using IPbus version 1.3" );
       mInstance->add< TCP< IPbus< 2 , 0 , 350 > , 1 > > ( "ipbustcp-2.0" , "Direct access to hardware via TCP, using IPbus version 2.0" );
+      mInstance->add< TCP< IPbus< 2 , 0 , 350 , true > , 1 > > ( "ipbustcp-2.0-bigendian" , "Direct access to hardware via TCP, using IPbus version 2.0, with the big-endian hack" );
       // ---------------------------------------------------------------------
       mInstance->add< TCP< ControlHub < IPbus< 1 , 3 , 350 > > , 15 > > ( "chtcp-1.3", "Hardware access via the Control Hub, using IPbus version 1.3" );
       mInstance->add< TCP< ControlHub < IPbus< 2 , 0 , 350 > > , 15 > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0" );
+      mInstance->add< TCP< ControlHub < IPbus< 2 , 0 , 350 , true > > , 15 > > ( "chtcp-2.0-bigendian", "Hardware access via the Control Hub, using IPbus version 2.0, with the big-endian hack" );
       // ---------------------------------------------------------------------
     }
 

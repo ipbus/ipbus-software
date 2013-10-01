@@ -54,6 +54,7 @@
 #ifdef RUN_ASIO_MULTITHREADED
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/condition_variable.hpp>
 #endif
 
 #include <string>
@@ -160,6 +161,10 @@ namespace uhal
       std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
 
       uint32_t mPacketsInFlight;
+
+      boost::mutex mConditionalVariableMutex;
+      boost::condition_variable mConditionalVariable;
+      bool mFlushDone;
 #endif
 
       boost::shared_ptr< Buffers > mDispatchBuffers;

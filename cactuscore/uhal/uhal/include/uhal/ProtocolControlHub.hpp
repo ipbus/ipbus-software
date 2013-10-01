@@ -75,8 +75,6 @@ namespace uhal
 
     ExceptionClass ( ControlHubReportedMalformedStatus , "Exception class to handle the case where the hardware sent a bad status packet to the ControlHub" );
     ExceptionClass ( ControlHubUnknownErrorCode , "Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL" );
-
-
   }
 
   /**

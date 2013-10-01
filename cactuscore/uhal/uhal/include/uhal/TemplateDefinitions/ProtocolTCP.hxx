@@ -35,6 +35,8 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 
 #include "uhal/IPbusInspector.hpp"
 // #include "uhal/logo.hpp"
@@ -47,7 +49,7 @@ namespace uhal
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol, nr_buffers_per_send >::TCP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
     mIOservice ( ),
@@ -71,7 +73,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol , nr_buffers_per_send >::TCP ( const TCP< InnerProtocol , nr_buffers_per_send >& aTCP ) :
     mIOservice ( ),
 #ifdef RUN_ASIO_MULTITHREADED
@@ -93,7 +95,7 @@ namespace uhal
   }
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol, nr_buffers_per_send >& TCP< InnerProtocol , nr_buffers_per_send >::operator= ( const TCP< InnerProtocol , nr_buffers_per_send >& aTCP )
   {
     mEndpoint =  boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aTCP.mUri.mHostname , aTCP.mUri.mPort ) );
@@ -138,7 +140,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol , nr_buffers_per_send >::~TCP()
   {
     try
@@ -170,7 +172,7 @@ namespace uhal
   }
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     if ( mAsynchronousException )
@@ -204,7 +206,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::connect()
   {
     log ( Info() , "Attempting to create TCP connection to '" , mEndpoint->host_name() , "' port " , mEndpoint->service_name() , "." );
@@ -249,7 +251,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::write ( )
   {
 #ifdef RUN_ASIO_MULTITHREADED
@@ -260,9 +262,9 @@ namespace uhal
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( &mSendByteCounter , 4 ) );
     mSendByteCounter = 0;
 
-    size_t lNrBuffersToSend = std::min(mDispatchQueue.size(), nr_buffers_per_send);
+    std::size_t lNrBuffersToSend = std::min(mDispatchQueue.size(), nr_buffers_per_send);
     mDispatchBuffers.reserve(lNrBuffersToSend);
-    for ( size_t i = 0; i < lNrBuffersToSend; i++ )
+    for ( std::size_t i = 0; i < lNrBuffersToSend; i++ )
     {
       mDispatchBuffers.push_back( mDispatchQueue.front() );
       mDispatchQueue.pop_front();
@@ -314,7 +316,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::write_callback ( const boost::system::error_code& aErrorCode )
   {
 #ifdef RUN_ASIO_MULTITHREADED
@@ -382,7 +384,7 @@ namespace uhal
   }
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read ( )
   {
 #ifdef RUN_ASIO_MULTITHREADED
@@ -433,7 +435,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read_callback ( const boost::system::error_code& aErrorCode )
   {
     if ( mAsynchronousException )
@@ -488,7 +490,7 @@ namespace uhal
 
     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
 #ifdef RUN_ASIO_MULTITHREADED
-    size_t lNrReplyBuffers = 1;
+    std::size_t lNrReplyBuffers = 1;
     uint32_t lExpectedReplyBytes = 0;
     for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.begin(); lBufIt != mReplyBuffers.end(); lBufIt++ )
     {
@@ -605,7 +607,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::CheckDeadline()
   {
     boost::lock_guard<boost::mutex> lLock ( this->mTransportLayerMutex );
@@ -627,7 +629,7 @@ namespace uhal
   }
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::Flush( )
   {
 #ifdef RUN_ASIO_MULTITHREADED
@@ -663,7 +665,7 @@ namespace uhal
 
 
 
-  template < typename InnerProtocol , size_t nr_buffers_per_send >
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::dispatchExceptionHandler()
   {
     log ( Warning() , "Closing Socket since exception detected." );

@@ -51,7 +51,7 @@ namespace uhal
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 0 >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 0 , bool BigEndianHack = false>
   class IPbus;
 
 
@@ -176,8 +176,8 @@ namespace uhal
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  class IPbus < 2 , IPbus_minor, buffer_size > : public IPbusCore
+  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
+  class IPbus < 2 , IPbus_minor, buffer_size , BigEndianHack > : public IPbusCore
   {
 
     public:
@@ -204,12 +204,10 @@ namespace uhal
         */
       virtual uint32_t getPreambleSize();
 
-#ifdef BIG_ENDIAN_HACK
       /**
         Finalize the buffer before it is transmitted
       */
       virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
-#endif
 
     public:
       /**
