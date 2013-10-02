@@ -48,6 +48,11 @@ def get_commands(conn_file, controlhub_scripts_dir):
     controlhub_stop = "sudo " + join(controlhub_scripts_dir, "controlhub_stop")
 
     cmds = []
+
+    cmds += [["TEST CONTROLHUB START",
+              ['for i in `seq 1 100`; do sudo /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; sudo /opt/cactus/bin/controlhub_stop; done']
+            ]]
+
     cmds += [["TEST IPBUS 1.3 UDP",
               [# SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),

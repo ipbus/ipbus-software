@@ -120,7 +120,8 @@ COMMANDS += [["INSTALL",
 COMMANDS += [["TEST CONTROLHUB",
               ["sudo chmod +w /var/log",
                "%s -noshell -pa %s %s -eval 'eunit:test(\"%s\",[verbose])' -s init stop" % (join(CACTUS_PREFIX,"bin/erl"), CONTROLHUB_EBIN_DIR, join(CONTROLHUB_EBIN_DIR, "unittest"), CONTROLHUB_EBIN_DIR),
-               'for i in `seq 1 100`; do sudo /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; sudo /opt/cactus/bin/controlhub_stop; done']
+               'for i in `seq 1 100`; do sudo /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; sudo /opt/cactus/bin/controlhub_stop; done',
+               'uhal_test_suite.py -v -s "test controlhub start"']
             ]]
 
 COMMANDS += [["TEST IPbus 1.3 - UDP",
