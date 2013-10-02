@@ -174,8 +174,7 @@ namespace uhal
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
-  {
-    // log( Warning , ThisLocation() );
+  { 
     if ( mAsynchronousException )
     {
       log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
@@ -189,10 +188,8 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      {
-        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-        mDispatchQueue.push_back ( aBuffers );
-      }
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      mDispatchQueue.push_back ( aBuffers );
 
       if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
       {
