@@ -286,6 +286,7 @@ class TestBlock(unittest.TestCase):
         for i in range(N):
            self.assertRaises( uhal.NonValidatedMemory, memVals.at, (i) )
            self.assertRaises( uhal.NonValidatedMemory, memVals.__getitem__ , (i) )
+        self.assertRaises( uhal.NonValidatedMemory, memVals.value, () )
         self.assertRaises( uhal.NonValidatedMemory, memVals.__iter__ )
         self.assertRaises( IndexError , memVals.__getitem__ , (-N-1) )
         self.assertRaises( IndexError , memVals.__getitem__ , (N) )
@@ -294,6 +295,7 @@ class TestBlock(unittest.TestCase):
         self.assertTrue( memVals.valid() )
         self.assertEqual( memVals.size(), N )
         self.assertEqual( len(memVals), N )
+        self.assertEqual( xx , memVals.value() )
         # Test ValVector_uint32 indexing
         for i in range(N):
             self.assertEqual( xx[i], memVals[i] )
