@@ -413,7 +413,7 @@ namespace uhal
     //     {
     //       lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
     //     }
-    //     lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( mReplyBuffers->getSpareSpace() , Buffers::mSpareSpaceSize ) );
+
     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
     lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &mReplyByteCounter , 4 ) );
     log ( Debug() , "Getting reply byte counter" );

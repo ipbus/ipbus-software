@@ -346,7 +346,6 @@ namespace uhal
       lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
     }
 
-    lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( mReplyBuffers->getSpareSpace() , Buffers::mSpareSpaceSize ) );
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
