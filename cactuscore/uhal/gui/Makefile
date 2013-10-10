@@ -30,7 +30,9 @@ all:
 rpm: _rpmall
 _rpmall:
 	rm -rf /var/tmp/cactus* 
-	python setup.py bdist_rpm --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} --binary-only
+
+	python setup.py bdist_rpm --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} --binary-only --force-arch=`uname -m`
+
 
 install: _install
 _install:
