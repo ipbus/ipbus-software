@@ -1,4 +1,4 @@
-import wx
+import wx, logging
 
 from uhal.gui.utilities.utilities import dynamic_loader
 from uhal.gui.guis import defaultgui
@@ -47,27 +47,42 @@ class GuiLoader:
         
         output_to_window = False
         app = MainApplication(self.gui_list, output_to_window)
-        # client = ThreadClient(app)
+        logger.info('Starting application main loop...')
         app.MainLoop()
-
 
 
 
 def loader(default=True, guilist=[]):
 
+    configure_logger()
+    
     if default:
 
         try:
             default_mod_obj = __import__('uhal.gui.guis', globals(), locals(), ['defaultgui'])
             def_gui_mod_obj = default_mod_obj.defaultgui
             guilist.append(def_gui_mod_obj)
+            logger.info('GUI modules successfully imported')
             
         except ImportError, e:
-            print 'FAILED to import defaultgui module', e
+            logger.critical('Failed to import defaultgui module: %s', str(e))
             
         
     return GuiLoader(guilist)
     
+
+
+def configure_logger():
+    
+    global logger
+    
+    logger = logging.getLogger('uhal.gui')
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - from %(name)s -- %(levelname)s: %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
 
 

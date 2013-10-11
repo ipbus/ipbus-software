@@ -1,6 +1,5 @@
-import string
+import string, logging, wx
 
-import wx
 import wx.lib.scrolledpanel as scroll
 
 from uhal.gui.guis.plotreg import Plot
@@ -237,7 +236,10 @@ class IpEndPointWidget(wx.Panel):
 class HardwareTablePanel(scroll.ScrolledPanel):
      
     def __init__(self, parent):
-        print "DEBUG: HardwareTablePanel instantiated"
+                
+        self.__logger = logging.getLogger('uhal.gui.guis.hw_table_panel')
+        
+        self.__logger.debug('HardwareTablePanel instantiated')
         scroll.ScrolledPanel.__init__(self, parent, -1)  
         
         # Attributes
@@ -255,17 +257,90 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         
         
         # self.SetBackgroundColour('Pink')
-        box = wx.StaticBox(self, -1, "Register tables")
-        self.__global_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)        
+        box = wx.StaticBox(self, -1, "Register tables")        
+        self.__global_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)   
+        self.__text_display = wx.TextCtrl(self, value='', style=wx.TE_MULTILINE)
+        self.__global_sizer.Add(self.__text_display, 1, wx.EXPAND|wx.ALL, 5)
         self.SetSizer(self.__global_sizer)
         
         # SetAutoLayout tells the window to use the sizer to position and size the components
         self.SetAutoLayout(True)
         self.SetupScrolling()
         self.__global_sizer.Fit(self)
+       
+       
         
+    def update(self):
+        self.__logger.debug('Updating HW table panel')
     
     
+    
+    def add_new_widget(self, nodes, hw_structure):                       
+        
+        text = 'Printing widget for IP End Point %s' % nodes[0]
+        self.__text_display.AppendText(text + '\n')
+        
+        self.__select_tree_slice(nodes, hw_structure)              
+            
+                 
+    
+    
+    def __select_tree_slice(self, nodes, hw):
+               
+        id = ''
+        start_item = None
+        
+        for n in nodes:
+                        
+            for k, v in hw.iteritems():
+              
+                try:
+                    id = k.getId()
+                except AttributeError, e:
+                    id = k.id()
+                
+                if id != n:                    
+                    continue
+                
+                start_item = k                
+                hw = v
+                break
+        
+        self.__logger.debug('Finished first loop. start_item is %s and hw is %s', str(start_item), str(hw))
+        
+       
+        if 'Node' in str(type(start_item)):
+            
+            text = 'Name: %s; Address: %s; Mask: %s; ' % (start_item.getId(), start_item.getAddress(), start_item.getMask())
+            if type(hw) is dict:
+                text = text + 'Value: N/A'
+            elif type(hw) is int:
+                value = str(hw)
+                text = text + 'Value: ' + value
+            
+            self.__text_display.AppendText(text + '\n')
+            
+            if type(hw) is int:
+                return
+        
+        self.__print_tree_slice(hw)  
+                                
+       
+        
+    def __print_tree_slice(self, hw):
+        
+        for k, v in hw.iteritems():
+            text = '\t Name: %s; Address: %s; Mask: %s; ' % (k.getId(), k.getAddress(), k.getMask())
+            if type(v) is dict:
+                text = text + 'Value: N/A'
+                self.__text_display.AppendText(text + '\n')
+                self.__print_tree_slice(v)
+            elif type(v) is int:
+                value = str(v)
+                text = text + 'Value: ' + value
+                self.__text_display.AppendText(text + '\n')
+                
+    '''  
     def draw_hw_naked_tables(self, hw):
         
         bck_colour = "#99CCFF"
@@ -307,4 +382,5 @@ class HardwareTablePanel(scroll.ScrolledPanel):
             for n in ep.get_nodes():
                 # Pass here 'address' instead of 'name' to identify the node because there could be name collisions (?)
                 w.update_node_value(n)
+    '''
         

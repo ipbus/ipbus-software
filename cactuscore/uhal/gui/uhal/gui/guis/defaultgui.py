@@ -1,29 +1,26 @@
-import os
-import webbrowser
+import os, webbrowser, logging
 
 import wx
+from wx.lib.pubsub import Publisher
 
 from uhal.gui.utilities.hardware_monitoring import HardwareMonitoring
 from uhal.gui.guis.hardware_tree import HardwareTree
-from uhal.gui.utilities.hardware import HardwareStruct
-from uhal.gui.guis.refresh_buttons_panel import RefreshButtonsPanel
 from uhal.gui.guis.hardware_table_panel import HardwareTablePanel
-        
 
 class DefaultGui(wx.Frame):
 
     def __init__(self, parent, id, title):
 
+        self.__logger = logging.getLogger('uhal.gui.guis.defaultgui')      
         wx.Frame.__init__(self, parent, id, title, size=(500, 400))       
         
         # Attributes       
         self.__hw = None
-        self.__hw_mon = None
-        self.__auto_refresh = False
+        self.__hw_mon = None     
+        self.__hw_tree_struct = None 
         
         # GUIs Attributes
-        self.__hw_tree = None
-        self.__refresh_buttons_panel = None
+        self.__hw_tree_frame = None        
         self.__hw_table_panel = None
 
         # Layout
@@ -31,22 +28,20 @@ class DefaultGui(wx.Frame):
         self.__do_layout()
         self.CreateStatusBar()
         
-        # Event handlers 
-        self.Bind(HardwareMonitoring.EVT_HWREADY, self.__on_hw_ready)
-        self.Bind(wx.EVT_CLOSE, self.__on_close_window)
+        # Event handlers        
+        Publisher.subscribe(self.__on_hw_ready, "HW POLL")
+        self.Bind(wx.EVT_CLOSE, self.__on_close_window) 
+        self.__logger.info('DefaultGui instance created')      
 
 
 
     def __do_layout(self):
-
-        self.__refresh_buttons_panel = RefreshButtonsPanel(self)
+        
         self.__hw_table_panel = HardwareTablePanel(self)
         
         border_flags = wx.ALL
         
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.__refresh_buttons_panel, 0, border_flags, 5)
-        # sizer.Add(wx.StaticLine(self), 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 50)
+        sizer = wx.BoxSizer(wx.VERTICAL)       
         sizer.Add(self.__hw_table_panel, 1, border_flags | wx.EXPAND, 5)
         
         self.SetSizer(sizer)
@@ -55,9 +50,11 @@ class DefaultGui(wx.Frame):
 
 
 
-    # CREATE THE MENU BAR
+    
     def __create_menu_bar(self):
-
+        """ Creates the menu bar object and adds items to it using the methods
+        __menu_data and __create_menu
+        """
         menu_bar = wx.MenuBar()
         for each_menu_data in self.__menu_data():
             menu_label = each_menu_data[0]
@@ -68,9 +65,12 @@ class DefaultGui(wx.Frame):
 
 
 
-    # menu bar items
+    
     def __menu_data(self):
-        
+        """
+        Creates the content of the menus in the menu bar. 
+        Assigns events and handlers to each one of the items
+        """
         return (("&File",
                  ("&LoadHW", "Load HW", wx.ITEM_NORMAL, self.__on_load_hw),
                  ("&Quit", "Quit", wx.ITEM_NORMAL, self.__on_close_window)
@@ -87,9 +87,11 @@ class DefaultGui(wx.Frame):
 
 
 
-    # create individual menu objects
+    
     def __create_menu(self, items):
-
+        """
+        Creates individual menu objects
+        """
         menu = wx.Menu()
         for each_label, each_status, each_kind, each_handler in items:
             
@@ -105,9 +107,11 @@ class DefaultGui(wx.Frame):
 
 
     def __on_load_hw(self, event):
-
-        # Right now, only a connection file picker is offered.
-        # Another dialog should be displayed to cope with pycohal ConnectionManager('device_id', 'uri', 'address_table')
+        """
+        Opens a dialog to choose one connection file so that the HW can be loaded. 
+        It will incorporate another method to initiate the HW information, consisting on entering a device ID, URI and address_table (this 
+        will cope with uHAL's ConnectionManager('device_id', 'uri', 'address_table') method.
+        """    
             
         wildcard = "XML files (*.xml)|*.xml|" \
                    "All files (*.*)|*.*"
@@ -123,46 +127,82 @@ class DefaultGui(wx.Frame):
 
         if file_picker.ShowModal() == wx.ID_OK:            
             file_name = file_picker.GetPath()
-            
-            self.__hw = HardwareStruct(file_name)                    
-            self.__create_hardware_tree(self.__hw) 
-            self.__hw_table_panel.draw_hw_naked_tables(self.__hw)                               
+                        
+            self.__start_hw_thread(file_name)                                  
+            self.__create_hardware_tree(self.__hw_tree_struct)              
+            #self.__hw_table_panel.draw_hw_naked_tables(self.__hw)                               
         
         file_picker.Destroy()
 
   
   
     def __create_hardware_tree(self, hw):
-        if self.__hw_is_valid():
-            self.__hw_tree = HardwareTree(self, hw)
-            self.__hw_tree.Show()
-        else:
-            print "ERROR: could not start hardware_tree -> self.__hw is not a valid object"
+        """
+        Picks up the hierarchical HW structure computed in the HardwareMonitoring class, and passes it to the 
+        HardwareTree class, so that the HW tree can be built
+        """
+        
+        self.__logger.info('HW valid; creating HW tree...')
+        self.__hw_tree_frame = HardwareTree(self, hw)
+        self.__hw_tree_frame.Show()                   
 
 
 
-    def __on_hw_ready(self, event):
+    def __on_hw_ready(self, msg):
+        """
+        HardwareMonitoring class and the DefaultGui coordinate events using a publisher/subscriber schema. 
+        When HardwareMonitoring thread is done checking the HW, publishes an event that the DefaultGui object will catch. Upon the reception 
+        of this event, this method is executed, updating the HW tree (only status of the IP End points), and widgets drawn in the main panel.
+        """
+        
+        self.__hw = msg.data  
+        #self.__logger.debug('Received message: %s', str(self.__hw))           
+        
+        for i in self.GetChildren():            
+            print 'Child of defaultGUI: %d %s %s' % (i.GetId(), i.GetLabel(), i.GetName())
+                
+            """
+            i.update()
+            Include children's update: HW tree with ip end point status, and HW table panel with register values.
+            """
+        
+        # Update: hw tree (nodes status), widgets in panel        
+        
+        
+        
+    def __start_hw_thread(self, file_name):
+        """
+        Creates the thread object that checks the HW. Picks up from it the object that represents the HW hierarchy. Starts the thread (this could also
+        be done in the thread's constructor.
+        """  
+        try:
+               
+            self.__hw_mon = HardwareMonitoring(self, file_name)       
+            self.__hw_tree_struct = self.__hw_mon.get_hw_tree()
+            #self.__logger.debug('hw_tree_struct is %s', str(self.__hw_tree_struct))
+            self.__logger.info('Starting HW monitoring thread...')
+              
+        except Exception, e:
             
-        print "DEBUG: HW READY in default GUI"
-        self.__hw = event.get_event_info()               
-        self.__hw_table_panel.on_hw_ready(self.__hw)
-        self.__hw_tree.redraw(self.__hw)
-        
-        
-        
-    def __hw_is_valid(self):
-        return self.__hw is not None
+            self.__logger.critical('Exception while instantiating HW monitoring thread! %s Exiting...', str(e))            
+            import sys
+            sys.exit(1)
+              
+                                
+        try:
+            
+            self.__hw_mon.start()
+            
+        except RuntimeError, e:
+            
+            self.__logger.critical('Tried to initiate twice the HW monitoring thread! Message %s Exiting...', str(e))
+            self.__hw_mon.set_thread_running(False)
+            self.__hw_mon.join()
+            import sys
+            sys.exit(1)       
+               
     
     
-    
-    def __on_click_autorefresh(self, event):
-        
-        if self.__auto_refresh == False:
-            self.__auto_refresh = True            
-        else:
-            self.__auto_refresh = False  
-        
-
 
     def __on_click_doc(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus/wiki/uhalGuiInstructions")
@@ -170,11 +210,18 @@ class DefaultGui(wx.Frame):
 
 
     def __on_click_support(self, event):
+        """
+        Opens a web browser loading the CACTUS support website
+        """
+        
         webbrowser.open("https://svnweb.cern.ch/trac/cactus/newticket")
 
 
 
-    def __on_click_about(self, event):        
+    def __on_click_about(self, event):    
+        """
+        Displays a frame with this information
+        """    
 
         description = """uHAL GUI is a Python based graphical user interface 
         written using the graphical library wxPython. It has been designed to provide a simple interface
@@ -211,23 +258,29 @@ class DefaultGui(wx.Frame):
 
 
     def __on_close_window(self, event):
+        """
+        Sets the HW thread to not run anymore, waits for the tread to finish and closes the window, offering a confirmation dialog beforehand.
+        """
 
         msg = "Do you really want to close this GUI?"
         
         dialog = wx.MessageDialog(self, msg, "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
         result = dialog.ShowModal()
         dialog.Destroy()
+        
+        if self.__hw_mon and self.__hw_mon.isAlive():
+            self.__hw_mon.set_thread_running(False)
+            self.__hw_mon.join()
 
         if result == wx.ID_OK:
             self.Destroy()
             
             
+    def add_new_widget_to_panel(self, nodes):
+        self.__logger.debug('Add new widget to panel...')
+        self.__hw_table_panel.add_new_widget(nodes, self.__hw_tree_struct)
+    
             
-    def start_hw_thread(self):
-        print "DEBUG: Received message from refresh_buttons_panel. Should start HW thread now"
-        if self.__hw_is_valid():
-           
-            hw_worker = HardwareMonitoring(self, self.__hw)
-            hw_worker.start()
-        else: 
-            print "ERROR: could not start HW update thread -> self.__hw is not a valid object"
+            
+            
+    

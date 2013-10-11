@@ -1,75 +1,182 @@
-import sys
-import threading
-import time
-
-import wx
+import sys, threading, time, logging, wx
+from wx.lib.pubsub import Publisher
 
 import uhal
 
 from uhal.gui.utilities.utilities import HwReadyEvent
-from uhal.gui.utilities.hardware import HardwareStruct, IPEndPoint, Node
 
 
 class HardwareMonitoring(threading.Thread):
-
-    myEVT_HWREADY = wx.NewEventType()
-    EVT_HWREADY = wx.PyEventBinder(myEVT_HWREADY, 1)
-    
-    def __init__(self, parent, hw):
-
+        
+    def __init__(self, parent, file_name):  
+        """
+        Thread that checks the HW. The thread is set to be a thread daemon, so that it finishes when the main thread does. 
+        __is_running: controls the thread execution
+        __parent: the main thread
+        __hw_complete: map of IP end points' names to map of node names to node values. It's updated after every iteration of the thread
+        __hw_tree: is built only once in the constructor. Contains the HW information in a hierarchical/recursive way. This structure is defined:
+            __hw_tree := {item - value}, where item is [IPEndPoint, Node] and value is [__hw_tree, node value] 
+        __cm: uHAL ConnectionManager
+        __devices: contains all IP End Points present in the address table file
+        """
+        self.__logger = logging.getLogger('uhal.gui.utilities.hardware_monitoring')
+        
         threading.Thread.__init__(self)
+        self.setDaemon(True)
+        
+        #members
+        self.__is_running = True        
         self.__parent = parent      
-        self.__hw = hw
-
-
-    def run(self):
-        print "DEBUG: Checking HW... start!"        
-        
-        for i in self.__hw.get_ip_end_points():            
-            
-            print "DEBUG: Updating IP End Point %s" % i.get_id()
-            ##### get the status here, or make the IP end point object to find it out #####
-            i.set_status("Undefined")
-            
-            # Do the following ONLY if status is OK:
-            '''
-            if i.get_status() != "OK":
-                continue
-            '''
-            for n in i.get_nodes():                                             
-                print "DEBUG: Updating node %s" % n.get_id()
-                self.__update(i.get_id(), n)
-      
+        self.__hw_complete = {}
+        self.__hw_tree = {}
                 
-        
-        evt = HwReadyEvent(self.myEVT_HWREADY, -1, self.__hw)
-        wx.PostEvent(self.__parent, evt)
-
-            
-            
-    def __update(self, ip_ep_name, node):      
-        
-        hw_man = self.__hw.get_hw_manager()
-        ip_ep = hw_man.getDevice(ip_ep_name)
-        new_value = ""
+        self.__cm = None
+        self.__devices = None
         
         try:
-        # Before reading, check that node permission's allow to read
-            if node.has_no_children() and ("READ" in node.get_permission()):            
-                node_id = node.get_id()               
-                new_value = ip_ep.getNode(node_id).read()                
-                ip_ep.dispatch()
-                print "DEBUG: Setting value %s in node %s, parent %s" % (new_value, node_id, node.get_parent())
-                node.set_value(new_value)
-        except Exception, e:
-            print "ERROR: updating the node %s from HW device %s" %(node_id, ip_ep_name)
-                            
-        
-        for n in node.get_children():           
-            self.__update(ip_ep_name, n)        
-    
-    
-    def __print_hardware(self):
+            self.__init_hw(file_name)      
+            self.__build_hw_tree()
+            
+        except Exception, e:            
+            raise                                 
 
-        for i in self.__hw.get_ip_end_points():       
-            i.print_ip_end_point()
+
+
+    def run(self):    
+        """
+        Thread activity. Infinite loop reading the HW registers. The reading operations have been restricted to:
+        1. Nodes that are alive (reply to ping)
+        2. End nodes. For example, SUBMODULE or SUBMODULE.SUBSYSTEM will not be read, whereas SUBMODULE.SUBSYSTEM.REG or SUBMODULE.SUBSYSTEM.MEM will
+        This is due to the fact that uHAL always displays 0 value for those nodes up in the hierarchy regardless of what is written in the HW
+        3. Nodes that are readable
+        At the end of every iteration, the read values are copied in the __hw_complete structure and the publisher writes this information
+        """                    
+        
+        while self.__is_running:                        
+            self.__logger.debug('Start!')    
+            
+            map_devs_to_map_nodes_to_values = {}
+            for name, dev in self.__devices.iteritems():
+                '''
+                if dev.get_status() is not "OK":
+                    continue
+                '''                
+                nodes = dev.getNodes()
+                nodes_vs_values = {}
+                for node in nodes:
+                    
+                    try: 
+                        node_object = dev.getNode(node)
+                        # Only reading end nodes
+                        if node_object.getNodes():
+                            continue
+                        
+                        # Only reading readable nodes (DUH!)
+                        permission = str(node_object.getPermission())
+                        if "READ" not in permission:
+                            continue
+                    
+                        nodes_vs_values[node] = node_object.read()  
+                        #self.__logger.debug('Insert read operation for device %s node %s' % (name, node))                                         
+                    except Exception, e:
+                        self.__logger.warning('Exception while reading node %s from device %s: %s', node , name, str(e))                        
+                                   
+                dev.dispatch()  
+                map_devs_to_map_nodes_to_values[name] = nodes_vs_values                            
+            
+            self.__synchronize_hw_info(map_devs_to_map_nodes_to_values)
+            
+            wx.CallAfter(Publisher().sendMessage, "HW POLL", self.__hw_complete)              
+            time.sleep(5)     
+
+
+
+    def set_thread_running(self, is_running):
+        """
+        Sets the thread to run or not to run
+        """
+        self.__is_running = is_running
+        
+        
+        
+    def get_hw_tree(self):
+        return self.__hw_tree
+        
+        
+        
+    def __init_hw(self, file_name):
+        """
+        Initializes the __hw_tree, __hw_complete and __devices objects
+        """
+        
+        self.__cm = uhal.ConnectionManager(str("file://" + file_name))
+        self.__devices = {}
+        
+        for device in self.__cm.getDevices():
+            device_object = self.__cm.getDevice(device)
+            
+            self.__hw_tree[device_object] = {}            
+            self.__devices[device] = device_object            
+            self.__hw_complete[device] = {}
+            
+            node_vs_value = {}
+            
+            for node in device_object.getNodes():
+                node_vs_value[node] = 0
+            
+            self.__hw_complete[device] = node_vs_value   
+            
+            
+            
+    def __build_hw_tree(self):
+        """
+        This method and __build_tree construct the __hw_tree object.    
+        """
+        for k in self.__hw_tree.keys():
+            self.__logger.debug('Going to build tree for device %s', k.id())
+            self.__build_tree(k, self.__hw_tree)
+    
+            
+            
+    def __build_tree(self, item, parent):
+        """
+        Builds the __hw_tree object recursively
+        """        
+        for node in item.getNodes():
+            node_object = item.getNode(node)
+            # node is not one of the first level nodes
+            if node not in item.getNodes("[^.]*"):
+                continue
+                        
+            # node has no children
+            if not item.getNode(node).getNodes():
+                parent[item][node_object] = 0
+            else:
+                parent[item][node_object] = {}
+                self.__build_tree(node_object, parent[item])
+    
+    
+            
+    def __synchronize_hw_info(self, hw_map):
+        """
+        Synchronizes up the information polled from the HW with the one used for display, __hw_complete
+        """        
+        for dev, node_dict in hw_map.iteritems():
+            for node, value in node_dict.iteritems():
+                
+                self.__hw_complete[dev][node] = value               
+                #self.__update_hw_tree(self._hw_tree[dev], node, value)
+                #self.__logger.debug('Value %s set in node %s of device %s', str(value), node, dev)               
+    
+    """
+    def __update_hw_tree(self, tree, nodes, value):
+        
+        nodes = node.split('.')
+        self.__logger.debug('Node to update is %s' % str(nodes))
+        
+        if len(nodes) > 1:
+            self.__update_hw_tree(tree[nodes[0]], nodes[1:], value)
+        else:
+    """
+       
+            
