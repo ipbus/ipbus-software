@@ -15,6 +15,7 @@
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/Node.hpp"
 
+// pycohal includes
 #include "uhal/pycohal/converters_exceptions.hpp"
 #include "uhal/pycohal/enums_logging.hpp"
 
@@ -27,22 +28,42 @@ namespace pycohal
     return uhal::defs::NOMASK;
   }
 
-  /// Returns vector of strings, generated from splitting string argument using ":" as delimeter. [Function solely used in unitests]
-  std::vector<std::string> make_test_vec_of_strings ( const std::string& single_string )
+  /// Trivial function that returns copy of vector argument in order to test vector to/from list converters. [Function solely used in unit-tests]
+  template<class T>
+  std::vector<T> copy_vector ( const std::vector<T>& aVec )
   {
-    std::vector<std::string> result;
+    return std::vector<T>( aVec );
+  }
 
-    if ( single_string.empty() )
+  /// Returns vector, generated from splitting string argument using "," as delimeter, and converting string to type via lexical cast. [Function solely used in unit-tests]
+  template < class T >
+  std::vector<T> convert_string_to_vector ( const std::string& aString )
+  {
+    std::vector<std::string> sVec;
+    std::vector<T> result;
+
+    if ( ! aString.empty() )
     {
-      return result;
+      boost::algorithm::split ( sVec, aString, boost::algorithm::is_any_of(",") );
+      result.reserve(sVec.size());
+      for ( std::vector<std::string>::const_iterator it = sVec.begin(); it != sVec.end(); it++ )
+      {
+         result.push_back( boost::lexical_cast<T>(*it) );
+      }
     }
 
-    boost::algorithm::split ( result, single_string, boost::algorithm::is_any_of ( ":" ) );
     return result;
   }
-  std::vector<std::string> make_test_empty_vec_of_strings()
+
+  template <>
+  std::vector<std::string> convert_string_to_vector ( const std::string& aString )
   {
-    return std::vector<std::string>();
+    std::vector<std::string> result;
+    if ( ! aString.empty() )
+    {
+      boost::algorithm::split ( result, aString, boost::algorithm::is_any_of(",") );
+    }
+    return result;
   }
 
   /// Returns whether uint32 and string arguments represent the same nubmer. Used in tests to check that uint32 arguments don't get altered at python-to-C boundary.
@@ -72,11 +93,13 @@ namespace pycohal
     packageScope.attr ( "tests" ) = testModule; //< Enables "from mypackage import tests"
     // Change to sub-module scope ...
     bpy::scope testScope = testModule;
+
     // Wrap the test functions ...
-    bpy::def ( "make_vec_of_strings", pycohal::make_test_vec_of_strings );
-    bpy::def ( "make_empty_vec_of_strings", pycohal::make_test_empty_vec_of_strings );
     bpy::def ( "check_uint32_argument", pycohal::test_check_uint32_argument );
     bpy::def ( "convert_str_to_uint32", pycohal::test_convert_str_to_uint32 );
+    bpy::def ( "convert_str_to_vec_str", pycohal::convert_string_to_vector<std::string> );
+    bpy::def ( "convert_str_to_vec_uint32", pycohal::convert_string_to_vector<uint32_t> );
+    bpy::def ( "copy_vec_uint32", pycohal::copy_vector<uint32_t> );
   }
 
 
@@ -182,10 +205,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_readBlock_overload
 BOOST_PYTHON_MODULE ( _core )
 {
   def ( "NOMASK", pycohal::defs_NOMASK );
-  // Wrap vector of uint32_t
-  class_< std::vector<uint32_t> > ( "vec_uint32" )
-  .def ( init<const std::vector<uint32_t>& >() )
-  .def ( vector_indexing_suite< std::vector<uint32_t> >() );
   // ENUMS
   pycohal::wrap_enums();
   // LOGGING FUNCTIONS

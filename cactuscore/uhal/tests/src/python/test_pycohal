@@ -140,25 +140,39 @@ class TestConverters(unittest.TestCase):
         - vector<uint32_t> from list
     """
 
-    def test_vec_uint32_from_list(self):
+    def test_vec_uint32_from_list_and_to_list(self):
         # Firstly check valid conversions
-        self.exe_test_vec_uint32_from_uint32_list( [] )
-        self.exe_test_vec_uint32_from_uint32_list( [42, 56, 74] )
-        self.exe_test_vec_uint32_from_uint32_list( list_randuint32s(100) )
-        self.exe_test_vec_uint32_from_uint32_list( list_randuint32s( randint(1000,10000) ) )
+        self.exe_test_vec_uint32_from_list_and_to_list( [] )
+        self.exe_test_vec_uint32_from_list_and_to_list( [42, 56, 74] )
+        self.exe_test_vec_uint32_from_list_and_to_list( list_randuint32s(100) )
+        self.exe_test_vec_uint32_from_list_and_to_list( list_randuint32s( randint(1000,10000) ) )
 
         # Now check conversion that should fail
-        self.assertRaises( OverflowError, uhal.vec_uint32, ([42, -1, 76]) )
-        self.assertRaises( OverflowError, uhal.vec_uint32, ([3, 6, 22222222222222222222222222222222222222223]) )
-        self.assertRaises( TypeError, uhal.vec_uint32, ([1,2.1,3]) )
-        self.assertRaises( TypeError, uhal.vec_uint32, ([[], []]) )
-        self.assertRaises( TypeError, uhal.vec_uint32, (['bob']) )
+        self.assertRaises( OverflowError, uhal.tests.copy_vec_uint32, ([42, -1, 76]) )
+        self.assertRaises( OverflowError, uhal.tests.copy_vec_uint32, ([3, 6, 22222222222222222222222222222222222222223]) )
+        self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, ([1,2.1,3]) )
+        self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, ([[], []]) )
+        self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, (['bob']) )
 
-    def exe_test_vec_uint32_from_uint32_list(self, list_of_uint32s):
-        vec = uhal.vec_uint32( list_of_uint32s )
-        self.assertEqual( len(vec), len(list_of_uint32s) )
-        for i in range( len(vec) ):
-            self.assertEqual( vec[i], list_of_uint32s[i] )
+    def exe_test_vec_uint32_from_list_and_to_list(self, list_of_uint32s):
+        list_copy = uhal.tests.copy_vec_uint32( list_of_uint32s )
+        self.assertTrue( isinstance(list_copy, list) )
+        self.assertEqual( len(list_copy), len(list_of_uint32s) )
+        for i in range( len(list_copy) ):
+            self.assertEqual( list_copy[i], list_of_uint32s[i] )
+
+    def test_vec_uint32_to_list(self):
+        """Test conversion of C++ vector<uint32_t> return values to python list"""
+        self.exe_test_vec_uint32_to_list( [] )
+        self.exe_test_vec_uint32_to_list( [randuint32()] )
+        self.exe_test_vec_uint32_to_list( [1,42,99] )
+        self.exe_test_vec_uint32_to_list( list_randuint32s(100) )
+        self.exe_test_vec_uint32_to_list( list_randuint32s(1000) )
+        self.exe_test_vec_uint32_to_list( list_randuint32s(10000) )
+
+    def exe_test_vec_uint32_to_list(self, list_of_uint32s):
+        list_from_vector = uhal.tests.convert_str_to_vec_uint32( ",".join(str(i) for i in list_of_uint32s) )
+        self.assertEqual ( list_of_uint32s, list_from_vector )
 
     def test_vec_string_to_list(self):
         """Test conversion of C++ vector<string> return values to python list."""
@@ -169,15 +183,7 @@ class TestConverters(unittest.TestCase):
         self.exe_test_vec_string_to_list( ['alphabet', 'b', 'c', 'd', 'e'] )
 
     def exe_test_vec_string_to_list(self, list_of_strings):
-        if len(list_of_strings)==0:
-            list_from_vector = uhal.tests.make_empty_vec_of_strings()
-        else:
-           test_func_arg = ""
-           for x in list_of_strings:
-               self.assertTrue( isinstance(x, str) )
-               test_func_arg += x+":"
-           test_func_arg = test_func_arg[0:-1]
-           list_from_vector = uhal.tests.make_vec_of_strings(test_func_arg)
+        list_from_vector = uhal.tests.convert_str_to_vec_str( ",".join(list_of_strings) )
         self.assertEqual( list_of_strings, list_from_vector )
      
 
@@ -286,7 +292,7 @@ class TestBlock(unittest.TestCase):
         for i in range(N):
            self.assertRaises( uhal.NonValidatedMemory, memVals.at, (i) )
            self.assertRaises( uhal.NonValidatedMemory, memVals.__getitem__ , (i) )
-        self.assertRaises( uhal.NonValidatedMemory, memVals.value, () )
+        self.assertRaises( uhal.NonValidatedMemory, memVals.value )
         self.assertRaises( uhal.NonValidatedMemory, memVals.__iter__ )
         self.assertRaises( IndexError , memVals.__getitem__ , (-N-1) )
         self.assertRaises( IndexError , memVals.__getitem__ , (N) )
@@ -393,7 +399,7 @@ class TestRawClient(unittest.TestCase):
         client = self.hw.getClient()
 
         total = 0
-        xx = uhal.vec_uint32()
+        xx = []
         for i in range(N):
             xx.append( randint(0,0xffffffff/1024) )
             total += xx[i]
