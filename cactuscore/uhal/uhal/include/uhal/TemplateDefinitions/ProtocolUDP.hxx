@@ -225,12 +225,12 @@ namespace uhal
     std::vector< boost::asio::const_buffer > lAsioSendBuffer;
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
-    // log( Warning() , ThisLocation() );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 
+    // Patch for suspected bug in using boost asio with boost python; see https://svnweb.cern.ch/trac/cactus/ticket/323#comment:7
     while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds ( 600 ) )
     {
-      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
+      log ( Debug() , "Resetting deadline timer since it just got set to strange value, likely due to a bug within boost (expires_from_now was: ", mDeadlineTimer.expires_from_now() , ")." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
@@ -350,9 +350,10 @@ namespace uhal
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 
+    // Patch for suspected bug in using boost asio with boost python; see https://svnweb.cern.ch/trac/cactus/ticket/323#comment:7
     while ( mDeadlineTimer.expires_from_now() < boost::posix_time::microseconds ( 600 ) )
     {
-      log ( Fatal() , "N.B. Deadline timer just set to strange value in ", __func__, ". Expires_from_now is: ", mDeadlineTimer.expires_from_now(), " . Resetting ..." );
+      log ( Debug() , "Resetting deadline timer since it just got set to strange value, likely due to a bug within boost (expires_from_now was: ", mDeadlineTimer.expires_from_now() , ")." );
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
