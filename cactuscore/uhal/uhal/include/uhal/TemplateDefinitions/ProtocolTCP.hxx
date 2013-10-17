@@ -232,7 +232,7 @@ namespace uhal
       std::ostringstream oss;
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        oss << "Timeout (" << this->getTimeoutPeriod() << " milliseconds) occurred when connecting to ";
+        oss << "Timeout (" << this->getBoostTimeoutPeriod().total_milliseconds() << " milliseconds) occurred when connecting to ";
       }
       else if ( lErrorCode == boost::asio::error::connection_refused )
       {
@@ -338,9 +338,9 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for send to ", 
+      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for send to ", 
             ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
-      if ( aErrorCode )
+      if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
@@ -478,9 +478,10 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for receive from ",
+      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
             ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
-      if ( aErrorCode )
+
+      if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
@@ -574,7 +575,7 @@ namespace uhal
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         lExc = new exception::TcpTimeout();
-        log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for receive from ",
+        log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
               ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
       }
       else

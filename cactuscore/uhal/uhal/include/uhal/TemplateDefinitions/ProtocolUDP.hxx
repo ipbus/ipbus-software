@@ -272,8 +272,8 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for UDP send to target with URI: ", this->uri() );
-      if ( aErrorCode )
+      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for UDP send to target with URI: ", this->uri() );
+      if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
@@ -391,8 +391,8 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for UDP receive from target with URI: ", this->uri() );
-      if ( aErrorCode )
+      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for UDP receive from target with URI: ", this->uri() );
+      if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
