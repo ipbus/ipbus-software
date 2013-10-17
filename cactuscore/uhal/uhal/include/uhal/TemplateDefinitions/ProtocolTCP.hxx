@@ -111,8 +111,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       exception::ASIOTcpError lExc;
-      log ( lExc , "Error closing socket" );
-      log ( lExc , "ASIO reported " , Quote ( aExc.what() ) );
+      log ( lExc , "Error " , Quote ( aExc.what() ) , " encountered when closing TCP socket for URI: ", this->uri() );
       throw lExc;
     }
 
@@ -233,11 +232,11 @@ namespace uhal
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        log ( lExc , "ASIO TCP connection timed out" );
+        log ( lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred in TCP connect for URI: " , this->uri() );
       }
       else
       {
-        log ( lExc , "ASIO reported an error: " , lErrorCode.message() );
+        log ( lExc , "Error " , Quote ( lErrorCode.message() ) , " encountered when connecting to TCP server with URI: " , this->uri() );
       }
 
       throw lExc;
@@ -335,7 +334,11 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
-      log ( *lExc , "ASIO reported a timeout in TCP write callback. Error code message is: ", Quote ( aErrorCode.message() ) );
+      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for send to TCP server with URI: ", this->uri() );
+      if ( aErrorCode )
+      {
+        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+      }
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -343,6 +346,9 @@ namespace uhal
 
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
+      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
+      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to TCP server with URI: " , this->uri() );
+
       try
       {
         mSocket.close();
@@ -352,16 +358,9 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
-        log ( *lExc , "Error closing socket" );
-        log ( *lExc , "ASIO reported " , Quote ( aExc.what() ) );
-        mAsynchronousException = lExc;
-        NotifyConditionalVariable ( true );
-        return;
+        log ( *lExc , "Error closing TCP socket following the ASIO send error" );
       }
 
-      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
-      log ( *lExc , "ASIO reported a write error: " , Quote ( aErrorCode.message() ) );
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -473,7 +472,14 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
-      log ( *lExc , "ASIO reported a timeout in TCP read callback. Error code message is: ", Quote ( aErrorCode.message() ) );
+      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for receive from TCP target with URI: ", this->uri() );
+      if ( aErrorCode )
+      {
+        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+      }
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -481,6 +487,9 @@ namespace uhal
 
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
+      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
+      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from TCP target with URI: " , this->uri() );
+
       try
       {
         mSocket.close();
@@ -490,16 +499,12 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
-        log ( *lExc , "Error closing socket" );
-        log ( *lExc , "ASIO reported " , Quote ( aExc.what() ) );
-        mAsynchronousException = lExc;
-        NotifyConditionalVariable ( true );
-        return;
+        log ( *lExc , "Error closing socket following ASIO read error" );
       }
 
-      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
-      log ( *lExc , "ASIO reported a read error : " , Quote ( aErrorCode.message() ) );
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -557,18 +562,21 @@ namespace uhal
     {
       mSocket.close();
 
+      exception::exception* lExc;
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        exception::TcpTimeout* lExc = new exception::TcpTimeout();
-        log ( *lExc , "ASIO reported an error: " , Quote ( lErrorCode.message() ) );
-        log ( *lExc , "ASIO reported a timeout in TCP callback" );
-        mAsynchronousException = lExc;
-        NotifyConditionalVariable ( true );
-        return;
+        lExc = new exception::TcpTimeout();
+        log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for receive from TCP target with URI: ", this->uri() );
+      }
+      else
+      {
+        lExc = new exception::ASIOTcpError();
+        log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from TCP target with URI: " , this->uri() );
       }
 
-      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
-      log ( *lExc , "ASIO reported an error: " , Quote ( lErrorCode.message() ) );
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -584,7 +592,9 @@ namespace uhal
       }
       catch ( exception::exception& aExc )
       {
+        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
         mAsynchronousException = new exception::ValidationError ();
+        log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) ); 
       }
 
       if ( mAsynchronousException )
@@ -627,6 +637,7 @@ namespace uhal
     catch ( exception::exception& aExc )
     {
       mAsynchronousException = new exception::ValidationError ();
+      log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) ); 
     }
 
     if ( mAsynchronousException )
