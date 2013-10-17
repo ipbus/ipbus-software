@@ -628,101 +628,101 @@ void uhal::tests::PerfTester::validationTest()
   for(ClientVec::iterator clientIt = m_clients.begin(); clientIt != m_clients.end(); clientIt++)
   {
     ClientPtr client = *clientIt;
-  cout << "\n\nWRITE READ-BACK TESTS for device at '" << client->uri() << "'" << endl;
-  vector<uint32_t> addr_vec;
-  addr_vec.push_back ( m_baseAddr );
-  addr_vec.push_back ( m_baseAddr + m_bandwidthTestDepth - 1 );
+    cout << "\n\nWRITE READ-BACK TESTS for device at '" << client->uri() << "'" << endl;
+    vector<uint32_t> addr_vec;
+    addr_vec.push_back ( m_baseAddr );
+    addr_vec.push_back ( m_baseAddr + m_bandwidthTestDepth - 1 );
 
-  for ( unsigned i = 0; i < 498; i++ )
-  {
-    addr_vec.push_back ( m_baseAddr + ( rand() % m_bandwidthTestDepth ) );
-  }
-
-  cout << "\n 1. Single-register write/read (" << addr_vec.size() * 2 << " tests)" << endl;
-
-  for ( unsigned i = 0; i < addr_vec.size(); i++ )
-  {
-    nrTestsTotal++;
-
-    if ( ! validation_test_single_write_read ( client, addr_vec.at ( i ), true ) )
+    for ( unsigned i = 0; i < 498; i++ )
     {
-      nrTestsFailed++;
+      addr_vec.push_back ( m_baseAddr + ( rand() % m_bandwidthTestDepth ) );
     }
 
-    nrTestsTotal++;
+    cout << "\n 1. Single-register write/read (" << addr_vec.size() * 2 << " tests)" << endl;
 
-    if ( ! validation_test_single_write_read ( client, addr_vec.at ( i ), false || m_perIterationDispatch ) )
+    for ( unsigned i = 0; i < addr_vec.size(); i++ )
     {
-      nrTestsFailed++;
-    }
-  }
+      nrTestsTotal++;
 
-  cout << "\n 2. Block write/read (" << addr_vec.size() * 2 << " tests)" << endl;
+      if ( ! validation_test_single_write_read ( client, addr_vec.at ( i ), true ) )
+      {
+        nrTestsFailed++;
+      }
 
-  for ( unsigned i = 0; i < addr_vec.size(); i++ )
-  {
-    uint32_t addr = addr_vec.at ( i );
-    uint32_t max_depth = m_baseAddr + m_bandwidthTestDepth - addr;
-    uint32_t depth = rand() % ( max_depth + 1 );
+      nrTestsTotal++;
 
-    // Remove 0-word write/read tests until bug solved -- https://svnweb.cern.ch/trac/cactus/ticket/343
-    if ( depth == 0 )
-    {
-      depth = max_depth;
+      if ( ! validation_test_single_write_read ( client, addr_vec.at ( i ), false || m_perIterationDispatch ) )
+      {
+        nrTestsFailed++;
+      }
     }
 
-    nrTestsTotal++;
+    cout << "\n 2. Block write/read (" << addr_vec.size() * 2 << " tests)" << endl;
 
-    if ( ! validation_test_block_write_read ( client, addr, depth, true ) )
+    for ( unsigned i = 0; i < addr_vec.size(); i++ )
     {
-      nrTestsFailed++;
+      uint32_t addr = addr_vec.at ( i );
+      uint32_t max_depth = m_baseAddr + m_bandwidthTestDepth - addr;
+      uint32_t depth = rand() % ( max_depth + 1 );
+
+      // Remove 0-word write/read tests until bug solved -- https://svnweb.cern.ch/trac/cactus/ticket/343
+      if ( depth == 0 )
+      {
+        depth = max_depth;
+      }
+
+      nrTestsTotal++;
+
+      if ( ! validation_test_block_write_read ( client, addr, depth, true ) )
+      {
+        nrTestsFailed++;
+      }
+
+      nrTestsTotal++;
+
+      if ( ! validation_test_block_write_read ( client, addr, depth, false || m_perIterationDispatch ) )
+      {
+        nrTestsFailed++;
+      }
     }
 
-    nrTestsTotal++;
+    cout << "\n 3. Testing RMW-bits (write, RMWbits, read; " << addr_vec.size() * 2 << " tests)" << endl;
 
-    if ( ! validation_test_block_write_read ( client, addr, depth, false || m_perIterationDispatch ) )
+    for ( std::vector<uint32_t>::const_iterator it = addr_vec.begin(); it != addr_vec.end(); it++ )
     {
-      nrTestsFailed++;
-    }
-  }
+      nrTestsTotal++;
 
-  cout << "\n 3. Testing RMW-bits (write, RMWbits, read; " << addr_vec.size() * 2 << " tests)" << endl;
+      if ( ! validation_test_write_rmwbits_read ( client, *it, true ) )
+      {
+        nrTestsFailed++;
+      }
 
-  for ( std::vector<uint32_t>::const_iterator it = addr_vec.begin(); it != addr_vec.end(); it++ )
-  {
-    nrTestsTotal++;
+      nrTestsTotal++;
 
-    if ( ! validation_test_write_rmwbits_read ( client, *it, true ) )
-    {
-      nrTestsFailed++;
-    }
-
-    nrTestsTotal++;
-
-    if ( ! validation_test_write_rmwbits_read ( client, *it, false || m_perIterationDispatch ) )
-    {
-      nrTestsFailed++;
-    }
-  }
-
-  cout << "\n 4. Testing RMW-sum (write, RMW-sum, read; " << addr_vec.size() * 2 << " tests)" << endl;
-
-  for ( std::vector<uint32_t>::const_iterator it = addr_vec.begin(); it != addr_vec.end(); it++ )
-  {
-    nrTestsTotal++;
-
-    if ( ! validation_test_write_rmwsum_read ( client, *it, true ) )
-    {
-      nrTestsFailed++;
+      if ( ! validation_test_write_rmwbits_read ( client, *it, false || m_perIterationDispatch ) )
+      {
+        nrTestsFailed++;
+      }
     }
 
-    nrTestsTotal++;
+    cout << "\n 4. Testing RMW-sum (write, RMW-sum, read; " << addr_vec.size() * 2 << " tests)" << endl;
 
-    if ( ! validation_test_write_rmwsum_read ( client, *it, false || m_perIterationDispatch ) )
+    for ( std::vector<uint32_t>::const_iterator it = addr_vec.begin(); it != addr_vec.end(); it++ )
     {
-      nrTestsFailed++;
+      nrTestsTotal++;
+
+      if ( ! validation_test_write_rmwsum_read ( client, *it, true ) )
+      {
+        nrTestsFailed++;
+      }
+
+      nrTestsTotal++;
+
+      if ( ! validation_test_write_rmwsum_read ( client, *it, false || m_perIterationDispatch ) )
+      {
+        nrTestsFailed++;
+      }
     }
-  }
   }//end: for, m_clients
 
   if ( nrTestsFailed == 0 )
@@ -743,148 +743,148 @@ void uhal::tests::PerfTester::validationTest()
     ClientPtr client = *clientIt;
     cout << "\nSOAK TEST to device '" << client->uri() << "'\n   Random sequence of " << m_iterations << " transactions will be sent to hardware" << endl << endl;
 
-  // Setup
-  uint32_t ipbus_vsn;
-  size_t found = client->uri().find ( "-1.3" );
-
-  if ( found!=std::string::npos )
-  {
-    ipbus_vsn = 1;
-  }
-  else
-  {
-    found = client->uri().find ( "-2.0" );
+    // Setup
+    uint32_t ipbus_vsn;
+    size_t found = client->uri().find ( "-1.3" );
 
     if ( found!=std::string::npos )
     {
-      ipbus_vsn = 2;
+      ipbus_vsn = 1;
     }
     else
     {
-      log ( Error() , "Cannot deduce protocol from URI " , Quote ( client->uri() ), "  Exiting before performing soak test." );
-      std::exit ( 1 );
+      found = client->uri().find ( "-2.0" );
+
+      if ( found!=std::string::npos )
+      {
+        ipbus_vsn = 2;
+      }
+      else
+      {
+        log ( Error() , "Cannot deduce protocol from URI " , Quote ( client->uri() ), "  Exiting before performing soak test." );
+        std::exit ( 1 );
+      }
     }
-  }
 
-  std::vector< uint32_t > registers ( m_bandwidthTestDepth , 0x00000000 );
-  // Initialise registers to 0x0
-  client->writeBlock ( m_baseAddr, registers );
-  client->dispatch();
+    // Initialise registers to 0x0
+    std::vector< uint32_t > registers ( m_bandwidthTestDepth , 0x00000000 );
+    client->writeBlock ( m_baseAddr, registers );
+    client->dispatch();
 
-  // ACTUAL MEAT OF SOAK TEST
-  uint32_t type, addr, blockSize;
-  uint32_t tempUInt1, tempUInt2;
-  vector< boost::shared_ptr<QueuedTransaction> > queuedTransactions;
-  uint32_t nrQueuedWords = 0;
+    // ACTUAL MEAT OF SOAK TEST
+    uint32_t type, addr, blockSize;
+    uint32_t tempUInt1, tempUInt2;
+    vector< boost::shared_ptr<QueuedTransaction> > queuedTransactions;
+    uint32_t nrQueuedWords = 0;
 
-  for ( unsigned i = 0; i < m_iterations; i++ )
-  {
-    type = ( rand() % 4 );
-    addr = m_baseAddr + ( rand() % m_bandwidthTestDepth );
-
-    switch ( type )
+    for ( unsigned i = 0; i < m_iterations; i++ )
     {
-      case 0: // read
-      {
-        blockSize = getRandomBlockSize( m_baseAddr + m_bandwidthTestDepth - addr );
-        // Remove 0-word reads until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
-        if ( blockSize == 0 )
-        {
-          blockSize = 1;
-        }
-        log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+      type = ( rand() % 4 );
+      addr = m_baseAddr + ( rand() % m_bandwidthTestDepth );
 
-        ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
-        queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead ( addr, result, registers.begin() + ( addr - m_baseAddr ) ) ) );
-        nrQueuedWords += blockSize;
-        break;
+      switch ( type )
+      {
+        case 0: // read
+        {
+          blockSize = getRandomBlockSize( m_baseAddr + m_bandwidthTestDepth - addr );
+          // Remove 0-word reads until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
+          if ( blockSize == 0 )
+          {
+            blockSize = 1;
+          }
+          log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+
+          ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead ( addr, result, registers.begin() + ( addr - m_baseAddr ) ) ) );
+          nrQueuedWords += blockSize;
+          break;
+        }
+        case 1: // write
+        {
+          blockSize = getRandomBlockSize( m_baseAddr + m_bandwidthTestDepth - addr );
+          // Remove 0-word writes until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
+          if ( blockSize == 0 )
+          {
+            blockSize = 1;
+          }
+          log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+
+          vector<uint32_t> randomData = getRandomBuffer ( blockSize );
+          ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
+          std::copy ( randomData.begin(), randomData.end(), registers.begin() + ( addr - m_baseAddr ) );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockWrite ( addr, blockSize, result ) ) );
+          nrQueuedWords += blockSize;
+          break;
+        }
+        case 2: // RMW-bits
+        {
+          log ( Notice(), "Soak test - queueing: RMW-bits at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+          tempUInt1 = rand();
+          tempUInt2 = rand();
+          vector<uint32_t>::iterator regIt = registers.begin() + ( addr - m_baseAddr );
+
+          if ( ipbus_vsn == 1 )
+          {
+            *regIt &= tempUInt1;
+            *regIt |= tempUInt2;
+          }
+
+          ValWord<uint32_t> result = client->rmw_bits ( addr, tempUInt1, tempUInt2 );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwBits ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
+          nrQueuedWords += 1;
+
+          if ( ipbus_vsn == 2 )
+          {
+            *regIt &= tempUInt1;
+            *regIt |= tempUInt2;
+          }
+
+          break;
+        }
+        case 3: // RMW-sum
+        {
+          log ( Notice(), "Soak test - queueing: RMW-sum at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+          tempUInt1 = rand();
+          vector<uint32_t>::iterator regIt = registers.begin() + ( addr - m_baseAddr );
+
+          if ( ipbus_vsn == 1 )
+          {
+            *regIt += tempUInt1;
+          }
+
+          ValWord<uint32_t> result = client->rmw_sum ( addr, tempUInt1 );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwSum ( addr, tempUInt1, result, *regIt ) ) );
+          nrQueuedWords += 1;
+
+          if ( ipbus_vsn == 2 )
+          {
+            *regIt += tempUInt1;
+          }
+
+          break;
+        }
       }
-      case 1: // write
+
+      if ( m_perIterationDispatch || ( nrQueuedWords > 10000 ) || ( ( i+1 ) == m_iterations ) )
       {
-        blockSize = getRandomBlockSize( m_baseAddr + m_bandwidthTestDepth - addr );
-        // Remove 0-word writes until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
-        if ( blockSize == 0 )
-        {
-          blockSize = 1;
-        }
-        log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+        log ( Notice(), "Soak test - issuing dispatch" );
+        client->dispatch();
+        log ( Notice(), "Soak test - issuing empty dispatch" );
+        client->dispatch();
 
-        vector<uint32_t> randomData = getRandomBuffer ( blockSize );
-        ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
-        std::copy ( randomData.begin(), randomData.end(), registers.begin() + ( addr - m_baseAddr ) );
-        queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockWrite ( addr, blockSize, result ) ) );
-        nrQueuedWords += blockSize;
-        break;
-      }
-      case 2: // RMW-bits
-      {
-        log ( Notice(), "Soak test - queueing: RMW-bits at ", Integer ( addr, IntFmt<hex,fixed>() ) );
-        tempUInt1 = rand();
-        tempUInt2 = rand();
-        vector<uint32_t>::iterator regIt = registers.begin() + ( addr - m_baseAddr );
-
-        if ( ipbus_vsn == 1 )
+        for ( vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++ )
         {
-          *regIt &= tempUInt1;
-          *regIt |= tempUInt2;
+          if ( ! ( *it )->check_values() )
+          {
+            cout << "ERROR OCCURED IN SOAK TEST to '" << client->uri() << "' - after " << i << " successful transactions" << endl;
+            std::exit ( 1 );
+          }
         }
 
-        ValWord<uint32_t> result = client->rmw_bits ( addr, tempUInt1, tempUInt2 );
-        queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwBits ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
-        nrQueuedWords += 1;
-
-        if ( ipbus_vsn == 2 )
-        {
-          *regIt &= tempUInt1;
-          *regIt |= tempUInt2;
-        }
-
-        break;
-      }
-      case 3: // RMW-sum
-      {
-        log ( Notice(), "Soak test - queueing: RMW-sum at ", Integer ( addr, IntFmt<hex,fixed>() ) );
-        tempUInt1 = rand();
-        vector<uint32_t>::iterator regIt = registers.begin() + ( addr - m_baseAddr );
-
-        if ( ipbus_vsn == 1 )
-        {
-          *regIt += tempUInt1;
-        }
-
-        ValWord<uint32_t> result = client->rmw_sum ( addr, tempUInt1 );
-        queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwSum ( addr, tempUInt1, result, *regIt ) ) );
-        nrQueuedWords += 1;
-
-        if ( ipbus_vsn == 2 )
-        {
-          *regIt += tempUInt1;
-        }
-
-        break;
+        queuedTransactions.clear();
+        nrQueuedWords = 0;
       }
     }
-
-    if ( m_perIterationDispatch || ( nrQueuedWords > 10000 ) || ( ( i+1 ) == m_iterations ) )
-    {
-      log ( Notice(), "Soak test - issuing dispatch" );
-      client->dispatch();
-      log ( Notice(), "Soak test - issuing empty dispatch" );
-      client->dispatch();
-
-      for ( vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++ )
-      {
-        if ( ! ( *it )->check_values() )
-        {
-          cout << "ERROR OCCURED IN SOAK TEST to '" << client->uri() << "' - after " << i << " successful transactions" << endl;
-          std::exit ( 1 );
-        }
-      }
-
-      queuedTransactions.clear();
-      nrQueuedWords = 0;
-    }
-  }
   }//end: for, m_clients
 
   cout << endl << "Reached end of soak testing successfully!" << endl;
