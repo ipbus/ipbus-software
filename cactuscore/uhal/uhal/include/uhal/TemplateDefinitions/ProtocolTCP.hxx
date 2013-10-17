@@ -242,7 +242,8 @@ namespace uhal
       {
         oss << "Error \"" << lErrorCode.message() << "\" encountered when connecting to ";
       }
-      log ( lExc , oss.str() , ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+      log ( lExc , oss.str() , ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , 
+            " at ", Quote ( this->mUri.mHostname + ":" + this->mUri.mPort ) , ". URI=" , Quote ( this->uri() ) );
       throw lExc;
     }
 

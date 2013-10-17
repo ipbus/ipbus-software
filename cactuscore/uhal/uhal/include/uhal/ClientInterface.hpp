@@ -361,14 +361,14 @@ namespace uhal
       //! the identifier of the target for this client
       std::string mId;
 
-      //! a struct containing the full URI of the target for this client
-      URI mUri;
-
       //! Timeout period for transactions
       boost::posix_time::time_duration mTimeoutPeriod;
 
 
     protected:
+
+      //! a struct containing the full URI of the target for this client
+      URI mUri;
 
       /**
         Function which checks the available space in the currently filling buffer against requested send and receive sizes and, if there is insufficient space in the currently filling buffer, then dispatch it and create a new buffer

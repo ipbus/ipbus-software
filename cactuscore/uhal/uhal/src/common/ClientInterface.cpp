@@ -45,8 +45,8 @@ namespace uhal
 #endif
     //    mCurrentBuffers ( NULL ),
     mId ( aId ),
-    mUri ( aUri ),
-    mTimeoutPeriod ( aTimeoutPeriod )
+    mTimeoutPeriod ( aTimeoutPeriod ),
+    mUri ( aUri )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -60,8 +60,8 @@ namespace uhal
 #endif
     //    mCurrentBuffers ( NULL ),
     mId ( ),
-    mUri ( ),
-    mTimeoutPeriod ( boost::posix_time::pos_infin )
+    mTimeoutPeriod ( boost::posix_time::pos_infin ),
+    mUri ( )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -75,8 +75,8 @@ namespace uhal
 #endif
     //    mCurrentBuffers ( NULL ),
     mId ( aClientInterface.mId ),
-    mUri ( aClientInterface.mUri ),
-    mTimeoutPeriod ( aClientInterface.mTimeoutPeriod )
+    mTimeoutPeriod ( aClientInterface.mTimeoutPeriod ),
+    mUri ( aClientInterface.mUri )
   {
     //     log ( Warning() , ThisLocation()  );
   }
