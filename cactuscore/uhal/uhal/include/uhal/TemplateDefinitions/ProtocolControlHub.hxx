@@ -133,7 +133,8 @@ namespace uhal
     {
       uhal::exception::ControlHubReturnedWrongAddress* lExc = new uhal::exception::ControlHubReturnedWrongAddress();
       log ( *lExc , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
-            " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) );
+            " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) , 
+            " for device with URI: " , this->uri() );
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
       return lExc;
@@ -146,7 +147,8 @@ namespace uhal
     {
       uhal::exception::ControlHubReturnedWrongAddress* lExc = new uhal::exception::ControlHubReturnedWrongAddress();
       log ( *lExc , "Returned Port number " , Integer ( lReplyPort ) ,
-            " does not match that sent " , Integer ( mDevicePort ) );
+            " does not match that sent " , Integer ( mDevicePort ) ,
+            " for device with URI: " , this->uri() );
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
       return lExc;
@@ -163,25 +165,27 @@ namespace uhal
       if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 )
       {
         uhal::exception::ControlHubTargetTimeout* lExc = new uhal::exception::ControlHubTargetTimeout();
-        log ( *lExc , "The ControlHub did not receive any response from the board." );
+        log ( *lExc , "The ControlHub did not receive any response from the target with URI: ", this->uri() );
+        log ( *lExc , "ControlHub error code is: ", Integer ( lErrorCode ) );
         return lExc ;
       }
       else if ( lErrorCode == 2 )
       {
         uhal::exception::ControlHubInternalTimeout* lExc = new uhal::exception::ControlHubInternalTimeout();
-        log ( *lExc, "Internal timeout within the ControlHub." );
+        log ( *lExc, "Internal timeout within the ControlHub for target with URI: ", this->uri() );
         return lExc;
       }
       else if ( lErrorCode == 5 )
       {
         uhal::exception::ControlHubReportedMalformedStatus* lExc = new uhal::exception::ControlHubReportedMalformedStatus();
-        log ( *lExc , "ControlHub received malformed status packet from target" );
+        log ( *lExc , "ControlHub received malformed status packet from target with URI: " , this->uri() );
         return lExc;
       }
       else
       {
         uhal::exception::ControlHubUnknownErrorCode* lExc = new uhal::exception::ControlHubUnknownErrorCode();
-        log ( *lExc , "Control Hub reported an unknown error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ), ". Please report this at https://svnweb.cern.ch/trac/cactus/newticket" );
+        log ( *lExc , "Control Hub returned an unknown error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ),
+              " for target with URI " , this->uri() , ". Please report this at https://svnweb.cern.ch/trac/cactus/newticket" );
         return lExc;
       }
 

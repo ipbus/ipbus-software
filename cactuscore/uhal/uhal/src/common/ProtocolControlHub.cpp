@@ -61,7 +61,7 @@ namespace uhal
     if ( lIt == aUri.mArguments.end() )
     {
       exception::XMLfileMissingRequiredParameters lExc;
-      log ( lExc , "This function expects arguments of the form " , Quote ( "target=192.168.200.200:50001" ) ,". It appears that this is missing." );
+      log ( lExc , "Expected URI arguments of the form " , Quote ( "target=192.168.200.200:50001" ) ,". It appears that this is missing in URI " , aUri );
       throw lExc;
     }
 
@@ -106,7 +106,8 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       exception::HostnameToIPlookupFailed lExc;
-      log ( lExc , "Look up failed for hostname=" , lIP.first , ", port=" , lIP.second );
+      log ( lExc , "Hostname to IP look up failed for hostname=" , lIP.first , ", port=" , lIP.second );
+      log ( lExc , "ASIO threw exception with what returning: ", Quote ( aExc.what() ) );
       throw lExc;
     }
 
