@@ -226,6 +226,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         
         # Attributes
         self.__global_sizer = None
+        self.__widget_sizer = None
         self.__children = {}
         
         # Layout
@@ -244,7 +245,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         
         box = wx.StaticBox(self, -1, "Hardware Panel")        
         self.__global_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)  
-        self.__widget_sizer = wx.GridSizer(0, 3, 0, 0)         
+        self.__widget_sizer = wx.FlexGridSizer(0, 3, 0, 0)         
         self.__global_sizer.Add(self.__widget_sizer)
         self.SetSizer(self.__global_sizer)
         
