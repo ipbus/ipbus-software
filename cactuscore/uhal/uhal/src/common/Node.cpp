@@ -423,7 +423,7 @@ namespace uhal
     else
     {
       exception::WriteAccessDenied lExc;
-      log ( lExc , "Node permissions denied write access" );
+      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
       throw lExc;
     }
   }
@@ -434,7 +434,7 @@ namespace uhal
     if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
       exception::BulkTransferOnSingleRegister lExc;
-      log ( lExc , "Bulk Transfer requested on single register node" );
+      log ( lExc , "Bulk Transfer requested on single register node " , Quote ( mUid ) );
       log ( lExc , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
@@ -443,7 +443,7 @@ namespace uhal
       if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
       {
         exception::BulkTransferRequestedTooLarge lExc;
-        log ( lExc , "Requested bulk write of greater size than the specified endpoint size" );
+        log ( lExc , "Requested bulk write of greater size than the specified endpoint size of node ", Quote ( mUid ) );
         throw lExc;
       }
 
@@ -454,7 +454,7 @@ namespace uhal
       else
       {
         exception::WriteAccessDenied lExc;
-        log ( lExc , "Node permissions denied write access" );
+        log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
         throw lExc;
       }
     }
@@ -477,8 +477,8 @@ namespace uhal
     else
     {
       exception::ReadAccessDenied lExc;
-      log ( lExc , "Node permissions denied read access" );
-      throw exception::ReadAccessDenied();
+      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
+      throw lExc;
     }
   }
 
@@ -488,7 +488,7 @@ namespace uhal
     if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
       exception::BulkTransferOnSingleRegister lExc;
-      log ( lExc , "Bulk Transfer requested on single register node" );
+      log ( lExc , "Bulk Transfer requested on single register node ", Quote ( mUid ) );
       log ( lExc , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
@@ -497,7 +497,7 @@ namespace uhal
       if ( ( mSize != 1 ) && ( aSize>mSize ) )
       {
         exception::BulkTransferRequestedTooLarge lExc;
-        log ( lExc , "Requested bulk read of greater size than the specified endpoint size" );
+        log ( lExc , "Requested bulk read of greater size than the specified endpoint size of node " , Quote ( mUid ) );
         throw lExc;
       }
 
@@ -508,7 +508,7 @@ namespace uhal
       else
       {
         exception::ReadAccessDenied lExc;
-        log ( lExc , "Node permissions denied read access" );
+        log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
         throw lExc;
       }
     }

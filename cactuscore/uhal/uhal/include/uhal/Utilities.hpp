@@ -402,7 +402,10 @@ namespace uhal
       }
       else
       {
-        throw uhal::exception::NonSupportedUriProtocol();
+        uhal::exception::NonSupportedUriProtocol lExc;
+        log ( lExc , "The protocol " , Quote ( aProtocol ) , " for file " , Quote ( aFilenameExpr ) , " is not supported." );
+        log ( lExc , "The supported protocols are " , Quote ( "file://" ) , " and " , Quote ( "http://" ) );
+        throw lExc;
       }
     }
 

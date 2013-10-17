@@ -244,7 +244,8 @@ namespace uhal
           else
           {
             exception::DuplicatedUID lExc;
-            log ( lExc , "Duplicate connection ID found but parameters do not match! Bailing!" );
+            log ( lExc , "Duplicate connection ID " , Quote ( lDescriptor.id ) , " found in connections file " ,
+                  Quote ( aProtocol+ ( aPath.string() ) ) , " but parameters do not match! Bailing!" );
             throw lExc;
           }
         }

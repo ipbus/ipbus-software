@@ -492,7 +492,7 @@ namespace uhal
       if ( lXmlNode )
       {
         exception::BlockAccessNodeCannotHaveChild lExc;
-        log ( lExc , "Block access nodes are not allowed to have child nodes" );
+        log ( lExc , "Block access nodes are not allowed to have child nodes, but the node " , Quote ( aNode->mUid ) , " has a child node in the address table" );
         throw lExc;
       }
     }

@@ -95,7 +95,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       exception::FailedToParseURI lExc;
-      log ( lExc , "Failed to parse URI " , Quote ( aUri ) );
+      log ( lExc , "Failed to parse device URI " , Quote ( aUri ) );
       throw lExc;
     }
 
