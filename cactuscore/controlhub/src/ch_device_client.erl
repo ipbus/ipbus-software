@@ -204,6 +204,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
         {error, _, MsgForTransManager} ->
             ?CH_LOG_ERROR("Target didn't respond correctly to status request in ch_device_client:init/1."),
             ClientPid ! MsgForTransManager,
+            reply_to_all_pending_requests_in_msg_inbox(MsgForTransManager),
             {stop, "Target didn't respond correctly to status request in device client setup.", S}
     end;
 
@@ -276,12 +277,7 @@ device_client_loop(timeout, S) ->
             ?CH_LOG_ERROR("Irrecoverable TIMEOUT when waiting for response from board."),
             Pids = [Pid || {Pid, _, _, _} <- queue:to_list(element(2,S#state.in_flight))],
             lists:foreach(fun(Pid) -> Pid ! MsgForTransactionManager end, Pids),
-            receive 
-                {'$gen_cast', {send, _Pkt, Pid}} ->
-                    Pid ! MsgForTransactionManager
-            after 0 ->
-                void
-            end,
+            reply_to_all_pending_requests_in_msg_inbox(MsgForTransactionManager),
             {stop, normal, S}
     end.
 
@@ -395,6 +391,17 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
     after ?UDP_RESPONSE_TIMEOUT ->
         recover_from_timeout(NrFailedAttempts+1, S)
     end.
+
+
+reply_to_all_pending_requests_in_msg_inbox(ReplyMsg) ->
+    receive
+        {'$gen_cast', {send, _Pkt, Pid}} ->
+            Pid ! ReplyMsg,
+            reply_to_all_pending_requests_in_msg_inbox(ReplyMsg)
+    after 0 ->
+        void
+    end.
+
 
 
 %% --------------------------------------------------------------------
