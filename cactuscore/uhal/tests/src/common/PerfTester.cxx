@@ -275,6 +275,19 @@ void uhal::tests::PerfTester::outputStandardResults ( double totalSeconds ) cons
 }
 
 
+uint32_t uhal::tests::PerfTester::getRandomBlockSize( const uint32_t maxSize ) const
+{
+  // Generate uniformly-distributed random float in range: 0 <= x < 1
+  const float uniformRandom = static_cast<float>(rand())/static_cast<float>(RAND_MAX);
+
+  // Transform to 1/x distributed random float in range: 0.5 <= x < maxSize+1
+  const float inverseRandom = 0.5 * pow ( static_cast<float>(maxSize+1) / 0.5 , uniformRandom );
+
+  // Floor the float to get integer with desired distribution
+  return static_cast<uint32_t>( floor(inverseRandom) );
+}
+
+
 uhal::tests::PerfTester::U32Vec uhal::tests::PerfTester::getRandomBuffer ( unsigned size ) const
 {
   U32Vec buffer;
@@ -609,14 +622,18 @@ void uhal::tests::PerfTester::validationTest()
 {
   unsigned nrTestsFailed = 0;
   unsigned nrTestsTotal  = 0;
-  assert ( m_clients.size() == 1 );
-  ClientPtr client = m_clients.at ( 0 );
-  cout << "\nWRITE READ-BACK TESTS" << endl;
+
+  // ---> A) Write read-back tests
+  //
+  for(ClientVec::iterator clientIt = m_clients.begin(); clientIt != m_clients.end(); clientIt++)
+  {
+    ClientPtr client = *clientIt;
+  cout << "\n\nWRITE READ-BACK TESTS for device at '" << client->uri() << "'" << endl;
   vector<uint32_t> addr_vec;
   addr_vec.push_back ( m_baseAddr );
   addr_vec.push_back ( m_baseAddr + m_bandwidthTestDepth - 1 );
 
-  for ( unsigned i = 0; i < 48; i++ )
+  for ( unsigned i = 0; i < 498; i++ )
   {
     addr_vec.push_back ( m_baseAddr + ( rand() % m_bandwidthTestDepth ) );
   }
@@ -706,19 +723,27 @@ void uhal::tests::PerfTester::validationTest()
       nrTestsFailed++;
     }
   }
+  }//end: for, m_clients
 
   if ( nrTestsFailed == 0 )
   {
-    cout << "\nBASIC TESTS SUMMARY: All " << nrTestsTotal << " tests passed!" << endl;
+    cout << "\n\nBASIC TESTS SUMMARY: All " << nrTestsTotal << " tests passed!" << endl << endl << endl;
   }
   else
   {
-    cout << "\nBASIC TESTS SUMMARY: Total of " << nrTestsTotal << " tests run -- " << nrTestsFailed << " tests FAILED , " << ( nrTestsTotal - nrTestsFailed ) << " tests PASSED" << endl;
+    cout << "\n\nBASIC TESTS SUMMARY: Total of " << nrTestsTotal << " tests run -- " << nrTestsFailed << " tests FAILED , " << ( nrTestsTotal - nrTestsFailed ) << " tests PASSED" << endl;
     std::exit ( 1 );
   }
 
-  // SOAK TEST - SETUP
-  cout << "\n\nSOAK TEST\n   Random sequence of " << m_iterations << " transactions sent to hardware" << endl << endl;
+
+  // ---> B) SOAK TESTs
+  //
+  for(ClientVec::iterator clientIt = m_clients.begin(); clientIt != m_clients.end(); clientIt++)
+  {
+    ClientPtr client = *clientIt;
+    cout << "\nSOAK TEST to device '" << client->uri() << "'\n   Random sequence of " << m_iterations << " transactions will be sent to hardware" << endl << endl;
+
+  // Setup
   uint32_t ipbus_vsn;
   size_t found = client->uri().find ( "-1.3" );
 
@@ -745,7 +770,8 @@ void uhal::tests::PerfTester::validationTest()
   // Initialise registers to 0x0
   client->writeBlock ( m_baseAddr, registers );
   client->dispatch();
-  // SOAK TEST - RUNNING IT
+
+  // ACTUAL MEAT OF SOAK TEST
   uint32_t type, addr, blockSize;
   uint32_t tempUInt1, tempUInt2;
   vector< boost::shared_ptr<QueuedTransaction> > queuedTransactions;
@@ -758,32 +784,30 @@ void uhal::tests::PerfTester::validationTest()
 
     switch ( type )
     {
-      case 0:
+      case 0: // read
       {
-        // read
-        log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
-        blockSize = ( rand() % ( m_baseAddr + m_bandwidthTestDepth - addr ) );
-
-        if ( blockSize == 0 ) // Remove 0-word reads until bug fixed
+        blockSize = getRandomBlockSize( m_baseAddr + m_bandwidthTestDepth - addr );
+        // Remove 0-word reads until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
+        if ( blockSize == 0 )
         {
           blockSize = 1;
         }
+        log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
 
         ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
         queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead ( addr, result, registers.begin() + ( addr - m_baseAddr ) ) ) );
         nrQueuedWords += blockSize;
         break;
       }
-      case 1:
+      case 1: // write
       {
-        // write
-        log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
-        blockSize = ( rand() % ( m_baseAddr + m_bandwidthTestDepth - addr ) );
-
-        if ( blockSize == 0 ) // Remove 0-word writes until bug fixed
+        blockSize = getRandomBlockSize( m_baseAddr + m_bandwidthTestDepth - addr );
+        // Remove 0-word writes until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
+        if ( blockSize == 0 )
         {
           blockSize = 1;
         }
+        log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
 
         vector<uint32_t> randomData = getRandomBuffer ( blockSize );
         ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
@@ -792,9 +816,8 @@ void uhal::tests::PerfTester::validationTest()
         nrQueuedWords += blockSize;
         break;
       }
-      case 2:
+      case 2: // RMW-bits
       {
-        // RMW-bits
         log ( Notice(), "Soak test - queueing: RMW-bits at ", Integer ( addr, IntFmt<hex,fixed>() ) );
         tempUInt1 = rand();
         tempUInt2 = rand();
@@ -818,9 +841,8 @@ void uhal::tests::PerfTester::validationTest()
 
         break;
       }
-      case 3:
+      case 3: // RMW-sum
       {
-        // RMW-sum
         log ( Notice(), "Soak test - queueing: RMW-sum at ", Integer ( addr, IntFmt<hex,fixed>() ) );
         tempUInt1 = rand();
         vector<uint32_t>::iterator regIt = registers.begin() + ( addr - m_baseAddr );
@@ -854,7 +876,7 @@ void uhal::tests::PerfTester::validationTest()
       {
         if ( ! ( *it )->check_values() )
         {
-          cout << "ERROR OCCURED IN SOAK TEST - after " << i << " successful transactions" << endl;
+          cout << "ERROR OCCURED IN SOAK TEST to '" << client->uri() << "' - after " << i << " successful transactions" << endl;
           std::exit ( 1 );
         }
       }
@@ -863,8 +885,9 @@ void uhal::tests::PerfTester::validationTest()
       nrQueuedWords = 0;
     }
   }
+  }//end: for, m_clients
 
-  cout << "Reached end of soak test successfully!" << endl;
+  cout << endl << "Reached end of soak testing successfully!" << endl;
 }
 
 
