@@ -159,8 +159,8 @@ class HardwareMonitoring(threading.Thread):
             
     def __synchronize_hw_info(self, hw_map):
         """
-        Synchronizes up the information polled from the HW with the one used for display, __hw_complete
-        """        
+        Synchronizes up the information polled from the HW with the one used for display, __hw_tree
+        """                                        
         for dev, node_dict in hw_map.iteritems():
             for node, value in node_dict.iteritems():
                 

@@ -10,18 +10,17 @@ from uhal.gui.utilities.hardware import HardwareStruct
 
 class NodeWidget(wx.Panel):
     
-    def __init__(self, parent, n, colour):
-        
-        print "DEBUG: Init NodeWidget with id %s" % n.get_id()
+    def __init__(self, parent, name='', address='', mask='', value='', colour='#FFFFFF'):
+                
         wx.Panel.__init__(self, parent)
         
+        
         # Attributes
-        self.__id      = n.get_id()
-        self.__address = n.get_address()
-        self.__mask    = n.get_mask()
-        if not n.get_value():
-            self.__value = "Unknown"
-                 
+        self.__id      = name
+        self.__address = address
+        self.__mask    = mask
+        self.__value   = value
+        
         self.__wid_dict = {}
         self.__wid_order = ["id", "address", "mask", "value"]
         
@@ -42,17 +41,17 @@ class NodeWidget(wx.Panel):
         # Event handlers
         self.__id_field.Bind(wx.EVT_LEFT_DOWN, self.__on_click_regname, self.__id_field)
         self.__value_field.Bind(wx.EVT_LEFT_DOWN, self.__on_click_regvalue, self.__value_field)
-    
+        
     
     def __do_layout(self):
         
         self.SetBackgroundColour(self.__colour)
         self.__sizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        self.__id_field        = wx.StaticText(self, label=str(self.__id))
-        self.__address_field   = wx.StaticText(self, label=hex(self.__address))
-        self.__mask_field      = wx.StaticText(self, label=hex(self.__mask))
-        self.__value_field     = wx.StaticText(self, label=str(self.__value))
+        self.__id_field        = wx.StaticText(self, label=str(self.__id), style=wx.ALIGN_LEFT)
+        self.__address_field   = wx.StaticText(self, label=hex(self.__address), style=wx.ALIGN_CENTER_HORIZONTAL)
+        self.__mask_field      = wx.StaticText(self, label=hex(self.__mask),  style=wx.ALIGN_CENTER_HORIZONTAL)
+        self.__value_field     = wx.StaticText(self, label=str(self.__value), style=wx.ALIGN_CENTER_HORIZONTAL)
         
         self.__wid_dict["id"]      = self.__id_field
         self.__wid_dict["address"] = self.__address_field
@@ -69,9 +68,11 @@ class NodeWidget(wx.Panel):
         self.SetAutoLayout(True)
         self.__sizer.Fit(self)
         
-        
-    def update_value(self, value):
-                
+    
+            
+    def update(self):
+        pass
+        '''
         try:
             value_to_set = hex(value)
         except TypeError:
@@ -87,12 +88,12 @@ class NodeWidget(wx.Panel):
             
         if self.__values_window:
             self.__values_window.update(self.__value)
-        
+        '''
         
         
     
     def __on_click_regname(self, event):
-        print "DEBUG: Plotting regname %s..." % self.__id
+        #self.__logger.debug('Plotting regname %s...', self.__id)
         self.__plotreg = Plot(self, self.__id)
         self.__plotreg.Show()
         
@@ -103,12 +104,7 @@ class NodeWidget(wx.Panel):
         print "DEBUG: Showing values in different formats for register %s and value %s..." % (self.__id, self.__value)
         regvalue = RegValues(self, self.__id, self.__value)            
         regvalue.Show()
-        '''
-    
-    
-    def get_value_field(self):
-        return self.__value_field
-
+        '''    
 
         
     
@@ -131,15 +127,16 @@ class StaticFields(wx.Panel):
         self.__do_layout()
         
         
+        
     def __do_layout(self):
         
         self.SetBackgroundColour('#CCFFFF')
         self.__sizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        self.__wid_dict["name"]    = wx.StaticText(self, label="NAME")
-        self.__wid_dict["address"] = wx.StaticText(self, label="ADDRESS")
-        self.__wid_dict["mask"]    = wx.StaticText(self, label="MASK")
-        self.__wid_dict["value"]   = wx.StaticText(self, label="VALUE")
+        self.__wid_dict["name"]    = wx.StaticText(self, label="NAME", style=wx.ALIGN_CENTER_HORIZONTAL)
+        self.__wid_dict["address"] = wx.StaticText(self, label="ADDRESS", style=wx.ALIGN_CENTER_HORIZONTAL)
+        self.__wid_dict["mask"]    = wx.StaticText(self, label="MASK", style=wx.ALIGN_CENTER_HORIZONTAL)
+        self.__wid_dict["value"]   = wx.StaticText(self, label="VALUE", style=wx.ALIGN_CENTER_HORIZONTAL)
         
         for name in self.__wid_order:
             self.__wid_dict[name].SetFont(wx.Font(8, wx.MODERN, wx.NORMAL, wx.NORMAL)) 
@@ -150,91 +147,76 @@ class StaticFields(wx.Panel):
         self.SetAutoLayout(True)
         self.__sizer.Fit(self)
         
-         
-                
-                
-class IpEndPointWidget(wx.Panel):
+                     
+    
+    
+class Widget(wx.Panel):
+    
+    def __init__(self, parent, id='', status='OK'):
         
-        
-    def __init__(self, parent, name="", status=""):
-        
-        print "DEBUG: IPEndPointWidget created"
+        self.__logger = logging.getLogger('uhal.gui.guis.hw_table_panel.Widget')
         wx.Panel.__init__(self, parent)    
         
-        # Attributes      
-        self.__wid_dict = {}
-        self.__wid_order = ["name", "static"] 
-        #self.__wid_order = ["name", "status", "static"]
+        # Attributes                            
+        self.__id = id
+        self.__row_colour = '#99CCFF'
         self.__nodes_dict = {}
-        self.__id = name
            
         # Layout
         self.__do_layout()
         
-        # Event handlers
-        
-        
-    def __do_layout(self):
-        
-        self.__borders = wx.ALL       
+        self.__logger.debug('Widget created with id %s', self.__id)
+    
+    
+    
+    def __do_layout(self):                
                 
-        box = wx.StaticBox(self, -1, self.__id)
-        self.__widget_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+        box = wx.StaticBox(self, -1)
+        self.__sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
             
-        self.__wid_dict["name"]   = wx.StaticText(self, label="Name")         
-        # self.__wid_dict["status"] = wx.StaticText(self, label="Status")
-        self.__wid_dict["static"] = StaticFields(self)
+        borders = wx.ALL | wx.ALIGN_CENTER 
+        self.__id_field = wx.StaticText(self, label = self.__id[:self.__id.find('_')]) 
+        self.__id_field.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
         
+        self.__sizer.Add(self.__id_field, 1, borders, 1)   
         
-        for name in self.__wid_order:
-            borders = self.__borders
-            
-            if name != "static":
-                borders = borders | wx.ALIGN_CENTER
-                self.__wid_dict[name].SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
-            else:
-                borders = borders | wx.EXPAND
-            
-            self.__widget_sizer.Add(self.__wid_dict[name], 1, borders , 1)       
+        borders =  wx.ALL | wx.EXPAND          
+        self.__static_field = StaticFields(self)
+        self.__sizer.Add(self.__static_field, 1, borders, 1)  
         
-        self.SetSizer(self.__widget_sizer)
+        self.SetSizer(self.__sizer)
         self.SetAutoLayout(True)
-        self.__widget_sizer.Fit(self)
+        self.__sizer.Fit(self)
+        
+        
+        
+    def add_row(self, name, address, mask, value):
+                            
+        self.__row_colour = (self.__row_colour == '#99CCFF') and '#33CCFF' or '#99CCFF'
+            
+        #FIX THIS:
+        borders = wx.ALL | wx.EXPAND   
+        node = NodeWidget(self, name, address, mask, value, self.__row_colour)       
+        self.__nodes_dict[id] = node       
+        self.__sizer.Add(self.__nodes_dict[id], 1, borders, 1)
+        
+        self.__sizer.Layout()
+        
         
     
-    def set_name(self, name):
-        self.__wid_dict["name"].SetLabel(unicode(str(name)))
-        
-    '''    
-    def set_status(self, status):
-        self.__wid_dict["status"].SetLabel(unicode(str(status)))
-    ''' 
-        
-    def add_node_row(self, n, colour):
-        borders = self.__borders | wx.EXPAND
-        id = n.get_id()
-        print "Adding node row for node %s " % id
-        self.__nodes_dict[id] = NodeWidget(self, n, colour) 
-        print "Node widget for node %s is ready" % id   
-        self.__widget_sizer.Add(self.__nodes_dict[id], 1, borders, 1)
-        
-        for child in n.get_children():
-            self.add_node_row(child, colour)
-        
+    def update(self):
+        for k, v in self.__nodes_dict.iteritems():
+            self.__logger.debug('Updating node %s', k)
+            v.update()        
     
-    def update_node_value(self, n):
-        print "DEBUG: Updating node %s with value %s" %(n.get_id(), n.get_value()) 
-        self.__nodes_dict[n.get_id()].update_value(n.get_value())
-        
-        for child in n.get_children():
-            self.update_node_value(child)        
     
-
-
 
 
 class HardwareTablePanel(scroll.ScrolledPanel):
-     
+    """
+    Main class. It is a panel object with scroll bars that hosts all the widgets.
+    The widgets are added both to a sizer object and a dictionary, which is later used to update their values
+    """
     def __init__(self, parent):
                 
         self.__logger = logging.getLogger('uhal.gui.guis.hw_table_panel')
@@ -244,7 +226,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         
         # Attributes
         self.__global_sizer = None
-        self.__widget_dict = {}
+        self.__children = {}
         
         # Layout
         self.__do_layout()
@@ -255,12 +237,15 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         
     def __do_layout(self):
         
+        """
+        The self.__global_sizer has been added just because I wanted it to be a StaticBox
+        The self.__widget_sizer is the sizer object hosting the widgets. 
+        """
         
-        # self.SetBackgroundColour('Pink')
-        box = wx.StaticBox(self, -1, "Register tables")        
-        self.__global_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)   
-        self.__text_display = wx.TextCtrl(self, value='', style=wx.TE_MULTILINE)
-        self.__global_sizer.Add(self.__text_display, 1, wx.EXPAND|wx.ALL, 5)
+        box = wx.StaticBox(self, -1, "Hardware Panel")        
+        self.__global_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)  
+        self.__widget_sizer = wx.GridSizer(0, 3, 0, 0)         
+        self.__global_sizer.Add(self.__widget_sizer)
         self.SetSizer(self.__global_sizer)
         
         # SetAutoLayout tells the window to use the sizer to position and size the components
@@ -268,119 +253,100 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         self.SetupScrolling()
         self.__global_sizer.Fit(self)
        
-       
-        
-    def update(self):
-        self.__logger.debug('Updating HW table panel')
     
     
-    
-    def add_new_widget(self, nodes, hw_structure):                       
+    def add_new_widget(self, nodes, hw_tree):                       
+        """
+        Adds new widget to the panel. 
+        The widget ID consists on the IP end point name + the number of widget on the panel 
+        The self.__select_tree_slice method is called to fill the widget
+        """
         
-        text = 'Printing widget for IP End Point %s' % nodes[0]
-        self.__text_display.AppendText(text + '\n')
-        
-        self.__select_tree_slice(nodes, hw_structure)              
+        id = nodes[0] + '_' + str(len(self.__children))
+        widget = Widget(self, id)
+        self.__children[id] = widget
+                        
+        self.__select_tree_slice(nodes, hw_tree, widget) 
+        self.__widget_sizer.AddWindow(widget) 
+        self.__widget_sizer.FitInside(self)  
+                        
             
-                 
+            
+            
+    def update(self, hw_info):
+        """
+        The method is called from the defaultgui class every time the HW has been read. 
+        Loops through all the widgets, calling their update method
+        """
+        for k, v in self.__children.iteritems():
+            self.__logger.debug('Updating widget %s ', k)
+            v.update()
+          
+          
+          
+    def clear(self):
+        """
+        The method is called from the defaultgui class' menu bar. It erases 'graphically' the widgets that 
+        had been added to the panel. It also removes them from the self.__children dictionary (to prevent them from being updated)
+        """
+        self.__children.clear()
+        self.__widget_sizer.DeleteWindows()    
+         
     
     
-    def __select_tree_slice(self, nodes, hw):
-               
+    
+    def __select_tree_slice(self, nodes, hw_tree, widget):
+        """
+        nodes: list of node names that are needed to traverse the tree until the node that was selected from the tree window is reached
+        hw_tree: HW representation in tree-shape
+        widget: the brand new widget that has to be fulfilled
+        
+        The method first traverses the tree until getting to the node that has to be represented. Then calls self.__fill_widget to fill the widget
+        with the this node's information and children
+        """   
+         
         id = ''
         start_item = None
         
         for n in nodes:
                         
-            for k, v in hw.iteritems():
+            for k, v in hw_tree.iteritems():
               
                 try:
+                    # Item is a Node object 
                     id = k.getId()
                 except AttributeError, e:
+                    # The item is an IP End point object (HardwareInterface)
                     id = k.id()
                 
                 if id != n:                    
                     continue
                 
                 start_item = k                
-                hw = v
-                break
-        
-        self.__logger.debug('Finished first loop. start_item is %s and hw is %s', str(start_item), str(hw))
-        
-       
-        if 'Node' in str(type(start_item)):
-            
-            text = 'Name: %s; Address: %s; Mask: %s; ' % (start_item.getId(), start_item.getAddress(), start_item.getMask())
-            if type(hw) is dict:
-                text = text + 'Value: N/A'
-            elif type(hw) is int:
-                value = str(hw)
-                text = text + 'Value: ' + value
-            
-            self.__text_display.AppendText(text + '\n')
-            
-            if type(hw) is int:
-                return
-        
-        self.__print_tree_slice(hw)  
+                hw_tree = v
+                break   
+                       
+        self.__fill_widget(start_item, hw_tree, widget)  
                                 
        
         
-    def __print_tree_slice(self, hw):
+    def __fill_widget(self, start_item, hw_tree, widget):
+        """
+        The method fills the widget
+        """
         
-        for k, v in hw.iteritems():
-            text = '\t Name: %s; Address: %s; Mask: %s; ' % (k.getId(), k.getAddress(), k.getMask())
-            if type(v) is dict:
-                text = text + 'Value: N/A'
-                self.__text_display.AppendText(text + '\n')
-                self.__print_tree_slice(v)
-            elif type(v) is int:
-                value = str(v)
-                text = text + 'Value: ' + value
-                self.__text_display.AppendText(text + '\n')
-                
-    '''  
-    def draw_hw_naked_tables(self, hw):
+        # We have arrived to a tree leaf (register - value)
+        if type(hw_tree) is not dict:              
+            value = str(hw_tree)
+            widget.add_row(start_item.getId(), start_item.getAddress(), start_item.getMask(), value)
+            return 
         
-        bck_colour = "#99CCFF"
-        for ep in hw.get_ip_end_points():
-            new_widget = IpEndPointWidget(self)
-            
-            ep_id = ep.get_id()
-            new_widget.set_name(string.upper(ep_id))
-            # new_widget.set_status(ep.get_status())
-            
-            for n in ep.get_nodes():                
-                new_widget.add_node_row(n, bck_colour)
-                
-            if not self.__widget_dict.has_key(ep_id):
-                self.__widget_dict[ep_id] = new_widget
+        # The item being analyzed is a Node (uhal Node object) composed of more nodes
+        # In such a case, we add the node info + N/A in its value
+        if 'HwInterface' not in str(type(start_item)):
+            widget.add_row(start_item.getId(), start_item.getAddress(), start_item.getMask(), 'N/A')
         
-                print "DEBUG: widget added in dictionary with name %s" % ep_id
-                self.__global_sizer.Add(new_widget, 1, wx.EXPAND, 2)
-                print "DEBUG: widget added to global sizer"
-        
-        self.__global_sizer.Layout()
-    
-    
-    def on_hw_ready(self, hw):
-        print "DEBUG: HW ready in HardwareTablePanel"
-        self.__dress_up_tables(hw)
-        
-    
-    
-    def __dress_up_tables(self, hw):
-        
-        for ep in hw.get_ip_end_points():
-            ep_id = ep.get_id()
-            new_status = ep.get_status()
-            
-            w = self.__widget_dict[ep_id]
-            # w.set_status(new_status)
-            
-            for n in ep.get_nodes():
-                # Pass here 'address' instead of 'name' to identify the node because there could be name collisions (?)
-                w.update_node_value(n)
-    '''
-        
+        # Whether the item being analyzed is a Node that has children or an IP end point (uhal HwInterface object), we call the algorithm recursively 
+        for k, v in hw_tree.iteritems():            
+            self.__fill_widget(k, v, widget)                       
+                                     

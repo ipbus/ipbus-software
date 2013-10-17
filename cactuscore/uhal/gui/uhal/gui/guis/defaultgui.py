@@ -71,17 +71,18 @@ class DefaultGui(wx.Frame):
         Creates the content of the menus in the menu bar. 
         Assigns events and handlers to each one of the items
         """
-        return (("&File",
-                 ("&LoadHW", "Load HW", wx.ITEM_NORMAL, self.__on_load_hw),
-                 ("&Quit", "Quit", wx.ITEM_NORMAL, self.__on_close_window)
+        return (('&File',
+                 ('&LoadHW', 'Load HW', wx.ITEM_NORMAL, self.__on_load_hw),
+                 ('&Quit', 'Quit', wx.ITEM_NORMAL, self.__on_close_window)
                 ),                
-                #("&View",
-                # ("&AutoRefresh", "Auto-refresh", wx.ITEM_CHECK, self.__on_click_autorefresh)
-                # ),                        
-                ("&Help",
-                 ("&Documentation", "Documentation", wx.ITEM_NORMAL, self.__on_click_doc),
-                 ("&Support", "Support", wx.ITEM_NORMAL, self.__on_click_support),
-                 ("&About", "About", wx.ITEM_NORMAL, self.__on_click_about)               
+                ('&View',
+                 ('&ClearPanel', 'Clear Panel', wx.ITEM_NORMAL, self.__on_clear_panel)
+                # ('&AutoRefresh', 'Auto-refresh', wx.ITEM_CHECK, self.__on_click_autorefresh)
+                ),                        
+                ('&Help',
+                 ('&Documentation', 'Documentation', wx.ITEM_NORMAL, self.__on_click_doc),
+                 ('&Support', 'Support', wx.ITEM_NORMAL, self.__on_click_support),
+                 ('&About', 'About', wx.ITEM_NORMAL, self.__on_click_about)               
                 )
             )
 
@@ -160,6 +161,9 @@ class DefaultGui(wx.Frame):
         
         for i in self.GetChildren():            
             print 'Child of defaultGUI: %d %s %s' % (i.GetId(), i.GetLabel(), i.GetName())
+            
+            if 'update' in dir(i):
+                i.update(self.__hw)
                 
             """
             i.update()
@@ -203,7 +207,11 @@ class DefaultGui(wx.Frame):
                
     
     
-
+    def __on_clear_panel(self, event):
+        self.__hw_table_panel.clear()
+        
+        
+        
     def __on_click_doc(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus/wiki/uhalGuiInstructions")
 
