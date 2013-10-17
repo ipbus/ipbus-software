@@ -119,6 +119,10 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
+    const uint8_t* lSendBufferFirstByte = aSendBufferStart;
+    uint32_t lNrSendBytesProcessed = 0;
+    uint32_t lNrReplyBytesValidated = 0;
+
     eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
@@ -126,17 +130,22 @@ namespace uhal
 
     do
     {
+      //log ( Debug() , "Validation: transaction with send/reply header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) , " / " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) , " -- " , Integer(lNrSendBytesProcessed+1) , "/" , Integer(lNrReplyBytesValidated+1) , " bytes into payload" ); 
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
       {
         uhal::exception::IPbusCoreUnparsableTransactionHeader* lExc = new uhal::exception::IPbusCoreUnparsableTransactionHeader();
-        log ( *lExc , "Unable to parse send header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) );
+        log ( *lExc , "Unable to parse send header " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) , 
+              ", " , Integer ( lNrSendBytesProcessed+1 ) , " bytes into IPbus payload" );
         return lExc;
       }
 
       if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
       {
         uhal::exception::IPbusCoreUnparsableTransactionHeader* lExc = new uhal::exception::IPbusCoreUnparsableTransactionHeader();
-        log ( *lExc , "Unable to parse reply header " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) );
+        log ( *lExc , "Unable to parse reply header " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ) , 
+              ", " , Integer ( lNrReplyBytesValidated+1 ) , " bytes into IPbus reply payload." );
+        log ( *lExc , "Original sent header was ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) , 
+              ", " , Integer ( lNrSendBytesProcessed+1 ) , " bytes into IPbus send payload" );
         return lExc;
       }
 
@@ -147,14 +156,18 @@ namespace uhal
               " ( transaction id = " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
               ", transaction type = " , Integer ( ( uint8_t ) ( ( lReplyIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) ,
               ", word count = " , Integer ( lReplyWordCount ) ,
-              " ) had response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicating an error" );
+              " ) had response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicating an error (" ,
+              Integer ( lNrReplyBytesValidated+1 ) , " bytes into IPbus reply payload)" );
+        log ( *lExc , "Original sent header was ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) , 
+              ", " , Integer ( lNrSendBytesProcessed+1 ) , " bytes into IPbus send payload" );
         return lExc;
       }
 
       if ( lSendIPbusTransactionType != lReplyIPbusTransactionType )
       {
         uhal::exception::IPbusTransactionTypeIncorrect* lExc = new uhal::exception::IPbusTransactionTypeIncorrect();
-        log ( *lExc , "Returned Transaction Type " , lReplyIPbusTransactionType , " does not match that sent " , lSendIPbusTransactionType );
+        log ( *lExc , "Returned Transaction Type " , lReplyIPbusTransactionType , " for transaction header " , 
+              Integer ( lNrReplyBytesValidated+1 ), " bytes into IPbus reply payload does not match type sent " , lSendIPbusTransactionType );
         return lExc;
       }
 
@@ -162,7 +175,8 @@ namespace uhal
       {
         uhal::exception::IPbusTransactionIdIncorrect* lExc = new uhal::exception::IPbusTransactionIdIncorrect();
         log ( *lExc , "Sent Header was " , Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ) ,
-              " whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) );
+              " whilst Return Header was " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , IntFmt< hex , fixed >() ) ,
+              ", " , Integer ( lNrReplyBytesValidated+1 ) , " bytes into IPbus reply payload" );
         return lExc;
       }
 
@@ -187,12 +201,14 @@ namespace uhal
           aSendBufferStart += ( 4<<2 );
           break;
       }
+      lNrSendBytesProcessed = aSendBufferStart - lSendBufferFirstByte;
 
       switch ( lReplyIPbusTransactionType )
       {
         case B_O_T:
         case NI_WRITE:
         case WRITE:
+          lNrReplyBytesValidated += aReplyStartIt->second;
           aReplyStartIt++;
           break;
         case R_A_I:
@@ -200,6 +216,7 @@ namespace uhal
         case READ:
         case RMW_SUM:
         case RMW_BITS:
+          lNrReplyBytesValidated += (aReplyStartIt->second + (aReplyStartIt+1)->second);
           aReplyStartIt+=2;
           break;
       }

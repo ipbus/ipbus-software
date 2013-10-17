@@ -272,8 +272,7 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
-      log ( *lExc , "ASIO reported a timeout in UDP write callback" );
-
+      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for UDP send to target with URI: ", this->uri() );
       if ( aErrorCode )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
@@ -288,7 +287,7 @@ namespace uhal
     {
       mSocket.close();
       exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
-      log ( *lExc , "ASIO reported an error in write_callback:" , Quote ( aErrorCode.message() ) );
+      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to UDP target with URI: " , this->uri() );
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -392,8 +391,7 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
-      log ( *lExc , "ASIO reported a timeout in UDP read callback" );
-
+      log ( *lExc , "Timeout (" , Integer ( this->getTimeoutPeriod() ) , " milliseconds) occurred for UDP receive from target with URI: ", this->uri() );
       if ( aErrorCode )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
@@ -408,7 +406,7 @@ namespace uhal
     {
       mSocket.close();
       exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
-      log ( *lExc , "ASIO reported an error in read_callback: " , Quote ( aErrorCode.message() ) );
+      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from UDP target with URI: " , this->uri() );
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -445,7 +443,11 @@ namespace uhal
     }
     catch ( exception::exception& aExc )
     {
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
       mAsynchronousException = new exception::ValidationError ();
+      log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) );
     }
 
     if ( mAsynchronousException )
