@@ -281,7 +281,7 @@ uint32_t uhal::tests::PerfTester::getRandomBlockSize( const uint32_t maxSize ) c
   const float uniformRandom = static_cast<float>(rand())/static_cast<float>(RAND_MAX);
 
   // Transform to 1/x distributed random float in range: 0.5 <= x < maxSize+1
-  const float inverseRandom = 0.5 * pow ( static_cast<float>(maxSize+1) / 0.5 , uniformRandom );
+  const float inverseRandom = 0.5 * pow ( static_cast<float>( (maxSize+1) / 0.5) , uniformRandom );
 
   // Floor the float to get integer with desired distribution
   return static_cast<uint32_t>( floor(inverseRandom) );
