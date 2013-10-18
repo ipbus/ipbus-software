@@ -672,7 +672,12 @@ namespace uhal
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
       // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
-      log ( Warning() , "Closing socket since deadline has passed" );
+#ifdef RUN_ASIO_MULTITHREADED
+      if ( mDispatchQueue.size() || mDispatchBuffers.size() || mReplyQueue.size() || mReplyBuffers.size() )
+      {
+        log ( Warning() , "Closing socket since deadline has passed" );
+      }
+#endif
       // The deadline has passed. The socket is closed so that any outstanding asynchronous operations are cancelled.
       mSocket.close();
       // There is no longer an active deadline. The expiry is set to positive infinity so that the actor takes no action until a new deadline is set.
