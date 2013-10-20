@@ -332,9 +332,6 @@ forward_reply(Pkt, S) ->
     S.
 
 
-recover_from_timeout(NrFailedAttempts, S) when NrFailedAttempts == 3 ->
-    throw({recovery_failed, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}});
-
 recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {1,3} ->
     ?CH_LOG_INFO("IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [?UDP_RESPONSE_TIMEOUT]),
     receive
@@ -342,7 +339,12 @@ recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, po
             NewS = forward_reply(Pkt, S),
             {ok, NewS}
     after ?UDP_RESPONSE_TIMEOUT ->
-        recover_from_timeout(NrFailedAttempts + 1, S)
+        if 
+          (NrFailedAttempts+1) == 3 ->
+            throw({recovery_failed, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}});
+          true ->
+            recover_from_timeout(NrFailedAttempts + 1, S)
+        end
     end;
 
 recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}, socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {2,0} ->
@@ -389,7 +391,16 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
             ch_stats:udp_timeout(S#state.stats, recovered),
             {ok, NewS}
     after ?UDP_RESPONSE_TIMEOUT ->
-        recover_from_timeout(NrFailedAttempts+1, S)
+        if 
+          (NrFailedAttempts+1) == 3 ->
+            ErrorCode = if 
+                          Type==response -> ?ERRCODE_TARGET_RESEND_TIMEOUT;
+                          true -> ?ERRCODE_TARGET_CONTROL_TIMEOUT
+                        end,
+            throw({recovery_failed, {device_client_response, S#state.ip_u32, S#state.port, ErrorCode, <<>>}});
+          true ->
+            recover_from_timeout(NrFailedAttempts + 1, S)
+        end
     end.
 
 
