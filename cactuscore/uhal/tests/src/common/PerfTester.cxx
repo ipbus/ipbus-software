@@ -278,10 +278,10 @@ void uhal::tests::PerfTester::outputStandardResults ( double totalSeconds ) cons
 uint32_t uhal::tests::PerfTester::getRandomBlockSize( const uint32_t maxSize ) const
 {
   // Generate uniformly-distributed random float in range: 0 <= x < 1
-  const float uniformRandom = static_cast<float>(rand())/static_cast<float>(RAND_MAX);
+  const double uniformRandom = static_cast<double>(rand()) / RAND_MAX; //TODO -- replace with boost::random random-double-generating function
 
   // Transform to 1/x distributed random float in range: 0.5 <= x < maxSize+1
-  const float inverseRandom = 0.5 * pow ( static_cast<float>( (maxSize+1) / 0.5) , uniformRandom );
+  const double inverseRandom = 0.5 * pow ( static_cast<double>( (maxSize+1) / 0.5) , uniformRandom );
 
   // Floor the float to get integer with desired distribution
   return static_cast<uint32_t>( floor(inverseRandom) );
@@ -777,7 +777,7 @@ void uhal::tests::PerfTester::validationTest()
     vector< boost::shared_ptr<QueuedTransaction> > queuedTransactions;
     uint32_t nrQueuedWords = 0;
 
-    for ( unsigned i = 0; i < m_iterations; i++ )
+    for ( unsigned i = 1; i <= m_iterations; i++ )
     {
       type = ( rand() % 4 );
       addr = m_baseAddr + ( rand() % m_bandwidthTestDepth );
@@ -865,7 +865,7 @@ void uhal::tests::PerfTester::validationTest()
         }
       }
 
-      if ( m_perIterationDispatch || ( nrQueuedWords > 10000 ) || ( ( i+1 ) == m_iterations ) )
+      if ( m_perIterationDispatch || ( nrQueuedWords > 1000000 ) || ( i == m_iterations ) )
       {
         log ( Notice(), "Soak test - issuing dispatch" );
         client->dispatch();
@@ -883,6 +883,12 @@ void uhal::tests::PerfTester::validationTest()
 
         queuedTransactions.clear();
         nrQueuedWords = 0;
+
+        if ( ! m_verbose )
+        {
+          std::cout << "No errors after " << i << " transactions -- " << setiosflags(ios::fixed) << setprecision(2) << (100.0 * i) / m_iterations << "% done\r";
+          std::cout.flush();
+        }
       }
     }
   }//end: for, m_clients
