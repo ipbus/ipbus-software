@@ -886,7 +886,7 @@ void uhal::tests::PerfTester::validationTest()
 
         if ( ! m_verbose )
         {
-          std::cout << "No errors after " << i << " transactions -- " << setiosflags(ios::fixed) << setprecision(2) << (100.0 * i) / m_iterations << "% done\r";
+          std::cout << "No errors after " << i << " transactions -- " << setiosflags(ios::fixed) << setprecision(1) << (100.0 * i) / m_iterations << "% done\r";
           std::cout.flush();
         }
       }
