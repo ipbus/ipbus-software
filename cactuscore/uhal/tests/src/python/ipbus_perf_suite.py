@@ -46,7 +46,7 @@ TARGETS = ['amc-e1a12-19-09:50001',
 
 DIRECT_UDP_NR_IN_FLIGHT = 16
 
-CACTUS_REVISION = "SW @ r23772, FW @ r23770"
+CACTUS_REVISION = "SW @ r23776, FW @ r23770"
 
 CHANGES_TAG = "No changes"
 
@@ -478,7 +478,8 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
     depths = [1001, 2500, 5000, 
               10000, 25000, 50000, 
               100000, 250000, 500000, 
-              1000000, 2500000, 5000000]
+              1000000, 2500000, 5000000,
+              9999999] 
 
 #    udp_bandwidths = dict((x, []) for x in depths)
 #    udp_uri = "ipbusudp-2.0://" + target
@@ -499,8 +500,8 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
         for i in range(50):
             for d in depths:
                 itns = 1
-                ch_tx_bws[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x2001 -w "+str(d)+" -p -i "+str(itns)+" -d "+ch_uri)[1] )
-                ch_rx_bws[d].append( run_command("PerfTester.exe -t BandwidthRx -b 0x2001 -w "+str(d)+" -p -i "+str(itns)+" -d "+ch_uri)[1] )
+                ch_tx_bws[d].append( run_command("PerfTester.exe -t BandwidthTx -b 0x2001 -w "+str(d)+" -p -i "+str(itns)+" -d "+ch_uri)[1] / 1000.0 )
+                ch_rx_bws[d].append( run_command("PerfTester.exe -t BandwidthRx -b 0x2001 -w "+str(d)+" -p -i "+str(itns)+" -d "+ch_uri)[1] / 1000.0 )
         stop_controlhub(controlhub_ssh_client)
 
         ch_tx_bws_mean, ch_tx_bws_yerrors = calc_y_with_errors(ch_tx_bws)
@@ -510,7 +511,7 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
         ax.errorbar(depths, ch_rx_bws_mean, yerr=ch_rx_bws_yerrors, label="Block read")
 
     ax.set_xlabel("Number of words")
-    ax.set_ylabel("Mean bandwidth [Mb/s]")
+    ax.set_ylabel("Mean bandwidth [Gbit/s]")
     plt.xscale("log")
     ax.legend(loc='upper left')
 
@@ -533,8 +534,8 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
         for n in nrs_in_flight:
             update_controlhub_sys_config(n, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
             start_controlhub(controlhub_ssh_client)
-            ch_tx_bws[n].append( run_command(cmd_base + " -t BandwidthTx")[1] )
-            ch_rx_bws[n].append( run_command(cmd_base + " -t BandwidthRx")[1] )
+            ch_tx_bws[n].append( run_command(cmd_base + " -t BandwidthTx")[1] / 1000.0 )
+            ch_rx_bws[n].append( run_command(cmd_base + " -t BandwidthRx")[1] / 1000.0 )
             stop_controlhub(controlhub_ssh_client)
 
     ch_tx_bws_mean, ch_tx_bws_yerrors = calc_y_with_errors(ch_tx_bws)
@@ -543,7 +544,7 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
     ax.errorbar(nrs_in_flight, ch_tx_bws_mean, yerr=ch_tx_bws_yerrors, label='20MB write')
     ax.errorbar(nrs_in_flight, ch_rx_bws_mean, yerr=ch_rx_bws_yerrors, label='20MB read')
     ax.set_xlabel('Number in flight over UDP')
-    ax.set_ylabel('Mean bandwidth [Mb/s]')
+    ax.set_ylabel('Mean bandwidth [Gbit/s]')
     ax.set_ylim(0)
     ax.legend(loc='lower right')
 
@@ -582,7 +583,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 #                itns = int(250000/(n_clients*n_targets))
 #                cmds = [cmd_base + t.replace(":"," ") + ' ' + str(itns) + " 50" for t in targets[0:n_targets] for x in range(n_clients)]
                 monitor_results, cmd_results = cmd_runner.run(cmds)
-                bws = [x[1] for x in cmd_results]
+                bws = [ (x[1]/1000.0) for x in cmd_results]
 
                 dict_idx = (n_clients, n_targets)
                 uhal_cpu_vals[dict_idx].append( monitor_results[0][1] )
@@ -629,9 +630,9 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     for ax in [ax_bw_board, ax_bw_total, ax_ch_cpu, ax_ch_mem, ax_uhal_cpu, ax_uhal_mem]:
         ax.set_xlabel('Number of clients per board')
 
-    ax_bw_board.set_ylabel('Total bandwidth per board [Mb/s]')
+    ax_bw_board.set_ylabel('Total bandwidth per board [Gbit/s]')
 #    ax_bw_client.set_ylabel('Bandwidth per client [Mb/s]')
-    ax_bw_total.set_ylabel('Total bandwidth [Mb/s]')
+    ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
     for ax in [ax_bw_board, ax_bw_total]:
         ax.set_ylim(0, 900)
 
