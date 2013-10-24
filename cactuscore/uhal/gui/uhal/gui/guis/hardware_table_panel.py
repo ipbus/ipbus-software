@@ -159,6 +159,7 @@ class Widget(wx.Panel):
         
         # Attributes                            
         self.__id = id
+        self.SetName(self.__id)
         self.__row_colour = '#99CCFF'
         self.__nodes_dict = {}
            
@@ -172,7 +173,7 @@ class Widget(wx.Panel):
     def __do_layout(self):                
                 
         self.SetBackgroundColour(wx.WHITE)
-        box = wx.StaticBox(self, -1)
+        box = wx.StaticBox(self, -1, style=wx.SUNKEN_BORDER)
         self.__sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
             
         borders = wx.ALL | wx.ALIGN_CENTER 
@@ -205,9 +206,12 @@ class Widget(wx.Panel):
         
     
     def update(self):
-        for k, v in self.__nodes_dict.iteritems():
-            self.__logger.debug('Updating node %s', k)
-            v.update()        
+        self.__logger.debug('Updating widget with id %s', self.__id)
+        
+        for k in self.GetChildren():
+            if 'update' in dir(k):
+                #self.__logger.debug('Updating node %s', str(k))
+                k.update()        
     
     
 
@@ -227,7 +231,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         # Attributes
         self.__global_sizer = None
         self.__widget_sizer = None
-        self.__children = {}
+        self.__children_count = 0
         
         # Layout
         self.__do_layout()
@@ -259,19 +263,19 @@ class HardwareTablePanel(scroll.ScrolledPanel):
     def add_new_widget(self, nodes, hw_tree):                       
         """
         Adds new widget to the panel. 
-        The widget ID consists on the IP end point name + the number of widget on the panel 
+        The widget ID consists on the IP end point name + the number of widgets on the panel, starting from 0 (empty panel) 
         The self.__fill_widget method is called to fill the widget
         """
         
         self.SetBackgroundColour(wx.WHITE)
-        id = nodes[0] + '_' + str(len(self.__children))
-        widget = Widget(self, id)
-        self.__children[id] = widget
+        id = nodes[0] + '_' + str(self.__children_count)
+        self.__children_count += 1 
+        widget = Widget(self, id)        
                         
         self.__fill_widget(nodes, hw_tree, widget) 
         self.__widget_sizer.AddWindow(widget) 
         self.__widget_sizer.FitInside(self)  
-                        
+                                
             
             
             
@@ -280,20 +284,21 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         The method is called from the defaultgui class every time the HW has been read. 
         Loops through all the widgets, calling their update method
         """
-        for k, v in self.__children.iteritems():
-            self.__logger.debug('Updating widget %s ', k)
-            v.update()
-          
-          
+        
+        # TODO: do not iterate through all children, just the ones in hw_info instead
+        for i in self.GetChildren():
+            if 'update' in dir(i):              
+                i.update()
+            
+                    
           
     def clear(self):
         """
         The method is called from the defaultgui class' menu bar. It erases 'graphically' the widgets that 
         had been added to the panel. It also removes them from the self.__children dictionary (to prevent them from being updated)
-        """
-        self.__children.clear()
+        """       
         self.__widget_sizer.DeleteWindows()  
-        self.SetBackgroundColour(wx.Colour(222, 222, 180))  
+        self.SetBackgroundColour(wx.Colour(222, 222, 222))  
          
     
     
@@ -327,13 +332,15 @@ class HardwareTablePanel(scroll.ScrolledPanel):
                 
                 start_item = k                
                 hw_tree = v
-                break   
-                       
-        self.__fill_widget_nodes(start_item, hw_tree, widget)  
+                break
+               
+        prefix_id = '.'.join(nodes[1:])
+        self.__logger.debug('Prefix ID is %s', prefix_id)          
+        self.__fill_widget_nodes(start_item, hw_tree, widget, prefix_id)  
                                 
        
         
-    def __fill_widget_nodes(self, start_item, hw_tree, widget):
+    def __fill_widget_nodes(self, start_item, hw_tree, widget, prefix_id):
         """
         The method fills the widget
         """
@@ -341,15 +348,16 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         # We have arrived to a tree leaf (register - value)
         if type(hw_tree) is not dict:              
             value = str(hw_tree)
-            widget.add_row(start_item.getId(), start_item.getAddress(), start_item.getMask(), value)
+            widget.add_row(prefix_id + '.' + start_item.getId(), start_item.getAddress(), start_item.getMask(), value)
             return 
         
         # The item being analyzed is a Node (uhal Node object) composed of more nodes
         # In such a case, we add the node info + N/A in its value
         if 'HwInterface' not in str(type(start_item)):
-            widget.add_row(start_item.getId(), start_item.getAddress(), start_item.getMask(), 'N/A')
+            widget.add_row(prefix_id + '.' + start_item.getId(), start_item.getAddress(), start_item.getMask(), 'N/A')
+            prefix_id += start_item.getId()
         
         # Whether the item being analyzed is a Node that has children or an IP end point (uhal HwInterface object), we call the algorithm recursively 
         for k, v in hw_tree.iteritems():            
-            self.__fill_widget_nodes(k, v, widget)                       
+            self.__fill_widget_nodes(k, v, widget, prefix_id)                       
                                      
