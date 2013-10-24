@@ -13,7 +13,8 @@ class HardwareTree(wx.Frame):
 
         # Attributes
         self.__parent = parent
-        self.__hw = hw       
+        self.__hw = hw   
+        self.__ip_end_points = {}
         
         # GUIs Attributes
         self.__tree = None   
@@ -35,12 +36,14 @@ class HardwareTree(wx.Frame):
         Adds the tree ctrl root node, and calls __add_tree_nodes to add the rest of them
         """                      
         
-        if self.__hw:
-            self.__tree = wx.TreeCtrl(self, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.TR_DEFAULT_STYLE)
+        if self.__hw:        
+            tree_style = wx.TR_LINES_AT_ROOT | wx.TR_HAS_BUTTONS    
+            self.__tree = wx.TreeCtrl(self, pos=wx.DefaultPosition, size=wx.DefaultSize, style=tree_style)
             root = self.__tree.AddRoot("uTCA HW")            
-            self.__add_tree_nodes(root, self.__hw)                    
-                 
-            self.__tree.Expand(root)
+            self.__add_tree_nodes(root, self.__hw)  
+                              
+            self.__get_ip_points_nodes(root)
+            self.__tree.Expand(root)                 
         else:
             self.__logger.error('Cannot add IP end Points to the HW tree!')                
         
@@ -52,7 +55,7 @@ class HardwareTree(wx.Frame):
         """
                                         
         for k, v in items.iteritems():
-            id = ""
+            id = ''
             try:
                 # Case node is an IP End point
                 id = k.id()
@@ -65,10 +68,20 @@ class HardwareTree(wx.Frame):
                 self.__tree.AppendItem(parent, id)
             else:
                 sub_parent = self.__tree.AppendItem(parent, id)
-                self.__add_tree_nodes(sub_parent, v)              
+                self.__add_tree_nodes(sub_parent, v)       
+                self.__tree.SortChildren(sub_parent)       
         
         
     
+    def __get_ip_points_nodes(self, theroot):
+        
+        item, cookie = self.__tree.GetFirstChild(theroot)
+        while item:
+            self.__ip_end_points[self.__tree.GetItemText(item)] = item
+            self.__logger.debug('added item id %s', self.__tree.GetItemText(item))
+            item, cookie = self.__tree.GetNextChild(theroot, cookie)
+            
+            
     def __get_item_text(self, item):
         
         if item:
@@ -117,7 +130,13 @@ class HardwareTree(wx.Frame):
     
     def update(self, hw):
         """
-        Updates the status of the IP End points
-        """
+        Updates the status of the IP End points, changing their text colour
+        """    
         self.__logger.debug('Updating HW tree')
+        for k, v in self.__ip_end_points.iteritems():            
+            self.__tree.SetItemTextColour(v, wx.Colour(0, 255, 127)) 
+            if k not in hw:               
+                self.__tree.SetItemTextColour(v, wx.Colour(205, 205, 193))
+            
+        
 

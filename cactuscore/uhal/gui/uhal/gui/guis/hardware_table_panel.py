@@ -130,7 +130,7 @@ class StaticFields(wx.Panel):
         
     def __do_layout(self):
         
-        self.SetBackgroundColour('#CCFFFF')
+        self.SetBackgroundColour('#6C7B8B')
         self.__sizer = wx.BoxSizer(wx.HORIZONTAL)
         
         self.__wid_dict["name"]    = wx.StaticText(self, label="NAME", style=wx.ALIGN_CENTER_HORIZONTAL)
@@ -171,12 +171,13 @@ class Widget(wx.Panel):
     
     def __do_layout(self):                
                 
+        self.SetBackgroundColour(wx.WHITE)
         box = wx.StaticBox(self, -1)
         self.__sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
             
         borders = wx.ALL | wx.ALIGN_CENTER 
-        self.__id_field = wx.StaticText(self, label = self.__id[:self.__id.find('_')]) 
-        self.__id_field.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL))
+        self.__id_field = wx.StaticText(self, label = self.__id[:self.__id.find('_')].upper()) 
+        self.__id_field.SetFont(wx.Font(10, wx.MODERN, wx.NORMAL, wx.FONTWEIGHT_BOLD))
         
         self.__sizer.Add(self.__id_field, 1, borders, 1)   
         
@@ -192,13 +193,12 @@ class Widget(wx.Panel):
         
     def add_row(self, name, address, mask, value):
                             
-        self.__row_colour = (self.__row_colour == '#99CCFF') and '#33CCFF' or '#99CCFF'
-            
-        #FIX THIS:
+        self.__row_colour = (self.__row_colour == '#B9D3EE') and '#9FB6CD' or '#B9D3EE'
+                  
         borders = wx.ALL | wx.EXPAND   
         node = NodeWidget(self, name, address, mask, value, self.__row_colour)       
-        self.__nodes_dict[id] = node       
-        self.__sizer.Add(self.__nodes_dict[id], 1, borders, 1)
+        self.__nodes_dict[name] = node       
+        self.__sizer.Add(self.__nodes_dict[name], 1, borders, 1)
         
         self.__sizer.Layout()
         
@@ -242,7 +242,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         The self.__global_sizer has been added just because I wanted it to be a StaticBox
         The self.__widget_sizer is the sizer object hosting the widgets. 
         """
-        
+        self.SetBackgroundColour(wx.Colour(222, 222, 222))
         box = wx.StaticBox(self, -1, "Hardware Panel")        
         self.__global_sizer = wx.StaticBoxSizer(box, wx.VERTICAL)  
         self.__widget_sizer = wx.FlexGridSizer(0, 3, 0, 0)         
@@ -260,14 +260,15 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         """
         Adds new widget to the panel. 
         The widget ID consists on the IP end point name + the number of widget on the panel 
-        The self.__select_tree_slice method is called to fill the widget
+        The self.__fill_widget method is called to fill the widget
         """
         
+        self.SetBackgroundColour(wx.WHITE)
         id = nodes[0] + '_' + str(len(self.__children))
         widget = Widget(self, id)
         self.__children[id] = widget
                         
-        self.__select_tree_slice(nodes, hw_tree, widget) 
+        self.__fill_widget(nodes, hw_tree, widget) 
         self.__widget_sizer.AddWindow(widget) 
         self.__widget_sizer.FitInside(self)  
                         
@@ -291,18 +292,19 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         had been added to the panel. It also removes them from the self.__children dictionary (to prevent them from being updated)
         """
         self.__children.clear()
-        self.__widget_sizer.DeleteWindows()    
+        self.__widget_sizer.DeleteWindows()  
+        self.SetBackgroundColour(wx.Colour(222, 222, 180))  
          
     
     
     
-    def __select_tree_slice(self, nodes, hw_tree, widget):
+    def __fill_widget(self, nodes, hw_tree, widget):
         """
         nodes: list of node names that are needed to traverse the tree until the node that was selected from the tree window is reached
         hw_tree: HW representation in tree-shape
         widget: the brand new widget that has to be fulfilled
         
-        The method first traverses the tree until getting to the node that has to be represented. Then calls self.__fill_widget to fill the widget
+        The method first traverses the tree until getting to the node that has to be represented. Then calls self.__fill_widget_nodes to fill the widget
         with the this node's information and children
         """   
          
@@ -327,11 +329,11 @@ class HardwareTablePanel(scroll.ScrolledPanel):
                 hw_tree = v
                 break   
                        
-        self.__fill_widget(start_item, hw_tree, widget)  
+        self.__fill_widget_nodes(start_item, hw_tree, widget)  
                                 
        
         
-    def __fill_widget(self, start_item, hw_tree, widget):
+    def __fill_widget_nodes(self, start_item, hw_tree, widget):
         """
         The method fills the widget
         """
@@ -349,5 +351,5 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         
         # Whether the item being analyzed is a Node that has children or an IP end point (uhal HwInterface object), we call the algorithm recursively 
         for k, v in hw_tree.iteritems():            
-            self.__fill_widget(k, v, widget)                       
+            self.__fill_widget_nodes(k, v, widget)                       
                                      

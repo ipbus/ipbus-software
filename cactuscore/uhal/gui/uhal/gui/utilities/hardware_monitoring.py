@@ -54,8 +54,10 @@ class HardwareMonitoring(threading.Thread):
         
         while self.__is_running:                        
             self.__logger.debug('Start!')    
+            self.__update_devices()
             
             map_devs_to_map_nodes_to_values = {}
+           
             for name, dev in self.__devices.iteritems():
                 '''
                 if dev.get_status() is not "OK":
@@ -80,13 +82,18 @@ class HardwareMonitoring(threading.Thread):
                         #self.__logger.debug('Insert read operation for device %s node %s' % (name, node))                                         
                     except Exception, e:
                         self.__logger.warning('Exception while reading node %s from device %s: %s', node , name, str(e))                        
-                                   
-                dev.dispatch()  
-                map_devs_to_map_nodes_to_values[name] = nodes_vs_values                            
-            
+                
+                # Temporarily add try/except block to cope with the fact that IP End point check status (PING) is not offered right now
+                try:              
+                    dev.dispatch()                    
+                    map_devs_to_map_nodes_to_values[name] = nodes_vs_values
+                except Exception, e:
+                    self.__logger.warning('Dispatch operation for device %s failed: %s', dev.id(), str(e))
+                    
+                                                        
             self.__synchronize_hw_info(map_devs_to_map_nodes_to_values)
             
-            wx.CallAfter(Publisher().sendMessage, "HW POLL", self.__hw_complete)              
+            wx.CallAfter(Publisher().sendMessage, "HW POLL", map_devs_to_map_nodes_to_values)              
             time.sleep(5)     
 
 
@@ -101,9 +108,9 @@ class HardwareMonitoring(threading.Thread):
         
     def get_hw_tree(self):
         return self.__hw_tree
-        
-        
-        
+                
+                    
+            
     def __init_hw(self, file_name):
         """
         Initializes the __hw_tree, __hw_complete and __devices objects
@@ -156,7 +163,18 @@ class HardwareMonitoring(threading.Thread):
                 self.__build_tree(node_object, parent[item])
     
     
+    
+    def __update_devices(self):        
+        """
+        This method gets executed at the beginning of the background thread. Its goal is to update the list of IP End Points with 
+        just the ones that continue being up and running
+        """
+        for device in self.__cm.getDevices():
+            device_object = self.__cm.getDevice(device)
+            self.__devices[device] = device_object
             
+            
+                    
     def __synchronize_hw_info(self, hw_map):
         """
         Synchronizes up the information polled from the HW with the one used for display, __hw_tree

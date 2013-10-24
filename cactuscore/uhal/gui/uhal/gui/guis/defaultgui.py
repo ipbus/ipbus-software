@@ -12,7 +12,7 @@ class DefaultGui(wx.Frame):
     def __init__(self, parent, id, title):
 
         self.__logger = logging.getLogger('uhal.gui.guis.defaultgui')      
-        wx.Frame.__init__(self, parent, id, title, size=(500, 400))       
+        wx.Frame.__init__(self, parent, id, title)       
         
         # Attributes       
         self.__hw = None
@@ -156,24 +156,16 @@ class DefaultGui(wx.Frame):
         of this event, this method is executed, updating the HW tree (only status of the IP End points), and widgets drawn in the main panel.
         """
         
-        self.__hw = msg.data  
-        #self.__logger.debug('Received message: %s', str(self.__hw))           
-        
-        for i in self.GetChildren():            
-            print 'Child of defaultGUI: %d %s %s' % (i.GetId(), i.GetLabel(), i.GetName())
+        self.__logger.info('Hw ready event: updating main gui\'s children')
+        self.__hw = msg.data          
+            
+        for i in self.GetChildren():                        
             
             if 'update' in dir(i):
                 i.update(self.__hw)
+                         
+        
                 
-            """
-            i.update()
-            Include children's update: HW tree with ip end point status, and HW table panel with register values.
-            """
-        
-        # Update: hw tree (nodes status), widgets in panel        
-        
-        
-        
     def __start_hw_thread(self, file_name):
         """
         Creates the thread object that checks the HW. Picks up from it the object that represents the HW hierarchy. Starts the thread (this could also
