@@ -70,30 +70,27 @@ class NodeWidget(wx.Panel):
         
     
             
-    def update(self):
-        pass
-        '''
-        try:
-            value_to_set = hex(value)
-        except TypeError:
-            value_to_set = value
+    def update(self, hw_info):
+        if self.__id not in hw_info.keys():
+            return
+                
+        self.__value = hw_info[self.__id]        
+        self.__wid_dict['value'].SetLabel(str(self.__value))
+        self.__sizer.Layout()
         
-        self.__value = value_to_set
-        self.__wid_dict["value"].SetLabel(self.__value)
         
         if self.__plotreg:
-            
-            self.__plotreg.add_pair(self.__value)
+            self.__plotreg.add_pair(int(self.__value))
             self.__plotreg.plot()
             
+        """    
         if self.__values_window:
             self.__values_window.update(self.__value)
-        '''
+        """
         
         
-    
-    def __on_click_regname(self, event):
-        #self.__logger.debug('Plotting regname %s...', self.__id)
+            
+    def __on_click_regname(self, event):       
         self.__plotreg = Plot(self, self.__id)
         self.__plotreg.Show()
         
@@ -199,19 +196,26 @@ class Widget(wx.Panel):
         borders = wx.ALL | wx.EXPAND   
         node = NodeWidget(self, name, address, mask, value, self.__row_colour)       
         self.__nodes_dict[name] = node       
-        self.__sizer.Add(self.__nodes_dict[name], 1, borders, 1)
+        self.__sizer.Add(node, 1, borders, 1)
         
         self.__sizer.Layout()
         
         
     
-    def update(self):
+    def update(self, hw_info):
         self.__logger.debug('Updating widget with id %s', self.__id)
         
-        for k in self.GetChildren():
-            if 'update' in dir(k):
-                #self.__logger.debug('Updating node %s', str(k))
-                k.update()        
+        widget_id_list = [x for x in hw_info.keys() if x in self.__id] 
+        
+        # hw_info doesn't contain information about IP End points that are down. Hence, the list is empty if the IP End point is down. 
+        # In that case, set the background colour to red and do NOT update     
+        if not widget_id_list:
+            self.SetBackgroundColour(wx.RED)
+        else:
+            self.SetBackgroundColour(wx.WHITE)        
+            for k in self.GetChildren():
+                if 'update' in dir(k):               
+                    k.update(hw_info[widget_id_list[0]])        
     
     
 
@@ -283,12 +287,13 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         """
         The method is called from the defaultgui class every time the HW has been read. 
         Loops through all the widgets, calling their update method
+        hw_info is generated in the hardware_monitoring module, and it contains the values of the readable registers of an IP End point which is up and running
         """
         
-        # TODO: do not iterate through all children, just the ones in hw_info instead
-        for i in self.GetChildren():
+        # TODO: do not iterate through all children, just the ones in hw_info instead       
+        for i in self.GetChildren():          
             if 'update' in dir(i):              
-                i.update()
+                i.update(hw_info)
             
                     
           
@@ -297,6 +302,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
         The method is called from the defaultgui class' menu bar. It erases 'graphically' the widgets that 
         had been added to the panel. It also removes them from the self.__children dictionary (to prevent them from being updated)
         """       
+        self.__children_count = 0 
         self.__widget_sizer.DeleteWindows()  
         self.SetBackgroundColour(wx.Colour(222, 222, 222))  
          
@@ -333,31 +339,41 @@ class HardwareTablePanel(scroll.ScrolledPanel):
                 start_item = k                
                 hw_tree = v
                 break
-               
-        prefix_id = '.'.join(nodes[1:])
-        self.__logger.debug('Prefix ID is %s', prefix_id)          
-        self.__fill_widget_nodes(start_item, hw_tree, widget, prefix_id)  
-                                
+       
+        # Not very happy about the following lines...
+        # In this case, the selected item was either an IP End point or a register with no children
+        if len(nodes) <= 2:
+            nodes = []
+        # In this other case, we have to remove the first item (IP End point) and the last one, which will be added in the method __fill_widget_nodes
+        else:
+            nodes.remove(nodes[0])
+            nodes.remove(nodes[-1])
+                 
+        prefix_id = '.'.join(nodes)        
+        self.__fill_widget_nodes(start_item, hw_tree, widget, prefix_id)         
        
         
-    def __fill_widget_nodes(self, start_item, hw_tree, widget, prefix_id):
+    def __fill_widget_nodes(self, start_item, hw_tree, widget, prefix_id):    
         """
         The method fills the widget
         """
         
         # We have arrived to a tree leaf (register - value)
         if type(hw_tree) is not dict:              
-            value = str(hw_tree)
-            widget.add_row(prefix_id + '.' + start_item.getId(), start_item.getAddress(), start_item.getMask(), value)
+            value = str(hw_tree)  
+            widget_id = (not prefix_id) and start_item.getId() or (prefix_id + '.' + start_item.getId())                        
+            widget.add_row(widget_id, start_item.getAddress(), start_item.getMask(), value)                        
             return 
         
         # The item being analyzed is a Node (uhal Node object) composed of more nodes
         # In such a case, we add the node info + N/A in its value
         if 'HwInterface' not in str(type(start_item)):
-            widget.add_row(prefix_id + '.' + start_item.getId(), start_item.getAddress(), start_item.getMask(), 'N/A')
-            prefix_id += start_item.getId()
+            widget_id = (not prefix_id) and start_item.getId() or (prefix_id + '.' + start_item.getId())                        
+            widget.add_row(widget_id, start_item.getAddress(), start_item.getMask(), 'N/A')            
+            prefix_id = widget_id            
         
         # Whether the item being analyzed is a Node that has children or an IP end point (uhal HwInterface object), we call the algorithm recursively 
-        for k, v in hw_tree.iteritems():            
-            self.__fill_widget_nodes(k, v, widget, prefix_id)                       
+        for k, v in hw_tree.iteritems():                       
+            self.__fill_widget_nodes(k, v, widget, prefix_id)            
+                                   
                                      

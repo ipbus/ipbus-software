@@ -79,7 +79,7 @@ class HardwareMonitoring(threading.Thread):
                             continue
                     
                         nodes_vs_values[node] = node_object.read()  
-                        #self.__logger.debug('Insert read operation for device %s node %s' % (name, node))                                         
+                                                        
                     except Exception, e:
                         self.__logger.warning('Exception while reading node %s from device %s: %s', node , name, str(e))                        
                 
@@ -91,7 +91,7 @@ class HardwareMonitoring(threading.Thread):
                     self.__logger.warning('Dispatch operation for device %s failed: %s', dev.id(), str(e))
                     
                                                         
-            self.__synchronize_hw_info(map_devs_to_map_nodes_to_values)
+            #self.__synchronize_hw_info(map_devs_to_map_nodes_to_values)
             
             wx.CallAfter(Publisher().sendMessage, "HW POLL", map_devs_to_map_nodes_to_values)              
             time.sleep(5)     
@@ -185,16 +185,6 @@ class HardwareMonitoring(threading.Thread):
                 self.__hw_complete[dev][node] = value               
                 #self.__update_hw_tree(self._hw_tree[dev], node, value)
                 #self.__logger.debug('Value %s set in node %s of device %s', str(value), node, dev)               
-    
-    """
-    def __update_hw_tree(self, tree, nodes, value):
         
-        nodes = node.split('.')
-        self.__logger.debug('Node to update is %s' % str(nodes))
-        
-        if len(nodes) > 1:
-            self.__update_hw_tree(tree[nodes[0]], nodes[1:], value)
-        else:
-    """
        
             
