@@ -24,8 +24,9 @@ else
 fi
 
 if [ $CONTROLHUBSTATUS != 0 ]; then
-  echo "Starting Control Hub... "
+  echo -n "Starting Control Hub... "
   ${DIR}/erl_controlhub +zdbbl 2097151 +sbt db +scl false  +swt very_low -sname controlhub -setcookie ch_cookie -boot ${CONTROLHUB_ROOTDIR}/releases/2.0.0/start -config ${CONTROLHUB_ROOTDIR}/releases/2.0.0/sys -pa /opt/cactus/lib/erlang/lib/*/ebin/ -detached
+
   for i in `seq 1 10`; do
     sleep 1
     ${DIR}/controlhub_status > /dev/null
@@ -33,7 +34,6 @@ if [ $CONTROLHUBSTATUS != 0 ]; then
       echo "ok"
       exit 0
     fi
-    echo "N.B: ControlHub not up after $i attempts of controlhub_status."
   done
 
   # Only get here if controlhub didn't start after N seconds
