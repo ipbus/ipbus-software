@@ -35,6 +35,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/placeholders.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include "uhal/IPbusInspector.hpp"
@@ -58,7 +59,7 @@ namespace uhal
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
-    //     mReplyMemory ( 65536 , 0x00000000 ),
+    mReplyMemory ( 1500 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
@@ -84,7 +85,7 @@ namespace uhal
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUDP.mUri.mHostname , aUDP.mUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
-    //     mReplyMemory ( 65536 , 0x00000000 ),
+    mReplyMemory ( 1500 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
@@ -334,18 +335,9 @@ namespace uhal
       return;
     }
 
-    //     mAsioReplyBuffer.clear();
-    //    mAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
-    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
-    std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-    lAsioReplyBuffer.reserve ( lReplyBuffers.size() +1 );
+    std::vector<boost::asio::mutable_buffer> lAsioReplyBuffer ( 1 , boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
 
-    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-    {
-      lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
-    }
-
-    log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply" );
+    log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply." );
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 
@@ -357,7 +349,7 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP< InnerProtocol >::read_callback, this, _1 ) );
+    mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP<InnerProtocol>::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
@@ -374,7 +366,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void UDP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode )
+  void UDP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
     if ( mAsynchronousException )
     {
@@ -400,6 +392,11 @@ namespace uhal
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
+    }
+
+    if ( aBytesTransferred != mReplyBuffers->replyCounter() )
+    {
+      log ( Error() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , "-byte UDP payload from target " , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , " bytes. Validating returned data to work out where error occurred." );
     }
 
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
@@ -428,14 +425,22 @@ namespace uhal
     //         std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
     //         lT2HInspector.analyze ( lBegin2 , lEnd2 );
     //  std::cout << "Filling reply buffer : " << mReplyBuffers << std::endl;
-    //     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
-    //     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
-    //
-    //     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-    //     {
-    //       memcpy ( lIt->first, lReplyBuf, lIt->second );
-    //       lReplyBuf += lIt->second;
-    //     }
+
+    std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
+    uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
+
+    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    {
+      // Don't copy more of mReplyMemory than was written to, for cases when less data received than expected
+      if ( static_cast<uint32_t>( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) >= aBytesTransferred )
+      {
+        break;
+      }
+
+      uint32_t lNrBytesToCopy = std::min ( lIt->second , static_cast<uint32_t>( aBytesTransferred - ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) ) );
+      memcpy ( lIt->first, lReplyBuf, lNrBytesToCopy );
+      lReplyBuf += lNrBytesToCopy;
+    }
 
     try
     {

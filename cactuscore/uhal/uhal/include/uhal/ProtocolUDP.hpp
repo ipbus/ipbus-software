@@ -122,7 +122,7 @@ namespace uhal
       void write ( );
       void write_callback ( const boost::system::error_code& aErrorCode );
       void read ( );
-      void read_callback ( const boost::system::error_code& aErrorCode );
+      void read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred );
 
 
       void CheckDeadline();
@@ -147,7 +147,7 @@ namespace uhal
 
       boost::asio::deadline_timer mDeadlineTimer;
 
-      //       std::vector<uint8_t> mReplyMemory;
+      std::vector<uint8_t> mReplyMemory;
 
 #ifdef RUN_ASIO_MULTITHREADED
       boost::thread mDispatchThread;
