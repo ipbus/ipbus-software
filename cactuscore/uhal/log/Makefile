@@ -48,7 +48,8 @@ ifeq ($(USE_BACKTRACE),TRUE)
 			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/binutils/\
 			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd/
 	
-	CPP_FLAGS = -g  -Wall -O0 -rdynamic -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE
+	CPP_FLAGS = -g  -Wall -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
+							#-fprofile-arcs -ftest-coverage
 
 else
 
@@ -60,7 +61,8 @@ else
 	INCLUDE_PATH = 	-Iinclude  \
 			-I${EXTERN_BOOST_INCLUDE_PREFIX}
 	
-	CPP_FLAGS = -g  -Wall -O0 -rdynamic -MMD -MP -fPIC -D MAX_NUM_ARGS=32 ${INCLUDE_PATH} -DCOURTEOUS_EXCEPTIONS
+	CPP_FLAGS = -g  -Wall -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
+							#-fprofile-arcs -ftest-coverage
 
 endif		
 
@@ -68,9 +70,11 @@ endif
 
 
 
-LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES}
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES} \
+										 #-lgcov -coverage
 
-LINK_EXECUTABLE_FLAGS = -Wall -g 
+LINK_EXECUTABLE_FLAGS = -Wall -g\
+										 #-lgcov -coverage 
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
@@ -101,19 +105,19 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	mkdir -p {bin,obj,lib}
-	g++ -c ${CPP_FLAGS}  $< -o $@
+	g++ -c ${CPP_FLAGS}  ${INCLUDE_PATH}  $< -o $@
 
 -include $(EXECUTABLE_OBJECT_FILES:.o=.d)
 
 ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 #Make evaluates the list of files before it starts and does not pick up the existence of the file created during the ${EXECUTABLES} stage. We must, therefore, explicitly specify that it is built.
-	g++ -c ${CPP_FLAGS} src/common/log.cpp -o obj/log.o
+	g++ -c ${CPP_FLAGS}  ${INCLUDE_PATH} src/common/log.cpp -o obj/log.o
 #And similarly, we must manually specify the inclusion of the object file created in the line above into the shared object file
 	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} obj/log.o -o $@
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}  
 	mkdir -p {bin,obj,lib}
-	g++ -c ${CPP_FLAGS} $< -o $@
+	g++ -c ${CPP_FLAGS}  ${INCLUDE_PATH} $< -o $@
 
 -include $(LIBRARY_OBJECT_FILES:.o=.d)
 

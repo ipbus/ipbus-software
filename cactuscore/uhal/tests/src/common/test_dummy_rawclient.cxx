@@ -59,6 +59,22 @@ void single_write_read ( const std::string& connection, const std::string& id )
   c->dispatch();
   CACTUS_CHECK ( reg.valid() );
   CACTUS_CHECK ( reg.value() == x );
+  CACTUS_TEST_THROW ( c->write ( addr,0xF0000000, 0xF0 ) ,uhal::exception::BitsSetWhichAreForbiddenByBitMask );
+  CACTUS_TEST_THROW ( c->write ( addr,0xFF, 0x0F ) ,uhal::exception::BitsSetWhichAreForbiddenByBitMask );
+  uint32_t y = static_cast<uint32_t> ( rand() ) & 0xF;
+  c->write ( addr,y, 0xF );
+  ValWord< uint32_t > reg2 = c->read ( addr );
+  CACTUS_CHECK ( !reg2.valid() );
+  CACTUS_TEST_THROW ( reg2.value(),uhal::exception::NonValidatedMemory );
+  c->dispatch();
+  CACTUS_CHECK ( reg2.valid() );
+  CACTUS_CHECK ( reg2.value() == ( ( x&~0xF ) |y ) );
+  ValWord< uint32_t > reg3 = c->read ( addr , 0xF );
+  CACTUS_CHECK ( !reg3.valid() );
+  CACTUS_TEST_THROW ( reg3.value(),uhal::exception::NonValidatedMemory );
+  c->dispatch();
+  CACTUS_CHECK ( reg3.valid() );
+  CACTUS_CHECK ( reg3.value() == y );
 }
 
 void mem_write_read ( const std::string& connection, const std::string& id )

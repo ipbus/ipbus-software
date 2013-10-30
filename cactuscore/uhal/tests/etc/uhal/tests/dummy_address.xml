@@ -2,7 +2,7 @@
 
 <node>
 
-    <node id="REG" address="0x0001" permission="rw" tags="test"/>
+    <node id="REG" address="0x0001" permission="rw" class="bad" tags="test"/>
 
     <node id="REG_READ_ONLY" address="0x0002" permission="r"/>
 

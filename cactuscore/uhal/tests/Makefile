@@ -54,11 +54,14 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		-I${UHAL_UHAL_INCLUDE_PREFIX}
 
-CPP_FLAGS = -g -Wall -O0 -rdynamic -MMD -MP -fPIC ${INCLUDE_PATH}
+CPP_FLAGS = -g -Wall -O3 -MMD -MP -fPIC \
+#						-fprofile-arcs -ftest-coverage
 
-LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O0 -rdynamic ${LIBRARY_PATH} ${LIBRARIES}
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 ${LIBRARY_PATH} ${LIBRARIES}\
+#										 -lgcov -coverage
 
-LINK_EXECUTABLE_FLAGS = -Wall -g -O0 -rdynamic ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} 
+LINK_EXECUTABLE_FLAGS = -Wall -g -O3 ${LIBRARY_PATH} ${EXECUTABLE_LIBRARIES} \
+#										 -lgcov -coverage
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
@@ -84,7 +87,7 @@ ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	mkdir -p {bin,obj,lib}
-	g++ -c ${CPP_FLAGS}  $< -o $@
+	g++ -c ${CPP_FLAGS} ${INCLUDE_PATH} $< -o $@
 
 -include $(EXECUTABLE_OBJECT_FILES:.o=.d)
 
@@ -93,7 +96,7 @@ ${LIBRARY}: ${LIBRARY_OBJECT_FILES}
 
 ${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p {bin,obj,lib}
-	g++ -c ${CPP_FLAGS} $< -o $@
+	g++ -c ${CPP_FLAGS} ${INCLUDE_PATH} $< -o $@
 
 -include $(LIBRARY_OBJECT_FILES:.o=.d)
 

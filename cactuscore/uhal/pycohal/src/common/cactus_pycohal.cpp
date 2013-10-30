@@ -32,7 +32,7 @@ namespace pycohal
   template<class T>
   std::vector<T> copy_vector ( const std::vector<T>& aVec )
   {
-    return std::vector<T>( aVec );
+    return std::vector<T> ( aVec );
   }
 
   /// Returns vector, generated from splitting string argument using "," as delimeter, and converting string to type via lexical cast. [Function solely used in unit-tests]
@@ -44,11 +44,12 @@ namespace pycohal
 
     if ( ! aString.empty() )
     {
-      boost::algorithm::split ( sVec, aString, boost::algorithm::is_any_of(",") );
-      result.reserve(sVec.size());
+      boost::algorithm::split ( sVec, aString, boost::algorithm::is_any_of ( "," ) );
+      result.reserve ( sVec.size() );
+
       for ( std::vector<std::string>::const_iterator it = sVec.begin(); it != sVec.end(); it++ )
       {
-         result.push_back( boost::lexical_cast<T>(*it) );
+        result.push_back ( boost::lexical_cast<T> ( *it ) );
       }
     }
 
@@ -59,10 +60,12 @@ namespace pycohal
   std::vector<std::string> convert_string_to_vector ( const std::string& aString )
   {
     std::vector<std::string> result;
+
     if ( ! aString.empty() )
     {
-      boost::algorithm::split ( result, aString, boost::algorithm::is_any_of(",") );
+      boost::algorithm::split ( result, aString, boost::algorithm::is_any_of ( "," ) );
     }
+
     return result;
   }
 
@@ -93,7 +96,6 @@ namespace pycohal
     packageScope.attr ( "tests" ) = testModule; //< Enables "from mypackage import tests"
     // Change to sub-module scope ...
     bpy::scope testScope = testModule;
-
     // Wrap the test functions ...
     bpy::def ( "check_uint32_argument", pycohal::test_check_uint32_argument );
     bpy::def ( "convert_str_to_uint32", pycohal::test_convert_str_to_uint32 );

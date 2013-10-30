@@ -46,12 +46,12 @@ INCLUDE_PATH = 	-Iinclude  \
 CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC\
 					 -DDISABLE_PACKET_COUNTER_HACK\
 					 -DRUN_ASIO_MULTITHREADED  \
-					 -fprofile-arcs -ftest-coverage
+#					 -fprofile-arcs -ftest-coverage
 #					 -DNO_PREEMPTIVE_DISPATCH 
 #-D THROW_ON_ADDRESS_SPACE_OVERLAP 
 
 LINK_FLAGS = -g -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}\
-										 -lgcov -coverage
+#										 -lgcov -coverage
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 

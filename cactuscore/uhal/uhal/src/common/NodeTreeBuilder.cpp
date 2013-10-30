@@ -282,11 +282,20 @@ namespace uhal
     if ( lIt == mCreators.end() )
     {
       //exception::LabelUnknownToClassFactory lExc;
-      log ( Warning , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory. Known types are:" );
+      log ( Warning , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory." );
 
-      for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+      if ( mCreators.size() )
       {
-        log ( Warning , "    > " , lIt->first );
+        log ( Warning , "Known types are:" );
+
+        for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+        {
+          log ( Warning , "    > " , lIt->first );
+        }
+      }
+      else
+      {
+        log ( Warning , "No class types have been defined" );
       }
 
       log ( Warning, "Will return a plain node for now, but you have been warned!" );

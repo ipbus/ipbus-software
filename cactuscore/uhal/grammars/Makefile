@@ -28,8 +28,11 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_LOG_INCLUDE_PREFIX}
 
 
-CPP_FLAGS = -g -O0 -rdynamic -Wall -MMD -MP -fPIC
-LINK_FLAGS = -g -shared -fPIC -Wall -O0 -rdynamic
+CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC \
+						#-fprofile-arcs -ftest-coverage
+
+LINK_FLAGS = -g -shared -fPIC -Wall -O3\
+							#-lgcov -coverage
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 

@@ -139,7 +139,7 @@ namespace uhal
         /// Outputs a standard result set to screen - provide it with the number of seconds the test took.
         void outputStandardResults ( double totalSeconds ) const;
 
-        /// Returns a random uint32_t in the range [0,maxSize], with 1/x probability distribution -- so that p(x=0) = p(2<=x<4) = p(2^n <= x < 2^n+1) 
+        /// Returns a random uint32_t in the range [0,maxSize], with 1/x probability distribution -- so that p(x=0) = p(2<=x<4) = p(2^n <= x < 2^n+1)
         uint32_t getRandomBlockSize ( const uint32_t maxSize ) const;
 
         /// Returns a buffer of random numbers
