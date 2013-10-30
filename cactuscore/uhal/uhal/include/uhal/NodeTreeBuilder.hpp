@@ -96,8 +96,8 @@ namespace uhal
     // class ChildHasAddressOverlap : public exception {};
     // //! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
     // class ChildHasAddressMaskOverlap : public exception {};
-    //! Exception class to handle the case where a class is requested which does not exist in the class factory.
-    ExceptionClass ( LabelUnknownToClassFactory , "Exception class to handle the case where a class is requested which does not exist in the class factory." );
+    //    //! Exception class to handle the case where a class is requested which does not exist in the class factory.
+    //    ExceptionClass ( LabelUnknownToClassFactory , "Exception class to handle the case where a class is requested which does not exist in the class factory." );
   }
 
   //! EXPERIMENTAL! Helper class to add Nodes derived from DerivedNode to the class factory

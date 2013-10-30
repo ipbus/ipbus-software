@@ -133,7 +133,7 @@ namespace uhal
     {
       uhal::exception::ControlHubReturnedWrongAddress* lExc = new uhal::exception::ControlHubReturnedWrongAddress();
       log ( *lExc , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
-            " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) , 
+            " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) ,
             " for device with URI: " , this->uri() );
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();

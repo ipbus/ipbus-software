@@ -94,12 +94,12 @@ namespace uhal
       */
       UDP ( const UDP& aUDP );
 
-       /**
-        Assignment operator
-        This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-        @param aUDP a UDP-protocol object to copy
-        @return reference to the current object to allow chaining of assignments
-      */
+      /**
+       Assignment operator
+       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
+       @param aUDP a UDP-protocol object to copy
+       @return reference to the current object to allow chaining of assignments
+            */
       UDP& operator= ( const UDP& aUDP );
 
 
@@ -122,9 +122,9 @@ namespace uhal
 
 
     protected:
-          /**
-        Function which tidies up this protocol layer in the event of an exception
-       */    
+      /**
+              Function which tidies up this protocol layer in the event of an exception
+             */
       virtual void dispatchExceptionHandler();
 
 
@@ -145,19 +145,19 @@ namespace uhal
         @param aErrorCode the error code with which the ASIO operation completed
       */
       void write_callback ( const boost::system::error_code& aErrorCode );
-      
+
       /**
         Initialize performing the next UDP read operation
         In multi-threaded mode, this runs the ASIO async receive and exits
         In single-threaded mode, this runs the ASIO async receive and blocks
       */
       void read ( );
-      
+
       /**
         Callback function which is called upon completion of the ASIO async receive
         This, then, checks the queue to see if there are more packets to be sent and if so, calls write
         @param aErrorCode the error code with which the ASIO operation completed
-      */      
+      */
       void read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred );
 
       /**
@@ -165,15 +165,15 @@ namespace uhal
       */
       void CheckDeadline();
 
-       /**
-        Function to set the value of a variable associated with a BOOST conditional-variable and then notify that conditional variable
-        @param aValue a value to which to update the variable associated with a BOOST conditional-variable
-      */
+      /**
+       Function to set the value of a variable associated with a BOOST conditional-variable and then notify that conditional variable
+       @param aValue a value to which to update the variable associated with a BOOST conditional-variable
+            */
       void NotifyConditionalVariable ( const bool& aValue );
 
       /**
         Function to block a thread pending a BOOST conditional-variable and its associated regular variable
-      */ 
+      */
       void WaitOnConditionalVariable();
 
 
@@ -211,7 +211,7 @@ namespace uhal
 
       //! The list of buffers still waiting to be sent
       std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
-      //! The list of buffers still awaiting a reply      
+      //! The list of buffers still awaiting a reply
       std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
 
       //! Counter of how many writes have been sent, for which no reply has yet been received
@@ -221,7 +221,7 @@ namespace uhal
       boost::mutex mConditionalVariableMutex;
       //! A conditional variable for blocking the main thread until the variable with which it is associated is set correctly
       boost::condition_variable mConditionalVariable;
-      //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received     
+      //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received
       bool mFlushDone;
 #endif
 

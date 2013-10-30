@@ -270,6 +270,7 @@ namespace uhal
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
       log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for UDP send to target with URI: ", this->uri() );
+
       if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
@@ -332,7 +333,6 @@ namespace uhal
     }
 
     std::vector<boost::asio::mutable_buffer> lAsioReplyBuffer ( 1 , boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
-
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply." );
     boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
@@ -380,6 +380,7 @@ namespace uhal
     {
       exception::UdpTimeout* lExc = new exception::UdpTimeout();
       log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for UDP receive from target with URI: ", this->uri() );
+
       if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
@@ -421,19 +422,18 @@ namespace uhal
     //         std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
     //         lT2HInspector.analyze ( lBegin2 , lEnd2 );
     //  std::cout << "Filling reply buffer : " << mReplyBuffers << std::endl;
-
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
     {
       // Don't copy more of mReplyMemory than was written to, for cases when less data received than expected
-      if ( static_cast<uint32_t>( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) >= aBytesTransferred )
+      if ( static_cast<uint32_t> ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) >= aBytesTransferred )
       {
         break;
       }
 
-      uint32_t lNrBytesToCopy = std::min ( lIt->second , static_cast<uint32_t>( aBytesTransferred - ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) ) );
+      uint32_t lNrBytesToCopy = std::min ( lIt->second , static_cast<uint32_t> ( aBytesTransferred - ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) ) );
       memcpy ( lIt->first, lReplyBuf, lNrBytesToCopy );
       lReplyBuf += lNrBytesToCopy;
     }

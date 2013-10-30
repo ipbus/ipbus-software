@@ -169,7 +169,7 @@ namespace uhal
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
-  { 
+  {
     if ( mAsynchronousException )
     {
       log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
@@ -226,6 +226,7 @@ namespace uhal
 
       exception::TcpConnectionFailure lExc;
       std::ostringstream oss;
+
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         oss << "Timeout (" << this->getBoostTimeoutPeriod().total_milliseconds() << " milliseconds) occurred when connecting to ";
@@ -234,11 +235,12 @@ namespace uhal
       {
         oss << "Connection refused for ";
       }
-      else  
+      else
       {
         oss << "Error \"" << lErrorCode.message() << "\" encountered when connecting to ";
       }
-      log ( lExc , oss.str() , ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , 
+
+      log ( lExc , oss.str() , ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
             " at ", Quote ( this->mUri.mHostname + ":" + this->mUri.mPort ) , ". URI=" , Quote ( this->uri() ) );
       throw lExc;
     }
@@ -335,12 +337,14 @@ namespace uhal
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for send to ", 
-            ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
+      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for send to ",
+            ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
+
       if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
+
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -350,7 +354,7 @@ namespace uhal
     {
       exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
       log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to ",
-            ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+            ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
 
       try
       {
@@ -416,7 +420,6 @@ namespace uhal
     //     {
     //       lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
     //     }
-
     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
     lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &mReplyByteCounter , 4 ) );
     log ( Debug() , "Getting reply byte counter" );
@@ -476,12 +479,13 @@ namespace uhal
     {
       exception::TcpTimeout* lExc = new exception::TcpTimeout();
       log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
-            ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
+            ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
 
       if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
         log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
+
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
@@ -494,7 +498,7 @@ namespace uhal
     {
       exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
       log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
-            ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+            ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
 
       try
       {
@@ -567,19 +571,19 @@ namespace uhal
     if ( lErrorCode && ( lErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
-
       exception::exception* lExc;
+
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         lExc = new exception::TcpTimeout();
         log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
-              ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
+              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
       }
       else
       {
         lExc = new exception::ASIOTcpError();
         log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
-              ( this->uri().find("chtcp-") == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
       }
 
 #ifdef RUN_ASIO_MULTITHREADED
@@ -599,10 +603,10 @@ namespace uhal
         mAsynchronousException = ClientInterface::validate ( *lBufIt ); //Control of the pointer has been passed back to the client interface
       }
       catch ( exception::exception& aExc )
-      {	
+      {
         boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
         mAsynchronousException = new exception::ValidationError ();
-        log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) ); 
+        log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) );
       }
 
       if ( mAsynchronousException )
@@ -645,7 +649,7 @@ namespace uhal
     catch ( exception::exception& aExc )
     {
       mAsynchronousException = new exception::ValidationError ();
-      log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) ); 
+      log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) );
     }
 
     if ( mAsynchronousException )
@@ -673,6 +677,7 @@ namespace uhal
       {
         log ( Warning() , "Closing socket since deadline has passed" );
       }
+
 #endif
       // The deadline has passed. The socket is closed so that any outstanding asynchronous operations are cancelled.
       mSocket.close();

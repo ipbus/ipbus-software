@@ -96,12 +96,12 @@ namespace uhal
       */
       TCP ( const TCP& aTCP );
 
-       /**
-        Assignment operator
-        This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-        @param aTCP a TCP-protocol object to copy
-        @return reference to the current object to allow chaining of assignments
-      */
+      /**
+       Assignment operator
+       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
+       @param aTCP a TCP-protocol object to copy
+       @return reference to the current object to allow chaining of assignments
+            */
       TCP& operator= ( const TCP& aTCP );
 
 
@@ -126,7 +126,7 @@ namespace uhal
     protected:
       /**
         Function which tidies up this protocol layer in the event of an exception
-       */    
+       */
       virtual void dispatchExceptionHandler();
 
 
@@ -143,26 +143,26 @@ namespace uhal
         In single-threaded mode, this runs the ASIO async write and blocks
       */
       void write ( );
-      
+
       /**
         Callback function which is called upon completion of the ASIO async write
         This, then, makes a call to read to read back the reply to what has just been sent
         @param aErrorCode the error code with which the ASIO operation completed
       */
       void write_callback ( const boost::system::error_code& aErrorCode );
-      
+
       /**
         Initialize performing the next TCP read operation
         In multi-threaded mode, this runs the ASIO async read and exits
         In single-threaded mode, this runs the ASIO async read and blocks
       */
       void read ( );
-      
+
       /**
         Callback function which is called upon completion of the ASIO async read
         This, then, checks the queue to see if there are more packets to be sent and if so, calls write
         @param aErrorCode the error code with which the ASIO operation completed
-      */      
+      */
       void read_callback ( const boost::system::error_code& aErrorCode );
 
       /**
@@ -177,7 +177,7 @@ namespace uhal
       void NotifyConditionalVariable ( const bool& aValue );
       /**
         Function to block a thread pending a BOOST conditional-variable and its associated regular variable
-      */      
+      */
       void WaitOnConditionalVariable();
 
 
@@ -206,7 +206,7 @@ namespace uhal
 
       //! The list of buffers still waiting to be sent
       std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
-      //! The list of buffers still awaiting a reply      
+      //! The list of buffers still awaiting a reply
       std::deque < std::vector< boost::shared_ptr< Buffers > > > mReplyQueue;
 
       //! Counter of how many writes have been sent, for which no reply has yet been received
@@ -216,7 +216,7 @@ namespace uhal
       boost::mutex mConditionalVariableMutex;
       //! A conditional variable for blocking the main thread until the variable with which it is associated is set correctly
       boost::condition_variable mConditionalVariable;
-      //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received     
+      //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received
       bool mFlushDone;
 #endif
 
@@ -228,7 +228,7 @@ namespace uhal
       /**
         When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
         @todo Tom Williams needs to check this and expand
-      */      
+      */
       uint32_t mReplyByteCounter;
 
 #ifdef RUN_ASIO_MULTITHREADED
@@ -240,7 +240,7 @@ namespace uhal
       /**
         When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
         @todo Tom Williams needs to check this and expand
-      */      
+      */
       std::vector< boost::shared_ptr< Buffers > > mReplyBuffers;
 #else
       //! The write operation currently in progress

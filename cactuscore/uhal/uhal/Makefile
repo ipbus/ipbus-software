@@ -43,13 +43,15 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -g -O0 -rdynamic -Wall -MMD -MP -fPIC ${INCLUDE_PATH}\
+CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC\
 					 -DDISABLE_PACKET_COUNTER_HACK\
-					 -DRUN_ASIO_MULTITHREADED 
+					 -DRUN_ASIO_MULTITHREADED  \
+					 -fprofile-arcs -ftest-coverage
 #					 -DNO_PREEMPTIVE_DISPATCH 
 #-D THROW_ON_ADDRESS_SPACE_OVERLAP 
 
-LINK_FLAGS = -g -shared -fPIC -Wall -O0 -rdynamic ${LIBRARY_PATH} ${LIBRARIES}
+LINK_FLAGS = -g -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}\
+										 -lgcov -coverage
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
@@ -73,7 +75,7 @@ ${LIBRARY}: ${OBJECT_FILES}
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p {lib,obj}
-	g++ ${CPP_FLAGS} -c $< -o $@
+	g++ ${INCLUDE_PATH} ${CPP_FLAGS} -c $< -o $@
 
 -include $(OBJECT_FILES:.o=.d)
 

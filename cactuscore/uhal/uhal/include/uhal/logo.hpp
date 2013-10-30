@@ -22,7 +22,7 @@ namespace uhal
 
       /**
         Print the next character in the logo
-        @param aDummy a dummy parameter to make the operator postfix 
+        @param aDummy a dummy parameter to make the operator postfix
       */
       void operator++ ( int aDummy );
 

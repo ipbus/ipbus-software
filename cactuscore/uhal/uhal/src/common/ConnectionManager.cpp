@@ -87,11 +87,12 @@ namespace uhal
       return false;
     }
 
-    if ( connection_file != aConnectionDescriptor.connection_file )
-    {
-      return false;
-    }
-
+    /*
+        if ( connection_file != aConnectionDescriptor.connection_file )
+        {
+          return false;
+        }
+    */
     return true;
   }
 

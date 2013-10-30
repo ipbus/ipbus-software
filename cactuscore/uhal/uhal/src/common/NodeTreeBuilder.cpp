@@ -277,21 +277,27 @@ namespace uhal
     boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
     //create an object of the class type returned by the parsed string
     boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
+    Node* lNode ( NULL );
 
     if ( lIt == mCreators.end() )
     {
-      exception::LabelUnknownToClassFactory lExc;
-      log ( lExc , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory. Known types are:" );
+      //exception::LabelUnknownToClassFactory lExc;
+      log ( Warning , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory. Known types are:" );
 
       for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
       {
-        log ( lExc , "    > " , lIt->first );
+        log ( Warning , "    > " , lIt->first );
       }
 
-      throw lExc;
+      log ( Warning, "Will return a plain node for now, but you have been warned!" );
+      //throw lExc;
+      lNode = new Node();
+    }
+    else
+    {
+      lNode = lIt->second->create ( lClass.mArguments );
     }
 
-    Node* lNode ( lIt->second->create ( lClass.mArguments ) );
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );

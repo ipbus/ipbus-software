@@ -75,7 +75,7 @@ namespace uhal
 
     //! Exception class to handle the case where the hardware sent a bad status packet to the ControlHub
     ExceptionClass ( ControlHubReportedMalformedStatus , "Exception class to handle the case where the hardware sent a bad status packet to the ControlHub" );
-    
+
     //! Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL
     ExceptionClass ( ControlHubUnknownErrorCode , "Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL" );
   }
@@ -159,7 +159,7 @@ namespace uhal
 
       /**
         Function which tidies up this protocol layer in the event of an exception
-       */    
+       */
       virtual void dispatchExceptionHandler();
 
 
