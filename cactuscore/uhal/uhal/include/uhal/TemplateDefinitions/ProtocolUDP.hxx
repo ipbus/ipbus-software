@@ -219,9 +219,11 @@ namespace uhal
           std::cout << std::setfill ( '0' ) << std::hex << std::setw ( 8 ) <<  *lBegin << std::endl;
         }*/
     //     mAsioSendBuffer.clear();
+
     std::vector< boost::asio::const_buffer > lAsioSendBuffer;
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
+
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 
     // Patch for suspected bug in using boost asio with boost python; see https://svnweb.cern.ch/trac/cactus/ticket/323#comment:7
@@ -334,7 +336,6 @@ namespace uhal
 
     std::vector<boost::asio::mutable_buffer> lAsioReplyBuffer ( 1 , boost::asio::mutable_buffer ( & ( mReplyMemory.at ( 0 ) ) , mReplyBuffers->replyCounter() ) );
     log ( Debug() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , " bytes in reply." );
-    boost::asio::ip::udp::endpoint lEndpoint;
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 
     // Patch for suspected bug in using boost asio with boost python; see https://svnweb.cern.ch/trac/cactus/ticket/323#comment:7
@@ -345,10 +346,10 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::bind ( &UDP<InnerProtocol>::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+    mSocket.async_receive ( lAsioReplyBuffer , 0 , boost::bind ( &UDP<InnerProtocol>::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
-    mSocket.async_receive_from ( lAsioReplyBuffer , lEndpoint , 0 , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
+    mSocket.async_receive ( lAsioReplyBuffer , 0 , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
 
     do
     {
