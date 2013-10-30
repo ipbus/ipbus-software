@@ -82,18 +82,26 @@ namespace uhal
   {
 
     public:
-      //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
-
       /**
       	Constructor
-      	@param aId the uinique identifier that the client will be given.
+      	@param aId the unique identifier that the client will be given.
       	@param aUri a struct containing the full URI of the target.
       */
       TCP ( const std::string& aId, const URI& aUri );
 
-
+      /**
+        Copy Constructor
+        This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
+        @param aTCP a TCP-protocol object to copy
+      */
       TCP ( const TCP& aTCP );
 
+       /**
+        Assignment operator
+        This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
+        @param aTCP a TCP-protocol object to copy
+        @return reference to the current object to allow chaining of assignments
+      */
       TCP& operator= ( const TCP& aTCP );
 
 
@@ -104,35 +112,72 @@ namespace uhal
 
       /**
       	Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
-      	@param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
+      	@param aBuffers the buffer object wrapping the send and receive buffers that are to be transported
       	If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
       */
       void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
 
       /**
-      Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
+        Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
        */
       virtual void Flush( );
 
 
     protected:
+      /**
+        Function which tidies up this protocol layer in the event of an exception
+       */    
       virtual void dispatchExceptionHandler();
 
 
     private:
 
+      /**
+        Make the TCP connection
+      */
       void connect();
 
+      /**
+        Initialize performing the next TCP write operation
+        In multi-threaded mode, this runs the ASIO async write and exits
+        In single-threaded mode, this runs the ASIO async write and blocks
+      */
       void write ( );
+      
+      /**
+        Callback function which is called upon completion of the ASIO async write
+        This, then, makes a call to read to read back the reply to what has just been sent
+        @param aErrorCode the error code with which the ASIO operation completed
+      */
       void write_callback ( const boost::system::error_code& aErrorCode );
+      
+      /**
+        Initialize performing the next TCP read operation
+        In multi-threaded mode, this runs the ASIO async read and exits
+        In single-threaded mode, this runs the ASIO async read and blocks
+      */
       void read ( );
+      
+      /**
+        Callback function which is called upon completion of the ASIO async read
+        This, then, checks the queue to see if there are more packets to be sent and if so, calls write
+        @param aErrorCode the error code with which the ASIO operation completed
+      */      
       void read_callback ( const boost::system::error_code& aErrorCode );
 
-
+      /**
+        Function called by the ASIO deadline timer
+      */
       void CheckDeadline();
 
-
+      /**
+        Function to set the value of a variable associated with a BOOST conditional-variable and then notify that conditional variable
+        @param aValue a value to which to update the variable associated with a BOOST conditional-variable
+      */
       void NotifyConditionalVariable ( const bool& aValue );
+      /**
+        Function to block a thread pending a BOOST conditional-variable and its associated regular variable
+      */      
       void WaitOnConditionalVariable();
 
 
@@ -140,52 +185,74 @@ namespace uhal
       //! The boost::asio::io_service used to create the connections
       boost::asio::io_service mIOservice;
 
-#ifdef RUN_ASIO_MULTITHREADED
-      boost::asio::io_service::work mIOserviceWork;
-#endif
-
       //! A shared pointer to a boost::asio tcp socket through which the operation will be performed
       boost::asio::ip::tcp::socket mSocket;
 
-      //! A shared pointer to a boost::asio tcp endpoint stored as a member as TCP as no concept of a connection
+      //! A shared pointer to a boost::asio tcp endpoint - used by the delayed (open-on-first-use) connect
       boost::asio::ip::tcp::resolver::iterator mEndpoint;
 
+      //! The mechanism for providing the time-out
       boost::asio::deadline_timer mDeadlineTimer;
 
-      //       std::vector<uint8_t> mReplyMemory;
-
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::thread mDispatchThread;
-#endif
+      /// Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
+      boost::asio::io_service::work mIOserviceWork;
 
-      //       std::vector< boost::asio::const_buffer > mAsioSendBuffer;
-      //       std::vector< boost::asio::mutable_buffer > mAsioReplyBuffer;
+      //! The Worker thread in Multi-threaded mode
+      boost::thread mDispatchThread;
 
       //! A MutEx lock used to make sure the access functions are thread safe
-#ifdef RUN_ASIO_MULTITHREADED
       boost::mutex mTransportLayerMutex;
 
+      //! The list of buffers still waiting to be sent
       std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
+      //! The list of buffers still awaiting a reply      
       std::deque < std::vector< boost::shared_ptr< Buffers > > > mReplyQueue;
 
+      //! Counter of how many writes have been sent, for which no reply has yet been received
       uint32_t mPacketsInFlight;
 
+      //! A mutex for use by the conditional variable
       boost::mutex mConditionalVariableMutex;
+      //! A conditional variable for blocking the main thread until the variable with which it is associated is set correctly
       boost::condition_variable mConditionalVariable;
+      //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received     
       bool mFlushDone;
 #endif
 
+      /**
+        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
+        @todo Tom Williams needs to check this and expand
+      */
       uint32_t mSendByteCounter;
+      /**
+        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
+        @todo Tom Williams needs to check this and expand
+      */      
       uint32_t mReplyByteCounter;
 
 #ifdef RUN_ASIO_MULTITHREADED
+      /**
+        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
+        @todo Tom Williams needs to check this and expand
+      */
       std::vector< boost::shared_ptr< Buffers > > mDispatchBuffers;
+      /**
+        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
+        @todo Tom Williams needs to check this and expand
+      */      
       std::vector< boost::shared_ptr< Buffers > > mReplyBuffers;
 #else
+      //! The write operation currently in progress
       boost::shared_ptr< Buffers > mDispatchBuffers;
+      //! The read operation currently in progress or the next to be done
       boost::shared_ptr< Buffers > mReplyBuffers;
 #endif
 
+      /**
+        A pointer to an exception object for passing exceptions from the worker thread to the main thread.
+        Exceptions must always be created on the heap (i.e. using `new`) and deletion will be handled in the main thread
+      */
       uhal::exception::exception* mAsynchronousException;
 
   };

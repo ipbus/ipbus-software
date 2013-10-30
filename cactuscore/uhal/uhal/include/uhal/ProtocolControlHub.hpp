@@ -73,7 +73,10 @@ namespace uhal
     //! Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub
     ExceptionClass ( ControlHubInternalTimeout , "Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub" );
 
+    //! Exception class to handle the case where the hardware sent a bad status packet to the ControlHub
     ExceptionClass ( ControlHubReportedMalformedStatus , "Exception class to handle the case where the hardware sent a bad status packet to the ControlHub" );
+    
+    //! Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL
     ExceptionClass ( ControlHubUnknownErrorCode , "Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL" );
   }
 
@@ -107,18 +110,25 @@ namespace uhal
 
       /**
       	Add a preamble to an IPbus buffer
+        @param aBuffers a buffer to which to add the preamble
       */
       virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
 
+      /**
+        Get the size of the preamble added by this protocol layer
+        @return the size of the preamble added by this protocol layer
+      */
       virtual uint32_t getPreambleSize();
 
       /**
       	Finalize an IPbus buffer before it is transmitted
+        @param aBuffers a buffer on which to do the predispatch operation
       */
       virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
 
       /**
         	Function which dispatch calls when the reply is received to check that the headers are as expected
+          @param aBuffers a buffer to validate
         	@return whether the returned packet is valid
         */
       virtual  exception::exception* validate ( boost::shared_ptr< Buffers > aBuffers );
@@ -136,11 +146,20 @@ namespace uhal
           std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
           std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
 
+      /**
+        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
+        @return the maximum number of buffers
+        @todo Tom Williams needs to check this and expand
+        @todo should this really be here?
+      */
       virtual uint32_t getMaxNumberOfBuffers()
       {
         return 60;
       }
 
+      /**
+        Function which tidies up this protocol layer in the event of an exception
+       */    
       virtual void dispatchExceptionHandler();
 
 

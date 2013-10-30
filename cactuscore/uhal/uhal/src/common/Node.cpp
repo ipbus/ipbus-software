@@ -53,6 +53,8 @@
 /**
 	The log_inserter function to add the node object to a log entry
 	@param aNode a node to format and print to log
+	@param aStr a stream to which to append the formatted node
+	@return a reference to the stream object for chaining stream calls
 */
 std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode )
 {

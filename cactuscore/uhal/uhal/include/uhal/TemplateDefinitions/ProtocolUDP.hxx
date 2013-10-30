@@ -53,14 +53,12 @@ namespace uhal
   UDP< InnerProtocol >::UDP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
     mIOservice ( ),
-#ifdef RUN_ASIO_MULTITHREADED
-    mIOserviceWork ( mIOservice ),
-#endif
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( 1500 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
+    mIOserviceWork ( mIOservice ),
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
     mReplyQueue(),
@@ -79,14 +77,12 @@ namespace uhal
   template < typename InnerProtocol >
   UDP< InnerProtocol >::UDP ( const UDP< InnerProtocol >& aUDP ) :
     mIOservice ( ),
-#ifdef RUN_ASIO_MULTITHREADED
-    mIOserviceWork ( mIOservice ),
-#endif
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUDP.mUri.mHostname , aUDP.mUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( 1500 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
+    mIOserviceWork ( mIOservice ),
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
     mReplyQueue(),

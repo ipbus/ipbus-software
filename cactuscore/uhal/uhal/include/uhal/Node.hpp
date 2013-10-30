@@ -220,12 +220,14 @@ namespace uhal
       /**
       	Write a single, unmasked word to a register
       	@param aValue the value to write to the register
+        @return a Validated Header which will contain the returned IPbus header
       */
       ValHeader write ( const uint32_t& aValue ) const;
 
       /**
       	Write a block of data to a block of registers or a block-write port
       	@param aValues the values to write to the registers or a block-write port
+        @return a Validated Header which will contain the returned IPbus header
       */
       ValHeader writeBlock ( const std::vector< uint32_t >& aValues ) const;
 
@@ -233,6 +235,7 @@ namespace uhal
       	DEPRICATED! Write a block of data to a block of registers or a block-write port
       	@param aValues the values to write to the registers or a block-write port
       	@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
+        @return a Validated Header which will contain the returned IPbus header
       	@warning DEPRICATED and will be removed in the next release!
       */
       ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
@@ -283,13 +286,13 @@ namespace uhal
         return lRet;
       }
 
-      // /**
+      // /*
       // Read a single, unmasked word and interpret it as being signed
       // @return a Validated Memory which wraps the location to which the reply data is to be written
       // */
       // ValWord< int32_t > readSigned ( );
 
-      // /**
+      // /*
       // Read a block of data from a block of registers or a block-read port and interpret it as being signed data
       // @param aSize the number of words to read
       // @return a Validated Memory which wraps the location to which the reply data is to be written
@@ -297,7 +300,7 @@ namespace uhal
       // ValVector< int32_t > readBlockSigned ( const uint32_t& aSize );
 
 
-      // /**
+      // /*
       // DEPRICATED! Read a block of data from a block of registers or a block-read port and interpret it as being signed data
       // @param aSize the number of words to read
       // @return a Validated Memory which wraps the location to which the reply data is to be written
@@ -319,7 +322,7 @@ namespace uhal
       // }
 
 
-      // /**
+      // /*
       // Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
       // @param aANDterm the AND-term to apply to existing value in the target register
       // @param aORterm the OR-term to apply to existing value in the target register
@@ -327,7 +330,7 @@ namespace uhal
       // */
       // ValWord< uint32_t > rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm );
 
-      // /**
+      // /*
       // Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
       // @param aAddend the addend to add to the existing value in the target register
       // @return a Validated Memory which wraps the location to which the reply data is to be written

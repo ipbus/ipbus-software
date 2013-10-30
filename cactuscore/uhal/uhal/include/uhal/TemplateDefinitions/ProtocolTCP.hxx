@@ -53,14 +53,12 @@ namespace uhal
   TCP< InnerProtocol, nr_buffers_per_send >::TCP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
     mIOservice ( ),
-#ifdef RUN_ASIO_MULTITHREADED
-    mIOserviceWork ( mIOservice ),
-#endif
     mSocket ( mIOservice ),
     mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     //     mReplyMemory ( 65536 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
+    mIOserviceWork ( mIOservice ),
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
     mReplyQueue(),
@@ -77,14 +75,12 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol , nr_buffers_per_send >::TCP ( const TCP< InnerProtocol , nr_buffers_per_send >& aTCP ) :
     mIOservice ( ),
-#ifdef RUN_ASIO_MULTITHREADED
-    mIOserviceWork ( mIOservice ),
-#endif
     mSocket ( mIOservice ),
     mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aTCP.mUri.mHostname , aTCP.mUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     //     mReplyMemory ( 65536 , 0x00000000 ),
 #ifdef RUN_ASIO_MULTITHREADED
+    mIOserviceWork ( mIOservice ),
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
     mReplyQueue(),

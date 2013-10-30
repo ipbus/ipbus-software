@@ -100,6 +100,7 @@ namespace uhal
     ExceptionClass ( LabelUnknownToClassFactory , "Exception class to handle the case where a class is requested which does not exist in the class factory." );
   }
 
+  //! EXPERIMENTAL! Helper class to add Nodes derived from DerivedNode to the class factory
   template< typename T > class RegistrationHelper;
 
   /**

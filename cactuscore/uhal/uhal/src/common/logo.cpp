@@ -12,7 +12,7 @@ namespace uhal
     std::cout << std::endl;
   }
 
-  void logo::operator++ ( int )
+  void logo::operator++ ( int aDummy )
   {
     if ( *mPtr == '\0' )
     {

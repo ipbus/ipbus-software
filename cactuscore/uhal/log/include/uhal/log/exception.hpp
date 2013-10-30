@@ -49,7 +49,9 @@
 // #include "uhal/log/log_inserters.location.hpp"
 #include "boost/thread.hpp"
 
-
+/**
+	Macro for simplifying the declaration and definition of derived exception types
+*/
 #define ExceptionClass( ClassName , ClassDescription )\
  class ClassName : public uhal::exception::exception {\
  public:\
@@ -60,6 +62,9 @@
  std::string description() const throw() { return std::string( ClassDescription ); } \
 };
 
+/**
+	Macro version of the member function to wrap the ThrowAsDerivedType but also tell the compiler that this function always throws
+*/
 #define ThrowAsDerivedType() ThrowAsDerivedType_(); throw 0;
 
 
@@ -85,13 +90,16 @@ namespace uhal
 
         /**
           Copy constructor
+		  @param aExc an exception to copy
         */
-        exception ( const exception& );
+        exception ( const exception& aExc );
 
         /**
           Assignment operator
+		  @param aExc an exception to copy
+		  @return a reference to this object
         */
-        exception& operator= ( const exception& );
+        exception& operator= ( const exception& aExc );
 
         /**
         	Destructor
@@ -105,25 +113,48 @@ namespace uhal
         */
         virtual const char* what() const throw();
 
+        /**
+			Function which casts a pointer from the base type of this object to a derived type of this object and rethrows as the derived type
+		*/
         virtual void ThrowAsDerivedType_() = 0;
 
+		/**
+			Return a new object of the derived exception type cloned from this object
+			@return a new object of the derived exception type
+		*/
         virtual exception* clone() = 0;
 
-
+		/**
+			Add additional information to the exception message
+			@param aCStr additional information to be added to the exception message
+		*/
         void append ( const char* aCStr ) throw();
 
 
       protected:
+		/**
+			Return the description associated with this type of exception 
+			@return the description associated with this type of exception
+		*/
         virtual std::string description() const throw() = 0;
 
       private:
 #ifdef USE_BACKTRACE
+		/**
+			List of pointers to the backtrace symbols
+		*/
         std::vector< void* > mBacktrace;
 #endif
+		/// The thread ID of the thread in which the exception was originally thrown
         boost::thread::id mThreadId;
+		
+		/// The time at which the exception was thrown
         timeval mTime;
 
+		/// Memory which the call to "what()" uses when formatting the output string
         char* mString;
+		
+		/// Memory into which additional information is added by calls to append
         char* mAdditionalInfo;
     };
 
