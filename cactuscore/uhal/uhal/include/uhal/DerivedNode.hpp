@@ -41,11 +41,20 @@
 
 #include "uhal/Node.hpp"
 
+/**
+  Macro which adds a Derived Node Class to the factory
+  It takes a classname and then creates a registration helper object, with the classname as its template parameter
+  and a stringified version of the classname as its constructor argument.
+*/
 #define REGISTER( classname ) uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname );
 
 namespace uhal
 {
 
+  /**
+    We can derive from the Node class but that requires that we implement the clone method for each derived type
+    By deriving from DerivedNode, we can use CRTP to provide that for us
+  */
   template < typename DerivedType >
   class DerivedNode : public Node
   {
@@ -59,9 +68,20 @@ namespace uhal
 
   };
 
+  /**
+    Experimental!! Helper struct for adding the DerivedNode to the Node Factory
+    Declaring an instance of an object at global scope means that it is created *before* the main code is entered
+    We can use this to our advantage by using the constructor of this object to add entries to the factory in a distributed fashion
+    (for instance, in the file where the derived node is defined), rather than manually having to add entries in one file
+    To make things even simpler, the REGISTER macro expands the template argument to a string and passes it to the constructor.
+  */
   template< typename T >
   struct RegistrationHelper
   {
+    /**
+      Constructor
+      @param aDerivedClassName The name that will be used to identify this class in the factory
+    */
     RegistrationHelper ( const std::string& aDerivedClassName );
   };
 

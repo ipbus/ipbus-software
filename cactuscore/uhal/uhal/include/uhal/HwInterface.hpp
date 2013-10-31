@@ -59,7 +59,10 @@ namespace uhal
       HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode );
 
       /**
-      	Copy Constrctor
+      	Copy Constructor
+        Calls the copy constructor on the ClientInterface
+        Calls the clone method on the Node Tree
+        @param hwInterface a Hardware Interface instance to copy
       */
       HwInterface ( const HwInterface& hwInterface );
 
