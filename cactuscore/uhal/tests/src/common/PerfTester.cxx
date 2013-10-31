@@ -452,7 +452,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwbits_read ( ClientPtr& c,
 
     if ( x1 != reg_read.value() )
     {
-      cout << "TEST FAILED: " << oss_details.str() << " ... Read after RMW-bits returned value 0x" << std::hex << reg_rmw.value() << ", but expected 0x" << std::dec << x1 << endl << oss_values.str() << endl;
+      cout << "TEST FAILED: " << oss_details.str() << " ... Read after RMW-bits returned value 0x" << std::hex << reg_read.value() << ", but expected 0x" << x1 << std::dec << endl << oss_values.str() << endl;
       return false;
     }
   }
@@ -511,7 +511,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read ( ClientPtr& c, 
 
     if ( x1 != reg_read.value() )
     {
-      cout << "TEST FAILED: " << oss_details.str() << " ... Read after RMW-sum returned value 0x" << std::hex << reg_sum.value() << ", but expected 0x" << x1 << std::dec << endl << oss_values.str() << endl;
+      cout << "TEST FAILED: " << oss_details.str() << " ... Read after RMW-sum returned value 0x" << std::hex << reg_read.value() << ", but expected 0x" << x1 << std::dec << endl << oss_values.str() << endl;
       return false;
     }
   }
