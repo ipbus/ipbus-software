@@ -1,6 +1,6 @@
 import logging, wx
 
-from uhal.gui.utilities.hardware_monitoring import HardwareMonitoring
+from utilities.hardware_monitoring import HardwareMonitoring
 
 
 class HardwareTree(wx.Frame):

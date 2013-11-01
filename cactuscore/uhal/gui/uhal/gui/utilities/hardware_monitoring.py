@@ -3,7 +3,7 @@ from wx.lib.pubsub import Publisher
 
 import uhal
 
-from uhal.gui.utilities.utilities import HwReadyEvent
+from utilities import HwReadyEvent
 
 
 class HardwareMonitoring(threading.Thread):
@@ -77,8 +77,8 @@ class HardwareMonitoring(threading.Thread):
                         permission = str(node_object.getPermission())
                         if "READ" not in permission:
                             continue
-                    
-                        nodes_vs_values[node] = node_object.read()  
+                                               
+                        nodes_vs_values[node] = node_object.read()                       
                                                         
                     except Exception, e:
                         self.__logger.warning('Exception while reading node %s from device %s: %s', node , name, str(e))                        
@@ -89,12 +89,10 @@ class HardwareMonitoring(threading.Thread):
                     map_devs_to_map_nodes_to_values[name] = nodes_vs_values
                 except Exception, e:
                     self.__logger.warning('Dispatch operation for device %s failed: %s', dev.id(), str(e))
-                    
-                                                        
-            #self.__synchronize_hw_info(map_devs_to_map_nodes_to_values)
+                                                                                    
             
             wx.CallAfter(Publisher().sendMessage, "HW POLL", map_devs_to_map_nodes_to_values)              
-            time.sleep(5)     
+            time.sleep(10)     
 
 
 
@@ -172,19 +170,5 @@ class HardwareMonitoring(threading.Thread):
         for device in self.__cm.getDevices():
             device_object = self.__cm.getDevice(device)
             self.__devices[device] = device_object
-            
-            
-                    
-    def __synchronize_hw_info(self, hw_map):
-        """
-        Synchronizes up the information polled from the HW with the one used for display, __hw_tree
-        """                                        
-        for dev, node_dict in hw_map.iteritems():
-            for node, value in node_dict.iteritems():
-                
-                self.__hw_complete[dev][node] = value               
-                #self.__update_hw_tree(self._hw_tree[dev], node, value)
-                #self.__logger.debug('Value %s set in node %s of device %s', str(value), node, dev)               
-        
-       
+                                
             

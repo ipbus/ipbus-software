@@ -3,9 +3,10 @@ import os, webbrowser, logging
 import wx
 from wx.lib.pubsub import Publisher
 
-from uhal.gui.utilities.hardware_monitoring import HardwareMonitoring
-from uhal.gui.guis.hardware_tree import HardwareTree
-from uhal.gui.guis.hardware_table_panel import HardwareTablePanel
+from utilities.hardware_monitoring import HardwareMonitoring
+from guis.hardware_tree import HardwareTree
+from guis.hardware_table_panel import HardwareTablePanel
+
 
 class DefaultGui(wx.Frame):
 
@@ -14,7 +15,8 @@ class DefaultGui(wx.Frame):
         self.__logger = logging.getLogger('uhal.gui.guis.defaultgui')      
         wx.Frame.__init__(self, parent, id, title)       
         
-        # Attributes       
+        # Attributes 
+        self.__current_session = None      
         self.__hw = None
         self.__hw_mon = None     
         self.__hw_tree_struct = None 
@@ -73,11 +75,16 @@ class DefaultGui(wx.Frame):
         """
         return (('&File',
                  ('&LoadHW', 'Load HW', wx.ITEM_NORMAL, self.__on_load_hw),
+                 ('&SaveSession', 'Save Session', wx.ITEM_NORMAL, self.__on_save_session),
+                 ('&SaveSessionAs', 'Save Session As...', wx.ITEM_NORMAL, self.__on_save_session_as),
+                 ('&LoadSession', 'Load Session', wx.ITEM_NORMAL, self.__on_load_session),
                  ('&Quit', 'Quit', wx.ITEM_NORMAL, self.__on_close_window)
                 ),                
                 ('&View',
+                 ('&Compact', 'Compact View', wx.ITEM_CHECK, self.__on_compact_view),
+                 ('&ExpandAll', 'Expand All', wx.ITEM_CHECK, self.__on_expand_all),
+                 ('&ReadOnly', 'Read Only', wx.ITEM_CHECK, self.__on_read_only),
                  ('&ClearPanel', 'Clear Panel', wx.ITEM_NORMAL, self.__on_clear_panel)
-                # ('&AutoRefresh', 'Auto-refresh', wx.ITEM_CHECK, self.__on_click_autorefresh)
                 ),                        
                 ('&Help',
                  ('&Documentation', 'Documentation', wx.ITEM_NORMAL, self.__on_click_doc),
@@ -88,7 +95,6 @@ class DefaultGui(wx.Frame):
 
 
 
-    
     def __create_menu(self, items):
         """
         Creates individual menu objects
@@ -104,9 +110,20 @@ class DefaultGui(wx.Frame):
             self.Bind(wx.EVT_MENU, each_handler, menu_item)
 
         return menu
+    
+    
+    
+    def add_new_widget_to_panel(self, nodes):
+        """
+        The method is called from the hardware_tree module when a tree item is clicked on. It passes the tree structure
+        and the necessary list of nodes to arrive to the selected item from the tree root
+        """
+        self.__logger.debug('Add new widget to panel...')
+        self.__hw_table_panel.add_new_widget(nodes, self.__hw_tree_struct)
 
 
 
+    ########## FILE MENU OPTIONS ##########
     def __on_load_hw(self, event):
         """
         Opens a dialog to choose one connection file so that the HW can be loaded. 
@@ -114,29 +131,77 @@ class DefaultGui(wx.Frame):
         will cope with uHAL's ConnectionManager('device_id', 'uri', 'address_table') method.
         """    
             
-        wildcard = "XML files (*.xml)|*.xml|" \
-                   "All files (*.*)|*.*"
-
+        xml_wildcard = 'XML files (*.xml)|*.xml|' \
+                   'All files (*.*)|*.*'
         
-        file_picker = wx.FileDialog(None, style = wx.OPEN)
+        self.__dialog(parent=None, msg='Choose connection file', def_dir=os.getcwd(), def_file='', def_wildcard=xml_wildcard, def_style=wx.FD_OPEN)            
 
-        file_picker.SetMessage("Choose connection file")
-        file_picker.SetDirectory(os.getcwd())
-        file_picker.SetWildcard(wildcard)
-        file_picker.SetFilename("gui")
+  
+  
+    def __on_save_session(self, event):
+        
+        if self.__current_session is None:
+            self.__on_save_session_as(event)
+            return            
     
-
-        if file_picker.ShowModal() == wx.ID_OK:            
-            file_name = file_picker.GetPath()
-                        
-            self.__start_hw_thread(file_name)                                  
-            self.__create_hardware_tree(self.__hw_tree_struct)              
-            #self.__hw_table_panel.draw_hw_naked_tables(self.__hw)                               
+    
+    
+    def __on_save_session_as(self, event):
         
-        file_picker.Destroy()
+        txt_wildcard = 'TXT files (*.txt)|*.txt|' \
+                    'All files (*.*)|*.*'
+         
+        self.__dialog(parent=None, msg='Save GUI session', def_dir=os.getcwd(), def_file='guiSession', def_wildcard=txt_wildcard, def_style=wx.FD_SAVE)                               
+    
+        
+             
+    def __dialog(self, parent, msg, def_dir, def_file, def_wildcard, def_style):
+        
+        save_dialog = wx.FileDialog(parent, message=msg, defaultDir=def_dir, defaultFile=def_file, wildcard=def_wildcard, style=def_style)
+        
+        if save_dialog.ShowModal() == wx.ID_OK:
+            file_name = save_dialog.GetPath()
+            self.__logger.debug('Saving session in file %s', str(file_name))
+            
+            if def_style == wx.FD_OPEN:
+                self.__start_hw_thread(file_name)                                  
+                self.__create_hardware_tree(self.__hw_tree_struct)   
+            elif def_style == wx.FD_SAVE:  
+                fd = open(file_name, 'w')
+                fd.write('bla bla')
+                fd.close()
+                self.__current_session = file_name
+        
+        
+        save_dialog.Destroy()
+    
+    
+    
+    def __on_load_session(self, event):
+        pass
+    
+    
+    
+    def __on_close_window(self, event):
+        """
+        Sets the HW thread to not run anymore, waits for the tread to finish and closes the window, offering a confirmation dialog beforehand.
+        """
 
-  
-  
+        msg = "Do you really want to close this GUI?"
+        
+        dialog = wx.MessageDialog(self, msg, "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
+        result = dialog.ShowModal()
+        dialog.Destroy()
+        
+        if self.__hw_mon and self.__hw_mon.isAlive():
+            self.__hw_mon.set_thread_running(False)
+            self.__hw_mon.join()
+
+        if result == wx.ID_OK:
+            self.Destroy()
+    
+    
+    
     def __create_hardware_tree(self, hw):
         """
         Picks up the hierarchical HW structure computed in the HardwareMonitoring class, and passes it to the 
@@ -174,8 +239,7 @@ class DefaultGui(wx.Frame):
         try:
                
             self.__hw_mon = HardwareMonitoring(self, file_name)       
-            self.__hw_tree_struct = self.__hw_mon.get_hw_tree()
-            #self.__logger.debug('hw_tree_struct is %s', str(self.__hw_tree_struct))
+            self.__hw_tree_struct = self.__hw_mon.get_hw_tree()           
             self.__logger.info('Starting HW monitoring thread...')
               
         except Exception, e:
@@ -199,11 +263,28 @@ class DefaultGui(wx.Frame):
                
     
     
+    ########## VIEW MENU OPTIONS ##########
+    def __on_compact_view(self, event):
+        pass
+    
+    
+    
+    def __on_expand_all(self, event):
+        pass
+    
+    
+    
+    def __on_read_only(self, event):
+        pass
+    
+    
+    
     def __on_clear_panel(self, event):
         self.__hw_table_panel.clear()
         
         
         
+    ########## ABOUT MENU OPTIONS ########## 
     def __on_click_doc(self, event):
         webbrowser.open("https://svnweb.cern.ch/trac/cactus/wiki/uhalGuiInstructions")
 
@@ -254,33 +335,3 @@ class DefaultGui(wx.Frame):
         info.AddDocWriter('Carlos Ghabrous')
 
         wx.AboutBox(info)
-
-
-
-    def __on_close_window(self, event):
-        """
-        Sets the HW thread to not run anymore, waits for the tread to finish and closes the window, offering a confirmation dialog beforehand.
-        """
-
-        msg = "Do you really want to close this GUI?"
-        
-        dialog = wx.MessageDialog(self, msg, "Confirm Exit", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
-        result = dialog.ShowModal()
-        dialog.Destroy()
-        
-        if self.__hw_mon and self.__hw_mon.isAlive():
-            self.__hw_mon.set_thread_running(False)
-            self.__hw_mon.join()
-
-        if result == wx.ID_OK:
-            self.Destroy()
-            
-            
-    def add_new_widget_to_panel(self, nodes):
-        self.__logger.debug('Add new widget to panel...')
-        self.__hw_table_panel.add_new_widget(nodes, self.__hw_tree_struct)
-    
-            
-            
-            
-    

@@ -2,9 +2,9 @@ import string, logging, wx
 
 import wx.lib.scrolledpanel as scroll
 
-from uhal.gui.guis.plotreg import Plot
-from uhal.gui.guis.regvalues import RegValues
-from uhal.gui.utilities.hardware import HardwareStruct
+from plotreg import Plot
+from regvalues import RegValues
+from utilities.hardware import HardwareStruct
 
 
 
@@ -39,8 +39,8 @@ class NodeWidget(wx.Panel):
         self.__do_layout()
         
         # Event handlers
-        self.__id_field.Bind(wx.EVT_LEFT_DOWN, self.__on_click_regname, self.__id_field)
-        self.__value_field.Bind(wx.EVT_LEFT_DOWN, self.__on_click_regvalue, self.__value_field)
+        self.__id_field.Bind(wx.EVT_LEFT_DCLICK, self.__on_click_regname, self.__id_field)
+        self.__value_field.Bind(wx.EVT_LEFT_DCLICK, self.__on_click_regvalue, self.__value_field)
         
     
     def __do_layout(self):

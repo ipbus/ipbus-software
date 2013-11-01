@@ -1,7 +1,7 @@
 import wx, logging
 
-from uhal.gui.utilities.utilities import dynamic_loader
-from uhal.gui.guis import defaultgui
+from utilities.utilities import dynamic_loader
+from guis import defaultgui
 
 
 
@@ -48,6 +48,7 @@ class GuiLoader:
         output_to_window = False
         app = MainApplication(self.gui_list, output_to_window)
         logger.info('Starting application main loop...')
+        logger.info('Starting application main loop...')
         app.MainLoop()
 
 
@@ -59,7 +60,7 @@ def loader(default=True, guilist=[]):
     if default:
 
         try:
-            default_mod_obj = __import__('uhal.gui.guis', globals(), locals(), ['defaultgui'])
+            default_mod_obj = __import__('guis', globals(), locals(), ['defaultgui'])
             def_gui_mod_obj = default_mod_obj.defaultgui
             guilist.append(def_gui_mod_obj)
             logger.info('GUI modules successfully imported')
