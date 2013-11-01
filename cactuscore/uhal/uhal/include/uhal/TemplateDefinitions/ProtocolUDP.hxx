@@ -219,11 +219,9 @@ namespace uhal
           std::cout << std::setfill ( '0' ) << std::hex << std::setw ( 8 ) <<  *lBegin << std::endl;
         }*/
     //     mAsioSendBuffer.clear();
-
     std::vector< boost::asio::const_buffer > lAsioSendBuffer;
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
-
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
 
     // Patch for suspected bug in using boost asio with boost python; see https://svnweb.cern.ch/trac/cactus/ticket/323#comment:7

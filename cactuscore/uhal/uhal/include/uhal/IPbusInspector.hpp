@@ -68,7 +68,7 @@ namespace uhal
       HostToTargetInspector( );
       /**
         Destructor
-      */  
+      */
       virtual ~HostToTargetInspector( );
 
     protected:
@@ -78,14 +78,14 @@ namespace uhal
       eIPbusTransactionType mType;
       //! The current word count
       uint32_t mWordCounter;
-      //! The current transaction id     
+      //! The current transaction id
       uint32_t mTransactionId;
-      //! The current error code/flag     
+      //! The current error code/flag
       uint8_t mResponseGood;
 
       //! The current raw IPbus2 packet header
       uint32_t mPacketHeader;
-      //! The current IPbus2 packet counter     
+      //! The current IPbus2 packet counter
       uint32_t mPacketCounter;
       //! The current IPbus2 packet type
       uint32_t mPacketType;
@@ -138,7 +138,7 @@ namespace uhal
       TargetToHostInspector( );
       /**
         Destructor
-      */      
+      */
       virtual ~TargetToHostInspector( );
 
     protected:
@@ -148,14 +148,14 @@ namespace uhal
       eIPbusTransactionType mType;
       //! The current word count
       uint32_t mWordCounter;
-      //! The current transaction id     
+      //! The current transaction id
       uint32_t mTransactionId;
-      //! The current error code/flag     
+      //! The current error code/flag
       uint8_t mResponseGood;
 
       //! The current raw IPbus2 packet header
       uint32_t mPacketHeader;
-      //! The current IPbus2 packet counter     
+      //! The current IPbus2 packet counter
       uint32_t mPacketCounter;
       //! The current IPbus2 packet type
       uint32_t mPacketType;
