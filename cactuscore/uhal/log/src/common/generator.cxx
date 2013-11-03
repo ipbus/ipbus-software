@@ -365,12 +365,13 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                //               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
                << "void log (  exception::exception& aExc ," << lArgsStr << " )\n"
                << "{\n"
-               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
                << "\t\t\tstd::stringstream lStr;\n"
-               << "\t\t\tlStr<<\"   > \";\n"
+               << "\t\t\t{\n"
+               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
                << lInstructions.str()
-               << "\t\t\tlStr<<std::endl;\n"
-               << "\t\t\taExc.append( lStr.str().c_str() );\n"
+               << "\t\t\taExc.append( ( \"   > \" + lStr.str() + \"\\n\" ).c_str() );\n"
+               << "\t\t\t}\n"
+               << "\t\t\tlog ( Error() , lStr.str() );\n"
                << "}\n"
                << "\n";
     }
