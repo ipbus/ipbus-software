@@ -149,7 +149,7 @@ namespace uhal
         This, then, makes a call to read to read back the reply to what has just been sent
         @param aErrorCode the error code with which the ASIO operation completed
       */
-      void write_callback ( const boost::system::error_code& aErrorCode );
+      void write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred );
 
       /**
         Initialize performing the next TCP read operation
@@ -163,7 +163,7 @@ namespace uhal
         This, then, checks the queue to see if there are more packets to be sent and if so, calls write
         @param aErrorCode the error code with which the ASIO operation completed
       */
-      void read_callback ( const boost::system::error_code& aErrorCode );
+      void read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred );
 
       /**
         Function called by the ASIO deadline timer

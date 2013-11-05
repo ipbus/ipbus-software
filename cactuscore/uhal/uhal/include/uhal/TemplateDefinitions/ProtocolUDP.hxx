@@ -232,7 +232,7 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, _1 ) );
+    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
     mPacketsInFlight++;
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
@@ -250,7 +250,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void UDP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode )
+  void UDP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
 #ifdef RUN_ASIO_MULTITHREADED
     //     if( !mDispatchBuffers)
@@ -281,11 +281,18 @@ namespace uhal
       return;
     }
 
-    if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
+    if ( ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) ) || ( aBytesTransferred != mDispatchBuffers->sendCounter() ) )
     {
       mSocket.close();
       exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
-      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to UDP target with URI: " , this->uri() );
+      if ( aErrorCode )
+      {
+        log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to UDP target with URI: " , this->uri() );
+      }
+      if ( aBytesTransferred != mDispatchBuffers->sendCounter() )
+      {
+        log ( *lExc , "Only ", Integer ( aBytesTransferred ) , " of " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes transferred in UDP send to URI: " , this->uri() );
+      }
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;

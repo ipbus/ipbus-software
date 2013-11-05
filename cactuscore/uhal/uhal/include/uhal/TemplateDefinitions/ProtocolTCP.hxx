@@ -303,7 +303,7 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::write_callback, this, _1 ) );
+    boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
     mPacketsInFlight += mDispatchBuffers.size();
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
@@ -322,11 +322,12 @@ namespace uhal
 
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
-  void TCP< InnerProtocol , nr_buffers_per_send >::write_callback ( const boost::system::error_code& aErrorCode )
+  void TCP< InnerProtocol , nr_buffers_per_send >::write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
     // log( Warning , ThisLocation() );
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    mSendByteCounter = ntohl ( mSendByteCounter );
 
     if ( mAsynchronousException )
     {
@@ -350,7 +351,7 @@ namespace uhal
       return;
     }
 
-    if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
+    if ( ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) ) || ( aBytesTransferred != ( mSendByteCounter+4 ) ) )
     {
       exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
       log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to ",
@@ -366,6 +367,13 @@ namespace uhal
       catch ( const std::exception& aExc )
       {
         log ( *lExc , "Error closing TCP socket following the ASIO send error" );
+      }
+
+      if ( aBytesTransferred != ( mSendByteCounter + 4 ) )
+      {
+        log ( *lExc, "Attempted to send " , Integer ( mReplyByteCounter ) , " bytes to ",
+             ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
+             " with URI "  , Quote ( this->uri() ) , ", but only sent " , Integer ( aBytesTransferred ) , "bytes" );
       }
 
       mAsynchronousException = lExc;
@@ -434,7 +442,7 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
-    boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::read_callback, this, _1 ) );
+    boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
 #else
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
@@ -454,7 +462,7 @@ namespace uhal
 
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
-  void TCP< InnerProtocol , nr_buffers_per_send >::read_callback ( const boost::system::error_code& aErrorCode )
+  void TCP< InnerProtocol , nr_buffers_per_send >::read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
     // log( Warning , ThisLocation() );
     if ( mAsynchronousException )
@@ -494,11 +502,14 @@ namespace uhal
       return;
     }
 
-    if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
+    if ( ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) ) || ( aBytesTransferred != 4 ) )
     {
       exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
-      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
-            ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+      if ( aErrorCode )
+      {
+        log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
+              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+      }
 
       try
       {
@@ -515,6 +526,12 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
+      if ( aBytesTransferred != 4 )
+      {
+        log ( *lExc, "Expected to receive 4-byte header in async read from ",
+             ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , 
+             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , "bytes" );
+      }
       mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
@@ -558,17 +575,9 @@ namespace uhal
 
 #endif
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
-    boost::asio::read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( mReplyByteCounter ), lErrorCode );
-    //     do
-    //     {
-    //       std::cout << "." << std::flush;
-    // #ifndef RUN_ASIO_MULTITHREADED
-    //       mIOservice.run_one();
-    // #endif
-    //     }
-    //     while ( lErrorCode == boost::asio::error::would_block );
+    std::size_t lBytesTransferred = boost::asio::read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( mReplyByteCounter ), lErrorCode );
 
-    if ( lErrorCode && ( lErrorCode != boost::asio::error::eof ) )
+    if ( ( lErrorCode && ( lErrorCode != boost::asio::error::eof ) ) || ( lBytesTransferred != mReplyByteCounter ) )
     {
       mSocket.close();
       exception::exception* lExc;
@@ -584,6 +593,12 @@ namespace uhal
         lExc = new exception::ASIOTcpError();
         log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+      }
+      if ( lBytesTransferred != mReplyByteCounter )
+      {
+        log ( *lExc, "Expected to receive " , Integer ( mReplyByteCounter ) , " bytes in read from ",
+             ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
+             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( lBytesTransferred ) , "bytes" );
       }
 
 #ifdef RUN_ASIO_MULTITHREADED
