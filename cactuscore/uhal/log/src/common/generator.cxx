@@ -369,7 +369,7 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << "\t\t\t{\n"
                << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
                << lInstructions.str()
-               << "\t\t\taExc.append( ( \"   > \" + lStr.str() + \"\\n\" ).c_str() );\n"
+               << "\t\t\taExc.append( ( lStr.str() + \"\\n\" ).c_str() );\n"
                << "\t\t\t}\n"
                << "\t\t\tlog ( Error() , lStr.str() );\n"
                << "}\n"
