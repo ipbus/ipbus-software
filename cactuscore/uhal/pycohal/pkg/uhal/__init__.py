@@ -58,11 +58,5 @@ _add_int_methods_to_ValWord(['__add__', '__radd__',
 _add_int_method_to_ValWord('__nonzero__', unary=True)
 
 # Binary comparison operator
-_add_int_methods_to_ValWord(['__lt__',
-                             '__le__',
-                             '__eq__',
-                             '__ne__',
-                             '__gt__',
-                             '__ge__'
-                             ])
+_add_int_method_to_ValWord('__cmp__')
 
