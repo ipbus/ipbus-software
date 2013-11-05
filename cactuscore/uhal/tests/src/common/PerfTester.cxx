@@ -153,7 +153,7 @@ int uhal::tests::PerfTester::run ( int argc, char* argv[] )
   }
   catch ( std::exception& e )
   {
-    cerr << "Error:  " << e.what() << endl;
+    cerr << "Error - exception thrown ..." << endl << e.what() << endl;
     return 50;
   }
   catch ( ... )
