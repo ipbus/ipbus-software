@@ -118,9 +118,12 @@ namespace uhal
         return mString;
       }
 
+      std::stringstream lStr;
+
+#ifdef USE_BACKTRACE
+
       timeval lTime;
       gettimeofday ( &lTime, NULL );
-      std::stringstream lStr;
       lStr << "\n";
 #ifdef COURTEOUS_EXCEPTIONS
       lStr << "I'm terribly sorry to have to tell you this, but it appears that there was an exception:\n";
@@ -162,7 +165,7 @@ namespace uhal
       lStr << " * Exception constructed at time:              " << tmbuf << '.' << std::setw ( 6 ) << mTime.tv_usec << "\n";
       strftime ( tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", localtime ( &lTime.tv_sec ) );
       lStr << " * Exception's what() function called at time: " << tmbuf << '.' << std::setw ( 6 ) << lTime.tv_usec << "\n";
-#ifdef USE_BACKTRACE
+
       lStr << " * Call stack:\n";
       std::vector< Backtrace::TracePoint > lBacktrace = Backtrace::BacktraceSymbols ( mBacktrace );
       uint32_t lCounter ( 0 );
@@ -174,7 +177,15 @@ namespace uhal
         lStr << "          at " << lIt->file << ":" << lIt->line << "\n";
       }
 
+#else
+
+      if ( strlen ( mAdditionalInfo ) )
+      {
+        lStr << mAdditionalInfo;
+      }
+
 #endif
+
       std::string lString ( lStr.str() );
       strncpy ( mString , lString.c_str() , 65536 );
 
