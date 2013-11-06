@@ -862,7 +862,7 @@ void uhal::tests::PerfTester::validationTest()
         }
       }
 
-      if ( m_perIterationDispatch || ( nrQueuedWords > 1000000 ) || ( i == m_iterations ) )
+      if ( m_perIterationDispatch || ( nrQueuedWords > 20000000 ) || ( i == m_iterations ) )
       {
         log ( Notice(), "Soak test - issuing dispatch" );
         client->dispatch();
