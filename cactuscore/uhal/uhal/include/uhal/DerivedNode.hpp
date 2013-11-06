@@ -46,7 +46,7 @@
   It takes a classname and then creates a registration helper object, with the classname as its template parameter
   and a stringified version of the classname as its constructor argument.
 */
-#define REGISTER( classname ) uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname );
+#define UHAL_REGISTER_DERIVED_NODE( classname ) uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname );
 
 namespace uhal
 {
