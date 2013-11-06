@@ -281,6 +281,15 @@ uint32_t uhal::tests::PerfTester::getRandomBlockSize ( const uint32_t maxSize ) 
   const double uniformRandom = static_cast<double> ( rand() ) / RAND_MAX; //TODO -- replace with boost::random random-double-generating function
   // Transform to 1/x distributed random float in range: 0.5 <= x < maxSize+1
   const double inverseRandom = 0.5 * pow ( static_cast<double> ( ( maxSize+1 ) / 0.5 ) , uniformRandom );
+  uint32_t retVal = static_cast<uint32_t>( floor(inverseRandom) );
+
+  if ( retVal > maxSize )
+  {
+    log ( Warning(), "Random block size (", Integer(retVal), ") is larger than maxSize (" , Integer(retVal) , ") ...\n",
+                     "   * uniformRandom=", uniformRandom, "\n",
+                     "   * inverseRandom=", inverseRandom );
+  }
+
   // Floor the float to get integer with desired distribution
   return static_cast<uint32_t> ( floor ( inverseRandom ) );
 }
@@ -663,12 +672,6 @@ void uhal::tests::PerfTester::validationTest()
       uint32_t max_depth = m_baseAddr + m_bandwidthTestDepth - addr;
       uint32_t depth = rand() % ( max_depth + 1 );
 
-      // Remove 0-word write/read tests until bug solved -- https://svnweb.cern.ch/trac/cactus/ticket/343
-      if ( depth == 0 )
-      {
-        depth = max_depth;
-      }
-
       nrTestsTotal++;
 
       if ( ! validation_test_block_write_read ( client, addr, depth, true ) )
@@ -782,14 +785,8 @@ void uhal::tests::PerfTester::validationTest()
         case 0: // read
         {
           blockSize = getRandomBlockSize ( m_baseAddr + m_bandwidthTestDepth - addr );
-
-          // Remove 0-word reads until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
-          if ( blockSize == 0 )
-          {
-            blockSize = 1;
-          }
-
           log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+
           ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
           queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead ( addr, result, registers.begin() + ( addr - m_baseAddr ) ) ) );
           nrQueuedWords += blockSize;
@@ -798,14 +795,8 @@ void uhal::tests::PerfTester::validationTest()
         case 1: // write
         {
           blockSize = getRandomBlockSize ( m_baseAddr + m_bandwidthTestDepth - addr );
-
-          // Remove 0-word writes until bug fixed -- https://svnweb.cern.ch/trac/cactus/ticket/343 & https://svnweb.cern.ch/trac/cactus/ticket/414
-          if ( blockSize == 0 )
-          {
-            blockSize = 1;
-          }
-
           log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+
           vector<uint32_t> randomData = getRandomBuffer ( blockSize );
           ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
           std::copy ( randomData.begin(), randomData.end(), registers.begin() + ( addr - m_baseAddr ) );
