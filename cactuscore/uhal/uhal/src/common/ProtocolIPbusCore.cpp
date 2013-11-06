@@ -307,15 +307,6 @@ namespace uhal
 
   ValHeader IPbusCore::implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
-    if ( aSource.size() == 0 )
-    {
-      log ( Warning() , "Zero-sized block transaction requested. uHAL has made the executive decision to ignore this: the instruction will not be sent and the returned header is >>assumed<< to be validated." );
-      ValHeader lReply ( CreateValHeader().first );
-      lReply.valid ( true );
-      return lReply;
-      //throw exception::IPbusCoreZeroSizeTransaction();
-    }
-
     log ( Debug() , "Write block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -331,12 +322,12 @@ namespace uhal
     uint32_t  lReplyBytesAvailable;
     eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? WRITE : NI_WRITE );
     int32_t lPayloadByteCount ( aSource.size() << 2 );
-    uint8_t* lSourcePtr ( ( uint8_t* ) ( & ( aSource.at ( 0 ) ) ) );
+    uint8_t* lSourcePtr ( ( uint8_t* ) ( aSource.empty() ? NULL : & ( aSource.at ( 0 ) ) ) );
     uint32_t lAddr ( aAddr );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
     boost::shared_ptr< Buffers > lBuffers;
 
-    while ( lPayloadByteCount > 0 )
+    do
     {
       lBuffers = checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lSendBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
@@ -348,9 +339,12 @@ namespace uhal
       //            " | lPayloadByteCount = " , Integer ( lPayloadByteCount ) );
       lBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode() ) );
       lBuffers->send ( lAddr );
-      lBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
-      lSourcePtr += lSendBytesAvailableForPayload;
-      lPayloadByteCount -= lSendBytesAvailableForPayload;
+      if ( aSource.size() > 0 )
+      {
+        lBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
+        lSourcePtr += lSendBytesAvailableForPayload;
+        lPayloadByteCount -= lSendBytesAvailableForPayload;
+      }
 
       if ( aMode == defs::INCREMENTAL )
       {
@@ -360,6 +354,7 @@ namespace uhal
       lReply.second->IPbusHeaders.push_back ( 0 );
       lBuffers->receive ( lReply.second->IPbusHeaders.back() );
     }
+    while ( lPayloadByteCount > 0 );
 
     lBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
     return lReply.first;
@@ -397,15 +392,6 @@ namespace uhal
 
   ValVector< uint32_t > IPbusCore::implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
-    if ( aSize == 0 )
-    {
-      log ( Warning() , "Zero-sized block transaction requested. uHAL has made the executive decision to ignore this: the instruction will not be sent and the returned packet is >>assumed<< to be validated." );
-      ValVector<uint32_t> lReply ( CreateValVector ( aSize ).first );
-      lReply.valid ( true );
-      return lReply;
-      //       throw exception::IPbusCoreZeroSizeTransaction();
-    }
-
     log ( Debug() , "Read unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
     // HEADER
@@ -420,13 +406,13 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > lReply ( CreateValVector ( aSize ) );
-    uint8_t* lReplyPtr = ( uint8_t* ) ( & ( lReply.second->value[0] ) );
+    uint8_t* lReplyPtr = ( uint8_t* ) ( aSize == 0 ? NULL : & ( lReply.second->value.at(0) ) );
     eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
     int32_t lPayloadByteCount ( aSize << 2 );
     uint32_t lAddr ( aAddr );
     boost::shared_ptr< Buffers > lBuffers;
 
-    while ( lPayloadByteCount > 0 )
+    do
     {
       lBuffers = checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lReplyBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
@@ -444,6 +430,7 @@ namespace uhal
         lAddr += ( lReplyBytesAvailableForPayload>>2 );
       }
     }
+    while ( lPayloadByteCount > 0 );
 
     lBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
     return lReply.first;

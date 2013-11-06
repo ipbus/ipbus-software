@@ -132,30 +132,18 @@ namespace uhal
               read ( lAddress );
               break;
             case NI_WRITE:
-
-              if ( mWordCounter == 0 )
-              {
-                log ( Error(), "Write size of 0 is invalid" );
-                return false;
-              }
-
               lAddress = *aIt++;
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+              lPayloadBegin = aIt;
+              lPayloadEnd = aIt + mWordCounter;
               ni_write ( lAddress , lPayloadBegin , lPayloadEnd );
+              aIt += mWordCounter;
               break;
             case WRITE:
-
-              if ( mWordCounter == 0 )
-              {
-                log ( Error(), "Write size of 0 is invalid" );
-                return false;
-              }
-
               lAddress = *aIt++;
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+              lPayloadBegin = aIt;
+              lPayloadEnd = aIt + mWordCounter;
               write ( lAddress , lPayloadBegin , lPayloadEnd );
+              aIt += mWordCounter;
               break;
             case RMW_SUM:
               lAddress = *aIt++;
@@ -384,28 +372,16 @@ namespace uhal
               bot();
               break;
             case NI_READ:
-
-              if ( mWordCounter == 0 )
-              {
-                log ( Error(), "Read size of 0 is invalid" );
-                return false;
-              }
-
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+              lPayloadBegin = aIt;
+              lPayloadEnd = aIt + mWordCounter;
               ni_read ( lPayloadBegin , lPayloadEnd );
+              aIt += mWordCounter;
               break;
             case READ:
-
-              if ( mWordCounter == 0 )
-              {
-                log ( Error(), "Read size of 0 is invalid" );
-                return false;
-              }
-
-              lPayloadBegin = ( aIt++ );
-              lPayloadEnd = ( aIt+= ( mWordCounter-1 ) );
+              lPayloadBegin = aIt;
+              lPayloadEnd = aIt + mWordCounter;
               read ( lPayloadBegin , lPayloadEnd );
+              aIt += mWordCounter;
               break;
             case NI_WRITE:
               ni_write ();
