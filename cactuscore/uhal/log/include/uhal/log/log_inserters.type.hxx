@@ -47,7 +47,7 @@ namespace uhal
     // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
     int lStatus ( 0 );
     static std::size_t lSize ( 1024 );
-    static char lDemangled[lSize];
+    static char* lDemangled = new char[lSize];
     aStr << ( abi::__cxa_demangle ( typeid ( T ).name() , lDemangled , &lSize , &lStatus ) );
 #else
     aStr << ( typeid ( T ).name() );
