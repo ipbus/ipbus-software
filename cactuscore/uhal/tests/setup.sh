@@ -2,7 +2,7 @@
 
 HERE=$(readlink -f $(dirname $BASH_SOURCE))
 
-CACTUSCORE_DIR=$HERE/../../
+CACTUSCORE_DIR=$HERE/../..
 CACTUSCORE_UHAL_DIR=$HERE/..
 
 export PATH=$CACTUSCORE_DIR/controlhub/scripts:$PATH
