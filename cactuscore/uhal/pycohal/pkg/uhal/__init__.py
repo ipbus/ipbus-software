@@ -1,3 +1,5 @@
+
+import sys
 from _core import *
 
 ##################################################
@@ -53,6 +55,9 @@ _add_int_methods_to_ValWord(['__add__', '__radd__',
                              '__and__', '__rand__',
                              '__or__', '__ror__'
                              ])
+
+if sys.hexversion >= 0x020600F0:
+    _add_int_method_to_ValWord('__format__')
 
 # Unary comparison operator (used in "if valWord")
 _add_int_method_to_ValWord('__nonzero__', unary=True)
