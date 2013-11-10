@@ -288,10 +288,11 @@ uint32_t uhal::tests::PerfTester::getRandomBlockSize ( const uint32_t maxSize ) 
     log ( Warning(), "Random block size (", Integer(retVal), ") is larger than maxSize (" , Integer(retVal) , ") ...\n",
                      "   * uniformRandom=", uniformRandom, "\n",
                      "   * inverseRandom=", inverseRandom );
+    retVal = maxSize;
   }
 
   // Floor the float to get integer with desired distribution
-  return static_cast<uint32_t> ( floor ( inverseRandom ) );
+  return retVal;
 }
 
 
