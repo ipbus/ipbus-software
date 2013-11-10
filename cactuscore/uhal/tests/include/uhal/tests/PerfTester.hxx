@@ -111,7 +111,7 @@ namespace uhal
         StringVec m_deviceURIs;  ///< Vector of individual connection URI strings.
         ClientVec m_clients;  ///< Vector of low-level uHAL clients.
         std::string m_testName;  ///< Holds the test name
-        unsigned m_iterations;  ///< Number of test iterations
+        uint64_t m_iterations;  ///< Number of test iterations
         std::string m_baseAddrStr;  ///< Base addr of reg/ram the test will use. Use a string as workaround for hex input via boost::program_options
         boost::uint32_t m_baseAddr;  ///< The m_baseAddrStr as converted into an actual unsigned value.
         boost::uint32_t m_bandwidthTestDepth;  ///< The depth of read/write used in bandwidth tests
