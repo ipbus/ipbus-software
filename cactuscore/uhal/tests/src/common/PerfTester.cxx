@@ -287,7 +287,8 @@ uint32_t uhal::tests::PerfTester::getRandomBlockSize ( const uint32_t maxSize ) 
   {
     log ( Warning(), "Random block size (", Integer(retVal), ") is larger than maxSize (" , Integer(retVal) , ") ...\n",
                      "   * uniformRandom=", uniformRandom, "\n",
-                     "   * inverseRandom=", inverseRandom );
+                     "   * inverseRandom=", inverseRandom, "\n",
+                     "Correcting block size as temporary fix." );
     retVal = maxSize;
   }
 
