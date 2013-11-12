@@ -82,6 +82,15 @@ namespace pycohal
     return boost::lexical_cast<uint32_t> ( uIntString );
   }
 
+  /// Returns dummy ValWord instance for testing.
+  uhal::ValWord<uint32_t> get_dummy_ValWord(const uint32_t aValue, const bool aValid)
+  {
+    uhal::ValWord<uint32_t> valWord;
+    valWord.value( aValue );
+    valWord.valid( aValid );
+    return valWord;
+  }
+
   /// Wraps functions that are only sed in unti tests. Puts them in "tests" sub-module.
   void wrap_test_functions()
   {
@@ -102,6 +111,7 @@ namespace pycohal
     bpy::def ( "convert_str_to_vec_str", pycohal::convert_string_to_vector<std::string> );
     bpy::def ( "convert_str_to_vec_uint32", pycohal::convert_string_to_vector<uint32_t> );
     bpy::def ( "copy_vec_uint32", pycohal::copy_vector<uint32_t> );
+    bpy::def ( "get_dummy_ValWord", pycohal::get_dummy_ValWord );
   }
 
 

@@ -212,6 +212,111 @@ class TestLogLevels(unittest.TestCase):
         uhal.setLogLevelTo( uhal.LogLevel.FATAL )
 
 
+class TestValWordIntMethods(unittest.TestCase):
+    """TestCase sub-class testing numeric & comparison operators for ValWord_uint32"""
+
+    def test_int_methods(self):
+       for i in range(200):
+           (x1, x2) = (randuint32(), randuint32())
+           self.exe_test_int_methods(x1, x2, False)
+           self.exe_test_int_methods(x1, x2, True)
+
+    def assertAllEqual(self, *args):
+        assert( len(args) > 1 )
+        for i in range( len(args)-1 ):
+            self.assertEqual(args[0], args[i+1])
+
+    def exe_test_int_methods(self, x1, x2, valid):
+        reg1 = uhal.tests.get_dummy_ValWord(x1, valid)
+        reg2 = uhal.tests.get_dummy_ValWord(x2, valid)
+
+        # Mod-32 copies for pow & bitshifting
+        s1 = x1 % 32
+        sreg1 = uhal.tests.get_dummy_ValWord(s1, valid)
+        s2 = x2 % 32
+        sreg2 = uhal.tests.get_dummy_ValWord(s2, valid)
+
+        # __invert__  ,  __neg__  ,  __pos__
+        if valid:
+            self.assertEqual ( ~x1 , ~reg1 )
+            self.assertEqual ( -x1 , -reg1 )
+            self.assertEqual ( +x1 , +reg1 )
+ 
+        # __(r)add__  ,  __(r)sub__  ,  __(r)mul__  ,  __(r)mod__
+        if valid:
+            self.assertAllEqual ( x1 + x2 , reg1 + x2 , x1 + reg2 , reg1 + reg2 )
+            self.assertAllEqual ( x1 - x2 , reg1 - x2 , x1 - reg2 , reg1 - reg2 )
+            self.assertAllEqual ( x1 * x2 , reg1 * x2 , x1 * reg2 , reg1 * reg2 )
+            self.assertAllEqual ( x1 % x2 , reg1 % x2 , x1 % reg2 , reg1 % reg2 )
+        else:
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__add__ , (x2) )
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__radd__ , (x2) )
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__sub__ , (x2) )
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__rsub__ , (x2) )
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__mul__ , (x2) )
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__rmul__ , (x2) )
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__mod__ , (x2) )
+            self.assertRaises ( uhal.NonValidatedMemory, reg1.__rmod__ , (x2) )
+        
+        # __pow__  &  __rpow__
+        if valid:
+            self.assertAllEqual ( s1 ** s2 , sreg1 ** s2 , s1 ** sreg2 , sreg1 ** sreg2 )
+        else:
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__pow__ , (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__rpow__ , (x2) )
+
+        # __(r)lshift__  &  __(r)rshift__
+        if valid:
+            self.assertAllEqual ( x1 << s2 , reg1 << s2 , x1 << sreg2 , reg1 << sreg2 )
+            self.assertAllEqual ( x1 >> s2 , reg1 >> s2 , x1 >> sreg2 , reg1 >> sreg2 )
+        else:
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__lshift__ , (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__rlshift__, (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__rshift__ , (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__rrshift__, (x2) )
+
+        # __(r)and__  &  __(r)or__
+        if valid:
+            self.assertAllEqual ( x1 & x2 , reg1 & x2 , x1 & reg2 , reg1 & reg2 )
+            self.assertAllEqual ( x1 | x2 , reg1 | x2 , x1 | reg2 , reg1 | reg2 )
+            self.assertAllEqual ( x1 ^ x2 , reg1 ^ x2 , x1 ^ reg2 , reg1 ^ reg2 )
+        else:
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__and__, (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__rand__, (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__or__, (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__ror__, (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__xor__, (x2) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__rxor__, (x2) )
+
+        # __nonzero__
+        if valid:
+            x0 = 0
+            reg0 = uhal.tests.get_dummy_ValWord(x0, True)
+            self.assertEqual ( x0.__nonzero__() , reg0.__nonzero__() )
+            self.assertEqual ( bool(x0) , bool(reg0) )
+            self.assertEqual ( x1.__nonzero__() , reg1.__nonzero__() )
+            self.assertEqual ( bool(x1) , bool(reg1) )
+        else:
+            self.assertRaises( uhal.NonValidatedMemory, bool , (reg1) )
+
+        # __cmp__
+        if valid:
+            self.assertAllEqual ( x1 <  x2 , reg1 <  x2 , x1 <  reg2 , reg1 <  reg2 )
+            self.assertAllEqual ( x1 <= x2 , reg1 <= x2 , x1 <= reg2 , reg1 <= reg2 )
+            self.assertAllEqual ( x1 >  x2 , reg1 >  x2 , x1 >  reg2 , reg1 >  reg2 )
+            self.assertAllEqual ( x1 >= x2 , reg1 >= x2 , x1 >= reg2 , reg1 >= reg2 )
+            self.assertAllEqual ( x1 == x2 , reg1 == x2 , x1 == reg2 , reg1 == reg2 )
+            self.assertAllEqual ( x1 != x2 , reg1 != x2 , x1 != reg2 , reg1 != reg2 )
+            reg1b = uhal.tests.get_dummy_ValWord(x1, True)
+            self.assertAllEqual ( x1 == x1 , reg1 == x1 , x1 == reg1 , reg1 == reg1b )
+        else:
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (x1) )
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (reg2) ) 
+        
+        # __format__
+
+
+
 ##################################################################################
 # SECTION 2: 
 #    Tests of normal use cases, involving actual interaction with (dummy) hardware
