@@ -5,34 +5,49 @@ from _core import *
 ##################################################
 # Pythonic additions to uhal::exception API
 
-def exception_to_string(self):
+def _exception_to_string(self):
    return self.what
 
-exception.__str__ = exception_to_string
+exception.__str__ = _exception_to_string
 
 
 ##################################################
 # Pythonic additions to the ValWord_uint32 API
 
+def _ValWord_to_long(self):
+    return long(int(self))
+
+ValWord_uint32.__long__ = _ValWord_to_long
+
+
 def _add_int_method_to_ValWord(method_name, unary=False):
-    # Grab standard int method
-    int_method = getattr(int, method_name)
-    # Wrap around this method for ValWord_uint32 object
     if unary:
         def valWord_method(self):
+            int_method = getattr(type(int(self)), method_name)
             return int_method( int(self) )
     else:
         def valWord_method(self, other):
-            if isinstance(other, ValWord_uint32):
-                return int_method(int(self), int(other))
+#            print "Enterting valWord_method for '"+method_name+"' ... self:", type(self), " other:", type(other)
+            int_type = int
+            if (type(int(self)) is long) or (type(int(other)) is long):
+                int_type = long
+            int_method = getattr(int_type, method_name)
+#            print "int_type:", int_type
+#            print "int_type(self):", int_type(self)
+#            print "other:", other
+            if isinstance(other, ValWord_uint32) or (type(other) is not int_type):
+                return int_method( int_type(self), int_type(other) )
             else:
-                return int_method(int(self), other)
+                return int_method( int_type(self), other )
+
     # Add wraparound method to ValWord_uint32
     setattr(ValWord_uint32, method_name, valWord_method)
+
 
 def _add_int_methods_to_ValWord(method_names, unary=False):
     for method_name in method_names:
         _add_int_method_to_ValWord(method_name, unary)
+
 
 # Unary numeric methods
 _add_int_methods_to_ValWord(['__invert__', '__neg__', '__pos__'], unary=True)

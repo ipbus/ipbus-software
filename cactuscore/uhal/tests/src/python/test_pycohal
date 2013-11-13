@@ -216,6 +216,10 @@ class TestValWordIntMethods(unittest.TestCase):
     """TestCase sub-class testing numeric & comparison operators for ValWord_uint32"""
 
     def test_int_methods(self):
+       self.exe_test_int_methods(0xffffffff, randuint32(), False)
+       self.exe_test_int_methods(0xffffffff, randuint32(), True)
+       self.exe_test_int_methods(randuint32(), 0xffffffff, False)
+       self.exe_test_int_methods(randuint32(), 0xffffffff, True)
        for i in range(200):
            (x1, x2) = (randuint32(), randuint32())
            self.exe_test_int_methods(x1, x2, False)
@@ -241,7 +245,7 @@ class TestValWordIntMethods(unittest.TestCase):
             self.assertEqual ( ~x1 , ~reg1 )
             self.assertEqual ( -x1 , -reg1 )
             self.assertEqual ( +x1 , +reg1 )
- 
+
         # __(r)add__  ,  __(r)sub__  ,  __(r)mul__  ,  __(r)mod__
         if valid:
             self.assertAllEqual ( x1 + x2 , reg1 + x2 , x1 + reg2 , reg1 + reg2 )
