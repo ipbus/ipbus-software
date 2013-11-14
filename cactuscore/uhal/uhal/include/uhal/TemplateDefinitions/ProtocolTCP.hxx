@@ -134,7 +134,6 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol , nr_buffers_per_send >::~TCP()
   {
-    // log( Warning , ThisLocation() );
     try
     {
       mSocket.close();
@@ -255,9 +254,8 @@ namespace uhal
   void TCP< InnerProtocol , nr_buffers_per_send >::write ( )
   {
     NotifyConditionalVariable ( false );
+
 #ifdef RUN_ASIO_MULTITHREADED
-    assert ( mDispatchBuffers.empty() );
-    assert ( ! mDispatchQueue.empty() );
     std::vector< boost::asio::const_buffer > lAsioSendBuffer;
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( &mSendByteCounter , 4 ) );
     mSendByteCounter = 0;
@@ -273,7 +271,6 @@ namespace uhal
       lAsioSendBuffer.push_back ( boost::asio::const_buffer ( lBuffer->getSendBuffer() , lBuffer->sendCounter() ) );
     }
 
-    assert ( ! mDispatchBuffers.empty() );
     log ( Debug() , "Sending " , Integer ( mSendByteCounter ) , " bytes from ", Integer ( mDispatchBuffers.size() ), " buffers" );
     mSendByteCounter = htonl ( mSendByteCounter );
 #else
@@ -403,11 +400,6 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read ( )
   {
-    // log( Warning , ThisLocation() );
-#ifdef RUN_ASIO_MULTITHREADED
-    assert ( ! mReplyBuffers.empty() );
-#else
-
     if ( ! mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
