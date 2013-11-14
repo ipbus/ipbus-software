@@ -145,7 +145,6 @@ namespace uhal
       mIOservice.stop();
 #ifdef RUN_ASIO_MULTITHREADED
       mDispatchThread.join();
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
       ClientInterface::returnBufferToPool ( mDispatchBuffers );
@@ -162,6 +161,10 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
+
     if ( mAsynchronousException )
     {
       log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
@@ -173,21 +176,17 @@ namespace uhal
       connect();
     }
 
-    {
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-      mDispatchQueue.push_back ( aBuffers );
+    mDispatchQueue.push_back ( aBuffers );
 
-      if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
-      {
-        write ( );
-      }
-
-#else
-      mDispatchBuffers = aBuffers;
+    if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+    {
       write ( );
-#endif
     }
+#else
+    mDispatchBuffers = aBuffers;
+    write ( );
+#endif
   }
 
 
@@ -195,19 +194,26 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::connect()
   {
-    // log( Warning , ThisLocation() );
     log ( Info() , "Attempting to create TCP connection to '" , mEndpoint->host_name() , "' port " , mEndpoint->service_name() , "." );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     boost::system::error_code lErrorCode = boost::asio::error::would_block;
     boost::asio::async_connect ( mSocket , mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
 
+#ifdef RUN_ASIO_MULTITHREADED
+    // Unlock mutex whilst connect runs in other thread, to avoid deadlock in case timeout occurs
+    mTransportLayerMutex.unlock();
     do
     {
-#ifndef RUN_ASIO_MULTITHREADED
-      mIOservice.run_one();
-#endif
     }
     while ( lErrorCode == boost::asio::error::would_block );
+    mTransportLayerMutex.lock();
+#else
+    do
+    {
+      mIOservice.run_one();
+    }
+    while ( lErrorCode == boost::asio::error::would_block );
+#endif
 
     if ( lErrorCode )
     {
@@ -248,7 +254,6 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::write ( )
   {
-    // log( Warning , ThisLocation() );
     NotifyConditionalVariable ( false );
 #ifdef RUN_ASIO_MULTITHREADED
     assert ( mDispatchBuffers.empty() );
@@ -316,7 +321,6 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
-    // log( Warning , ThisLocation() );
 #ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
     mSendByteCounter = ntohl ( mSendByteCounter );
@@ -363,7 +367,7 @@ namespace uhal
 
       if ( aBytesTransferred != ( mSendByteCounter + 4 ) )
       {
-        log ( *lExc, "Attempted to send " , Integer ( mReplyByteCounter ) , " bytes to ",
+        log ( *lExc, "Attempted to send " , Integer ( mSendByteCounter ) , " bytes to ",
              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
              " with URI "  , Quote ( this->uri() ) , ", but only sent " , Integer ( aBytesTransferred ) , "bytes" );
       }
@@ -475,23 +479,25 @@ namespace uhal
 
 #endif
 
-    if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
-      exception::TcpTimeout* lExc = new exception::TcpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
-            ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
-
-      if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
-      {
-        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
-      }
-
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
-      mAsynchronousException = lExc;
-      NotifyConditionalVariable ( true );
-      return;
+      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+      {
+        exception::TcpTimeout* lExc = new exception::TcpTimeout();
+        log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
+              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
+
+        if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
+        {
+          log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+        }
+
+        mAsynchronousException = lExc;
+        NotifyConditionalVariable ( true );
+        return;
+      }
     }
 
     if ( ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) ) || ( aBytesTransferred != 4 ) )
@@ -571,32 +577,30 @@ namespace uhal
 
     if ( ( lErrorCode && ( lErrorCode != boost::asio::error::eof ) ) || ( lBytesTransferred != mReplyByteCounter ) )
     {
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
       mSocket.close();
-      exception::exception* lExc;
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
-        lExc = new exception::TcpTimeout();
-        log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
+        mAsynchronousException = new exception::TcpTimeout();
+        log ( *mAsynchronousException , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
       }
       else
       {
-        lExc = new exception::ASIOTcpError();
-        log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
+        mAsynchronousException = new exception::ASIOTcpError();
+        log ( *mAsynchronousException , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
       }
       if ( lBytesTransferred != mReplyByteCounter )
       {
-        log ( *lExc, "Expected to receive " , Integer ( mReplyByteCounter ) , " bytes in read from ",
+        log ( *mAsynchronousException, "Expected to receive " , Integer ( mReplyByteCounter ) , " bytes in read from ",
              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
              " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( lBytesTransferred ) , "bytes" );
       }
 
-#ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
-      mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
     }
@@ -754,7 +758,6 @@ namespace uhal
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
       mPacketsInFlight = 0;
