@@ -708,11 +708,12 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::Flush( )
   {
-    // log( Warning , ThisLocation() );
 #ifdef RUN_ASIO_MULTITHREADED
     while ( true )
     {
       WaitOnConditionalVariable();
+
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex ); 
 
       if ( mAsynchronousException )
       {
@@ -728,11 +729,6 @@ namespace uhal
         break;
       }
     }
-
-    assert ( mDispatchBuffers.empty() );
-    assert ( mDispatchQueue.empty() );
-    assert ( mReplyBuffers.empty() );
-    assert ( mReplyQueue.empty() );
 #endif
   }
 
