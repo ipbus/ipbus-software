@@ -400,13 +400,14 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read ( )
   {
+#ifndef RUN_ASIO_MULTITHREADED
     if ( ! mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
       return;
     }
-
 #endif
+
     //     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     //     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
     //     lAsioReplyBuffer.reserve ( lReplyBuffers.size() +1 );
