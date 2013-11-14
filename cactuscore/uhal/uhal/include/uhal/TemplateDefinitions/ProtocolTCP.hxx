@@ -365,7 +365,7 @@ namespace uhal
       {
         log ( *mAsynchronousException , "Attempted to send " , Integer ( mSendByteCounter ) , " bytes to ",
              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
-             " with URI "  , Quote ( this->uri() ) , ", but only sent " , Integer ( aBytesTransferred ) , "bytes" );
+             " with URI "  , Quote ( this->uri() ) , ", but only sent " , Integer ( aBytesTransferred ) , " bytes" );
       }
 
       NotifyConditionalVariable ( true );
@@ -502,7 +502,7 @@ namespace uhal
       {
         log ( *mAsynchronousException, "Expected to receive 4-byte header in async read from ",
              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
-             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , "bytes" );
+             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , " bytes" );
       }
 
       try
@@ -584,7 +584,7 @@ namespace uhal
       {
         log ( *mAsynchronousException, "Expected to receive " , Integer ( mReplyByteCounter ) , " bytes in read from ",
              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
-             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( lBytesTransferred ) , "bytes" );
+             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( lBytesTransferred ) , " bytes" );
       }
 
       NotifyConditionalVariable ( true );
