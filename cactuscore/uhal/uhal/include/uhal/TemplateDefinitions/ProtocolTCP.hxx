@@ -333,24 +333,23 @@ namespace uhal
 
     if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
     {
-      exception::TcpTimeout* lExc = new exception::TcpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for send to ",
+      mAsynchronousException = new exception::TcpTimeout();
+      log ( *mAsynchronousException , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for send to ",
             ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
 
       if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
       {
-        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+        log ( *mAsynchronousException , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
       }
 
-      mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
     }
 
     if ( ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) ) || ( aBytesTransferred != ( mSendByteCounter+4 ) ) )
     {
-      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
-      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to ",
+      mAsynchronousException = new exception::ASIOTcpError();
+      log ( *mAsynchronousException , "Error ", Quote ( aErrorCode.message() ) , " encountered during send to ",
             ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
 
       try
@@ -362,17 +361,16 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        log ( *lExc , "Error closing TCP socket following the ASIO send error" );
+        log ( *mAsynchronousException , "Error closing TCP socket following the ASIO send error" );
       }
 
       if ( aBytesTransferred != ( mSendByteCounter + 4 ) )
       {
-        log ( *lExc, "Attempted to send " , Integer ( mSendByteCounter ) , " bytes to ",
+        log ( *mAsynchronousException , "Attempted to send " , Integer ( mSendByteCounter ) , " bytes to ",
              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
              " with URI "  , Quote ( this->uri() ) , ", but only sent " , Integer ( aBytesTransferred ) , "bytes" );
       }
 
-      mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
     }
@@ -460,29 +458,24 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
-    // log( Warning , ThisLocation() );
-    if ( mAsynchronousException )
-    {
-      NotifyConditionalVariable ( true );
-      return;
-    }
-
-#ifdef RUN_ASIO_MULTITHREADED
-    assert ( ! mReplyBuffers.empty() );
-#else
-
+#ifndef RUN_ASIO_MULTITHREADED
     if ( ! mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
       return;
     }
-
 #endif
 
     {
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
+      if ( mAsynchronousException )
+      {
+        NotifyConditionalVariable ( true );
+        return;
+      }
+
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         exception::TcpTimeout* lExc = new exception::TcpTimeout();
@@ -502,35 +495,35 @@ namespace uhal
 
     if ( ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) ) || ( aBytesTransferred != 4 ) )
     {
-      exception::ASIOTcpError* lExc = new exception::ASIOTcpError();
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
+      mAsynchronousException = new exception::ASIOTcpError();
+
       if ( aErrorCode )
       {
-        log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
+        log ( *mAsynchronousException , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
+      }
+
+      if ( aBytesTransferred != 4 )
+      {
+        log ( *mAsynchronousException, "Expected to receive 4-byte header in async read from ",
+             ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) ,
+             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , "bytes" );
       }
 
       try
       {
         mSocket.close();
-
         while ( mSocket.is_open() )
           {}
       }
       catch ( const std::exception& aExc )
       {
-        log ( *lExc , "Error closing socket following ASIO read error" );
+        log ( *mAsynchronousException , "Error closing socket following ASIO read error" );
       }
 
-#ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
-      if ( aBytesTransferred != 4 )
-      {
-        log ( *lExc, "Expected to receive 4-byte header in async read from ",
-             ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , 
-             " with URI "  , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , "bytes" );
-      }
-      mAsynchronousException = lExc;
       NotifyConditionalVariable ( true );
       return;
     }
@@ -594,6 +587,7 @@ namespace uhal
         log ( *mAsynchronousException , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from ",
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: " , this->uri() );
       }
+
       if ( lBytesTransferred != mReplyByteCounter )
       {
         log ( *mAsynchronousException, "Expected to receive " , Integer ( mReplyByteCounter ) , " bytes in read from ",
@@ -611,13 +605,17 @@ namespace uhal
     {
       try
       {
-        mAsynchronousException = ClientInterface::validate ( *lBufIt ); //Control of the pointer has been passed back to the client interface
+        if ( uhal::exception::exception* lExc =  ClientInterface::validate ( *lBufIt ) ) //Control of the pointer has been passed back to the client interface
+        {
+          boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+          mAsynchronousException = lExc;
+        }
       }
       catch ( exception::exception& aExc )
       {
         boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
         mAsynchronousException = new exception::ValidationError ();
-        log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) );
+        log ( *mAsynchronousException , "Exception caught during reply validation for URI: " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
       }
 
       if ( mAsynchronousException )
