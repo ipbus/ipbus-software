@@ -113,13 +113,9 @@ namespace uhal
 
 #ifdef RUN_ASIO_MULTITHREADED
     ClientInterface::returnBufferToPool ( mDispatchQueue );
-    mDispatchQueue.clear();
     ClientInterface::returnBufferToPool ( mReplyQueue );
-    mReplyQueue.clear();
     ClientInterface::returnBufferToPool ( mDispatchBuffers );
-    mDispatchBuffers.clear();
     ClientInterface::returnBufferToPool ( mReplyBuffers );
-    mReplyBuffers.clear();
     mPacketsInFlight = 0;
 #endif
 
@@ -151,13 +147,9 @@ namespace uhal
       mDispatchThread.join();
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
-      mDispatchQueue.clear();
       ClientInterface::returnBufferToPool ( mReplyQueue );
-      mReplyQueue.clear();
       ClientInterface::returnBufferToPool ( mDispatchBuffers );
-      mDispatchBuffers.clear();
       ClientInterface::returnBufferToPool ( mReplyBuffers );
-      mReplyBuffers.clear();
 #endif
     }
     catch ( const std::exception& aExc )
@@ -764,14 +756,10 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
-      mDispatchQueue.clear();
       ClientInterface::returnBufferToPool ( mReplyQueue );
-      mReplyQueue.clear();
       mPacketsInFlight = 0;
       ClientInterface::returnBufferToPool ( mDispatchBuffers );
-      mDispatchBuffers.clear();
       ClientInterface::returnBufferToPool ( mReplyBuffers );
-      mReplyBuffers.clear();
 #else
       mDispatchBuffers.reset();
       mReplyBuffers.reset();
