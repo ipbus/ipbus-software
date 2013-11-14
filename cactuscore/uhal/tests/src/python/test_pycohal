@@ -318,15 +318,7 @@ class TestValWordIntMethods(unittest.TestCase):
             self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (reg2) ) 
         
         # __format__
-        if sys.hexversion >= 0x020600F0:
-            print "Format tests"
-            if valid:
-                self.assertEqual ( "{0:d}".format(x1) , "{0:d}".format(reg1) )
-                self.assertEqual ( "{0:x}".format(x1) , "{0:x}".format(reg1) )
-                self.assertAllEqual ( hex(x1), hex(reg1), "0x{0:x}".format(x1), "0x{0:x}".format(reg1) )
-            else:
-                self.assertRaises( uhal.NonValidatedMemory , reg1.__format__ , ("{0:d}") )
-                self.assertRaises( uhal.NonValidatedMemory , reg1.__format__ , ("{0:x}") )
+
 
 
 ##################################################################################
