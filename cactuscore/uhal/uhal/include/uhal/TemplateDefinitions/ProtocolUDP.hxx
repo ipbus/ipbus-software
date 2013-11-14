@@ -152,6 +152,10 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
+
     if ( mAsynchronousException )
     {
       log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
@@ -163,26 +167,23 @@ namespace uhal
       connect();
     }
 
-    {
+
 #ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-
-      if ( mDispatchBuffers || mPacketsInFlight == this->getMaxNumberOfBuffers() )
-      {
-        mDispatchQueue.push_back ( aBuffers );
-        //   std::cout << "extended mDispatchQueue" << std::endl;
-      }
-      else
-      {
-        mDispatchBuffers = aBuffers;
-        write ( );
-      }
-
-#else
+    if ( mDispatchBuffers || mPacketsInFlight == this->getMaxNumberOfBuffers() )
+    {
+      mDispatchQueue.push_back ( aBuffers );
+      //   std::cout << "extended mDispatchQueue" << std::endl;
+    }
+    else
+    {
       mDispatchBuffers = aBuffers;
       write ( );
-#endif
     }
+
+#else
+    mDispatchBuffers = aBuffers;
+    write ( );
+#endif
   }
 
 
@@ -370,30 +371,34 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
-    if ( mAsynchronousException )
     {
-      NotifyConditionalVariable ( true );
-      return;
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
+      if ( mAsynchronousException )
+      {
+        NotifyConditionalVariable ( true );
+        return;
+      }
+
+      if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
+      {
+        mAsynchronousException = new exception::UdpTimeout();
+        log ( *mAsynchronousException , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for UDP receive from target with URI: ", this->uri() );
+
+        if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
+        {
+          log ( *mAsynchronousException , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
+        }
+
+        NotifyConditionalVariable ( true );
+        return;
+      }
     }
 
     if ( !mReplyBuffers )
     {
       log ( Error() , __PRETTY_FUNCTION__ , " called when 'mReplyBuffers' was NULL" );
-      return;
-    }
-
-    if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
-    {
-      exception::UdpTimeout* lExc = new exception::UdpTimeout();
-      log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for UDP receive from target with URI: ", this->uri() );
-
-      if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
-      {
-        log ( *lExc , "ASIO reported an error: " , Quote ( aErrorCode.message() ) );
-      }
-
-      mAsynchronousException = lExc;
-      NotifyConditionalVariable ( true );
       return;
     }
 
@@ -405,9 +410,12 @@ namespace uhal
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
-      exception::ASIOUdpError* lExc = new exception::ASIOUdpError();
-      log ( *lExc , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from UDP target with URI: " , this->uri() );
-      mAsynchronousException = lExc;
+#ifdef RUN_ASIO_MULTITHREADED
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
+      mAsynchronousException = new exception::ASIOUdpError();
+      log ( *mAsynchronousException , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from UDP target with URI: " , this->uri() );
+
       NotifyConditionalVariable ( true );
       return;
     }
@@ -446,7 +454,13 @@ namespace uhal
 
     try
     {
-      mAsynchronousException = ClientInterface::validate ( mReplyBuffers ); //Control of the pointer has been passed back to the client interface
+      if ( uhal::exception::exception* lExc = ClientInterface::validate ( mReplyBuffers ) ) //Control of the pointer has been passed back to the client interface
+      {
+#ifdef RUN_ASIO_MULTITHREADED
+        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
+        mAsynchronousException = lExc;
+      }
     }
     catch ( exception::exception& aExc )
     {
@@ -457,14 +471,14 @@ namespace uhal
       log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) );
     }
 
+#ifdef RUN_ASIO_MULTITHREADED
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+
     if ( mAsynchronousException )
     {
       NotifyConditionalVariable ( true );
       return;
     }
-
-#ifdef RUN_ASIO_MULTITHREADED
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
     if ( mReplyQueue.size() )
     {
@@ -531,15 +545,11 @@ namespace uhal
     WaitOnConditionalVariable();
 #ifdef RUN_ASIO_MULTITHREADED
 
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
     if ( mAsynchronousException )
     {
       mAsynchronousException->ThrowAsDerivedType();
     }
-
-    //     assert ( !mDispatchBuffers );
-    assert ( mDispatchQueue.empty() );
-    //     assert ( !mReplyBuffers );
-    assert ( mReplyQueue.empty() );
 #endif
   }
 
@@ -565,15 +575,17 @@ namespace uhal
 
     NotifyConditionalVariable ( true );
 
-    if ( mAsynchronousException )
-    {
-      delete mAsynchronousException;
-      mAsynchronousException = NULL;
-    }
-
     {
 #ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+#endif
+      if ( mAsynchronousException )
+      {
+        delete mAsynchronousException;
+        mAsynchronousException = NULL;
+      }
+
+#ifdef RUN_ASIO_MULTITHREADED
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
       mPacketsInFlight = 0;
