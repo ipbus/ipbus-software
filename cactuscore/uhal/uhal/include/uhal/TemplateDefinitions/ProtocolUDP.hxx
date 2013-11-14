@@ -575,26 +575,21 @@ namespace uhal
 
     NotifyConditionalVariable ( true );
 
+    if ( mAsynchronousException )
     {
-#ifdef RUN_ASIO_MULTITHREADED
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
-      if ( mAsynchronousException )
-      {
-        delete mAsynchronousException;
-        mAsynchronousException = NULL;
-      }
+      delete mAsynchronousException;
+      mAsynchronousException = NULL;
+    }
 
 #ifdef RUN_ASIO_MULTITHREADED
-      ClientInterface::returnBufferToPool ( mDispatchQueue );
-      ClientInterface::returnBufferToPool ( mReplyQueue );
-      mPacketsInFlight = 0;
+    ClientInterface::returnBufferToPool ( mDispatchQueue );
+    ClientInterface::returnBufferToPool ( mReplyQueue );
+    mPacketsInFlight = 0;
 #endif
-      ClientInterface::returnBufferToPool ( mDispatchBuffers );
-      mDispatchBuffers.reset();
-      ClientInterface::returnBufferToPool ( mReplyBuffers );
-      mReplyBuffers.reset();
-    }
+    ClientInterface::returnBufferToPool ( mDispatchBuffers );
+    mDispatchBuffers.reset();
+    ClientInterface::returnBufferToPool ( mReplyBuffers );
+    mReplyBuffers.reset();
 
     InnerProtocol::dispatchExceptionHandler();
   }

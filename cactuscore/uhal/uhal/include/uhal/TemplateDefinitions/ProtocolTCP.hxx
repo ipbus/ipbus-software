@@ -754,20 +754,18 @@ namespace uhal
       mAsynchronousException = NULL;
     }
 
-    {
 #ifdef RUN_ASIO_MULTITHREADED
-      ClientInterface::returnBufferToPool ( mDispatchQueue );
-      ClientInterface::returnBufferToPool ( mReplyQueue );
-      mPacketsInFlight = 0;
-      ClientInterface::returnBufferToPool ( mDispatchBuffers );
-      ClientInterface::returnBufferToPool ( mReplyBuffers );
+    ClientInterface::returnBufferToPool ( mDispatchQueue );
+    ClientInterface::returnBufferToPool ( mReplyQueue );
+    mPacketsInFlight = 0;
+    ClientInterface::returnBufferToPool ( mDispatchBuffers );
+    ClientInterface::returnBufferToPool ( mReplyBuffers );
 #else
-      mDispatchBuffers.reset();
-      mReplyBuffers.reset();
+    mDispatchBuffers.reset();
+    mReplyBuffers.reset();
 #endif
-      mSendByteCounter = 0;
-      mReplyByteCounter = 0;
-    }
+    mSendByteCounter = 0;
+    mReplyByteCounter = 0;
 
     InnerProtocol::dispatchExceptionHandler();
   }
