@@ -27,14 +27,10 @@ def _add_int_method_to_ValWord(method_name, unary=False):
             return int_method( int(self) )
     else:
         def valWord_method(self, other):
-#            print "Enterting valWord_method for '"+method_name+"' ... self:", type(self), " other:", type(other)
             int_type = int
             if isinstance(int(self), long) or ( not isinstance(other, str) and isinstance(int(other), long) ):
                 int_type = long
             int_method = getattr(int_type, method_name)
-#            print "int_type:", int_type
-#            print "int_type(self):", int_type(self)
-#            print "other:", other
             if isinstance(other, int_type) or isinstance(other, str):
                 return int_method( int_type(self), other )
             else:
