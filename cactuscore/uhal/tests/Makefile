@@ -107,7 +107,7 @@ _rpmall:
 	cp -p include/${Package}/*.hpp ${RPMBUILD_DIR}/SOURCES/include/${Package}/.
 	cp -p bin/*.exe ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
 	cp -p src/python/test_pycohal ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
-	cp -p uhal_test_suite.py ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
+	cp -p scripts/* ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
 	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
 	cp -p etc/${Package}/*.xml ${RPMBUILD_DIR}/SOURCES/etc/${Package}
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
