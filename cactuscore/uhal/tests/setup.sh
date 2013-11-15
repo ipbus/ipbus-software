@@ -7,6 +7,7 @@ CACTUSCORE_UHAL_DIR=$HERE/..
 
 export PATH=$CACTUSCORE_UHAL_DIR/tests/bin:$PATH
 export PATH=$CACTUSCORE_UHAL_DIR/tests/src/python:$PATH
+export PATH=$CACTUSCORE_UHAL_DIR/tests/scripts:$PATH
 export PATH=$CACTUSCORE_DIR/extern/erlang/RPMBUILD/SOURCES/bin:$PATH
 export PATH=$CACTUSCORE_DIR/controlhub/scripts:$PATH
 
