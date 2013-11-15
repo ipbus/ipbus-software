@@ -675,11 +675,14 @@ namespace uhal
     {
       // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
 #ifdef RUN_ASIO_MULTITHREADED
-      if ( mDispatchQueue.size() || mDispatchBuffers.size() || mReplyQueue.size() || mReplyBuffers.size() )
+      if (  mDispatchBuffers.size() || mReplyBuffers.size() )
       {
         log ( Warning() , "Closing socket since deadline has passed" );
       }
-
+      else
+      {
+        log ( Debug() , "Closing socket since no communication in " , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds to URI " , Quote ( this->uri() ) );
+      }
 #endif
       // The deadline has passed. The socket is closed so that any outstanding asynchronous operations are cancelled.
       mSocket.close();
