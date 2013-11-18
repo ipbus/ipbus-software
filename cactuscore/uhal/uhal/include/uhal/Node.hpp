@@ -47,6 +47,7 @@
 #include "uhal/ClientInterface.hpp"
 
 #include <exception>
+#include <utility>
 #include <vector>
 #include <map>
 #include <string>
@@ -209,6 +210,12 @@ namespace uhal
       */
       const std::string& getModule() const;
 
+      /**
+        Return the parameters of the current node
+        @return the parameters of the current node
+      */
+      const std::vector< std::pair <std::string, std::string> >& getParameters() const;
+      
       /**
       	A streaming helper function to create pretty, indented tree diagrams
       	@param aStr a stream to write to
@@ -376,6 +383,9 @@ namespace uhal
       //! The name of the module in which the current node resides
       std::string mModule;
 
+      //! Additional parameters of the node
+      std::vector< std::pair <std::string, std::string> > mParameters;
+      
       //! The direct children of the node
       std::deque< Node* > mChildren;
 

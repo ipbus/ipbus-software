@@ -47,6 +47,7 @@ namespace uhal
 
   const char* NodeTreeBuilder::mIdAttribute = "id";
   const char* NodeTreeBuilder::mAddressAttribute = "address";
+  const char* NodeTreeBuilder::mParametersAttribute = "parameters";
   const char* NodeTreeBuilder::mTagsAttribute = "tags";
   const char* NodeTreeBuilder::mDescriptionAttribute = "description";
   const char* NodeTreeBuilder::mPermissionsAttribute = "permission";
@@ -70,6 +71,7 @@ namespace uhal
     .forbid ( NodeTreeBuilder::mMaskAttribute )
     .optional ( NodeTreeBuilder::mIdAttribute )
     .optional ( NodeTreeBuilder::mAddressAttribute )
+    .optional ( NodeTreeBuilder::mParametersAttribute )
     .optional ( NodeTreeBuilder::mPermissionsAttribute )
     .optional ( NodeTreeBuilder::mModeAttribute )
     .optional ( NodeTreeBuilder::mSizeAttribute )
@@ -82,6 +84,7 @@ namespace uhal
     .forbid ( NodeTreeBuilder::mModuleAttribute )
     .optional ( NodeTreeBuilder::mIdAttribute )
     .optional ( NodeTreeBuilder::mAddressAttribute )
+    .optional ( NodeTreeBuilder::mParametersAttribute )
     .optional ( NodeTreeBuilder::mModeAttribute )
     .optional ( NodeTreeBuilder::mSizeAttribute )
     .optional ( NodeTreeBuilder::mPermissionsAttribute )
@@ -95,6 +98,7 @@ namespace uhal
     .optional ( NodeTreeBuilder::mAddressAttribute )		// .forbid ( NodeTreeBuilder::mAddressAttribute ) //see https://svnweb.cern.ch/trac/cactus/ticket/92
     .forbid ( NodeTreeBuilder::mModeAttribute )
     .forbid ( NodeTreeBuilder::mSizeAttribute )
+    .optional ( NodeTreeBuilder::mParametersAttribute )
     .optional ( NodeTreeBuilder::mPermissionsAttribute )
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
@@ -116,6 +120,7 @@ namespace uhal
     .forbid ( NodeTreeBuilder::mSizeAttribute )
     .forbid ( NodeTreeBuilder::mPermissionsAttribute )
     .optional ( NodeTreeBuilder::mAddressAttribute )
+    .optional ( NodeTreeBuilder::mParametersAttribute )
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
@@ -253,6 +258,7 @@ namespace uhal
     Node* lNode ( new Node() );
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
+    setPars ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -277,8 +283,50 @@ namespace uhal
     boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
     //create an object of the class type returned by the parsed string
     boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
-    Node* lNode ( NULL );
+//    Node* lNode ( NULL );
+//
+//    if ( lIt == mCreators.end() )
+//    {
+//      //exception::LabelUnknownToClassFactory lExc;
+//      log ( Warning , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory." );
+//
+//      if ( mCreators.size() )
+//      {
+//        log ( Warning , "Known types are:" );
+//
+//        for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+//        {
+//          log ( Warning , "    > " , lIt->first );
+//        }
+//      }
+//      else
+//      {
+//        log ( Warning , "No class types have been defined" );
+//      }
+//
+//      log ( Warning, "Will return a plain node for now, but you have been warned!" );
+//      //throw lExc;
+//      lNode = new Node();
+//    }
+//    else
+//    {
+//      lNode = lIt->second->create ( lClass.mArguments );
+//    }
 
+    Node lBareNode = Node();
+    
+    setUid ( aRequireId , aXmlNode , &lBareNode );
+    setPars ( aXmlNode , &lBareNode );
+    setTags ( aXmlNode , &lBareNode );
+    setDescription ( aXmlNode , &lBareNode );
+    setModule ( aXmlNode , &lBareNode );
+    setPermissions ( aXmlNode , &lBareNode );
+    //setMask( aXmlNode , lNode );
+    setModeAndSize ( aXmlNode , &lBareNode );
+    addChildren ( aXmlNode , &lBareNode );
+    
+    Node* lNode ( NULL ) ;
+    
     if ( lIt == mCreators.end() )
     {
       //exception::LabelUnknownToClassFactory lExc;
@@ -304,19 +352,11 @@ namespace uhal
     }
     else
     {
-      lNode = lIt->second->create ( lClass.mArguments );
+      lNode = lIt->second->create ( lBareNode );
     }
-
-    setUid ( aRequireId , aXmlNode , lNode );
-    setAddr ( aXmlNode , lNode );
-    setTags ( aXmlNode , lNode );
-    setDescription ( aXmlNode , lNode );
-    setModule ( aXmlNode , lNode );
-    setPermissions ( aXmlNode , lNode );
-    //setMask( aXmlNode , lNode );
-    setModeAndSize ( aXmlNode , lNode );
-    addChildren ( aXmlNode , lNode );
+    
     log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
+    
     return lNode;
   }
 
@@ -328,6 +368,7 @@ namespace uhal
     Node* lNode ( getNodeTree ( lModule , mFileCallStack.back( ) ) );
     setUid ( true , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
+    setPars ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -352,6 +393,7 @@ namespace uhal
     Node* lNode ( new Node() );
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode ); //was commented out, see https://svnweb.cern.ch/trac/cactus/ticket/92
+    setPars ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -390,6 +432,24 @@ namespace uhal
     aNode->mPartialAddr |= lAddr;
   }
 
+  void NodeTreeBuilder::setPars ( const pugi::xml_node& aXmlNode , Node* aNode )
+  {
+    
+    std::string lParsStr;
+    //get attribute from xml file as string
+    uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mParametersAttribute , lParsStr );
+    if ( lParsStr.size() ) {
+        //parse the string into a NodeTreeParameters object
+        std::string::const_iterator lBegin ( lParsStr.begin() );
+        std::string::const_iterator lEnd ( lParsStr.end() );
+        NodeTreeParameters lPars;
+        boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeParametersGrammar , boost::spirit::ascii::space , lPars );
+        
+        aNode->mParameters = lPars.mParameters;
+
+    }
+  }
+  
   void NodeTreeBuilder::setTags ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
     std::string lStr;

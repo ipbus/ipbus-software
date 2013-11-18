@@ -1,6 +1,7 @@
 #!/bin/bash
 
 HERE=$(readlink -f $(dirname $BASH_SOURCE))
+#HERE=$(python -c "import os.path; os.path.dirname(os.path.abspath('$BASH_SOURCE'))")
 
 CACTUSCORE_DIR=$HERE/../..
 CACTUSCORE_UHAL_DIR=$HERE/..

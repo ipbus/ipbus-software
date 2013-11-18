@@ -53,7 +53,7 @@
 #include <boost/spirit/include/qi_symbols.hpp>
 
 #include "uhal/grammars/NodeTreeClassAttributeGrammar.hpp"
-
+#include "uhal/grammars/NodeTreeParametersGrammar.hpp"
 
 #include "pugixml/pugixml.hpp"
 
@@ -170,6 +170,7 @@ namespace uhal
       Node* bitmaskNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 
       void setUid ( const bool& aRequireId , const pugi::xml_node& aXmlNode , Node* aNode );
+      void setPars ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setAddr ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setTags ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setDescription ( const pugi::xml_node& aXmlNode , Node* aNode );
@@ -180,7 +181,8 @@ namespace uhal
       void addChildren ( const pugi::xml_node& aXmlNode , Node* aNode );
 
       static const char* mIdAttribute;
-      static const char* mAddressAttribute;
+      static const char* mAddressAttribute;      
+      static const char* mParametersAttribute;
       static const char* mTagsAttribute;
       static const char* mDescriptionAttribute;
       static const char* mPermissionsAttribute;
@@ -226,7 +228,7 @@ namespace uhal
           @param aAttributes a vector containing a set of name value pairs which were passed as arguments
           @return a new node tree
           */
-          virtual Node* create ( const std::vector< std::pair<std::string, std::string> >& aAttributes ) = 0;
+          virtual Node* create ( const Node& aNode ) = 0;
       };
 
       //! Templated concrete implementation with a CreatorInterface interface
@@ -252,7 +254,7 @@ namespace uhal
           @param aAttributes a vector containing a set of name value pairs which were passed as arguments
           @return a new node tree
           */
-          Node* create ( const std::vector< std::pair<std::string, std::string> >& aAttributes );
+          Node* create ( const Node& aNode );
       };
 
 
@@ -283,6 +285,7 @@ namespace uhal
 
 
       grammars::NodeTreeClassAttributeGrammar mNodeTreeClassAttributeGrammar;
+      grammars::NodeTreeParametersGrammar mNodeTreeParametersGrammar;
   };
 
 }

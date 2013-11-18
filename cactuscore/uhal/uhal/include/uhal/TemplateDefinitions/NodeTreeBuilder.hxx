@@ -52,10 +52,10 @@ namespace uhal
 
 
   template <class T>
-  Node* NodeTreeBuilder::Creator<T>::create ( const std::vector< std::pair<std::string, std::string> >& aAttributes )
+  Node* NodeTreeBuilder::Creator<T>::create ( const Node& aNode )
   {
     log ( Debug() , "Creator called for Node of type " , Quote ( Type < T >() ) );
-    return new T ( aAttributes );
+    return new T ( aNode );
   }
 
 

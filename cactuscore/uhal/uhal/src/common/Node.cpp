@@ -86,6 +86,7 @@ namespace uhal
     mTags ( "" ),
     mDescription ( "" ),
     mModule ( "" ),
+    mParameters ( ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -104,6 +105,7 @@ namespace uhal
     mTags ( aNode.mTags ),
     mDescription ( aNode.mDescription ),
     mModule ( aNode.mModule ),
+    mParameters ( aNode.mParameters ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -139,6 +141,7 @@ namespace uhal
     mTags = aNode.mTags;
     mDescription = aNode.mDescription;
     mModule = aNode.mModule;
+    mParameters = aNode.mParameters;
 
     for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
@@ -251,6 +254,10 @@ namespace uhal
   {
     return mModule;
   }
+  
+  const std::vector< std::pair <std::string, std::string> >& Node::getParameters() const {
+    return mParameters;
+  }
 
 
   void Node::stream ( std::ostream& aStr , std::size_t aIndent ) const
@@ -316,7 +323,16 @@ namespace uhal
     {
       aStr << ", Module \"" << mModule << "\"";
     }
-
+    
+    if ( mParameters.size() )
+    {
+      aStr << ", Parameters: ";
+      for ( std::vector< std::pair< std::string, std::string> >::const_iterator lIt = mParameters.begin(); lIt != mParameters.end(); ++lIt )
+      {
+        aStr << lIt->first << "=" << lIt->second;
+      }
+    }
+    
     for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       ( **lIt ).stream ( aStr , aIndent+2 );
