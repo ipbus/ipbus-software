@@ -1,7 +1,7 @@
 import wx, logging
 
-from utilities.utilities import dynamic_loader
-from guis import defaultgui
+from uhal.gui.utilities.utilities import dynamic_loader
+from uhal.gui.guis import defaultgui
 
 
 
@@ -47,8 +47,7 @@ class GuiLoader:
         
         output_to_window = False
         app = MainApplication(self.gui_list, output_to_window)
-        logger.info('Starting application main loop...')
-        logger.info('Starting application main loop...')
+        logger.info('Starting application main loop...')       
         app.MainLoop()
 
 
@@ -78,9 +77,9 @@ def configure_logger():
     global logger
     
     logger = logging.getLogger('uhal.gui')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - from %(name)s -- %(levelname)s: %(message)s')
     ch.setFormatter(formatter)
     logger.addHandler(ch)

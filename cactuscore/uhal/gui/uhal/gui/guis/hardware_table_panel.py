@@ -2,9 +2,9 @@ import string, logging, wx
 
 import wx.lib.scrolledpanel as scroll
 
-from plotreg import Plot
-from regvalues import RegValues
-from utilities.hardware import HardwareStruct
+from uhal.gui.guis.plotreg import Plot
+from uhal.gui.guis.regvalues import RegValues
+from uhal.gui.utilities.hardware import HardwareStruct
 
 
 

@@ -3,7 +3,7 @@ from wx.lib.pubsub import Publisher
 
 import uhal
 
-from utilities import HwReadyEvent
+from uhal.gui.utilities.utilities import HwReadyEvent
 
 
 class HardwareMonitoring(threading.Thread):

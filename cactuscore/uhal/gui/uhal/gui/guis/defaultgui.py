@@ -3,9 +3,9 @@ import os, webbrowser, logging
 import wx
 from wx.lib.pubsub import Publisher
 
-from utilities.hardware_monitoring import HardwareMonitoring
-from guis.hardware_tree import HardwareTree
-from guis.hardware_table_panel import HardwareTablePanel
+from uhal.gui.utilities.hardware_monitoring import HardwareMonitoring
+from uhal.gui.guis.hardware_tree import HardwareTree
+from uhal.gui.guis.hardware_table_panel import HardwareTablePanel
 
 
 class DefaultGui(wx.Frame):
@@ -75,15 +75,15 @@ class DefaultGui(wx.Frame):
         """
         return (('&File',
                  ('&LoadHW', 'Load HW', wx.ITEM_NORMAL, self.__on_load_hw),
-                 ('&SaveSession', 'Save Session', wx.ITEM_NORMAL, self.__on_save_session),
-                 ('&SaveSessionAs', 'Save Session As...', wx.ITEM_NORMAL, self.__on_save_session_as),
-                 ('&LoadSession', 'Load Session', wx.ITEM_NORMAL, self.__on_load_session),
+                 #('&SaveSession', 'Save Session', wx.ITEM_NORMAL, self.__on_save_session),
+                 #('&SaveSessionAs', 'Save Session As...', wx.ITEM_NORMAL, self.__on_save_session_as),
+                 #('&LoadSession', 'Load Session', wx.ITEM_NORMAL, self.__on_load_session),
                  ('&Quit', 'Quit', wx.ITEM_NORMAL, self.__on_close_window)
                 ),                
                 ('&View',
-                 ('&Compact', 'Compact View', wx.ITEM_CHECK, self.__on_compact_view),
-                 ('&ExpandAll', 'Expand All', wx.ITEM_CHECK, self.__on_expand_all),
-                 ('&ReadOnly', 'Read Only', wx.ITEM_CHECK, self.__on_read_only),
+                 #('&Compact', 'Compact View', wx.ITEM_CHECK, self.__on_compact_view),
+                 #('&ExpandAll', 'Expand All', wx.ITEM_CHECK, self.__on_expand_all),
+                 #('&ReadOnly', 'Read Only', wx.ITEM_CHECK, self.__on_read_only),
                  ('&ClearPanel', 'Clear Panel', wx.ITEM_NORMAL, self.__on_clear_panel)
                 ),                        
                 ('&Help',
@@ -309,19 +309,19 @@ class DefaultGui(wx.Frame):
         for uTCA HW developers which use the uHAL C++ library
         """
 
-        licence = """uHAL GUI is free software; you can redistribute 
-        it and/or modify it under the terms of the GNU General Public License as 
-        published by the Free Software Foundation; either version 2 of the License, 
-        or (at your option) any later version.
+        #licence = """uHAL GUI is free software; you can redistribute 
+        #it and/or modify it under the terms of the GNU General Public License as 
+        #published by the Free Software Foundation; either version 2 of the License, 
+        #or (at your option) any later version.
 
-        uHAL GUI is distributed in the hope that it will be useful, 
-        but WITHOUT ANY WARRANTY; without even the implied warranty of 
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
-        See the GNU General Public License for more details. You should have 
-        received a copy of the GNU General Public License along with File Hunter; 
-        if not, write to the Free Software Foundation, Inc., 59 Temple Place, 
-        Suite 330, Boston, MA  02111-1307  USA
-        """
+        #uHAL GUI is distributed in the hope that it will be useful, 
+        #but WITHOUT ANY WARRANTY; without even the implied warranty of 
+        #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+        #See the GNU General Public License for more details. You should have 
+        #received a copy of the GNU General Public License along with File Hunter; 
+        #if not, write to the Free Software Foundation, Inc., 59 Temple Place, 
+        #Suite 330, Boston, MA  02111-1307  USA
+        #"""
 
 
         info = wx.AboutDialogInfo()
