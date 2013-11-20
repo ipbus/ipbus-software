@@ -36,11 +36,11 @@ namespace uhal
 {
 
   template< typename T>
-  T& Node::getNode ( const std::string& aId )
+  const T& Node::getNode ( const std::string& aId ) const
   {
     try
     {
-      return dynamic_cast< T& > ( getNode ( aId ) );
+      return dynamic_cast< const T& > ( getNode ( aId ) );
     }
     catch ( const std::exception& aExc )
     {

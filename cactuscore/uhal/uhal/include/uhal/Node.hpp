@@ -129,7 +129,7 @@ namespace uhal
       	@param aId a full-stop delimeted name path to a node, relative to the current node
       	@return the Node given by the identifier
       */
-      Node& getNode ( const std::string& aId );
+      const Node& getNode ( const std::string& aId ) const;
 
 
       /**
@@ -138,7 +138,7 @@ namespace uhal
       	@return the Node given by the identifier
       */
       template< typename T>
-      T& getNode ( const std::string& aId );
+      const T& getNode ( const std::string& aId ) const;
 
 
       /**
@@ -214,7 +214,7 @@ namespace uhal
         Return the parameters of the current node
         @return the parameters of the current node
       */
-      const std::vector< std::pair <std::string, std::string> >& getParameters() const;
+      const boost::unordered_map< std::string, std::string >& getParameters() const;
       
       /**
       	A streaming helper function to create pretty, indented tree diagrams
@@ -244,7 +244,6 @@ namespace uhal
       	@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
         @return a Validated Header which will contain the returned IPbus header
       	@warning DEPRICATED and will be removed in the next release!
-      */
       ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
       {
         log ( Error() , "THIS METHOD IS DEPRECATED! "
@@ -258,6 +257,7 @@ namespace uhal
         mMode = lMode;
         return lReply;
       }
+      */
 
       /**
       	Read a single, unmasked, unsigned word
@@ -278,7 +278,6 @@ namespace uhal
       	@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       	@warning DEPRICATED and will be removed in the next release!
-      */
       ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
       {
         log ( Error() , "THIS METHOD IS DEPRECATED! "
@@ -292,6 +291,7 @@ namespace uhal
         mMode = lMode;
         return lRet;
       }
+      */
 
       // /*
       // Read a single, unmasked word and interpret it as being signed
@@ -384,7 +384,7 @@ namespace uhal
       std::string mModule;
 
       //! Additional parameters of the node
-      std::vector< std::pair <std::string, std::string> > mParameters;
+      boost::unordered_map< std::string, std::string > mParameters;
       
       //! The direct children of the node
       std::deque< Node* > mChildren;

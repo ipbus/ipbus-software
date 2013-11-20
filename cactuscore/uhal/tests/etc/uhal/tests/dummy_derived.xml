@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<node>
+
+    <node id="derived" class="DummyDerivedNode;attr1=val1;attr2=val2" address="0x0000">
+        <node id="REG_UPPER_MASK" mask="0xffff0000" permission="rw"/>
+        <node id="REG_LOWER_MASK" mask="0x0000ffff" permission="rw"/>
+    </node>
+
+    <node id="derived2" class="DummyDerivedNode" parameters="attr1=val1;attr2=val2" address="0x1000">
+        <node id="REG_UPPER_MASK" mask="0xffff0000" permission="rw"/>
+        <node id="REG_LOWER_MASK" mask="0x0000ffff" permission="rw"/>
+    </node>
+    
+    <node id="derived3" class="DoubleDerivedNode" parameters="attr1=val1;attr2=val2;attr3=val3" address="0x2000">
+        <node id="REG_UPPER_MASK" mask="0xffff0000" permission="rw"/>
+        <node id="REG_LOWER_MASK" mask="0x0000ffff" permission="rw"/>
+    </node>
+</node>

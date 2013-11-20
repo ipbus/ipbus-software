@@ -34,18 +34,30 @@
 
 #include <boost/spirit/include/qi.hpp>
 
+
 namespace grammars
 {
-  NodeTreeParametersGrammar::NodeTreeParametersGrammar() :
-    NodeTreeParametersGrammar::base_type ( start )
-  {
-    using namespace boost::spirit;
-    start = ( data_pairs_vector );
-    data_pairs_vector = *data_pairs;
-    data_pairs = data_pairs_1 > data_pairs_2;
-    data_pairs_1 = + ( qi::char_ - qi::lit ( "=" ) ) > qi::lit ( "=" );
-    data_pairs_2 = * ( qi::char_ - qi::lit ( ";" ) ) >> - ( qi::lit ( ";" ) );
-  }
+  //NodeTreeParametersGrammar::NodeTreeParametersGrammar() :
+    //NodeTreeParametersGrammar::base_type ( start )
+  //{
+    //using namespace boost::spirit;
+    //start = ( data_pairs_vector );
+    //data_pairs_vector = *data_pairs;
+    //data_pairs = data_pairs_1 > data_pairs_2;
+    //data_pairs_1 = + ( qi::char_ - qi::lit ( "=" ) ) > qi::lit ( "=" );
+    //data_pairs_2 = * ( qi::char_ - qi::lit ( ";" ) ) >> - ( qi::lit ( ";" ) );
+  //}
 
+  NodeTreeParametersGrammar::NodeTreeParametersGrammar() :
+    NodeTreeParametersGrammar::base_type(query)
+  {
+
+    namespace qi = boost::spirit::qi;
+    
+    query =  pair >> *((qi::lit(';') | '&') >> pair);
+    pair  =  key >> -('=' >> value);
+    key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
+    value = +qi::char_("a-zA-Z_0-9");
+  }
 }
 

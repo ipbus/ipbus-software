@@ -117,13 +117,13 @@ namespace uhal
     return mClientInterface->getTimeoutPeriod();
   }
 
-  Node& HwInterface::getNode () const
+  const Node& HwInterface::getNode () const
   {
     return *mNode;
   }
 
 
-  Node& HwInterface::getNode ( const std::string& aId ) const
+  const Node& HwInterface::getNode ( const std::string& aId ) const
   {
     return mNode->getNode ( aId );
   }

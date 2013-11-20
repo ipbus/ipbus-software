@@ -36,7 +36,7 @@ namespace uhal
 {
 
   template< typename T>
-  T& HwInterface::getNode ( const std::string& aId ) const
+  const T& HwInterface::getNode ( const std::string& aId ) const
   {
     return mNode->getNode< T > ( aId );
   }

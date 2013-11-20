@@ -116,14 +116,14 @@ namespace uhal
       	Retrieve the top-level node
       	@return the top-level node
       */
-      Node& getNode () const;
+      const Node& getNode () const;
 
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the top-level node
       	@param aId a full-stop delimeted name path to a node, relative to the top-level node
       	@return the Node given by the identifier
       */
-      Node& getNode ( const std::string& aId ) const;
+      const Node& getNode ( const std::string& aId ) const;
 
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the current node and cast it to a particular node type
@@ -131,7 +131,7 @@ namespace uhal
       	@return the Node given by the identifier
       */
       template< typename T>
-      T& getNode ( const std::string& aId ) const;
+      const T& getNode ( const std::string& aId ) const;
 
 
       /**

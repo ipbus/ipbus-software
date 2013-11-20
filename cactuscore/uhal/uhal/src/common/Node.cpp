@@ -255,7 +255,7 @@ namespace uhal
     return mModule;
   }
   
-  const std::vector< std::pair <std::string, std::string> >& Node::getParameters() const {
+  const boost::unordered_map< std::string, std::string >& Node::getParameters() const {
     return mParameters;
   }
 
@@ -327,7 +327,8 @@ namespace uhal
     if ( mParameters.size() )
     {
       aStr << ", Parameters: ";
-      for ( std::vector< std::pair< std::string, std::string> >::const_iterator lIt = mParameters.begin(); lIt != mParameters.end(); ++lIt )
+      boost::unordered_map<std::string, std::string>::const_iterator lIt;
+      for ( lIt = mParameters.begin(); lIt != mParameters.end(); ++lIt )
       {
         aStr << lIt->first << "=" << lIt->second;
       }
@@ -339,8 +340,7 @@ namespace uhal
     }
   }
 
-
-  Node& Node::getNode ( const std::string& aId )
+  const Node& Node::getNode ( const std::string& aId ) const
   {
     if ( aId.size() == 0 )
     {

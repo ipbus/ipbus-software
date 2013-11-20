@@ -431,10 +431,10 @@ namespace uhal
         //parse the string into a NodeTreeParameters object
         std::string::const_iterator lBegin ( lParsStr.begin() );
         std::string::const_iterator lEnd ( lParsStr.end() );
-        NodeTreeParameters lPars;
+        boost::unordered_map<std::string, std::string> lPars;
         boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeParametersGrammar , boost::spirit::ascii::space , lPars );
         
-        aNode->mParameters = lPars.mParameters;
+        aNode->mParameters = lPars;
 
     }
   }
