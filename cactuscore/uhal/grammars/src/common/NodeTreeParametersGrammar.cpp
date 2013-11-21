@@ -37,16 +37,6 @@
 
 namespace grammars
 {
-  //NodeTreeParametersGrammar::NodeTreeParametersGrammar() :
-    //NodeTreeParametersGrammar::base_type ( start )
-  //{
-    //using namespace boost::spirit;
-    //start = ( data_pairs_vector );
-    //data_pairs_vector = *data_pairs;
-    //data_pairs = data_pairs_1 > data_pairs_2;
-    //data_pairs_1 = + ( qi::char_ - qi::lit ( "=" ) ) > qi::lit ( "=" );
-    //data_pairs_2 = * ( qi::char_ - qi::lit ( ";" ) ) >> - ( qi::lit ( ";" ) );
-  //}
 
   NodeTreeParametersGrammar::NodeTreeParametersGrammar() :
     NodeTreeParametersGrammar::base_type(query)
