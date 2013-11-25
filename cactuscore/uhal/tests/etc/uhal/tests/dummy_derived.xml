@@ -16,4 +16,9 @@
         <node id="REG_UPPER_MASK" mask="0xffff0000" permission="rw"/>
         <node id="REG_LOWER_MASK" mask="0x0000ffff" permission="rw"/>
     </node>
+    
+    <node id="derived4" class="BadlyNamedDerivedNode" address="0x3000">
+      <node id="REG_UPPER_MASK" mask="0xffff0000" permission="rw"/>
+      <node id="REG_LOWER_MASK" mask="0x0000ffff" permission="rw"/>
+    </node>    
 </node>

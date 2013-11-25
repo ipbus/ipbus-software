@@ -384,6 +384,9 @@ namespace uhal
       //! The name of the module in which the current node resides
       std::string mModule;
 
+      //! Class name used to construct the derived node type
+      std::string mClassName;
+
       //! Additional parameters of the node
       boost::unordered_map< std::string, std::string > mParameters;
       

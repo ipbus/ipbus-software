@@ -66,7 +66,7 @@ namespace uhal
   {
     //------------------------------------------------------------------------------------------------------------------------
     Rule<Node*> lPlainNode;
-    lPlainNode.forbid ( NodeTreeBuilder::mClassAttribute )
+    lPlainNode.optional ( NodeTreeBuilder::mClassAttribute ) //.forbid ( NodeTreeBuilder::mClassAttribute ) //see https://svnweb.cern.ch/trac/cactus/ticket/452
     .forbid ( NodeTreeBuilder::mModuleAttribute )
     .forbid ( NodeTreeBuilder::mMaskAttribute )
     .optional ( NodeTreeBuilder::mIdAttribute )
@@ -78,18 +78,18 @@ namespace uhal
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
-    Rule<Node*> lClass;
-    lClass.require ( NodeTreeBuilder::mClassAttribute )
-    .forbid ( NodeTreeBuilder::mMaskAttribute )
-    .forbid ( NodeTreeBuilder::mModuleAttribute )
-    .optional ( NodeTreeBuilder::mIdAttribute )
-    .optional ( NodeTreeBuilder::mAddressAttribute )
-    .optional ( NodeTreeBuilder::mParametersAttribute )
-    .optional ( NodeTreeBuilder::mModeAttribute )
-    .optional ( NodeTreeBuilder::mSizeAttribute )
-    .optional ( NodeTreeBuilder::mPermissionsAttribute )
-    .optional ( NodeTreeBuilder::mTagsAttribute )
-    .optional ( NodeTreeBuilder::mDescriptionAttribute );
+//     Rule<Node*> lClass;
+//     lClass.require ( NodeTreeBuilder::mClassAttribute )
+//     .forbid ( NodeTreeBuilder::mMaskAttribute )
+//     .forbid ( NodeTreeBuilder::mModuleAttribute )
+//     .optional ( NodeTreeBuilder::mIdAttribute )
+//     .optional ( NodeTreeBuilder::mAddressAttribute )
+//     .optional ( NodeTreeBuilder::mParametersAttribute )
+//     .optional ( NodeTreeBuilder::mModeAttribute )
+//     .optional ( NodeTreeBuilder::mSizeAttribute )
+//     .optional ( NodeTreeBuilder::mPermissionsAttribute )
+//     .optional ( NodeTreeBuilder::mTagsAttribute )
+//     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
     Rule<Node*> lBitMask;
     lBitMask.require ( NodeTreeBuilder::mMaskAttribute )
@@ -103,19 +103,11 @@ namespace uhal
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
-    mTopLevelNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , _1 ) );
-    mTopLevelNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , false , _1 ) );
-    mTopLevelNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , false , _1 ) );
-    //------------------------------------------------------------------------------------------------------------------------
-    lPlainNode.require ( NodeTreeBuilder::mIdAttribute );
-    lClass.require ( NodeTreeBuilder::mIdAttribute );
-    lBitMask.require ( NodeTreeBuilder::mIdAttribute );
-    //------------------------------------------------------------------------------------------------------------------------
     Rule<Node*> lModule;
-    lModule.require ( NodeTreeBuilder::mIdAttribute )
+    lModule.optional ( NodeTreeBuilder::mIdAttribute )
     .require ( NodeTreeBuilder::mModuleAttribute )
     .forbid ( NodeTreeBuilder::mMaskAttribute )
-    .forbid ( NodeTreeBuilder::mClassAttribute )
+    .optional ( NodeTreeBuilder::mClassAttribute ) //.forbid ( NodeTreeBuilder::mClassAttribute ) //see https://svnweb.cern.ch/trac/cactus/ticket/452
     .forbid ( NodeTreeBuilder::mModeAttribute )
     .forbid ( NodeTreeBuilder::mSizeAttribute )
     .forbid ( NodeTreeBuilder::mPermissionsAttribute )
@@ -124,10 +116,23 @@ namespace uhal
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
+
+    mTopLevelNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , _1 ) );
+//     mTopLevelNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , false , _1 ) );
+    mTopLevelNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , false , _1 ) );
+    mTopLevelNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , false , _1 ) );
+
+    //------------------------------------------------------------------------------------------------------------------------
+    lPlainNode.require ( NodeTreeBuilder::mIdAttribute );
+//     lClass.require ( NodeTreeBuilder::mIdAttribute );
+    lBitMask.require ( NodeTreeBuilder::mIdAttribute );
+    lModule.require ( NodeTreeBuilder::mIdAttribute );
+
+    //------------------------------------------------------------------------------------------------------------------------
     mNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , true , _1 ) );
-    mNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , true , _1 ) );
+//     mNodeParser.addRule ( lClass , boost::bind ( &NodeTreeBuilder::classNodeCreator , this , true , _1 ) );
     mNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , true , _1 ) );
-    mNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , _1 ) );
+    mNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , true , _1 ) );
     //------------------------------------------------------------------------------------------------------------------------
   }
   NodeTreeBuilder::~NodeTreeBuilder ()
@@ -252,6 +257,41 @@ namespace uhal
 
 
 
+Node* NodeTreeBuilder::convertToClassType( Node* aNode )
+{
+      boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNode->mClassName );
+
+      if ( lIt == mCreators.end() )
+      {
+        log ( Warning , "Class " , Quote ( aNode->mClassName ) , " is unknown to the NodeTreeBuilder class factory." );
+  
+        if ( mCreators.size() )
+        {
+          log ( Warning , "Known types are:" );
+  
+          for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+          {
+            log ( Warning , "    > " , lIt->first );
+          }
+        }
+        else
+        {
+          log ( Warning , "No class types have been defined" );
+        }
+  
+        log ( Warning, "Will return a plain node for now, but you have been warned!" );
+        return aNode;
+      }
+      else
+      {
+        Node* lClassNode( lIt->second->create ( *aNode ) );
+        delete aNode;
+        return lClassNode;
+      }
+
+}
+
+
 
   Node* NodeTreeBuilder::plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
   {
@@ -259,6 +299,7 @@ namespace uhal
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
+    setClassName ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -266,97 +307,107 @@ namespace uhal
     //setMask( aXmlNode , lNode );
     setModeAndSize ( aXmlNode , lNode );
     addChildren ( aXmlNode , lNode );
+
     log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
-    return lNode;
+
+    if ( lNode->mClassName.size() )
+    {
+      return convertToClassType( lNode );
+    }
+    else    
+    {
+      return lNode;
+    }
   }
 
 
-  Node* NodeTreeBuilder::classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
-  {
-    std::string lClassStr;
-    //get attribute from xml file as string
-    uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
-    //parse the string into a NodeTreeClassAttribute object
-    std::string::const_iterator lBegin ( lClassStr.begin() );
-    std::string::const_iterator lEnd ( lClassStr.end() );
-    NodeTreeClassAttribute lClass;
-    boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
+//   Node* NodeTreeBuilder::classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
+//   {
+//     std::string lClassStr;
+//     //get attribute from xml file as string
+//     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
+//     //parse the string into a NodeTreeClassAttribute object
+//     std::string::const_iterator lBegin ( lClassStr.begin() );
+//     std::string::const_iterator lEnd ( lClassStr.end() );
+//     NodeTreeClassAttribute lClass;
+//     boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
+// 
+//     if ( lClass.mArguments.size() )
+//     {
+//       boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::Apr , 1 );
+//       boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
+//       boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
+// 
+//       if ( lTimeToExpiry.is_negative() )
+//       {
+//         log ( Error , "Support for the old-style class attributes expired on 1st April 2014. Please update your address table." );
+//         sleep ( 60 );
+//       }
+//       else
+//       {
+//         log ( Warning , "Support for the old-style class attributes will expire on 1st April 2014. Please update your address table. Functionality will be limited after this expiry date." );
+//       }
+//     }
+// 
+//     //create an object of the class type returned by the parsed string
+//     boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
+// 
+//     Node lBareNode = Node();
+//     
+//     setUid ( aRequireId , aXmlNode , &lBareNode );
+//     setPars ( aXmlNode , &lBareNode );
+//     setTags ( aXmlNode , &lBareNode );
+//     setDescription ( aXmlNode , &lBareNode );
+//     setModule ( aXmlNode , &lBareNode );
+//     setPermissions ( aXmlNode , &lBareNode );
+//     //setMask( aXmlNode , lNode );
+//     setModeAndSize ( aXmlNode , &lBareNode );
+//     addChildren ( aXmlNode , &lBareNode );
+//     
+//     Node* lNode ( NULL ) ;
+//     
+//     if ( lIt == mCreators.end() )
+//     {
+//       //exception::LabelUnknownToClassFactory lExc;
+//       log ( Warning , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory." );
+// 
+//       if ( mCreators.size() )
+//       {
+//         log ( Warning , "Known types are:" );
+// 
+//         for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+//         {
+//           log ( Warning , "    > " , lIt->first );
+//         }
+//       }
+//       else
+//       {
+//         log ( Warning , "No class types have been defined" );
+//       }
+// 
+//       log ( Warning, "Will return a plain node for now, but you have been warned!" );
+//       //throw lExc;
+//       lNode = new Node();
+//     }
+//     else
+//     {
+//       lNode = lIt->second->create ( lBareNode );
+//     }
+//     
+//     log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
+//     
+//     return lNode;
+//   }
 
-    if ( lClass.mArguments.size() )
-    {
-      boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::Apr , 1 );
-      boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
-      boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
 
-      if ( lTimeToExpiry.is_negative() )
-      {
-        log ( Error , "Support for the old-style class attributes expired on 1st April 2014. Please update your address table." );
-        sleep ( 60 );
-      }
-      else
-      {
-        log ( Warning , "Support for the old-style class attributes will expire on 1st April 2014. Please update your address table. Functionality will be limited after this expiry date." );
-      }
-    }
-
-    //create an object of the class type returned by the parsed string
-    boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lClass.mClass );
-
-    Node lBareNode = Node();
-    
-    setUid ( aRequireId , aXmlNode , &lBareNode );
-    setPars ( aXmlNode , &lBareNode );
-    setTags ( aXmlNode , &lBareNode );
-    setDescription ( aXmlNode , &lBareNode );
-    setModule ( aXmlNode , &lBareNode );
-    setPermissions ( aXmlNode , &lBareNode );
-    //setMask( aXmlNode , lNode );
-    setModeAndSize ( aXmlNode , &lBareNode );
-    addChildren ( aXmlNode , &lBareNode );
-    
-    Node* lNode ( NULL ) ;
-    
-    if ( lIt == mCreators.end() )
-    {
-      //exception::LabelUnknownToClassFactory lExc;
-      log ( Warning , "Class " , Quote ( lClass.mClass ) , " is unknown to the NodeTreeBuilder class factory." );
-
-      if ( mCreators.size() )
-      {
-        log ( Warning , "Known types are:" );
-
-        for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
-        {
-          log ( Warning , "    > " , lIt->first );
-        }
-      }
-      else
-      {
-        log ( Warning , "No class types have been defined" );
-      }
-
-      log ( Warning, "Will return a plain node for now, but you have been warned!" );
-      //throw lExc;
-      lNode = new Node();
-    }
-    else
-    {
-      lNode = lIt->second->create ( lBareNode );
-    }
-    
-    log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
-    
-    return lNode;
-  }
-
-
-  Node* NodeTreeBuilder::moduleNodeCreator ( const pugi::xml_node& aXmlNode )
+  Node* NodeTreeBuilder::moduleNodeCreator (  const bool& aRequireId , const pugi::xml_node& aXmlNode )
   {
     std::string lModule;
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mModuleAttribute , lModule );
     Node* lNode ( getNodeTree ( lModule , mFileCallStack.back( ) ) );
-    setUid ( true , aXmlNode , lNode );
+    setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
+    setClassName ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
@@ -366,7 +417,15 @@ namespace uhal
     //setModeAndSize( aXmlNode , lNode );
     //addChildren( aXmlNode , lNode );
     log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
-    return lNode;
+
+    if ( lNode->mClassName.size() )
+    {
+      return convertToClassType( lNode );
+    }
+    else    
+    {
+      return lNode;
+    }
   }
 
 
@@ -382,6 +441,7 @@ namespace uhal
     Node* lNode ( new Node() );
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode ); //was commented out, see https://svnweb.cern.ch/trac/cactus/ticket/92
+    setClassName ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
@@ -421,13 +481,51 @@ namespace uhal
     aNode->mPartialAddr |= lAddr;
   }
 
+
+  void NodeTreeBuilder::setClassName ( const pugi::xml_node& aXmlNode , Node* aNode )
+  {
+    //Address is an optional attribute for hierarchical addressing
+    std::string lClassStr;
+    uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
+    if ( lClassStr.size() )
+    {
+      //parse the string into a NodeTreeClassAttribute object
+      std::string::const_iterator lBegin ( lClassStr.begin() );
+      std::string::const_iterator lEnd ( lClassStr.end() );
+      NodeTreeClassAttribute lClass;
+      boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
+
+      aNode->mClassName = lClass.mClass;
+  
+      if ( lClass.mArguments.size() )
+      {
+        boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::Apr , 1 );
+        boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
+        boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
+  
+        if ( lTimeToExpiry.is_negative() )
+        {
+          log ( Error , "Support for the old-style class attributes (class=\"classname;attr1=val1;attr2=val2\") expired on 1st April 2014. Please update your address table to use the format 'class=\"classname\" parameters=\"attr1=val1;attr2=val2\"'." );
+          sleep ( 60 );
+        }
+        else
+        {
+          log ( Warning , "Support for the old-style class attributes ('class=\"classname;attr1=val1;attr2=val2\"') will expire on 1st April 2014. Please update your address table to use the format 'class=\"classname\" parameters=\"attr1=val1;attr2=val2\"'. Functionality will be limited after this expiry date." );
+        }
+
+        aNode->mParameters.insert( lClass.mArguments.begin() , lClass.mArguments.end() );
+      }
+    }
+  }
+
   void NodeTreeBuilder::setPars ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
     
     std::string lParsStr;
     //get attribute from xml file as string
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mParametersAttribute , lParsStr );
-    if ( lParsStr.size() ) {
+    if ( lParsStr.size() )
+    {
         //parse the string into a NodeTreeParameters object
         std::string::const_iterator lBegin ( lParsStr.begin() );
         std::string::const_iterator lEnd ( lParsStr.end() );

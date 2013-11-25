@@ -165,11 +165,12 @@ namespace uhal
 
 
       Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
-      Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
-      Node* moduleNodeCreator ( const pugi::xml_node& aXmlNode );
+//       Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
+      Node* moduleNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
       Node* bitmaskNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 
       void setUid ( const bool& aRequireId , const pugi::xml_node& aXmlNode , Node* aNode );
+      void setClassName ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setPars ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setAddr ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setTags ( const pugi::xml_node& aXmlNode , Node* aNode );
@@ -195,10 +196,12 @@ namespace uhal
       Parser< Node* > mTopLevelNodeParser;
       Parser< Node* > mNodeParser;
 
-
       std::deque< boost::filesystem::path > mFileCallStack;
 
     private:
+
+      Node* convertToClassType( Node* aNode );
+
 
       /**
       Method to create an associate between a node type identifier and a Creator of that particular node type

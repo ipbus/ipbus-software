@@ -86,6 +86,7 @@ namespace uhal
     mTags ( "" ),
     mDescription ( "" ),
     mModule ( "" ),
+    mClassName( "" ),
     mParameters ( ),
     mChildren ( ),
     mChildrenMap ( )
@@ -105,6 +106,7 @@ namespace uhal
     mTags ( aNode.mTags ),
     mDescription ( aNode.mDescription ),
     mModule ( aNode.mModule ),
+    mClassName( aNode.mClassName ),
     mParameters ( aNode.mParameters ),
     mChildren ( ),
     mChildrenMap ( )
@@ -141,6 +143,7 @@ namespace uhal
     mTags = aNode.mTags;
     mDescription = aNode.mDescription;
     mModule = aNode.mModule;
+    mClassName = aNode.mClassName;
     mParameters = aNode.mParameters;
 
     for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
@@ -272,7 +275,9 @@ namespace uhal
 #ifdef __GNUG__
       // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
       int lStatus ( 0 );
-      aStr << abi::__cxa_demangle ( typeid ( *this ).name() , 0 , 0 , &lStatus );
+      static std::size_t lSize ( 1024 );
+      static char* lDemangled = new char[lSize];
+      aStr << ( abi::__cxa_demangle ( typeid ( *this ).name() , lDemangled , &lSize , &lStatus ) );
 #else
       aStr << typeid ( *this ).name();
 #endif
@@ -323,6 +328,11 @@ namespace uhal
     {
       aStr << ", Module \"" << mModule << "\"";
     }
+
+    if ( mClassName.size() )
+    {
+      aStr << ", Class Name \"" << mClassName << "\"";
+    }
     
     if ( mParameters.size() )
     {
@@ -330,7 +340,7 @@ namespace uhal
       boost::unordered_map<std::string, std::string>::const_iterator lIt;
       for ( lIt = mParameters.begin(); lIt != mParameters.end(); ++lIt )
       {
-        aStr << lIt->first << "=" << lIt->second;
+        aStr << lIt->first << "=" << lIt->second << ";";
       }
     }
     

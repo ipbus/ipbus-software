@@ -7,7 +7,7 @@ using namespace uhal;
 
 int main ( int argc,char* argv[] )
 {
-   HwInterface hw=ConnectionManager::getDevice ( "test_device_id","ipbusudp-2.0://192.168.0.128:50001","file://etc/uhal/tests/dummy_derived.xml" );
+   HwInterface hw=ConnectionManager::getDevice ( "test_device_id","ipbusudp-2.0://192.168.0.128:50001","file://tests/etc/uhal/tests/dummy_derived.xml" );
 
    log( Notice(), "Derived 1");
    hw.getNode<DummyDerivedNode>("derived").print();
