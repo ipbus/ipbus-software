@@ -245,28 +245,6 @@ namespace uhal
       */
       ValHeader writeBlock ( const std::vector< uint32_t >& aValues ) const;
 
-      // /**
-      // DEPRICATED! Write a block of data to a block of registers or a block-write port
-      // @param aValues the values to write to the registers or a block-write port
-      // @param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
-      // @return a Validated Header which will contain the returned IPbus header
-      // @warning DEPRICATED and will be removed in the next release!
-      // **/
-      // ValHeader writeBlock ( const std::vector< uint32_t >& aValues , const defs::BlockReadWriteMode& aMode )
-      // {
-      //   log ( Error() , "THIS METHOD IS DEPRECATED! "
-      //         "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-      //         "AND CHANGE THE FUNCTION CALL TO writeBlock ( const std::vector< uint32_t >& aValues ). "
-      //         "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-      //         "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-      //   defs::BlockReadWriteMode lMode ( mMode );
-      //   mMode = aMode;
-      //   ValHeader lReply ( writeBlock ( aValues ) );
-      //   mMode = lMode;
-      //   return lReply;
-      // }
-
-
       /**
       	Read a single, unmasked, unsigned word
       	@return a Validated Memory which wraps the location to which the reply data is to be written
@@ -279,78 +257,6 @@ namespace uhal
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
       ValVector< uint32_t > readBlock ( const uint32_t& aSize ) const;
-
-      // /**
-      //	DEPRICATED! Read a block of unsigned data from a block of registers or a block-read port
-      //	@param aSize the number of words to read
-      //	@param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-      //	@return a Validated Memory which wraps the location to which the reply data is to be written
-      // @warning DEPRICATED and will be removed in the next release!
-      // 
-      // ValVector< uint32_t > readBlock ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
-      // {
-      //   log ( Error() , "THIS METHOD IS DEPRECATED! "
-      //         "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-      //         "AND CHANGE THE FUNCTION CALL TO readBlock ( const uint32_t& aSize ). "
-      //         "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-      //         "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-      //   defs::BlockReadWriteMode lMode ( mMode );
-      //   mMode = aMode;
-      //   ValVector< uint32_t > lRet ( readBlock ( aSize ) );
-      //   mMode = lMode;
-      //   return lRet;
-      // }
-
-      // /*
-      // Read a single, unmasked word and interpret it as being signed
-      // @return a Validated Memory which wraps the location to which the reply data is to be written
-      // */
-      // ValWord< int32_t > readSigned ( );
-
-      // /*
-      // Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-      // @param aSize the number of words to read
-      // @return a Validated Memory which wraps the location to which the reply data is to be written
-      // */
-      // ValVector< int32_t > readBlockSigned ( const uint32_t& aSize );
-
-
-      // /*
-      // DEPRICATED! Read a block of data from a block of registers or a block-read port and interpret it as being signed data
-      // @param aSize the number of words to read
-      // @return a Validated Memory which wraps the location to which the reply data is to be written
-      // @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-      // @warning DEPRICATED and will be removed in the next release!
-      // */
-      // ValVector< int32_t > readBlockSigned ( const uint32_t& aSize , const defs::BlockReadWriteMode& aMode )
-      // {
-      // log ( Error() , "THIS METHOD IS DEPRECATED! "
-      // "PLEASE MODIFY YOUR ADDRESS FILE TO ADD THE INCREMENTAL/NON_INCREMENTAL FLAGS THERE "
-      // "AND CHANGE THE FUNCTION CALL TO readBlockSigned ( const uint32_t& aSize ). "
-      // "I WILL ATTEMPT A HACK TO CALL THIS FUNCTION BUT BE WARNED. "
-      // "THIS METHOD WILL BE REMOVED IN THE NEXT RELEASE!" );
-      // defs::BlockReadWriteMode lMode ( mMode );
-      // mMode = aMode;
-      // ValVector< int32_t > lRet ( readBlockSigned ( aSize ) );
-      // mMode = lMode;
-      // return lRet;
-      // }
-
-
-      // /*
-      // Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
-      // @param aANDterm the AND-term to apply to existing value in the target register
-      // @param aORterm the OR-term to apply to existing value in the target register
-      // @return a Validated Memory which wraps the location to which the reply data is to be written
-      // */
-      // ValWord< uint32_t > rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm );
-
-      // /*
-      // Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
-      // @param aAddend the addend to add to the existing value in the target register
-      // @return a Validated Memory which wraps the location to which the reply data is to be written
-      // */
-      // ValWord< uint32_t > rmw_sum ( const int32_t& aAddend );
 
 
       /**

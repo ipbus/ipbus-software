@@ -66,6 +66,7 @@ protected: \
 namespace uhal
 {
 
+  //! A class to provide a CRTP implementation of the clone method to save the user from having to do it
   template < typename DerivedType, typename NodeType = Node >
   class DerivedNode : public NodeType {
     BOOST_STATIC_ASSERT(( boost::is_base_of<Node, NodeType>::value ));

@@ -6,16 +6,22 @@
 #include "uhal/log/log.hpp"
 #include <iostream>
 
+//! A derived node class for use in the test suite
 class ClassLvl1Node : public uhal::Node {
   UHAL_DERIVEDNODE(ClassLvl1Node);
   public:
-
+    /**
+      Constructor
+      @param aNode a node which is deep-copied to create the current node
+    */
   ClassLvl1Node(const Node& aNode) : uhal::Node(aNode) {
   }
 
+  //! Destructor
   virtual ~ClassLvl1Node() {
   }
 
+    //! Method to print information about the current node type
   void printParameters() const {
     const boost::unordered_map<std::string, std::string>& lParameters = getParameters();
     boost::unordered_map<std::string, std::string>::const_iterator it;
@@ -33,13 +39,22 @@ UHAL_REGISTER_DERIVED_NODE(ClassLvl1Node)
 /**
  * Class further derived from Level1
  */
-
 class ClassLvl2Node : public ClassLvl1Node {
   UHAL_DERIVEDNODE(ClassLvl2Node)
   public:
+      /**
+      Constructor
+      @param aNode a node which is deep-copied to create the current node
+    */
     ClassLvl2Node(const Node& aNode) : ClassLvl1Node(aNode) {
     }
 
+    //! Destructor
+    virtual ~ClassLvl2Node() {
+    }
+
+  
+    //! Method to print information about the current node type
     void printParameters() const {
       log(uhal::Warning(), "This is ", getClassName());
       ClassLvl1Node::printParameters();

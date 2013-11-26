@@ -46,7 +46,11 @@ namespace uhal
   //! boost::fusion requires us to typedef our template types, so typedef a container which can hold key/value pairs
   typedef std::vector< std::pair<std::string, std::string> > NameValuePairVectorType;
 
-  //! Struct to store the name and member variables within a node class attribute when parsed by boost spirit
+  /**
+    Struct to store the name and member variables within a node class attribute when parsed by boost spirit
+    The class attribute has the form "classname;name1=val1;name2=val2;name3=val3;" where the name-value pairs are optional, 
+    as is the trailing semicolon
+  */
   struct NodeTreeClassAttribute
   {
     //! The name of the class
@@ -75,15 +79,15 @@ namespace grammars
     NodeTreeClassAttributeGrammar();
     //! Boost spirit parsing rule for parsing a NodeTreeClassAttribute
     boost::spirit::qi::rule< std::string::const_iterator,	uhal::NodeTreeClassAttribute(), 						boost::spirit::ascii::space_type > start;
-    //! Boost spirit parsing rule for parsing a NodeTreeClassAttribute
+    //! Boost spirit parsing rule for parsing the "classname" part of a NodeTreeClassAttribute
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > classname;
-    //! Boost spirit parsing rule for parsing a NodeTreeClassAttribute
+    //! Boost spirit parsing rule for parsing all the "name-value pairs" of a NodeTreeClassAttribute
     boost::spirit::qi::rule< std::string::const_iterator,	std::vector< std::pair<std::string, std::string> > (),	boost::spirit::ascii::space_type > data_pairs_vector; //NameValuePairVectorType
-    //! Boost spirit parsing rule for parsing a NodeTreeClassAttribute
+    //! Boost spirit parsing rule for parsing each of the "name-value pairs" of a NodeTreeClassAttribute
     boost::spirit::qi::rule< std::string::const_iterator,	std::pair<std::string, std::string>(),					boost::spirit::ascii::space_type > data_pairs;
-    //! Boost spirit parsing rule for parsing a NodeTreeClassAttribute
+    //! Boost spirit parsing rule for parsing the "name" part of the "name-value pairs" of a NodeTreeClassAttribute
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_1;
-    //! Boost spirit parsing rule for parsing a NodeTreeClassAttribute
+    //! Boost spirit parsing rule for parsing the "value" part of the "name-value pairs" of a NodeTreeClassAttribute
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_2;
   };
 }

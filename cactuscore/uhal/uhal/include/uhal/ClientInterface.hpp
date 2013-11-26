@@ -77,11 +77,12 @@ namespace uhal
     //! Exception class to handle the case where we were unable to validate the packet.
     ExceptionClass ( ValidationError , "Exception class to handle the case where we were unable to validate the packet." );
 
+    //! Exception class to handle a NULL buffer being passed to the transport class.
     ExceptionClass ( NullBufferException , "Exception class to handle a NULL buffer being passed to the transport class." );
 
   }
 
-  //! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing funcationality
+  //! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing functionality
   class ClientInterface
   {
     protected:
@@ -89,12 +90,13 @@ namespace uhal
       	Constructor
       	@param aId the uinique identifier that the client will be given.
       	@param aUri a struct containing the full URI of the target.
+        @param aTimeoutPeriod the default timeout period for the protocol
       */
       ClientInterface ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod = boost::posix_time::pos_infin );
 
     private:
       /**
-      	Null Constructor
+      	Default Constructor
       */
       ClientInterface ();
 
@@ -141,17 +143,24 @@ namespace uhal
 
       /**
       	A method to modify the timeout period for any pending or future transactions
+        @warning Protected by user mutex, so only for use from user side (not from client code)
       	@param aTimeoutPeriod the desired timeout period in milliseconds
       */
       void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod  = 0 );
 
       /**
       	A method to retrieve the timeout period currently being used
+        @warning Protected by user mutex, so only for use from user side (not from client code)
       	@return the timeout period currently being used in milliseconds
       */
       uint64_t getTimeoutPeriod();
 
     protected:
+      /**
+      	A method to retrieve the timeout period currently being used
+        @warning NOT protected by user mutex, so only for use from client side (not from user code - hence protected)
+      	@return the timeout period currently being used as a boost time_duration
+      */    
       const boost::posix_time::time_duration& getBoostTimeoutPeriod();
 
     public:
@@ -221,13 +230,13 @@ namespace uhal
       ValWord< uint32_t > rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend );
 
     protected:
-
-
       /**
-      Send a byte order transaction
+        Pure virtual function which actually performs the dispatch operation
+        @param aBuffers the buffer to be dispatched
       */
       virtual void implementDispatch ( boost::shared_ptr< Buffers > aBuffers ) = 0;
 
+      //! Virtual function to dispatch all buffers and block until all replies are received
       virtual void Flush( );
 
 
@@ -298,16 +307,33 @@ namespace uhal
 
       /**
       	Finalize the buffer before it is transmitted
+        @param aBuffers the buffer to finalize before dispatch
       */
       virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
 
-
+      /**
+        Helper function to create a ValHeader object
+        @return a std::pair containing the ValHeader object and a pointer to the underlying memory object
+      */
       std::pair < ValHeader , _ValHeader_* > CreateValHeader();
+      /**
+        Helper function to create a ValWord object
+        @param aValue an initial value
+        @param aMask a bit-mask for selecting a subset of bits in the word
+        @return a std::pair containing the ValWord object and a pointer to the underlying memory object
+      */      
       std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > CreateValWord ( const uint32_t& aValue , const uint32_t& aMask = defs::NOMASK );
+      
+      /**
+        Helper function to create a ValVector object
+        @param aSize the size of the ValVector
+        @return a std::pair containing the ValVector object and a pointer to the underlying memory object
+      */          
       std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > CreateValVector ( const uint32_t& aSize );
 
       /**
         	Function which dispatch calls when the reply is received to check that the headers are as expected
+          @param aBuffers the buffer to validate when it is propagated with replies
         	@return whether the returned packet is valid
         */
       virtual  exception::exception* validate ( boost::shared_ptr< Buffers > aBuffers );
@@ -328,14 +354,35 @@ namespace uhal
           std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
           std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt ) = 0;
 
+      //! Function which is called when an exception is thrown
       virtual void dispatchExceptionHandler();
 
+      /**
+        Function to return a buffer to the buffer pool
+        @param aBuffers a shared-pointer to a buffer to be returned to the buffer pool
+      */
       void returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers );
+      /**
+        Function to return a collection of buffers to the buffer pool
+        @param aBuffers a collection of shared-pointers to a buffer to be returned to the buffer pool
+      */
       void returnBufferToPool ( std::deque< boost::shared_ptr< Buffers > >& aBuffers );
+      /**
+        Function to return a collection of buffers to the buffer pool
+        @param aBuffers a collection of shared-pointers to a buffer to be returned to the buffer pool
+      */
       void returnBufferToPool ( std::vector< boost::shared_ptr< Buffers > >& aBuffers );
+      /**
+        Function to return a collection of buffers to the buffer pool
+        @param aBuffers a collection of shared-pointers to a buffer to be returned to the buffer pool
+      */
       void returnBufferToPool ( std::deque< std::vector< boost::shared_ptr< Buffers > > >& aBuffers );
 
     private:
+      /**
+        If the current buffer is null, allocate a buffer from the buffer pool for it
+        If the buffer pool is empty, create 10 new buffers
+      */
       void updateCurrentBuffers();
       void deleteBuffers();
 
@@ -343,7 +390,9 @@ namespace uhal
     private:
       //! A MutEx lock used to make sure the access functions are thread safe
       boost::mutex mUserSideMutex;
+      
 #ifdef RUN_ASIO_MULTITHREADED
+      //! A MutEx lock used to make sure the access to the buffers is thread safe
       boost::mutex mBufferMutex;
 #endif
 
@@ -351,6 +400,7 @@ namespace uhal
       std::deque < boost::shared_ptr< Buffers > > mBuffers;
 
 #ifdef NO_PREEMPTIVE_DISPATCH
+      //! A deque to store buffers pending dispatch for the case where pre-emptive dispatch is disabled
       std::deque < boost::shared_ptr< Buffers > > mNoPreemptiveDispatchBuffers;
 #endif
 
@@ -380,11 +430,21 @@ namespace uhal
       virtual boost::shared_ptr< Buffers > checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 
 
+      /**
+        Return the maximum number of packets in flight
+        @return the maximum number of packets in flight
+      */
       virtual uint32_t getMaxNumberOfBuffers() = 0;
+      /**
+        Return the maximum size to be sent based on the buffer size in the target
+        @return the maximum size to be sent
+      */
       virtual uint32_t getMaxSendSize() = 0;
+      /**
+        Return the maximum size of reply packet based on the buffer size in the target
+        @return the maximum size of reply packet
+      */
       virtual uint32_t getMaxReplySize() = 0;
-
-
   };
 
 

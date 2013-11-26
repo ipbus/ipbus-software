@@ -44,17 +44,17 @@
 namespace grammars
 {
 
-  //! The BOOST::SPIRIT grammar for parsing the Semicolon delimited URI list
+  //! The BOOST::SPIRIT grammar for parsing the Semicolon delimited URI list into a vector of protocol-URI pairs
   struct SemicolonDelimitedUriListGrammar : boost::spirit::qi::grammar< std::string::const_iterator , std::vector< std::pair<std::string, std::string> >() , boost::spirit::ascii::space_type >
   {
     SemicolonDelimitedUriListGrammar();
     //! Boost spirit parsing rule for parsing a Semicolon delimited URI list
     boost::spirit::qi::rule< std::string::const_iterator , std::vector< std::pair<std::string, std::string> > () ,	boost::spirit::ascii::space_type > data_pairs_vector;
-    //! Boost spirit parsing rule for parsing a Semicolon delimited URI list
+    //! Boost spirit parsing rule for parsing each entry within a Semicolon delimited URI list
     boost::spirit::qi::rule< std::string::const_iterator , std::pair<std::string, std::string>() ,					boost::spirit::ascii::space_type > data_pairs;
-    //! Boost spirit parsing rule for parsing a Semicolon delimited URI list
+    //! Boost spirit parsing rule for parsing the "protocol" part of each entry in a Semicolon delimited URI list
     boost::spirit::qi::rule< std::string::const_iterator , std::string() ,											boost::spirit::ascii::space_type > data_pairs_1;
-    //! Boost spirit parsing rule for parsing a Semicolon delimited URI list
+    //! Boost spirit parsing rule for parsing the "URI" part of each entry in a Semicolon delimited URI list
     boost::spirit::qi::rule< std::string::const_iterator , std::string() ,											boost::spirit::ascii::space_type > data_pairs_2;
   };
 

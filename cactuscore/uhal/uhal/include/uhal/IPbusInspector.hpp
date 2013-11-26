@@ -63,7 +63,7 @@ namespace uhal
   {
     public:
       /**
-        Constructor
+        Default constructor
       */
       HostToTargetInspector( );
       /**
@@ -100,23 +100,76 @@ namespace uhal
       */
       bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError = true );
     protected:
+      /**
+        Virtual callback function called when a Byte-OrderTransaction is observed
+      */
       virtual void bot();
+      /**
+        Virtual callback function called when a non-incrementing read is observed
+        @param aAddress the base address of the read
+      */
       virtual void ni_read ( const uint32_t& aAddress );
 
+      /**
+        Virtual callback function called when an incrementing read is observed
+        @param aAddress the base address of the read
+      */
       virtual void read ( const uint32_t& aAddress );
 
+      /**
+        Virtual callback function called when a non-incrementing write is observed
+        @param aAddress the base address of the write
+        @param aIt iterator to the start of the payload
+        @param aEnd iterator to the end of the payload
+      */
       virtual void ni_write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd );
+
+      /**
+        Virtual callback function called when an incrementing write is observed
+        @param aAddress the base address of the write
+        @param aIt iterator to the start of the payload
+        @param aEnd iterator to the end of the payload
+      */
       virtual void write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd );
+
+      /**
+        Virtual callback function called when a read-modify-write sum is observed
+        @param aAddress the base address of the write
+        @param aAddend the value to be added
+      */
       virtual void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend );
+
+      /**
+        Virtual callback function called when a read-modify-write bits is observed
+        @param aAddress the base address of the write
+        @param aAndTerm the value to be and'ed
+        @param aOrTerm the value to be or'ed
+      */
       virtual void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm );
+
+      /**
+        Virtual callback function for the case where the header is unknown
+      */
       virtual void unknown_type();
 
+      /**
+        Virtual callback function called when an IPbus 2.0 control packet header is observed
+      */
       virtual bool control_packet_header ();
 
+      /**
+        Virtual callback function called when an IPbus 2.0 status packet header is observed
+      */
       virtual void status_packet_header();
 
+      /**
+        Virtual callback function called when an IPbus 2.0 resend packet header is observed
+      */
       virtual void resend_packet_header();
 
+      /**
+        Virtual callback function called when an unknown IPbus 2.0 packet header is observed
+      */
       virtual void unknown_packet_header();
 
   };
@@ -133,7 +186,7 @@ namespace uhal
   {
     public:
       /**
-        Constructor
+        Default constructor
       */
       TargetToHostInspector( );
       /**
@@ -172,26 +225,63 @@ namespace uhal
       bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError = true );
 
     protected:
+      /**
+        Virtual callback function called when a Byte-OrderTransaction is observed
+      */
       virtual void bot();
 
+      /**
+        Virtual callback function called when a non-incrementing read is observed
+        @param aIt iterator to the start of the payload
+        @param aEnd iterator to the end of the payload        
+      */
       virtual void ni_read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd );
 
+      /**
+        Virtual callback function called when an incrementing read is observed
+        @param aIt iterator to the start of the payload
+        @param aEnd iterator to the end of the payload        
+      */
       virtual void read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd );
-
+      /**
+        Virtual callback function called when a non-incrementing write is observed
+      */
       virtual void ni_write ( );
-
+      /**
+        Virtual callback function called when an incrementing write is observed
+      */
       virtual void write ( );
 
+      /**
+        Virtual callback function called when a read-modify-write sum is observed
+        @param aNewValue the value before/after the change (depending on IPbus version)
+      */
       virtual void rmw_sum ( const uint32_t& aNewValue );
-
+ 
+      /**
+        Virtual callback function called when a read-modify-write bits is observed
+        @param aNewValue the value before/after the change (depending on IPbus version)
+      */
       virtual void rmw_bits ( const uint32_t& aNewValue );
 
+      /**
+        Virtual callback function for the case where the header is unknown
+      */
       virtual void unknown_type();
 
+      /**
+        Virtual callback function called when an IPbus 2.0 control packet header is observed
+      */
       virtual bool control_packet_header ();
 
+      /**
+        Virtual callback function called when an IPbus 2.0 status packet header is observed
+      */
       virtual void status_packet_header();
 
+      /**
+        Virtual callback function called when an unknown IPbus 2.0 packet header is observed
+      */
       virtual void unknown_packet_header();
 
   };

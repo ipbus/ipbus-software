@@ -42,16 +42,20 @@
 
 namespace grammars
 {
-  ////! A struct wrapping a set of rules as a grammar that can parse a NodeTreeParametersGrammar of the form "name1=val1;name2=val2;name3=val3"
-
-  struct NodeTreeParametersGrammar
-  : boost::spirit::qi::grammar<std::string::const_iterator, boost::unordered_map<std::string, std::string>()>
+  //! A struct wrapping a set of rules as a grammar that can parse a NodeTreeParametersGrammar of the form "name1=val1;name2=val2;name3=val3"
+  struct NodeTreeParametersGrammar : boost::spirit::qi::grammar<std::string::const_iterator, boost::unordered_map<std::string, std::string>()>
   {
+    //! Default Constructor where we will define the boost::qi rules relating the members
     NodeTreeParametersGrammar();
+    //! Boost spirit parsing rule for parsing a NodeTree Parameters attribute    
     boost::spirit::qi::rule<std::string::const_iterator, boost::unordered_map<std::string, std::string>()> query;
+    //! Boost spirit parsing rule for parsing each of the "name-value pairs" of a NodeTree Parameters attribute
     boost::spirit::qi::rule<std::string::const_iterator, std::pair<std::string, std::string>()> pair;
-    boost::spirit::qi::rule<std::string::const_iterator, std::string()> key, value;
-};
+    //! Boost spirit parsing rule for parsing the "name" part of the "name-value pairs" of a NodeTreeParameters attribute
+    boost::spirit::qi::rule<std::string::const_iterator, std::string()> key;
+    //! Boost spirit parsing rule for parsing the "value" part of the "name-value pairs" of a NodeTreeParameters attribute
+    boost::spirit::qi::rule<std::string::const_iterator, std::string()> value;
+  };
 }
 
 #endif

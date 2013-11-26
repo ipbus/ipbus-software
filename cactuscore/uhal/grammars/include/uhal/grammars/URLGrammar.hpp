@@ -91,23 +91,23 @@ namespace grammars
     URIGrammar();
     //! Boost spirit parsing rule for parsing a URI
     boost::spirit::qi::rule< std::string::const_iterator,	uhal::URI(), 											boost::spirit::ascii::space_type > start;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing the "protocol" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > protocol;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing the "hostname" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > hostname;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing the "port" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > port;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing the "path" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > path;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing the "extension" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > extension;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing all of the "key-value pairs" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::vector< std::pair<std::string, std::string> > (),	boost::spirit::ascii::space_type > data_pairs_vector; //NameValuePairVectorType
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing each of the "key-value pairs" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::pair<std::string, std::string>(),					boost::spirit::ascii::space_type > data_pairs;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing the "key" part of the "key-value pairs" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_1;
-    //! Boost spirit parsing rule for parsing a URI
+    //! Boost spirit parsing rule for parsing the "value" part of the "key-value pairs" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_2;
   };
 }

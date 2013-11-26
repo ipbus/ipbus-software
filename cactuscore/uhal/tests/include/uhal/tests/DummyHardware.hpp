@@ -51,18 +51,26 @@
 // Using the uhal namespace
 namespace uhal
 {
+  //! The mask for the address space (size od the address space in one larger than this) 
   static const uint32_t ADDRESSMASK = 0x00FFFFFF;
+  //! The size of the reply history for IPbus 2.0
   static const uint32_t REPLY_HISTORY_DEPTH = 5;
+  //! Size of the receive and reply buffers
   static const uint32_t BUFFER_SIZE = 100000;
 
 
-
+  //! Abstract base class to emulate IPbus hardware
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class DummyHardware : public HostToTargetInspector< IPbus_major , IPbus_minor >
   {
       typedef HostToTargetInspector< IPbus_major , IPbus_minor > base_type;
 
     public:
+      /**
+        Constructor
+        @param aReplyDelay a time delay between the reply and response for the first transaction
+        @param aBigEndianHack whether we are using the dummy hardware with a client which uses the big-endian hack.
+      */
       DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) : HostToTargetInspector< IPbus_major , IPbus_minor >() ,
         mMemory ( ADDRESSMASK+1 , 0x00000000 ),
         mReplyDelay ( aReplyDelay ),
@@ -77,12 +85,22 @@ namespace uhal
       {
       }
 
+      /**
+        Destructor
+      */
       virtual ~DummyHardware()
       {
       }
 
+      /**
+        Function which "starts" the dummy hardware
+      */
       virtual void run() = 0;
 
+      /**
+        Function which analyses the received IPbus packet and creates the suitable response
+        @param aByteCount the number of bytes received
+      */
       void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount )
       {
         //        std::cout << aByteCount << " bytes received" << std::endl;
@@ -165,6 +183,9 @@ namespace uhal
       }
 
     private:
+      /**
+        Analyse request and create reply when a Byte-OrderTransaction is observed
+      */    
       void bot()
       {
         mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
@@ -174,7 +195,10 @@ namespace uhal
         mSentControlPacketHeaderHistory.push_back ( lExpected );
         mSentControlPacketHeaderHistory.pop_front();
       }
-
+      /**
+        Analyse request and create reply when a non-incrementing read is observed
+        @param aAddress the base address of the read
+      */
       void ni_read ( const uint32_t& aAddress )
       {
         mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
@@ -190,7 +214,10 @@ namespace uhal
           mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
         }
       }
-
+      /**
+        Analyse request and create reply when an incrementing read is observed
+        @param aAddress the base address of the read
+      */
       void read ( const uint32_t& aAddress )
       {
         mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
@@ -207,6 +234,12 @@ namespace uhal
         }
       }
 
+      /**
+        Analyse request and create reply when a non-incrementing write is observed
+        @param aAddress the base address of the write
+        @param aIt iterator to the start of the payload
+        @param aEnd iterator to the end of the payload
+      */
       void ni_write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
         mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
@@ -234,6 +267,12 @@ namespace uhal
         mSentControlPacketHeaderHistory.pop_front();
       }
 
+      /**
+        Analyse request and create reply when an incrementing write is observed
+        @param aAddress the base address of the write
+        @param aIt iterator to the start of the payload
+        @param aEnd iterator to the end of the payload
+      */
       void write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
       {
         mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
@@ -261,6 +300,11 @@ namespace uhal
         mSentControlPacketHeaderHistory.pop_front();
       }
 
+      /**
+        Analyse request and create reply when a read-modify-write sum is observed
+        @param aAddress the base address of the write
+        @param aAddend the value to be added
+      */
       void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
       {
         mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
@@ -285,6 +329,12 @@ namespace uhal
         }
       }
 
+      /**
+        Analyse request and create reply when a read-modify-write bits is observed
+        @param aAddress the base address of the write
+        @param aAndTerm the value to be and'ed
+        @param aOrTerm the value to be or'ed
+      */
       void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
       {
         mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
@@ -311,6 +361,9 @@ namespace uhal
         }
       }
 
+      /**
+        Analyse request and create reply when the header is unknown
+      */
       void unknown_type()
       {
         log ( Error() , Integer ( base_type::mHeader, IntFmt<hex,fixed>() ) , " is an unknown IPbus transaction header. Returning error code." );
@@ -322,6 +375,9 @@ namespace uhal
         mSentControlPacketHeaderHistory.pop_front();
       }
 
+      /**
+        Analyse request and create reply when an IPbus 2.0 control packet header is observed
+      */
       bool control_packet_header ()
       {
         //         if ( LoggingIncludes ( Debug() ) )
@@ -353,7 +409,9 @@ namespace uhal
         return true;
       }
 
-
+      /**
+        Analyse request and create reply when an IPbus 2.0 status packet header is observed
+      */
       void status_packet_header ( )
       {
         //         if ( LoggingIncludes ( Debug() ) )
@@ -402,6 +460,9 @@ namespace uhal
       }
 
 
+      /**
+        Analyse request and create reply when an IPbus 2.0 resend packet header is observed
+      */
       void resend_packet_header ()
       {
         //         if ( LoggingIncludes ( Debug() ) )
@@ -423,6 +484,9 @@ namespace uhal
         mTrafficHistory.pop_front();
       }
 
+      /**
+        Analyse request and create reply when an unknown IPbus 2.0 packet header is observed
+      */
       void unknown_packet_header()
       {
         mTrafficHistory.push_back ( 5 );
@@ -432,22 +496,33 @@ namespace uhal
 
 
     private:
+      //! The memory space of the virtual hardware
       std::vector< uint32_t > mMemory;
+      //! The delay in seconds between the request and reply of the first transaction
       uint32_t mReplyDelay;
 
     protected:
+      //! The buffer for the incoming IPbus packet
       std::vector< uint32_t > mReceive;
+      //! The buffer for the outgoing IPbus packet
       std::vector< uint32_t > mReply;
 
-      //IPbus 2.0 and above only
+      //! The history of the replies for the retry mechanism (IPbus 2.0 and above only)
       std::deque< std::pair< uint32_t , std::vector< uint32_t > > > mReplyHistory;
+      
+      //! The last sent packet header for the retry mechanism (IPbus 2.0 and above only)
       uint32_t mLastPacketHeader;
+      
+      //! History of the IPbus 2.0 packet-types received
       std::deque< uint8_t > mTrafficHistory;
 
+      //! History of the received control packet headers
       std::deque< uint32_t > mReceivedControlPacketHeaderHistory;
+      //! History of the sent control packet headers
       std::deque< uint32_t > mSentControlPacketHeaderHistory;
 
     private:
+      //! Whether we are talking to an IPbus client which includes the big-endian hack
       bool mBigEndianHack;
 
   };
@@ -457,15 +532,24 @@ namespace uhal
 
 
 
-
+  //! Struct to store the command line options
   struct CommandLineOptions
   {
+    //! The delay in seconds between the request and response of the first IPbus transaction
     uint32_t delay;
+    //! The port used by the dummy hardware
     uint16_t port;
+    //! Whether we use the big-endian hack
     bool bigendian;
+    //! IPbus version number - 1 or 2
     uint32_t version;
   };
 
+  /**
+    Function to parse the command line arguments into a struct containing the information
+    @param argc the number of command line arguments
+    @param argv array of c-strings containing the command line arguments
+  */
   CommandLineOptions ParseCommandLineOptions ( int argc,char* argv[] )
   {
     // Declare the supported options.

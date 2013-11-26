@@ -95,6 +95,7 @@ namespace uhal
       @param aType the type of the IPbus transaction
       @param aWordCount the word count field of the IPbus header
       @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction
       @return an IPbus header
       */
       static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
@@ -104,6 +105,7 @@ namespace uhal
       @param aType the type of the IPbus transaction
       @param aWordCount the word count field of the IPbus header
       @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction
       @return an IPbus header
       */
       static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
@@ -127,6 +129,7 @@ namespace uhal
       @param aType the type of the IPbus transaction
       @param aWordCount the word count field of the IPbus header
       @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction
       @return an IPbus header
       */
       uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
@@ -201,7 +204,7 @@ namespace uhal
 
       /**
         	Return the size of the preamble
-        */
+      */
       virtual uint32_t getPreambleSize();
 
       /**
@@ -215,6 +218,7 @@ namespace uhal
       @param aType the type of the IPbus transaction
       @param aWordCount the word count field of the IPbus header
       @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction      
       @return an IPbus header
       */
       static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
@@ -224,6 +228,7 @@ namespace uhal
       @param aType the type of the IPbus transaction
       @param aWordCount the word count field of the IPbus header
       @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction      
       @return an IPbus header
       */
       static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
@@ -261,6 +266,7 @@ namespace uhal
       @param aType the type of the IPbus transaction
       @param aWordCount the word count field of the IPbus header
       @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction      
       @return an IPbus header
       */
       uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );

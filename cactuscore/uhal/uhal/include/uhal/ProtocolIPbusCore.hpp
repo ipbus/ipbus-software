@@ -65,6 +65,12 @@ namespace uhal
   };
 }
 
+/**
+  Streaming operator for formatting objects of the uhal::eIPbusTransactionType
+  @param aStr a stream to which to append the formatted data
+  @param aIPbusTransactionType an enum object to be formatted
+  @return a reference to the stream for chaining stram calls
+*/
 std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType );
 
 
@@ -75,9 +81,11 @@ namespace uhal
     //! Exception class to handle the case where the IPbus header could not be parsed.
     ExceptionClass ( IPbusCoreUnparsableTransactionHeader , "Exception class to handle the case where the IPbus transaction header could not be parsed." );
     //     ExceptionClass ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." );
-
+    //! Exception class to handle the case where the IPbus transaction header response code indicated an error.
     ExceptionClass ( IPbusCoreResponseCodeSet , "Exception class to handle the case where the IPbus transaction header response code indicated an error." );
+    //! Exception class to handle the case where the IPbus transaction type came back as the wrong type.
     ExceptionClass ( IPbusTransactionTypeIncorrect , "Exception class to handle the case where the IPbus transaction type came back as the wrong type." );
+    //! Exception class to handle the case where the IPbus transaction id came back as incorrect.
     ExceptionClass ( IPbusTransactionIdIncorrect , "Exception class to handle the case where the IPbus transaction id came back as incorrect." );
 
   }
@@ -117,7 +125,15 @@ namespace uhal
 
     protected:
 
+      /**
+        Return the maximum size to be sent based on the buffer size in the target
+        @return the maximum size to be sent
+      */
       virtual uint32_t getMaxSendSize();
+      /**
+        Return the maximum size of reply packet based on the buffer size in the target
+        @return the maximum size of reply packet
+      */
       virtual uint32_t getMaxReplySize();
 
       /**
@@ -195,6 +211,7 @@ namespace uhal
       @param aType the type of the IPbus transaction
       @param aWordCount the word count field of the IPbus header
       @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction      
       @return an IPbus header
       */
       virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode ) = 0;
@@ -216,6 +233,7 @@ namespace uhal
       //! Returns the maximum value of the word count in the transaction header, for each IPbus version
       virtual uint32_t getMaxTransactionWordCount() const = 0;
 
+      //! Function which is called when an exception is thrown
       virtual void dispatchExceptionHandler();
 
     private:

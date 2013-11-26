@@ -36,13 +36,20 @@
 using boost::asio::ip::tcp;
 using namespace uhal;
 
-
+//! Concrete implementation of emulator of hardware using TCP
 template< uint8_t IPbus_major , uint8_t IPbus_minor >
 class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
 {
   public:
+    //! Define the underlying DummyHardware type to be a more convenient label
     typedef DummyHardware< IPbus_major , IPbus_minor > base_type;
 
+    /**
+      Constructor
+      @param aPort the port to be used by the hardware
+      @param aReplyDelay a time delay between the reply and response for the first transaction
+      @param aBigEndianHack whether we are using the dummy hardware with a client which uses the big-endian hack.
+    */
     TCPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
       DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay , aBigEndianHack ) ,
       mIOservice(),
@@ -51,11 +58,17 @@ class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
       mAcceptor.listen();
     }
 
-
+    /**
+      Destructor
+    */
     ~TCPdummyHardware()
     {
     }
 
+    /**
+      Concrete implementation of the run function
+      Starts the TCP server and runs indefinitely, until exception or user kills the server
+    */
     void run()
     {
       while ( true )
@@ -95,6 +108,7 @@ class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
 
           base_type::mReply.clear();
           base_type::mReply.push_back ( 0x00000000 );
+          //All responsibility for understanding the contents and replying is handled by the base class
           base_type::AnalyzeReceivedAndCreateReply ( lBytes );
           uint32_t lSize ( base_type::mReply.size() << 2 );
 
@@ -108,8 +122,11 @@ class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
     }
 
   private:
+    //! The BOOST ASIO io_service used by the TCP server
     boost::asio::io_service mIOservice;
+    //! The TCP acceptor which opens the TCP port and handles the connection
     tcp::acceptor mAcceptor;
+    //! The endpoint which sent the UDP datagram
     tcp::endpoint mSenderEndpoint;
 };
 
@@ -123,7 +140,7 @@ int main ( int argc, char* argv[] )
   {
     TCPdummyHardware<1,3> lDummyHardware ( lOptions.port , lOptions.delay , false );
 
-    while ( true )
+    while ( true ) //Is this necessary with the nested "while(true)"'s in the run function?
     {
       lDummyHardware.run();
     }
@@ -132,7 +149,7 @@ int main ( int argc, char* argv[] )
   {
     TCPdummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay, lOptions.bigendian );
 
-    while ( true )
+    while ( true ) //Is this necessary with the nested "while(true)"'s in the run function?
     {
       lDummyHardware.run();
     }
