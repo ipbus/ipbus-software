@@ -5,34 +5,43 @@
   <!-- DUMMY UDP -->
   <connection id="dummy.udp" uri="ipbusudp-1.3://localhost:50001"	address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.udp" uri="ipbusudp-1.3://localhost:50001" address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.udp" uri="ipbusudp-1.3://localhost:50001"	address_table="file://dummy_derivednode_address.xml" />
 
   <connection id="dummy.udp2" uri="ipbusudp-2.0://localhost:60001"	address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.udp2" uri="ipbusudp-2.0://localhost:60001" address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.udp2" uri="ipbusudp-2.0://localhost:60001"	address_table="file://dummy_derivednode_address.xml" />
   
   <connection id="dummy.udp2bigendian" uri="ipbusudp-2.0-bigendian://localhost:60001"  address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.udp2bigendian" uri="ipbusudp-2.0-bigendian://localhost:60001" address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.udp2bigendian" uri="ipbusudp-2.0-bigendian://localhost:60001"	address_table="file://dummy_derivednode_address.xml" />
 
 
   <!-- DUMMY TCP -->
   <connection id="dummy.tcp" uri="ipbustcp-1.3://localhost:50002"	address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.tcp" uri="ipbustcp-1.3://localhost:50002" address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.tcp" uri="ipbustcp-1.3://localhost:50002"	address_table="file://dummy_derivednode_address.xml" />
 
   <connection id="dummy.tcp2" uri="ipbustcp-2.0://localhost:60002"	address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.tcp2" uri="ipbustcp-2.0://localhost:60002" address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.tcp2" uri="ipbustcp-2.0://localhost:60002"	address_table="file://dummy_derivednode_address.xml" />
 
   <connection id="dummy.tcp2bigendian" uri="ipbustcp-2.0-bigendian://localhost:60002"  address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.tcp2bigendian" uri="ipbustcp-2.0-bigendian://localhost:60002" address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.tcp2bigendian" uri="ipbustcp-2.0-bigendian://localhost:60002"	address_table="file://dummy_derivednode_address.xml" />
 
   
   <!-- DUMMY ControlHub to DUMMY UDP -->
   <connection id="dummy.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"	address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"  address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.controlhub" uri="chtcp-1.3://localhost:10203?target=localhost:50001"  address_table="file://docu_derivednode_address.xml" />
 
   <connection id="dummy.controlhub2" uri="chtcp-2.0://localhost:10203?target=localhost:60001"	address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.controlhub2" uri="chtcp-2.0://localhost:10203?target=localhost:60001"  address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.controlhub2" uri="chtcp-2.0://localhost:10203?target=localhost:60001"  address_table="file://docu_derivednode_address.xml" />
   
   <connection id="dummy.controlhub2bigendian" uri="chtcp-2.0-bigendian://localhost:10203?target=localhost:60001" address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.controlhub2bigendian" uri="chtcp-2.0-bigendian://localhost:10203?target=localhost:60001"  address_table="file://docu_examples_address.xml" />
+  <connection id="dummy.derived.controlhub2bigendian" uri="chtcp-2.0-bigendian://localhost:10203?target=localhost:60001"  address_table="file://docu_derivednode_address.xml" />
   
 </connections>
 
