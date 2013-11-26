@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<node address="0x10010" parameters="arg1=val1;arg2=val2" >
+    <node id="REG" address="0x0001" permission="rw" tags="test"/>
+
+    <node id="REG_WRITE_ONLY" address="0x0003" permission="w"/>
+    
+    <node id="REG_UPPER_MASK" address="0x0004" mask="0xffff0000" permission="rw"/>
+    <node id="REG_LOWER_MASK" address="0x0004" mask="0x0000ffff" permission="rw"/>
+
+</node>

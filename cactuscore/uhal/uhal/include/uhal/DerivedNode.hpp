@@ -49,6 +49,20 @@
 */
 #define UHAL_REGISTER_DERIVED_NODE( classname ) uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname );
 
+
+/**
+ Macro which adds the clone method implementation for derived classesk
+ */
+#define UHAL_DERIVEDNODE(DerivedType) \
+private: \
+  BOOST_STATIC_ASSERT(( boost::is_base_of<Node, uhal::Node>::value )); \
+protected: \
+  Node* clone() const \
+  { \
+    return new DerivedType ( static_cast<const DerivedType&> ( *this ) ); \
+  }
+  
+
 namespace uhal
 {
 

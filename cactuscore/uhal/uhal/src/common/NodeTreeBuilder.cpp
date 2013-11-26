@@ -532,7 +532,11 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
         boost::unordered_map<std::string, std::string> lPars;
         boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeParametersGrammar , boost::spirit::ascii::space , lPars );
         
-        aNode->mParameters = lPars;
+        // Update the parameters map 
+        // Add to lPars those previously defined (module node)
+        lPars.insert(aNode->mParameters.begin(), aNode->mParameters.end());
+        // Swap the containers
+        aNode->mParameters.swap(lPars);
 
     }
   }
