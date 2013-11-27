@@ -2,7 +2,7 @@
 
 <node>
 
-  <node id="DERIVEDNODE" class="ClassLvl1Node" parameters="arg1=val1;arg2=val2;arg3=val3" address="0x0000">
+  <node id="DERIVEDNODE" class="DummyParentNode" parameters="arg1=val1;arg2=val2;arg3=val3" address="0x0000">
     <node id="REG" address="0x0001" />
     <node id="REG_WRITE_ONLY" address="0x0003" permission="w"/>
 
@@ -10,17 +10,17 @@
     <node id="REG_LOWER_MASK" address="0x0004" mask="0x0000ffff" permission="rw"/>
   </node>
 
-  <node id="DERIVEDMODULE1"   module="file://dummy_module_derived_1.xml" address="0x0010"/>
-  <node id="DERIVEDMODULE1_1" module="file://dummy_module_derived_1.xml" parameters="arg1=val107;arg2=val207" address="0x0020"/>
+  <node id="DERIVEDMODULE1"   module="file://dummy_derived_level2_module1.xml" address="0x0010"/>
+  <node id="DERIVEDMODULE1_1" module="file://dummy_derived_level2_module1.xml" parameters="arg1=val107;arg2=val207" address="0x0020"/>
 
-  <node id="DERIVEDMODULE2"   module="file://dummy_module_derived_2.xml" address="0x0030"/>
-  <node id="DERIVEDMODULE2_1" module="file://dummy_module_derived_2.xml" parameters="arg1=val107;arg2=val207" address="0x0040"/>
+  <node id="DERIVEDMODULE2"   module="file://dummy_derived_level2_module2.xml" address="0x0030"/>
+  <node id="DERIVEDMODULE2_1" module="file://dummy_derived_level2_module2.xml" parameters="arg1=val107;arg2=val207" address="0x0040"/>
 
-  <node id="DERIVEDMODULE3"   module="file://dummy_module_derived_3.xml" address="0x0050"/>
-  <node id="DERIVEDMODULE3_1" module="file://dummy_module_derived_3.xml" parameters="arg1=val107;arg2=val207" address="0x0060"/>
+  <node id="DERIVEDMODULE3"   module="file://dummy_derived_level2_module3.xml" address="0x0050"/>
+  <node id="DERIVEDMODULE3_1" module="file://dummy_derived_level2_module3.xml" parameters="arg1=val107;arg2=val207" address="0x0060"/>
 
-  <node id="DERIVEDMODULE4"   module="file://dummy_submodule_derived.xml" class="ClassLvl2Node" address="0x0060"/>
-  <node id="DERIVEDMODULE4_1" module="file://dummy_submodule_derived.xml" class="ClassLvl2Node" parameters="arg1=val107;arg2=val207;arg3=val3" address="0x0080"/>
+  <node id="DERIVEDMODULE4"   module="file://dummy_derived_level3_class.xml" class="DummyChildNode" address="0x0060"/>
+  <node id="DERIVEDMODULE4_1" module="file://dummy_derived_level3_class.xml" class="DummyChildNode" parameters="arg1=val107;arg2=val207;arg3=val3" address="0x0080"/>
 
   <node id="BADNODE" class="BadlyNamedDerivedNode" address="0x0100">
     <node id="REG" address="0x0001" />

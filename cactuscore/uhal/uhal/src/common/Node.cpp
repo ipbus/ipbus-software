@@ -258,11 +258,6 @@ namespace uhal
     return mModule;
   }
   
-  const std::string& Node::getClassName() const
-  {
-    return mClassName;
-  }
-  
   const boost::unordered_map< std::string, std::string >& Node::getParameters() const {
     return mParameters;
   }

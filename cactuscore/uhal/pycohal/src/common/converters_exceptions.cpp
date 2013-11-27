@@ -54,6 +54,8 @@ void pycohal::register_converters()
   pycohal::Converter_vec_uint32_from_list();
   bpy::to_python_converter< std::vector<std::string>, pycohal::Converter_std_vector_to_list<std::string> >();
   bpy::to_python_converter< std::vector<uint32_t>, pycohal::Converter_std_vector_to_list<uint32_t> >();
+  bpy::to_python_converter< boost::unordered_map<std::string, std::string>, pycohal::Converter_boost_unorderedmap_to_dict<std::string,std::string> >(); 
+
 }
 
 

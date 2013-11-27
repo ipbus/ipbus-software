@@ -211,13 +211,6 @@ namespace uhal
       const std::string& getModule() const;
 
       /**
-        Return the name of the class in which the current node was converted into
-        @return the name of the class in which the current node was converted into
-      */
-      const std::string& getClassName() const;
-
-      
-      /**
         Return the parameters of the current node
         @return the parameters of the current node
       */

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<node address="0x10010" module="file://dummy_derived_level3_plain.xml" class="DummyChildNode" parameters="arg3=val3" />

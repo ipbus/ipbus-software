@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-
-<node address="0x10001" parameters="arg0=val200;arg1=val201;arg2=val202" >
+<node address="0x10010" class="DummyChildNode" parameters="arg1=val1;arg2=val2;arg3=val3" >
     <node id="REG" address="0x0001" permission="rw" tags="test"/>
 
     <node id="MEM" address="0x0002" permission="rw" mode="incremental" size="262144" tags="test" />
 
-    <node id="SUBMODULE" module="file://dummy_level3_address.xml" address="0x60000" parameters="arg2=val10302;arg3=val10303;"/>
 </node>

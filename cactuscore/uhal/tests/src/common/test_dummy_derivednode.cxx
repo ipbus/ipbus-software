@@ -40,56 +40,48 @@
 
 using namespace uhal;
 
+/*
 // To Delete
 void print_derived ( const std::string& connection, const std::string& id ) {
 
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  //HwInterface hw=ConnectionManager::getDevice ( "test_device_id","ipbusudp-2.0://192.168.0.128:50001","file://etc/uhal/tests/dummy_derivednode.xml" );
 
   log( Notice(), "Plain node     : class attribute (user-level)");
-  hw.getNode<ClassLvl1Node>("DERIVEDNODE").printParameters();
+  hw.getNode<tests::DummyParentNode>("DERIVEDNODE").printParameters();
 
   log( Notice(), "Module node 1. : inner class attribute (Level2)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE1").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE1").printParameters();
 
   log( Notice(), "Module node 1.1: inner class attribute with parameter override (Level2)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE1_1").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE1_1").printParameters();
 
   log( Notice(), "Module node 2. : 1-levels class structure and inner parameter override (Level2, Level1)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE2").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE2").printParameters();
 
   log( Notice(), "Module node 2.1: 1-levels class structure and outer parameter override (Level2, Level1)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE2_1").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE2_1").printParameters();
 
   log( Notice(), "Module node 3. : 2-levels class structure and inner parameter override (Level2, Level1)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE3").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE3").printParameters();
 
   log( Notice(), "Module node 3.1: 2-levels class structure and outer parameter override (Level2, Level1)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE3_1").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE3_1").printParameters();
 
   log( Notice(), "Module node 4. : class override (Level2, Level1)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE4").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE4").printParameters();
 
   log( Notice(), "Module node 4.1: class and parameter override (Level2, Level1)");
-  hw.getNode<ClassLvl2Node>("DERIVEDMODULE4_1").printParameters();
+  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE4_1").printParameters();
 
 }
+*/
 
-void derivednode_building ( const std::string& connection, const std::string& id ) {
+/*
+void derivednode_parameters ( const std::string& connection, const std::string& id ) {
+
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
-  //HwInterface hw=ConnectionManager::getDevice ( "test_device_id","ipbusudp-2.0://192.168.0.128:50001","file://etc/uhal/tests/dummy_derived_node.xml" );
-  using namespace std;
-
-
-  // Check class names loading 
-  CACTUS_CHECK( hw.getNode("DERIVEDNODE").getClassName() == "ClassLvl1Node" );
-  CACTUS_CHECK( hw.getNode("DERIVEDMODULE1").getClassName() == "ClassLvl2Node" );
-  CACTUS_CHECK( hw.getNode("DERIVEDMODULE2").getClassName() == "ClassLvl2Node" );
-  CACTUS_CHECK( hw.getNode("DERIVEDMODULE3").getClassName() == "ClassLvl2Node" );
-  CACTUS_CHECK( hw.getNode("DERIVEDMODULE4").getClassName() == "ClassLvl2Node" );
-  CACTUS_CHECK( hw.getNode("BADNODE").getClassName() == "BadlyNamedDerivedNode" );
 
   // Check parameters overriding 
   boost::unordered_map<std::string,std::string> lPars;
@@ -134,12 +126,20 @@ void derivednode_building ( const std::string& connection, const std::string& id
   CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val207" );
   CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
 
+}
+*/
+
+void derivednode_building ( const std::string& connection, const std::string& id ) {
+  ConnectionManager manager ( connection );
+  HwInterface hw=manager.getDevice ( id );
+  using namespace std;
+
   // Check node casting
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDNODE") )    == typeid(ClassLvl1Node) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE1") ) == typeid(ClassLvl2Node) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE2") ) == typeid(ClassLvl2Node) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE3") ) == typeid(ClassLvl2Node) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE4") ) == typeid(ClassLvl2Node) );
+  CACTUS_CHECK( typeid( hw.getNode("DERIVEDNODE") )    == typeid(tests::DummyParentNode) );
+  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE1") ) == typeid(tests::DummyChildNode) );
+  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE2") ) == typeid(tests::DummyChildNode) );
+  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE3") ) == typeid(tests::DummyChildNode) );
+  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE4") ) == typeid(tests::DummyChildNode) );
   CACTUS_CHECK( typeid( hw.getNode("BADNODE") ) == typeid(uhal::Node) );
 }
 
@@ -152,5 +152,5 @@ int main ( int argc,char* argv[] )
 
   CACTUS_TEST( derivednode_building( connection_file, device_id ) );
 
-
+  CACTUS_TEST_RESULT();
 }
