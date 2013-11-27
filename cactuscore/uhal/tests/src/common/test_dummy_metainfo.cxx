@@ -55,6 +55,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "REG" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "REG" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "REG" ).getTags() == "test" );
+  CACTUS_CHECK ( hw.getNode ( "REG" ).getParameters().empty() );
   //REG_READ_ONLY
   CACTUS_CHECK ( hw.getNode ( "REG_READ_ONLY" ).getAddress() == 0x0002 );
   CACTUS_CHECK ( hw.getNode ( "REG_READ_ONLY" ).getId() == "REG_READ_ONLY" );
@@ -63,6 +64,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "REG_READ_ONLY" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "REG_READ_ONLY" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "REG_READ_ONLY" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "REG_READ_ONLY" ).getParameters().empty() );
   //REG_WRITE_ONLY
   CACTUS_CHECK ( hw.getNode ( "REG_WRITE_ONLY" ).getAddress() == 0x0003 );
   CACTUS_CHECK ( hw.getNode ( "REG_WRITE_ONLY" ).getId() == "REG_WRITE_ONLY" );
@@ -71,6 +73,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "REG_WRITE_ONLY" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "REG_WRITE_ONLY" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "REG_WRITE_ONLY" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "REG_WRITE_ONLY" ).getParameters().empty() );
   //REG_UPPER_MASK
   CACTUS_CHECK ( hw.getNode ( "REG_UPPER_MASK" ).getAddress() == 0x0004 );
   CACTUS_CHECK ( hw.getNode ( "REG_UPPER_MASK" ).getId() == "REG_UPPER_MASK" );
@@ -79,6 +82,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "REG_UPPER_MASK" ).getMask() == 0xFFFF0000 );
   CACTUS_CHECK ( hw.getNode ( "REG_UPPER_MASK" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "REG_UPPER_MASK" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "REG_UPPER_MASK" ).getParameters().empty() );
   //REG_LOWER_MASK 
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getAddress() == 0x0004 );
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getId() == "REG_LOWER_MASK" );
@@ -87,6 +91,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getMask() == 0x0000FFFF );
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getParameters().empty() );
   //REG_WITH_PARS
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getAddress() == 0x0005 );
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getId() == "REG_PARS" );
@@ -95,9 +100,10 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getParameters().size() == 2 );
   lPars = hw.getNode("REG_PARS").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val100" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val101" );
+  CACTUS_CHECK ( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val100" );
+  CACTUS_CHECK ( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val101" );
   //SUBSYSTEM1.REG
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getAddress() == 0x210002 );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getId() == "REG" );
@@ -106,6 +112,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getTags() == "test" );
+  CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.REG" ).getParameters().empty() );
   //SUBSYSTEM2.REG
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getAddress() == 0x310002 );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getId() == "REG" );
@@ -114,6 +121,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getTags() == "test" );
+  CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.REG" ).getParameters().empty() );
   //FIFO
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getAddress() == 0x0100 );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getId() == "FIFO" );
@@ -122,6 +130,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getMode() == uhal::defs::NON_INCREMENTAL );
   CACTUS_CHECK ( hw.getNode ( "FIFO" ).getTags() == "test" );
+  CACTUS_CHECK ( hw.getNode ( "FIFO" ).getParameters().empty() );
   //MEM
   CACTUS_CHECK ( hw.getNode ( "MEM" ).getAddress() == 0x100000 );
   CACTUS_CHECK ( hw.getNode ( "MEM" ).getId() == "MEM" );
@@ -130,6 +139,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "MEM" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "MEM" ).getMode() == uhal::defs::INCREMENTAL );
   CACTUS_CHECK ( hw.getNode ( "MEM" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "MEM" ).getParameters().empty() );
   //SMALL_MEM
   CACTUS_CHECK ( hw.getNode ( "SMALL_MEM" ).getAddress() == 0x400000 );
   CACTUS_CHECK ( hw.getNode ( "SMALL_MEM" ).getId() == "SMALL_MEM" );
@@ -138,6 +148,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "SMALL_MEM" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "SMALL_MEM" ).getMode() == uhal::defs::INCREMENTAL );
   CACTUS_CHECK ( hw.getNode ( "SMALL_MEM" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "SMALL_MEM" ).getParameters().empty() );
   //LARGE_MEM
   CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getAddress() == 0x500000 );
   CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getId() == "LARGE_MEM" );
@@ -146,6 +157,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getMode() == uhal::defs::INCREMENTAL );
   CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "LARGE_MEM" ).getParameters().empty() );
   //SUBSYSTEM1.MEM
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getAddress() == 0x210003 );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getId() == "MEM" );
@@ -154,6 +166,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getMode() == uhal::defs::INCREMENTAL );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getTags() == "test" );
+  CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM1.MEM" ).getParameters().empty() );
   //SUBSYSTEM2.MEM
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getAddress() == 0x310003 );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getId() == "MEM" );
@@ -162,23 +175,27 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getMask() == uhal::defs::NOMASK );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getMode() == uhal::defs::INCREMENTAL );
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getTags() == "test" );
+  CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getParameters().empty() );
   //SUBSYSTEM1
   lPars = hw.getNode("SUBSYSTEM1").getParameters();
   CACTUS_CHECK( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val200" );
   CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val201" );
   CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val202" );
+  CACTUS_CHECK( lPars.size() == 3 );
   //SUBSYSTEM2
   lPars = hw.getNode("SUBSYSTEM2").getParameters();
   CACTUS_CHECK( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val10000" );
   CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val201" );
   CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val202" );
   CACTUS_CHECK( ( iPar = lPars.find("arg5") ) != lPars.end() && iPar->second == "val10005" );
+  CACTUS_CHECK( lPars.size() == 4 );
   //SUBSYSTEM2.SUBMODULE
   lPars = hw.getNode("SUBSYSTEM1.SUBMODULE").getParameters();
   CACTUS_CHECK( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val300" );
   CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val301" );
   CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val10302" );
   CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val10303" );
+  CACTUS_CHECK( lPars.size() == 4 );
 }
 
 int main ( int argc,char* argv[] )
