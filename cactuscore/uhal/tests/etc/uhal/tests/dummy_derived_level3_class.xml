@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<node address="0x10010" class="ClassLvl1Node" parameters="arg1=val1;arg2=val2" >
+<node address="0x10010" class="ClassLvl1Node" >
     <node id="REG" address="0x0001" permission="rw" tags="test"/>
 
     <node id="REG_WRITE_ONLY" address="0x0003" permission="w"/>
