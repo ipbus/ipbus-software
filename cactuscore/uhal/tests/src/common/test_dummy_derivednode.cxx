@@ -135,12 +135,12 @@ void derivednode_building ( const std::string& connection, const std::string& id
   using namespace std;
 
   // Check node casting
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDNODE") )    == typeid(tests::DummyParentNode) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE1") ) == typeid(tests::DummyChildNode) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE2") ) == typeid(tests::DummyChildNode) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE3") ) == typeid(tests::DummyChildNode) );
-  CACTUS_CHECK( typeid( hw.getNode("DERIVEDMODULE4") ) == typeid(tests::DummyChildNode) );
-  CACTUS_CHECK( typeid( hw.getNode("BADNODE") ) == typeid(uhal::Node) );
+  CACTUS_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDNODE") )    == typeid(tests::DummyParentNode) );
+  CACTUS_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDMODULE1") ) == typeid(tests::DummyChildNode) );
+  CACTUS_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDMODULE2") ) == typeid(tests::DummyChildNode) );
+  CACTUS_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDMODULE3") ) == typeid(tests::DummyChildNode) );
+  CACTUS_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDMODULE4") ) == typeid(tests::DummyChildNode) );
+  CACTUS_CHECK( typeid( hw.getNode("SUBSYSTEM3.BADNODE") ) == typeid(uhal::Node) );
 }
 
 int main ( int argc,char* argv[] )

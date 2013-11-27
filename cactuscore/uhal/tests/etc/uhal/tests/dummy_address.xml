@@ -25,5 +25,7 @@
     <node id="LARGE_MEM" address="0x500000"  permission="rw" mode="incremental" size="26214400"/>
 
 
+    <!-- Additional substructure for node specialisation testing-->
+    <node id="SUBSYSTEM3" address="0x600000" module="file://dummy_derived_address.xml" />
 
 </node>

@@ -79,6 +79,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.udp" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-1.3://localhost:50001",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
@@ -106,6 +107,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.tcp"  % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-1.3://localhost:50002",
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
@@ -142,6 +144,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.controlhub" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-1.3://localhost:10203?target=localhost:50001",
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
@@ -171,6 +174,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.udp2" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-2.0://localhost:60001",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
@@ -198,6 +202,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.tcp2"  % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-2.0://localhost:60002",
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
@@ -234,6 +239,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.controlhub2" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
@@ -263,6 +269,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.udp2bigendian" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.udp2bigendian" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.udp2bigendian" % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.udp2bigendian" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-2.0-bigendian://localhost:60001",
                "pkill -f \"DummyHardwareUdp.exe\""]
             ]]
@@ -290,6 +297,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.tcp2bigendian" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2bigendian"  % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.tcp2bigendian"  % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-2.0-bigendian://localhost:60002",
                "pkill -f \"DummyHardwareTcp.exe\""]
              ]]
@@ -326,17 +334,18 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "test_dummy_metainfo.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
                "test_dummy_navigation.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
+               "test_dummy_derivednode.exe -c %s -d dummy.controlhub2bigendian" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-2.0-bigendian://localhost:10203?target=localhost:60001",
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
                controlhub_stop]
-                ]]      
-      
+                ]]
+
     cmds += [["TEST VALGRIND",
               [ # UDP 2
                "DummyHardwareUdp.exe --version 1 --port 50001",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",      
+               "pkill -f \"DummyHardwareUdp.exe\"",
                 # TCP 2
                "DummyHardwareTcp.exe --version 1 --port 50002",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
@@ -352,7 +361,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                 # UDP 2
                "DummyHardwareUdp.exe --version 2 --port 60001",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",      
+               "pkill -f \"DummyHardwareUdp.exe\"",
                 # TCP 2
                "DummyHardwareTcp.exe --version 2 --port 60002",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
@@ -371,7 +380,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
               [# UDP 2 with ASYNC EXCEPTION
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",      
+               "pkill -f \"DummyHardwareUdp.exe\"",
                 # TCP 2 with ASYNC EXCEPTION
                "DummyHardwareTcp.exe --version 1 --port 50002 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
@@ -387,7 +396,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                 # UDP 2 with ASYNC EXCEPTION
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",      
+               "pkill -f \"DummyHardwareUdp.exe\"",
                 # TCP 2 with ASYNC EXCEPTION
                "DummyHardwareTcp.exe --version 2 --port 60002 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
@@ -400,8 +409,8 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "pkill -f \"DummyHardwareUdp.exe\"",
                controlhub_stats,
                controlhub_stop]
-                ]]     
-      
+                ]]
+
     cmds += [["TEST IPBUS 2.0 CONTROLHUB - light packet loss",
               [# Setup
                "sudo /sbin/tc -s qdisc ls dev lo",
@@ -440,7 +449,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               controlhub_stats, 
+               controlhub_stats,
                # Clean up
                "sudo /sbin/tc qdisc del dev lo root",
                "sudo /sbin/tc -s qdisc ls dev lo",
@@ -470,7 +479,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
 
 def cleanup_cmds():
     """Return list of cleanup commands to be used in case test script interupted - e.g. by ctrl-c"""
-    
+
     cmds = ["pkill -f \"DummyHardwareUdp.exe\"",
             "pkill -f \"DummyHardwareTcp.exe\"",
             "sudo controlhub_stop",
@@ -504,14 +513,14 @@ def get_controlhub_status( cmd ):
 def get_dummyhardware_status( cmd ):
   if ("dummy.controlhub" in cmd) or ("chtcp" in cmd) or ("dummy.udp" in cmd) or ("ipbusudp" in cmd) or ("test_pycohal" in cmd):
     StdOut, ExitCode , Time = run_command( 'ps aux | grep -ce "[D]ummyHardwareUdp"' , False)
-  else:  
+  else:
     StdOut, ExitCode , Time = run_command( 'ps aux | grep -ce "[D]ummyHardwareTcp"' , False)
-    
+
   StdOut = StdOut[0].strip()
   if StdOut == '1':
-    return "1 DummyHardware running" 
+    return "1 DummyHardware running"
   else:
-    return StdOut+" DummyHardwares running" 
+    return StdOut+" DummyHardwares running"
 
 def background_run_command(cmd , Pid):
     """
@@ -520,10 +529,10 @@ def background_run_command(cmd , Pid):
     def runInThread(cmd , Pid):
       t0 = time.time()
       p = subprocess.Popen( cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid )
-      
+
       Pid.append( p.pid )
       p.wait()
-        
+
       exit_code = p.poll()
       cmd_duration = time.time()-t0
       if exit_code == -15:
@@ -536,7 +545,7 @@ def background_run_command(cmd , Pid):
         print msg
       else:
         print "+ Background command '%s' completed successfully, time elapsed: %s seconds" % (cmd, cmd_duration)
-  
+
     print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Background running ", cmd
     thread = threading.Thread( target=runInThread , args=( cmd , Pid ) )
     thread.start()
@@ -579,7 +588,7 @@ def run_command(cmd, verbose=True):
 
           except IOError:
               time.sleep(0.1)
-              
+
               if (current-last) > SOFT_TIMEOUT_S:
                   print "+ ERROR : unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
                   os.killpg(p.pid, signal.SIGTERM)
@@ -596,7 +605,7 @@ def run_command(cmd, verbose=True):
 
 
 if __name__=="__main__":
-    # Parse options 
+    # Parse options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "xhvls:c:", ["help"])
     except getopt.GetoptError, err:
@@ -608,11 +617,11 @@ if __name__=="__main__":
     conn_file = "/opt/cactus/etc/uhal/tests/dummy_connections.xml"
     section_search_str = None
     quit_on_error = False
-    
+
     stdout = []
     exit_code = 0
     cmd_duration = 0
-    
+
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
@@ -646,7 +655,7 @@ if __name__=="__main__":
         controlhub_scripts_dir = "/opt/cactus/bin"
     else:
         controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") )
-    print '  ControlHub scripts dir: ', controlhub_scripts_dir 
+    print '  ControlHub scripts dir: ', controlhub_scripts_dir
 
     def skip_section(name):
         if (section_search_str is None):
@@ -693,7 +702,7 @@ if __name__=="__main__":
                 print
                 if verbose:
                     print "-" * 120
-                    
+
                 if cmd.startswith( "DummyHardware" ):
                   background_run_command( cmd , BackgroundPid )
                 else:
@@ -709,7 +718,7 @@ if __name__=="__main__":
                       split_name = split_name + split_name_list[1]
 
                     print "+ *** ERROR OCCURED (section = '%s', test = '%s', exit code = %s, time elapsed = %s seconds, %s%s ) ***" % (section_name, split_name , exit_code, cmd_duration , get_controlhub_status( cmd ) , get_dummyhardware_status( cmd ) )
- 
+
                     if quit_on_error:
                       print "+ Quitting as an error was observed and the '-x' flag was specified by the user"
                       run_cleanup_commands()
