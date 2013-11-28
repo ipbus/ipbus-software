@@ -649,13 +649,13 @@ class TestMetaInfo(unittest.TestCase):
         self.assertEqual( hw.getNode(longId).getAddress()   ,  address )
         self.assertEqual( hw.getNode(longId).getId()        ,  ownId )
         self.assertEqual( hw.getNode(longId).__str__()      ,  ownId )
-        self.assertEqual( hw.getNode(longId).getPermission(),  permission)
-        self.assertEqual( hw.getNode(longId).getDescription(), description)
+        self.assertEqual( hw.getNode(longId).getPermission(),  permission )
+        self.assertEqual( hw.getNode(longId).getDescription(), description )
         self.assertEqual( hw.getNode(longId).getSize(),        size )
         self.assertEqual( hw.getNode(longId).getMask(),        mask )
         self.assertEqual( hw.getNode(longId).getMode(),        mode )
         self.assertEqual( hw.getNode(longId).getTags(),        tags )
-        self.assertEqual( hw.getNode(longId).getParmameters(), pars )
+        self.assertEqual( hw.getNode(longId).getParameters(),  pars )
 
     def test_node_metainfo(self):
         """Run meta-info tests for Node class."""
@@ -665,7 +665,7 @@ class TestMetaInfo(unittest.TestCase):
                                            size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={})
         self.exe_test_node_metainfo(DEVICE_ID, "REG_WRITE_ONLY", ownId="REG_WRITE_ONLY", address=0x0003, permission=uhal.NodePermission.WRITE, description="",
                                            size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={})
-        self.exe_test_node_metainfo(DEVICE_ID, "REG_PARS", ownId="REG_PARS", address=0x0004, permission=uhal.NodePermission.WRITE, description="",
+        self.exe_test_node_metainfo(DEVICE_ID, "REG_PARS", ownId="REG_PARS", address=0x0005, permission=uhal.NodePermission.READWRITE, description="",
                                             size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={'arg0':'val100','arg1':'val101'})
         self.exe_test_node_metainfo(DEVICE_ID, "MEM", ownId="MEM", address=0x100000, permission=uhal.NodePermission.READWRITE, description="A block memory in an example XML file",
                                            size=262144, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.INCREMENTAL, tags="", pars={})
