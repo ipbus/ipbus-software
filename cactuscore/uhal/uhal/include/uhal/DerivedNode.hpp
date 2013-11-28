@@ -65,32 +65,6 @@ protected: \
 namespace uhal
 {
 
-  //! A class to provide a CRTP implementation of the clone method to save the user from having to do it
-  template < typename DerivedType, typename NodeType = Node >
-  class DerivedNode : public NodeType {
-    BOOST_STATIC_ASSERT(( boost::is_base_of<Node, NodeType>::value ));
-  protected:
-    
-    /**
-    Constructor from a generic Node.
-     */
-    DerivedNode(const Node&);
-
-    /** 
-     CRTP function to produce a new copy of the current Node
-     @return a new copy of the current Node
-     */
-    virtual Node* clone() const;
-
-  private:
-
-    /**
-    Private constuctor. A derivedNode can be instantiated only by a child class 
-     */
-    DerivedNode() {
-    };
-  };
-  
   /**
     Experimental!! Helper struct for adding the DerivedNode to the Node Factory
     Declaring an instance of an object at global scope means that it is created *before* the main code is entered

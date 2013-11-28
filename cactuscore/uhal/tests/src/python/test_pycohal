@@ -671,7 +671,7 @@ class TestMetaInfo(unittest.TestCase):
                                            size=262144, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.INCREMENTAL, tags="", pars={})
 
         upperNode = self.manager.getDevice( DEVICE_ID ).getNode()
-        self.assertEqual(len(upperNode.getNodes()), 21)
+        self.assertEqual(len(upperNode.getNodes()), 51)
         self.assertEqual(len(upperNode.getNodes(r".*_MEM")), 2)
 
 

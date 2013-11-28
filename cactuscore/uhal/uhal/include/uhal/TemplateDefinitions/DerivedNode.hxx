@@ -35,17 +35,6 @@
 namespace uhal
 {
   
-  template < typename DerivedType, typename NodeType >
-  DerivedNode< DerivedType, NodeType >::DerivedNode( const Node& aNode ) : NodeType(aNode) {
-  }
-
-  template < typename DerivedType, typename NodeType >
-  Node* DerivedNode< DerivedType, NodeType >::clone() const
-  {
-    return new DerivedType ( static_cast<const DerivedType&> ( *this ) ); // call the copy ctor.
-  }
-
-
   template< typename T >
   RegistrationHelper< T >::RegistrationHelper ( const std::string& aDerivedClassName )
   {
