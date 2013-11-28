@@ -42,12 +42,19 @@
 #include "uhal/Node.hpp"
 #include <boost/static_assert.hpp>
 
+
 /**
   Macro which adds a Derived Node Class to the factory
   It takes a classname and then creates a registration helper object, with the classname as its template parameter
   and a stringified version of the classname as its constructor argument.
 */
-#define UHAL_REGISTER_DERIVED_NODE( classname ) uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname );
+#define UHAL_REGISTER_DERIVED_NODE( classname ) \
+  uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname ); \
+  Node* classname::clone() const \
+  { \
+    return new classname ( static_cast<const classname&> ( *this ) ); \
+  }
+
 
 /**
  Macro which adds the clone method implementation for derived classesk
@@ -56,10 +63,7 @@
 private: \
   BOOST_STATIC_ASSERT(( boost::is_base_of<Node, uhal::Node>::value )); \
 protected: \
-  virtual Node* clone() const \
-  { \
-    return new DerivedType ( static_cast<const DerivedType&> ( *this ) ); \
-  }
+  virtual Node* clone() const;
 
   
 namespace uhal
