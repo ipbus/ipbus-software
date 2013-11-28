@@ -40,96 +40,9 @@
 
 using namespace uhal;
 
-/*
-// To Delete
-void print_derived ( const std::string& connection, const std::string& id ) {
 
-  ConnectionManager manager ( connection );
-  HwInterface hw=manager.getDevice ( id );
-
-  log( Notice(), "Plain node     : class attribute (user-level)");
-  hw.getNode<tests::DummyParentNode>("DERIVEDNODE").printParameters();
-
-  log( Notice(), "Module node 1. : inner class attribute (Level2)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE1").printParameters();
-
-  log( Notice(), "Module node 1.1: inner class attribute with parameter override (Level2)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE1_1").printParameters();
-
-  log( Notice(), "Module node 2. : 1-levels class structure and inner parameter override (Level2, Level1)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE2").printParameters();
-
-  log( Notice(), "Module node 2.1: 1-levels class structure and outer parameter override (Level2, Level1)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE2_1").printParameters();
-
-  log( Notice(), "Module node 3. : 2-levels class structure and inner parameter override (Level2, Level1)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE3").printParameters();
-
-  log( Notice(), "Module node 3.1: 2-levels class structure and outer parameter override (Level2, Level1)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE3_1").printParameters();
-
-  log( Notice(), "Module node 4. : class override (Level2, Level1)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE4").printParameters();
-
-  log( Notice(), "Module node 4.1: class and parameter override (Level2, Level1)");
-  hw.getNode<tests::DummyChildNode>("DERIVEDMODULE4_1").printParameters();
-
-}
-*/
-
-/*
-void derivednode_parameters ( const std::string& connection, const std::string& id ) {
-
-  ConnectionManager manager ( connection );
-  HwInterface hw=manager.getDevice ( id );
-
-  // Check parameters overriding 
-  boost::unordered_map<std::string,std::string> lPars;
-  boost::unordered_map<std::string,std::string>::iterator iPar; 
-
-  lPars = hw.getNode("DERIVEDNODE").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val1" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val2" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
-
-  lPars = hw.getNode("DERIVEDMODULE1").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val1" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val2" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
-
-  lPars = hw.getNode("DERIVEDMODULE2").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val1" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val2" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
-
-  lPars = hw.getNode("DERIVEDMODULE2_1").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val107" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val207" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
-
-  lPars = hw.getNode("DERIVEDMODULE3").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val1" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val2" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
-
-  lPars = hw.getNode("DERIVEDMODULE3_1").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val107" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val207" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
-
-  lPars = hw.getNode("DERIVEDMODULE4").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val1" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val2" );
-
-  lPars = hw.getNode("DERIVEDMODULE4_1").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val107" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val207" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val3" );
-
-}
-*/
-
-void derivednode_building ( const std::string& connection, const std::string& id ) {
+void derivednode_building ( const std::string& connection, const std::string& id )
+{
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
   using namespace std;
