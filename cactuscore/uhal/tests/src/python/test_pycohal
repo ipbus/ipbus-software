@@ -5,7 +5,7 @@ Usage: test_pycohal -c <connections xml file> [-v] [other options for unittest m
 Executes the CACTUS pycohal tests.
 
 Mandatory option:
-   -c, --connections-file    Connections xml file used in tests 
+   -c, --connections-file    Connections xml file used in tests
    -v                        Verbose reporting (one line per test)
 """
 
@@ -28,7 +28,7 @@ def list_randuint32s(length):
 
 
 ##################################################################################
-# SECTION 1: 
+# SECTION 1:
 #    Tests specific to python bindings - e.g. conversion of objects across C/python boundary.
 #    (Doesn't involve any actual interaction with H/W)
 
@@ -73,7 +73,7 @@ class TestEnums(unittest.TestCase):
                     self.assertTrue(item1 != item2)
 
     def test_NodePermission_equality(self):
-        self.exe_equality_test( self.gen_enum_list_NodePerm ) 
+        self.exe_equality_test( self.gen_enum_list_NodePerm )
 
     def test_BlockReadWriteMode_equality(self):
         self.exe_equality_test( self.gen_enum_list_BlockMode )
@@ -86,7 +86,7 @@ class TestUInt32s(unittest.TestCase):
     """
     TestCase sub-class checking that:
               1) uint32 arguments and return values remain unchanged when crossing the C-python boundary
-              2) Exception is raised when invalid values are given for uint32 arguments 
+              2) Exception is raised when invalid values are given for uint32 arguments
     (This behaviour is not always assured in certain flavours of python bindings on 32-bit machines.)
     """
 
@@ -96,10 +96,10 @@ class TestUInt32s(unittest.TestCase):
         l = [-1, -2, -3, -5]
         for i in range(10):
             l.append( randint(-10000, -5) )
-        # Too large 
+        # Too large
         l += [0x100000000, 4294967296 ]  # 2^32
-        l += [0x100000001, 4294967297 ]  # 2^32 +1 
-        l += [0x100000002, 4294967298 ]  # 2^32 +2 
+        l += [0x100000001, 4294967297 ]  # 2^32 +1
+        l += [0x100000002, 4294967298 ]  # 2^32 +2
         return l
 
     def gen_list_valid_numbers(self):
@@ -133,10 +133,10 @@ class TestUInt32s(unittest.TestCase):
 
 class TestConverters(unittest.TestCase):
     """
-    TestCase sub-class checking behaviour of to-/from-python converters 
+    TestCase sub-class checking behaviour of to-/from-python converters
     To-python converters (e.g. used for C++ return values):
         - vector<string> to list
-    From-python converters (e.g. used for converting from python objects to C++ arguments): 
+    From-python converters (e.g. used for converting from python objects to C++ arguments):
         - vector<uint32_t> from list
     """
 
@@ -185,7 +185,7 @@ class TestConverters(unittest.TestCase):
     def exe_test_vec_string_to_list(self, list_of_strings):
         list_from_vector = uhal.tests.convert_str_to_vec_str( ",".join(list_of_strings) )
         self.assertEqual( list_of_strings, list_from_vector )
-     
+
 
 class TestLogLevels(unittest.TestCase):
     """TestCase sub-class checking that log-levels are set correctly."""
@@ -207,7 +207,7 @@ class TestLogLevels(unittest.TestCase):
         for level in self.allLevels:
            includedLevels.append(level)
            self.exe_test( level , includedLevels)
-        
+
         # Reset log-level to FATAL so that logging lines don't clutter up tests
         uhal.setLogLevelTo( uhal.LogLevel.FATAL )
 
@@ -261,7 +261,7 @@ class TestValWordIntMethods(unittest.TestCase):
             self.assertRaises ( uhal.NonValidatedMemory, reg1.__rmul__ , (x2) )
             self.assertRaises ( uhal.NonValidatedMemory, reg1.__mod__ , (x2) )
             self.assertRaises ( uhal.NonValidatedMemory, reg1.__rmod__ , (x2) )
-        
+
         # __pow__  &  __rpow__
         if valid:
             self.assertAllEqual ( s1 ** s2 , sreg1 ** s2 , s1 ** sreg2 , sreg1 ** sreg2 )
@@ -315,22 +315,22 @@ class TestValWordIntMethods(unittest.TestCase):
             self.assertAllEqual ( x1 == x1 , reg1 == x1 , x1 == reg1 , reg1 == reg1b )
         else:
             self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (x1) )
-            self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (reg2) ) 
-        
+            self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (reg2) )
+
         # __format__
         if sys.hexversion >= 0x020600F0:
-            if valid: 
-                self.assertEqual ( "{0:d}".format(x1) , "{0:d}".format(reg1) ) 
-                self.assertEqual ( "{0:x}".format(x1) , "{0:x}".format(reg1) ) 
-                self.assertAllEqual ( hex(x1), hex(reg1), "0x{0:x}".format(x1), "0x{0:x}".format(reg1) ) 
-            else: 
-                self.assertRaises( uhal.NonValidatedMemory , reg1.__format__ , ("{0:d}") ) 
-                self.assertRaises( uhal.NonValidatedMemory , reg1.__format__ , ("{0:x}") ) 
+            if valid:
+                self.assertEqual ( "{0:d}".format(x1) , "{0:d}".format(reg1) )
+                self.assertEqual ( "{0:x}".format(x1) , "{0:x}".format(reg1) )
+                self.assertAllEqual ( hex(x1), hex(reg1), "0x{0:x}".format(x1), "0x{0:x}".format(reg1) )
+            else:
+                self.assertRaises( uhal.NonValidatedMemory , reg1.__format__ , ("{0:d}") )
+                self.assertRaises( uhal.NonValidatedMemory , reg1.__format__ , ("{0:x}") )
 
 
 
 ##################################################################################
-# SECTION 2: 
+# SECTION 2:
 #    Tests of normal use cases, involving actual interaction with (dummy) hardware
 #    (There is usually an equivalent C++ executable in uhal/tests.)
 
@@ -553,7 +553,7 @@ class TestCheckPermissions(unittest.TestCase):
 
 class TestMasking(unittest.TestCase):
     """
-    TestCase sub-class checking behaviour of writes & read of masked registers. 
+    TestCase sub-class checking behaviour of writes & read of masked registers.
     Analogous to C++ test_dummy_masking exe.
     """
 
@@ -643,29 +643,32 @@ class TestMetaInfo(unittest.TestCase):
 #        self.assertRaises( uhal.exception, uhal.getDevice, "id0", "ipbusudp-1.3://localhost:12345", "file://a_non_existant_address_table.xml")
         self.assertRaises( uhal.exception, uhal.getDevice, "id1", "ipbusudp-1.3://localhost:23456", "invalid_format.xml")
 
-    def exe_test_node_metainfo(self, deviceId, longId, address, ownId, permission, description, size, mask, mode, tags):
+    def exe_test_node_metainfo(self, deviceId, longId, address, ownId, permission, description, size, mask, mode, tags, pars):
         """Execute meta-info tests for a particular node."""
         hw = self.manager.getDevice( deviceId )
-        self.assertEqual( hw.getNode(longId).getAddress()   , address )
-        self.assertEqual( hw.getNode(longId).getId()        , ownId )
-        self.assertEqual( hw.getNode(longId).__str__()      , ownId )
-        self.assertEqual( hw.getNode(longId).getPermission(), permission)
+        self.assertEqual( hw.getNode(longId).getAddress()   ,  address )
+        self.assertEqual( hw.getNode(longId).getId()        ,  ownId )
+        self.assertEqual( hw.getNode(longId).__str__()      ,  ownId )
+        self.assertEqual( hw.getNode(longId).getPermission(),  permission)
         self.assertEqual( hw.getNode(longId).getDescription(), description)
-        self.assertEqual( hw.getNode(longId).getSize(),       size )
-        self.assertEqual( hw.getNode(longId).getMask(),       mask )
-        self.assertEqual( hw.getNode(longId).getMode(),       mode )
-        self.assertEqual( hw.getNode(longId).getTags(),       tags )
+        self.assertEqual( hw.getNode(longId).getSize(),        size )
+        self.assertEqual( hw.getNode(longId).getMask(),        mask )
+        self.assertEqual( hw.getNode(longId).getMode(),        mode )
+        self.assertEqual( hw.getNode(longId).getTags(),        tags )
+        self.assertEqual( hw.getNode(longId).getParmameters(), pars )
 
     def test_node_metainfo(self):
         """Run meta-info tests for Node class."""
         self.exe_test_node_metainfo(DEVICE_ID, "REG", ownId="REG", address=0x000001, permission=uhal.NodePermission.READWRITE, description="",
-                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="test")
+                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="test", pars={})
         self.exe_test_node_metainfo(DEVICE_ID, "REG_READ_ONLY", ownId="REG_READ_ONLY", address=0x0002, permission=uhal.NodePermission.READ, description="",
-                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="")
+                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={})
         self.exe_test_node_metainfo(DEVICE_ID, "REG_WRITE_ONLY", ownId="REG_WRITE_ONLY", address=0x0003, permission=uhal.NodePermission.WRITE, description="",
-                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="")
+                                           size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={})
+        self.exe_test_node_metainfo(DEVICE_ID, "REG_PARS", ownId="REG_PARS", address=0x0004, permission=uhal.NodePermission.WRITE, description="",
+                                            size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={'arg0':'val100','arg1':'val101'})
         self.exe_test_node_metainfo(DEVICE_ID, "MEM", ownId="MEM", address=0x100000, permission=uhal.NodePermission.READWRITE, description="A block memory in an example XML file",
-                                           size=262144, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.INCREMENTAL, tags="")
+                                           size=262144, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.INCREMENTAL, tags="", pars={})
 
         upperNode = self.manager.getDevice( DEVICE_ID ).getNode()
         self.assertEqual(len(upperNode.getNodes()), 21)
@@ -689,7 +692,7 @@ class TestPrintValMem( unittest.TestCase ):
 
     def exe_ValVector_test(self, xx):
         # Construct string from list, removing trailling "L"s in case working on 32-bit computer
-        xx_string = "[" 
+        xx_string = "["
         for x in xx:
           xx_string += str(x).rstrip("L")+", "
         xx_string = xx_string.rstrip(", ")
