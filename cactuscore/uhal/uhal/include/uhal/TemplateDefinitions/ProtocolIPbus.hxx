@@ -217,18 +217,18 @@ namespace uhal
   {
     if ( BigEndianHack )
     {
-      boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::Apr , 1 );
+      boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::May , 1 );
       boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
       boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
 
       if ( lTimeToExpiry.is_negative() )
       {
-        log ( Error , "Support for the big-endian hack expired on 1st April 2014. Please update either your software, your firmware or both to use the native-endian variant." );
+        log ( Error , "Support for the big-endian hack expired on 1st May 2014. Please update either your software, your firmware or both to use the native-endian variant. The trunk of the IPbus firmware has supported native endian communication since the end of June 2013, although the ipbus_2_0_v1 tag is recommended as it includes many bugfixes. To update your software to use native-endian communication remove \"-bigendian\" from the protocol part of the URI." );
         sleep ( 60 );
       }
       else
       {
-        log ( Warning , "Support for the big-endian hack will expire on 1st April 2014. Please update either your software, your firmware or both to use the native-endian variant. Functionality will be limited after this expiry date." );
+        log ( Warning , "Support for the big-endian hack will expire on 1st May 2014; functionality will be limited after this date. Please update either your software, your firmware or both to use the native-endian variant. The trunk of the IPbus firmware has supported native endian communication since the end of June 2013, although the ipbus_2_0_v1 tag is recommended as it includes many bugfixes. To update your software to use native-endian communication remove \"-bigendian\" from the protocol part of the URI." );
       }
     }
   }
