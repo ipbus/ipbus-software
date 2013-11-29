@@ -70,6 +70,24 @@
                                >>).
 
 
+-define(IPBUS_RXFULL_PRAM_REQ, <<16#200000f0:32,
+                                 16#2000011f:32,
+                                 16#00002000:32,
+                                 16#00000000:32,
+                                 16#2000ff2f:32,
+                                 16#00002001:32,
+                                 16#20005c2f:32,
+                                 16#00002001:32
+                               >>).
+-define(IPBUS_RXFULL_PRAM_REP, <<16#200000f0:32,
+                                 16#20000110:32,
+                                 16#2000ff20:32,
+                                 0:(32*(16#ff)),
+                                 16#20005c20:32,
+                                 0:(32*(16#5c))
+                               >>).
+
+
 -define(IPBUS_BOTHFULL_PRAM_REQ, <<16#200000f0:32,
                                    16#2000011f:32, % 1-word write for PRAM 
                                    16#00002000:32,
@@ -175,11 +193,19 @@ main(["udp_ipbus_client2" | OtherArgs]) ->
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
 
-main(["udp_ipbus_client_pram" | OtherArgs]) ->
+main(["udp_ipbus_client_pramtx" | OtherArgs]) ->
     {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
     Socket = create_udp_socket(),
     Request = ?IPBUS_TXFULL_PRAM_REQ,
     Reply = ?IPBUS_TXFULL_PRAM_REP,
+    {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
+    print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
+
+main(["udp_ipbus_client_pramrx" | OtherArgs]) ->
+    {TargetIP, TargetPort, NrItns, NrInFlight} = parse_args(OtherArgs),
+    Socket = create_udp_socket(),
+    Request = ?IPBUS_RXFULL_PRAM_REQ,
+    Reply = ?IPBUS_RXFULL_PRAM_REP,
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:udp_client_loop(Socket, TargetIP, TargetPort, Request, Reply, {0,NrInFlight}, NrItns) end),
     print_results(NrItns, MicroSecs, byte_size(Request), byte_size(Reply));
 
@@ -216,13 +242,13 @@ main(["tcp_ch_client", ArgControlHubIP | OtherArgs]) ->
     TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
                     + (element(3,TargetIP) bsl 8) + element(4,TargetIP),
     Request = <<TargetIPU32:32,
-                TargetPort:16, (byte_size(?IPBUS_TXFULL_PRAM_REQ) div 4):16,
-                (?IPBUS_TXFULL_PRAM_REQ)/binary
+                TargetPort:16, (byte_size(?IPBUS_RXFULL_PRAM_REQ) div 4):16,
+                (?IPBUS_RXFULL_PRAM_REQ)/binary
               >>,
-    Reply = <<(byte_size(?IPBUS_TXFULL_PRAM_REP)+8):32 ,
+    Reply = <<(byte_size(?IPBUS_RXFULL_PRAM_REP)+8):32 ,
               TargetIPU32:32,
               TargetPort:16, 0:16,
-              (?IPBUS_TXFULL_PRAM_REP)/binary>>,
+              (?IPBUS_RXFULL_PRAM_REP)/binary>>,
     io:format("Request: ~w bytes~nReply: ~w bytes~n", [byte_size(Request), byte_size(Reply)]),
     {ok, [{active, ActiveValue}]} = inet:getopts(Socket, [active]),
     {MicroSecs, ok} = timer:tc( fun () -> ch_unittest_common:tcp_client_loop({Socket, ActiveValue}, Request, Reply, {0,NrInFlight}, NrItns) end ),
@@ -237,13 +263,13 @@ main(["tcp_ch_client2", ArgControlHubIP | OtherArgs]) ->
     TargetIPU32 = (element(1,TargetIP) bsl 24) + (element(2,TargetIP) bsl 16)
                     + (element(3,TargetIP) bsl 8) + element(4,TargetIP),
     PartialReq = <<TargetIPU32:32,
-                   TargetPort:16, (byte_size(?IPBUS_TXFULL_PRAM_REQ) div 4):16,
-                   (?IPBUS_TXFULL_PRAM_REQ)/binary
+                   TargetPort:16, (byte_size(?IPBUS_RXFULL_PRAM_REQ) div 4):16,
+                   (?IPBUS_RXFULL_PRAM_REQ)/binary
                  >>,
-    PartialReply = <<(byte_size(?IPBUS_TXFULL_PRAM_REP)+8):32 ,
+    PartialReply = <<(byte_size(?IPBUS_RXFULL_PRAM_REP)+8):32 ,
                      TargetIPU32:32,
                      TargetPort:16, 0:16,
-                     (?IPBUS_TXFULL_PRAM_REP)/binary
+                     (?IPBUS_RXFULL_PRAM_REP)/binary
                    >>,
     Request = <<PartialReq/binary,
                 PartialReq/binary,
