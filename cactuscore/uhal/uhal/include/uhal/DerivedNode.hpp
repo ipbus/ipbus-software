@@ -50,7 +50,7 @@
 */
 #define UHAL_REGISTER_DERIVED_NODE( classname ) \
   uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname ); \
-  Node* classname::clone() const \
+  uhal::Node* classname::clone() const \
   { \
     return new classname ( static_cast<const classname&> ( *this ) ); \
   }
@@ -63,7 +63,7 @@
 private: \
   BOOST_STATIC_ASSERT(( boost::is_base_of<Node, uhal::Node>::value )); \
 protected: \
-  virtual Node* clone() const;
+  virtual uhal::Node* clone() const;
 
   
 namespace uhal
