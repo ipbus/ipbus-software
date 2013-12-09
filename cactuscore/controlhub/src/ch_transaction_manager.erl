@@ -67,14 +67,14 @@ start_link(TcpListenSocket) ->
 %% this module so it doesn't need to be an external function.
 tcp_acceptor(TcpListenSocket) ->
     ?CH_LOG_DEBUG("Transaction manager born. Waiting for TCP connection..."),
+    % Spawn TCP socket process now in order to reduce latency from gen_tcp:accept returning to entering transaction_manager loop.
+    TcpPid = proc_lib:spawn_link(fun tcp_proc_init/0),
     case gen_tcp:accept(TcpListenSocket) of
         {ok, Socket} ->
             ch_tcp_listener:connection_accept_completed(),
             ch_stats:client_connected(),
             case inet:peername(Socket) of
                 {ok, {ClientAddr, ClientPort}} ->
-                    TcpPid = proc_lib:spawn_link(fun tcp_proc_init/0),
-                    put(tcp_pid, TcpPid),
                     gen_tcp:controlling_process(Socket, TcpPid),
                     TcpPid ! {start, Socket, self()},
                     ?CH_LOG_INFO("TCP socket accepted from client at ~s. Socket options: ~w~n",
