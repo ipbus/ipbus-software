@@ -212,6 +212,9 @@ namespace uhal
       //! Counter of how many writes have been sent, for which no reply has yet been received
       uint32_t mPacketsInFlight;
 
+      //! Boolean specifying whether or not the main thread is within TCP::Flush method. Its value checked by the worker thread to know whether it should wait for more packets before sending onto the TCP socket.
+      bool mFlushStarted;
+
       //! A mutex for use by the conditional variable
       boost::mutex mConditionalVariableMutex;
       //! A conditional variable for blocking the main thread until the variable with which it is associated is set correctly

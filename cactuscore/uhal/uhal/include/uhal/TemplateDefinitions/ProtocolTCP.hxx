@@ -63,6 +63,7 @@ namespace uhal
     mDispatchQueue(),
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
+    mFlushStarted ( false ),
     mFlushDone ( true ),
 #endif
     mAsynchronousException ( NULL )
@@ -176,6 +177,7 @@ namespace uhal
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
+    mFlushStarted = false;
     mDispatchQueue.push_back ( aBuffers );
 
     if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
@@ -384,7 +386,7 @@ namespace uhal
 
     mDispatchBuffers.clear();
 
-    if ( ( mDispatchQueue.size() >= nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+    if ( ( mDispatchQueue.size() >= (mFlushStarted ? 1 : nr_buffers_per_send) ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
     {
       write();
     }
@@ -632,7 +634,7 @@ namespace uhal
       mReplyBuffers.clear();
     }
 
-    if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() > nr_buffers_per_send ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+    if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() > (mFlushStarted ? 1 : nr_buffers_per_send) ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
     {
       write();
     }
@@ -701,6 +703,15 @@ namespace uhal
   void TCP< InnerProtocol , nr_buffers_per_send >::Flush( )
   {
 #ifdef RUN_ASIO_MULTITHREADED
+    {
+      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      mFlushStarted = true;
+      if ( mDispatchQueue.size() && mDispatchBuffers.empty() )
+      {
+        write();
+      }
+    }
+
     while ( true )
     {
       WaitOnConditionalVariable();
