@@ -66,8 +66,7 @@ uhal::tests::PerfTester::PerfTester() :
   m_baseAddr ( 0 ),
   m_bandwidthTestDepth ( 0 ),
   m_verbose ( false ),
-  m_perIterationDispatch ( false ),
-  m_includeConnect ( false )
+  m_perIterationDispatch ( false )
 {
   // ***** DECLARE TESTS HERE - descriptions should not be longer than a shortish line. *****:
   // Receive bandwidth test
@@ -103,8 +102,7 @@ int uhal::tests::PerfTester::run ( int argc, char* argv[] )
     ( "devices,d", po::value<StringVec> ( &m_deviceURIs )->multitoken(), "List of device connection URIs, e.g. chtcp-1.3://..., etc" )
     ( "baseAddr,b", po::value<string> ( &m_baseAddrStr )->default_value ( "0x0" ), "Base address (in hex) of the test location on the target device(s)." )
     ( "bandwidthTestDepth,w", po::value<boost::uint32_t> ( &m_bandwidthTestDepth )->default_value ( 340 ), "Depth of read/write used in bandwidth tests." )
-    ( "perIterationDispatch,p", "Force a network dispatch every test iteration instead of the default single dispatch call at the end." )
-    ( "includeConnect,c", "Include connect time in reported bandwidths and latencies" );
+    ( "perIterationDispatch,p", "Force a network dispatch every test iteration instead of the default single dispatch call at the end." );
     po::variables_map argMap;
     po::store ( po::parse_command_line ( argc, argv, argDescriptions ), argMap );
     po::notify ( argMap );
@@ -142,11 +140,6 @@ int uhal::tests::PerfTester::run ( int argc, char* argv[] )
     if ( argMap.count ( "perIterationDispatch" ) )
     {
       m_perIterationDispatch = true;
-    }
-
-    if ( argMap.count ( "includeConnect" ) )
-    {
-      m_includeConnect = true;
     }
 
     if ( badInput() )
@@ -547,15 +540,6 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read ( ClientPtr& c, 
 
 void uhal::tests::PerfTester::bandwidthRxTest()
 {
-  if ( ! m_includeConnect )
-  {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->readBlock ( m_baseAddr, 1, defs::NON_INCREMENTAL );
-      iClient->dispatch();
-    }
-  }
-
   Timer myTimer;
 
   for ( unsigned i = 0; i < m_iterations ; ++i )
@@ -599,15 +583,6 @@ void uhal::tests::PerfTester::bandwidthRxTest()
 
 void uhal::tests::PerfTester::bandwidthTxTest()
 {
-  if ( ! m_includeConnect )
-  {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      iClient->writeBlock ( m_baseAddr, std::vector<uint32_t>(1,0x0), defs::NON_INCREMENTAL );
-      iClient->dispatch();
-    }
-  }
-
   // Send buffer - lots of "cafebabe" (in little-endian)
   U32Vec sendBuffer ( m_bandwidthTestDepth, 0xbebafeca );
   Timer myTimer;

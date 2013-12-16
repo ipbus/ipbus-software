@@ -117,7 +117,6 @@ namespace uhal
         boost::uint32_t m_bandwidthTestDepth;  ///< The depth of read/write used in bandwidth tests
         bool m_verbose;  ///< Verbosity true/false flag.
         bool m_perIterationDispatch; ///< Perform a network dispatch every iteration flag.
-        bool m_includeConnect; ///< Include (e.g. TCP) connect time in reported bandwidth/latency
 
 
         // PRIVATE MEMBER FUNCTIONS - Test infrastructure
