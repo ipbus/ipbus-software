@@ -634,7 +634,7 @@ namespace uhal
       mReplyBuffers.clear();
     }
 
-    if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() > (mFlushStarted ? 1 : nr_buffers_per_send) ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
+    if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= (mFlushStarted ? 1 : nr_buffers_per_send) ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
     {
       write();
     }
@@ -706,31 +706,20 @@ namespace uhal
     {
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       mFlushStarted = true;
+
       if ( mDispatchQueue.size() && mDispatchBuffers.empty() )
       {
         write();
       }
     }
 
-    while ( true )
+    WaitOnConditionalVariable();
+
+    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex ); 
+
+    if ( mAsynchronousException )
     {
-      WaitOnConditionalVariable();
-
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex ); 
-
-      if ( mAsynchronousException )
-      {
-        mAsynchronousException->ThrowAsDerivedType();
-      }
-
-      if ( mDispatchQueue.size() )
-      {
-        write();
-      }
-      else
-      {
-        break;
-      }
+      mAsynchronousException->ThrowAsDerivedType();
     }
 #endif
   }
