@@ -641,6 +641,7 @@ namespace uhal
 
     if ( mDispatchBuffers.empty() && mReplyBuffers.empty() )
     {
+      mDeadlineTimer.expires_from_now ( boost::posix_time::seconds(60) );
       NotifyConditionalVariable ( true );
     }
 
@@ -681,11 +682,11 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
       if (  mDispatchBuffers.size() || mReplyBuffers.size() )
       {
-        log ( Warning() , "Closing socket since deadline has passed" );
+        log ( Warning() , "Closing socket for URI " , Quote ( this->uri() ) , " since deadline has passed" );
       }
       else
       {
-        log ( Debug() , "Closing socket since no communication in " , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds to URI " , Quote ( this->uri() ) );
+        log ( Debug() , "Closing socket for URI " , Quote ( this->uri() ) , " since no communication in 60 seconds" );
       }
 #endif
       // The deadline has passed. The socket is closed so that any outstanding asynchronous operations are cancelled.
