@@ -39,7 +39,7 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
               'LD_LIBRARY_PATH':os.environ['LD_LIBRARY_PATH'] 
               }
 
-CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.0.0/sys.config"
+CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.2.0/sys.config"
 
 TARGETS = ['amc-e1a12-19-09:50001',
            'amc-e1a12-19-10:50001',
@@ -534,14 +534,15 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
     ax_lat4 = fig_lat.add_subplot(224)
 
     depths = [1]
-    for n in range(1, 10) + range(10, 31, 2):
-        depths += [3*343*n]
-    for n in range(40, 80, 20) + range(80, 200, 40):
-        depths += [3*343*n]
+    depths += [50, 100, 150, 200, 250, 300, 340, 350, 500, 600, 680, 700, 800, 900, 1000]
+    for n in range(1, 10):
+        depths += [3*n*343] # depths += [(3*n-1)*343, (3*n-1)*343+1, 3*n*343, 3*n*343+1]
+    for n in range(10, 31, 2) + range(40, 80, 20) + range(80, 200, 40):
+        depths += [3*n*343]
     for n in [2e2, 3e2, 4e2, 7e2, 10e2]:
-        depths += [3*343*n]
+        depths += [3*n*343]
     for n in [2e3, 3e3, 4e3, 7e3, 10e3]:
-        depths += [3*343*n]
+        depths += [3*n*343]
 
 #    depths += range(50, 2000, 50)
 #    depths += range(2000, 20000, 100)
@@ -573,22 +574,16 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
 
         update_controlhub_sys_config(nr_in_flight, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
         start_controlhub(controlhub_ssh_client)
-        for i in range(50):
+        for i in range(40):
             SCRIPT_LOGGER.warning('iteration %d' % i)
             for d in depths:
-#                SCRIPT_LOGGER.warning('iteration %d :: depth %d' % (i,d))
-                itns = 1
+                itns = {True : 10, False : 1}[i<1000]
                 cmd_tx = "PerfTester.exe -t BandwidthTx -b 0x2001 -w "+str(int(d))+" -p -i "+str(itns)+" -d "+ch_uri
                 cmd_rx = cmd_tx.replace("BandwidthTx", "BandwidthRx")
-                ch_tx_bws_excl_connect[d].append( run_command( cmd_tx )[1] )
-                ch_tx_bws_incl_connect[d].append( run_command( cmd_tx + " --includeConnect" )[1] )
-                ch_rx_bws_excl_connect[d].append( run_command( cmd_rx )[1] )
-                ch_rx_bws_incl_connect[d].append( run_command( cmd_rx + " --includeConnect" )[1] )
-
-                ch_tx_lats_excl_connect[d].append( 1e-3 * 32 * d / ch_tx_bws_excl_connect[d][-1] )
-                ch_tx_lats_incl_connect[d].append( 1e-3 * 32 * d / ch_tx_bws_incl_connect[d][-1] )
-                ch_rx_lats_excl_connect[d].append( 1e-3 * 32 * d / ch_rx_bws_excl_connect[d][-1] )
-                ch_rx_lats_incl_connect[d].append( 1e-3 * 32 * d / ch_rx_bws_incl_connect[d][-1] )
+                ch_tx_lats_excl_connect[d].append( run_command( cmd_tx )[0] )
+#                ch_tx_lats_incl_connect[d].append( run_command( cmd_tx + " --includeConnect" )[0] )
+                ch_rx_lats_excl_connect[d].append( run_command( cmd_rx )[0] )
+#                ch_rx_lats_incl_connect[d].append( run_command( cmd_rx + " --includeConnect" )[0] )
 
         stop_controlhub(controlhub_ssh_client)
 
@@ -597,18 +592,25 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
             ch_tx_lats_incl_connect[d].sort()
             ch_rx_lats_excl_connect[d].sort()
             ch_rx_lats_incl_connect[d].sort()
-            for i in range( int( ceil( 0.08 * len(ch_tx_bws_excl_connect[d]) ) ) ):
+            for i in range( int( ceil( 0.08 * len(ch_tx_lats_excl_connect[d]) ) ) ):
+                SCRIPT_LOGGER.warning('Removing "high latency" outlier from depth=%d measurements' % (d))
+                if d == 1:
+                    print "Latency being removed is:", ch_tx_lats_excl_connect[d][-1]
                 ch_tx_lats_excl_connect[d].pop() 
-                ch_tx_lats_incl_connect[d].pop()
+#                ch_tx_lats_incl_connect[d].pop()
                 ch_rx_lats_excl_connect[d].pop()
-                ch_rx_lats_incl_connect[d].pop()
+#                ch_rx_lats_incl_connect[d].pop()
+            ch_tx_bws_excl_connect[d] = [ 1e-3 * 32 * d / t for t in ch_tx_lats_excl_connect[d] ]
+            ch_tx_bws_incl_connect[d] = [ 1e-3 * 32 * d / t for t in ch_tx_lats_incl_connect[d] ]
+            ch_rx_bws_excl_connect[d] = [ 1e-3 * 32 * d / t for t in ch_rx_lats_excl_connect[d] ]
+            ch_rx_bws_incl_connect[d] = [ 1e-3 * 32 * d / t for t in ch_rx_lats_incl_connect[d] ]
 
         tx_rtt = 0.0
         tx_t_send = 0.0
-        for meas_bws, meas_lats, label in [(ch_tx_bws_excl_connect, ch_tx_lats_excl_connect, 'Write, excl. connect'), 
-                                           (ch_tx_bws_incl_connect, ch_tx_lats_incl_connect, 'Write, incl. connect'), 
-                                           (ch_rx_bws_excl_connect, ch_rx_lats_excl_connect, 'Read, excl. connect'), 
-                                           (ch_rx_bws_incl_connect, ch_rx_lats_incl_connect, 'Read, incl. connect')]:
+        for meas_bws, meas_lats, label in [(ch_tx_bws_excl_connect, ch_tx_lats_excl_connect, 'Write'),
+#                                           (ch_tx_bws_incl_connect, ch_tx_lats_incl_connect, 'Write, incl. connect'), 
+                                           (ch_rx_bws_excl_connect, ch_rx_lats_excl_connect, 'Read') ]: 
+#                                           (ch_rx_bws_incl_connect, ch_rx_lats_incl_connect, 'Read, incl. connect')]:
             bws_stats = calc_y_stats(meas_bws)
             lats_stats = calc_y_stats(meas_lats)
             for (ax_mean, ax_rms) in [(ax_bw1,ax_bw3), (ax_bw2,ax_bw4)]:
@@ -642,8 +644,10 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
             ax.set_ylabel('Fractional RMS variation')
 
         for ax in [ax_bw1, ax_bw3, ax_lat1, ax_lat3]:
-            ax.set_xlim(0, 30001)
-        ax_lat1.set_ylim(0, 4500)
+            ax.set_xlim(0, 1001) # 30001)
+#            for d in range(0, 10000, 343):
+#                ax.axvline(d, color='DarkGrey', linestyle='-.')
+        ax_lat1.set_ylim(200, 600) # 0, 4500)
 
         for ax in [ax_bw2, ax_bw4]:
             ax.set_xlim(999, 1.001e7)
@@ -653,12 +657,14 @@ def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
 
         
         print "1-word latencies ... tx w/o connect ; rx w/o connect; tx w/ connect ; tx w/o connect ..."
-        for tx_excl, rx_excl, tx_incl, rx_incl in zip( sorted(ch_tx_lats_excl_connect[1]),
-                                                       sorted(ch_rx_lats_excl_connect[1]),
-                                                       sorted(ch_tx_lats_incl_connect[1]),
-                                                       sorted(ch_rx_lats_incl_connect[1]) 
-                                                      ):
-            print "  {0:7.1f}  {1:7.1f}  {2:7.1f}  {2:7.1f}".format(tx_excl, rx_excl, tx_incl, rx_incl)
+        for tx_excl in sorted(ch_tx_lats_excl_connect[1]): #, rx_excl, tx_incl, rx_incl in 
+                  #zip( sorted(ch_tx_lats_excl_connect[1]),
+                  #sorted(ch_rx_lats_excl_connect[1]),
+                  #sorted(ch_tx_lats_incl_connect[1]),
+                  #sorted(ch_rx_lats_incl_connect[1]) 
+                  #):
+            #print "  {0:7.1f}  {1:7.1f}  {2:7.1f}  {2:7.1f}".format(tx_excl, rx_excl, tx_incl, rx_incl)
+            print "  {0:7.2f}".format(tx_excl)
 
 
 def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
