@@ -46,6 +46,7 @@ _all:
 		./configure                                                         \
 			--prefix=${RPMBUILD_DIR}/SOURCES                                               \
 			--exec-prefix=${RPMBUILD_DIR}/SOURCES                                          \
+			--without-ssl                                                                  \
 			--without-javac;                                                               \
 		make;                                                                                  \
 		make install;                                                                          \
