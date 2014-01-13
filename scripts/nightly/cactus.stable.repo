@@ -1,13 +1,13 @@
 [cactus-base]
 name=CACTUS Project Base Software Repository
-baseurl=http://cactus.web.cern.ch/cactus/release/2.1/<platform>/base/RPMS
+baseurl=http://cactus.web.cern.ch/cactus/release/2.2/<platform>/base/RPMS
 enabled=1
 gpgcheck=0
 timeout=120
 
 [cactus-updates]
 name=CACTUS Project Updates Software Repository
-baseurl=http://cactus.web.cern.ch/cactus/release/2.1/<platform>/updates/RPMS
+baseurl=http://cactus.web.cern.ch/cactus/release/2.2/<platform>/updates/RPMS
 enabled=1
 gpgcheck=0
 timeout=120
