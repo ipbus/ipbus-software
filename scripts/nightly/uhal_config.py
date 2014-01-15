@@ -29,6 +29,19 @@ system("mkdir -p %s" % NIGHTLY_BASE,exception=False)
 system("rm -f %s" % join(NIGHTLY_BASE,"..",pseudo_platform),exception=False)
 system("ln -s %s %s" % (NIGHTLY_BASE,join(NIGHTLY_BASE,"..",pseudo_platform)),exception=False)
 
+# The following lines are meant to delete old platform directories containing RPMs and logs
+target_platform = "unknown"
+if pseudo_platform == "slc5_i686":
+    target_platform = "i686-with-redhat-5"
+elif pseudo_platform == "slc5_x86_64":
+    target_platform = "x86_64-with-redhat-5"
+elif pseudo_platform = "slc6_x86_64":
+    target_platform = "x86_64-with-redhat-6"
+    
+del_dirs = [d for d in listdir(join(NIGHTLY_BASE, "..")) if isdir(join(NIGHTLY_BASE, "..", d)) and d.find(target_platform) != -1 and d != platform()]
+for d in del_dirs:
+    system("rm -rf %s" % join(NIGHTLY_BASE, "..", d), exception=False)
+
 ####VARIABLES: analysis of logs
 TITLE             = "uHAL Nightlies: %s " % pseudo_platform
 FROM_EMAIL        = "cactus.service@cern.ch"
