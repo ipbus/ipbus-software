@@ -35,7 +35,7 @@ if pseudo_platform == "slc5_i686":
     target_platform = "i686-with-redhat-5"
 elif pseudo_platform == "slc5_x86_64":
     target_platform = "x86_64-with-redhat-5"
-elif pseudo_platform = "slc6_x86_64":
+elif pseudo_platform == "slc6_x86_64":
     target_platform = "x86_64-with-redhat-6"
     
 del_dirs = [d for d in listdir(join(NIGHTLY_BASE, "..")) if isdir(join(NIGHTLY_BASE, "..", d)) and d.find(target_platform) != -1 and d != platform()]
