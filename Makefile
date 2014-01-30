@@ -13,15 +13,21 @@ PACKAGES = \
 else ifeq ($(Set), ts)
 PACKAGES = \
         cactuscore/ts \
-	cactuscore/confdb \
-	cactusprojects/subsystem \
-	cactusprojects/retri \
-	cactusprojects/central \
-	cactusprojects/ttc \
-	cactusprojects/l1page \
-	cactusprojects/gt \
-	cactusprojects/gmt \
-	cactusprojects/dtsc
+        cactuscore/confdb \
+        cactusprojects/central \
+        cactusprojects/csctf \
+        cactusprojects/dtsc \
+        cactusprojects/dttf \
+        cactusprojects/gct \
+        cactusprojects/gmt \
+        cactusprojects/gt \
+        cactusprojects/l1page \
+        cactusprojects/rct \
+        cactusprojects/retri \
+        cactusprojects/rpct \
+        cactusprojects/subsystem \
+        cactusprojects/ttc 
+        
 endif
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
