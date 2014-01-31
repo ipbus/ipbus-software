@@ -15,16 +15,11 @@ PACKAGES = \
         cactuscore/ts \
         cactuscore/confdb \
         cactusprojects/central \
-        cactusprojects/csctf \
         cactusprojects/dtsc \
-        cactusprojects/dttf \
-        cactusprojects/gct \
         cactusprojects/gmt \
         cactusprojects/gt \
         cactusprojects/l1page \
-        cactusprojects/rct \
         cactusprojects/retri \
-        cactusprojects/rpct \
         cactusprojects/subsystem \
         cactusprojects/ttc 
         
