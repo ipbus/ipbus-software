@@ -16,7 +16,8 @@ PACKAGES = \
         cactuscore/confdb \
         cactusprojects/central \
         cactusprojects/dtsc \
-        cactusprojects/gmt \
+        cactusprojects/gct \
+				cactusprojects/gmt \
         cactusprojects/gt \
         cactusprojects/l1page \
         cactusprojects/retri \
