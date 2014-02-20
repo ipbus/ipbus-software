@@ -142,7 +142,10 @@ def ipbus_addr_map(fn,verbose=False):
                 slaves.append((name,child.getAddress(),width))
                 
             elif isModule(child):
-                children += getChildren(d,child)
+                children += getChildren(d,name)
+
+            else:
+                raise Exception("Slave '%s' is not tagged as slave, bus or module" % (name))
 
         #sort by address        
         slaves.sort(lambda x,y: cmp(d.getNode(x[0]).getAddress(),d.getNode(y[0]).getAddress()))
