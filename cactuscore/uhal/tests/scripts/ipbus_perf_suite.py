@@ -10,12 +10,15 @@ N.B: You must set LD_LIBRARY_PATH and PATH appropriately before this
 
 from datetime import datetime
 import fcntl
+import getopt
 import getpass
+from itertools import izip
 from math import sqrt
 from math import ceil
 import numpy
 import os
 import paramiko
+import pickle
 from random import randint
 import re
 import signal
@@ -47,7 +50,8 @@ TARGETS = ['amc-e1a12-19-09:50001',
 
 DIRECT_UDP_NR_IN_FLIGHT = 16
 
-CACTUS_REVISION = "SW @ r23785, FW @ r23770"
+FW_VERSION = "ipbus_2_0_v1"
+SW_VERSION = "v2.2.0"
 
 CHANGES_TAG = "No changes"
 
@@ -75,6 +79,7 @@ SCRIPT_LOGGER.setLevel(logging.WARNING)
 #  SETUP MATPLOTLIB
 
 import matplotlib.pyplot as plt
+
 
 ####################################################################################################
 #  EXCEPTION CLASSES
@@ -360,8 +365,22 @@ def update_controlhub_sys_config(max_in_flight, ssh_client, sys_config_location)
         sftp_client.close()     
 
 
+
+
 ####################################################################################################
-#  FUNCTIONS RUNNING SEQUENCES OF TESTS
+#  FUNCTIONS: SETUP
+
+def setup_for_measurements():
+    pass
+
+
+def setup_for_plotting():
+    pass
+
+
+
+####################################################################################################
+#  FUNCTIONS RUNNING SEQUENCES OF MEASUREMENTS / MAKING SEQUENCES OF PLOTS
 
 class DataseriesStats(object):
     def __init__(self):
@@ -393,7 +412,9 @@ def calc_y_stats(data_dict):
         stats.rms_err_hi.append(rms_err/mean)
 
     return stats
-    
+
+
+
 def calc_mean_with_error(data_list):
     mean = numpy.mean(data_list)
     n = len(data_list)
@@ -408,10 +429,13 @@ def calc_mean_with_error(data_list):
     return mean, err
 
 
+
 def calc_rms(data_list):
     mean = numpy.mean(data_list)
     mean_sq_diff = sum([ (y-mean)**2 for y in data_list ]) / len(data_list)
     return sqrt( mean_sq_diff )
+
+
 
 def calc_rms_with_error(data_list):
     rms = calc_rms(data_list)
@@ -432,12 +456,13 @@ def calc_rms_with_error(data_list):
             elif val > max:
                 max = val
         mean = sum/n
-        if min == max:
+        if min == max or (max-min) < (1e-8 * mean):
            bootstrap_sample_rms.append ( 0.0 )
         else:
            bootstrap_sample_rms.append ( sqrt(sum2/n - mean*mean) )
     err = calc_rms( bootstrap_sample_rms )
     return rms, err
+
 
 
 def measure_latency(target, controhub_ssh_client, ax):
@@ -514,6 +539,354 @@ def measure_latency(target, controhub_ssh_client, ax):
 #    plt.xscale("log")
     ax.legend(loc='lower right')
 
+
+
+def measure_1_to_1_latency(target, controlhub_ssh_client, n_meas=40):
+    '''
+    Measures latencies for block reads & writes to given endpoint, and 
+    returns structured array containing latencies in micro-sec
+
+    Arguments:
+      target                 --  target hostname (or IP) & port in format "hostname:port"
+      controlhub_ssh_client  --  ssh client instance for connecting to controlhub host
+      n_meas                 --  number of measurements to take at each depth
+    '''
+
+    print "\n ---> MEASURING 1 to 1 performance vs DEPTH to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    depths = [1]
+    depths += [50, 100, 150, 200, 250, 300, 340, 350, 500, 600, 680, 700, 800, 900, 1000]
+    for n in range(1, 10):
+        depths += [3*n*343]
+    for n in range(10, 31, 2) + range(40, 80, 20) + range(80, 200, 40):
+        depths += [3*n*343]
+    for n in [2e2, 3e2, 4e2, 7e2, 10e2]:
+        depths += [3*n*343]
+    for n in [2e3, 3e3, 4e3, 7e3, 10e3]:
+        depths += [3*n*343]
+
+    data = numpy.zeros(len(depths), 
+                    dtype=[('w','uint32'),
+#                           ('udp_tx', 'float32', (n_meas,)),
+#                           ('udp_tx_1itn', 'float32', (n_meas,)),
+#                           ('udp_rx', 'float32', (n_meas,)),
+                           ('ch_tx',  'float32', (n_meas,)),
+#                           ('ch_tx_1itn', 'float32', (n_meas,)),
+                           ('ch_rx',  'float32', (n_meas,))
+                          ]
+                   )
+
+    for i in range(len(depths)):
+        data['w'][i] = int(depths[i])
+
+    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    start_controlhub(controlhub_ssh_client)
+
+    udp_uri = "ipbusudp-2.0://" + target
+    ch_uri  = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
+
+    for i in range(n_meas):
+        SCRIPT_LOGGER.warning('1-to-1 measurements: iteration %d' % i)
+
+        for entry in data:
+            cmd_tx = "PerfTester.exe -t BandwidthTx -b 0x2001 -w " + str(entry['w']) + " -p -i 1 -d "
+            cmd_rx = cmd_tx.replace("BandwitdthTx", "BandwidthRx")
+
+#            entry['udp_tx'][i] = run_command( cmd_tx + udp_uri )[0]
+#            entry['udp_tx_1itn'][i] = run_command( cmd_tx.replace('-i 10', '-i 1') + udp_uri )[0]
+#            entry['udp_rx'][i] = run_command( cmd_rx + udp_uri )[0]
+            entry['ch_tx'][i]  = run_command( cmd_tx + ch_uri  )[0]
+#            entry['ch_tx_10itn'][i] = run_command( cmd_tx.replace('-i 1', '-i 10') + ch_uri )[0]
+            entry['ch_rx'][i]  = run_command( cmd_rx + ch_uri  )[0]
+
+
+    # Final cleanup
+    stop_controlhub(controlhub_ssh_client)
+
+    return data
+
+
+
+def random_sample(src, N=None, transform=lambda x: x):
+    '''
+    Returns a random sample of length N, generated by randomly picking elements of src
+    '''
+    assert isinstance(src, numpy.ndarray)
+    assert hasattr(transform, '__call__')
+
+    if N is None:
+        N = len(src)
+
+    result = numpy.zeros(N, src.dtype)
+    for i in range(len(result)):
+        result[i] = transform( src[ numpy.random.randint(len(src)) ] )
+    return result
+
+
+
+def calc_percentiles(sample, fractions):
+    '''
+    Returns the positions of the percentile 'fraction' within this sample
+    NOTA BENE ... CURRENT IMPLEMENTATION SORTS sample IN PLACE.
+    '''
+    assert isinstance(sample, numpy.ndarray)
+    assert isinstance(fractions, list)
+    for f in fractions:
+        assert (f > 0.0) and (f < 1.0)
+
+    sample.sort() # In place sort => changes the argument
+
+    result = numpy.zeros(len(fractions), 'float32')
+
+    for i, f in enumerate(fractions):
+        frac_as_index = f * ( len(sample) - 1 )
+        low_index  = int(frac_as_index)
+        high_index = low_index + 1
+        result[i] = sample[low_index] + (frac_as_index - low_index) * (sample[high_index] - sample[low_index])
+
+    return result
+
+
+
+def bootstrap_percentile(measurements, fractions, N=100, transform=lambda x: x):
+    '''
+    Returns the estimate of the percentile corresponding to fraction, and it's error, as a tuple (estimate, error)
+
+    Arguments:
+      measurements  --  A 1D numpy.ndarray containing the 
+      f  --  percentile value, expressed as a fraction - i.e. 0 < f < 1
+      N  --  number of bootstrap
+    '''
+    assert isinstance(measurements, numpy.ndarray)
+    assert isinstance(fractions, list)
+#    assert ( f > 0.0 ) and ( f < 1.0 )
+    assert isinstance(N, int)
+
+    bootstrap_pc_struct = numpy.zeros(N, str(len(fractions))+'float32')
+    for i in range(len(bootstrap_pc_struct)):
+        sample = random_sample( measurements, transform=transform )
+        bootstrap_pc_struct[i] = calc_percentiles(sample, fractions)
+
+    return [(numpy.mean(bootstrap_pc_values), calc_rms( bootstrap_pc_values))
+             for bootstrap_pc_values 
+             in bootstrap_pc_struct.swapaxes(0,1)
+           ]
+
+
+
+def bootstrap_stats_array( raw_data, transforms=None ):
+    '''
+    Returns stats values as numpy structured array
+
+    Arguments:
+      raw_data  --  A numpy array of numpy arrays.
+    '''
+
+    result = numpy.zeros(
+                         (len(raw_data),),
+                         dtype=[('16_est', 'float32'), ('16_est_rel2median', 'float32'),
+                                ('16_err', 'float32'), ('16_err_rel2median', 'float32'),
+                                ('50_est', 'float32'),
+                                ('50_err', 'float32'),
+                                ('84_est', 'float32'), ('84_est_rel2median', 'float32'),
+                                ('84_err', 'float32'), ('84_err_rel2median', 'float32'),
+                               ]
+                        )
+
+    if transforms is None:
+        transforms = [(lambda x: x) for i in result]
+
+    for values, stats_struct, transform in izip(raw_data, result, transforms):
+        [(stats_struct['16_est'], stats_struct['16_err']),
+         (stats_struct['50_est'], stats_struct['50_err']),
+         (stats_struct['84_est'], stats_struct['84_err']),
+        ] = bootstrap_percentile(values, [0.16, 0.50, 0.84], transform=transform)
+
+    for i in range(len(result)):
+        for pc in ['16', '84']:
+            result[pc+'_est_rel2median'][i] = ( result[pc+'_est'][i] / result['50_est'][i] ) - 1.0
+            result[pc+'_err_rel2median'][i] = ( result[pc+'_err'][i] / result['50_est'][i] )
+
+    return result
+
+
+
+def plot_1_to_1_performance( all_data , key_label_pairs ):
+    '''
+    Plots latency and bandwidth for block reads and writes from single client to single target.
+ 
+    Arguments:
+      data  --  
+    '''
+    print "\n ---> PLOTTING LATENCY/BANDWIDTH vs DEPTH <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    # Set up graphs ...
+
+    fig_lat = plt.figure(figsize=(12,10))
+    ax_lat1 = fig_lat.add_subplot(221)
+    ax_lat2 = fig_lat.add_subplot(222)
+    ax_lat3 = fig_lat.add_subplot(223)
+    ax_lat4 = fig_lat.add_subplot(224)
+
+    fig_bw = plt.figure(figsize=(12,10))
+    ax_bw1 = fig_bw.add_subplot(221)
+    ax_bw2 = fig_bw.add_subplot(222, xscale='log')
+    ax_bw3 = fig_bw.add_subplot(223)
+    ax_bw4 = fig_bw.add_subplot(224, xscale='log')
+
+    # Calc stats for each line, and then plot
+
+    depths = all_data['w']
+
+#    udp_tx_data = all_data['udp_tx']
+#    idx = 4
+#    print "Width", depths[idx]
+#    print bootstrap_percentile(udp_tx_data[idx], 0.50)
+#    print bootstrap_percentile(udp_tx_data[idx], 0.50, transform=lambda x: 1e-3 * depths[idx] * 32 / x)
+#    return
+    
+
+    for key, label in key_label_pairs:
+        print key, "--", label
+
+        stats = bootstrap_stats_array( all_data[key] )
+        bw_stats = bootstrap_stats_array( all_data[key], transforms=[(lambda x, d=d: 1e-3 * 32 * d / x) for d in depths] )
+
+        col = ax_lat1.errorbar(depths, stats['50_est'], yerr=(stats['50_err']), label=label)[0].get_color()
+        ax_lat2.errorbar(depths, stats['50_est'], yerr=(stats['50_err']), label=label)
+
+        ax_lat3.errorbar(depths, stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
+        ax_lat3.errorbar(depths, stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
+
+        ax_lat4.errorbar(depths, stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
+        ax_lat4.errorbar(depths, stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
+
+        ax_bw1.errorbar(depths, bw_stats['50_est'], yerr=(bw_stats['50_err']), label=label)
+        ax_bw2.errorbar(depths, bw_stats['50_est'], yerr=(bw_stats['50_err']), label=label)
+
+        ax_bw4.errorbar(depths, bw_stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
+        ax_bw4.errorbar(depths, bw_stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
+
+    for ax in [ax_bw1, ax_bw2, ax_bw3, ax_bw4, ax_lat1, ax_lat2, ax_lat3, ax_lat4]:
+        ax.set_xlabel("Number of words")
+        ax.set_ylim(0.)
+
+    for ax in [ax_bw1, ax_bw2]:
+        ax.set_ylabel('Median throughput [Gbit/s]')
+        leg = ax.legend(loc='best', fancybox=True)
+        leg.get_frame().set_alpha(0.5)
+    for ax in [ax_lat1, ax_lat2]:
+        ax.set_ylabel('Median latency [us]') 
+        leg = ax.legend(loc='best', fancybox=True)
+        leg.get_frame().set_alpha(0.5)
+
+    for ax in [ax_lat3, ax_lat4, ax_bw3, ax_bw4]:
+        ax.set_ylim(-0.2, 0.2)
+        ax.set_ylabel('Fractional central 68% variation range')
+
+    for ax in [ax_bw1, ax_bw3, ax_lat1, ax_lat3]:
+        ax.set_xlim(0, 1001)
+        for d in range(0, 10000, 343):
+            ax.axvline(d, color='DarkGrey', linestyle='-.')
+        ax.set_xlim(0, 1001)
+
+    ax_lat1.set_ylim(100, 600)
+
+    for ax in [ax_bw2, ax_bw4]:
+        ax.set_xlim(999, 1.001e7)
+
+    for ax in [ax_lat2, ax_lat4]:
+        ax.set_xlim(0, 1.001e6)
+    ax_lat2.set_ylim(0,1e5)
+
+
+# #        tx_rtt = 3*343*32 / ( 1000.0 * numpy.mean( ch_tx_bws[3*343] ) )
+# #        tx_t_max = 2 * 3*343*32 * ( 1 / numpy.mean(ch_tx_bws[2*3*343]) - 0.5 / numpy.mean(ch_tx_bws[3*343]) ) / 1000.0
+# #        print " --> PREDICTION PARAMS ..."
+# #        print "       tx_rtt   =", tx_rtt, "us"
+# #        print "       tx_t_max =", tx_t_max, "us"
+# #        xx = numpy.arange(343.0, 200000.0, 0.1)
+# #        tx_prediction = [ (x/1029.0)*32.928 / (tx_rtt + ((x/1029.0)-1)*tx_t_max) for x in xx]
+
+        
+#         print "1-word latencies ... tx w/o connect ; rx w/o connect; tx w/ connect ; tx w/o connect ..."
+#         for tx_excl in sorted(ch_tx_lats_excl_connect[1]): #, rx_excl, tx_incl, rx_incl in 
+#                   #zip( sorted(ch_tx_lats_excl_connect[1]),
+#                   #sorted(ch_rx_lats_excl_connect[1]),
+#                   #sorted(ch_tx_lats_incl_connect[1]),
+#                   #sorted(ch_rx_lats_incl_connect[1]) 
+#                   #):
+#             #print "  {0:7.1f}  {1:7.1f}  {2:7.1f}  {2:7.1f}".format(tx_excl, rx_excl, tx_incl, rx_incl)
+#             print "  {0:7.2f}".format(tx_excl)
+
+
+
+def measure_1_to_1_latency(target, controlhub_ssh_client, n_meas=40):
+    '''
+    Measures latencies for block reads & writes to given endpoint, and 
+    returns structured array containing latencies in micro-sec
+
+    Arguments:
+      target                 --  target hostname (or IP) & port in format "hostname:port"
+      controlhub_ssh_client  --  ssh client instance for connecting to controlhub host
+      n_meas                 --  number of measurements to take at each depth
+    '''
+
+    print "\n ---> MEASURING 1 to 1 performance vs DEPTH to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    depths = [1]
+    depths += [50, 100, 150, 200, 250, 300, 340, 350, 500, 600, 680, 700, 800, 900, 1000]
+    for n in range(1, 10):
+        depths += [3*n*343]
+    for n in range(10, 31, 2) + range(40, 80, 20) + range(80, 200, 40):
+        depths += [3*n*343]
+    for n in [2e2, 3e2, 4e2, 7e2, 10e2]:
+        depths += [3*n*343]
+    for n in [2e3, 3e3, 4e3, 7e3, 10e3]:
+        depths += [3*n*343]
+
+    data = numpy.zeros(len(depths), 
+                    dtype=[('w','uint32'),
+#                           ('udp_tx', 'float32', (n_meas,)),
+#                           ('udp_tx_1itn', 'float32', (n_meas,)),
+#                           ('udp_rx', 'float32', (n_meas,)),
+                           ('ch_tx',  'float32', (n_meas,)),
+#                           ('ch_tx_1itn', 'float32', (n_meas,)),
+                           ('ch_rx',  'float32', (n_meas,))
+                          ]
+                   )
+
+    for i in range(len(depths)):
+        data['w'][i] = int(depths[i])
+
+    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    start_controlhub(controlhub_ssh_client)
+
+    udp_uri = "ipbusudp-2.0://" + target
+    ch_uri  = "chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
+
+    for i in range(n_meas):
+        SCRIPT_LOGGER.warning('1-to-1 measurements: iteration %d' % i)
+
+        for entry in data:
+            cmd_tx = "PerfTester.exe -t BandwidthTx -b 0x2001 -w " + str(entry['w']) + " -p -i 1 -d "
+            cmd_rx = cmd_tx.replace("BandwitdthTx", "BandwidthRx")
+
+#            entry['udp_tx'][i] = run_command( cmd_tx + udp_uri )[0]
+#            entry['udp_tx_1itn'][i] = run_command( cmd_tx.replace('-i 10', '-i 1') + udp_uri )[0]
+#            entry['udp_rx'][i] = run_command( cmd_rx + udp_uri )[0]
+            entry['ch_tx'][i]  = run_command( cmd_tx + ch_uri  )[0]
+#            entry['ch_tx_10itn'][i] = run_command( cmd_tx.replace('-i 1', '-i 10') + ch_uri )[0]
+            entry['ch_rx'][i]  = run_command( cmd_rx + ch_uri  )[0]
+
+
+    # Final cleanup
+    stop_controlhub(controlhub_ssh_client)
+
+    return data
 
 
 def measure_bw_vs_depth(target, controlhub_ssh_client, ax):
@@ -679,11 +1052,11 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
 #    cmd_base = "perf_tester.escript tcp_ch_client " + CH_PC_NAME + " " + target.replace(":"," ") + " 16000 50"
 
     ch_tx_bws = dict((x, []) for x in nrs_in_flight)
-    ch_tx_bws_3 = dict((x, []) for x in nrs_in_flight)
-    ch_tx_bws_4 = dict((x, []) for x in nrs_in_flight)
+#    ch_tx_bws_3 = dict((x, []) for x in nrs_in_flight)
+#    ch_tx_bws_4 = dict((x, []) for x in nrs_in_flight)
     ch_rx_bws  = dict((x, []) for x in nrs_in_flight)
-    ch_rx_bws_3 = dict((x, []) for x in nrs_in_flight)
-    ch_rx_bws_4 = dict((x, []) for x in nrs_in_flight)
+#    ch_rx_bws_3 = dict((x, []) for x in nrs_in_flight)
+#    ch_rx_bws_4 = dict((x, []) for x in nrs_in_flight)
 
     for i in range(10):
         SCRIPT_LOGGER.warning( "Starting iteration %d" % i )
@@ -694,40 +1067,40 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
             ch_tx_bws[n].append( run_command(cmd_base + " -t BandwidthTx")[1] / 1000.0 )
             stop_controlhub(controlhub_ssh_client)
 
-            start_controlhub(controlhub_ssh_client)
-            ch_tx_bws_3[n].append( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-3perSend") + " -t BandwidthTx")[1] / 1000.0 )
-            stop_controlhub(controlhub_ssh_client)
+#            start_controlhub(controlhub_ssh_client)
+#            ch_tx_bws_3[n].append( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-3perSend") + " -t BandwidthTx")[1] / 1000.0 )
+#            stop_controlhub(controlhub_ssh_client)
 
-            start_controlhub(controlhub_ssh_client)
-            ch_tx_bws_4[n].append( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-4perSend") + " -t BandwidthTx")[1] / 1000.0 )
-            stop_controlhub(controlhub_ssh_client)
+#            start_controlhub(controlhub_ssh_client)
+#            ch_tx_bws_4[n].append( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-4perSend") + " -t BandwidthTx")[1] / 1000.0 )
+#            stop_controlhub(controlhub_ssh_client)
 
             start_controlhub(controlhub_ssh_client)
             ch_rx_bws[n].append( run_command(cmd_base + " -t BandwidthRx")[1] / 1000.0 )
             stop_controlhub(controlhub_ssh_client)
 
-            start_controlhub(controlhub_ssh_client)
-            ch_rx_bws_3[n].append ( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-3perSend") + " -t BandwidthRx")[1] / 1000.0 )
-            stop_controlhub(controlhub_ssh_client)
-
-            start_controlhub(controlhub_ssh_client)
-            ch_rx_bws_4[n].append ( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-4perSend") + " -t BandwidthRx")[1] / 1000.0 )
-            stop_controlhub(controlhub_ssh_client)
+#            start_controlhub(controlhub_ssh_client)
+#            ch_rx_bws_3[n].append ( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-3perSend") + " -t BandwidthRx")[1] / 1000.0 )
+#            stop_controlhub(controlhub_ssh_client)
+#
+#            start_controlhub(controlhub_ssh_client)
+#            ch_rx_bws_4[n].append ( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-4perSend") + " -t BandwidthRx")[1] / 1000.0 )
+#            stop_controlhub(controlhub_ssh_client)
 
 
     ch_tx_bws_stats   = calc_y_stats(ch_tx_bws)
-    ch_tx_bws_3_stats = calc_y_stats(ch_tx_bws_3)
-    ch_tx_bws_4_stats = calc_y_stats(ch_tx_bws_4)
+#    ch_tx_bws_3_stats = calc_y_stats(ch_tx_bws_3)
+#    ch_tx_bws_4_stats = calc_y_stats(ch_tx_bws_4)
     ch_rx_bws_stats   = calc_y_stats(ch_rx_bws)
-    ch_rx_bws_3_stats = calc_y_stats(ch_rx_bws_3)
-    ch_rx_bws_4_stats = calc_y_stats(ch_rx_bws_4)
+#    ch_rx_bws_3_stats = calc_y_stats(ch_rx_bws_3)
+#    ch_rx_bws_4_stats = calc_y_stats(ch_rx_bws_4)
 
-    ax.errorbar(nrs_in_flight, ch_tx_bws_stats.mean, yerr=ch_tx_bws_stats.mean_errors(), label='20MB write, 15')
-    ax.errorbar(nrs_in_flight, ch_tx_bws_3_stats.mean, yerr=ch_tx_bws_3_stats.mean_errors(), label='20MB write, 3')
-    ax.errorbar(nrs_in_flight, ch_tx_bws_4_stats.mean, yerr=ch_tx_bws_4_stats.mean_errors(), label='20MB write, 4')
-    ax.errorbar(nrs_in_flight, ch_rx_bws_stats.mean, yerr=ch_rx_bws_stats.mean_errors(), fmt='--', label='20MB read, 15')
-    ax.errorbar(nrs_in_flight, ch_rx_bws_3_stats.mean, yerr=ch_rx_bws_3_stats.mean_errors(), fmt='--', label="20MB read, 3")
-    ax.errorbar(nrs_in_flight, ch_rx_bws_4_stats.mean, yerr=ch_rx_bws_4_stats.mean_errors(), fmt='--', label="20MB read, 4")
+    ax.errorbar(nrs_in_flight, ch_tx_bws_stats.mean, yerr=ch_tx_bws_stats.mean_errors(), label='20MB write')
+#    ax.errorbar(nrs_in_flight, ch_tx_bws_3_stats.mean, yerr=ch_tx_bws_3_stats.mean_errors(), label='20MB write, 3')
+#    ax.errorbar(nrs_in_flight, ch_tx_bws_4_stats.mean, yerr=ch_tx_bws_4_stats.mean_errors(), label='20MB write, 4')
+    ax.errorbar(nrs_in_flight, ch_rx_bws_stats.mean, yerr=ch_rx_bws_stats.mean_errors(), fmt='--', label='20MB read')
+#    ax.errorbar(nrs_in_flight, ch_rx_bws_3_stats.mean, yerr=ch_rx_bws_3_stats.mean_errors(), fmt='--', label="20MB read, 3")
+#    ax.errorbar(nrs_in_flight, ch_rx_bws_4_stats.mean, yerr=ch_rx_bws_4_stats.mean_errors(), fmt='--', label="20MB read, 4")
     ax.set_xlabel('Number in flight over UDP')
     ax.set_ylabel('Mean bandwidth [Gbit/s]')
     ax.set_ylim(0, 0.65)
@@ -759,7 +1132,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
     start_controlhub(controlhub_ssh_client)
 
-    for i in range(5):
+    for i in range(4):
         for n_clients in nrs_clients:
             for n_targets in nrs_targets:
                 itns = int(20480/(n_clients*n_targets))
@@ -768,7 +1141,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 #                itns = int(250000/(n_clients*n_targets))
 #                cmds = [cmd_base + t.replace(":"," ") + ' ' + str(itns) + " 50" for t in targets[0:n_targets] for x in range(n_clients)]
                 monitor_results, cmd_results = cmd_runner.run(cmds)
-                bws = [ (x[1]/1000.0) for x in cmd_results]
+                bws = [ x[1] for x in cmd_results]
 
                 dict_idx = (n_clients, n_targets)
                 uhal_cpu_vals[dict_idx].append( monitor_results[0][1] )
@@ -788,29 +1161,29 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
     ax_ch_mem = fig.add_subplot(235, ylim=[0,100])
     ax_uhal_cpu = fig.add_subplot(233, ylim=[0,400])
     ax_uhal_mem = fig.add_subplot(236, ylim=[0,100])
-    fig.suptitle('100MB continuous write to crate')
+    fig.suptitle('300MB continuous write to crate')
 
     for n_targets in nrs_targets:
         label = str(n_targets) + ' targets'
-        bws_per_board_mean , bws_per_board_errs  = calc_y_with_errors( dict(x for x in bws_per_board.items() if x[0][1]==n_targets) )
-        bws_per_client_mean, bws_per_client_errs = calc_y_with_errors( dict(x for x in bws_per_client.items() if x[0][1]==n_targets) )
-        total_bws_mean, total_bws_errs           = calc_y_with_errors( dict(x for x in total_bws.items() if x[0][1]==n_targets) )
-        ch_cpu_mean, ch_cpu_errs = calc_y_with_errors( dict(x for x in ch_cpu_vals.items() if x[0][1]==n_targets) )
-        ch_mem_mean, ch_mem_errs = calc_y_with_errors( dict(x for x in ch_mem_vals.items() if x[0][1]==n_targets) )
-        uhal_cpu_mean, uhal_cpu_errs = calc_y_with_errors( dict(x for x in uhal_cpu_vals.items() if x[0][1]==n_targets) )
-        uhal_mem_mean, uhal_mem_errs = calc_y_with_errors( dict(x for x in uhal_mem_vals.items() if x[0][1]==n_targets) )
+        bws_per_board_stats  = calc_y_stats( dict(x for x in bws_per_board.items() if x[0][1]==n_targets) )
+        bws_per_client_stats = calc_y_stats( dict(x for x in bws_per_client.items() if x[0][1]==n_targets) )
+        total_bws_stats      = calc_y_stats( dict(x for x in total_bws.items() if x[0][1]==n_targets) )
+        ch_cpu_stats         = calc_y_stats( dict(x for x in ch_cpu_vals.items() if x[0][1]==n_targets) )
+        ch_mem_stats         = calc_y_stats( dict(x for x in ch_mem_vals.items() if x[0][1]==n_targets) )
+        uhal_cpu_stats       = calc_y_stats( dict(x for x in uhal_cpu_vals.items() if x[0][1]==n_targets) )
+        uhal_mem_stats       = calc_y_stats( dict(x for x in uhal_mem_vals.items() if x[0][1]==n_targets) )
 
         print label
-        for cpu in ch_cpu_mean:
+        for cpu in ch_cpu_stats.mean:
             print "ControlHub cpu:", cpu
 
-        ax_bw_board.errorbar(nrs_clients, bws_per_board_mean, yerr=bws_per_board_errs, label=label)
+        ax_bw_board.errorbar(nrs_clients, bws_per_board_stats.mean, yerr=bws_per_board_stats.mean_errors(), label=label)
 #        ax_bw_client.errorbar(nrs_clients, bws_per_client_mean, yerr=bws_per_client_errs, label=label)
-        ax_bw_total.errorbar(nrs_clients, total_bws_mean, yerr=total_bws_errs, label=label)
-        ax_ch_cpu.errorbar(nrs_clients, ch_cpu_mean, yerr=ch_cpu_errs, label=label)
-        ax_ch_mem.errorbar(nrs_clients, ch_mem_mean, yerr=ch_mem_errs, label=label)
-        ax_uhal_cpu.errorbar(nrs_clients, uhal_cpu_mean, yerr=uhal_cpu_errs, label=label)
-        ax_uhal_mem.errorbar(nrs_clients, uhal_mem_mean, yerr=uhal_mem_errs, label=label)
+        ax_bw_total.errorbar(nrs_clients, total_bws_stats.mean, yerr=bws_per_board_stats.mean_errors(), label=label)
+        ax_ch_cpu.errorbar(nrs_clients, ch_cpu_stats.mean, yerr=ch_cpu_stats.mean_errors(), label=label)
+        ax_ch_mem.errorbar(nrs_clients, ch_mem_stats.mean, yerr=ch_mem_stats.mean_errors(), label=label)
+        ax_uhal_cpu.errorbar(nrs_clients, uhal_cpu_stats.mean, yerr=uhal_cpu_stats.mean_errors(), label=label)
+        ax_uhal_mem.errorbar(nrs_clients, uhal_mem_stats.mean, yerr=uhal_mem_stats.mean_errors(), label=label)
         
     for ax in [ax_bw_board, ax_bw_total, ax_ch_cpu, ax_ch_mem, ax_uhal_cpu, ax_uhal_mem]:
         ax.set_xlabel('Number of clients per board')
@@ -834,10 +1207,100 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client):
 #    ax.set_title('a title')
 
 
+
+####################################################################################################
+#  Highest-level plot / measure functions
+
+def take_measurements(file_prefix):
+
+    data = {'start_time' : time.localtime(),
+            'fw_version' : FW_VERSION,
+            'sw_version' : SW_VERSION,
+            'client_host_name' : UHAL_PC_NAME,
+            'bridge_host_name' : CH_PC_NAME,
+            'targets' : TARGETS
+           }
+
+    controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
+
+    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], controlhub_ssh_client , n_meas=100 )
+
+    filename = file_prefix
+    if not filename.endswith(".pkl"):
+       filename += ".pkl"
+    print "Saving measurements to:", filename
+
+    pickle.dump( data, open(filename, "wb") )
+
+
+
+def make_plots(input_file):
+    
+    data = pickle.load( open(filename, "rb") )
+
+    print "Data from file", input_file, "is ..."
+#    print data
+
+    plot_1_to_1_performance( data['1_to_1_latency'] , [#('udp_rx', 'Read, direct UDP'), 
+                                                       #('udp_tx', 'Tx, udp, 10 itns'),
+                                                       #('udp_tx_1itn', 'Tx, udp, 1 itn'),
+                                                      ('ch_rx',  'Rx, ch, 1 itn'), 
+                                                       ('ch_tx',  'Tx, ch, 1 itn'),
+                                                       #('ch_tx_1itn', 'Tx, ch, 1 itn')
+                                                      ] )
+
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+    plt.show()
+
+
 ####################################################################################################
 #  MAIN
 
 if __name__ == "__main__":
+
+    # Parse args ...
+    try:
+       opts, args = getopt.getopt(sys.argv[1:], "hmp", ["help", "measure", "plot"])
+    except getopt.GetoptError, e:
+       print "ERROR in parsing arguments: ", e, "\n"
+       print __doc__
+       sys.exit(2)
+
+    measure = False
+    plot = False
+
+    for opt, value in opts:
+        if opt in ("-h", "--help"):
+           print __doc__
+           sys.exit(0)
+        elif opt in ("-m", "--measure"):
+           measure = True
+        elif opt in ("-p", "--plot"):
+           plot = True
+
+    if measure and plot:
+        print "ERROR: Incorrect usage - cannot run in measure and plot modes at same time!"
+        sys.exit(1)
+    elif not measure and not plot:
+        print "ERROR: Incorrect usage - must run either measure mode or plot mode!"
+        sys.exit(1)
+
+    if len(args) != 1:
+        print "ERROR: Incorrect usage - wrong number of aguments!"
+        print __doc__
+        sys.exit(1)
+
+    filename = args[0]
+
+    if measure:
+        take_measurements(filename)
+    if plot:
+        make_plots(filename)
+
+    sys.exit(0)
+
+    ########################################################
+
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
 #    (f, ((ax1, ax2), (ax3, ax4))) = plt.subplots(2, 2)
@@ -861,7 +1324,7 @@ if __name__ == "__main__":
 
 #    plt.savefig('plot1.png') 
 
-#    measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
+    measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
 
 #    plt.savefig('plot2.png')
 
