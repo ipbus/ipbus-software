@@ -857,7 +857,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client, n_meas=10):
 
     # Run commands for measurements
 
-    cmd_base = "PerfTester.exe -t BandwidthTx -w 3840 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
+    cmd_base = "PerfTester.exe -t BandwidthTx -i 1 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
     cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
 
     update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
@@ -870,8 +870,8 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client, n_meas=10):
                 n_clients, n_targets = entry['n_clients'], entry['n_targets']
                 SCRIPT_LOGGER.warning( '     %d, %d' % (n_clients, n_targets) )
 
-                itns = int(20480/(n_clients*n_targets))
-                cmds = [cmd_base + t + ' -i ' + str(itns) for t in targets[0:n_targets] for x in range(n_clients)]
+                depth = 300 * 1000 * 1000 / ( 4 * n_clients * n_targets )
+                cmds = [cmd_base + t + ' -w ' + str(depth) for t in targets[0:n_targets] for x in range(n_clients)]
 
                 monitor_results, cmd_results = cmd_runner.run(cmds)
                 bws = [ x[1] for x in cmd_results]
