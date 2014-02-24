@@ -1061,13 +1061,13 @@ def make_plots(input_file):
     print "Data from file", input_file, "is ..."
 #    print data
 
-#    plot_1_to_1_performance( data['1_to_1_latency'] , [#('udp_rx', 'Read, direct UDP'), 
-#                                                       #('udp_tx', 'Tx, udp, 10 itns'),
-#                                                       #('udp_tx_1itn', 'Tx, udp, 1 itn'),
-#                                                      ('ch_rx',  'Rx, ch, 1 itn'), 
-#                                                       ('ch_tx',  'Tx, ch, 1 itn'),
-#                                                       #('ch_tx_1itn', 'Tx, ch, 1 itn')
-#                                                      ] )
+    plot_1_to_1_performance( data['1_to_1_latency'] , [#('udp_rx', 'Read, direct UDP'), 
+                                                       #('udp_tx', 'Tx, udp, 10 itns'),
+                                                       #('udp_tx_1itn', 'Tx, udp, 1 itn'),
+                                                      ('ch_rx',  'Rx, ch, 1 itn'), 
+                                                       ('ch_tx',  'Tx, ch, 1 itn'),
+                                                       #('ch_tx_1itn', 'Tx, ch, 1 itn')
+                                                      ] )
 
     plot_n_to_m_performance( data['n_to_m_performance'] )
 
