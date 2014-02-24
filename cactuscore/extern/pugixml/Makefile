@@ -10,8 +10,8 @@ PackageName = cactuscore-extern-pugixml
 Packager = Andrew Rose, Marc Magrans de Abril
 
 PACKAGE_VER_MAJOR = 1
-PACKAGE_VER_MINOR = 0
-PACKAGE_RELEASE = 2
+PACKAGE_VER_MINOR = 2
+PACKAGE_RELEASE = 0
 
 LIBRARY = libcactus_extern_pugixml.so
 
