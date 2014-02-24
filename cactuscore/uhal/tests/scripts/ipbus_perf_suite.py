@@ -336,6 +336,7 @@ def ssh_into(hostname, username):
         return ssh_into(hostname, username)
 
 
+
 def update_controlhub_sys_config(max_in_flight, ssh_client, sys_config_location):
     """Writes new ControlHub sys.config file in /tmp, and copies to remote PC via SFTP."""
     
@@ -363,7 +364,6 @@ def update_controlhub_sys_config(max_in_flight, ssh_client, sys_config_location)
         sftp_client = ssh_client.open_sftp()
         sftp_client.put(tmp_file.name, sys_config_location)
         sftp_client.close()     
-
 
 
 
@@ -724,17 +724,13 @@ def plot_1_to_1_performance( all_data , key_label_pairs ):
 
     # Set up graphs ...
 
-    fig_lat = plt.figure(figsize=(12,10))
-    ax_lat1 = fig_lat.add_subplot(221)
-    ax_lat2 = fig_lat.add_subplot(222)
-    ax_lat3 = fig_lat.add_subplot(223)
-    ax_lat4 = fig_lat.add_subplot(224)
+    fig_lat = plt.figure(figsize=(6,10))
+    ax_lat1 = fig_lat.add_subplot(211)
+    ax_lat2 = fig_lat.add_subplot(212)
 
-    fig_bw = plt.figure(figsize=(12,10))
-    ax_bw1 = fig_bw.add_subplot(221)
-    ax_bw2 = fig_bw.add_subplot(222, xscale='log')
-    ax_bw3 = fig_bw.add_subplot(223)
-    ax_bw4 = fig_bw.add_subplot(224, xscale='log')
+    fig_bw = plt.figure(figsize=(6,10))
+    ax_bw1 = fig_bw.add_subplot(211, xscale='log')
+    ax_bw2 = fig_bw.add_subplot(212, xscale='log')
 
     # Calc stats for each line, and then plot
 
@@ -755,51 +751,40 @@ def plot_1_to_1_performance( all_data , key_label_pairs ):
         bw_stats = bootstrap_stats_array( all_data[key], transforms=[(lambda x, d=d: 1e-3 * 32 * d / x) for d in depths] )
 
         col = ax_lat1.errorbar(depths, stats['50_est'], yerr=(stats['50_err']), label=label)[0].get_color()
-        ax_lat2.errorbar(depths, stats['50_est'], yerr=(stats['50_err']), label=label)
 
-        ax_lat3.errorbar(depths, stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
-        ax_lat3.errorbar(depths, stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
-
-        ax_lat4.errorbar(depths, stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
-        ax_lat4.errorbar(depths, stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
+        ax_lat2.errorbar(depths, stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
+        ax_lat2.errorbar(depths, stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
 
         ax_bw1.errorbar(depths, bw_stats['50_est'], yerr=(bw_stats['50_err']), label=label)
-        ax_bw2.errorbar(depths, bw_stats['50_est'], yerr=(bw_stats['50_err']), label=label)
 
-        ax_bw4.errorbar(depths, bw_stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
-        ax_bw4.errorbar(depths, bw_stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
+        ax_bw2.errorbar(depths, bw_stats['16_est_rel2median'], yerr=(stats['16_err_rel2median']), label=label, color=col)
+        ax_bw2.errorbar(depths, bw_stats['84_est_rel2median'], yerr=(stats['84_err_rel2median']), label=label, color=col)
 
-    for ax in [ax_bw1, ax_bw2, ax_bw3, ax_bw4, ax_lat1, ax_lat2, ax_lat3, ax_lat4]:
+
+    for ax in [ax_bw1, ax_bw2, ax_lat1, ax_lat2]:
         ax.set_xlabel("Number of words")
         ax.set_ylim(0.)
 
-    for ax in [ax_bw1, ax_bw2]:
-        ax.set_ylabel('Median throughput [Gbit/s]')
-        leg = ax.legend(loc='best', fancybox=True)
-        leg.get_frame().set_alpha(0.5)
-    for ax in [ax_lat1, ax_lat2]:
-        ax.set_ylabel('Median latency [us]') 
+    ax_bw1.set_ylabel('Median throughput [Gbit/s]')
+    ax_lat1.set_ylabel('Median latency [us]') 
+
+    for ax in [ax_lat1, ax_bw1]:
         leg = ax.legend(loc='best', fancybox=True)
         leg.get_frame().set_alpha(0.5)
 
-    for ax in [ax_lat3, ax_lat4, ax_bw3, ax_bw4]:
+    for ax in [ax_lat2, ax_bw2]:
         ax.set_ylim(-0.2, 0.2)
         ax.set_ylabel('Fractional central 68% variation range')
 
-    for ax in [ax_bw1, ax_bw3, ax_lat1, ax_lat3]:
-        ax.set_xlim(0, 1001)
+    for ax in [ax_lat1, ax_lat2]:
         for d in range(0, 10000, 343):
             ax.axvline(d, color='DarkGrey', linestyle='-.')
         ax.set_xlim(0, 1001)
 
     ax_lat1.set_ylim(100, 600)
 
-    for ax in [ax_bw2, ax_bw4]:
+    for ax in [ax_bw1, ax_bw2]:
         ax.set_xlim(999, 1.001e7)
-
-    for ax in [ax_lat2, ax_lat4]:
-        ax.set_xlim(0, 1.001e6)
-    ax_lat2.set_ylim(0,1e5)
 
 
 # #        tx_rtt = 3*343*32 / ( 1000.0 * numpy.mean( ch_tx_bws[3*343] ) )
@@ -828,7 +813,7 @@ def plot_1_to_1_performance( all_data , key_label_pairs ):
 ###############################################################################################################################
 
 
-def measure_bw_vs_nClients(targets, controlhub_ssh_client, n_meas=10):
+def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas=10):
     '''
     Measures continuous block-write bandwidth from to all endpoints, varying the number of clients.
     '''
@@ -870,7 +855,7 @@ def measure_bw_vs_nClients(targets, controlhub_ssh_client, n_meas=10):
                 n_clients, n_targets = entry['n_clients'], entry['n_targets']
                 SCRIPT_LOGGER.warning( '     %d, %d' % (n_clients, n_targets) )
 
-                depth = 300 * 1000 * 1000 / ( 4 * n_clients * n_targets )
+                depth = 125 * 1000 * 1000 / ( 4 * n_clients * n_targets )
                 cmds = [cmd_base + t + ' -w ' + str(depth) for t in targets[0:n_targets] for x in range(n_clients)]
 
                 monitor_results, cmd_results = cmd_runner.run(cmds)
@@ -893,8 +878,8 @@ def plot_n_to_m_performance(all_data):
     # Set up figures ...
 
     fig = plt.figure(figsize=(18,10))
-    ax_bw_board = fig.add_subplot(231)
-    ax_bw_total = fig.add_subplot(234)
+    ax_bw_total = fig.add_subplot(231)
+    ax_bw_board = fig.add_subplot(234)
     ax_ch_cpu   = fig.add_subplot(232)
     ax_ch_mem   = fig.add_subplot(235)
     ax_uhal_cpu = fig.add_subplot(233)
@@ -917,8 +902,11 @@ def plot_n_to_m_performance(all_data):
         uhal_cpu_stats = bootstrap_stats_array( data_subset['uhal_cpu'] )
         uhal_mem_stats = bootstrap_stats_array( data_subset['uhal_mem'] )
 
+        bw_board_50est = numpy.divide( bw_stats['50_est'], n_targets )
+        bw_board_50err = numpy.divide( bw_stats['50_err'], n_targets )
+
 #        ax_bw_board.errorbar(nrs_clients, bws_per_board_stats.mean, yerr=bws_per_board_stats.mean_errors(), label=label)
-#        ax_bw_client.errorbar(nrs_clients, bws_per_client_mean, yerr=bws_per_client_errs, label=label)
+        ax_bw_board.errorbar(nrs_clients, bw_board_50est, yerr=bw_board_50err, label=label)
         ax_bw_total.errorbar(nrs_clients, bw_stats['50_est'], yerr=bw_stats['50_err'], label=label)
         ax_ch_cpu.errorbar(nrs_clients, ch_cpu_stats['50_est'], yerr=ch_cpu_stats['50_err'], label=label)
         ax_ch_mem.errorbar(nrs_clients, ch_mem_stats['50_est'], yerr=ch_mem_stats['50_err'], label=label)
@@ -943,13 +931,92 @@ def plot_n_to_m_performance(all_data):
         ax.set_ylim(0, 0.9)
 
 
-#    for ax in [ax_ch_cpu, ax_uhal_cpu]:
-#        ax.set_ylim(0,400)
-#    for ax in [ax_ch_mem, ax_uhal_mem]:
-#        ax.set_ylim(0)
+    for ax in [ax_ch_cpu, ax_uhal_cpu]:
+        ax.set_ylim(0,400)
+    for ax in [ax_ch_mem, ax_uhal_mem]:
+        ax.set_ylim(0)
 
     ax_bw_total.legend(loc='lower right')
-#    ax.set_title('a title')
+
+
+
+#############################################################################################################################
+#############################################################################################################################
+#############################################################################################################################
+
+def measure_1_to_1_vs_pktLoss(target, controlhub_ssh_client, n_meas=10, depth=1, fractions=[x/1e3 for x in range(0, 11, 2)]):
+    '''
+    Measures latencies for single-word reads as function of fractional send/receive UDP packet loss on controlhub host.
+    Returns structured array containing latencies in micro-secs.
+
+    Arguments:
+      target                 --  target hostname (or IP) & port in format "hostname:port"
+      controlhub_ssh_client  --  ssh client instance for connecting to controlhub host
+      n_meas                 --  number of measurements to take for each fractional 
+    '''
+
+    print "\n ---> MEASURING 1 to 1 performance vs fractionsl packet loss to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    data = numpy.zeros(len(fractions), 
+                       dtype=[('f','float32'),
+                              ('latency', 'float32', (n_meas,)),
+                             ]
+                      )
+
+    print fractions
+    for i in range(len(fractions)):
+        data['f'][i] = fractions[i]
+
+    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    start_controlhub(controlhub_ssh_client)
+
+    cmd = 'PerfTester.exe -t BandwidthRx -b 0x2001 -w %d -i 10000 -p -d chtcp-2.0://%s:10203?target=%s' % (depth, CH_PC_NAME, target)
+    cmd_fmt_add_pkt_loss = 'sudo /sbin/iptables -I {0} -p udp -m statistic --mode random --probability {1} -j DROP'
+    cmd_fmt_del_pkt_loss = 'sudo /sbin/iptables -D {0} 1'
+
+    for i in range(n_meas):
+        SCRIPT_LOGGER.warning('packet loss measurements: iteration %d' % i)
+ 
+        for entry in data:
+            f = entry['f']
+            print "frac loss: ", f
+
+            if f != 0.0:
+                print '   - This is non-zero pkt loss. Running iptables commands'
+                run_command( cmd_fmt_add_pkt_loss.format('INPUT', f), controlhub_ssh_client )
+                run_command( cmd_fmt_add_pkt_loss.format('OUTPUT', f), controlhub_ssh_client )
+
+            entry['latency'][i] = run_command(cmd)[0]
+
+            if f != 0.0:
+                print '   - Removing iptables pkt loss'
+                run_command( cmd_fmt_del_pkt_loss.format('INPUT'), controlhub_ssh_client )
+                run_command( cmd_fmt_del_pkt_loss.format('OUTPUT'), controlhub_ssh_client )
+
+    # Final cleanup
+    stop_controlhub(controlhub_ssh_client)
+
+    return data
+
+
+
+def plot_1_to_1_vs_pktLoss(data):
+
+    # Set up figure ...
+
+    fig = plt.figure(figsize=(6,4.5))
+    ax  = fig.add_subplot(111)
+
+    # Plot the datapoints ...
+
+    fractions = numpy.multiply( data['f'], 100. )
+    lat_stats = bootstrap_stats_array( data['latency'] )
+
+    ax.errorbar(fractions, lat_stats['50_est'], yerr=lat_stats['50_err'])
+
+    ax.set_xlabel('UDP packet loss [%]')
+    ax.set_ylabel('Median latency [us]')
 
 
 
@@ -1041,9 +1108,12 @@ def take_measurements(file_prefix):
 
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], controlhub_ssh_client, n_meas=100 )
+    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], controlhub_ssh_client, n_meas=50 )
 
-    data['n_to_m_performance'] = measure_bw_vs_nClients( TARGETS, controlhub_ssh_client, n_meas=20 )
+    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], controlhub_ssh_client, n_meas=10 )
+
+    data['n_to_m_performance'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=10 )
+
 
     filename = file_prefix
     if not filename.endswith(".pkl"):
@@ -1058,16 +1128,15 @@ def make_plots(input_file):
     
     data = pickle.load( open(filename, "rb") )
 
-    print "Data from file", input_file, "is ..."
-#    print data
-
     plot_1_to_1_performance( data['1_to_1_latency'] , [#('udp_rx', 'Read, direct UDP'), 
                                                        #('udp_tx', 'Tx, udp, 10 itns'),
                                                        #('udp_tx_1itn', 'Tx, udp, 1 itn'),
-                                                      ('ch_rx',  'Rx, ch, 1 itn'), 
-                                                       ('ch_tx',  'Tx, ch, 1 itn'),
+                                                       ('ch_tx',  'Tx, ch'), 
+                                                       ('ch_rx',  'Rx, ch'),
                                                        #('ch_tx_1itn', 'Tx, ch, 1 itn')
                                                       ] )
+
+    plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
 
     plot_n_to_m_performance( data['n_to_m_performance'] )
 
