@@ -855,7 +855,7 @@ def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas=10):
                 n_clients, n_targets = entry['n_clients'], entry['n_targets']
                 SCRIPT_LOGGER.warning( '     %d, %d' % (n_clients, n_targets) )
 
-                depth = 125 * 1000 * 1000 / ( 4 * n_clients * n_targets )
+                depth = 300 * 1000 * 1000 / ( 4 * n_clients * n_targets )
                 cmds = [cmd_base + t + ' -w ' + str(depth) for t in targets[0:n_targets] for x in range(n_clients)]
 
                 monitor_results, cmd_results = cmd_runner.run(cmds)
@@ -1108,11 +1108,11 @@ def take_measurements(file_prefix):
 
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], controlhub_ssh_client, n_meas=50 )
+    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], controlhub_ssh_client, n_meas=100 )
 
-    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], controlhub_ssh_client, n_meas=10 )
+    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], controlhub_ssh_client, n_meas=20 )
 
-    data['n_to_m_performance'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=10 )
+    data['n_to_m_performance'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=20 )
 
 
     filename = file_prefix
