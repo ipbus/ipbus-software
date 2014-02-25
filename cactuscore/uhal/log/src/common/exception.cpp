@@ -179,9 +179,10 @@ namespace uhal
 
 #else
 
+      lStr << description();
       if ( strlen ( mAdditionalInfo ) )
       {
-        lStr << mAdditionalInfo;
+        lStr << " : " << mAdditionalInfo;
       }
 
 #endif
@@ -194,7 +195,7 @@ namespace uhal
         strcpy ( mString+65530 , "..." );
       }
 
-      return mString; //result from c_str is valid for as long as the object exists or until it is modified after the c_str operation.
+      return mString;
     }
 
 
