@@ -148,10 +148,10 @@ namespace uhal
        */
       static HwInterface getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr );
 
+    private:
       //! A mutex lock to protect access to the factory methods in multithreaded environments
       static boost::mutex mMutex;
 
-    private:
       /**
       	Method called once the file specified in the constructor has been opened
       	@param aProtocol The protocol by which the file was loaded
@@ -160,11 +160,11 @@ namespace uhal
       */
       void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile );
 
-    private:
       //! A map of connection identifiers to stucts containing details of the parsed XML node
       std::map< std::string, ConnectionDescriptor >  mConnectionDescriptors;	//connection identifier, parsed descriptor (also contains the connection identifier)
+
       //! A set of previously opened filenames, so that the same file is not parsed multiple times
-      std::set< std::string > mPreviouslyOpenedFiles;							//previously opened file names
+      std::set< std::string > mPreviouslyOpenedFiles;
 
   };
 
