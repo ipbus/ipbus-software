@@ -299,9 +299,10 @@ class CommandRunner:
             except CommandBadExitCode as e:
                 if not self._cmd_completed:
                     raise
-            time.sleep(0.05) 
-        cpu_vals.pop()
-        mem_vals.pop() 
+            time.sleep(0.02) 
+        for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
+            cpu_vals.pop()
+            mem_vals.pop() 
 
         # Wait (w/o monitoring)
         SCRIPT_LOGGER.debug('One of the commands has now finished. No more monitoring - just wait for rest to finish.')
@@ -813,7 +814,7 @@ def plot_1_to_1_performance( all_data , key_label_pairs ):
 ###############################################################################################################################
 
 
-def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas=10):
+def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas=10, n_words):
     '''
     Measures continuous block-write bandwidth from to all endpoints, varying the number of clients.
     '''
@@ -855,7 +856,7 @@ def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas=10):
                 n_clients, n_targets = entry['n_clients'], entry['n_targets']
                 SCRIPT_LOGGER.warning( '     %d, %d' % (n_clients, n_targets) )
 
-                depth = 300 * 1000 * 1000 / ( 4 * n_clients * n_targets )
+                depth = n_words / ( n_clients * n_targets )
                 cmds = [cmd_base + t + ' -w ' + str(depth) for t in targets[0:n_targets] for x in range(n_clients)]
 
                 monitor_results, cmd_results = cmd_runner.run(cmds)
@@ -1096,7 +1097,7 @@ def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
 ####################################################################################################
 #  Highest-level plot / measure functions
 
-def take_measurements(file_prefix):
+def take_measurements(file_prefix, multiple_in_flight):
 
     data = {'start_time' : time.localtime(),
             'fw_version' : FW_VERSION,
@@ -1108,11 +1109,15 @@ def take_measurements(file_prefix):
 
     controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], controlhub_ssh_client, n_meas=100 )
+    ifmultiple = lambda a,b: a if multiple_in_flight else b
+    n = ifmultiple(2,1)
+
+    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], controlhub_ssh_client, n_meas=n*50 )
 
     data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], controlhub_ssh_client, n_meas=20 )
 
-    data['n_to_m_performance'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=20 )
+    n_words = ifmultiple(200,50) * 1000 * 1000 / 4
+    data['n_to_m_performance'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=n*10, n_words=n_words )
 
 
     filename = file_prefix
@@ -1129,7 +1134,7 @@ def make_plots(input_file):
     data = pickle.load( open(filename, "rb") )
 
     plot_1_to_1_performance( data['1_to_1_latency'] , [#('udp_rx', 'Read, direct UDP'), 
-                                                       #('udp_tx', 'Tx, udp, 10 itns'),
+                                                      #('udp_tx', 'Tx, udp, 10 itns'),
                                                        #('udp_tx_1itn', 'Tx, udp, 1 itn'),
                                                        ('ch_tx',  'Tx, ch'), 
                                                        ('ch_rx',  'Rx, ch'),
@@ -1152,7 +1157,7 @@ if __name__ == "__main__":
 
     # Parse args ...
     try:
-       opts, args = getopt.getopt(sys.argv[1:], "hmp", ["help", "measure", "plot"])
+       opts, args = getopt.getopt(sys.argv[1:], "hmp", ["help", "measure", "plot", "single"])
     except getopt.GetoptError, e:
        print "ERROR in parsing arguments: ", e, "\n"
        print __doc__
@@ -1160,6 +1165,7 @@ if __name__ == "__main__":
 
     measure = False
     plot = False
+    multiple_in_flight = True
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
@@ -1169,6 +1175,9 @@ if __name__ == "__main__":
            measure = True
         elif opt in ("-p", "--plot"):
            plot = True
+        elif opt in ("--single"):
+           multiple_in_flight = False
+
 
     if measure and plot:
         print "ERROR: Incorrect usage - cannot run in measure and plot modes at same time!"
@@ -1185,9 +1194,9 @@ if __name__ == "__main__":
     filename = args[0]
 
     if measure:
-        take_measurements(filename)
+        take_measurements(filename, multiple_in_flight=multiple_in_flight)
     if plot:
-        make_plots(filename)
+        make_plots(filename, multiple_in_flight=multiple_in_flight)
 
     sys.exit(0)
 
