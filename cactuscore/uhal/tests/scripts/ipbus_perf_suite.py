@@ -791,7 +791,7 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
     # Add legends
     for ax in [ax_lat1, ax_linbw1, ax_logbw1]:
         leg = ax.legend(loc='best', fancybox=True)
-        leg.get_frame().set_alpha(0.5)
+        #leg.get_frame().set_alpha(0.5)
 
 
 
@@ -1119,7 +1119,7 @@ def take_measurements(file_prefix, multiple_in_flight):
 
     data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
                                                      controlhub_ssh_client, 
-                                                     n_meas = n*50, 
+                                                     n_meas = 100, 
                                                      max_depth = ifmultiple(1e9,1e4),
                                                      pkt_depths = ifmultiple([342,343,348], [250,254])
                                                    )
