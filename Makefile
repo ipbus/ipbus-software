@@ -17,8 +17,8 @@ PACKAGES = \
         cactusprojects/central \
         cactusprojects/dtsc \
         cactusprojects/gct \
-				cactusprojects/gmt \
-        cactusprojects/gt \
+	cactusprojects/gt \
+        cactusprojects/gmt \
         cactusprojects/l1page \
         cactusprojects/retri \
         cactusprojects/subsystem \
