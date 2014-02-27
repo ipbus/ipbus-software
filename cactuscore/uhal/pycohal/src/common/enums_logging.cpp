@@ -1,7 +1,8 @@
 
 #include "uhal/pycohal/enums_logging.hpp"
 
-#include "boost/python.hpp"
+// The following python boost patch is required to compile on apple
+#include "uhal/pycohal/boost_python.hpp"
 
 #include "uhal/definitions.hpp"
 #include "uhal/log/log.hpp"

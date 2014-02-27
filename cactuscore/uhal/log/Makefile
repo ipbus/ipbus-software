@@ -56,7 +56,8 @@ else
 	LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}
 	
 	LIBRARIES = -lpthread \
-			-lboost_thread
+			-lboost_thread \
+			-lboost_system
 	
 	INCLUDE_PATH = 	-Iinclude  \
 			-I${EXTERN_BOOST_INCLUDE_PREFIX}

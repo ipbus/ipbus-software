@@ -7,7 +7,9 @@
 #include "uhal/log/exception.hpp"
 #include "uhal/log/log.hpp"
 
-#include "boost/python.hpp"
+// The following python boost patch is required to compile on apple
+#include "uhal/pycohal/boost_python.hpp"
+
 #include "boost/python/converter/rvalue_from_python_data.hpp"
 #include "boost/unordered_map.hpp"
 

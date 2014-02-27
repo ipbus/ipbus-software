@@ -223,6 +223,10 @@ std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint64_t ,
 template< typename FORMAT >
 std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int64_t , FORMAT >& aInt );
 
+#ifdef __APPLE__ 
+template< typename FORMAT > 
+std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< size_t , FORMAT >& aInt ); 
+#endif 
 
 #include <uhal/log/log_inserters.integer.hxx>
 

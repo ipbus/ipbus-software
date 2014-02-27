@@ -45,10 +45,20 @@ INCLUDE_PATH = 	-Iinclude  \
 
 CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC\
 					 -DDISABLE_PACKET_COUNTER_HACK\
-					 -DRUN_ASIO_MULTITHREADED  \
+					 -DRUN_ASIO_MULTITHREADED # \
 #					 -fprofile-arcs -ftest-coverage
 #					 -DNO_PREEMPTIVE_DISPATCH 
+
+#CPP_FLAGS += -fdelayed-template-parsing 
+
 #-D THROW_ON_ADDRESS_SPACE_OVERLAP 
+
+# NOTE: Adding this flag is a dirty hack to make uhal/uhal compile on 
+# OS X. The fact that this is necessary really means the code is 
+# fishy. 
+ifeq ($(CACTUS_OS),osx) 
+CPP_FLAGS += -fdelayed-template-parsing 
+endif 
 
 LINK_FLAGS = -g -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}\
 #										 -lgcov -coverage

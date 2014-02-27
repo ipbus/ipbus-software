@@ -6,7 +6,12 @@ PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 2
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 0
-PYTHON_VERSION = $(shell python -c "import platform;print platform.python_version()")
+
+PYTHON_VERSION = $(shell python -c "import sys; sys.stdout.write(sys.version[:3])")
+
+PYTHON_HOME = $(shell python -c "import sys; print sys.prefix")
+PYTHON_LIB=python${PYTHON_VERSION}
+PYTHON_LIB_PREFIX=${PYTHON_HOME}/lib
 
 export CACTUS_ROOT
 export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
@@ -16,17 +21,20 @@ BINDINGS_SOURCES = $(wildcard src/common/*.cpp)
 BINDINGS_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${BINDINGS_SOURCES})
 BINDINGS_LIB = pkg/uhal/_core.so
 
-LIBRARY_PATH = -L${EXTERN_BOOST_LIB_PREFIX} \
-				-L${EXTERN_PUGIXML_LIB_PREFIX} \
-				-L${UHAL_UHAL_LIB_PREFIX} \
-				-L${UHAL_LOG_LIB_PREFIX} \
-				-L${UHAL_GRAMMARS_LIB_PREFIX}
+LIBRARY_PATH = \
+		-L${PYTHON_LIB_PREFIX} \
+		-L${EXTERN_BOOST_LIB_PREFIX} \
+		-L${EXTERN_PUGIXML_LIB_PREFIX} \
+		-L${UHAL_UHAL_LIB_PREFIX} \
+		-L${UHAL_LOG_LIB_PREFIX} \
+		-L${UHAL_GRAMMARS_LIB_PREFIX}
 
 
 BINDING_LIBRARIES = 	\
 			-lpthread \
 			-ldl \
 			-lutil \
+			-l${PYTHON_LIB} \
 			\
 			-lboost_filesystem \
 			-lboost_python \
@@ -50,7 +58,13 @@ INCLUDE_PATH = 	-Iinclude  \
 
 CPP_FLAGS = -g -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
 
-LINK_BINDINGS_FLAGS = -shared -fPIC -Wall -g -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic ${LIBRARY_PATH}  ${BINDING_LIBRARIES}
+LINK_BINDINGS_FLAGS_COMMON = -shared -fPIC -Wall -g ${LIBRARY_PATH}  ${BINDING_LIBRARIES}
+$(warning CACTUS_OS=$(CACTUS_OS))
+ifeq (${CACTUS_OS},osx)
+  LINK_BINDINGS_FLAGS = ${LINK_BINDINGS_FLAGS_COMMON}
+else
+  LINK_BINDINGS_FLAGS = ${LINK_BINDINGS_FLAGS_COMMON} -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic
+endif
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update generator
 

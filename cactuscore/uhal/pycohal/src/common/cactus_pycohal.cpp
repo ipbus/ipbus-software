@@ -1,8 +1,10 @@
+// The following include is required to compile on apple
+#include "uhal/pycohal/boost_python.hpp"
+
 
 // Boost includes
 #include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
-#include "boost/python.hpp"
 #include "boost/python/module.hpp"
 #include "boost/python/def.hpp"
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
