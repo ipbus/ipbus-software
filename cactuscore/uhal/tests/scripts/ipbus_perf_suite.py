@@ -299,10 +299,13 @@ class CommandRunner:
             except CommandBadExitCode as e:
                 if not self._cmd_completed:
                     raise
-            time.sleep(0.02) 
+            #time.sleep(0.02) 
         for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
             cpu_vals.pop()
-            mem_vals.pop() 
+            assert(len(cpu_vals) is not 0)
+            mem_vals.pop()
+            assert(len(mem_vals) is not 0)
+
 
         # Wait (without monitoring)
         SCRIPT_LOGGER.debug('One of the commands has now finished. No more monitoring - just wait for rest to finish.')
@@ -561,7 +564,7 @@ def measure_1_to_1_latency(target, controlhub_ssh_client, n_meas, max_depth, pkt
     for n in range(1, 30):
         depths += [n*min(pkt_depths), n*max(pkt_depths)+1]
     for n in range(10, 31, 2) + range(40, 80, 20) + range(80, 200, 40):
-        depths += [3*n*min(pkt_depths)*343]
+        depths += [3*n*min(pkt_depths)]
     for n in [2e2, 3e2, 4e2, 7e2, 10e2]:
         depths += [3*n*min(pkt_depths)]
     for n in [2e3, 3e3, 4e3, 7e3, 10e3]:
@@ -638,17 +641,13 @@ def calc_percentiles(sample, fractions):
     assert isinstance(fractions, list)
     for f in fractions:
         assert (f > 0.0) and (f < 1.0)
-
     sample.sort() # In place sort => changes the argument
-
     result = numpy.zeros(len(fractions), 'float32')
-
     for i, f in enumerate(fractions):
         frac_as_index = f * ( len(sample) - 1 )
         low_index  = int(frac_as_index)
         high_index = low_index + 1
         result[i] = sample[low_index] + (frac_as_index - low_index) * (sample[high_index] - sample[low_index])
-
     return result
 
 
@@ -729,24 +728,27 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
     ## Set up graphs ...
     ## sharex: Makes x axes of plots have same limits
 
-    fig_lat = plt.figure(figsize=(6,10))
-    ax_lat1 = fig_lat.add_subplot(211, autoscalex_on=False, autoscaley_on=True, xticklabels=[])
-    ax_lat2 = fig_lat.add_subplot(212, autoscalex_on=False, autoscaley_on=True, sharex=ax_lat1)
+    med_ax_loc = (.15,.4,.8,.55)
+    err_ax_loc = (.15,.1,.8,.25)
+
+    fig_lat = plt.figure(figsize=(6,6.5))
+    ax_lat1 = fig_lat.add_axes(med_ax_loc, autoscalex_on=False, autoscaley_on=True, xticklabels=[])
+    ax_lat2 = fig_lat.add_axes(err_ax_loc, autoscalex_on=False, autoscaley_on=True, sharex=ax_lat1)
 
     ax_lat1.set_xlim(0,1001)
-    ax_lat1.set_ylabel('Median latency [$\mu$s]') 
+    ax_lat1.set_ylabel('Median latency [us]') 
 
 
-    fig_linbw = plt.figure(figsize=(6,10))
-    ax_linbw1 = fig_linbw.add_subplot(211, autoscalex_on=False, autoscaley_on=True)
-    ax_linbw2 = fig_linbw.add_subplot(212, autoscalex_on=False, autoscaley_on=True, sharex=ax_linbw1)
+    fig_linbw = plt.figure(figsize=(6,6.5))
+    ax_linbw1 = fig_linbw.add_axes(med_ax_loc, autoscalex_on=False, autoscaley_on=True)
+    ax_linbw2 = fig_linbw.add_axes(err_ax_loc, autoscalex_on=False, autoscaley_on=True, sharex=ax_linbw1)
 
     ax_linbw1.set_xlim(0, 5e3)
     ax_linbw1.set_ylabel('Median throughput [Gbit/s]')
 
-    fig_logbw = plt.figure(figsize=(6,10))
-    ax_logbw1 = fig_logbw.add_subplot(211, autoscalex_on=False, autoscaley_on=True, xscale='log')
-    ax_logbw2 = fig_logbw.add_subplot(212, autoscalex_on=False, autoscaley_on=True, sharex=ax_logbw1)
+    fig_logbw = plt.figure(figsize=(6,6.5))
+    ax_logbw1 = fig_logbw.add_axes(med_ax_loc, autoscalex_on=False, autoscaley_on=True, xscale='log')
+    ax_logbw2 = fig_logbw.add_axes(err_ax_loc, autoscalex_on=False, autoscaley_on=True, sharex=ax_logbw1)
 
     ax_logbw1.set_xlim(max(100,max(all_data['w'])/1e4), max(all_data['w']))
     ax_logbw1.set_ylabel('Median throughput [Gbit/s]')
@@ -758,7 +760,7 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
     # Fractional error subplots
     for ax in [ax_lat2, ax_linbw2, ax_logbw2]:
         ax.set_ylim(-0.2, 0.2)
-        ax.set_ylabel('Fractional central 68% variation range')
+        ax.set_ylabel('Fractional variation')
 
     # Calc stats for each line, and then plot
 
@@ -924,8 +926,8 @@ def plot_n_to_m_performance(all_data):
     # Labels
 
     for ax in [ax_bw_board, ax_bw_total, ax_ch_cpu, ax_ch_mem, ax_uhal_cpu, ax_uhal_mem]:
-        ax.set_xlabel('Number of clients per board')
-    ax_bw_board.set_ylabel('Total bandwidth per board [Gbit/s]')
+        ax.set_xlabel('Number of clients per target')
+    ax_bw_board.set_ylabel('Bandwidth per target [Gbit/s]')
     ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
 
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
@@ -936,7 +938,7 @@ def plot_n_to_m_performance(all_data):
      # Limits
 
     for ax in [ax_bw_board, ax_bw_total]:
-        ax.set_ylim(0, 0.9)
+        ax.set_ylim(0)
 
 
     for ax in [ax_ch_cpu, ax_uhal_cpu]:
@@ -1120,13 +1122,13 @@ def take_measurements(file_prefix, multiple_in_flight):
     data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
                                                      controlhub_ssh_client, 
                                                      n_meas = 100, 
-                                                     max_depth = ifmultiple(1e9,1e4),
+                                                     max_depth = ifmultiple(1e7,1e4),
                                                      pkt_depths = ifmultiple([342,343,348], [250,254])
                                                    )
 
     data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], controlhub_ssh_client, n_meas=20 )
 
-    n_words = ifmultiple(200,50) * 1000 * 1000 / 4
+    n_words = ifmultiple(250,50) * 1000 * 1000 / 4
     data['n_to_m_bw'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=n*10, n_words=n_words )
 
     data['end_time'] = time.localtime()
@@ -1155,7 +1157,7 @@ def make_plots(input_file):
 
     #plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
 
-    #plot_n_to_m_performance( data['n_to_m_bw'] )
+    plot_n_to_m_performance( data['n_to_m_bw'] )
 
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
     plt.show()
