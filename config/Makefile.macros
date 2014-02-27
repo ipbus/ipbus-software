@@ -4,11 +4,21 @@ CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
 CACTUS_PLATFORM=$(shell /usr/bin/python -c "import platform; print platform.platform()")
 CACTUS_OS="unknown.os"
-ifneq ($(findstring redhat-5,$(CACTUS_PLATFORM)),) 
-	CACTUS_OS="slc5"
-else ifneq ($(findstring redhat-6,$(CACTUS_PLATFORM)),) 
-	CACTUS_OS="slc6"
+
+UNAME=$(strip $(shell uname -s))
+ifeq ($(UNAME),Linux) 
+	ifneq ($(findstring redhat-5,$(CACTUS_PLATFORM)),) 
+		CACTUS_OS=slc5
+	else ifneq ($(findstring redhat-6,$(CACTUS_PLATFORM)),) 
+		CACTUS_OS=slc6
+	endif
 endif
+ifeq ($(UNAME),Darwin) 
+	CACTUS_OS=osx
+endif
+
+$(info OS Detected: $(CACTUS_OS))
+
 
 
 #extern/erlang
