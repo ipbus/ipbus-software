@@ -208,6 +208,7 @@ def cpu_mem_usage(cmd_to_check, ssh_client=None):
     assert " " not in cmd_to_check
 
     output = run_command("top -b -n 1 | grep "+cmd_to_check, ssh_client=ssh_client)[1]
+#    SCRIPT_LOGGER.warning("Parsing ...")
     cpu, mem = 0.0, 0.0    
 
     regex = re.compile("^\\s*\\d+\\s+\\w+\\s+\\S+\\s+\\S+\\s+"        # PID USER      PR  NI  
@@ -292,6 +293,7 @@ class CommandRunner:
         while not self._cmd_completed:
             try:
                 for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
+#                    SCRIPT_LOGGER.warning('Monitoring command: %s' % cmd)
                     meas_cpu, meas_mem = cpu_mem_usage(cmd, ssh_client)
 #                    print meas_cpu, meas_mem
                     cpu_vals.append(meas_cpu)
@@ -302,9 +304,9 @@ class CommandRunner:
             #time.sleep(0.02) 
         for cmd, ssh_client, cpu_vals, mem_vals in monitor_results:
             cpu_vals.pop()
-            assert(len(cpu_vals) is not 0)
+#            assert(len(cpu_vals) is not 0)
             mem_vals.pop()
-            assert(len(mem_vals) is not 0)
+#            assert(len(mem_vals) is not 0)
 
 
         # Wait (without monitoring)
@@ -759,7 +761,6 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
 
     # Fractional error subplots
     for ax in [ax_lat2, ax_linbw2, ax_logbw2]:
-        ax.set_ylim(-0.2, 0.2)
         ax.set_ylabel('Fractional variation')
 
     # Calc stats for each line, and then plot
@@ -790,12 +791,22 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
         for d in range(0, 10000, words_per_pkt):
             ax.axvline(d, color='DarkGrey', linestyle='-.')
 
+    # Fractional variation plots:  Add y=0 line & change y range
+    for ax in [ax_lat2, ax_linbw2, ax_logbw2]:
+        ax.axhline(0, color='Black', linestyle=':')
+        ax.set_ylim(-0.16, 0.16)
+
+
     # Add legends
     for ax in [ax_lat1, ax_linbw1, ax_logbw1]:
         leg = ax.legend(loc='best', fancybox=True)
         #leg.get_frame().set_alpha(0.5)
 
 
+    return [(fig_lat, '1_to_1_latency'),
+            (fig_linbw, '1_to_1_bw_lin'),
+            (fig_logbw, '1_to_1_bw_log')
+           ]
 
 # #        tx_rtt = 3*343*32 / ( 1000.0 * numpy.mean( ch_tx_bws[3*343] ) )
 # #        tx_t_max = 2 * 3*343*32 * ( 1 / numpy.mean(ch_tx_bws[2*3*343]) - 0.5 / numpy.mean(ch_tx_bws[3*343]) ) / 1000.0
@@ -887,15 +898,16 @@ def plot_n_to_m_performance(all_data):
 
     # Set up figures ...
 
-    fig = plt.figure(figsize=(18,10))
+    fig = plt.figure(figsize=(15,8))
     ax_bw_total = fig.add_subplot(231)
     ax_bw_board = fig.add_subplot(234)
     ax_ch_cpu   = fig.add_subplot(232)
     ax_ch_mem   = fig.add_subplot(235)
     ax_uhal_cpu = fig.add_subplot(233)
-    ax_uhal_mem = fig.add_subplot(236)
+    ax_uhal_mem = fig.add_subplot(236, sharey=ax_ch_mem)
 
-    fig.suptitle('300MB continuous write to crate')
+    fig.subplots_adjust(left=.06, right=.98, bottom=.07, top=.96)
+    fig.canvas.set_window_title('300MB continuous write to crate')
 
     # Plot the datapoints ...
 
@@ -938,15 +950,17 @@ def plot_n_to_m_performance(all_data):
      # Limits
 
     for ax in [ax_bw_board, ax_bw_total]:
+        ax.set_xlim(numpy.min(data_subset['n_clients']))
         ax.set_ylim(0)
-
 
     for ax in [ax_ch_cpu, ax_uhal_cpu]:
         ax.set_ylim(0,400)
     for ax in [ax_ch_mem, ax_uhal_mem]:
         ax.set_ylim(0)
 
-    ax_bw_total.legend(loc='lower right')
+    ax_bw_total.legend(loc='best', fancybox=True)
+
+    return [(fig, 'n_to_m_perf')]
 
 
 
@@ -1013,6 +1027,7 @@ def plot_1_to_1_vs_pktLoss(data):
     # Set up figure ...
 
     fig = plt.figure(figsize=(6,4.5))
+    fig.subplots_adjust(left=.13, right=.95, bottom=.12, top=.94)
     ax  = fig.add_subplot(111)
 
     # Plot the datapoints ...
@@ -1024,6 +1039,10 @@ def plot_1_to_1_vs_pktLoss(data):
 
     ax.set_xlabel('UDP packet loss [%]')
     ax.set_ylabel('Median latency [us]')
+
+    ax.set_xlim(min(fractions), max(fractions))
+
+    return [(fig, '1_to_1_pktLoss')]
 
 
 
@@ -1148,18 +1167,35 @@ def make_plots(input_file):
 
     multiple_in_flight = data['multiple_in_flight']
 
-    plot_1_to_1_performance( data['1_to_1_latency'] , 
-                             [('ch_tx',  'Tx, ch'), 
-                              ('ch_rx',  'Rx, ch'),
-                             ],
-                             words_per_pkt = 343 if multiple_in_flight else 251
-                           )
+    plots = []
 
-    #plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
+                                     [('ch_tx',  'Tx, ch'), ('ch_rx',  'Rx, ch')],
+                                     words_per_pkt = 343 if multiple_in_flight else 251
+                                    )
 
-    plot_n_to_m_performance( data['n_to_m_bw'] )
+    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+
+    plots += plot_n_to_m_performance( data['n_to_m_bw'] )
 
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    while True:
+        answer = raw_input('Shall I save this to file? ')
+
+        if answer.lower() in ('y', 'yes'):
+           prefix = re.sub('\.pkl$', '', filename)
+           for fig, suffix in plots:
+               pdfname = prefix + '.' +  time.strftime('%Y%m%d') + '__' + suffix + '.pdf'
+               fig.savefig( pdfname )
+           break
+
+        elif answer.lower() in ('n', 'no'):
+           break
+
+        else:
+           print 'Invalid answer. Please type "y", "yes", "n", or "no" ...'
+
     plt.show()
 
 
