@@ -120,7 +120,11 @@ def run_command(cmd, ssh_client=None, parser=None):
     SCRIPT_LOGGER.debug("Running (locally): "+cmd)
     t0 = time.time()
 
-    p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
+    if cmd.startswith('PerfTester.exe'):
+        p  = subprocess.Popen(cmd.split(),stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=False, preexec_fn=os.setsid)
+    else:
+        p  = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid)
+
     try:
       f1 = fcntl.fcntl(p.stdout, fcntl.F_GETFL)
       fcntl.fcntl(p.stdout, fcntl.F_SETFL, f1 | os.O_NONBLOCK)
@@ -834,14 +838,14 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
 ###############################################################################################################################
 
 
-def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas, n_words):
+def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas, n_words, bw=True):
     '''
     Measures continuous block-write bandwidth from to all endpoints, varying the number of clients.
     '''
     print "\n ---> BANDWIDTH vs NR_CLIENTS to", targets, "<---"
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
-    nrs_clients = [1,2,3,4,5,6,8]
+    nrs_clients = [1,2,3,4,5,6,8,10]
     nrs_targets = range(1, len(targets)+1)
 
     # Preparing data structure to store measurements in
@@ -849,7 +853,7 @@ def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas, n_words):
     data = numpy.zeros((len(targets), len(nrs_clients),), 
                        dtype=[('n_clients', 'uint8' ),
                               ('n_targets', 'uint8' ),
-                              ('bw',        'float32', (n_meas,) ),
+                              ('y',        'float32', (n_meas,) ),
                               ('ch_cpu',    'float32', (n_meas,) ),
                               ('ch_mem',    'float32', (n_meas,) ),
                               ('uhal_cpu',  'float32', (n_meas,) ),
@@ -863,7 +867,13 @@ def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas, n_words):
 
     # Run commands for measurements
 
-    cmd_base = "PerfTester.exe -t BandwidthTx -i 1 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
+    cmd_base = "PerfTester.exe"
+    if bw:
+        cmd_base += " -t BandwidthTx -i 1"
+    else:
+        cmd_base += " -t BandwidthRx -p -w 1 -i " + str(n_words)
+    cmd_base += " -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
+
     cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
 
     update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
@@ -876,13 +886,13 @@ def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas, n_words):
                 n_clients, n_targets = entry['n_clients'], entry['n_targets']
                 SCRIPT_LOGGER.warning( '     %d, %d' % (n_clients, n_targets) )
 
-                depth = n_words / ( n_clients * n_targets )
-                cmds = [cmd_base + t + ' -w ' + str(depth) for t in targets[0:n_targets] for x in range(n_clients)]
+                cmd_suffix = ' -w ' + str( n_words / ( n_clients * n_targets ) ) if bw else ''
+                cmds = [cmd_base + t + cmd_suffix for t in targets[0:n_targets] for x in range(n_clients)]
 
                 monitor_results, cmd_results = cmd_runner.run(cmds)
                 bws = [ x[1] for x in cmd_results]
 
-                entry['bw'][i] = sum(bws)
+                entry['y'][i] = sum([ x[1] for x in cmd_results]) if bw else numpy.median([x[0] for x in cmd_results])
                 entry['ch_cpu'][i]   = monitor_results[1][1]
                 entry['ch_mem'][i]   = monitor_results[1][2]
                 entry['uhal_cpu'][i] = monitor_results[0][1]
@@ -894,20 +904,23 @@ def measure_n_to_m_performance(targets, controlhub_ssh_client, n_meas, n_words):
 
 
 
-def plot_n_to_m_performance(all_data):
+def plot_n_to_m_performance(all_data, bw=True):
 
     # Set up figures ...
 
     fig = plt.figure(figsize=(15,8))
     ax_bw_total = fig.add_subplot(231)
-    ax_bw_board = fig.add_subplot(234)
-    ax_ch_cpu   = fig.add_subplot(232)
-    ax_ch_mem   = fig.add_subplot(235)
-    ax_uhal_cpu = fig.add_subplot(233)
-    ax_uhal_mem = fig.add_subplot(236, sharey=ax_ch_mem)
+    ax_bw_board = fig.add_subplot(234, sharex=ax_bw_total)
+    ax_ch_cpu   = fig.add_subplot(232, sharex=ax_bw_total)
+    ax_ch_mem   = fig.add_subplot(235, sharex=ax_bw_total)
+    ax_uhal_cpu = fig.add_subplot(233, sharex=ax_bw_total)
+    ax_uhal_mem = fig.add_subplot(236, sharex=ax_bw_total, sharey=ax_ch_mem)
 
     fig.subplots_adjust(left=.06, right=.98, bottom=.07, top=.96)
-    fig.canvas.set_window_title('300MB continuous write to crate')
+    fig.canvas.set_window_title('500MB continuous write to crate' if bw else 'Polling: multiple clients and targets')
+
+#    import matplotlib
+#    matplotlib.rcParams.update({'font.size': 13})
 
     # Plot the datapoints ...
 
@@ -918,29 +931,33 @@ def plot_n_to_m_performance(all_data):
 
         label = str(n_targets) + ' targets'
 
-        bw_stats       = bootstrap_stats_array( data_subset['bw'] )
+        bw_stats       = bootstrap_stats_array( data_subset['y'] )
         ch_cpu_stats   = bootstrap_stats_array( data_subset['ch_cpu'] )
         ch_mem_stats   = bootstrap_stats_array( data_subset['ch_mem'] )
         uhal_cpu_stats = bootstrap_stats_array( data_subset['uhal_cpu'] )
         uhal_mem_stats = bootstrap_stats_array( data_subset['uhal_mem'] )
 
-        bw_board_50est = numpy.divide( bw_stats['50_est'], n_targets )
-        bw_board_50err = numpy.divide( bw_stats['50_err'], n_targets )
-
 #        ax_bw_board.errorbar(nrs_clients, bws_per_board_stats.mean, yerr=bws_per_board_stats.mean_errors(), label=label)
-        ax_bw_board.errorbar(nrs_clients, bw_board_50est, yerr=bw_board_50err, label=label)
         ax_bw_total.errorbar(nrs_clients, bw_stats['50_est'], yerr=bw_stats['50_err'], label=label)
         ax_ch_cpu.errorbar(nrs_clients, ch_cpu_stats['50_est'], yerr=ch_cpu_stats['50_err'], label=label)
         ax_ch_mem.errorbar(nrs_clients, ch_mem_stats['50_est'], yerr=ch_mem_stats['50_err'], label=label)
         ax_uhal_cpu.errorbar(nrs_clients, uhal_cpu_stats['50_est'], yerr=uhal_cpu_stats['50_err'], label=label)
         ax_uhal_mem.errorbar(nrs_clients, uhal_mem_stats['50_est'], yerr=uhal_mem_stats['50_err'], label=label)
+
+        if bw:
+            bw_board_50est = numpy.divide( bw_stats['50_est'], n_targets )
+            bw_board_50err = numpy.divide( bw_stats['50_err'], n_targets )
+            ax_bw_board.errorbar(nrs_clients, bw_board_50est, yerr=bw_board_50err, label=label)
         
     # Labels
 
     for ax in [ax_bw_board, ax_bw_total, ax_ch_cpu, ax_ch_mem, ax_uhal_cpu, ax_uhal_mem]:
         ax.set_xlabel('Number of clients per target')
-    ax_bw_board.set_ylabel('Bandwidth per target [Gbit/s]')
-    ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
+    if bw:
+        ax_bw_board.set_ylabel('Bandwidth per target [Gbit/s]')
+        ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
+    else:
+        ax_bw_total.set_ylabel('Latency [us]')
 
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
     ax_ch_mem.set_ylabel('ControlHub memory usage [%]')
@@ -960,7 +977,7 @@ def plot_n_to_m_performance(all_data):
 
     ax_bw_total.legend(loc='best', fancybox=True)
 
-    return [(fig, 'n_to_m_perf')]
+    return [(fig, 'n_to_m_' + ('bw' if bw else 'lat'))]
 
 
 
@@ -1050,75 +1067,6 @@ def plot_1_to_1_vs_pktLoss(data):
 #############################################################################################################################
 #############################################################################################################################
 
-
-def measure_bw_vs_nInFlight(target, controlhub_ssh_client, ax):
-    '''Measures continuous write/read bandwidth for block writes to given endpoint'''
-    print "\n ---> BANDWIDTH vs NR_IN_FLIGHT to '" + target + "' <---"
-    print time.strftime('%l:%M%p %Z on %b %d, %Y')
-
-    nrs_in_flight = [4,8,10,12,16] # [1,2,3,4,6,8,10,12,14,16]
-    cmd_base = "PerfTester.exe -w 5000000 -b 0x2001 -i 1 -d chtcp-2.0://" + CH_PC_NAME + ":10203?target=" + target
-    print cmd_base
-#    cmd_base = "perf_tester.escript tcp_ch_client2 " + CH_PC_NAME + " " + target.replace(":"," ") + " 1600 6"
-#    cmd_base = "perf_tester.escript tcp_ch_client " + CH_PC_NAME + " " + target.replace(":"," ") + " 16000 50"
-
-    ch_tx_bws = dict((x, []) for x in nrs_in_flight)
-#    ch_tx_bws_3 = dict((x, []) for x in nrs_in_flight)
-#    ch_tx_bws_4 = dict((x, []) for x in nrs_in_flight)
-    ch_rx_bws  = dict((x, []) for x in nrs_in_flight)
-#    ch_rx_bws_3 = dict((x, []) for x in nrs_in_flight)
-#    ch_rx_bws_4 = dict((x, []) for x in nrs_in_flight)
-
-    for i in range(10):
-        SCRIPT_LOGGER.warning( "Starting iteration %d" % i )
-        for n in nrs_in_flight:
-            update_controlhub_sys_config(n, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
-
-            start_controlhub(controlhub_ssh_client)
-            ch_tx_bws[n].append( run_command(cmd_base + " -t BandwidthTx")[1] / 1000.0 )
-            stop_controlhub(controlhub_ssh_client)
-
-#            start_controlhub(controlhub_ssh_client)
-#            ch_tx_bws_3[n].append( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-3perSend") + " -t BandwidthTx")[1] / 1000.0 )
-#            stop_controlhub(controlhub_ssh_client)
-
-#            start_controlhub(controlhub_ssh_client)
-#            ch_tx_bws_4[n].append( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-4perSend") + " -t BandwidthTx")[1] / 1000.0 )
-#            stop_controlhub(controlhub_ssh_client)
-
-            start_controlhub(controlhub_ssh_client)
-            ch_rx_bws[n].append( run_command(cmd_base + " -t BandwidthRx")[1] / 1000.0 )
-            stop_controlhub(controlhub_ssh_client)
-
-#            start_controlhub(controlhub_ssh_client)
-#            ch_rx_bws_3[n].append ( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-3perSend") + " -t BandwidthRx")[1] / 1000.0 )
-#            stop_controlhub(controlhub_ssh_client)
-#
-#            start_controlhub(controlhub_ssh_client)
-#            ch_rx_bws_4[n].append ( run_command(cmd_base.replace("chtcp-2.0","chtcp-2.0-4perSend") + " -t BandwidthRx")[1] / 1000.0 )
-#            stop_controlhub(controlhub_ssh_client)
-
-
-    ch_tx_bws_stats   = calc_y_stats(ch_tx_bws)
-#    ch_tx_bws_3_stats = calc_y_stats(ch_tx_bws_3)
-#    ch_tx_bws_4_stats = calc_y_stats(ch_tx_bws_4)
-    ch_rx_bws_stats   = calc_y_stats(ch_rx_bws)
-#    ch_rx_bws_3_stats = calc_y_stats(ch_rx_bws_3)
-#    ch_rx_bws_4_stats = calc_y_stats(ch_rx_bws_4)
-
-    ax.errorbar(nrs_in_flight, ch_tx_bws_stats.mean, yerr=ch_tx_bws_stats.mean_errors(), label='20MB write')
-#    ax.errorbar(nrs_in_flight, ch_tx_bws_3_stats.mean, yerr=ch_tx_bws_3_stats.mean_errors(), label='20MB write, 3')
-#    ax.errorbar(nrs_in_flight, ch_tx_bws_4_stats.mean, yerr=ch_tx_bws_4_stats.mean_errors(), label='20MB write, 4')
-    ax.errorbar(nrs_in_flight, ch_rx_bws_stats.mean, yerr=ch_rx_bws_stats.mean_errors(), fmt='--', label='20MB read')
-#    ax.errorbar(nrs_in_flight, ch_rx_bws_3_stats.mean, yerr=ch_rx_bws_3_stats.mean_errors(), fmt='--', label="20MB read, 3")
-#    ax.errorbar(nrs_in_flight, ch_rx_bws_4_stats.mean, yerr=ch_rx_bws_4_stats.mean_errors(), fmt='--', label="20MB read, 4")
-    ax.set_xlabel('Number in flight over UDP')
-    ax.set_ylabel('Mean bandwidth [Gbit/s]')
-    ax.set_ylim(0, 0.65)
-    ax.legend(loc='top right')
-
-
-
 ####################################################################################################
 #  Highest-level plot / measure functions
 
@@ -1147,8 +1095,10 @@ def take_measurements(file_prefix, multiple_in_flight):
 
     data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], controlhub_ssh_client, n_meas=20 )
 
-    n_words = ifmultiple(250,50) * 1000 * 1000 / 4
-    data['n_to_m_bw'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=n*10, n_words=n_words )
+    data['n_to_m_lat'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=3, n_words=12000, bw=False )
+
+    n_words = ifmultiple(400,50) * 1000 * 1000 / 4
+    data['n_to_m_bw'] = measure_n_to_m_performance( TARGETS, controlhub_ssh_client, n_meas=n*3, n_words=n_words )
 
     data['end_time'] = time.localtime()
 
@@ -1175,6 +1125,8 @@ def make_plots(input_file):
                                     )
 
     plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+
+    plots += plot_n_to_m_performance( data['n_to_m_lat'], bw=False )
 
     plots += plot_n_to_m_performance( data['n_to_m_bw'] )
 
