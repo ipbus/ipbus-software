@@ -63,12 +63,15 @@ else
 			-I${EXTERN_BOOST_INCLUDE_PREFIX}
 	
 	CPP_FLAGS = -g  -Wall -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
-							#-fprofile-arcs -ftest-coverage
+                        #-fprofile-arcs -ftest-coverage
 
 endif		
 
 
-
+# Hide c++11-extensions warning when building on osx
+ifeq ($(CACTUS_OS),osx)
+CPP_FLAGS += -Wno-c++11-extensions
+endif
 
 
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES} \

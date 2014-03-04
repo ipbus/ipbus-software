@@ -29,10 +29,16 @@ INCLUDE_PATH = 	-Iinclude  \
 
 
 CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC \
-						#-fprofile-arcs -ftest-coverage
+                                                #-fprofile-arcs -ftest-coverage
 
 LINK_FLAGS = -g -shared -fPIC -Wall -O3\
 							#-lgcov -coverage
+
+# Hide c++11-extensions warning when building on osx
+ifeq ($(CACTUS_OS),osx)
+CPP_FLAGS += -Wno-c++11-extensions
+endif
+
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 

@@ -13,15 +13,25 @@ void insert ( std::ostream& aStr , const U& aU )
   aStr << aU;
 }
 
+// NOTE: the log_insert_warning is defined to bridge between the compilers used on Linux and OSX.
+// While on linux the 'warning' attribute is defined, it is not in OSX 10.9 clang.
+// On the other hand clang's 'deprecated' is messageless in g++, while it supports messages in clang.
+// To make the story short, log_insert_warning uses the most appropriated attribute for the system in use.
+#ifndef __APPLE__
+#define log_insert_warning warning
+#else
+#define log_insert_warning deprecated
+#endif
 
-__attribute__ ( ( warning ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
+__attribute__ ( ( log_insert_warning ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
 void insert ( std::ostream& aStr , const uint32_t& aUint ) ;
 
-__attribute__ ( ( warning ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
+__attribute__ ( ( log_insert_warning ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
 void insert ( std::ostream& aStr , const int32_t& aInt );
 
-__attribute__ ( ( warning ( "Insertion of boolean types can result in implicit casts. Consider using the Boolean() formatter instead" ) ) )
+__attribute__ ( ( log_insert_warning ( "Insertion of boolean types can result in implicit casts. Consider using the Boolean() formatter instead" ) ) )
 void insert ( std::ostream& aStr , const bool& aBool );
+
 
 namespace uhal
 {

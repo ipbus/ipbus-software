@@ -59,8 +59,10 @@ INCLUDE_PATH = 	-Iinclude  \
 CPP_FLAGS = -g -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
 
 LINK_BINDINGS_FLAGS_COMMON = -shared -fPIC -Wall -g ${LIBRARY_PATH}  ${BINDING_LIBRARIES}
+
 ifeq (${CACTUS_OS},osx)
   LINK_BINDINGS_FLAGS = ${LINK_BINDINGS_FLAGS_COMMON}
+  CPP_FLAGS += -Wno-c++11-extensions
 else
   LINK_BINDINGS_FLAGS = ${LINK_BINDINGS_FLAGS_COMMON} -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic
 endif

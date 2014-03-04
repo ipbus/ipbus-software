@@ -101,7 +101,7 @@ namespace uhal
   }
 
   //! EXPERIMENTAL! Helper class to add Nodes derived from DerivedNode to the class factory
-  template< typename T > class RegistrationHelper;
+  template< typename T > struct RegistrationHelper;
 
   /**
     A class to build a node tree from an Address table file
@@ -112,7 +112,7 @@ namespace uhal
     public:
 
       //! EXPERIMENTAL! Give the RegistrationHelper access to the private factory
-      template< typename T > friend class RegistrationHelper;
+      template< typename T > friend struct RegistrationHelper;
 
     private:
       /**

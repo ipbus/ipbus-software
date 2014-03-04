@@ -57,7 +57,7 @@ CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC\
 # OS X. The fact that this is necessary really means the code is 
 # fishy. 
 ifeq ($(CACTUS_OS),osx) 
-CPP_FLAGS += -fdelayed-template-parsing 
+CPP_FLAGS += -Wno-c++11-extensions -fdelayed-template-parsing
 endif 
 
 LINK_FLAGS = -g -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}\

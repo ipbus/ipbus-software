@@ -57,6 +57,11 @@ INCLUDE_PATH = 	-Iinclude  \
 CPP_FLAGS = -g -Wall -O3 -MMD -MP -fPIC \
 #						-fprofile-arcs -ftest-coverage
 
+# Hide c++11-extensions warning when building on osx
+ifeq ($(CACTUS_OS),osx)
+CPP_FLAGS += -Wno-c++11-extensions
+endif
+
 LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 ${LIBRARY_PATH} ${LIBRARIES}\
 #										 -lgcov -coverage
 

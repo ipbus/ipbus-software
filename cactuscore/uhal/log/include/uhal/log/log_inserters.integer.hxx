@@ -172,7 +172,7 @@ namespace uhal
       {
         lCurrent = lValue & lMask;
 
-        if ( lPrint |= lCurrent )
+        if ( (lPrint |= lCurrent) )
         {
           aStr.put ( lCurrent?'1':'0' );
         }
@@ -235,14 +235,14 @@ namespace uhal
         --lPtr;
         lPos = ( ( ( *lPtr ) &0xF0 ) >>4 );
 
-        if ( lPrint |= ( bool ) ( lPos ) )
+        if ( (lPrint |= ( bool ) ( lPos )) )
         {
           aStr.put ( * ( lCharacterMapping + lPos ) );
         }
 
         lPos = ( ( *lPtr ) &0x0F );
 
-        if ( lPrint |= ( bool ) ( lPos ) )
+        if ( (lPrint |= ( bool ) ( lPos )) )
         {
           aStr.put ( * ( lCharacterMapping + lPos ) );
         }
