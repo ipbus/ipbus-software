@@ -6,7 +6,7 @@ import fcntl
 import sys
 
 #maximum seconds without logs
-SOFT_TIMEOUT_S = 10*60
+SOFT_TIMEOUT_S = 20*60
 #maximum seconds to execute a command 
 HARD_TIMEOUT_S = 120*60
 
