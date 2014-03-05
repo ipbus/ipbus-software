@@ -714,7 +714,7 @@ def bootstrap_stats_array( raw_data, transforms=None ):
 
     for i in range(len(result)):
         for pc in ['16', '84']:
-            result[pc+'_est_rel2median'][i] = ( result[pc+'_est'][i] / result['50_est'][i] ) - 1.0
+            result[pc+'_est_rel2median'][i] = ( result[pc+'_est'][i] / result['50_est'][i] )
             result[pc+'_err_rel2median'][i] = ( result[pc+'_err'][i] / result['50_est'][i] )
 
     return result
@@ -1055,7 +1055,7 @@ def plot_1_to_1_vs_pktLoss(data):
     ax.errorbar(fractions, lat_stats['50_est'], yerr=lat_stats['50_err'])
 
     ax.set_xlabel('UDP packet loss [%]')
-    ax.set_ylabel('Median latency [us]')
+    ax.set_ylabel('Latency [us]')
 
     ax.set_xlim(min(fractions), max(fractions))
 
@@ -1090,7 +1090,7 @@ def take_measurements(file_prefix, multiple_in_flight):
                                                      controlhub_ssh_client, 
                                                      n_meas = 100, 
                                                      max_depth = ifmultiple(1e7,1e4),
-                                                     pkt_depths = ifmultiple([342,343,348], [250,254])
+                                                     pkt_depths = ifmultiple([342,343], [250])
                                                    )
 
     data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], controlhub_ssh_client, n_meas=20 )
@@ -1120,8 +1120,8 @@ def make_plots(input_file):
     plots = []
 
     plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
-                                     [('ch_tx',  'Tx, ch'), ('ch_rx',  'Rx, ch')],
-                                     words_per_pkt = 343 if multiple_in_flight else 251
+                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
+                                     words_per_pkt = 343 if multiple_in_flight else 250
                                     )
 
     plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
