@@ -15,7 +15,7 @@ options:
                              commands for the nightly builds will be executed
    --emailto=<email>         Where to send the email report (-s will override this)
    --checkout_as=<username>  Use a different username to checkout the code than the current user
-                     
+   --build_home=<path>       Specify a custom path to use as build home                     
    
 """
 
