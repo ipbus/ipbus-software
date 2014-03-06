@@ -201,7 +201,8 @@ def main():
     t = nodetree()
     for i in device.getNodes():
         d = device.getNode(i)
-        d.getFirmwareInfo()["type"] = "endpoint" : t.add(node(i, d))
+        f = d.getFirmwareInfo()
+        if "type" in f and f["type"] == "endpoint": t.add(node(i, d))
     t.assign_width(t.root)
     log.info(t)
     uhal_slaves = t.get_nodes(t.root)
@@ -261,7 +262,7 @@ def main():
     snippet2 += "-- END automatically generated VHDL\n"
 
     # print vhdl code
-    vhdlfile=open("addr_decode_"+moduleName+".vhd","w")
+    vhdlfile=open("ipbus_decode_"+moduleName+".vhd","w")
     vhdlfile.write(get_vhdl_template().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
                    .replace("-- INSERT_SELECTION_HERE",snippet2)\
                    .replace("PACKAGENAME",moduleName))
