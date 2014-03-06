@@ -54,6 +54,7 @@
 
 #include "uhal/grammars/NodeTreeClassAttributeGrammar.hpp"
 #include "uhal/grammars/NodeTreeParametersGrammar.hpp"
+#include "uhal/grammars/NodeTreeFirmwareInfoAttributeGrammar.hpp"
 
 #include "pugixml/pugixml.hpp"
 
@@ -179,6 +180,7 @@ namespace uhal
       void setPermissions ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setMask ( const pugi::xml_node& aXmlNode , Node* aNode );
       void setModeAndSize ( const pugi::xml_node& aXmlNode , Node* aNode );
+      void setFirmwareInfo ( const pugi::xml_node& aXmlNode , Node* aNode );
       void addChildren ( const pugi::xml_node& aXmlNode , Node* aNode );
 
       static const char* mIdAttribute;
@@ -192,6 +194,7 @@ namespace uhal
       static const char* mSizeAttribute;
       static const char* mClassAttribute;
       static const char* mModuleAttribute;
+      static const char* mFirmwareInfo;
 
       Parser< Node* > mTopLevelNodeParser;
       Parser< Node* > mNodeParser;
@@ -289,6 +292,8 @@ namespace uhal
 
       grammars::NodeTreeClassAttributeGrammar mNodeTreeClassAttributeGrammar;
       grammars::NodeTreeParametersGrammar mNodeTreeParametersGrammar;
+      grammars::NodeTreeFirmwareinfoAttributeGrammar mNodeTreeFirmwareInfoAttributeGrammar;
+     
   };
 
 }

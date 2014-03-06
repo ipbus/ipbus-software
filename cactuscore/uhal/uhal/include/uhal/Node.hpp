@@ -211,10 +211,16 @@ namespace uhal
       const std::string& getModule() const;
 
       /**
-        Return the parameters of the current node
-        @return the parameters of the current node
+        Return parameters of the current node
+        @return parameters of the current node
       */
       const boost::unordered_map< std::string, std::string >& getParameters() const;
+      
+      /**
+        Return parameters for inferring the VHDL address decoding
+        @return parameters for inferring the VHDL address decoding
+      */
+      const boost::unordered_map< std::string, std::string >& getFimrwareInfo() const;
       
       /**
       	A streaming helper function to create pretty, indented tree diagrams
@@ -295,6 +301,9 @@ namespace uhal
 
       //! Additional parameters of the node
       boost::unordered_map< std::string, std::string > mParameters;
+      
+      //!  parameters to infer the VHDL address decoding
+      boost::unordered_map< std::string, std::string > mFirmwareInfo;
       
       //! The direct children of the node
       std::deque< Node* > mChildren;

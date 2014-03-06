@@ -62,17 +62,8 @@ std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode )
   return aStr;
 }
 
-
-
-
-
-
 namespace uhal
 {
-
-
-
-
 
   Node::Node ( )  :
     mHw ( NULL ),
@@ -88,6 +79,7 @@ namespace uhal
     mModule ( "" ),
     mClassName( "" ),
     mParameters ( ),
+    mFirmwareInfo( ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -108,6 +100,7 @@ namespace uhal
     mModule ( aNode.mModule ),
     mClassName( aNode.mClassName ),
     mParameters ( aNode.mParameters ),
+    mFirmwareInfo ( aNode.mFirmwareInfo ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -258,10 +251,15 @@ namespace uhal
     return mModule;
   }
   
-  const boost::unordered_map< std::string, std::string >& Node::getParameters() const {
+  const boost::unordered_map< std::string, std::string >& Node::getParameters() const
+  {
     return mParameters;
   }
 
+  const boost::unordered_map< std::string, std::string >& Node::getFimrwareInfo() const
+  {
+    return mFirmwareInfo;
+  }
 
   void Node::stream ( std::ostream& aStr , std::size_t aIndent ) const
   {

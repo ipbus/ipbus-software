@@ -56,6 +56,7 @@ namespace uhal
   const char* NodeTreeBuilder::mSizeAttribute = "size";
   const char* NodeTreeBuilder::mClassAttribute = "class";
   const char* NodeTreeBuilder::mModuleAttribute = "module";
+  const char* NodeTreeBuilder::mFirmwareInfo = "fwinfo";
 
 
 
@@ -72,6 +73,7 @@ namespace uhal
     .optional ( NodeTreeBuilder::mIdAttribute )
     .optional ( NodeTreeBuilder::mAddressAttribute )
     .optional ( NodeTreeBuilder::mParametersAttribute )
+    .optional ( NodeTreeBuilder::mFirmwareInfo )
     .optional ( NodeTreeBuilder::mPermissionsAttribute )
     .optional ( NodeTreeBuilder::mModeAttribute )
     .optional ( NodeTreeBuilder::mSizeAttribute )
@@ -86,6 +88,7 @@ namespace uhal
     .forbid ( NodeTreeBuilder::mModeAttribute )
     .forbid ( NodeTreeBuilder::mSizeAttribute )
     .optional ( NodeTreeBuilder::mParametersAttribute )
+    .optional ( NodeTreeBuilder::mFirmwareInfo )
     .optional ( NodeTreeBuilder::mPermissionsAttribute )
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
@@ -100,6 +103,7 @@ namespace uhal
     .forbid ( NodeTreeBuilder::mPermissionsAttribute )
     .optional ( NodeTreeBuilder::mAddressAttribute )
     .optional ( NodeTreeBuilder::mParametersAttribute )
+    .optional ( NodeTreeBuilder::mFirmwareInfo )
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
@@ -263,6 +267,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
+    setFirmwareInfo( aXmlNode , lNode );
     setClassName ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
@@ -293,6 +298,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     setAddr ( aXmlNode , lNode );
     setClassName ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
+    setFirmwareInfo( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -327,6 +333,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     setAddr ( aXmlNode , lNode ); //was commented out, see https://svnweb.cern.ch/trac/cactus/ticket/92
     setClassName ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
+    setFirmwareInfo( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -531,7 +538,28 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     }
   }
 
+    void NodeTreeBuilder::setFirmwareInfo ( const pugi::xml_node& aXmlNode , Node* aNode )
+  {
+    //Address is an optional attribute for hierarchical addressing
+    std::string lFwInfoStr;
+    uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mFirmwareInfo , lFwInfoStr );
+    if ( lFwInfoStr.size() )
+    {
+      //parse the string into a NodeTreeFwInfoAttribute object
+      std::string::const_iterator lBegin ( lFwInfoStr.begin() );
+      std::string::const_iterator lEnd ( lFwInfoStr.end() );
+      NodeTreeFirmwareInfoAttribute lFwInfo;
+      boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeFirmwareInfoAttributeGrammar , boost::spirit::ascii::space , lFwInfo );
 
+      std::cout << "firmware info" << std::endl;
+      aNode->mFirmwareInfo.insert(make_pair("type",lFwInfo.mType));
+  
+      if ( lFwInfo.mArguments.size() )
+      {
+        aNode->mFirmwareInfo.insert( lFwInfo.mArguments.begin() , lFwInfo.mArguments.end() );
+      }
+    }
+  }
 
   void NodeTreeBuilder::addChildren ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
@@ -564,8 +592,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
       }
     }
   }
-
-
+  
   void NodeTreeBuilder::calculateHierarchicalAddresses ( Node* aNode , const uint32_t& aAddr )
   {
     if ( aNode->mMode == defs::HIERARCHICAL )

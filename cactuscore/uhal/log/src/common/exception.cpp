@@ -43,6 +43,7 @@
 
 #include "uhal/log/exception.hpp"
 #include "boost/lexical_cast.hpp"
+#include <iostream>
 
 #ifdef __GNUG__
 #include <cxxabi.h>

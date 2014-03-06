@@ -45,7 +45,9 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   HwInterface hw=manager.getDevice ( id );
 
   boost::unordered_map<std::string,std::string> lPars;
-  boost::unordered_map<std::string,std::string>::iterator iPar; 
+  boost::unordered_map<std::string,std::string>::iterator iPar;
+  boost::unordered_map<std::string,std::string> lFwInfo;
+  boost::unordered_map<std::string,std::string>::iterator iFwInfo;
 
   //REG
   CACTUS_CHECK ( hw.getNode ( "REG" ).getAddress() == 0x000001 );
@@ -178,24 +180,30 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "SUBSYSTEM2.MEM" ).getParameters().empty() );
   //SUBSYSTEM1
   lPars = hw.getNode("SUBSYSTEM1").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val200" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val201" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val202" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg0" ) ) != lPars.end() && iPar->second == "val200" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg1" ) ) != lPars.end() && iPar->second == "val201" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg2" ) ) != lPars.end() && iPar->second == "val202" );
   CACTUS_CHECK( lPars.size() == 3 );
   //SUBSYSTEM2
   lPars = hw.getNode("SUBSYSTEM2").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val10000" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val201" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val202" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg5") ) != lPars.end() && iPar->second == "val10005" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg0" ) ) != lPars.end() && iPar->second == "val10000" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg1" ) ) != lPars.end() && iPar->second == "val201" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg2" ) ) != lPars.end() && iPar->second == "val202" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg5" ) ) != lPars.end() && iPar->second == "val10005" );
   CACTUS_CHECK( lPars.size() == 4 );
   //SUBSYSTEM2.SUBMODULE
   lPars = hw.getNode("SUBSYSTEM1.SUBMODULE").getParameters();
-  CACTUS_CHECK( ( iPar = lPars.find("arg0") ) != lPars.end() && iPar->second == "val300" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg1") ) != lPars.end() && iPar->second == "val301" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg2") ) != lPars.end() && iPar->second == "val10302" );
-  CACTUS_CHECK( ( iPar = lPars.find("arg3") ) != lPars.end() && iPar->second == "val10303" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg0" ) ) != lPars.end() && iPar->second == "val300" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg1" ) ) != lPars.end() && iPar->second == "val301" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg2" ) ) != lPars.end() && iPar->second == "val10302" );
+  CACTUS_CHECK( ( iPar = lPars.find( "arg3" ) ) != lPars.end() && iPar->second == "val10303" );
   CACTUS_CHECK( lPars.size() == 4 );
+  
+  lFwInfo = hw.getNode("IPBUS_ENDPOINT").getFimrwareInfo();
+  
+  CACTUS_CHECK( ( iFwInfo = lFwInfo.find( "type" ) ) != lFwInfo.end() && iFwInfo->second == "endpoint" );  
+  CACTUS_CHECK( ( iFwInfo = lFwInfo.find( "width" ) ) != lFwInfo.end() && iFwInfo->second == "0x10" );
+  
 }
 
 int main ( int argc,char* argv[] )
