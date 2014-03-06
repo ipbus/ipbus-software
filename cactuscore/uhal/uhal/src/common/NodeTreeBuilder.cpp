@@ -544,7 +544,6 @@ namespace uhal
       std::string::const_iterator lEnd ( lFwInfoStr.end() );
       NodeTreeFirmwareInfoAttribute lFwInfo;
       boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeFirmwareInfoAttributeGrammar , boost::spirit::ascii::space , lFwInfo );
-      std::cout << "firmware info" << std::endl;
       aNode->mFirmwareInfo.insert ( make_pair ( "type",lFwInfo.mType ) );
 
       if ( lFwInfo.mArguments.size() )
