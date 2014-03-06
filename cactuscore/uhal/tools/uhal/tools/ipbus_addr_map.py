@@ -4,6 +4,7 @@ import sys
 import unittest
 import os
 import re
+import logging
 
 BUS_REGEX = re.compile("(^|[,])\s*bus\s*([,]|$)");
 SLAVE_REGEX = re.compile("(^|[,])\s*slave\s*([,]|$)");
@@ -27,6 +28,8 @@ def isRegister(node):
         return False
     
 def getWidth(node):
+    # TODO: bug alert? not reading the size tag for slaves?
+    # see mp7_default/tmt_demux.xml
     if isFIFO(node) or isRegister(node):
         return 0
     elif isMemory(node):
@@ -37,8 +40,8 @@ def getWidth(node):
         minaddr = None
         maxaddr = None
         for name in children:
-            if isSlave(node.getNode(name)):
-                raise Exception("Slave '%s' inside '%s' slave" % (name,node.getId()))
+            #if isSlave(node.getNode(name)):
+            #    raise Exception("Slave '%s' inside '%s' slave" % (name,node.getId()))
             addr = node.getNode(name).getAddress()
             if not minaddr or minaddr>addr:
                 minaddr = addr
@@ -76,82 +79,156 @@ def isSlave(node):
     else:
         return False
         
-def getChildren(d,name):
+def getChildren(device,name):
     if name:
-        nodes = d.getNode(name).getNodes("[^.]*")
+        nodes = device.getNode(name).getNodes("[^.]*")
         return map(lambda x: "%s.%s" % (name,x) ,nodes)
     else:
-        return d.getNodes("[^.]*")
+        return device.getNodes("[^.]*")
 
 def hex32(num):
     return "0x%08x" % num
 
 
+#=============================================================
 
-def ipbus_addr_map(fn,verbose=False):
+class Module:
+    def __init__(self,moduleName,fileName):
+        self.moduleName=moduleName
+        self.fileName=fileName
+        self.nodeList=[]
+        return
+#=============================================================
+
+
+def ipbus_addr_map(fn):
     '''
-    Returns a vector with all the slaves, addresses, and addresses for each bus.
+    Returns a vector with all the slaves, addresses, and addresses for each module.
     '''
-    if verbose:
+
+    # logging: create child of main log (the dot notation is mandatory!)
+    log = logging.getLogger("main.scan")
+    # adjust uhal verbosity according to overall log level
+    if log.getEffectiveLevel()<=logging.INFO:
         uhal.setLogLevelTo(uhal.LogLevel.DEBUG)
     else:
-        uhal.disableLogging()
+    	uhal.disableLogging()
 
+    # create uhal dummy device using the address table provided by the user.
+    # we can use an arbitrary url to initialize uhal because we are not going to
+    # connect to this particular device anyway.
     if fn.find("file://") == -1:
         fn = "file://"+fn
-
     try:
-        d = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345",fn)
+        device = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345",fn)
     except Exception:
         raise Exception("File '%s' does not exist or has incorrect format" % fn)
-        
+
+    # start by splitting the entire node tree into modules associated
+    # with individual input xml files.
+    # in principle the whole address table conversion could be done at
+    # this stage, but for clarity of the code we address each module
+    # in a separate pass over all member nodes later on.
 
     result = []
-    buses = ["__root__"]
-    addrs = set()
-    while (buses):
-        bus = buses.pop(0)
-        
-        if bus == "__root__":
-            parent = ""
-        else:
-            parent = bus
-            
-        children = getChildren(d,parent)
-        slaves = []
-        while (children):
-            name = children.pop(0)
-            child = d.getNode(name)
-            if isBus(child):
-                if isSlave(child):
-                    raise Exception("Node '%s' is tagged as slave and bus at the same time" % name)
-                elif not isModule(child):
-                    raise Exception("Node '%s' is tagged as bus but it does not have children" % name)
-                else:
-                    buses.append(name)
-            elif isSlave(child):
-                slv_addrs = getAddresses(child)
-
-                #Duplicate slaves are not allowed
-                if slv_addrs & addrs:
-                    raise Exception("Slave '%s' address %s is duplicated" % (name, hex32(child.getAddress())))
-                                    
-                addrs = addrs | slv_addrs
-                width = getWidth(child)
-
-                slaves.append((name,child.getAddress(),width))
-                
-            elif isModule(child):
-                children += getChildren(d,name)
-
+    
+    modules = {}
+    for nodeName in device.getNodes():
+        node = device.getNode(nodeName)
+        fileName = node.getModule()
+        # find name of the module this node belongs to, defined by parent node
+        moduleName=nodeName
+        while device.getNode(moduleName).getModule()==fileName:
+            dotPos=moduleName.rfind(".")
+            if dotPos>0:
+                moduleName=moduleName[:dotPos]
             else:
-                raise Exception("Slave '%s' is not tagged as slave, bus or module" % (name))
+                moduleName="root"
+                break
+        # create module if it doesn't exist yet
+        if not moduleName in modules.keys():
+            modules[moduleName] = Module(moduleName,fileName)
+        # add this node to the list of nodes associated with this module
+        modules[moduleName].nodeList.append(nodeName)
+
+    # intermediate output
+    for moduleName in modules.keys():
+        module=modules[moduleName]
+        log.debug("===============================")
+        log.debug("FILE:"+module.fileName)
+        log.debug("  MODULE NAME:"+module.moduleName) 
+        for entry in module.nodeList:
+            log.debug("  NODE:"+entry)
+        log.debug("-------------------------------")
+
+    # identify everything tagged as slave or bus, and everything that
+    # represents an entire module included at this level.
+    # these are the smallest objects we are supposed to resolve when decoding
+    # this particular module, and we will remove everything
+    # below from the list we are dealing with.
+    for moduleName in modules.keys():
+        relevantNodes=[]
+        for nodeName in modules[moduleName].nodeList:
+            node=device.getNode(nodeName)
+#           if isSlave(node) or isBus(node) or (nodeName in modules.keys()):
+            if isSlave(node) or isBus(node):
+                # check we do not put a node and a subnode of it into the list
+                for existingNodeName in relevantNodes:
+                    if nodeName.find(existingNodeName+".")==0 or\
+                       existingNodeName.find(nodeName+".")==0:
+                        raise Exception("%s and %s both tagged as slave or bus"%(nodeName,existingNodeName))
+                # fine, we can add this to the list
+                relevantNodes.append(nodeName)
+
+        # now check for anything that is left over
+        #unclassifiedNodes=[]
+        #for nodeName in modules[moduleName].nodeList:
+        #    if nodeName in relevantNodes: continue
+        #    subnode=False
+        #    for relevantNode in relevantNodes:
+        #        subnode|=(nodeName.find(relevantNode+".")==0)
+        #    if not subnode:
+        #        unclassifiedNodes.append(nodeName)
+        #        log.warning("Node %s assumed to represent a slave even though not tagged"%nodeName)
+        # we assume that untagged nodes are to be considered slaves as well
+        #relevantNodes+=unclassifiedNodes
+        # TODO: prevent node *and* subnode from being added here!
+
+        # assemble list of individual entities to be distinguished,
+        # with base address and total width
+        slaves = []
+        for entry in relevantNodes:
+            slaves.append([entry,\
+                           device.getNode(entry).getAddress(),\
+                           getWidth(device.getNode(entry))])
+        # TODO: BUG! if a module is added to the list of relevant nodes,
+        # the address of the module is not the offset it is included with,
+        # but the address of the first node, which is different if the first
+        # register is not at address 0 within the module!
 
         #sort by address        
-        slaves.sort(lambda x,y: cmp(d.getNode(x[0]).getAddress(),d.getNode(y[0]).getAddress()))
-        result.append((bus,slaves))
+        slaves.sort(lambda x,y: cmp(device.getNode(x[0]).getAddress(),
+                                    device.getNode(y[0]).getAddress()))
+
+        result.append((moduleName,slaves))
+                
+        # refined output, including relevant nodes only
+        module=modules[moduleName]
+        log.debug("===============================")
+        log.debug("FILE:"+module.fileName)
+        log.debug("  MODULE NAME:"+module.moduleName)
+        for entry in relevantNodes:
+            log.debug("  RELEVANT NODE: %08x %08x %s"%(device.getNode(entry).getAddress(),getWidth(device.getNode(entry)),entry))
+            
+        log.debug("-------------------------------")
 
     return result
+
+#===========================================================================
+
+# get VHDL template file. This function needs to be in this library
+# because it looks for the template file in a subdirectory relative
+# to the library directory
 
 def get_vhdl_template(fn=None):
     if not fn:
@@ -159,6 +236,10 @@ def get_vhdl_template(fn=None):
         fn = os.path.join(this_dir, "templates", "ipbus_addr_decode.vhd")
 
     return open(fn).read()
+
+
+#===========================================================================
+
 
 class TestSimple(unittest.TestCase):
     def test_uhal(self):
@@ -209,7 +290,7 @@ class TestSimple(unittest.TestCase):
         #just a smoke test
         buses = [bus for bus,slaves in m]
         self.assertTrue(len(buses) == 3)
-        self.assertTrue("__root__" in buses)
+        self.assertTrue("root" in buses)
         self.assertTrue("SUBSYSTEM1" in buses)
         self.assertTrue("SUBSYSTEM1.SUBSYSTEM2" in buses)
 

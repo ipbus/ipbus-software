@@ -14,21 +14,33 @@ where:
 options:
   -v, --verbose          verbose
 """
-from uhal.tools.ipbus_addr_map import ipbus_addr_map,hex32
+#from uhal.tools.ipbus_addr_map import ipbus_addr_map,hex32
+from ipbus_addr_map import ipbus_addr_map,hex32
 import getopt
 import sys
+import logging
 
 def main():
+
+    # configure logger
+    log = logging.getLogger("main")
+    formatter = logging.Formatter('%(name)s %(levelname)s: %(message)s')
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
+    log.setLevel(logging.WARNING)
+    
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "vh", ["verbose","help"])
+        opts, args = getopt.getopt(sys.argv[1:], "vhd", ["verbose","help"])
     except getopt.GetoptError, err:
         print __doc__
         sys.exit(2)
 
-    verbose = False
     for o, a in opts:
         if o in ("-v", "--verbose"):
-            verbose = True
+        	log.setLevel(logging.INFO)
+        elif o in ("-d", "--debug"):
+            log.setLevel(logging.DEBUG)
         if o in ("-h", "--help"):
             print __doc__
             sys.exit(0)
@@ -38,13 +50,15 @@ def main():
         print __doc__
         sys.exit(1)
 
-
     try:
-        m = ipbus_addr_map(args[0],verbose)
+        m = ipbus_addr_map(args[0])
     except Exception,e:
         sys.stderr.write("ERROR: %s\n" % str(e))
         sys.exit(1)
-        
+
+    for i in m:
+        print i
+
     for bus,slaves in m:
         print "#%s bus address map" % bus
         print "#slave_num\tslave_id\taddress[hex]\taddress_width[bits]"
