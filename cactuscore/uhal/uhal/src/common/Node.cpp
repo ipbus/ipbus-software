@@ -77,9 +77,10 @@ namespace uhal
     mTags ( "" ),
     mDescription ( "" ),
     mModule ( "" ),
-    mClassName( "" ),
+    mClassName ( "" ),
     mParameters ( ),
     mFirmwareInfo( ),
+    mParent ( NULL ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -98,9 +99,10 @@ namespace uhal
     mTags ( aNode.mTags ),
     mDescription ( aNode.mDescription ),
     mModule ( aNode.mModule ),
-    mClassName( aNode.mClassName ),
+    mClassName ( aNode.mClassName ),
     mParameters ( aNode.mParameters ),
     mFirmwareInfo ( aNode.mFirmwareInfo ),
+    mParent ( NULL ),
     mChildren ( ),
     mChildrenMap ( )
   {
@@ -111,6 +113,7 @@ namespace uhal
 
     for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
+      ( **lIt ).mParent = this;
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
 
       for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
@@ -158,6 +161,7 @@ namespace uhal
 
     for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
+      ( **lIt ).mParent = this;
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
 
       for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
@@ -194,6 +198,21 @@ namespace uhal
   }
 
 
+
+
+  Node::const_iterator Node::begin() const
+  {
+    Node::const_iterator lIt ( this );
+    return lIt;
+  }
+
+
+  Node::const_iterator Node::end() const
+  {
+    Node::const_iterator lIt;
+    return lIt;
+  }
+
   bool Node::operator == ( const Node& aNode ) const
   {
     return this->getAddress() == aNode.getAddress() &&
@@ -207,6 +226,41 @@ namespace uhal
   {
     return mUid;
   }
+
+  std::string Node::getPath() const
+  {
+    std::deque< const Node* > lPath;
+    getAncestors ( lPath );
+    std::string lRet;
+
+    for ( std::deque< const Node* >::iterator lIt ( lPath.begin() ) ; lIt != lPath.end() ; ++lIt )
+    {
+      if ( ( **lIt ).mUid.size() )
+      {
+        lRet += ( **lIt ).mUid;
+        lRet += ".";
+      }
+    }
+
+    if ( lRet.size() )
+    {
+      lRet.resize ( lRet.size() - 1 );
+    }
+
+    return lRet;
+  }
+
+
+  void Node::getAncestors ( std::deque< const Node* >& aPath ) const
+  {
+    aPath.push_front ( this );
+
+    if ( mParent )
+    {
+      mParent->getAncestors ( aPath );
+    }
+  }
+
 
   const uint32_t& Node::getAddress() const
   {
@@ -250,7 +304,7 @@ namespace uhal
   {
     return mModule;
   }
-  
+
   const boost::unordered_map< std::string, std::string >& Node::getParameters() const
   {
     return mParameters;
@@ -331,17 +385,18 @@ namespace uhal
     {
       aStr << ", Class Name \"" << mClassName << "\"";
     }
-    
+
     if ( mParameters.size() )
     {
       aStr << ", Parameters: ";
       boost::unordered_map<std::string, std::string>::const_iterator lIt;
+
       for ( lIt = mParameters.begin(); lIt != mParameters.end(); ++lIt )
       {
         aStr << lIt->first << "=" << lIt->second << ";";
       }
     }
-    
+
     for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       ( **lIt ).stream ( aStr , aIndent+2 );
@@ -667,6 +722,111 @@ namespace uhal
   ClientInterface& Node::getClient() const
   {
     return mHw->getClient();
+  }
+
+
+
+  Node::const_iterator::const_iterator() : mBegin ( NULL )
+  {}
+
+  Node::const_iterator::const_iterator ( const Node* aBegin ) : mBegin ( aBegin )
+  {}
+
+  Node::const_iterator::const_iterator ( const const_iterator& aOrig ) : mBegin ( aOrig.mBegin ) , mItStack ( aOrig.mItStack )
+  {}
+
+
+  Node::const_iterator::~const_iterator()
+  {}
+
+  const Node& Node::const_iterator::operator*() const
+  {
+    return value();
+  }
+
+  const Node* Node::const_iterator::operator->() const
+  {
+    return & ( value() );
+  }
+
+  const Node& Node::const_iterator::value() const
+  {
+    return ( mItStack.size() ) ? ( **mItStack[0] ) : ( *mBegin );
+  }
+
+  Node::const_iterator& Node::const_iterator::operator++()
+  {
+    next();
+    return *this;
+  }
+
+
+  Node::const_iterator Node::const_iterator::operator++ ( int )
+  {
+    Node::const_iterator lTemp ( *this );
+    next();
+    return lTemp;
+  }
+
+
+  bool Node::const_iterator::next()
+  {
+    // Null iterator can't be incremented...
+    if ( !mBegin )
+    {
+      return false;
+    }
+
+    if ( ! mItStack.size() )
+    {
+      //We have just started and have no stack...
+      if ( mBegin->mChildren.size() )
+      {
+        //We have children so recurse down to them
+        mItStack.push_front ( mBegin->mChildren.begin() );
+        return true;
+      }
+
+      //We have no children so we are at the end of the iteration. Make Buffer NULL to stop infinite loop
+      mBegin = NULL;
+      return false;
+    }
+
+    //We are already in the tree...
+    if ( ( **mItStack[0] ).mChildren.size() )
+    {
+      // Entry has children, recurse...
+      mItStack.push_front ( ( **mItStack[0] ).mChildren.begin() );
+      return true;
+    }
+
+    // No children so go to the next entry on this level
+    while ( mItStack.size() )
+    {
+      if ( ++ ( mItStack[0] ) != ( ( mItStack.size() == 1 ) ? ( *mBegin ) : ( **mItStack[1] ) ).mChildren.end() )
+      {
+        // Next entry on this level is valid - return
+        return true;
+      }
+
+      // No more valid entries in this level, go back up tree
+      mItStack.pop_front();
+    }
+
+    //We have no more children so we are at the end of the iteration. Make Buffer NULL to stop infinite loop
+    mBegin = NULL;
+    return false;
+  }
+
+
+  bool Node::const_iterator::operator!= ( const Node::const_iterator& aIt ) const
+  {
+    return ! ( *this == aIt ) ;
+  }
+
+  bool Node::const_iterator::operator== ( const Node::const_iterator& aIt ) const
+  {
+    return ( aIt.mBegin == mBegin ) && ( aIt.mItStack == mItStack ) ;
   }
 
 }

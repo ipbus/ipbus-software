@@ -107,16 +107,13 @@ namespace uhal
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
-
     mTopLevelNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , _1 ) );
     mTopLevelNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , false , _1 ) );
     mTopLevelNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , false , _1 ) );
-
     //------------------------------------------------------------------------------------------------------------------------
     lPlainNode.require ( NodeTreeBuilder::mIdAttribute );
     lBitMask.require ( NodeTreeBuilder::mIdAttribute );
     lModule.require ( NodeTreeBuilder::mIdAttribute );
-
     //------------------------------------------------------------------------------------------------------------------------
     mNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , true , _1 ) );
     mNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , true , _1 ) );
@@ -225,39 +222,38 @@ namespace uhal
 
 
 
-Node* NodeTreeBuilder::convertToClassType( Node* aNode )
-{
-      boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNode->mClassName );
+  Node* NodeTreeBuilder::convertToClassType ( Node* aNode )
+  {
+    boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNode->mClassName );
 
-      if ( lIt == mCreators.end() )
+    if ( lIt == mCreators.end() )
+    {
+      log ( Warning , "Class " , Quote ( aNode->mClassName ) , " is unknown to the NodeTreeBuilder class factory." );
+
+      if ( mCreators.size() )
       {
-        log ( Warning , "Class " , Quote ( aNode->mClassName ) , " is unknown to the NodeTreeBuilder class factory." );
-  
-        if ( mCreators.size() )
+        log ( Warning , "Known types are:" );
+
+        for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
         {
-          log ( Warning , "Known types are:" );
-  
-          for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
-          {
-            log ( Warning , "    > " , lIt->first );
-          }
+          log ( Warning , "    > " , lIt->first );
         }
-        else
-        {
-          log ( Warning , "No class types have been defined" );
-        }
-  
-        log ( Warning, "Will return a plain node for now, but you have been warned!" );
-        return aNode;
       }
       else
       {
-        Node* lClassNode( lIt->second->create ( *aNode ) );
-        delete aNode;
-        return lClassNode;
+        log ( Warning , "No class types have been defined" );
       }
 
-}
+      log ( Warning, "Will return a plain node for now, but you have been warned!" );
+      return aNode;
+    }
+    else
+    {
+      Node* lClassNode ( lIt->second->create ( *aNode ) );
+      delete aNode;
+      return lClassNode;
+    }
+  }
 
 
 
@@ -267,7 +263,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     setUid ( aRequireId , aXmlNode , lNode );
     setAddr ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
-    setFirmwareInfo( aXmlNode , lNode );
+    setFirmwareInfo ( aXmlNode , lNode );
     setClassName ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
@@ -276,20 +272,19 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     //setMask( aXmlNode , lNode );
     setModeAndSize ( aXmlNode , lNode );
     addChildren ( aXmlNode , lNode );
-
     log ( Debug() , lNode->mUid , " built by " , __PRETTY_FUNCTION__ );
 
     if ( lNode->mClassName.size() )
     {
-      return convertToClassType( lNode );
+      return convertToClassType ( lNode );
     }
-    else    
+    else
     {
       return lNode;
     }
   }
 
-  Node* NodeTreeBuilder::moduleNodeCreator (  const bool& aRequireId , const pugi::xml_node& aXmlNode )
+  Node* NodeTreeBuilder::moduleNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
   {
     std::string lModule;
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mModuleAttribute , lModule );
@@ -298,7 +293,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     setAddr ( aXmlNode , lNode );
     setClassName ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
-    setFirmwareInfo( aXmlNode , lNode );
+    setFirmwareInfo ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -310,9 +305,9 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
 
     if ( lNode->mClassName.size() )
     {
-      return convertToClassType( lNode );
+      return convertToClassType ( lNode );
     }
-    else    
+    else
     {
       return lNode;
     }
@@ -333,7 +328,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     setAddr ( aXmlNode , lNode ); //was commented out, see https://svnweb.cern.ch/trac/cactus/ticket/92
     setClassName ( aXmlNode , lNode );
     setPars ( aXmlNode , lNode );
-    setFirmwareInfo( aXmlNode , lNode );
+    setFirmwareInfo ( aXmlNode , lNode );
     setTags ( aXmlNode , lNode );
     setDescription ( aXmlNode , lNode );
     setModule ( aXmlNode , lNode );
@@ -378,6 +373,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     //Address is an optional attribute for hierarchical addressing
     std::string lClassStr;
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
+
     if ( lClassStr.size() )
     {
       //parse the string into a NodeTreeClassAttribute object
@@ -385,15 +381,14 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
       std::string::const_iterator lEnd ( lClassStr.end() );
       NodeTreeClassAttribute lClass;
       boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
-
       aNode->mClassName = lClass.mClass;
-  
+
       if ( lClass.mArguments.size() )
       {
         boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::Apr , 1 );
         boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
         boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
-  
+
         if ( lTimeToExpiry.is_negative() )
         {
           log ( Error , "Support for the old-style class attributes (class=\"classname;attr1=val1;attr2=val2\") expired on 1st April 2014. Please update your address table to use the format 'class=\"classname\" parameters=\"attr1=val1;attr2=val2\"'." );
@@ -404,34 +399,32 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
           log ( Warning , "Support for the old-style class attributes ('class=\"classname;attr1=val1;attr2=val2\"') will expire on 1st April 2014. Please update your address table to use the format 'class=\"classname\" parameters=\"attr1=val1;attr2=val2\"'. Functionality will be limited after this expiry date." );
         }
 
-        aNode->mParameters.insert( lClass.mArguments.begin() , lClass.mArguments.end() );
+        aNode->mParameters.insert ( lClass.mArguments.begin() , lClass.mArguments.end() );
       }
     }
   }
 
   void NodeTreeBuilder::setPars ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    
     std::string lParsStr;
     //get attribute from xml file as string
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mParametersAttribute , lParsStr );
+
     if ( lParsStr.size() )
     {
-        //parse the string into a NodeTreeParameters object
-        std::string::const_iterator lBegin ( lParsStr.begin() );
-        std::string::const_iterator lEnd ( lParsStr.end() );
-        boost::unordered_map<std::string, std::string> lPars;
-        boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeParametersGrammar , boost::spirit::ascii::space , lPars );
-        
-        // Update the parameters map 
-        // Add to lPars those previously defined (module node)
-        lPars.insert(aNode->mParameters.begin(), aNode->mParameters.end());
-        // Swap the containers
-        aNode->mParameters.swap(lPars);
-
+      //parse the string into a NodeTreeParameters object
+      std::string::const_iterator lBegin ( lParsStr.begin() );
+      std::string::const_iterator lEnd ( lParsStr.end() );
+      boost::unordered_map<std::string, std::string> lPars;
+      boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeParametersGrammar , boost::spirit::ascii::space , lPars );
+      // Update the parameters map
+      // Add to lPars those previously defined (module node)
+      lPars.insert ( aNode->mParameters.begin(), aNode->mParameters.end() );
+      // Swap the containers
+      aNode->mParameters.swap ( lPars );
     }
   }
-  
+
   void NodeTreeBuilder::setTags ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
     std::string lStr;
@@ -538,11 +531,12 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
     }
   }
 
-    void NodeTreeBuilder::setFirmwareInfo ( const pugi::xml_node& aXmlNode , Node* aNode )
+  void NodeTreeBuilder::setFirmwareInfo ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
     //Address is an optional attribute for hierarchical addressing
     std::string lFwInfoStr;
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mFirmwareInfo , lFwInfoStr );
+
     if ( lFwInfoStr.size() )
     {
       //parse the string into a NodeTreeFwInfoAttribute object
@@ -550,16 +544,21 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
       std::string::const_iterator lEnd ( lFwInfoStr.end() );
       NodeTreeFirmwareInfoAttribute lFwInfo;
       boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeFirmwareInfoAttributeGrammar , boost::spirit::ascii::space , lFwInfo );
-
       std::cout << "firmware info" << std::endl;
-      aNode->mFirmwareInfo.insert(make_pair("type",lFwInfo.mType));
-  
+      aNode->mFirmwareInfo.insert ( make_pair ( "type",lFwInfo.mType ) );
+
       if ( lFwInfo.mArguments.size() )
       {
-        aNode->mFirmwareInfo.insert( lFwInfo.mArguments.begin() , lFwInfo.mArguments.end() );
+        aNode->mFirmwareInfo.insert ( lFwInfo.mArguments.begin() , lFwInfo.mArguments.end() );
       }
     }
   }
+
+  bool NodeTreeBuilder::NodePtrCompare ( Node* aNodeL, Node* aNodeR )
+  {
+    return ( aNodeL->mAddr < aNodeR->mAddr );
+  }
+
 
   void NodeTreeBuilder::addChildren ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
@@ -592,7 +591,7 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
       }
     }
   }
-  
+
   void NodeTreeBuilder::calculateHierarchicalAddresses ( Node* aNode , const uint32_t& aAddr )
   {
     if ( aNode->mMode == defs::HIERARCHICAL )
@@ -666,8 +665,11 @@ Node* NodeTreeBuilder::convertToClassType( Node* aNode )
 
     for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
     {
+      ( **lIt ).mParent = aNode;
       calculateHierarchicalAddresses ( *lIt , aNode->mAddr );
     }
+
+    std::sort ( aNode->mChildren.begin() , aNode->mChildren.end() , NodeTreeBuilder::NodePtrCompare );
   }
 
 

@@ -205,6 +205,21 @@ namespace uhal
 }//namespace uhal
 
 
+
+inline object const& pass_through(object const& o)
+{ return o; }
+
+const uhal::Node& NextNodeConstIterator( uhal::Node::const_iterator& aIt )
+{
+  if ( aIt.next() ) {
+    return *aIt;
+  }
+
+  PyErr_SetString(PyExc_StopIteration, "No more data.");
+  boost::python::throw_error_already_set();  
+}
+
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_Node_getNodes_overloads, getNodes, 0, 1 )
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_write_overloads,      write,      2, 3 )
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_writeBlock_overloads, writeBlock, 2, 3 )
@@ -257,9 +272,10 @@ BOOST_PYTHON_MODULE ( _core )
   ;
   // Wrap uhal::Node
   class_<uhal::Node, boost::noncopyable /*since no copy CTOR*/ > ( "Node", no_init )
-  .def ( "getNode",   static_cast< const uhal::Node& ( uhal::Node::* ) ( const std::string& ) const > ( &uhal::Node::getNode ), pycohal::norm_ref_return_policy() )
-  .def ( "getNodes", ( std::vector<std::string> ( uhal::Node::* ) ( const std::string& ) ) 0, uhal_Node_getNodes_overloads() )
+  .def ( "getNode",         static_cast< const uhal::Node& ( uhal::Node::* ) ( const std::string& ) const > ( &uhal::Node::getNode ), pycohal::norm_ref_return_policy() )
+  .def ( "getNodes",        ( std::vector<std::string> ( uhal::Node::* ) ( const std::string& ) ) 0, uhal_Node_getNodes_overloads() )
   .def ( "getId",           &uhal::Node::getId,         pycohal::const_ref_return_policy() )
+  .def ( "getPath",         &uhal::Node::getPath )
   .def ( "getParameters",   &uhal::Node::getParameters, pycohal::const_ref_return_policy() )
   .def ( "getFirmwareInfo", &uhal::Node::getFimrwareInfo, pycohal::const_ref_return_policy() ) 
   .def ( "getAddress",      &uhal::Node::getAddress,    pycohal::const_ref_return_policy() )
@@ -273,10 +289,17 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "write",           &uhal::Node::write )
   .def ( "writeBlock",      static_cast<uhal::ValHeader ( uhal::Node::* ) ( const std::vector<uint32_t>& ) const> ( &uhal::Node::writeBlock ) )
   .def ( "read",            &uhal::Node::read )
-  .def ( "readBlock",     static_cast<uhal::ValVector<uint32_t> ( uhal::Node::* ) ( const uint32_t& ) const> ( &uhal::Node::readBlock ) )
-  .def ( "getClient",     &uhal::Node::getClient,     pycohal::norm_ref_return_policy() )
+  .def ( "readBlock",       static_cast<uhal::ValVector<uint32_t> ( uhal::Node::* ) ( const uint32_t& ) const> ( &uhal::Node::readBlock ) )
+  .def ( "getClient",       &uhal::Node::getClient,     pycohal::norm_ref_return_policy() )
+  .def ( "__iter__"   ,     range< pycohal::norm_ref_return_policy >(&uhal::Node::begin, &uhal::Node::end) )
   .def ( /*__str__*/ self_ns::str ( self ) )
   ;
+
+  class_< uhal::Node::const_iterator >( "NodeConstIterator" , no_init )
+  .def("next" , NextNodeConstIterator , pycohal::norm_ref_return_policy() )
+  .def("__iter__" , pass_through , pycohal::norm_ref_return_policy() )
+  ;
+
   // Wrap uhal::ClientInterface
   class_<uhal::ClientInterface, boost::noncopyable /* no to-python converter (would require a copy CTOR) */,
          boost::shared_ptr<uhal::ClientInterface> /* all instances are held within boost::shared_ptr */> ( "ClientInterface", no_init /* no CTORs */ )

@@ -52,7 +52,7 @@
 #include <map>
 #include <string>
 #include <sstream>
-
+#include <iterator>
 #include "pugixml/pugixml.hpp"
 
 
@@ -82,8 +82,41 @@ namespace uhal
   //! A heirarchical node for navigating heirarchical firmwares
   class Node
   {
+    private:
       friend class HwInterface;
       friend class NodeTreeBuilder;
+
+    public:
+      class const_iterator : public std::iterator< std::forward_iterator_tag , Node , ptrdiff_t, const Node* , const Node& >
+      {
+          friend class Node;
+          typedef std::deque< std::deque< Node* >::const_iterator > stack;
+
+        public:
+          const_iterator();
+          virtual ~const_iterator();
+
+          const_iterator ( const Node* aBegin );
+          const_iterator ( const const_iterator& aOrig );
+
+          const Node& value() const;
+          const Node& operator*() const;
+          const Node* operator->() const;
+
+          bool next();
+          const_iterator& operator++();
+          const_iterator operator++ ( int );
+
+          bool operator== ( const const_iterator& aIt ) const;
+          bool operator!= ( const const_iterator& aIt ) const;
+
+        private:
+          const Node* mBegin;
+          stack mItStack;
+      };
+
+    private:
+      friend class const_iterator;
 
     protected:
       /**
@@ -115,6 +148,10 @@ namespace uhal
       	Destructor
       */
       virtual ~Node();
+
+      const_iterator begin() const;
+      const_iterator end() const;
+
 
       /**
       	A function to determine whether two Nodes are identical
@@ -161,6 +198,12 @@ namespace uhal
       	@return the unique ID of the current node
       */
       const std::string& getId() const;
+
+      /**
+        Return the full path to the current node
+        @return the full path to the current node
+      */
+      std::string getPath() const;
 
       /**
       	Return the register address with which this node is associated
@@ -215,13 +258,13 @@ namespace uhal
         @return parameters of the current node
       */
       const boost::unordered_map< std::string, std::string >& getParameters() const;
-      
+
       /**
         Return parameters for inferring the VHDL address decoding
         @return parameters for inferring the VHDL address decoding
       */
       const boost::unordered_map< std::string, std::string >& getFimrwareInfo() const;
-      
+
       /**
       	A streaming helper function to create pretty, indented tree diagrams
       	@param aStr a stream to write to
@@ -266,6 +309,12 @@ namespace uhal
 
 
     private:
+      /**
+        Get the full path to the current node
+      */
+      void getAncestors ( std::deque< const Node* >& aPath ) const;
+
+    private:
 
       //! The parent hardware interface of which this node is a child (or rather decendent)
       HwInterface* mHw;
@@ -301,10 +350,13 @@ namespace uhal
 
       //! Additional parameters of the node
       boost::unordered_map< std::string, std::string > mParameters;
-      
+
       //!  parameters to infer the VHDL address decoding
       boost::unordered_map< std::string, std::string > mFirmwareInfo;
-      
+
+      //! The parent of the current node
+      Node* mParent;
+
       //! The direct children of the node
       std::deque< Node* > mChildren;
 

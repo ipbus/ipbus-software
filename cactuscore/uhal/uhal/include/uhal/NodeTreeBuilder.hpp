@@ -165,8 +165,11 @@ namespace uhal
       void checkForAddressCollisions ( Node* aNode , const boost::filesystem::path& aPath );
 
 
+      static bool NodePtrCompare ( Node* aNodeL, Node* aNodeR );
+
+
       Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
-//       Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
+      //       Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
       Node* moduleNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
       Node* bitmaskNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
 
@@ -184,7 +187,7 @@ namespace uhal
       void addChildren ( const pugi::xml_node& aXmlNode , Node* aNode );
 
       static const char* mIdAttribute;
-      static const char* mAddressAttribute;      
+      static const char* mAddressAttribute;
       static const char* mParametersAttribute;
       static const char* mTagsAttribute;
       static const char* mDescriptionAttribute;
@@ -203,7 +206,7 @@ namespace uhal
 
     private:
 
-      Node* convertToClassType( Node* aNode );
+      Node* convertToClassType ( Node* aNode );
 
 
       /**
@@ -293,7 +296,7 @@ namespace uhal
       grammars::NodeTreeClassAttributeGrammar mNodeTreeClassAttributeGrammar;
       grammars::NodeTreeParametersGrammar mNodeTreeParametersGrammar;
       grammars::NodeTreeFirmwareinfoAttributeGrammar mNodeTreeFirmwareInfoAttributeGrammar;
-     
+
   };
 
 }
