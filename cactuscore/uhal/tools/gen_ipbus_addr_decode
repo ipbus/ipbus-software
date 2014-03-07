@@ -25,7 +25,6 @@ import time
 import logging
 import math
 import uhal
-from ipbus_addr_map import get_vhdl_template
 
 #===========================================================================================
         
