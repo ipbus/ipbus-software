@@ -10,6 +10,7 @@ License: BSD License
 Group: CACTUS
 Source: https://svnweb.cern.ch/trac/cactus/browser/trunk/uhal/tools
 URL: https://svnweb.cern.ch/trac/cactus 
+BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot 
 Prefix: %{_prefix}
 
