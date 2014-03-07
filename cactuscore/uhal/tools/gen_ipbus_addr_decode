@@ -16,7 +16,7 @@ options:
    -d  --debug                              debug output
    -t <file>, --template=<file>             uses a different vhdl template file
                                             (default
-                                            uhal/tools/templates/ipbus_addr_decode.vhd)
+                                            /opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd)
 """
 import getopt
 import sys
@@ -169,7 +169,7 @@ def main():
     uhal.setLogLevelTo(uhal.LogLevel.WARNING)
 
     # options for verbosity level and VHDL template
-    template_fn = "uhal/tools/templates/ipbus_addr_decode.vhd"
+    template_fn = "/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd"
     try:
         opts, args = getopt.getopt(sys.argv[1:], "vdht:", ["verbose","debug","help","template="])
     except getopt.GetoptError, err:
