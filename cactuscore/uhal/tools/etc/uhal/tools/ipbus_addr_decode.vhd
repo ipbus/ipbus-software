@@ -34,7 +34,7 @@ package body ipbus_decode_PACKAGENAME is
 
     return sel;
 
-  end function ipbus_addr_PACKAGENAME;
+  end function ipbus_sel_PACKAGENAME;
 
 end ipbus_decode_PACKAGENAME;
 
