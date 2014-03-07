@@ -37,7 +37,7 @@ rpm: _rpmall
 _rpmall: 
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{bin/${Package},etc/${Package}}
-	cp -p gen_ipbus_addr_decode ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
+	cp -p scripts/* ${RPMBUILD_DIR}/SOURCES/bin/${Package}/.
 	cp -p etc/${Package}/* ${RPMBUILD_DIR}/SOURCES/etc/${Package}
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
