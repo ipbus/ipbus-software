@@ -23,7 +23,7 @@ end ipbus_decode_PACKAGENAME;
 
 package body ipbus_decode_PACKAGENAME is
 
-  function ipbus_sel_PACKAGENAME(signal addr : in std_logic_vector(31 downto 0)) return decode_sel_t is
+  function ipbus_sel_PACKAGENAME(signal addr : in std_logic_vector(31 downto 0)) return ipbus_sel_t is
     variable sel: ipbus_sel_t;
   begin
 
@@ -34,6 +34,7 @@ package body ipbus_decode_PACKAGENAME is
 
     return sel;
 
-  end ipbus_addr_PACKAGENAME;
+  end function ipbus_addr_PACKAGENAME;
 
 end ipbus_decode_PACKAGENAME;
+
