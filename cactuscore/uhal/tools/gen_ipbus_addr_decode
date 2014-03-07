@@ -263,7 +263,7 @@ def main():
 
     # print vhdl code
     vhdlfile=open("ipbus_decode_"+moduleName+".vhd","w")
-    vhdlfile.write(get_vhdl_template().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
+    vhdlfile.write(open(template_fn).open().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
                    .replace("-- INSERT_SELECTION_HERE",snippet2)\
                    .replace("PACKAGENAME",moduleName))
     vhdlfile.close()
