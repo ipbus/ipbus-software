@@ -60,6 +60,7 @@ ERROR_LIST        = ['error: ',
                      'FAILED',
                      'FAIL: test', 'ERROR: test', #pycohal
                      '*failed*', #controlhub
+                     'CRITICAL', # uhal/tools
                      'terminate called',
                      'Segmentation fault']
 
