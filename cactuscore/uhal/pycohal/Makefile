@@ -9,10 +9,7 @@ PACKAGE_RELEASE = 0
 
 PYTHON_VERSION = $(shell python -c "import sys; sys.stdout.write(sys.version[:3])")
 
-PYTHON_HOME = $(shell python -c "import sys; print sys.prefix")
 PYTHON_LIB=python${PYTHON_VERSION}
-#PYTHON_LIB_PREFIX=${PYTHON_HOME}/lib
-PYTHON_LIB_PREFIX=/usr/local/lib/python2.6/config
 
 export CACTUS_ROOT
 export PACKAGE_VER_MAJOR PACKAGE_VER_MINOR PACKAGE_VER_PATCH
