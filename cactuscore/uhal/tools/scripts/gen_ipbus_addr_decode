@@ -135,7 +135,7 @@ class nodetree(object):
         else:
             if not n.desc:
                 log.error("Oops, I don't see a width parameter: " + n.name)
-                raise SystemExit()
+                raise SystemExit(1)
             for i in n.desc:
                 saddr = i.ref.getAddress()
                 if saddr < max_addr:
@@ -159,6 +159,7 @@ class nodetree(object):
 def main():    
 
     # configure logger
+    global log
     log = logging.getLogger("main")
     formatter = logging.Formatter('%(name)s %(levelname)s: %(message)s')
     handler = logging.StreamHandler(sys.stdout)
