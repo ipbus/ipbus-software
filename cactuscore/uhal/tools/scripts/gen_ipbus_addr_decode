@@ -262,11 +262,13 @@ def main():
     snippet2 += "-- END automatically generated VHDL\n"
 
     # print vhdl code
-    vhdlfile=open("ipbus_decode_"+moduleName+".vhd","w")
+    vhdlfilename = "ipbus_decode_"+moduleName+".vhd"
+    vhdlfile=open(vhdlfilename,"w")
     vhdlfile.write(open(template_fn).read().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
                    .replace("-- INSERT_SELECTION_HERE",snippet2)\
                    .replace("PACKAGENAME",moduleName))
     vhdlfile.close()
+    print "VHDL decode file saved: ", vhdlfilename
     
 if __name__ == '__main__':
     main()
