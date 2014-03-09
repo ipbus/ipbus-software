@@ -36,7 +36,7 @@ import re
 
 SOFT_TIMEOUT_S = 570
 
-def get_commands(conn_file, controlhub_scripts_dir):
+def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
     """Return full list of all sections/commands in this test suite."""
 
     if not conn_file.startswith("file://"):
@@ -470,7 +470,7 @@ def get_commands(conn_file, controlhub_scripts_dir):
 
     cmds += [["TEST uHAL TOOLS",
               [#uhal.tools.ipbus_addr_map
-               "/usr/bin/python -c \"import uhal.tools;uhal.tools.test()\""
+               "gen_ipbus_addr_decode -t %s %s" % (uhal_tools_template_vhdl, join(os.path.split(uhal_tools_template_vhdl)[0],'addr_table.xml')),
               ]
             ]]
 
@@ -657,6 +657,11 @@ if __name__=="__main__":
         controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") )
     print '  ControlHub scripts dir: ', controlhub_scripts_dir
 
+    # Get uhal tools template file name
+    which_gen_ipbus_addr_decode = run_command("which gen_ipbus_addr_decode", False)
+    uhal_tools_dir = os.path.split( os.path.dirname ( which_gen_ipbus_addr_decode[0][0].rstrip('\n') ) )[0]
+    uhal_tools_template_vhdl = join( uhal_tools_dir, 'etc', 'uhal', 'tools', 'ipbus_addr_decode.vhd' )
+
     def skip_section(name):
         if (section_search_str is None):
             return False
@@ -664,8 +669,8 @@ if __name__=="__main__":
             return False
         else:
             return True
-    sections_cmds_to_run = [(name, cmds) for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir) if not skip_section(name)]
-    sections_skipped     = [name for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir) if skip_section(name)]
+    sections_cmds_to_run = [(name, cmds) for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl) if not skip_section(name)]
+    sections_skipped     = [name for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl) if skip_section(name)]
 
     if run_cmds:
         for env_var in ["PATH", "LD_LIBRARY_PATH"]:
