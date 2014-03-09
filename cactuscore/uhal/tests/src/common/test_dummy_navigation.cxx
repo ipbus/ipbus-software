@@ -42,6 +42,18 @@
 
 using namespace uhal;
 
+void iteration ( const uhal::Node& parentNode )
+{ 
+  uint32_t lAddr = 0x0;
+
+  for(uhal::Node::const_iterator lIt = parentNode.begin(); lIt != parentNode.end(); lIt++)
+  {
+    CACTUS_CHECK ( lIt->getAddress() >= lAddr );
+    lAddr = lIt->getAddress();
+    lCount++;
+  }
+}
+
 void navigation_and_traversal ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
@@ -70,6 +82,9 @@ void navigation_and_traversal ( const std::string& connection, const std::string
   CACTUS_CHECK ( std::find ( ids.begin(),ids.end(),"MEM" ) != ids.end() );
   CACTUS_CHECK ( std::find ( ids.begin(),ids.end(),"SUBMODULE.REG" ) != ids.end() );
   CACTUS_CHECK ( std::find ( ids.begin(),ids.end(),"SUBMODULE.MEM" ) != ids.end() );
+
+  CACTUS_TEST ( iteration ( hw.getNode() ) );
+  CACTUS_TEST ( iteration ( hw.getNode("SUBSYSTEM1") ) );
 }
 
 void write_read ( const std::string& connection, const std::string& id )

@@ -657,6 +657,15 @@ class TestMetaInfo(unittest.TestCase):
         self.assertEqual( hw.getNode(longId).getTags(),        tags )
         self.assertEqual( hw.getNode(longId).getParameters(),  pars )
 
+    def exe_test_node_iteration(self, parent_node):
+        """Checks that a node's descendents are iterated over in address order"""
+        descendent_addr = 0x0
+        print '\n----------------------------------------------------------------------'
+        for node in parent_node:
+            self.assertTrue( node.getAddress() >= descendent_addr )
+            print '{0:<30}'.format(node.getId()), '{0:>8x}'.format(node.getAddress()), '>=', '{0:>8x}'.format(descendent_addr)
+            descendent_addr = node.getAddress()
+
     def test_node_metainfo(self):
         """Run meta-info tests for Node class."""
         self.exe_test_node_metainfo(DEVICE_ID, "REG", ownId="REG", address=0x000001, permission=uhal.NodePermission.READWRITE, description="",
@@ -671,8 +680,12 @@ class TestMetaInfo(unittest.TestCase):
                                            size=262144, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.INCREMENTAL, tags="", pars={})
 
         upperNode = self.manager.getDevice( DEVICE_ID ).getNode()
-        self.assertEqual(len(upperNode.getNodes()), 52)
+        self.assertEqual(len(upperNode.getNodes()), 53)
         self.assertEqual(len(upperNode.getNodes(r".*_MEM")), 2)
+
+        self.exe_test_node_iteration( upperNode )
+        self.exe_test_node_iteration( upperNode.getNode("REG") )
+        self.exe_test_node_iteration( upperNode.getNode("SUBSYSTEM1") )
 
 
 
