@@ -173,7 +173,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "vdht:", ["verbose","debug","help","template="])
     except getopt.GetoptError, err:
-        log.critical(__doc__)
+        log.critical("Incorrect usage! %s\n%s" % (str(err),__doc__) )
         sys.exit(2)
     for o, a in opts:
         if o in ("-v", "--verbose"):
@@ -190,7 +190,7 @@ def main():
 
     # make sure that exactly one argument was given, later assumed to be the xml file name
     if len(args) != 1:
-        log.critical(__doc__)
+        log.critical("Incorrect usage - invalid number of arguments! Make sure that options come before argument.\n" + __doc__)
         sys.exit(1)
 
     try:
