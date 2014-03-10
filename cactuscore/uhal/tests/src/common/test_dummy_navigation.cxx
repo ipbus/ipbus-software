@@ -50,7 +50,6 @@ void iteration ( const uhal::Node& parentNode )
   {
     CACTUS_CHECK ( lIt->getAddress() >= lAddr );
     lAddr = lIt->getAddress();
-    lCount++;
   }
 }
 
