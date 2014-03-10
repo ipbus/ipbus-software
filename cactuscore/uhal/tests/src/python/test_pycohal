@@ -660,10 +660,8 @@ class TestMetaInfo(unittest.TestCase):
     def exe_test_node_iteration(self, parent_node):
         """Checks that a node's descendents are iterated over in address order"""
         descendent_addr = 0x0
-        print '\n----------------------------------------------------------------------'
         for node in parent_node:
             self.assertTrue( node.getAddress() >= descendent_addr )
-            print '{0:<30}'.format(node.getId()), '{0:>8x}'.format(node.getAddress()), '>=', '{0:>8x}'.format(descendent_addr)
             descendent_addr = node.getAddress()
 
     def test_node_metainfo(self):
