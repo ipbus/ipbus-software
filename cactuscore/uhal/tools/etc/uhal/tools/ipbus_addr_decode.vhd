@@ -15,7 +15,7 @@ package ipbus_decode_PACKAGENAME is
 
   constant IPBUS_SEL_WIDTH: positive := 5; -- Should be enough for now?
   subtype ipbus_sel_t is std_logic_vector(IPBUS_SEL_WIDTH - 1 downto 0);
-  function ipbus_sel_PACKAGENAME(signal addr : in std_logic_vector(31 downto 0)) return ipbus_sel_t;
+  function ipbus_sel_PACKAGENAME(addr : in std_logic_vector(31 downto 0)) return ipbus_sel_t;
 
 -- INSERT_SYMBOLIC_CONSTANTS_HERE
     
@@ -23,7 +23,7 @@ end ipbus_decode_PACKAGENAME;
 
 package body ipbus_decode_PACKAGENAME is
 
-  function ipbus_sel_PACKAGENAME(signal addr : in std_logic_vector(31 downto 0)) return ipbus_sel_t is
+  function ipbus_sel_PACKAGENAME(addr : in std_logic_vector(31 downto 0)) return ipbus_sel_t is
     variable sel: ipbus_sel_t;
   begin
 
