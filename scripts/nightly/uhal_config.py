@@ -84,6 +84,7 @@ environ["LD_LIBRARY_PATH"] = ":".join([join(CACTUS_PREFIX,"lib"),
 
 environ["PATH"]            = ":".join([join(CACTUS_PREFIX,"bin"),
                                        join(CACTUS_PREFIX,"bin/uhal/tests"),
+                                       join(CACTUS_PREFIX,"bin/uhal/tools"),
                                        environ.get("PATH","")])
 
 def importCommands() :
