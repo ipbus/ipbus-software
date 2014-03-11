@@ -199,7 +199,7 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK( ( iPar = lPars.find( "arg3" ) ) != lPars.end() && iPar->second == "val10303" );
   CACTUS_CHECK( lPars.size() == 4 );
   
-  lFwInfo = hw.getNode("IPBUS_ENDPOINT").getFimrwareInfo();
+  lFwInfo = hw.getNode("IPBUS_ENDPOINT").getFirmwareInfo();
   
   CACTUS_CHECK( ( iFwInfo = lFwInfo.find( "type" ) ) != lFwInfo.end() && iFwInfo->second == "endpoint" );  
   CACTUS_CHECK( ( iFwInfo = lFwInfo.find( "width" ) ) != lFwInfo.end() && iFwInfo->second == "0x10" );

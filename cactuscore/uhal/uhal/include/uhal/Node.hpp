@@ -263,7 +263,7 @@ namespace uhal
         Return parameters for inferring the VHDL address decoding
         @return parameters for inferring the VHDL address decoding
       */
-      const boost::unordered_map< std::string, std::string >& getFimrwareInfo() const;
+      const boost::unordered_map< std::string, std::string >& getFirmwareInfo() const;
 
       /**
       	A streaming helper function to create pretty, indented tree diagrams

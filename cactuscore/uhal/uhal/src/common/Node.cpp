@@ -310,7 +310,7 @@ namespace uhal
     return mParameters;
   }
 
-  const boost::unordered_map< std::string, std::string >& Node::getFimrwareInfo() const
+  const boost::unordered_map< std::string, std::string >& Node::getFirmwareInfo() const
   {
     return mFirmwareInfo;
   }
