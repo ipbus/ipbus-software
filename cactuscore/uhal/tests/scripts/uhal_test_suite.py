@@ -658,8 +658,12 @@ if __name__=="__main__":
     print '  ControlHub scripts dir: ', controlhub_scripts_dir
 
     # Get uhal tools template file name
-    which_gen_ipbus_addr_decode = run_command("which gen_ipbus_addr_decode", False)
-    uhal_tools_dir = os.path.split( os.path.dirname ( which_gen_ipbus_addr_decode[0][0].rstrip('\n') ) )[0]
+    which_gen_ipbus_addr_decode = run_command("which gen_ipbus_addr_decode", False)[0][0].rstrip('\n')
+    uhal_tools_dir = os.path.dirname ( which_gen_ipbus_addr_decode )
+    if uhal_tools_dir.endswith("bin/uhal/tools"): # RPM-installed code
+        uhal_tools_dir = uhal_tools_dir[:-14]
+    else: # Checked-out code
+        uhal_tools_dir = os.path.split( uhal_tools_dir )[0]
     uhal_tools_template_vhdl = join( uhal_tools_dir, 'etc', 'uhal', 'tools', 'ipbus_addr_decode.vhd' )
 
     def skip_section(name):
