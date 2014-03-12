@@ -80,9 +80,6 @@ if __name__== "__main__":
             n,ext = os.path.splitext(fn)
             CONF = __import__(n)
             
-            if listonly :
-              print "The following set of commands is available for execution: %s" % ",".join([s for s,c in CONF.COMMANDS])
-              sys.exit(0)
         except ImportError,e:
             sys.stderr.write("ERROR: Failed to import '%s': %s\n\n" % (args[0],str(e)))
     else:
@@ -104,6 +101,10 @@ if __name__== "__main__":
     else:
       commandsToRun = commandsViaParam
       
+    if listonly :
+      print "The following set of commands is available for execution: %s" % ",".join([s for s,c in CONF.COMMANDS])
+      sys.exit(0)
+
     # Check if command list given is valid
     for command in commandsToRun:
       if command in [s for s,c in CONF.COMMANDS] :
