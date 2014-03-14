@@ -180,10 +180,13 @@ namespace uhal
 
 #else
 
-      lStr << description();
       if ( strlen ( mAdditionalInfo ) )
       {
-        lStr << " : " << mAdditionalInfo;
+        lStr << mAdditionalInfo;
+      }
+      else
+      {
+        lStr << description() << " (no additional info)";
       }
 
 #endif
