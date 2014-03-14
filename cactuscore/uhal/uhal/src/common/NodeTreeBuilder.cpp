@@ -374,6 +374,7 @@ namespace uhal
     std::string lClassStr;
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
 
+    /*
     if ( lClassStr.size() )
     {
       //parse the string into a NodeTreeClassAttribute object
@@ -402,6 +403,9 @@ namespace uhal
         aNode->mParameters.insert ( lClass.mArguments.begin() , lClass.mArguments.end() );
       }
     }
+    */
+
+    aNode->mClassName = lClassStr;
   }
 
   void NodeTreeBuilder::setPars ( const pugi::xml_node& aXmlNode , Node* aNode )
