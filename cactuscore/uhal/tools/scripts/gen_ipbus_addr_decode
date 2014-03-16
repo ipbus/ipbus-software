@@ -223,14 +223,17 @@ def main():
         if (addr_bits & mask_bits).uint() != 0:
             log.error("ERROR: Non Aligned address 0b%s with respect to address bit mask 0b%s" % (str(addr_bits),str(mask_bits)))
     
-        masked = addr_bits & ~mask_bits
-        or_prod = or_prod | masked
-        and_prod = and_prod & masked
+        or_prod = or_prod | (addr_bits & ~mask_bits)
+        and_prod = and_prod & (addr_bits | mask_bits)
         slaves.append((n,id,addr_bits,mask_bits))
 
     addr_mask = or_prod & ~and_prod
     log.info("Significant address bits 0b%s" % str(addr_mask))
-    
+
+# FIXME: this algorithm leads to more than the required number of address bits being
+# compared in the VHDL in some circumstances. Could add a loop here to calculate the
+# number of address bits needed for a unique match for a given slave.
+
     if not nflag:
 
         # generate vhdl snipped with symbolic constants
@@ -263,7 +266,7 @@ def main():
                     snippet2 += "0"
             snippet2 += "\") then\n"
             
-            snippet2 += "      sel := ipbus_sel_t(to_unsigned(" + slaveIds[n] + ", IPBUS_SEL_WIDTH)); -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + addr_mask.hex() + "\n"
+            snippet2 += "      sel := ipbus_sel_t(to_unsigned(" + slaveIds[n] + ", IPBUS_SEL_WIDTH)); -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + mask.hex() + "\n"
         snippet2 += "-- END automatically generated VHDL\n"
     
         # print vhdl code
