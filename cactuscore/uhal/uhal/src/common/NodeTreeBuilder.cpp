@@ -374,37 +374,6 @@ namespace uhal
     std::string lClassStr;
     uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mClassAttribute , lClassStr );
 
-    /*
-    if ( lClassStr.size() )
-    {
-      //parse the string into a NodeTreeClassAttribute object
-      std::string::const_iterator lBegin ( lClassStr.begin() );
-      std::string::const_iterator lEnd ( lClassStr.end() );
-      NodeTreeClassAttribute lClass;
-      boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeClassAttributeGrammar , boost::spirit::ascii::space , lClass );
-      aNode->mClassName = lClass.mClass;
-
-      if ( lClass.mArguments.size() )
-      {
-        boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::Apr , 1 );
-        boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
-        boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
-
-        if ( lTimeToExpiry.is_negative() )
-        {
-          log ( Error , "Support for the old-style class attributes (class=\"classname;attr1=val1;attr2=val2\") expired on 1st April 2014. Please update your address table to use the format 'class=\"classname\" parameters=\"attr1=val1;attr2=val2\"'." );
-          sleep ( 60 );
-        }
-        else
-        {
-          log ( Warning , "Support for the old-style class attributes ('class=\"classname;attr1=val1;attr2=val2\"') will expire on 1st April 2014. Please update your address table to use the format 'class=\"classname\" parameters=\"attr1=val1;attr2=val2\"'. Functionality will be limited after this expiry date." );
-        }
-
-        aNode->mParameters.insert ( lClass.mArguments.begin() , lClass.mArguments.end() );
-      }
-    }
-    */
-
     aNode->mClassName = lClassStr;
   }
 
