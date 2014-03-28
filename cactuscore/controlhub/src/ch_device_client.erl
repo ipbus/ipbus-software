@@ -756,6 +756,7 @@ state_as_string(S) when is_record(S, state) ->
 
 
 udp_proc_init() ->
+    process_flag(trap_exit, true),
     receive
         {start, Socket, IP, Port, ParentPid} ->
             link(ParentPid),
@@ -779,6 +780,9 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
             {inet_reply, Socket, SendError} ->
                 ?CH_LOG_ERROR("Error in UDP async send: ~w", [SendError]);%,
                 %throw({udp_send_error, SendError});
+            {'EXIT', ParentPid, Reason} ->
+                ?CH_LOG_DEBUG("UDP proc shutting down since parent device client ~w terminated with reason: ~w", [ParentPid, Reason]),
+                exit(normal);
             Other ->
                 ParentPid ! Other
         end 
