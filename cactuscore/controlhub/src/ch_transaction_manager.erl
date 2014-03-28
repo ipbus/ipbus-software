@@ -114,6 +114,7 @@ tcp_acceptor(TcpListenSocket) ->
 
 % initialisation function for TCP receive/send process
 tcp_proc_init() ->
+    process_flag(trap_exit, true),
     receive
         {start, Socket, ParentPid} ->
             link(ParentPid),
@@ -137,6 +138,9 @@ tcp_proc_loop(Socket, ParentPid) ->
             {inet_reply, Socket, SendError} ->
                 ?CH_LOG_ERROR("Error in TCP async send: ~w", [SendError]),
                 throw({tcp_send_error,SendError});
+            {'EXIT', ParentPid, Reason} ->
+                ?CH_LOG_DEBUG("TCP proc shutting down since parent transaction manager ~w terminated with reason: ~w", [ParentPid, Reason]),
+                exit(normal);
             Other ->
                 ParentPid ! Other
         end
