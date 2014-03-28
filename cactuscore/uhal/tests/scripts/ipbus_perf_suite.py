@@ -810,7 +810,7 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
     # Fractional variation plots:  Add y=1 line & change y range
     for ax in [ax_lat2, ax_linbw2, ax_logbw2]:
         ax.axhline(1, color='Black', linestyle=':')
-        ax.set_ylim(0.84, 1.16)
+        ax.set_ylim(0.77, 1.23)
 
 
     # Add legends
@@ -912,7 +912,11 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
 
 
 
-def plot_n_to_m(all_data, bw=True, write=True):
+def plot_n_to_m(data_label_list, bw=True, write=True):
+    if isinstance( data_label_list, numpy.ndarray ):
+        data_label_list = [(data_label_list, "{0} clients")]
+    assert isinstance(data_label_list, list)
+    assert all(map(lambda x: (isinstance(x,tuple) and len(x) is 2), data_label_list))
 
     # Set up figures ...
 
@@ -932,12 +936,13 @@ def plot_n_to_m(all_data, bw=True, write=True):
 
     # Plot the datapoints ...
 
-    for data_subset in numpy.swapaxes(all_data, 0, 1):
+    for all_data, label_format in data_label_list:
+      for data_subset in numpy.swapaxes(all_data, 0, 1):
         nrs_targets = data_subset['n_targets']
         n_clients = data_subset['n_clients'][0]
         assert all(map(lambda x: x == n_clients, data_subset['n_clients']))
 
-        label = str(n_clients) + ' clients'
+        label = label_format.format(n_clients)
 
         bw_stats       = bootstrap_stats_array( data_subset['y'] )
         ch_cpu_stats   = bootstrap_stats_array( data_subset['ch_cpu'] )
@@ -1057,15 +1062,18 @@ def plot_1_to_1_vs_pktLoss(data):
 
     # Plot the datapoints ...
 
-    fractions = numpy.multiply( data['f'], 100. )
     lat_stats = bootstrap_stats_array( data['latency'] )
 
-    ax.errorbar(fractions, lat_stats['50_est'], yerr=lat_stats['50_err'])
+    prediction_x = numpy.linspace(min(data['f']), max(data['f']), 100)
+    prediction_y = numpy.add( prediction_x * 2 * 2.01e4, lat_stats['50_est'][0] )
+    prediction_y = numpy.add( prediction_y, prediction_x * prediction_x * 4 * 2e4 )
+    ax.plot(prediction_x, prediction_y, 'g--')
 
-    ax.set_xlabel('UDP packet loss [%]')
+    ax.errorbar(data['f'], lat_stats['50_est'], yerr=lat_stats['50_err'], fmt=' _')
+
+    ax.set_xlabel('Fractional UDP packet loss')
     ax.set_ylabel('Latency [us]')
-
-    ax.set_xlim(min(fractions), max(fractions))
+    ax.set_xlim(min(data['f']), max(data['f']) + 0.01*(max(data['f'])-min(data['f'])))
 
     return [(fig, '1_to_1_pktLoss')]
 
@@ -1138,8 +1146,7 @@ def make_plots(input_file):
 
     plots += plot_n_to_m( data['n_to_m_lat'], bw=False )
 
-    plots += plot_n_to_m( data['n_to_m_bw_tx'], write=True )
-    plots += plot_n_to_m( data['n_to_m_bw_rx'], write=False )
+    plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write"), (data['n_to_m_bw_rx'], "Read")] )
 
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
