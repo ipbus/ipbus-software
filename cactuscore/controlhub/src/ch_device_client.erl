@@ -318,8 +318,8 @@ forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.
             Pid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, [OrigHdr, ReplyBody]},
             ch_stats:udp_rcvd(S#state.stats),
             S#state{ in_flight={NrInFlight-1,NewQ} };
-        _ ->
-            ?CH_LOG_WARN("Ignoring received packet with incorrect header (expecting header ~w, could just be genuine out-of-order reply): ~w", [SentHdr, Pkt]),
+        <<RcvdHdr:4/binary, _/binary>> ->
+            ?CH_LOG_DEBUG("Ignoring received packet with incorrect header (expecting header ~w, could just be genuine out-of-order reply): ~w", [SentHdr, RcvdHdr]),
             S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, NewQ)} }
     end;
 forward_reply(Pkt, S = #state{ in_flight={1,TransManagerPid} }) when S#state.ipbus_v == {1,3} ->
@@ -392,7 +392,7 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
             {ok, NewS}
     after ?UDP_RESPONSE_TIMEOUT ->
         if 
-          (NrFailedAttempts+1) == 3 ->
+          (NrFailedAttempts+1) == 5 ->
             ErrorCode = if 
                           Type==response -> ?ERRCODE_TARGET_RESEND_TIMEOUT;
                           true -> ?ERRCODE_TARGET_CONTROL_TIMEOUT
@@ -647,7 +647,7 @@ resend_request_pkt(Id) when Id =< 16#ffff, Id >= 0 ->
 %% ------------------------------------------------------------------------------------
 
 get_device_status(IPbusVer) ->
-    get_device_status(IPbusVer, 4).
+    get_device_status(IPbusVer, 5).
 
 
 %% ------------------------------------------------------------------------------------
