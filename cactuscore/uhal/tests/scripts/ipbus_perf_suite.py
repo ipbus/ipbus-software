@@ -1102,7 +1102,7 @@ def take_measurements(file_prefix, multiple_in_flight):
 
     data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=20 )
 
-    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=3, n_words=12000, bw=False, write=False, nrs_clients=[1,2,4] )
+    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=8, n_words=12000, bw=False, write=False, nrs_clients=[1,2,4] )
 
     n_words = ifmultiple(600,50) * 1000 * 1000 / 4
     data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=False, nrs_clients=[1] )
@@ -1134,7 +1134,7 @@ def make_plots(input_file):
 
 #    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
 
-    plots += plot_n_to_m_performance( data['n_to_m_lat'], bw=False )
+    plots += plot_n_to_m( data['n_to_m_lat'], bw=False )
 
     plots += plot_n_to_m( data['n_to_m_bw_tx'], write=True )
     plots += plot_n_to_m( data['n_to_m_bw_rx'], write=False )
