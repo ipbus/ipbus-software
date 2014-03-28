@@ -807,10 +807,10 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
         for d in range(0, 10000, words_per_pkt):
             ax.axvline(d, color='DarkGrey', linestyle='-.')
 
-    # Fractional variation plots:  Add y=0 line & change y range
+    # Fractional variation plots:  Add y=1 line & change y range
     for ax in [ax_lat2, ax_linbw2, ax_logbw2]:
-        ax.axhline(0, color='Black', linestyle=':')
-        ax.set_ylim(-0.16, 0.16)
+        ax.axhline(1, color='Black', linestyle=':')
+        ax.set_ylim(0.84, 1.16)
 
 
     # Add legends
@@ -884,7 +884,7 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
 
     cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
 
-#    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
     start_controlhub(controlhub_ssh_client)
 
     for i in range(n_meas):
@@ -1127,12 +1127,12 @@ def make_plots(input_file):
 
     plots = []
 
-#    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
-#                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
-#                                     words_per_pkt = 343 if multiple_in_flight else 250
-#                                    )
+    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
+                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
+                                     words_per_pkt = 343 if multiple_in_flight else 250
+                                    )
 
-#    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
 
     plots += plot_n_to_m( data['n_to_m_lat'], bw=False )
 
