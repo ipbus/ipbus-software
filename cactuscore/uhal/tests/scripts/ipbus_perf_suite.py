@@ -1105,8 +1105,8 @@ def take_measurements(file_prefix, multiple_in_flight):
     data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=8, n_words=12000, bw=False, write=False, nrs_clients=[1,2,5] )
 
     n_words = ifmultiple(600,50) * 1000 * 1000 / 4
-    data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=False, nrs_clients=[1,2] )
-    data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=True,  nrs_clients=[1,2] )
+    data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=False, nrs_clients=[1] )
+    data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=True,  nrs_clients=[1] )
 
 
 
