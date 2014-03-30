@@ -42,7 +42,7 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
               'LD_LIBRARY_PATH':os.environ['LD_LIBRARY_PATH'] 
               }
 
-CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.2.0/sys.config"
+CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.3.0/sys.config"
 
 TARGETS = [# GLIBs
            'amc-e1a12-19-04:50001',
@@ -879,7 +879,7 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
 
     cmd_base = "PerfTester.exe"
     cmd_base += " -t BandwidthTx" if write else " -t BandwidthRx"
-    cmd_base += " -i 1" if bw else " -p -w 1 -i " + str(n_words)
+    cmd_base += " -i 1" if bw else " -p -w 1 "
     cmd_base += " -d chtcp-2.0://" + CH_PC_NAME + ":10203?target="
 
     cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
@@ -893,6 +893,11 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
             for entry in subdata:
                 n_clients, n_targets = entry['n_clients'], entry['n_targets']
                 SCRIPT_LOGGER.warning( '     %d, %d' % (n_clients, n_targets) )
+                
+                if bw: 
+                    cmd_suffix = ' -w ' + str( n_words / ( n_clients * n_targets ) )
+                else:
+                    cmd_suffix = ' -i ' + str( n_words if ( (n_clients * n_targets) < 3) else n_words/2 )
 
                 cmd_suffix = ' -w ' + str( n_words / ( n_clients * n_targets ) ) if bw else ''
                 cmds = [cmd_base + t + cmd_suffix for t in targets[0:n_targets] for x in range(n_clients)]
@@ -929,7 +934,7 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
     ax_uhal_mem = fig.add_subplot(236, sharex=ax_bw_total, sharey=ax_ch_mem)
 
     fig.subplots_adjust(left=.06, right=.98, bottom=.07, top=.96)
-    fig.canvas.set_window_title('500MB continuous write/read to crate' if bw else 'Polling: multiple clients and targets')
+    fig.canvas.set_window_title('600MB continuous write/read to crate' if bw else 'Polling: multiple clients and targets')
 
 #    import matplotlib
 #    matplotlib.rcParams.update({'font.size': 13})
@@ -957,6 +962,9 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
         ax_uhal_cpu.errorbar(nrs_targets, uhal_cpu_stats['50_est'], yerr=uhal_cpu_stats['50_err'], label=label)
         ax_uhal_mem.errorbar(nrs_targets, uhal_mem_stats['50_est'], yerr=uhal_mem_stats['50_err'], label=label)
 
+        if not bw:
+            freq_stats = bootstrap_stats_array( data_subset['y'], transforms=[(lambda x: 1e3 / x) for n in nrs_targets])
+            ax_bw_board.errorbar( nrs_targets, freq_stats['50_est'], yerr=freq_stats['50_err'], label=label)
 #        if bw:
 #            bw_board_50est = numpy.divide( bw_stats['50_est'], n_clients )
 #            bw_board_50err = numpy.divide( bw_stats['50_err'], n_clients )
@@ -971,6 +979,7 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
         ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
     else:
         ax_bw_total.set_ylabel('Latency [us]')
+        ax_bw_board.set_ylabel('Frequency per client [kHz]')
 
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
     ax_ch_mem.set_ylabel('ControlHub memory usage [%]')
@@ -1101,22 +1110,20 @@ def take_measurements(file_prefix, multiple_in_flight):
 
     ifmultiple = lambda a,b: a if multiple_in_flight else b
 
-    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
-                                                     ch_ssh_client, 
-                                                     n_meas = 100, 
-                                                     max_depth = ifmultiple(1e7,1e4),
-                                                     pkt_depths = ifmultiple([342,343], [250])
-                                                   )
+#    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
+#                                                     ch_ssh_client, 
+#                                                     n_meas = 100, 
+#                                                     max_depth = ifmultiple(1e7,1e4),
+#                                                     pkt_depths = ifmultiple([342,343], [250])
+#                                                   )
+#
+#    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=20 )
 
-    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=20 )
-
-    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=8, n_words=12000, bw=False, write=False, nrs_clients=[1,2,5] )
+    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=5, n_words=12000, bw=False, write=False, nrs_clients=[1,2,4] )
 
     n_words = ifmultiple(600,50) * 1000 * 1000 / 4
     data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=False, nrs_clients=[1] )
     data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=True,  nrs_clients=[1] )
-
-
 
     data['end_time'] = time.localtime()
 
@@ -1137,12 +1144,12 @@ def make_plots(input_file):
 
     plots = []
 
-    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
-                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
-                                     words_per_pkt = 343 if multiple_in_flight else 250
-                                    )
-
-    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+#    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
+#                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
+#                                     words_per_pkt = 343 if multiple_in_flight else 250
+#                                    )
+#
+#    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
 
     plots += plot_n_to_m( data['n_to_m_lat'], bw=False )
 
@@ -1218,37 +1225,4 @@ if __name__ == "__main__":
     if plot:
         make_plots(filename)
 
-    sys.exit(0)
-
-    ########################################################
-
-    controlhub_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
-
-#    (f, ((ax1, ax2), (ax3, ax4))) = plt.subplots(2, 2)
-    f = plt.figure(figsize=(12,10))
-    ax2 = f.add_subplot(222)
-    ax3 = f.add_subplot(223)
-    ax4 = f.add_subplot(224)
-
-    f.text(0.06, 0.9, "Measurements @ " + time.strftime('%l:%M%p %Z on %b %d, %Y'))
-    f.text(0.06, 0.85, "Version:\n    " + CACTUS_REVISION)
-    f.text(0.06, 0.8, "Changes:\n    " + CHANGES_TAG) 
-    f.text(0.06, 0.75, "ControlHub host: " + CH_PC_NAME)
-    f.text(0.06, 0.7, "uHAL host: " + UHAL_PC_NAME)    
-    f.text(0.06, 0.65, "Targets: \n    " + "\n    ".join(TARGETS), verticalalignment='baseline')
-
-#    measure_latency(TARGETS[0], controlhub_ssh_client, ax2)
-
-#    measure_bw_vs_nInFlight(TARGETS[0], controlhub_ssh_client, ax3)
-
-    measure_bw_vs_depth(TARGETS[0], controlhub_ssh_client, ax4)
-
-#    plt.savefig('plot1.png') 
-
-    measure_bw_vs_nClients(TARGETS, controlhub_ssh_client)
-
-#    plt.savefig('plot2.png')
-
-    print time.strftime('%l:%M%p %Z on %b %d, %Y')
-    plt.show()
 
