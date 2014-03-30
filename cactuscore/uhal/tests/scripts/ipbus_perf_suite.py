@@ -579,9 +579,9 @@ def measure_1_to_1_latency(target, controlhub_ssh_client, n_meas, max_depth, pkt
 
     depths = [1]
     depths += [50, 100, 150, 200, 300, 500, 600, 800, 1000]
-    for n in range(1, 30):
+    for n in range(1, 18):
         depths += [n*min(pkt_depths), n*max(pkt_depths)+1]
-    for n in range(10, 31, 2) + range(40, 80, 20) + range(80, 200, 40):
+    for n in range(6, 31, 2) + range(40, 80, 20) + range(80, 200, 40):
         depths += [3*n*min(pkt_depths)]
     for n in [2e2, 3e2, 4e2, 7e2, 10e2]:
         depths += [3*n*min(pkt_depths)]
@@ -761,7 +761,7 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
     ax_linbw1 = fig_linbw.add_axes(med_ax_loc, autoscalex_on=False, autoscaley_on=True)
     ax_linbw2 = fig_linbw.add_axes(err_ax_loc, autoscalex_on=False, autoscaley_on=True, sharex=ax_linbw1)
 
-    ax_linbw1.set_xlim(0, 5e3)
+    ax_linbw1.set_xlim(0, 4.5e3)
     ax_linbw1.set_ylabel('Median throughput [Gbit/s]')
 
     fig_logbw = plt.figure(figsize=(6,6.5))
@@ -1109,14 +1109,14 @@ def take_measurements(file_prefix, multiple_in_flight):
 
     ifmultiple = lambda a,b: a if multiple_in_flight else b
 
-#    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
-#                                                     ch_ssh_client, 
-#                                                     n_meas = 100, 
-#                                                     max_depth = ifmultiple(1e7,1e4),
-#                                                     pkt_depths = ifmultiple([342,343], [250])
-#                                                   )
-#
-#    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=10 )
+    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
+                                                     ch_ssh_client, 
+                                                     n_meas = 100, 
+                                                     max_depth = ifmultiple(1e7,1e4),
+                                                     pkt_depths = ifmultiple([342,343], [250])
+                                                   )
+
+    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=10 )
 
     data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=4, n_words=12000, bw=False, write=False, nrs_clients=[1,2,4] )
 
@@ -1143,12 +1143,12 @@ def make_plots(input_file):
 
     plots = []
 
-#    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
-#                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
-#                                     words_per_pkt = 343 if multiple_in_flight else 250
-#                                    )
-#
-#    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
+                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
+                                     words_per_pkt = 343 if multiple_in_flight else 250
+                                    )
+
+    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
 
     plots += plot_n_to_m( data['n_to_m_lat'], bw=False )
 
