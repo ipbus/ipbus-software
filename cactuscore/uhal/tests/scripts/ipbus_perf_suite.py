@@ -103,7 +103,7 @@ class CommandHardTimeout(Exception):
         self.timeout = timeout
         self.output = output
     def __str__(self):
-        return "Command '" + self.cmd + "', timeout was " + str(self.timeout) + " seconds, and output so far was:\n" + output
+        return "Command '" + self.cmd + "', timeout was " + str(self.timeout) + " seconds, and output so far was:\n" + self.output
 
 class CommandBadExitCode(Exception):
     '''Exception thrown when command returns a non-zero exit code'''
@@ -899,7 +899,6 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
                 else:
                     cmd_suffix = ' -i ' + str( n_words if ( (n_clients * n_targets) < 3) else n_words/2 )
 
-                cmd_suffix = ' -w ' + str( n_words / ( n_clients * n_targets ) ) if bw else ''
                 cmds = [cmd_base + t + cmd_suffix for t in targets[0:n_targets] for x in range(n_clients)]
 
                 monitor_results, cmd_results = cmd_runner.run(cmds)
@@ -1117,13 +1116,13 @@ def take_measurements(file_prefix, multiple_in_flight):
 #                                                     pkt_depths = ifmultiple([342,343], [250])
 #                                                   )
 #
-#    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=20 )
+#    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=10 )
 
-    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=5, n_words=12000, bw=False, write=False, nrs_clients=[1,2,4] )
+    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=4, n_words=12000, bw=False, write=False, nrs_clients=[1,2,4] )
 
     n_words = ifmultiple(600,50) * 1000 * 1000 / 4
-    data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=False, nrs_clients=[1] )
-    data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(5,3), n_words=n_words, write=True,  nrs_clients=[1] )
+    data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), n_words=n_words, write=False, nrs_clients=[1] )
+    data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), n_words=n_words, write=True,  nrs_clients=[1] )
 
     data['end_time'] = time.localtime()
 
