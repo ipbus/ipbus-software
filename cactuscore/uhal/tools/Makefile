@@ -10,7 +10,7 @@ PackageName = cactuscore-uhal-tools
 Packager = Kristian Harder, Dave Newbold, Tom Williams
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 2
+PACKAGE_VER_MINOR = 3
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 0
 

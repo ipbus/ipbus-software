@@ -10,7 +10,7 @@ PackageName = cactuscore-uhal-grammars
 Packager = Andrew Rose
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 2
+PACKAGE_VER_MINOR = 3
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 0
 
