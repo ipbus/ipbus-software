@@ -147,10 +147,11 @@ namespace uhal
           std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
 
       /**
-        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
-        @return the maximum number of buffers
-        @todo Tom Williams needs to check this and expand
-        @todo should this really be here?
+        Returns the maximum number of buffers that should be in-flight from the uHAL client at any given time. 
+        @return the maximum number of buffers in-flight
+        @note Currently set to 60 based on experience of performance measurements in building 904 IPbus test.
+        @note Since TCP allows the ControlHub to throttle incoming traffic, in the long term this "number in-flight" limit may not been needed. 
+        @note But this limit is kept for the moment for safety (i.e. to prevent uHAL ever flooding ControlHub with data).
       */
       virtual uint32_t getMaxNumberOfBuffers()
       {

@@ -224,13 +224,17 @@ namespace uhal
 #endif
 
       /**
-        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
-        @todo Tom Williams needs to check this and expand
+        Variable storing "number of bytes to follow" field for the TCP chunk currently being sent.
+        @note Having this field in the TCP stream increases the efficiency (specifically, throughput) of sending data over the TCP stream, since the server application can wait for the whole chunk to arrive before unpacking it. 
+        @note I.e. with this field in the TCP stream, the server (e.g. ControlHub) can handle more data in each TCP receive call, and therefore doesn't have to call TCP receive function so often.
+        @note Similarly uHAL handles more data in each TCP send call, and therefore doesn't have to call the TCP send function so often.
       */
       uint32_t mSendByteCounter;
+
       /**
-        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
-        @todo Tom Williams needs to check this and expand
+        Variable used to store "number of bytes to follow" field for the next/current TCP chunk being received.
+        @note Having this field in the TCP stream increases the efficiency (specifically, throughput) of receiving data, since uHAL can wait for the whole chunk to arrive before unpacking it.
+        @note I.e. with this field in the TCP stream, uHAL can handle more data in each TCP receive call, and therefore doesn't have to call the TCP receive function so often.
       */
       uint32_t mReplyByteCounter;
 
