@@ -42,6 +42,7 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
               'LD_LIBRARY_PATH':os.environ['LD_LIBRARY_PATH'] 
               }
 
+CH_MAX_IN_FLIGHT = 12
 CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.3.0/sys.config"
 
 TARGETS = [# GLIBs
@@ -605,7 +606,7 @@ def measure_1_to_1_latency(target, controlhub_ssh_client, n_meas, max_depth, pkt
     for i in range(len(depths)):
         data['w'][i] = int(depths[i])
 
-    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    update_controlhub_sys_config(CH_MAX_IN_FLIGHT, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
     start_controlhub(controlhub_ssh_client)
 
     udp_uri = "ipbusudp-2.0://" + target
@@ -884,7 +885,7 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
 
     cmd_runner = CommandRunner( [('PerfTester.exe',None), ('beam.smp',controlhub_ssh_client)] )
 
-    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    update_controlhub_sys_config(CH_MAX_IN_FLIGHT, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
     start_controlhub(controlhub_ssh_client)
 
     for i in range(n_meas):
@@ -901,8 +902,20 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
 
                 cmds = [cmd_base + t + cmd_suffix for t in targets[0:n_targets] for x in range(n_clients)]
 
-                monitor_results, cmd_results = cmd_runner.run(cmds)
-                bws = [ x[1] for x in cmd_results]
+                nr_attempts = 0
+                while True:
+                    nr_attempts += 1
+                    try: 
+                        monitor_results, cmd_results = cmd_runner.run(cmds)
+                        break
+                    except CommandHardTimeout, e:
+                        if nr_attempts < 2:
+                            SCRIPT_LOGGER.warning('      Command reached hard timeout. Re-running just in case that was an error ...')
+                        else:
+                            SCRIPT_LOGGER.error('      Command reached hard timeout on all %s attempts. Bailing out now ...' % (nr_attempts))
+                            raise e
+
+                bws = [ x[1] for x in cmd_results ]
 
                 entry['y'][i] = sum([ x[1] for x in cmd_results]) if bw else numpy.median([x[0] for x in cmd_results])
                 entry['ch_cpu'][i]   = monitor_results[1][1]
@@ -948,7 +961,7 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
 
         label = label_format.format(n_clients)
 
-        bw_stats       = bootstrap_stats_array( data_subset['y'] )
+        bw_stats       = bootstrap_stats_array( data_subset['y'] ) if bw else bootstrap_stats_array( data_subset['y'], transforms=[(lambda x, f=n*n_clients: f * 1e3 / x) for n in nrs_targets] )
         ch_cpu_stats   = bootstrap_stats_array( data_subset['ch_cpu'] )
         ch_mem_stats   = bootstrap_stats_array( data_subset['ch_mem'] )
         uhal_cpu_stats = bootstrap_stats_array( data_subset['uhal_cpu'] )
@@ -977,7 +990,7 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
 #        ax_bw_board.set_ylabel('Bandwidth per client [Gbit/s]')
         ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
     else:
-        ax_bw_total.set_ylabel('Latency [us]')
+        ax_bw_total.set_ylabel('Total frequency [kHz]')
         ax_bw_board.set_ylabel('Frequency per client [kHz]')
 
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
@@ -1030,7 +1043,7 @@ def measure_1_to_1_vs_pktLoss(target, controlhub_ssh_client, n_meas=10, depth=1,
     for i in range(len(fractions)):
         data['f'][i] = fractions[i]
 
-    update_controlhub_sys_config(16, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
+    update_controlhub_sys_config(CH_MAX_IN_FLIGHT, controlhub_ssh_client, CH_SYS_CONFIG_LOCATION)
     start_controlhub(controlhub_ssh_client)
 
     cmd = 'PerfTester.exe -t BandwidthRx -b 0x2001 -w %d -i 10000 -p -d chtcp-2.0://%s:10203?target=%s' % (depth, CH_PC_NAME, target)
