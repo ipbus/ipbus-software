@@ -42,7 +42,7 @@ CH_PC_ENV  = {'PATH':os.environ['PATH'],
               'LD_LIBRARY_PATH':os.environ['LD_LIBRARY_PATH'] 
               }
 
-CH_MAX_IN_FLIGHT = 12
+CH_MAX_IN_FLIGHT = 16
 CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOURCES/lib/controlhub/releases/2.3.0/sys.config"
 
 TARGETS = [# GLIBs
@@ -851,7 +851,7 @@ def plot_1_to_1_performance( all_data , key_label_pairs , words_per_pkt ):
 ###############################################################################################################################
 
 
-def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, write=True, nrs_clients=[1]):
+def measure_n_to_m(targets, controlhub_ssh_client, n_meas, f_words, bw=True, write=True, nrs_clients=[1]):
     '''
     Measures continuous block-write bandwidth from to all endpoints, varying the number of clients.
     '''
@@ -893,7 +893,8 @@ def measure_n_to_m(targets, controlhub_ssh_client, n_meas, n_words, bw=True, wri
         for subdata in data:
             for entry in subdata:
                 n_clients, n_targets = entry['n_clients'], entry['n_targets']
-                SCRIPT_LOGGER.warning( '     %d, %d' % (n_clients, n_targets) )
+                n_words = int(f_words(n_clients, n_targets)) if hasattr(f_words,'__call__') else f_words
+                SCRIPT_LOGGER.warning( '     %d, %d   (%d words)' % (n_clients, n_targets, n_words) )
                 
                 if bw: 
                     cmd_suffix = ' -w ' + str( n_words / ( n_clients * n_targets ) )
@@ -961,7 +962,7 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
 
         label = label_format.format(n_clients)
 
-        bw_stats       = bootstrap_stats_array( data_subset['y'] ) if bw else bootstrap_stats_array( data_subset['y'], transforms=[(lambda x, f=n*n_clients: f * 1e3 / x) for n in nrs_targets] )
+        bw_stats       = bootstrap_stats_array( data_subset['y'] )
         ch_cpu_stats   = bootstrap_stats_array( data_subset['ch_cpu'] )
         ch_mem_stats   = bootstrap_stats_array( data_subset['ch_mem'] )
         uhal_cpu_stats = bootstrap_stats_array( data_subset['uhal_cpu'] )
@@ -975,7 +976,7 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
         ax_uhal_mem.errorbar(nrs_targets, uhal_mem_stats['50_est'], yerr=uhal_mem_stats['50_err'], label=label)
 
         if not bw:
-            freq_stats = bootstrap_stats_array( data_subset['y'], transforms=[(lambda x: 1e3 / x) for n in nrs_targets])
+            freq_stats = bootstrap_stats_array( data_subset['y'], transforms=[(lambda x, f=n*n_clients: f * 1e3 / x) for n in nrs_targets])
             ax_bw_board.errorbar( nrs_targets, freq_stats['50_est'], yerr=freq_stats['50_err'], label=label)
 #        if bw:
 #            bw_board_50est = numpy.divide( bw_stats['50_est'], n_clients )
@@ -990,8 +991,8 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
 #        ax_bw_board.set_ylabel('Bandwidth per client [Gbit/s]')
         ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
     else:
-        ax_bw_total.set_ylabel('Total frequency [kHz]')
-        ax_bw_board.set_ylabel('Frequency per client [kHz]')
+        ax_bw_total.set_ylabel('Latency [us]')
+        ax_bw_board.set_ylabel('Total frequency [kHz]')
 
     ax_ch_cpu.set_ylabel('ControlHub CPU usage [%]')
     ax_ch_mem.set_ylabel('ControlHub memory usage [%]')
@@ -1131,11 +1132,15 @@ def take_measurements(file_prefix, multiple_in_flight):
 
     data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=10 )
 
-    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=4, n_words=12000, bw=False, write=False, nrs_clients=[1,2,4] )
+    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=4,
+                                         f_words=lambda n,m: 3e4 / (1. + (n*m)*17./215.),
+                                         bw=False, write=False,
+                                         nrs_clients=[1,2,4]
+                                       )
 
     n_words = ifmultiple(600,50) * 1000 * 1000 / 4
-    data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), n_words=n_words, write=False, nrs_clients=[1] )
-    data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), n_words=n_words, write=True,  nrs_clients=[1] )
+    data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), f_words=n_words, write=False, nrs_clients=[1] )
+    data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), f_words=n_words, write=True,  nrs_clients=[1] )
 
     data['end_time'] = time.localtime()
 
@@ -1163,7 +1168,7 @@ def make_plots(input_file):
 
     plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
 
-    plots += plot_n_to_m( data['n_to_m_lat'], bw=False )
+    plots += plot_n_to_m( data['n_to_m_lat'], bw=False, write=False )
 
     plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write"), (data['n_to_m_bw_rx'], "Read")] )
 
@@ -1176,6 +1181,7 @@ def make_plots(input_file):
            prefix = re.sub('\.pkl$', '', filename)
            for fig, suffix in plots:
                pdfname = prefix + '.' +  time.strftime('%Y%m%d') + '__' + suffix + '.pdf'
+               print ' + Saving plot to file:', pdfname
                fig.savefig( pdfname )
            break
 
