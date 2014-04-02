@@ -3,7 +3,7 @@
 export DOXYGEN_HOME=${HOME}/doxygen/doxygen-1.8.6/
 export CACTUS_SANDBOX=/build/cactus/cactus/trunk
 #export CACTUS_SANDBOX=${HOME}/doxygen/test
-export API_DIR=/afs/cern.ch/user/c/cactus/www/release/2.3/api
+export API_DIR=/afs/cern.ch/user/c/cactus/www/nightly/api/html_dev_uhal
 export DOXYGEN_OUTPUT=/tmp/
 
 cd ${HOME}/doxygen
@@ -12,7 +12,7 @@ rm -r ${DOXYGEN_OUTPUT}/html
 
 DOXYGEN_MAINPAGE="${CACTUS_SANDBOX}/cactuscore/uhal/README.md"
 DOXYGEN_INPUTS="${CACTUS_SANDBOX}/cactuscore/uhal "
-DOXYGEN_PROJECT_NAME='&mu;HAL (v2.3.0)'
+DOXYGEN_PROJECT_NAME='&mu;HAL (nightly)'
 
 echo DOXYGEN_INPUTS=${DOXYGEN_INPUTS}
 export DOXYGEN_MAINPAGE DOXYGEN_INPUTS DOXYGEN_PROJECT_NAME
