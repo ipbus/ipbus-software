@@ -1,12 +1,12 @@
 #!/bin/bash
 
-export DOXYGEN_HOME=${HOME}/doxygen/doxygen-1.8.6/
+export DOXYGEN_HOME=${HOME}/nightly/doxygen/doxygen-1.8.6/
 export CACTUS_SANDBOX=/build/cactus/cactus/trunk
 #export CACTUS_SANDBOX=${HOME}/doxygen/test
-export API_DIR=/afs/cern.ch/user/c/cactus/www/nightly/api/html_dev_uhal
+export API_DIR=/afs/cern.ch/user/c/cactus/www/nightly/api/
 export DOXYGEN_OUTPUT=/tmp/
 
-cd ${HOME}/doxygen
+cd ${HOME}/nightly/doxygen
 echo "Cleaning up target directory"
 rm -r ${DOXYGEN_OUTPUT}/html
 
