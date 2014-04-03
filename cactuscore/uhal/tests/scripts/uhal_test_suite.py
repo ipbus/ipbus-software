@@ -497,7 +497,7 @@ def run_cleanup_commands():
 
 def get_sections():
     """Return list of all sections of commands defined in this test suite"""
-    return [section for section, cmds in get_commands("", "")]
+    return [section for section, cmds in get_commands("", "", "")]
 
 
 def get_controlhub_status( cmd ):
