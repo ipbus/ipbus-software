@@ -47,7 +47,7 @@ CH_SYS_CONFIG_LOCATION = "/cactusbuild/trunk/cactuscore/controlhub/RPMBUILD/SOUR
 
 TARGETS = [# GLIBs
            'amc-e1a12-19-04:50001',
-           'amc-e1a12-19-09:50001',
+#           'amc-e1a12-19-09:50001',
            'amc-e1a12-19-10:50001',
            # Mini-T5s
            'amc-e1a12-19-01:50001',
@@ -975,7 +975,10 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
         ax_uhal_cpu.errorbar(nrs_targets, uhal_cpu_stats['50_est'], yerr=uhal_cpu_stats['50_err'], label=label)
         ax_uhal_mem.errorbar(nrs_targets, uhal_mem_stats['50_est'], yerr=uhal_mem_stats['50_err'], label=label)
 
-        if not bw:
+        if bw:
+            bw_per_tgt_stats = bootstrap_stats_array( data_subset['y'], transforms=[(lambda bw, f=n: bw / f) for n in nrs_targets])
+            ax_bw_board.errorbar( nrs_targets, bw_per_tgt_stats['50_est'], yerr=bw_per_tgt_stats['50_err'], label=label)
+        else:
             freq_stats = bootstrap_stats_array( data_subset['y'], transforms=[(lambda x, f=n*n_clients: f * 1e3 / x) for n in nrs_targets])
             ax_bw_board.errorbar( nrs_targets, freq_stats['50_est'], yerr=freq_stats['50_err'], label=label)
 #        if bw:
@@ -988,8 +991,8 @@ def plot_n_to_m(data_label_list, bw=True, write=True):
     for ax in [ax_bw_board, ax_bw_total, ax_ch_cpu, ax_ch_mem, ax_uhal_cpu, ax_uhal_mem]:
         ax.set_xlabel('Number of targets')
     if bw:
-#        ax_bw_board.set_ylabel('Bandwidth per client [Gbit/s]')
-        ax_bw_total.set_ylabel('Total bandwidth [Gbit/s]')
+        ax_bw_board.set_ylabel('Throughput per target [Gbit/s]')
+        ax_bw_total.set_ylabel('Total throughput [Gbit/s]')
     else:
         ax_bw_total.set_ylabel('Latency [us]')
         ax_bw_board.set_ylabel('Total frequency [kHz]')
@@ -1091,7 +1094,7 @@ def plot_1_to_1_vs_pktLoss(data):
     prediction_y = numpy.add( prediction_y, prediction_x * prediction_x * 4 * 2e4 )
     ax.plot(prediction_x, prediction_y, 'g--')
 
-    ax.errorbar(data['f'], lat_stats['50_est'], yerr=lat_stats['50_err'], fmt=' _')
+    ax.errorbar(data['f'], lat_stats['50_est'], yerr=lat_stats['50_err'], fmt=' o', markersize=3)
 
     ax.set_xlabel('Fractional UDP packet loss')
     ax.set_ylabel('Latency [us]')
@@ -1115,6 +1118,7 @@ def take_measurements(file_prefix, multiple_in_flight):
             'sw_version' : SW_VERSION,
             'client_host_name' : UHAL_PC_NAME,
             'bridge_host_name' : CH_PC_NAME,
+            'controlhub_max_in_flight' : CH_MAX_IN_FLIGHT,
             'targets' : TARGETS,
             'multiple_in_flight' : multiple_in_flight
            }
@@ -1170,7 +1174,9 @@ def make_plots(input_file):
 
     plots += plot_n_to_m( data['n_to_m_lat'], bw=False, write=False )
 
-    plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write"), (data['n_to_m_bw_rx'], "Read")] )
+    plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write")] )
+
+    plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write"), (data['n_to_m_bw_rx'], "Read")], write=False )
 
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
