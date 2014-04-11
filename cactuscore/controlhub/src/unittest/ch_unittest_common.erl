@@ -12,7 +12,7 @@
 %% Exported Functions
 -export([spawn_device_emulator/2, device_emulator_init/2, dummy_request_data_generator/1, 
          udp_client_loop/7, tcp_client_loop/5, gencast_msg_client_loop/5, 
-         dummy_device_client_loop/2, start_udp_echo_server/1, start_tcp_echo_server/2]).
+         dummy_device_client_loop/2, start_udp_echo_server/2, start_tcp_echo_server/2]).
 
 
 
@@ -126,9 +126,8 @@ gencast_msg_client_loop(TargetPid, _RequestMsg, ReplyMsg, {NrInFlight,MaxInFligh
     end.
 
 
-start_udp_echo_server(SocketOptions) ->
-    {ok, Socket} =  gen_udp:open(0, SocketOptions),
-    {ok, Port} = inet:port(Socket),
+start_udp_echo_server(SocketOptions, Port) ->
+    {ok, Socket} =  gen_udp:open(Port, SocketOptions),
     io:format("~n UDP echo server is ready -- on port ~w~n", [Port]),
     udp_echo_server_loop(Socket).
 
