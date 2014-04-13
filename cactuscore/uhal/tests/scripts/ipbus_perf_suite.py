@@ -119,7 +119,7 @@ class CommandBadExitCode(Exception):
 ####################################################################################################
 #  COMMAND-RUNNING/PARSING FUNCTIONS
 
-def run_command(cmd, ssh_client=None, parser=None):
+def run_command(cmd, ssh_client=None, parser=None, throw_on_bad_exit_code=True):
   """
   Run command, returning tuple of exit code and stdout/err.
   The command will be killed if it takes longer than TEST_CMD_TIMEOUT_S
@@ -169,7 +169,7 @@ def run_command(cmd, ssh_client=None, parser=None):
         raise KeyboardInterrupt
 
     exit_code = p.poll()
-    if exit_code:
+    if exit_code and throw_on_bad_exit_code:
         raise CommandBadExitCode(cmd, exit_code, stdout)
 
     if parser in [None,False]:
@@ -187,7 +187,7 @@ def run_command(cmd, ssh_client=None, parser=None):
    
     SCRIPT_LOGGER.debug("Output is ...\n"+output)
  
-    if exit_code: 
+    if exit_code and throw_on_bad_exit_code: 
         raise CommandBadExitCode(cmd, exit_code, output)
 
     if parser in [None, False]:
@@ -197,7 +197,7 @@ def run_command(cmd, ssh_client=None, parser=None):
 
 
 def parse_perftester(cmd_output):
-    """Parses output of PerfTester.exe, and return tuple of latency per iteration (us), and bandwidth (Mb/s)"""
+    """Parses output of PerfTester.exe, and return tuple of latency per iteration (us), and bandwidth (Gbit/s)"""
     
     m1 = re.search(r"^Test iteration frequency\s+=\s*([\d\.]+)\s*Hz", cmd_output, flags=re.MULTILINE)
     freq = float(m1.group(1))
@@ -206,6 +206,21 @@ def parse_perftester(cmd_output):
 
     SCRIPT_LOGGER.info("Parsed: Latency = " + str(1000000.0/freq) + "us/iteration , bandwidth = " + str(bw) + "Gb/s")
     return (1000000.0/freq, bw)
+
+
+def parse_fixed_packet_client(cmd_output):
+    """
+    Parses output of fixed-packet Erlang/boost clients.
+    Returns tuple of latency per iteration (us) , and max of tx/rx bandwidth (Gbit/s)
+    """
+
+    m1 = re.search(r'^\s*Frequency\s+=\s+([\d\.]+)\s*Hz', cmd_output, flags=re.MULTILINE)
+    freq = float(m1.group(1))
+    m2 = re.search(r'^\s*Send\s*\(recv\) throughput\s*=\s*([\d\.]+)\s*\(([\d\.]+)\)\s*Mbit/s', cmd_output, flags=re.MULTILINE)
+    bw = max( float(m2.group(1)), float(m2.group(2)) ) / 1e3
+
+    SCRIPT_LOGGER.info('Parsed (fixed-packet client): Latency = ' + str(1e6/freq) + ' us/iteration , bandwidth = ' + str(bw) + ' Gbit/s')
+    return (1e6/freq, bw)
 
 
 def run_ping(target, ssh_client=None):
@@ -1104,14 +1119,258 @@ def plot_1_to_1_vs_pktLoss(data):
 
 
 
-#############################################################################################################################
-#############################################################################################################################
-#############################################################################################################################
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+def meas_ipbus_extern_performance( target, ch_ssh_client, nrs_in_flight, n_meas):
+    print "\n ---> MEASURING IPbus throughput vs number in flight from fixed-packet boost/Erlang clients to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    data = numpy.zeros(len(nrs_in_flight), 
+                       dtype=[('n','uint8'),
+                              ('erlang', 'float32', (n_meas,)),
+                              ('boost', 'float32', (n_meas,)),
+                             ]
+                      )
+
+    print nrs_in_flight
+    for i in range(len(nrs_in_flight)):
+        data['n'][i] = nrs_in_flight[i]
+
+    base_cmd_erl = ('/cactusbuild/tswsvn/network-examples/network_client.escript udp '
+                     + '/cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_send.dat' 
+                     + ' /cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_recv.dat '
+                     + target.replace(':', ' '))
+    base_cmd_cpp = ('/cactusbuild/tswsvn/network-examples/bin/udp_async_client '
+                     + target.replace(':', ' ')
+                     + ' /cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_send.dat' 
+                     + ' /cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_recv.dat')
+
+    for i in range(n_meas):
+        SCRIPT_LOGGER.warning('IPbus Erlang/boost measurements: iteration %d of %d' % (i+1,n_meas) )
+ 
+        for entry in data:
+            n = entry['n']
+            suffix = ' ' + str(6000*min(n,12))+ ' ' + str(n)
+
+            entry['erlang'][i] = run_command( base_cmd_erl + suffix, ch_ssh_client, parser=parse_fixed_packet_client)[1]
+            entry['boost'][i]  = run_command( base_cmd_cpp + suffix, ch_ssh_client, parser=parse_fixed_packet_client)[1]
+
+    return data
+
+
+def plot_ipbus_extern_performance(data, key_label_pairs):
+
+    # Set up figure ...
+
+    fig = plt.figure(figsize=(6,4.5))
+    fig.subplots_adjust(left=.13, right=.95, bottom=.12, top=.94)
+    ax  = fig.add_subplot(111)
+
+    # Plot the datapoints ...
+
+    for key, label in key_label_pairs:
+        bw_stats = bootstrap_stats_array( data[key] )
+
+        ax.errorbar(data['n'], bw_stats['50_est'], yerr=bw_stats['50_err'], fmt='-o', markersize=3, label=label)
+ 
+
+    ax.set_xlabel('Number in flight')
+    ax.set_ylabel('Median throughput [Gbit/s]')
+    ax.set_ylim(0.)
+    ax.set_xlim(0., max(data['n']) + 0.01*(max(data['n'])-min(data['n'])))
+
+    ax.legend(loc='best', fancybox=True, numpoints=1)
+
+    return [(fig, 'ipbus_extern_vs_nrInFlight')]
+
+
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+def meas_echo_full_frame_performance( target, ch_ssh_client, nrs_in_flight, n_meas):
+    print "\n ---> MEASURING Echo throughput vs number in flight from fixed-packet boost/Erlang clients to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    data = numpy.zeros(len(nrs_in_flight), 
+                       dtype=[('n','uint8'),
+                              ('udp_erlang', 'float32', (n_meas,)),
+                              ('udp_boost', 'float32', (n_meas,)),
+                              ('tcp_erlang', 'float32', (n_meas,)),
+                             ]
+                      )
+
+    for i in range(len(nrs_in_flight)):
+        data['n'][i] = nrs_in_flight[i]
+
+
+    base_cmd_udp_erl = ('/cactusbuild/tswsvn/network-examples/network_client.escript udp '
+                         + '/cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_send.dat' 
+                         + ' /cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_send.dat '
+                         + CH_PC_NAME + ' 10204')
+    base_cmd_tcp_erl = base_cmd_udp_erl.replace(' udp ', ' tcp ')
+    base_cmd_udp_cpp = ('/cactusbuild/tswsvn/network-examples/bin/udp_async_client '
+                        + CH_PC_NAME + ' 10204' 
+                        + ' /cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_send.dat' 
+                        + ' /cactusbuild/tswsvn/network-examples/data/ipbus2_pramWrite_send.dat')
+
+    # Start servers 
+    def run_echo_server(type):
+        SCRIPT_LOGGER.warning(type + ' echo server starting')
+        run_command('/cactusbuild/tswsvn/network-examples/echo_server.escript ' + type + ' 10204', ch_ssh_client, throw_on_bad_exit_code=False)
+        SCRIPT_LOGGER.warning(type + ' echo server stopped')
+    
+    threading.Thread(target=run_echo_server, args=('udp',)).start()
+    threading.Thread(target=run_echo_server, args=('tcp',)).start()
+
+    time.sleep(2.0)
+
+    # Run clients
+    for i in range(n_meas):
+        SCRIPT_LOGGER.warning('IPbus Erlang/boost measurements: iteration %d of %d' % (i+1,n_meas) )
+ 
+        for entry in data:
+            n = entry['n']
+            suffix = ' ' + str(2000*min(n,30))+ ' ' + str(n)
+            SCRIPT_LOGGER.warning('        * n = '+str(n)+'     suffix ='+suffix)
+
+            nr_attempts = 0
+            while True:
+                nr_attempts += 1
+                try:
+                    entry['udp_erlang'][i] = run_command( base_cmd_udp_erl + suffix, parser=parse_fixed_packet_client)[1]
+                    entry['udp_boost'][i]  = run_command( base_cmd_udp_cpp + suffix, parser=parse_fixed_packet_client)[1]
+                except:
+                    if nr_attempts <= 3:
+                        SCRIPT_LOGGER.warning('Bad exit code / timeout from UDP client. Maybe packet dropped. Re-running ...')
+                        continue
+                    else:
+                        raise
+                break
+
+            entry['tcp_erlang'][i] = run_command( base_cmd_tcp_erl + suffix, parser=parse_fixed_packet_client)[1]
+            
+
+    # Stop servers
+    run_command(r'killall --regexp "\\.*beam\\.smp"', ch_ssh_client)
+
+
+    return data
+
+
+def plot_echo_full_frame_performance(data, key_label_pairs):
+
+    # Set up figure ...
+
+    fig = plt.figure(figsize=(6,4.5))
+    fig.subplots_adjust(left=.13, right=.95, bottom=.12, top=.94)
+    ax  = fig.add_subplot(111)
+
+    # Plot the datapoints ...
+
+    for key, label in key_label_pairs:
+        bw_stats = bootstrap_stats_array( data[key] )
+
+        ax.errorbar(data['n'], bw_stats['50_est'], yerr=bw_stats['50_err'], fmt='-o', markersize=3, label=label)
+ 
+
+    ax.set_xlabel('Number in flight')
+    ax.set_ylabel('Median throughput [Gbit/s]')
+    ax.set_ylim(0.)
+    ax.set_xlim(0., max(data['n']) + 0.01*(max(data['n'])-min(data['n'])))
+
+    ax.legend(loc='best', fancybox=True, numpoints=1)
+
+    return [(fig, 'echo_full_frame')]
+
+
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+def meas_echo_performance_vs_size( target, ch_ssh_client, sizes, n_meas):
+    print "\n ---> MEASURING Echo throughput vs size from fixed-packet boost/Erlang clients to '" + target + "' <---"
+    print time.strftime('%l:%M%p %Z on %b %d, %Y')
+
+    data = numpy.zeros(len(sizes), 
+                       dtype=[('size','uint32'),
+                              ('tcp_erlang', 'float32', (n_meas,)),
+                             ]
+                      )
+
+    for i in range(len(sizes)):
+        data['size'][i] = sizes[i]
+
+
+    # Start servers 
+    def run_echo_server(type):
+        SCRIPT_LOGGER.warning(type + ' echo server starting')
+        run_command('/cactusbuild/tswsvn/network-examples/echo_server.escript ' + type + ' 10204', ch_ssh_client, throw_on_bad_exit_code=False)
+        SCRIPT_LOGGER.warning(type + ' echo server stopped')
+    
+    threading.Thread(target=run_echo_server, args=('udp',)).start()
+    threading.Thread(target=run_echo_server, args=('tcp',)).start()
+
+    time.sleep(2.0)
+
+    # Run clients
+    for i in range(n_meas):
+        SCRIPT_LOGGER.warning('IPbus Erlang/boost measurements: iteration %d of %d' % (i+1,n_meas) )
+ 
+        for entry in data:
+            size = entry['size']
+            nr_itns = 60000 / (1 + size/1500)
+            SCRIPT_LOGGER.warning('     * size: ' + str(size) + ' ;    ' + str(nr_itns) + ' iterations')
+
+            cmd_tcp_erl = ('/cactusbuild/tswsvn/network-examples/network_client.escript tcp '
+                           + '/cactusbuild/tswsvn/network-examples/data/zeros_'+str(size)+'.dat' 
+                           + ' /cactusbuild/tswsvn/network-examples/data/zeros_'+str(size)+'.dat '
+                           + CH_PC_NAME + ' 10204  ' + str(nr_itns) + ' 30')
+            entry['tcp_erlang'][i] = run_command( cmd_tcp_erl, parser=parse_fixed_packet_client)[1]
+            
+
+    # Stop servers
+    run_command(r'killall --regexp "\\.*beam\\.smp"', ch_ssh_client)
+
+
+    return data
+
+
+def plot_echo_performance_vs_size(data, key_label_pairs):
+
+    # Set up figure ...
+
+    fig = plt.figure(figsize=(6,4.5))
+    fig.subplots_adjust(left=.13, right=.95, bottom=.12, top=.94)
+    ax  = fig.add_subplot(111)
+
+    # Plot the datapoints ...
+
+    for key, label in key_label_pairs:
+        bw_stats = bootstrap_stats_array( data[key] )
+
+        ax.errorbar(data['size'], bw_stats['50_est'], yerr=bw_stats['50_err'], fmt='-o', markersize=3, label=label)
+ 
+
+    ax.set_xlabel('Transport layer payload size [bytes]')
+    ax.set_ylabel('Median throughput [Gbit/s]')
+    ax.set_ylim(0.)
+    ax.set_xlim(0.) # , max(data['n']) + 0.01*(max(data['n'])-min(data['n'])))
+
+    ax.legend(loc='best', fancybox=True, numpoints=1)
+
+    return [(fig, 'echo_vs_size')]
+
+
 
 ####################################################################################################
 #  Highest-level plot / measure functions
 
-def take_measurements(file_prefix, multiple_in_flight):
+def take_measurements(file_prefix, multiple_in_flight, externs):
 
     data = {'start_time' : time.localtime(),
             'fw_version' : FW_VERSION,
@@ -1125,28 +1384,34 @@ def take_measurements(file_prefix, multiple_in_flight):
 
     ch_ssh_client = ssh_into( CH_PC_NAME, CH_PC_USER )
 
-    ifmultiple = lambda a,b: a if multiple_in_flight else b
+    if externs:
+        data['ipbus_extern_bw'] = meas_ipbus_extern_performance( TARGETS[0], ch_ssh_client, n_meas=20, nrs_in_flight=[1,2,3,4,6,8,10,12,14,16] )
+        data['echo_full_frame_bw'] = meas_echo_full_frame_performance(TARGETS[0], ch_ssh_client, n_meas=20, nrs_in_flight=[1,2,4,6,8,12,16,20,24,28,30,32,34])
+        data['echo_bw_vs_size'] = meas_echo_performance_vs_size( TARGETS[0], ch_ssh_client, n_meas=20, sizes=[200,400,600,800,1000,1200,1400, 2800, 4200, 5600, 7000] )
+     
+    else:
+        ifmultiple = lambda a,b: a if multiple_in_flight else b
 
-    data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
-                                                     ch_ssh_client, 
-                                                     n_meas = 100, 
-                                                     max_depth = ifmultiple(1e7,1e4),
-                                                     pkt_depths = ifmultiple([342,343], [250])
-                                                   )
+        data['1_to_1_latency'] = measure_1_to_1_latency( TARGETS[0], 
+                                                         ch_ssh_client, 
+                                                         n_meas = 100, 
+                                                         max_depth = ifmultiple(1e7,1e4),
+                                                         pkt_depths = ifmultiple([342,343], [250])
+                                                       )
 
-    data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=10 )
+        data['1_to_1_vs_pktLoss'] = measure_1_to_1_vs_pktLoss( TARGETS[0], ch_ssh_client, n_meas=10 )
 
-    data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=4,
-                                         f_words=lambda n,m: 3e4 / (1. + (n*m)*17./215.),
-                                         bw=False, write=False,
-                                         nrs_clients=[1,2,4]
-                                       )
+        data['n_to_m_lat'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=4,
+                                             f_words=lambda n,m: 3e4 / (1. + (n*m)*17./215.),
+                                             bw=False, write=False,
+                                             nrs_clients=[1,2,4]
+                                           )
 
-    n_words = ifmultiple(600,50) * 1000 * 1000 / 4
-    data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), f_words=n_words, write=False, nrs_clients=[1] )
-    data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), f_words=n_words, write=True,  nrs_clients=[1] )
+        n_words = ifmultiple(600,50) * 1000 * 1000 / 4
+        data['n_to_m_bw_rx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), f_words=n_words, write=False, nrs_clients=[1] )
+        data['n_to_m_bw_tx'] = measure_n_to_m( TARGETS, ch_ssh_client, n_meas=ifmultiple(4,3), f_words=n_words, write=True,  nrs_clients=[1] )
 
-    data['end_time'] = time.localtime()
+        data['end_time'] = time.localtime()
 
     filename = file_prefix
     if not filename.endswith(".pkl"):
@@ -1157,7 +1422,7 @@ def take_measurements(file_prefix, multiple_in_flight):
 
 
 
-def make_plots(input_file):
+def make_plots(input_file, externs):
     
     data = pickle.load( open(filename, "rb") )
 
@@ -1165,18 +1430,30 @@ def make_plots(input_file):
 
     plots = []
 
-    plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
-                                     [('ch_tx',  'Write'), ('ch_rx',  'Read')],
-                                     words_per_pkt = 343 if multiple_in_flight else 250
-                                    )
+    if externs:
+        plots += plot_ipbus_extern_performance( data['ipbus_extern_bw'],
+                                                [('erlang', 'Erlang'), ('boost', 'C++ (boost)')] )
 
-    plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+        plots += plot_echo_full_frame_performance( data['echo_full_frame_bw'],
+                      [('udp_erlang', 'UDP, Erlang'), ('udp_boost', 'UDP, boost'), ('tcp_erlang', 'TCP, Erlang')] )
 
-    plots += plot_n_to_m( data['n_to_m_lat'], bw=False, write=False )
+        plots += plot_echo_performance_vs_size( data['echo_bw_vs_size'],
+                                                [('tcp_erlang', 'Erlang')]
+                                              )
 
-    plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write")] )
+    else:
+        plots += plot_1_to_1_performance( data['1_to_1_latency'] , 
+                                         [('ch_tx',  'Write'), ('ch_rx',  'Read')],
+                                         words_per_pkt = 343 if multiple_in_flight else 250
+                                        )
 
-    plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write"), (data['n_to_m_bw_rx'], "Read")], write=False )
+        plots += plot_1_to_1_vs_pktLoss( data['1_to_1_vs_pktLoss'] )
+
+        plots += plot_n_to_m( data['n_to_m_lat'], bw=False, write=False )
+
+        plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write")] )
+
+        plots += plot_n_to_m( [(data['n_to_m_bw_tx'], "Write"), (data['n_to_m_bw_rx'], "Read")], write=False )
 
     print time.strftime('%l:%M%p %Z on %b %d, %Y')
 
@@ -1208,7 +1485,7 @@ if __name__ == "__main__":
 
     # Parse args ...
     try:
-       opts, args = getopt.getopt(sys.argv[1:], "hmp", ["help", "measure", "plot", "single"])
+       opts, args = getopt.getopt(sys.argv[1:], "hmp", ["help", "measure", "plot", "single", 'extern'])
     except getopt.GetoptError, e:
        print "ERROR in parsing arguments: ", e, "\n"
        print __doc__
@@ -1217,6 +1494,7 @@ if __name__ == "__main__":
     measure = False
     plot = False
     multiple_in_flight = True
+    externs = False
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
@@ -1228,6 +1506,8 @@ if __name__ == "__main__":
            plot = True
         elif opt in ("--single"):
            multiple_in_flight = False
+        elif opt in ("--extern"):
+           externs = True
 
 
     if measure and plot:
@@ -1245,8 +1525,8 @@ if __name__ == "__main__":
     filename = args[0]
 
     if measure:
-        take_measurements(filename, multiple_in_flight=multiple_in_flight)
+        take_measurements(filename, multiple_in_flight=multiple_in_flight, externs=externs)
     if plot:
-        make_plots(filename)
+        make_plots(filename, externs=externs)
 
 
