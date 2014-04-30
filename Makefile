@@ -24,6 +24,22 @@ PACKAGES = \
         cactusprojects/retri \
         cactusprojects/subsystem \
         cactusprojects/ttc 
+else ifeq ($(Set), tsdev)
+PACKAGES = \
+        cactuscore/ts \
+        cactuscore/confdb \
+        cactusprojects/subsystem 
+else ifeq ($(Set), tssub)
+PACKAGES = \
+        cactusprojects/central \
+        cactusprojects/dtsc \
+        cactusprojects/dttf \
+        cactusprojects/gct \
+        cactusprojects/gt \
+        cactusprojects/gmt \
+        cactusprojects/l1page \
+        cactusprojects/retri \
+        cactusprojects/ttc
         
 endif
 
