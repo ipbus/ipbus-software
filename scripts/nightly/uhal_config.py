@@ -15,8 +15,6 @@ DEFAULT_COMMANDS    = ["CLEANUP_WWW_AREA","UNINSTALL","ENVIRONMENT","DEPENDENCIE
                        "TEST_IPbus_2.0_UDP","TEST_IPbus_2.0_TCP",
                        "TEST_IPbus_2.0_ControlHub_No_packet_loss",
                        "TEST_IPbus_2.0_ControlHub_With_packet_loss",
-                       "TEST_IPbus_2.0_big-endian_UDP","TEST_IPbus_2.0_big-endian_TCP",
-                       "TEST_IPbus_2.0_big-endian_ControlHub_No_packet_loss",
                        "TEST_PYCOHAL","TEST_uHAL_GUI","TEST_uHAL_TOOLS"]
 TO_EMAIL            = ""
 CHECKOUT_NAME       = ""
@@ -180,19 +178,6 @@ def importCommands() :
 
   COMMANDS += [["TEST_IPbus_2.0_ControlHub_With_packet_loss",
                 ['uhal_test_suite.py -v -s "2.0 controlhub - light packet loss"']
-              ]]
-
-
-  COMMANDS += [["TEST_IPbus_2.0_big-endian_UDP",
-                ['uhal_test_suite.py -v -s "2.0 bigendian udp"']
-              ]]
-
-  COMMANDS += [["TEST_IPbus_2.0_big-endian_TCP",
-                ['uhal_test_suite.py -v -s "2.0 bigendian tcp"']
-              ]]
-
-  COMMANDS += [["TEST_IPbus_2.0_big-endian_ControlHub_No_packet_loss",
-                ['uhal_test_suite.py -v -s "2.0 bigendian controlhub - normal"']
               ]]
 
 
