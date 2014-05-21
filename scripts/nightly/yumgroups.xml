@@ -101,6 +101,98 @@
 
 
 <group>
+	<id>triggersupervisor_core</id>
+	<name>triggersupervisor_core</name>
+	<default>true</default>
+	<description>Trigger Supervisor Framework Packages of the CACTUS YUM repository - Core Packages Only</description>
+	<uservisible>true</uservisible>
+	<grouplist></grouplist>
+	<packagelist>
+		
+		<packagereq type="mandatory">cactuscore-extern-dojo</packagereq>
+		<packagereq type="mandatory">cactuscore-extern-icons</packagereq>
+		
+		<packagereq type="mandatory">cactuscore-tsxdaqclient</packagereq>
+		
+		<packagereq type="mandatory">cactuscore-tsajaxell</packagereq>
+		<packagereq type="mandatory">cactuscore-tsajaxell-devel</packagereq>
+		<packagereq type="mandatory">cactuscore-tsajaxell-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactuscore-tsframework</packagereq>
+		<packagereq type="mandatory">cactuscore-tsframework-devel</packagereq>
+		<packagereq type="mandatory">cactuscore-tsframework-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactuscore-tsitf</packagereq>
+		<packagereq type="mandatory">cactuscore-tsitf-devel</packagereq>
+		<packagereq type="mandatory">cactuscore-tsitf-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactuscore-tstoolbox</packagereq>
+		<packagereq type="mandatory">cactuscore-tstoolbox-devel</packagereq>
+		<packagereq type="mandatory">cactuscore-tstoolbox-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactuscore-tsl1ce</packagereq>
+		<packagereq type="mandatory">cactuscore-tsl1ce-devel</packagereq>
+		<packagereq type="mandatory">cactuscore-tsl1ce-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactuscore-confdb</packagereq>
+		<packagereq type="mandatory">cactuscore-confdb-devel</packagereq>
+		<packagereq type="mandatory">cactuscore-confdb-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactusprojects-subsystemxdaq</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemxdaq-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemxdaq-debuginfo</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemsupervisor</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemsupervisor-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemsupervisor-debuginfo</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemworker</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemworker-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-subsystemworker-debuginfo</packagereq>
+		
+	</packagelist>
+</group>
+
+
+<group>
+	<id>triggersupervisor_projects</id>
+	<name>triggersupervisor_projects</name>
+	<default>true</default>
+	<description>Trigger Supervisor Framework Packages of the CACTUS YUM repository</description>
+	<uservisible>true</uservisible>
+	<grouplist></grouplist>
+	<packagelist>
+		<packagereq type="mandatory">cactusprojects-retriexternicutils</packagereq>
+		<packagereq type="mandatory">cactusprojects-retriexternicutils-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-retriexternicutils-debuginfo</packagereq>
+		<packagereq type="mandatory">cactusprojects-retriretricell</packagereq>
+		<packagereq type="mandatory">cactusprojects-retriretricell-devel</packagereq>
+		
+		<packagereq type="mandatory">cactusprojects-centralcell</packagereq>
+		<packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-centralcell-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactusprojects-ttctsttccicell</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttccicell-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttccicell-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactusprojects-ttctsttcmicell</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttcmicell-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttcmicell-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell-debuginfo</packagereq>
+		
+		<packagereq type="mandatory">cactusprojects-ttctsttcutils</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttcutils-devel</packagereq>
+		<packagereq type="mandatory">cactusprojects-ttctsttcutils-debuginfo</packagereq>
+		
+	</packagelist>
+</group>
+
+
+
+
+<group>
 <id>gtgmt</id>
 <name>gtgmt</name>
 <default>true</default>
