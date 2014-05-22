@@ -51,6 +51,7 @@ _all:
 
 rpm: _rpmall
 _rpmall: 
+	rm -rf ${RPMBUILD_DIR}/BUILD/*
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
 			--define  "_topdir ${RPMBUILD_DIR}"						\
 			--define "_prefix ${CACTUS_ROOT}"							\
@@ -61,4 +62,18 @@ _rpmall:
 			--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}"					\
 			--define "packager ${Packager}"								\
 			${PackageName}.spec
+
+cmsrpm: _cmsrpmall
+_cmsrpmall:
+	rm -rf ${RPMBUILD_DIR}/BUILD/*
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD                                            \
+	                --define  "_topdir ${RPMBUILD_DIR}"                                             \
+                        --define "_prefix /usr"                                                       \
+                        --define "tarball_file ${TARBALL_NAME}.tar.bz2"                                                 \
+                        --define "sources_dir ${RPMBUILD_DIR}/SOURCES"                                  \
+                        --define "name ${PackageName}"                                                          \
+                        --define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"       \
+                        --define "release ${PACKAGE_RELEASE}.cms.${CACTUS_OS}"                                      \
+                        --define "packager ${Packager}"                                                         \
+                        ${PackageName}.spec
 

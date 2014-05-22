@@ -36,6 +36,14 @@ cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/include
 
+# Use lib64 for libraries if installing under /usr
+%if "%{_prefix}" == "/usr"
+%ifarch x86_64
+mv $RPM_BUILD_ROOT%{_prefix}/lib $RPM_BUILD_ROOT%{_prefix}/lib64
+%endif
+%endif
+
+
 %clean 
 
 %post 
@@ -46,6 +54,6 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/include
 
 %files 
 %defattr(-, root, root) 
-%{_prefix}/lib/*
+%{_prefix}/lib*/*
 %{_prefix}/include/*
 
