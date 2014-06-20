@@ -56,6 +56,10 @@
 <packagereq type="mandatory">cactuscore-tsl1ce-devel</packagereq>
 <packagereq type="mandatory">cactuscore-tsl1ce-debuginfo</packagereq>
 
+<packagereq type="mandatory">cactuscore-confdb</packagereq>
+<packagereq type="mandatory">cactuscore-confdb-devel</packagereq>
+<packagereq type="mandatory">cactuscore-confdb-debuginfo</packagereq>
+
 <packagereq type="mandatory">cactusprojects-subsystemxdaq</packagereq>
 <packagereq type="mandatory">cactusprojects-subsystemxdaq-devel</packagereq>
 <packagereq type="mandatory">cactusprojects-subsystemxdaq-debuginfo</packagereq>
