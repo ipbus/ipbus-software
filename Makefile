@@ -15,6 +15,7 @@ PACKAGES = \
         cactuscore/ts \
         cactuscore/confdb \
         cactusprojects/central \
+	cactusprojects/csctf \
         cactusprojects/dtsc \
         cactusprojects/dttf \
         cactusprojects/gct \
@@ -32,6 +33,7 @@ PACKAGES = \
 else ifeq ($(Set), tssub)
 PACKAGES = \
         cactusprojects/central \
+        cactusprojects/csctf \
         cactusprojects/dtsc \
         cactusprojects/dttf \
         cactusprojects/gct \
