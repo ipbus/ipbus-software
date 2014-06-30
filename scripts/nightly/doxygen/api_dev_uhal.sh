@@ -7,7 +7,7 @@ export API_DIR=/afs/cern.ch/user/c/cactus/www/nightly/api
 export DOXYGEN_OUTPUT=/tmp/api_uhal
 export DOXYGEN_WWW=${API_DIR}/html_dev_uhal
 
-cd ${HOME}/doxygen
+cd ${HOME}/nightly/doxygen
 echo "Cleaning up target directory"
 rm -r ${DOXYGEN_OUTPUT}/html
 
