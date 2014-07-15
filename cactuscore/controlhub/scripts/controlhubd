@@ -1,5 +1,8 @@
 CACTUSROOT=/opt/cactus
 
+export HOME=$CACTUSROOT
+
+
 # Default LD_LIBRARY_PATH
 # Can be overridden in the package .conf files
 #
