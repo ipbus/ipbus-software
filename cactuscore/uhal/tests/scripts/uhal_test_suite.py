@@ -42,21 +42,23 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
     if not conn_file.startswith("file://"):
         conn_file = "file://" + conn_file
 
-    controlhub_start  = "sudo /sbin/service controlhub start"
-    controlhub_status = "sudo /sbin/service controlhub status"
-    controlhub_stats  = "sudo /sbin/service controlhub stats"
-    controlhub_stop   = "sudo /sbin/service controlhub stop"
-    #controlhub_start = "sudo " + join(controlhub_scripts_dir, "controlhub_start")
-    #controlhub_status = join(controlhub_scripts_dir, "controlhub_status")
-    #controlhub_stats = join(controlhub_scripts_dir, "controlhub_stats")
-    #controlhub_stop = "sudo " + join(controlhub_scripts_dir, "controlhub_stop")
+    if controlhub_scripts_dir is None:
+        controlhub_start  = "sudo /sbin/service controlhub start"
+        controlhub_status = "sudo /sbin/service controlhub status"
+        controlhub_stats  = "sudo /sbin/service controlhub stats"
+        controlhub_stop   = "sudo /sbin/service controlhub stop"
+    else:
+        controlhub_start = "sudo " + join(controlhub_scripts_dir, "controlhub_start")
+        controlhub_status = join(controlhub_scripts_dir, "controlhub_status")
+        controlhub_stats = join(controlhub_scripts_dir, "controlhub_stats")
+        controlhub_stop = "sudo " + join(controlhub_scripts_dir, "controlhub_stop")
 
     cmds = []
 
     cmds += [["TEST CONTROLHUB START",
               [
-               'for i in `seq 1 500`; do sudo /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; sudo /opt/cactus/bin/controlhub_stop; done',
-               'for i in `seq 1 500`; do sudo /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; sudo /opt/cactus/bin/controlhub_stop; done'
+               'for i in `seq 1 500`; do '+controlhub_start+'; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; '+controlhub_status+'; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; '+controlhub_stop+'; done',
+               'for i in `seq 1 500`; do '+controlhub_start+'; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; '+controlhub_status+'; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; '+controlhub_stop+'; done'
               ]
             ]]
 
@@ -659,6 +661,8 @@ if __name__=="__main__":
         controlhub_scripts_dir = "/opt/cactus/bin"
     else:
         controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") )
+    if controlhub_scripts_dir.startswith("/opt/cactus/bin"):
+        controlhub_scripts_dir = None
     print '  ControlHub scripts dir: ', controlhub_scripts_dir
 
     # Get uhal tools template file name
