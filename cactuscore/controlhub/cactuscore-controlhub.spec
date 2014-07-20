@@ -34,7 +34,7 @@ mkdir -p $RPM_BUILD_ROOT/var/log/controlhub
 # Copy over files
 cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
-cp -rp %{sources_dir}/controlhubd $RPM_BUILD_ROOT/etc/init.d/.
+cp -rp %{sources_dir}/controlhub $RPM_BUILD_ROOT/etc/init.d/.
 
 # Now update the escript executable paths in various controlhub scripts
 cd $RPM_BUILD_ROOT%{_prefix}/bin
@@ -61,5 +61,5 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 %defattr(-, root, root)
 %{_prefix}/bin/*
 %{_prefix}/lib/*
-/etc/init.d/controlhubd
+/etc/init.d/controlhub
 /var/log/controlhub

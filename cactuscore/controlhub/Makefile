@@ -95,7 +95,7 @@ dev: $(OBJECTS) _check_test_build_dir $(TEST_OBJECTS) test
 
 rpm: _rpmall
 _rpmall:
-	cp scripts/controlhubd ${RPMBUILD_SOURCES_DIR}
+	cp scripts/init.d ${RPMBUILD_SOURCES_DIR}/controlhub
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${CACTUS_ROOT}" \
