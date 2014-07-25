@@ -32,7 +32,7 @@ Packager = Robert Frazier
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 3
-PACKAGE_VER_PATCH = 0
+PACKAGE_VER_PATCH = 1
 
 # This is the version number for the RPM packaging.
 PACKAGE_RELEASE = 0
