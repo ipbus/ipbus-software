@@ -24,6 +24,7 @@ PACKAGES = \
         cactusprojects/l1page \
         cactusprojects/retri \
         cactusprojects/subsystem \
+	cactusprojects/tcds \
         cactusprojects/ttc 
 else ifeq ($(Set), tsdev)
 PACKAGES = \
@@ -41,6 +42,7 @@ PACKAGES = \
         cactusprojects/gmt \
         cactusprojects/l1page \
         cactusprojects/retri \
+        cactusprojects/tcds \
         cactusprojects/ttc
         
 endif
