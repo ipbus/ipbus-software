@@ -76,9 +76,10 @@ class BitArray:
 
 class node(object):
     
-    def __init__(self, name, ref, width = None, desc = None):
+    def __init__(self, name, ref, flag, width = None, desc = None):
         self.name = name
         self.ref = ref
+        self.flag = flag
         if width is None:
             self.width = 0
         else:
@@ -92,7 +93,7 @@ class node(object):
 class nodetree(object):
 	
     def __init__(self):
-        self.root = node("TOP", None)
+        self.root = node("TOP", None, False)
         
     def add(self, n):
         np = self.root
@@ -101,7 +102,7 @@ class nodetree(object):
             name = '.'.join(m[: i + 1])
             l = [x.name for x in np.desc]
             if name not in l:
-                c = node(name, None)
+                c = node(name, None, False)
                 np.desc.append(c)
                 np = c
             else:
@@ -111,6 +112,7 @@ class nodetree(object):
             np.desc.append(n)
         else:
             np.desc[l.index(n.name)].ref = n.ref
+            np.desc[l.index(n.name)].flag = n.flag
     
     def __str__(self):
         return self.dump(self.root, "")
@@ -118,7 +120,7 @@ class nodetree(object):
     def dump(self, n, prefix):
         s = ""
         for i in n.desc:
-            s = s + prefix + i.name + " " + hex(i.ref.getAddress()) + " " + hex(i.width) + "\n"
+            s = s + prefix + i.name + " " + hex(i.ref.getAddress()) + " " + hex(i.width) + " " + str(i.flag) + "\n"
             if i.desc: s = s + self.dump(i, prefix + "  ")
         return s
     
@@ -149,8 +151,11 @@ class nodetree(object):
 
     def get_nodes(self, n):
         l = list()
-        for i in n.desc:
-            l.append((i.name, i.ref.getAddress(), i.width))
+        if n.flag:
+            l.append((n.name, n.ref.getAddress(), n.width))
+        elif n.desc:
+            for i in n.desc:
+                l.extend(self.get_nodes(i))
         return l
 
 #===========================================================================================
@@ -205,9 +210,9 @@ def main():
     for i in device.getNodes():
         d = device.getNode(i)
         f = d.getFirmwareInfo()
-        if "type" in f and f["type"] == "endpoint": t.add(node(i, d))
+        p = "type" in f and f["type"] == "endpoint"
+        t.add(node(i,d,p))
     t.assign_width(t.root)
-    log.info(t)
     uhal_slaves = t.get_nodes(t.root)
     moduleName = os.path.splitext(os.path.basename(args[0]))[0]
         
