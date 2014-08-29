@@ -1,3 +1,6 @@
+# Sanitize build home
+BUILD_HOME := $(shell cd ${BUILD_HOME}; pwd)
+
 XDAQ_ROOT ?=/opt/xdaq
 CACTUS_ROOT ?= /opt/cactus
 CACTUS_RPM_ROOT ?= $(BUILD_HOME)
