@@ -121,6 +121,110 @@ void fifo_write_read ( size_t N,const std::string& connection, const std::string
   //The FIFO implementation on the dummy HW is a single memory location so there is not much to check
 }
 
+
+void block_offset_write_read ( size_t N,const std::string& connection, const std::string& id )
+{
+  ConnectionManager manager ( connection );
+  HwInterface hw=manager.getDevice ( id );
+
+  std::vector<uint32_t> xx,yy;
+  xx.reserve ( N );
+  yy.reserve ( N );
+  for ( size_t i=0; i!= N; ++i )
+  {
+    xx.push_back ( static_cast<uint32_t> ( rand() ) );
+    yy.push_back ( static_cast<uint32_t> ( rand() ) );
+  }
+
+  hw.getNode ( "LARGE_MEM" ).writeBlockOffset ( xx , 0 );
+  hw.getNode ( "LARGE_MEM" ).writeBlockOffset ( yy , N );
+  ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlockOffset ( N , 0 );
+  ValVector< uint32_t > mem2 = hw.getNode ( "LARGE_MEM" ).readBlockOffset ( N , N );
+
+  CACTUS_CHECK ( !mem.valid() );
+  CACTUS_CHECK ( mem.size() == N );
+
+  CACTUS_CHECK ( !mem2.valid() );
+  CACTUS_CHECK ( mem2.size() == N );
+
+  if ( N > 0 )
+  {
+    CACTUS_TEST_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
+  }
+  else
+  { 
+    CACTUS_TEST_THROW ( mem.value(), uhal::exception::NonValidatedMemory );
+  }
+
+  if ( N > 0 )
+  {
+    CACTUS_TEST_THROW ( mem2.at ( 0 ),uhal::exception::NonValidatedMemory );
+  }
+  else
+  { 
+    CACTUS_TEST_THROW ( mem2.value(), uhal::exception::NonValidatedMemory );
+  }
+
+  CACTUS_TEST ( hw.dispatch() );
+
+  CACTUS_CHECK ( mem.valid() );
+  CACTUS_CHECK ( mem.size() == N );
+
+  CACTUS_CHECK ( mem2.valid() );
+  CACTUS_CHECK ( mem2.size() == N );
+
+
+  //This check will fail when DummyHardware::ADDRESS_MASK < N
+  if ( N < N_10MB )
+  {
+    bool correct_block_write_read = true;
+    std::vector< uint32_t >::const_iterator j=xx.begin();
+
+    for ( ValVector< uint32_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
+    {
+      correct_block_write_read = correct_block_write_read && ( *i == *j );
+    }
+
+    j=yy.begin();
+
+    for ( ValVector< uint32_t >::const_iterator i ( mem2.begin() ); i!=mem2.end(); ++i , ++j )
+    {
+      correct_block_write_read = correct_block_write_read && ( *i == *j );
+    }
+
+    CACTUS_CHECK ( correct_block_write_read );
+  }
+
+
+
+}
+
+
+void block_access_type_violations ( const std::string& connection, const std::string& id )
+{
+  ConnectionManager manager ( connection );
+  HwInterface hw=manager.getDevice ( id );
+  std::vector<uint32_t> xx;
+
+  //We allow the user to call a bulk access of size=1 to a single register
+  xx.resize ( N_4B );
+  CACTUS_TEST ( hw.getNode ( "REG" ).writeBlock ( xx ) );
+  CACTUS_TEST ( ValVector< uint32_t > mem = hw.getNode ( "REG" ).readBlock( N_4B ) );
+
+  //These should all throw
+  CACTUS_TEST_THROW ( hw.getNode ( "REG" ).writeBlockOffset ( xx , 0 ) , uhal::exception::BulkTransferOffsetRequestedForSingleRegister );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "REG" ).readBlockOffset ( N_1kB , 0 ) , uhal::exception::BulkTransferOffsetRequestedForSingleRegister );
+
+  xx.resize ( N_1kB );
+  CACTUS_TEST_THROW ( hw.getNode ( "REG" ).writeBlock ( xx ) , uhal::exception::BulkTransferOnSingleRegister );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "REG" ).readBlock( N_1kB ) , uhal::exception::BulkTransferOnSingleRegister );
+
+  CACTUS_TEST_THROW ( hw.getNode ( "FIFO" ).writeBlockOffset ( xx , 1 ) , uhal::exception::BulkTransferOffsetRequestedForFifo );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlockOffset ( N_1kB , 1 ) , uhal::exception::BulkTransferOffsetRequestedForFifo );
+
+}
+
+
 void block_bigger_than_size_attribute ( const std::string& connection, const std::string& id )
 {
   ConnectionManager manager ( connection );
@@ -129,6 +233,22 @@ void block_bigger_than_size_attribute ( const std::string& connection, const std
   xx.resize ( N_1MB );
   CACTUS_TEST_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
   CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlock ( N_1MB ) , uhal::exception::BulkTransferRequestedTooLarge );
+}
+
+
+void block_offset_bigger_than_size_attribute ( const std::string& connection, const std::string& id )
+{
+  ConnectionManager manager ( connection );
+  HwInterface hw=manager.getDevice ( id );
+  std::vector<uint32_t> xx;
+  // Size OK but offset too large
+  xx.resize ( N_4B );
+  CACTUS_TEST_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlockOffset ( xx , 256 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlockOffset ( N_4B , 256 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  // Size OK, offset OK, combination too large
+  xx.resize ( N_1kB );
+  CACTUS_TEST_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlockOffset ( xx , 1 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  CACTUS_TEST_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlockOffset ( N_1kB , 1 ) , uhal::exception::BulkTransferRequestedTooLarge );
 }
 
 int main ( int argc,char* argv[] )
@@ -148,7 +268,17 @@ int main ( int argc,char* argv[] )
   CACTUS_TEST ( fifo_write_read ( N_1kB,connection_file,device_id ) );
   CACTUS_TEST ( fifo_write_read ( N_1MB,connection_file,device_id ) );
   CACTUS_TEST ( fifo_write_read ( N_200MB,connection_file,device_id ) );
-  //Block to big
+  //Memory with offset
+  CACTUS_TEST ( block_offset_write_read ( 0,connection_file,device_id ) );
+  CACTUS_TEST ( block_offset_write_read ( N_4B,connection_file,device_id ) );
+  CACTUS_TEST ( block_offset_write_read ( N_1kB,connection_file,device_id ) );
+  CACTUS_TEST ( block_offset_write_read ( N_1MB,connection_file,device_id ) );
+  CACTUS_TEST ( block_offset_write_read ( N_10MB,connection_file,device_id ) );
+  //Block writes on single registers, offsets into FIFOs
+  CACTUS_TEST ( block_access_type_violations ( connection_file,device_id ) );
+  //Block too big
   CACTUS_TEST ( block_bigger_than_size_attribute ( connection_file,device_id ) );
+  //Block offset too big
+  CACTUS_TEST ( block_offset_bigger_than_size_attribute ( connection_file,device_id ) );
   CACTUS_TEST_RESULT();
 }

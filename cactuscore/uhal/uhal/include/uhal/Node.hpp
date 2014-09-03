@@ -74,6 +74,10 @@ namespace uhal
     ExceptionClass ( BulkTransferOnSingleRegister , "Exception class to handle the case where a bulk read or write was performed on a single register." );
     //! Exception class to handle the case where requested bulk read or write was too large.
     ExceptionClass ( BulkTransferRequestedTooLarge , "Exception class to handle the case where requested bulk read or write was too large." );
+    //! Exception class to handle the case where an offset was requested into a FIFO
+    ExceptionClass ( BulkTransferOffsetRequestedForFifo , "Exception class to handle the case where an offset was requested into a FIFO." );
+    //! Exception class to handle the case where an offset was requested into a Single Register
+    ExceptionClass ( BulkTransferOffsetRequestedForSingleRegister , "Exception class to handle the case where an offset was requested into a Single Register." );
     //! Exception class to handle the case of an attempt to cast a node to the wrong type.
     ExceptionClass ( BadNodeCast , "Exception class to handle the case of an attempt to cast a node to the wrong type." );
   }
@@ -288,6 +292,14 @@ namespace uhal
       ValHeader writeBlock ( const std::vector< uint32_t >& aValues ) const;
 
       /**
+        Write a block of data to a block of registers or a block-write port
+        @param aValues the values to write to the registers or a block-write port
+        @param aOffset an offset into the block at which to start the block-write
+        @return a Validated Header which will contain the returned IPbus header
+      */
+      ValHeader writeBlockOffset ( const std::vector< uint32_t >& aValues , const uint32_t& aOffset ) const;
+
+      /**
       	Read a single, unmasked, unsigned word
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
@@ -299,6 +311,14 @@ namespace uhal
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
       ValVector< uint32_t > readBlock ( const uint32_t& aSize ) const;
+
+      /**
+        Read a block of unsigned data from a block of registers or a block-read port
+        @param aSize the number of words to read
+        @param aOffset an offset into the block at which to start the block-read
+        @return a Validated Memory which wraps the location to which the reply data is to be written
+      */
+      ValVector< uint32_t > readBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const;
 
 
       /**

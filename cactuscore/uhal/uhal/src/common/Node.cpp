@@ -501,12 +501,10 @@ namespace uhal
         return mHw->getClient().write ( mAddr , aValue , mMask );
       }
     }
-    else
-    {
-      exception::WriteAccessDenied lExc;
-      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
-      throw lExc;
-    }
+
+    exception::WriteAccessDenied lExc;
+    log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
+    throw lExc;
   }
 
 
@@ -519,26 +517,63 @@ namespace uhal
       log ( lExc , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
+
+    if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
+    {
+      exception::BulkTransferRequestedTooLarge lExc;
+      log ( lExc , "Requested bulk write of greater size than the specified endpoint size of node ", Quote ( mUid ) );
+      throw lExc;
+    }
+
+    if ( mPermission & defs::WRITE )
+    {
+      return mHw->getClient().writeBlock ( mAddr , aValues , mMode ); //aMode );
+    }
     else
     {
-      if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
-      {
-        exception::BulkTransferRequestedTooLarge lExc;
-        log ( lExc , "Requested bulk write of greater size than the specified endpoint size of node ", Quote ( mUid ) );
-        throw lExc;
-      }
-
-      if ( mPermission & defs::WRITE )
-      {
-        return mHw->getClient().writeBlock ( mAddr , aValues , mMode ); //aMode );
-      }
-      else
-      {
-        exception::WriteAccessDenied lExc;
-        log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
-        throw lExc;
-      }
+      exception::WriteAccessDenied lExc;
+      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
+      throw lExc;
     }
+    
+  }
+
+
+  ValHeader  Node::writeBlockOffset ( const std::vector< uint32_t >& aValues , const uint32_t& aOffset ) const // , const defs::BlockReadWriteMode& aMode )
+  {
+    if ( mMode == defs::NON_INCREMENTAL )
+    {
+      exception::BulkTransferOffsetRequestedForFifo lExc;
+      log ( lExc , "Bulk Transfer Offset requested for non-incremental node " , Quote ( mUid ) );
+      throw lExc;
+    }
+
+    if ( mMode == defs::SINGLE ) //We allow the user to call a bulk access of size=1 to a single register
+    {
+      exception::BulkTransferOffsetRequestedForSingleRegister lExc;
+      log ( lExc , "Bulk Transfer with offset requested on single register node " , Quote ( mUid ) );
+      log ( lExc , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
+      throw lExc;
+    }
+
+    if ( (aValues.size()+aOffset) > mSize )
+    {
+      exception::BulkTransferRequestedTooLarge lExc;
+      log ( lExc , "Requested bulk write size and offset would overflow the specified endpoint node ", Quote ( mUid ) );
+      throw lExc;
+    }
+
+    if ( mPermission & defs::WRITE )
+    {
+      return mHw->getClient().writeBlock ( mAddr+aOffset , aValues , mMode ); //aMode );
+    }
+    else
+    {
+      exception::WriteAccessDenied lExc;
+      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
+      throw lExc;
+    }
+    
   }
 
 
@@ -555,12 +590,11 @@ namespace uhal
         return mHw->getClient().read ( mAddr , mMask );
       }
     }
-    else
-    {
-      exception::ReadAccessDenied lExc;
-      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
-      throw lExc;
-    }
+
+    exception::ReadAccessDenied lExc;
+    log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
+    throw lExc;
+    
   }
 
 
@@ -573,28 +607,64 @@ namespace uhal
       log ( lExc , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
+
+    if ( ( mSize != 1 ) && ( aSize>mSize ) )
+    {
+      exception::BulkTransferRequestedTooLarge lExc;
+      log ( lExc , "Requested bulk read of greater size than the specified endpoint size of node " , Quote ( mUid ) );
+      throw lExc;
+    }
+
+    if ( mPermission & defs::READ )
+    {
+      return mHw->getClient().readBlock ( mAddr , aSize , mMode ); //aMode );
+    }
     else
     {
-      if ( ( mSize != 1 ) && ( aSize>mSize ) )
-      {
-        exception::BulkTransferRequestedTooLarge lExc;
-        log ( lExc , "Requested bulk read of greater size than the specified endpoint size of node " , Quote ( mUid ) );
-        throw lExc;
-      }
-
-      if ( mPermission & defs::READ )
-      {
-        return mHw->getClient().readBlock ( mAddr , aSize , mMode ); //aMode );
-      }
-      else
-      {
-        exception::ReadAccessDenied lExc;
-        log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
-        throw lExc;
-      }
+      exception::ReadAccessDenied lExc;
+      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
+      throw lExc;
     }
+    
   }
 
+
+  ValVector< uint32_t > Node::readBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const //, const defs::BlockReadWriteMode& aMode )
+  {
+    if ( mMode == defs::NON_INCREMENTAL )
+    {
+      exception::BulkTransferOffsetRequestedForFifo lExc;
+      log ( lExc , "Bulk Transfer offset requested for non-incremental node " , Quote ( mUid ) );
+      throw lExc;
+    }
+
+    if ( mMode == defs::SINGLE ) //We do not allow the user to use an offset from a single register
+    {
+      exception::BulkTransferOffsetRequestedForSingleRegister lExc;
+      log ( lExc , "Bulk Transfer with offset requested on single register node ", Quote ( mUid ) );
+      log ( lExc , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
+      throw lExc;
+    }
+
+    if ( (aSize+aOffset) > mSize )
+    {
+      exception::BulkTransferRequestedTooLarge lExc;
+      log ( lExc , "Requested bulk read size and offset would overflow the specified endpoint node " , Quote ( mUid ) );
+      throw lExc;
+    }
+
+    if ( mPermission & defs::READ )
+    {
+      return mHw->getClient().readBlock ( mAddr+aOffset , aSize , mMode ); //aMode );
+    }
+    else
+    {
+      exception::ReadAccessDenied lExc;
+      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
+      throw lExc;
+    }
+    
+  }
   // ValWord< int32_t > Node::readSigned()
   // {
   // try
