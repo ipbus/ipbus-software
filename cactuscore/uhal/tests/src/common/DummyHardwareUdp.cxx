@@ -29,8 +29,6 @@
 ---------------------------------------------------------------------------
 */
 
-#include <boost/asio.hpp>
-
 #include "uhal/tests/UDPDummyHardware.hpp"
 
 using namespace uhal;
