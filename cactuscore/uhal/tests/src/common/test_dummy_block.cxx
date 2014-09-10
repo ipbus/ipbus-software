@@ -137,15 +137,10 @@ void block_offset_write_read ( size_t N,const std::string& connection, const std
   }
 
   hw.getNode ( "LARGE_MEM" ).writeBlockOffset ( xx , 0 );
-  hw.getNode ( "LARGE_MEM" ).writeBlockOffset ( yy , N );
   ValVector< uint32_t > mem = hw.getNode ( "LARGE_MEM" ).readBlockOffset ( N , 0 );
-  ValVector< uint32_t > mem2 = hw.getNode ( "LARGE_MEM" ).readBlockOffset ( N , N );
 
   CACTUS_CHECK ( !mem.valid() );
   CACTUS_CHECK ( mem.size() == N );
-
-  CACTUS_CHECK ( !mem2.valid() );
-  CACTUS_CHECK ( mem2.size() == N );
 
   if ( N > 0 )
   {
@@ -155,6 +150,13 @@ void block_offset_write_read ( size_t N,const std::string& connection, const std
   { 
     CACTUS_TEST_THROW ( mem.value(), uhal::exception::NonValidatedMemory );
   }
+
+
+  hw.getNode ( "LARGE_MEM" ).writeBlockOffset ( yy , N );
+  ValVector< uint32_t > mem2 = hw.getNode ( "LARGE_MEM" ).readBlockOffset ( N , N );
+
+  CACTUS_CHECK ( !mem2.valid() );
+  CACTUS_CHECK ( mem2.size() == N );
 
   if ( N > 0 )
   {
@@ -194,9 +196,6 @@ void block_offset_write_read ( size_t N,const std::string& connection, const std
 
     CACTUS_CHECK ( correct_block_write_read );
   }
-
-
-
 }
 
 
