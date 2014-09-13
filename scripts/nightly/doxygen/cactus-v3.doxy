@@ -105,6 +105,7 @@ FILE_PATTERNS          = *.h \
                          *.hxx \
                          *.cc \
                          *.cpp \
+                         *.cxx \
                          *.i \
                          *.py \
                          *.js \

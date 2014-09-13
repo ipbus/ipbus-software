@@ -14,10 +14,11 @@ rm -r ${DOXYGEN_OUTPUT}/html
 DOXYGEN_MAINPAGE="${CACTUS_SANDBOX}/cactuscore/uhal/README.md"
 DOXYGEN_INPUTS="${CACTUS_SANDBOX}/cactuscore/uhal "
 DOXYGEN_PROJECT_NAME='&mu;HAL (nightly)'
+DOXYGEN_EXCLUDE_PATTERNS=''
 
 echo DOXYGEN_INPUTS=${DOXYGEN_INPUTS}
 export DOXYGEN_MAINPAGE DOXYGEN_INPUTS DOXYGEN_PROJECT_NAME
-${DOXYGEN_HOME}/bin/doxygen cactus-v2.doxy
+${DOXYGEN_HOME}/bin/doxygen cactus-v3.doxy
 
 
 echo "Removing old APIs"
