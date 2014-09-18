@@ -54,6 +54,15 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 
 
 %post
+/sbin/chkconfig --add controlhub
+/etc/init.d/controlhub start 
+
+%preun
+if [ $1 = 0 ]; then
+  /etc/init.d/controlhub stop 
+  /sbin/chkconfig controlhub off
+  /sbin/chkconfig --del controlhub
+fi
 
 %postun
 

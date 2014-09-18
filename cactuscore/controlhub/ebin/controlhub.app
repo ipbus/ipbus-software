@@ -10,7 +10,7 @@
 %%% ===========================================================================
 {application, controlhub,
  [{description, "Control Hub: multi-client packet routing for IPbus/UDP hardware"},
-   {vsn, "2.3.1"},
+   {vsn, "2.3.2"},
    {modules, [controlhub_app,
               ch_sup,
               ch_device_client_registry,

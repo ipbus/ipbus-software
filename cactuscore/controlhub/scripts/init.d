@@ -1,3 +1,23 @@
+#!/bin/bash
+#
+# controlhub	Starts up the controlhub server daemon
+#
+# chkconfig: 25 99 01
+# description: IPBus is a protocol for hardware access over ethernet. \
+#              This service starts up the IPBus ControlHub server daemon.
+#
+# processname: controlhub
+
+### BEGIN INIT INFO
+# Provides: controlhub
+# Default-Start: 3 5
+# Default-Stop: 0 1 6
+# Short-Description: Starts up the controlhub server daemon
+# Description:       IPBus is a protocol for hardware access over ethernet. \
+#                    This service starts up the IPBus ControlHub server daemon.
+#
+### END INIT INFO
+
 CACTUSROOT=/opt/cactus
 
 export HOME=$CACTUSROOT
