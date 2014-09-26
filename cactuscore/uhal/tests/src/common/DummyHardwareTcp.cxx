@@ -30,8 +30,10 @@
 */
 
 #include "uhal/tests/TCPDummyHardware.hpp"
+#include "uhal/tests/CommandLineOptions.hpp"
 
 using namespace uhal;
+using namespace uhal::tests;
 
 int main ( int argc, char* argv[] )
 {

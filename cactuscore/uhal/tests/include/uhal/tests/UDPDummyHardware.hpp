@@ -37,6 +37,7 @@
 #include "uhal/tests/DummyHardware.hpp"
 
 namespace uhal {
+  namespace tests {
 
   //! Concrete implementation of emulator of hardware using UDP
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
@@ -97,7 +98,7 @@ namespace uhal {
   
   
   };
-  
+  }
 }
 
 #endif
