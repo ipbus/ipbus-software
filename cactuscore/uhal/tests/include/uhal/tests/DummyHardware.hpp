@@ -40,9 +40,7 @@
 #define _uhal_tests_DummyHardware_hpp_
 
 #include "uhal/IPbusInspector.hpp"
-#include <boost/lexical_cast.hpp>
 
-#include <map>
 #include <vector>
 #include <deque>
 
