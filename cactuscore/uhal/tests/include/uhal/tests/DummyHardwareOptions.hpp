@@ -32,8 +32,8 @@
 */
 
 
-#ifndef _uhal_tests_DummyHardwareCommandLineOptions_hpp_
-#define _uhal_tests_DummyHardwareCommandLineOptions_hpp_
+#ifndef _uhal_tests_DummyHardwareOptions_hpp_
+#define _uhal_tests_DummyHardwareOptions_hpp_
 
 
 #include <boost/program_options.hpp>
@@ -42,8 +42,8 @@
 namespace uhal {
   namespace tests {
   
-    //! Struct to store the command line options
-    struct DummyHardwareCommandLineOptions
+    //! Struct to store the dummy hardware command line options
+    struct DummyHardwareOptions
     {
       //! The delay in seconds between the request and response of the first IPbus transaction
       uint32_t delay;
@@ -53,14 +53,24 @@ namespace uhal {
       bool bigendian;
       //! IPbus version number - 1 or 2
       uint32_t version;
+
+      /**
+        Static function to parse the command line arguments into a struct containing the information
+        @param argc the number of command line arguments
+        @param argv array of c-strings containing the command line arguments
+      */
+      static DummyHardwareOptions parseFromCommandLine( int argc,char* argv[] );
     };
   
-    /**
-      Function to parse the command line arguments into a struct containing the information
-      @param argc the number of command line arguments
-      @param argv array of c-strings containing the command line arguments
-    */
-    DummyHardwareCommandLineOptions ParseCommandLineOptions ( int argc,char* argv[] )
+  }
+}
+ 
+//   /**
+//      Function to parse the command line arguments into a struct containing the information
+//      @param argc the number of command line arguments
+//      @param argv array of c-strings containing the command line arguments
+//   */
+    uhal::tests::DummyHardwareOptions uhal::tests::DummyHardwareOptions::parseFromCommandLine ( int argc,char* argv[] )
     {
       // Declare the supported options.
       boost::program_options::options_description desc ( "Allowed options" );
@@ -86,7 +96,7 @@ namespace uhal {
           exit ( 0 );
         }
   
-        DummyHardwareCommandLineOptions lResult;
+        uhal::tests::DummyHardwareOptions lResult;
         lResult.delay = vm["delay"].as<uint32_t>();
         lResult.port = vm["port"].as<uint16_t>();
         lResult.version = vm["version"].as<uint32_t>();
@@ -116,8 +126,6 @@ namespace uhal {
         exit ( 1 );
       }
     }
-  }
-}
 
 
 #endif
