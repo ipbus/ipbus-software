@@ -29,8 +29,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef TCPDummyHardware_hpp
-#define TCPDummyHardware_hpp
+#ifndef _uhal_tests_TCPDummyHardware_hpp_
+#define _uhal_tests_TCPDummyHardware_hpp_
 
 #include <boost/asio.hpp>
 #include "uhal/tests/DummyHardware.hpp"

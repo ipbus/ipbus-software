@@ -29,8 +29,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef UDPDummyHardware_hpp
-#define UDPDummyHardware_hpp
+#ifndef _uhal_tests_UDPDummyHardware_hpp_
+#define _uhal_tests_UDPDummyHardware_hpp_
 
 #include <boost/asio.hpp>
 

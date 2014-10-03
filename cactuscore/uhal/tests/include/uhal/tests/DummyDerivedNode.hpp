@@ -1,5 +1,5 @@
-#ifndef _DummyDerivedNode_hpp_
-#define _DummyDerivedNode_hpp_
+#ifndef _uhal_tests_DummyDerivedNode_hpp_
+#define _uhal_tests_DummyDerivedNode_hpp_
 
 #include "uhal/DerivedNode.hpp"
 

@@ -36,11 +36,10 @@
 	@date 2013
 */
 
-#ifndef DummyHardware_hpp
-#define DummyHardware_hpp
+#ifndef _uhal_tests_DummyHardware_hpp_
+#define _uhal_tests_DummyHardware_hpp_
 
 #include "uhal/IPbusInspector.hpp"
-#include <boost/program_options.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <map>
