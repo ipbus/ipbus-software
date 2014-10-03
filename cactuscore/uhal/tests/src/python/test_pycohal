@@ -428,17 +428,54 @@ class TestBlock(unittest.TestCase):
         self.assertEqual( xx, [x for x in memVals] )
 
     def test_block_write_read(self):
-        self.exe_test_block_write_read(1)           #4B
-        self.exe_test_block_write_read(1024/4)      #1kB
-        self.exe_test_block_write_read( 1024 )      #4kB
-        self.exe_test_block_write_read(1024*1024/4) #1MB
+        for N in [1, 1024/4, 1024, 1024*1024/4]:
+            self.exe_test_block_write_read(N)
+
+    def exe_test_block_offset_write_read(self, N, offset):
+        # Queue IPBus transactions
+        xx = list_randuint32s(N)
+        self.hw.getNode("MEM").writeBlockOffset( xx, offset )
+        memVals = self.hw.getNode("MEM").readBlockOffset(N, offset)
+        # Pre-dispatch tests
+        self.assertEqual( memVals.valid(), False )
+        self.assertEqual( memVals.size(), N )
+        self.assertEqual( len(memVals), N )
+        for i in range(N):
+           self.assertRaises( uhal.NonValidatedMemory, memVals.at, (i) )
+           self.assertRaises( uhal.NonValidatedMemory, memVals.__getitem__ , (i) )
+        self.assertRaises( uhal.NonValidatedMemory, memVals.value )
+        self.assertRaises( uhal.NonValidatedMemory, memVals.__iter__ )
+        self.assertRaises( IndexError , memVals.__getitem__ , (-N-1) )
+        self.assertRaises( IndexError , memVals.__getitem__ , (N) )
+        # Dispatch & check values
+        self.hw.dispatch()
+        self.assertTrue( memVals.valid() )
+        self.assertEqual( memVals.size(), N )
+        self.assertEqual( len(memVals), N )
+        self.assertEqual( xx , memVals.value() )
+        # Test ValVector_uint32 indexing
+        for i in range(N):
+            self.assertEqual( xx[i], memVals[i] )
+            self.assertEqual( xx[i], memVals.at(i) )
+            self.assertEqual( xx[i], memVals[i-N] )
+        # Test ValVector_uint32 iteration
+        self.assertEqual( xx, [x for x in memVals] )
+
+    def test_block_offset_write_read(self):
+        for N in [1, 1024/4, 1024, 1024*1024/4]:
+            for offset in [0, min(N,self.hw.getNode("MEM").getSize()-N), randint(0,self.hw.getNode("MEM").getSize()-N)]:
+                self.exe_test_block_offset_write_read(N, offset)
 
     def test_block_bigger_than_size(self):
-        xx = []
-        for i in range(1024*1024):
-            xx.append(0)
-        self.assertRaises( uhal.BulkTransferRequestedTooLarge, self.hw.getNode("SMALL_MEM").writeBlock, (xx) )
+        # Block size too large (no offset)
+        self.assertRaises( uhal.BulkTransferRequestedTooLarge, self.hw.getNode("SMALL_MEM").writeBlock, [0 for i in range(1024*1024)] )
         self.assertRaises( uhal.BulkTransferRequestedTooLarge, self.hw.getNode("SMALL_MEM").readBlock, (1024*1024) )
+        # Offset too large
+        self.assertRaises( uhal.exception, self.hw.getNode("SMALL_MEM").writeBlockOffset, *([0],1024*1024) )
+        self.assertRaises( uhal.exception, self.hw.getNode("SMALL_MEM").readBlockOffset, *(0,1024*1024) )
+        # Block size and offset both OK, combination too large
+        self.assertRaises( uhal.exception, self.hw.getNode("SMALL_MEM").writeBlockOffset, *([0] * 128,129) )
+        self.assertRaises( uhal.exception, self.hw.getNode("SMALL_MEM").readBlockOffset, *(128,129) )
 
 
 class TestRawClient(unittest.TestCase):
