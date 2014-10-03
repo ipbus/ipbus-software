@@ -57,7 +57,6 @@ namespace uhal {
         DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay , aBigEndianHack ) ,
         mIOservice(),
         mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), aPort ) )
-  
       {
       }
   
@@ -72,21 +71,7 @@ namespace uhal {
         Concrete implementation of the run function
         Starts the UDP server and runs indefinitely, until exception or user kills the server
       */
-      void run()
-      {
-        while ( true )
-        {
-          uint32_t lBytes = mSocket.receive_from ( boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ) , mSenderEndpoint );
-          base_type::mReply.clear();
-          //All responsibility for understanding the contents and replying is handled by the base class
-          base_type::AnalyzeReceivedAndCreateReply ( lBytes );
-  
-          if ( base_type::mReply.size() )
-          {
-            mSocket.send_to ( boost::asio::buffer ( & ( base_type::mReply[0] ) , base_type::mReply.size() <<2 ) , mSenderEndpoint );
-          }
-        }
-      }
+      void run();
   
     private:
       //! The BOOST ASIO io_service used by the UDP server
