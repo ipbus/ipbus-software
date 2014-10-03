@@ -43,7 +43,7 @@ namespace uhal {
   namespace tests {
   
     //! Struct to store the command line options
-    struct CommandLineOptions
+    struct DummyHardwareCommandLineOptions
     {
       //! The delay in seconds between the request and response of the first IPbus transaction
       uint32_t delay;
@@ -60,7 +60,7 @@ namespace uhal {
       @param argc the number of command line arguments
       @param argv array of c-strings containing the command line arguments
     */
-    CommandLineOptions ParseCommandLineOptions ( int argc,char* argv[] )
+    DummyHardwareCommandLineOptions ParseCommandLineOptions ( int argc,char* argv[] )
     {
       // Declare the supported options.
       boost::program_options::options_description desc ( "Allowed options" );
@@ -86,7 +86,7 @@ namespace uhal {
           exit ( 0 );
         }
   
-        CommandLineOptions lResult;
+        DummyHardwareCommandLineOptions lResult;
         lResult.delay = vm["delay"].as<uint32_t>();
         lResult.port = vm["port"].as<uint16_t>();
         lResult.version = vm["version"].as<uint32_t>();

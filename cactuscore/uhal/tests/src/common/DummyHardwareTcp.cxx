@@ -30,18 +30,18 @@
 */
 
 #include "uhal/tests/TCPDummyHardware.hpp"
-#include "uhal/tests/CommandLineOptions.hpp"
+#include "uhal/tests/DummyHardwareCommandLineOptions.hpp"
 
 using namespace uhal;
 using namespace uhal::tests;
 
 int main ( int argc, char* argv[] )
 {
-  CommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
+  DummyHardwareCommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
 
   if ( lOptions.version == 1 )
   {
-    TCPdummyHardware<1,3> lDummyHardware ( lOptions.port , lOptions.delay , false );
+    TCPDummyHardware<1,3> lDummyHardware ( lOptions.port , lOptions.delay , false );
 
     while ( true ) //Is this necessary with the nested "while(true)"'s in the run function?
     {
@@ -50,7 +50,7 @@ int main ( int argc, char* argv[] )
   }
   else if ( lOptions.version == 2 )
   {
-    TCPdummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay, lOptions.bigendian );
+    TCPDummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay, lOptions.bigendian );
 
     while ( true ) //Is this necessary with the nested "while(true)"'s in the run function?
     {

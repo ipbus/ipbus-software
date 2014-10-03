@@ -30,14 +30,14 @@
 */
 
 #include "uhal/tests/UDPDummyHardware.hpp"
-#include "uhal/tests/CommandLineOptions.hpp"
+#include "uhal/tests/DummyHardwareCommandLineOptions.hpp"
 
 using namespace uhal;
 using namespace uhal::tests;
 
 int main ( int argc, char* argv[] )
 {
-  CommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
+  DummyHardwareCommandLineOptions lOptions ( ParseCommandLineOptions ( argc , argv ) );
 
   if ( lOptions.version == 1 )
   {

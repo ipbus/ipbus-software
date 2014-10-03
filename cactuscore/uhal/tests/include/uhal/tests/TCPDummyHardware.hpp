@@ -40,7 +40,7 @@ namespace uhal {
   
     //! Concrete implementation of emulator of hardware using TCP
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    class TCPdummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
+    class TCPDummyHardware : public DummyHardware< IPbus_major , IPbus_minor >
     {
       public:
         //! Define the underlying DummyHardware type to be a more convenient label
@@ -52,7 +52,7 @@ namespace uhal {
           @param aReplyDelay a time delay between the reply and response for the first transaction
           @param aBigEndianHack whether we are using the dummy hardware with a client which uses the big-endian hack.
         */
-        TCPdummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
+        TCPDummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
           DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay , aBigEndianHack ) ,
           mIOservice(),
           mAcceptor ( mIOservice , boost::asio::ip::tcp::endpoint ( boost::asio::ip::tcp::v4() , aPort ) )
@@ -63,7 +63,7 @@ namespace uhal {
         /**
           Destructor
         */
-        ~TCPdummyHardware()
+        ~TCPDummyHardware()
         {
         }
   
