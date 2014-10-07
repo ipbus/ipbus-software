@@ -54,6 +54,9 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 
 
 %post
+# 1) Must stop ControlHub in case RPM being upgraded (i.e. rpm -U), or in case of error on previous RPM erase
+/etc/init.d/controlhub stop > /dev/null || true
+# 2) Normal ControlHub start steps
 /sbin/chkconfig --add controlhub
 /etc/init.d/controlhub start 
 
