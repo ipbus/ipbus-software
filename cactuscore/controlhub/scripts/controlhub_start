@@ -25,7 +25,7 @@ fi
 
 if [ $CONTROLHUBSTATUS != 0 ]; then
   echo -n "Starting Control Hub... "
-  ${DIR}/erl_controlhub +zdbbl 2097151  +sbt db +scl false  +sbwt very_long +swt low  -sname controlhub -setcookie ch_cookie -boot ${CONTROLHUB_ROOTDIR}/releases/2.3.2/start -config ${CONTROLHUB_ROOTDIR}/releases/2.3.2/sys -detached
+  ${DIR}/erl_controlhub +zdbbl 2097151  +sbt db +scl false  +sbwt very_long +swt low  -sname controlhub -setcookie ch_cookie -boot ${CONTROLHUB_ROOTDIR}/releases/2.3.3/start -config ${CONTROLHUB_ROOTDIR}/releases/2.3.3/sys -detached
   # -pa /opt/cactus/lib/erlang/lib/*/ebin/
 
   for i in `seq 1 10`; do
