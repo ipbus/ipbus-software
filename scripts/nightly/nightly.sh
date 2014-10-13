@@ -7,4 +7,4 @@ cd $HOME/nightly
 #svn up
 
 #execute nightly
-python nightly2.py $@ 2>&1 | tee /tmp/nightly.log
+python nightly.py $@ 2>&1 | tee /tmp/nightly.log
