@@ -78,36 +78,34 @@ if __name__== "__main__":
         if o in ("--group"):
             nightly_group=a
             
-    if len(args) == 1:
-        try:
-            p,fn = os.path.split(args[0])
-            n,ext = os.path.splitext(fn)
-            CONF = __import__(n)
-            
-            if n == "ts_dev2" and nightly_group not in ("TS_DEV","SUBSYSTEM_904","SUBSYSTEM_DEV"):
-              sys.stderr.write("ERROR: Need to define group to run on\n\n")
-              print __doc__
-              sys.exit(2)
-              
-            if n == "uhal_config2" : 
-              nightly_group="UHAL"
-              
-            this_nightly = CONF.Nightly(nightly_group, to_email, checkout_as, build_home)
-            
-
-            
-        except ImportError,e:
-            sys.stderr.write("ERROR: Failed to import '%s': %s\n\n" % (args[0],str(e)))
-    else:
-        sys.stderr.write("ERROR: Wrong number of arguments\n\n")
+    if len(args) != 1:
+	sys.stderr.write("ERROR: Wrong number of arguments\n\n")
         print __doc__
-        sys.exit(2)        
+        sys.exit(2)	
+
+    try:
+	p,fn = os.path.split(args[0])
+        n,ext = os.path.splitext(fn)
+            
+        if n == "ts_dev" and nightly_group not in ("TS_DEV","SUBSYSTEM_904","SUBSYSTEM_DEV"):
+            sys.stderr.write("ERROR: Need to define group to run on\n\n")
+            print __doc__
+            sys.exit(2)
+              
+        if n == "uhal_config" : 
+            nightly_group="UHAL"
+        
+	CONF = __import__(n)      
+        this_nightly = CONF.Nightly(nightly_group, to_email, checkout_as, build_home)
+            
+    except ImportError,e:
+        sys.stderr.write("ERROR: Failed to import '%s': %s\n\n" % (args[0],str(e)))
           
     # If no command list is given, use the default set
-    if not commands_via_param :
-      commandsToRun = this_nightly.DEFAULT_COMMANDS
-    else:
-      commandsToRun = commands_via_param
+    commandsToRun = this_nightly.DEFAULT_COMMANDS
+    if commands_via_param:
+        commandsToRun = commands_via_param
+
       
     if listonly :
       print "The following set of commands is available for execution: %s" % ",".join([s for s,c in this_nightly.COMMANDS])
@@ -115,15 +113,14 @@ if __name__== "__main__":
 
     # Check if command list given is valid
     for command in commandsToRun:
-      if command in [s for s,c in this_nightly.COMMANDS] :
-        continue
-      else:
-        sys.stderr.write( "ERROR: Command '" + command + "' is not available.\n" )
-        sys.stderr.write( "List of available commands : %s\n" % str([s for s,c in this_nightly.COMMANDS]) )
-        sys.exit(2)
+      
+        if command not in [s for s,c in this_nightly.COMMANDS]:
+            sys.stderr.write( "ERROR: Command '" + command + "' is not available.\n" )
+            sys.stderr.write( "List of available commands : %s\n" % str([s for s,c in this_nightly.COMMANDS]) )
+            sys.exit(2)
     
-    if not silent :
-      logger.info("Reports will be sent to: %s" % this_nightly.TO_EMAIL )
+    if not silent:
+        logger.info("Reports will be sent to: %s" % this_nightly.TO_EMAIL )
     
     # Execute build/test/etc.
     try:
