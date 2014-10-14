@@ -13,7 +13,7 @@ PACKAGES = \
 else ifeq ($(Set), ts)
 PACKAGES = \
         cactuscore/ts \
-        cactuscore/confdb \
+        cactuscore/candela \
         cactusprojects/central \
 	cactusprojects/csctf \
         cactusprojects/dtsc \
@@ -29,7 +29,7 @@ PACKAGES = \
 else ifeq ($(Set), tsdev)
 PACKAGES = \
         cactuscore/ts \
-        cactuscore/confdb \
+        cactuscore/candela \
         cactusprojects/subsystem 
 else ifeq ($(Set), tssub)
 PACKAGES = \
