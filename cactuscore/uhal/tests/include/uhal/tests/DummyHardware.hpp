@@ -51,7 +51,7 @@ namespace uhal
   namespace tests 
   {
 
-    //! The mask for the address space (size od the address space in one larger than this) 
+    //! The mask for the address space (size of the address space in one larger than this) 
     static const uint32_t ADDRESSMASK = 0x00FFFFFF;
     //! The size of the reply history for IPbus 2.0
     static const uint32_t REPLY_HISTORY_DEPTH = 5;
@@ -96,6 +96,17 @@ namespace uhal
           Function which "starts" the dummy hardware
         */
         virtual void run() = 0;
+
+        virtual void SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue )
+        {
+          mMemory.at ( aAddress ) = aValue;
+        }
+
+        virtual uint32_t GetEndpoint( const uint32_t& aAddress )
+        {
+          return mMemory.at ( aAddress );
+        }        
+
   
         /**
           Function which analyses the received IPbus packet and creates the suitable response
@@ -211,7 +222,7 @@ namespace uhal
   
           for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
           {
-            mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+            mReply.push_back ( GetEndpoint( lAddress & ADDRESSMASK ) );
           }
         }
         /**
@@ -230,7 +241,7 @@ namespace uhal
   
           for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
           {
-            mReply.push_back ( mMemory.at ( lAddress++ & ADDRESSMASK ) );
+            mReply.push_back ( GetEndpoint( lAddress++ & ADDRESSMASK ) );
           }
         }
   
@@ -248,7 +259,7 @@ namespace uhal
   
           while ( aIt != aEnd )
           {
-            mMemory.at ( lAddress & ADDRESSMASK ) = *aIt++;
+            SetEndpoint ( lAddress & ADDRESSMASK , *aIt++ );
           }
   
           uint32_t lExpected;
@@ -281,7 +292,7 @@ namespace uhal
   
           while ( aIt != aEnd )
           {
-            mMemory.at ( lAddress++ & ADDRESSMASK ) = *aIt++;
+            SetEndpoint ( lAddress++ & ADDRESSMASK , *aIt++ );
           }
   
           uint32_t lExpected;
@@ -318,14 +329,18 @@ namespace uhal
           if ( IPbus_major == 1 )
           {
             //IPbus 1.x returns modified value
-            mMemory.at ( lAddress & ADDRESSMASK ) += aAddend;
-            mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            lValue += aAddend;
+            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
+            mReply.push_back ( lValue );
           }
           else
           {
             //IPbus 2.x returns pre-modified value
-            mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
-            mMemory.at ( lAddress & ADDRESSMASK ) += aAddend;
+            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            mReply.push_back ( lValue );
+            lValue += aAddend;
+            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
           }
         }
   
@@ -348,16 +363,20 @@ namespace uhal
           if ( IPbus_major == 1 )
           {
             //IPbus 1.x returns modified value
-            mMemory.at ( lAddress & ADDRESSMASK ) &= aAndTerm;
-            mMemory.at ( lAddress & ADDRESSMASK ) |= aOrTerm;
-            mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
+            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            lValue &= aAndTerm;
+            lValue |= aOrTerm;
+            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
+            mReply.push_back ( lValue );
           }
           else
           {
             //IPbus 2.x returns pre-modified value
-            mReply.push_back ( mMemory.at ( lAddress & ADDRESSMASK ) );
-            mMemory.at ( lAddress & ADDRESSMASK ) &= aAndTerm;
-            mMemory.at ( lAddress & ADDRESSMASK ) |= aOrTerm;
+            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            mReply.push_back ( lValue );
+            lValue &= aAndTerm;
+            lValue |= aOrTerm;
+            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
           }
         }
   
