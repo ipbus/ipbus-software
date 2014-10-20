@@ -72,7 +72,7 @@ namespace uhal
           @param aBigEndianHack whether we are using the dummy hardware with a client which uses the big-endian hack.
         */
         DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) : HostToTargetInspector< IPbus_major , IPbus_minor >() ,
-          mMemory ( ADDRESSMASK+1 , 0x00000000 ),
+          mMemory (),
           mReplyDelay ( aReplyDelay ),
           mReceive ( BUFFER_SIZE , 0x00000000 ),
           mReply ( BUFFER_SIZE , 0x00000000 ),
@@ -99,12 +99,14 @@ namespace uhal
 
         virtual void SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue )
         {
-          mMemory.at ( aAddress ) = aValue;
+          if( ! mMemory.size() ) mMemory.resize( ADDRESSMASK + 1 );
+          mMemory.at ( aAddress & ADDRESSMASK ) = aValue;
         }
 
         virtual uint32_t GetEndpoint( const uint32_t& aAddress )
         {
-          return mMemory.at ( aAddress );
+          if( ! mMemory.size() ) mMemory.resize( ADDRESSMASK + 1 );
+          return mMemory.at ( aAddress & ADDRESSMASK );
         }        
 
   
@@ -222,7 +224,7 @@ namespace uhal
   
           for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
           {
-            mReply.push_back ( GetEndpoint( lAddress & ADDRESSMASK ) );
+            mReply.push_back ( GetEndpoint( lAddress  ) );
           }
         }
         /**
@@ -241,7 +243,7 @@ namespace uhal
   
           for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
           {
-            mReply.push_back ( GetEndpoint( lAddress++ & ADDRESSMASK ) );
+            mReply.push_back ( GetEndpoint( lAddress++ ) );
           }
         }
   
@@ -259,7 +261,7 @@ namespace uhal
   
           while ( aIt != aEnd )
           {
-            SetEndpoint ( lAddress & ADDRESSMASK , *aIt++ );
+            SetEndpoint ( lAddress , *aIt++ );
           }
   
           uint32_t lExpected;
@@ -292,7 +294,7 @@ namespace uhal
   
           while ( aIt != aEnd )
           {
-            SetEndpoint ( lAddress++ & ADDRESSMASK , *aIt++ );
+            SetEndpoint ( lAddress++ , *aIt++ );
           }
   
           uint32_t lExpected;
@@ -329,18 +331,18 @@ namespace uhal
           if ( IPbus_major == 1 )
           {
             //IPbus 1.x returns modified value
-            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            uint32_t lValue( GetEndpoint( lAddress  ) );
             lValue += aAddend;
-            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
+            SetEndpoint( lAddress  ,  lValue );
             mReply.push_back ( lValue );
           }
           else
           {
             //IPbus 2.x returns pre-modified value
-            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            uint32_t lValue( GetEndpoint( lAddress  ) );
             mReply.push_back ( lValue );
             lValue += aAddend;
-            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
+            SetEndpoint( lAddress  ,  lValue );
           }
         }
   
@@ -363,20 +365,20 @@ namespace uhal
           if ( IPbus_major == 1 )
           {
             //IPbus 1.x returns modified value
-            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            uint32_t lValue( GetEndpoint( lAddress  ) );
             lValue &= aAndTerm;
             lValue |= aOrTerm;
-            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
+            SetEndpoint( lAddress  ,  lValue );
             mReply.push_back ( lValue );
           }
           else
           {
             //IPbus 2.x returns pre-modified value
-            uint32_t lValue( GetEndpoint( lAddress & ADDRESSMASK ) );
+            uint32_t lValue( GetEndpoint( lAddress  ) );
             mReply.push_back ( lValue );
             lValue &= aAndTerm;
             lValue |= aOrTerm;
-            SetEndpoint( lAddress & ADDRESSMASK ,  lValue );
+            SetEndpoint( lAddress  ,  lValue );
           }
         }
   
