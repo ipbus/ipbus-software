@@ -190,8 +190,6 @@
 </group>
 
 
-
-
 <group>
 <id>gtgmt</id>
 <name>gtgmt</name>
@@ -296,6 +294,21 @@
        <packagereq type="mandatory">cactusprojects-dtsctsoptorxworker</packagereq>
        <packagereq type="mandatory">cactusprojects-dtsctsoptorxworker-devel</packagereq>
        <packagereq type="mandatory">cactusprojects-dtsctsoptorxworker-debuginfo</packagereq>
+</packagelist>
+</group>
+
+
+<group>
+<id>triggersupervisor_upgrades</id>
+<name>triggersupervisor_upgrades</name>
+<default>true</default>
+<description>TS packages for the upgraded trigger</description>
+<uservisible>true</uservisible>
+<grouplist></grouplist>
+<packagelist>
+	<packagereg type="mandatory">cactusupgrades-S1calol2TsCell</packagereq>
+	<packagereg type="mandatory">cactusupgrades-S1calol2TsCell-devel</packagereq>
+	<packagereg type="mandatory">cactusupgrades-S1calol2TsCell-debuginfo</packagereq>
 </packagelist>
 </group>
 
