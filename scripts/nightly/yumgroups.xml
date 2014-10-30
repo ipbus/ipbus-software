@@ -80,22 +80,6 @@
 <packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
 <packagereq type="mandatory">cactusprojects-centralcell-debuginfo</packagereq>
 
-<packagereq type="mandatory">cactusprojects-ttctsttccicell</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttccicell-devel</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttccicell-debuginfo</packagereq>
-
-<packagereq type="mandatory">cactusprojects-ttctsttcmicell</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttcmicell-devel</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttcmicell-debuginfo</packagereq>
-
-<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell-devel</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell-debuginfo</packagereq>
-
-<packagereq type="mandatory">cactusprojects-ttctsttcutils</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttcutils-devel</packagereq>
-<packagereq type="mandatory">cactusprojects-ttctsttcutils-debuginfo</packagereq>
-
 </packagelist>
 </group>
 
@@ -169,23 +153,6 @@
 		<packagereq type="mandatory">cactusprojects-centralcell</packagereq>
 		<packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
 		<packagereq type="mandatory">cactusprojects-centralcell-debuginfo</packagereq>
-		
-		<packagereq type="mandatory">cactusprojects-ttctsttccicell</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttccicell-devel</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttccicell-debuginfo</packagereq>
-		
-		<packagereq type="mandatory">cactusprojects-ttctsttcmicell</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttcmicell-devel</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttcmicell-debuginfo</packagereq>
-		
-		<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell-devel</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttcmonitoringcell-debuginfo</packagereq>
-		
-		<packagereq type="mandatory">cactusprojects-ttctsttcutils</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttcutils-devel</packagereq>
-		<packagereq type="mandatory">cactusprojects-ttctsttcutils-debuginfo</packagereq>
-		
 	</packagelist>
 </group>
 
