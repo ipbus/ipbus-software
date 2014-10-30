@@ -46,7 +46,7 @@ PACKAGES = \
         cactusprojects/ttc
 else ifeq ($(Set), tsupgrades)
 PACKAGES = \
-	cactusupgrades/projects/ugt \ 
+	cactusupgrades/projects/ugt \
 	cactusupgrades/projects/s1calol2
         
 endif
