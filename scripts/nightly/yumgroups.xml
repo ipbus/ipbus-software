@@ -306,9 +306,9 @@
 <uservisible>true</uservisible>
 <grouplist></grouplist>
 <packagelist>
-	<packagereg type="mandatory">cactusupgrades-S1calol2TsCell</packagereq>
-	<packagereg type="mandatory">cactusupgrades-S1calol2TsCell-devel</packagereq>
-	<packagereg type="mandatory">cactusupgrades-S1calol2TsCell-debuginfo</packagereq>
+	<packagereq type="mandatory">cactusupgrades-S1calol2TsCell</packagereq>
+	<packagereq type="mandatory">cactusupgrades-S1calol2TsCell-devel</packagereq>
+	<packagereq type="mandatory">cactusupgrades-S1calol2TsCell-debuginfo</packagereq>
 </packagelist>
 </group>
 
