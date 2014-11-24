@@ -4,7 +4,7 @@
 
 #Update nightly scripts
 cd $HOME/nightly
-#svn up
+svn up
 
 #execute nightly
 python nightly.py $@ 2>&1 | tee /tmp/nightly.log
