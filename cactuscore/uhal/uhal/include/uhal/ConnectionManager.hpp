@@ -148,6 +148,10 @@ namespace uhal
        */
       static HwInterface getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr );
 
+
+      //! Clears cache of Node tree structure for previously-opened address files (thread safe)
+      static void clearAddressFileCache();
+
     private:
       //! A mutex lock to protect access to the factory methods in multithreaded environments
       static boost::mutex mMutex;

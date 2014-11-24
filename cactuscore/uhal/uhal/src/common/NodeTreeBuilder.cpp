@@ -163,6 +163,12 @@ namespace uhal
   }
 
 
+  void NodeTreeBuilder::clearAddressFileCache()
+  {
+    mNodes.clear();
+  }
+
+
   void NodeTreeBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< const Node* >& aNodes )
   {
     std::string lName ( aProtocol + ( aPath.string() ) );

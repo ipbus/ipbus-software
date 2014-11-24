@@ -136,12 +136,16 @@ namespace uhal
       static NodeTreeBuilder& getInstance();
 
       /**
-      	Construct a node tree from file whose name is specified
+      	Construct a node tree from file whose name is specified. NOT thread safe; for thread-safety, use ConnectionManager getDevice/getDevices methods
       	@param aFilenameExpr a Filename Expression
       	@param aPath a path that will be prepended to relative filenames for local files. Ignored for http files.
       	@return a freshly cloned node tree
       */
       Node* getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath );
+
+      //! Clears address filename -> Node tree cache. NOT thread safe; for tread-safety, use ConnectionManager method
+      void clearAddressFileCache();
+      
 
     private:
       /**

@@ -199,6 +199,14 @@ namespace uhal
   }
 
 
+  void ConnectionManager::clearAddressFileCache()
+  {
+    // Need a mutex lock here to protect access to NodeTreeBuilder
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    log( Info(), "ConnectionManager is clearing the address filename -> Node tree cache");
+    NodeTreeBuilder::getInstance().clearAddressFileCache();
+  }
+
 
 
   void ConnectionManager::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile )
