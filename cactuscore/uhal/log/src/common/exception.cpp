@@ -58,8 +58,8 @@ namespace uhal
       std::exception (),
 #ifdef USE_BACKTRACE
       mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
-#endif
       mThreadId ( boost::this_thread::get_id() ),
+#endif
       mString ( ( char* ) malloc ( 65536 ) ),
       mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
     {
@@ -75,8 +75,8 @@ namespace uhal
       std::exception (),
 #ifdef USE_BACKTRACE
       mBacktrace ( aExc.mBacktrace ),
-#endif
       mThreadId ( aExc.mThreadId ),
+#endif
       mTime ( aExc.mTime ),
       mString ( ( char* ) malloc ( 65536 ) ),
       mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
@@ -89,8 +89,8 @@ namespace uhal
       strcpy ( mAdditionalInfo , aExc.mAdditionalInfo );
 #ifdef USE_BACKTRACE
       mBacktrace = aExc.mBacktrace;
-#endif
       mThreadId = aExc.mThreadId;
+#endif
       mTime = aExc.mTime;
       return *this;
     }

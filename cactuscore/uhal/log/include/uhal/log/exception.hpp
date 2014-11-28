@@ -41,13 +41,13 @@
 
 #include <exception>
 #include <string>
-#include <map>
-#include <list>
 #include <sys/time.h>
 #include <time.h>
 
-// #include "uhal/log/log_inserters.location.hpp"
+#ifdef USE_BACKTRACE
 #include "boost/thread.hpp"
+#endif
+
 
 /**
 	Macro for simplifying the declaration and definition of derived exception types
@@ -144,10 +144,10 @@ namespace uhal
         	List of pointers to the backtrace symbols
         */
         std::vector< void* > mBacktrace;
-#endif
+
         /// The thread ID of the thread in which the exception was originally thrown
         boost::thread::id mThreadId;
-
+#endif
         /// The time at which the exception was thrown
         timeval mTime;
 

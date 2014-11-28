@@ -65,6 +65,7 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "#include <uhal/log/LogLevels.hpp>\n"
             << "#include <uhal/log/exception.hpp>\n"
             << "#include <boost/thread/mutex.hpp>\n"
+            << "#include <boost/thread/lock_guard.hpp>\n"
             << "\n"
             //            << "#define logging() logger log( ThisLocation() );\n"
             << "#define logging()\n"
