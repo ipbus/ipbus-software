@@ -31,6 +31,7 @@
 
 #include "uhal/uhal.hpp"
 #include "uhal/tests/tools.hpp"
+#include "uhal/log/log.hpp"
 
 #include <boost/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
