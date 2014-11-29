@@ -40,30 +40,25 @@
 #ifndef _uhal_ClientInterface_hpp_
 #define _uhal_ClientInterface_hpp_
 
+
 #include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
 
-#include "uhal/log/log.hpp"
-
-#include "uhal/Buffers.hpp"
-
-#include "uhal/grammars/URLGrammar.hpp"
+#include "uhal/grammars/URI.hpp"
 
 #include <vector>
 #include <deque>
-#include <iostream>
 
-#include <map>
-
-//#include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
-// #include <uhal/performance.hpp>
 
 
 
 namespace uhal
 {
+  // Forward declaration
+  class Buffers;
+
   namespace exception
   {
     // //! Exception class to handle the case where an Atomic Transaction was requested but could not be performed. Uses the base uhal::exception implementation of what()

@@ -46,9 +46,7 @@
 
 #include <vector>
 #include <deque>
-#include <iostream>
 
-#include "uhal/log/log.hpp"
 
 //! @todo Need to discuss and finalize which methods in ValWord and ValVector check validity and which don't. Currently it seems a little ad-hoc.
 

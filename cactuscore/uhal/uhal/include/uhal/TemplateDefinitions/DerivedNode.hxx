@@ -30,7 +30,7 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/NodeTreeBuilder.hpp"
+#include "uhal/DerivedNodeFactory.hpp"
 
 namespace uhal
 {
@@ -38,7 +38,7 @@ namespace uhal
   template< typename T >
   RegistrationHelper< T >::RegistrationHelper ( const std::string& aDerivedClassName )
   {
-    NodeTreeBuilder::getInstance().add< T > ( aDerivedClassName );
+    DerivedNodeFactory::getInstance().add< T > ( aDerivedClassName );
   }
 }
 

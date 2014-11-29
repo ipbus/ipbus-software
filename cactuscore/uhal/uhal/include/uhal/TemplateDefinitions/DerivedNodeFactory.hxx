@@ -35,7 +35,7 @@ namespace uhal
 {
 
   template <class T>
-  void NodeTreeBuilder::add ( const std::string& aNodeClassName )
+  void DerivedNodeFactory::add ( const std::string& aNodeClassName )
   {
     boost::unordered_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNodeClassName ) ;
 
@@ -52,7 +52,7 @@ namespace uhal
 
 
   template <class T>
-  Node* NodeTreeBuilder::Creator<T>::create ( const Node& aNode )
+  Node* DerivedNodeFactory::Creator<T>::create ( const Node& aNode )
   {
     log ( Debug() , "Creator called for Node of type " , Quote ( Type < T >() ) );
     return new T ( aNode );

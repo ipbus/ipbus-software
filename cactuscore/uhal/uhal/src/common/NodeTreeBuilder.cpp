@@ -30,9 +30,9 @@
 ---------------------------------------------------------------------------
 */
 
-//#include "uhal/ClientInterface.hpp"
-
 #include "uhal/NodeTreeBuilder.hpp"
+
+#include "uhal/DerivedNodeFactory.hpp"
 #include "uhal/Utilities.hpp"
 #include "uhal/log/log.hpp"
 
@@ -41,6 +41,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
+
 
 namespace uhal
 {
@@ -227,42 +228,6 @@ namespace uhal
   }
 
 
-
-  Node* NodeTreeBuilder::convertToClassType ( Node* aNode )
-  {
-    boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNode->mClassName );
-
-    if ( lIt == mCreators.end() )
-    {
-      log ( Warning , "Class " , Quote ( aNode->mClassName ) , " is unknown to the NodeTreeBuilder class factory." );
-
-      if ( mCreators.size() )
-      {
-        log ( Warning , "Known types are:" );
-
-        for ( boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
-        {
-          log ( Warning , "    > " , lIt->first );
-        }
-      }
-      else
-      {
-        log ( Warning , "No class types have been defined" );
-      }
-
-      log ( Warning, "Will return a plain node for now, but you have been warned!" );
-      return aNode;
-    }
-    else
-    {
-      Node* lClassNode ( lIt->second->create ( *aNode ) );
-      delete aNode;
-      return lClassNode;
-    }
-  }
-
-
-
   Node* NodeTreeBuilder::plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode )
   {
     Node* lNode ( new Node() );
@@ -282,7 +247,7 @@ namespace uhal
 
     if ( lNode->mClassName.size() )
     {
-      return convertToClassType ( lNode );
+      return DerivedNodeFactory::getInstance().convertToClassType ( lNode );
     }
     else
     {
@@ -311,7 +276,7 @@ namespace uhal
 
     if ( lNode->mClassName.size() )
     {
-      return convertToClassType ( lNode );
+      return DerivedNodeFactory::getInstance().convertToClassType ( lNode );
     }
     else
     {

@@ -44,13 +44,9 @@
 #include "uhal/definitions.hpp"
 #include "uhal/Node.hpp"
 
-//#include <boost/utility.hpp>
-//#include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
-//#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
-//#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_symbols.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 #include "uhal/grammars/NodeTreeClassAttributeGrammar.hpp"
 #include "uhal/grammars/NodeTreeParametersGrammar.hpp"
@@ -59,8 +55,6 @@
 #include "pugixml/pugixml.hpp"
 
 #include "uhal/XmlParser.hpp"
-
-#include <map>
 
 
 namespace uhal
@@ -101,8 +95,6 @@ namespace uhal
     //    ExceptionClass ( LabelUnknownToClassFactory , "Exception class to handle the case where a class is requested which does not exist in the class factory." );
   }
 
-  //! EXPERIMENTAL! Helper class to add Nodes derived from DerivedNode to the class factory
-  template< typename T > struct RegistrationHelper;
 
   /**
     A class to build a node tree from an Address table file
@@ -110,10 +102,6 @@ namespace uhal
   */
   class NodeTreeBuilder: private boost::noncopyable
   {
-    public:
-
-      //! EXPERIMENTAL! Give the RegistrationHelper access to the private factory
-      template< typename T > friend struct RegistrationHelper;
 
     private:
       /**
@@ -136,7 +124,7 @@ namespace uhal
       static NodeTreeBuilder& getInstance();
 
       /**
-      	Construct a node tree from file whose name is specified. NOT thread safe; for thread-safety, use ConnectionManager getDevice/getDevices methods
+        Construct a node tree from file whose name is specified. NOT thread safe; for thread-safety, use ConnectionManager getDevice/getDevices methods
       	@param aFilenameExpr a Filename Expression
       	@param aPath a path that will be prepended to relative filenames for local files. Ignored for http files.
       	@return a freshly cloned node tree
@@ -145,7 +133,7 @@ namespace uhal
 
       //! Clears address filename -> Node tree cache. NOT thread safe; for tread-safety, use ConnectionManager method
       void clearAddressFileCache();
-      
+
 
     private:
       /**
@@ -209,77 +197,11 @@ namespace uhal
       std::deque< boost::filesystem::path > mFileCallStack;
 
     private:
-
-      Node* convertToClassType ( Node* aNode );
-
-
-      /**
-      Method to create an associate between a node type identifier and a Creator of that particular node type
-      @param aNodeClassName the node type identifier
-      */
-      template <class T>
-      void add ( const std::string& aNodeClassName );
-
-      //! An abstract base class for defining the interface to the creators
-      class CreatorInterface
-      {
-        public:
-          /**
-          Default constructor
-          */
-          CreatorInterface()
-          {
-          }
-          /**
-          Destructor
-          */
-          virtual ~CreatorInterface()
-          {
-          }
-          /**
-          Interface to a function which create a new IPbus client based on the protocol identifier specified
-          @param aAttributes a vector containing a set of name value pairs which were passed as arguments
-          @return a new node tree
-          */
-          virtual Node* create ( const Node& aNode ) = 0;
-      };
-
-      //! Templated concrete implementation with a CreatorInterface interface
-      template <class T>
-      class Creator: public CreatorInterface
-      {
-        public:
-
-          /**
-          Default constructor
-          */
-          Creator()
-          {
-          }
-          /**
-          Destructor
-          */
-          virtual ~Creator()
-          {
-          }
-          /**
-          Concrete function which creates a new IPbus client based on the protocol identifier specified
-          @param aAttributes a vector containing a set of name value pairs which were passed as arguments
-          @return a new node tree
-          */
-          Node* create ( const Node& aNode );
-      };
-
-
-    private:
       //! The single instance of the class
       static NodeTreeBuilder* mInstance;
 
       //! Hash map associating a Node tree with a file name so that we do not need to repeatedly parse the xml documents if someone asks for a second copy of a particular node tree
       boost::unordered_map< std::string , const Node* > mNodes;
-
-      //! Hash map associating a creator for a particular node type with a string identifier for that node type
-      boost::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;
 
       //! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
       static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>
@@ -304,7 +226,5 @@ namespace uhal
   };
 
 }
-
-#include "uhal/TemplateDefinitions/NodeTreeBuilder.hxx"
 
 #endif

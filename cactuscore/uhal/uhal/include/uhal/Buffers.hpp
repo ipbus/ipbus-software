@@ -39,12 +39,12 @@
 #ifndef _uhal_Buffers_hpp_
 #define _uhal_Buffers_hpp_
 
+
 #include <deque>
 //#include "uhal/IPbusPacketInfo.hpp"
 
 #include "uhal/ValMem.hpp"
 
-#include "boost/date_time/posix_time/posix_time_duration.hpp"
 
 namespace uhal
 {

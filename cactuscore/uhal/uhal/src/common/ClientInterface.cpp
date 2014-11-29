@@ -32,6 +32,7 @@
 
 #include "uhal/ClientInterface.hpp"
 
+#include "uhal/Buffers.hpp"
 #include "uhal/Utilities.hpp"
 #include <sstream>
 

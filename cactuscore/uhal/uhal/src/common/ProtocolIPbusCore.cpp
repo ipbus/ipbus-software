@@ -36,6 +36,9 @@
 
 #include <cstring>
 
+#include "uhal/Buffers.hpp"
+#include "uhal/log/log.hpp"
+
 
 std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType )
 {

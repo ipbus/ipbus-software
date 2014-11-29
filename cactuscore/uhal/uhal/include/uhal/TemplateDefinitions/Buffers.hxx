@@ -31,8 +31,7 @@
 */
 
 #include <memory.h>
-#include <iostream>
-#include <iomanip>
+
 
 namespace uhal
 {

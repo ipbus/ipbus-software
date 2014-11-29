@@ -43,24 +43,20 @@
 #include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
-#include "uhal/Utilities.hpp"
 #include "uhal/ClientInterface.hpp"
 
-#include <exception>
-#include <utility>
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <iterator>
-#include "pugixml/pugixml.hpp"
+#include "boost/unordered_map.hpp"
 
+#include <vector>
+#include <string>
+#include <iterator>
 
 
 namespace uhal
 {
   class HwInterface;
   class NodeTreeBuilder;
+  class DerivedNodeFactory;
 
   namespace exception
   {
@@ -89,6 +85,7 @@ namespace uhal
     private:
       friend class HwInterface;
       friend class NodeTreeBuilder;
+      friend class DerivedNodeFactory;
 
     public:
       class const_iterator : public std::iterator< std::forward_iterator_tag , Node , ptrdiff_t, const Node* , const Node& >

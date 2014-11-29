@@ -35,6 +35,9 @@
 #include <cstring>
 #include <arpa/inet.h>
 
+#include "uhal/Buffers.hpp"
+
+
 namespace uhal
 {
 

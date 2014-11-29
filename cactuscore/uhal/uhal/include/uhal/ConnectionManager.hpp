@@ -40,20 +40,28 @@
 #ifndef _uhal_ConnectionManager_hpp_
 #define _uhal_ConnectionManager_hpp_
 
+
 #include "uhal/log/exception.hpp"
 #include "uhal/HwInterface.hpp"
-#include "uhal/Utilities.hpp"
 
-//#include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
-//#include <boost/regex.hpp>
-#include <boost/thread/mutex.hpp>
-
-#include "pugixml/pugixml.hpp"
 
 #include <vector>
 #include <set>
 #include <map>
+
+
+// Forward declarations
+namespace pugi
+{
+  class xml_node;
+}
+
+namespace boost
+{
+  class mutex;
+}
+
 
 namespace uhal
 {
@@ -147,7 +155,6 @@ namespace uhal
       	@return a HwInterface which encapsulates the Node tree and the IPbus Client
        */
       static HwInterface getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr );
-
 
       //! Clears cache of Node tree structure for previously-opened address files (thread safe)
       static void clearAddressFileCache();
