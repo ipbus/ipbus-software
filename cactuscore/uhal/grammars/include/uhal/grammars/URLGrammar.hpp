@@ -30,43 +30,16 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _uhal_URIGrammar_hpp_
-#define _uhal_URIGrammar_hpp_
+#ifndef _uhal_grammars_URIGrammar_hpp_
+#define _uhal_grammars_URIGrammar_hpp_
 
 #include <boost/fusion/adapted/std_pair.hpp>
-//#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_grammar.hpp>
 
 #include <string>
 #include <vector>
 
-
-namespace uhal
-{
-  //! boost::fusion requires us to typedef our template types, so typedef a container which can hold key/value pairs
-  typedef std::vector< std::pair<std::string, std::string> > NameValuePairVectorType;
-
-  //! Struct to store a URI when parsed by boost spirit
-  struct URI
-  {
-    //! The "protocol" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"
-    std::string mProtocol;
-    //! The "host" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"
-    std::string mHostname;
-    //! The "port" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"
-    std::string mPort;
-    //! The "patha/pathb/blah" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"
-    std::string mPath;
-    //! The "ext" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"
-    std::string mExtension;
-    //! The "key1=val1&key2=val2&key3=val3" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"	stored as a vector of key/val pairs
-    NameValuePairVectorType mArguments;
-  };
-}
-
-
-
-std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI );
+#include "uhal/grammars/URI.hpp"
 
 
 // Call to BOOST_FUSION_ADAPT_STRUCT must be at global scope

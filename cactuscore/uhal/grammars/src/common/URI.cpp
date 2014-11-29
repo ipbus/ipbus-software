@@ -30,28 +30,26 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/grammars/URLGrammar.hpp"
+#include "uhal/grammars/URI.hpp"
 
-#include <boost/spirit/include/qi.hpp>
+#include <iostream>
 
 
-namespace grammars
+std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI )
 {
-  URIGrammar::URIGrammar() :
-    URIGrammar::base_type ( start )
+  aStr << " > protocol : " << aURI.mProtocol << "\n";
+  aStr << " > hostname : " << aURI.mHostname << "\n";
+  aStr << " > port : " << aURI.mPort << "\n";
+  aStr << " > path : " << aURI.mPath << "\n";
+  aStr << " > extension : " << aURI.mExtension << "\n";
+  aStr << " > arguments :\n";
+
+  for ( uhal::NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin() ; lIt != aURI.mArguments.end() ; ++lIt )
   {
-    using namespace boost::spirit;
-    start = protocol > hostname > port > - ( path ) > - ( extension ) > - ( data_pairs_vector );
-    protocol = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( "://" );
-    hostname = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( ":" );
-    port 	 = + ( qi::char_ - ascii::punct ) ;
-    path 				= qi::lit ( "/" ) > + ( qi::char_ - qi::lit ( "." ) - qi::lit ( "?" ) );
-    extension 			= qi::lit ( "." ) > + ( qi::char_ - qi::lit ( "?" ) ) ;
-    data_pairs_vector 	= qi::lit ( "?" ) > *data_pairs;
-    data_pairs = data_pairs_1 > data_pairs_2;
-    data_pairs_1 = + ( qi::char_ - qi::lit ( "=" ) ) > qi::lit ( "=" );
-    data_pairs_2 = * ( qi::char_ - qi::lit ( "&" ) ) >> - ( qi::lit ( "&" ) );
+    aStr << "   > " << lIt->first << " = " << lIt->second << "\n";
   }
 
+  aStr << std::flush;
+  return aStr;
 }
 

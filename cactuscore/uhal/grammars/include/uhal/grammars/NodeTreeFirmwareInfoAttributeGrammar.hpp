@@ -34,7 +34,6 @@
 #define _uhal_NodeTreeFirmwareInfoAttributeGrammar_hpp_
 
 #include <boost/fusion/adapted/std_pair.hpp>
-//#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_grammar.hpp>
 
 #include <string>
