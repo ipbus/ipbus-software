@@ -32,7 +32,6 @@
 
 #include "boost/date_time/gregorian/gregorian.hpp"
 
-#include <cstring>
 #include <arpa/inet.h>
 
 #include "uhal/Buffers.hpp"

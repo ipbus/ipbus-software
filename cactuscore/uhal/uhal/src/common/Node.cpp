@@ -32,18 +32,15 @@
 
 #include "uhal/Node.hpp"
 
+#include "uhal/log/log.hpp"
 #include "uhal/HwInterface.hpp"
 #include "uhal/ValMem.hpp"
 #include "uhal/NodeTreeBuilder.hpp"
 #include "uhal/Utilities.hpp"
 
-#include "uhal/log/log.hpp"
-
 #include <boost/regex.hpp>
 
 #include <iomanip>
-
-#include "uhal/log/BacktraceSymbols.hpp"
 
 #ifdef __GNUG__
 #include <cxxabi.h>

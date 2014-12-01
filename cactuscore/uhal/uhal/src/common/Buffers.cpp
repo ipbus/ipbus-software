@@ -31,11 +31,7 @@
 */
 
 #include "uhal/Buffers.hpp"
-// #include "uhal/performance.hpp"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
-#include <cstring>
 
 namespace uhal
 {

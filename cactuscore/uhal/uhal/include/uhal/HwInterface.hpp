@@ -42,8 +42,6 @@
 #include "uhal/Node.hpp"
 #include "uhal/ClientInterface.hpp"
 
-//#include <boost/regex.hpp>
-
 
 namespace uhal
 {

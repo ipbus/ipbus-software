@@ -34,8 +34,6 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <cstring>
-
 #include "uhal/Buffers.hpp"
 #include "uhal/log/log.hpp"
 

@@ -41,12 +41,12 @@
 #define _uhal_DerivedNodeFactory_hpp_
 
 
-#include "uhal/log/exception.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/Node.hpp"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 
 namespace uhal
@@ -121,7 +121,7 @@ namespace uhal
           {
           }
           /**
-          Interface to a function which create a new IPbus client based on the protocol identifier specified
+          Interface to a function which create a new derived node class based on the class name
           @param aAttributes a vector containing a set of name value pairs which were passed as arguments
           @return a new node tree
           */

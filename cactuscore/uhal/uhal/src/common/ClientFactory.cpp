@@ -37,9 +37,8 @@
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 
-#include "uhal/grammars/URLGrammar.hpp"
-
 #include "uhal/ClientFactory.hpp"
+
 
 namespace uhal
 {
@@ -68,13 +67,13 @@ namespace uhal
   }
 
 
-
-
   ClientFactory* ClientFactory::mInstance = NULL;
+
 
   ClientFactory::ClientFactory()
   {
   }
+
 
   ClientFactory::~ClientFactory()
   {

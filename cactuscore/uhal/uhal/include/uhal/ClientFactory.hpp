@@ -42,13 +42,12 @@
 
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"
-#include "uhal/Utilities.hpp"
 #include "uhal/log/log.hpp"
 
-//#include "boost/utility.hpp"
 #include <boost/shared_ptr.hpp>
 
 #include <map>
+
 
 namespace uhal
 {

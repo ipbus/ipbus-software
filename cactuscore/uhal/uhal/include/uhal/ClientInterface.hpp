@@ -41,11 +41,10 @@
 #define _uhal_ClientInterface_hpp_
 
 
+#include "uhal/grammars/URI.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
-
-#include "uhal/grammars/URI.hpp"
 
 #include <vector>
 #include <deque>

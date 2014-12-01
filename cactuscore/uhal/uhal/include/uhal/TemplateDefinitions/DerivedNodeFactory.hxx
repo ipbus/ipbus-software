@@ -41,9 +41,7 @@ namespace uhal
 
     if ( lIt != mCreators.end() )
     {
-      //
-      //ProtocolAlreadyExist().throwFrom( ThisLocation() );
-      log ( Warning() , "Protocol \"" , aNodeClassName , "\" already exists in map of creators. Continuing for now, but be warned." );
+      log ( Warning() , "Derived node \"" , aNodeClassName , "\" already exists in map of creators. Continuing for now, but be warned." );
       return;
     }
 

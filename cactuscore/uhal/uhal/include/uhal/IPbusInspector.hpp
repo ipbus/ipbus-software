@@ -39,9 +39,9 @@
 #ifndef IPbusInspector_hpp
 #define IPbusInspector_hpp
 
-//#include "uhal/uhal.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/ProtocolIPbus.hpp"
+
 
 // Using the uhal namespace
 namespace uhal

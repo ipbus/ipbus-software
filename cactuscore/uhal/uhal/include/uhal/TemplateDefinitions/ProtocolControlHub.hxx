@@ -30,13 +30,6 @@
 ---------------------------------------------------------------------------
 */
 
-// #include "uhal/performance.hpp"
-// #include <boost/lambda/bind.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/lambda/lambda.hpp>
-
-#include <sys/time.h>
-
 #include "uhal/Buffers.hpp"
 
 
