@@ -9,6 +9,7 @@ usage() ->
    io:format("Usage:  ipbus2_status.escript hostname port~n").
 
 
+
 main( [ ArgHost , ArgPort ] ) ->
    io:format("Parsing args~n"),
    Port = list_to_integer(ArgPort),
@@ -22,7 +23,9 @@ main( ["--help"] ) ->
 
 main( _ ) ->
    io:format("Incorrect usage!~n"),
-   usage().
+   usage(),
+   halt(1).
+
 
 
 run( Host, Port ) ->
