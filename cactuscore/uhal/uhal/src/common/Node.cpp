@@ -412,7 +412,7 @@ namespace uhal
     if ( lIt==mChildrenMap.end() )
     {
       exception::NoBranchFoundWithGivenUID lExc;
-      log ( lExc , "No branch found with ID-path " ,  Quote ( aId ) );
+      log ( lExc , "No branch found with ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) );
       std::size_t lPos ( std::string::npos );
       bool lPartialMatch ( false );
 
@@ -429,8 +429,8 @@ namespace uhal
 
         if ( lIt!=mChildrenMap.end() )
         {
-          log ( lExc , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) );
-          log ( lExc , "Tree structure of partial match is:" , * ( lIt->second ) );
+          log ( lExc , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) );
+          log ( Error() , "Tree structure of partial match is:" , * ( lIt->second ) );
           lPartialMatch = true;
           break;
         }
@@ -440,7 +440,8 @@ namespace uhal
 
       if ( !lPartialMatch )
       {
-        log ( lExc , "Not even a partial match found for ID-path " ,  Quote ( aId ) , ". If this address looks correct, please check for leading, trailing and stray whitespace.\nTree structure is:" , *this );
+        log ( lExc , "Not even a partial match found for ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) , ". If this address looks correct, please check for leading, trailing and stray whitespace." );
+        log ( Error(), "Tree structure is:" , *this );
       }
 
       throw lExc;
