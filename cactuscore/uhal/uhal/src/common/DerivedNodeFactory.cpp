@@ -68,7 +68,7 @@ namespace uhal
 
     if ( lIt == mCreators.end() )
     {
-      log ( Warning , "Class " , Quote ( aNode->mClassName ) , " is unknown to the NodeTreeBuilder class factory." );
+      log ( Warning , "Class " , Quote ( aNode->mClassName ) , " is unknown to the NodeTreeBuilder class factory. A plain node will be returned instead." );
 
       if ( mCreators.size() )
       {
@@ -84,7 +84,6 @@ namespace uhal
         log ( Warning , "No class types have been defined" );
       }
 
-      log ( Warning, "Will return a plain node for now, but you have been warned!" );
       return aNode;
     }
     else
