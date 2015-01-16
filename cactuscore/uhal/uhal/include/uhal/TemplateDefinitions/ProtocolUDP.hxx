@@ -191,7 +191,7 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::connect()
   {
-    log ( Info() , "Creating new UDP socket, as it appears to have been closed..." );
+    log ( Info() , "Creating new UDP socket for device " , Quote ( this->uri() ) , ", as it appears to have been closed..." );
     //mSocket = boost::asio::ip::udp::socket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) );
     mSocket.open ( boost::asio::ip::udp::v4() );
     //    boost::asio::socket_base::non_blocking_io lNonBlocking ( true );
@@ -404,7 +404,7 @@ namespace uhal
 
     if ( aBytesTransferred != mReplyBuffers->replyCounter() )
     {
-      log ( Error() , "Expecting " , Integer ( mReplyBuffers->replyCounter() ) , "-byte UDP payload from target " , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , " bytes. Validating returned data to work out where error occurred." );
+      log ( Error() , "Expected " , Integer ( mReplyBuffers->replyCounter() ) , "-byte UDP payload from target " , Quote ( this->uri() ) , ", but only received " , Integer ( aBytesTransferred ) , " bytes. Validating returned data to work out where error occurred." );
     }
 
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
@@ -468,7 +468,7 @@ namespace uhal
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 #endif
       mAsynchronousException = new exception::ValidationError ();
-      log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) );
+      log ( *mAsynchronousException , "Exception caught during reply validation for UDP device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
     }
 
 #ifdef RUN_ASIO_MULTITHREADED
@@ -531,11 +531,11 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
       if (  mDispatchBuffers || mReplyBuffers )
       {
-        log ( Warning() , "Closing socket for URI " , Quote ( this->uri() ) , " since deadline has passed" );
+        log ( Warning() , "Closing UDP socket for URI " , Quote ( this->uri() ) , " since deadline has passed" );
       }
       else
       {
-        log ( Debug() , "Closing socket to URI " , Quote ( this->uri() ) , " since no communication in last 60 seconds" );
+        log ( Debug() , "Closing UDP socket for URI " , Quote ( this->uri() ) , " since no communication in last 60 seconds" );
       }
 #endif
       // The deadline has passed. The socket is closed so that any outstanding

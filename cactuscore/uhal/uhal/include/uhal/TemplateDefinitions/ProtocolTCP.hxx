@@ -610,7 +610,7 @@ namespace uhal
       {
         boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
         mAsynchronousException = new exception::ValidationError ();
-        log ( *mAsynchronousException , "Exception caught during reply validation for URI: " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
+        log ( *mAsynchronousException , "Exception caught during reply validation for TCP device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
       }
 
       if ( mAsynchronousException )
@@ -654,7 +654,7 @@ namespace uhal
     catch ( exception::exception& aExc )
     {
       mAsynchronousException = new exception::ValidationError ();
-      log ( *mAsynchronousException , "Exception caught during reply validation; what returned: " , Quote ( aExc.what() ) );
+      log ( *mAsynchronousException , "Exception caught during reply validation for URI: " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
     }
 
     if ( mAsynchronousException )
@@ -682,11 +682,11 @@ namespace uhal
 #ifdef RUN_ASIO_MULTITHREADED
       if (  mDispatchBuffers.size() || mReplyBuffers.size() )
       {
-        log ( Warning() , "Closing socket for URI " , Quote ( this->uri() ) , " since deadline has passed" );
+        log ( Warning() , "Closing TCP socket for device with URI " , Quote ( this->uri() ) , " since deadline has passed" );
       }
       else
       {
-        log ( Debug() , "Closing socket for URI " , Quote ( this->uri() ) , " since no communication in 60 seconds" );
+        log ( Debug() , "Closing TCP socket for device with URI " , Quote ( this->uri() ) , " since no communication in 60 seconds" );
       }
 #endif
       // The deadline has passed. The socket is closed so that any outstanding asynchronous operations are cancelled.

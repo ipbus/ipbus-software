@@ -316,7 +316,7 @@ namespace uhal
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
     {
       uhal::exception::IPbus2PacketHeaderMismatch* lExc = new uhal::exception::IPbus2PacketHeaderMismatch();
-      log ( *lExc , "Returned Packet Header " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) , IntFmt<hex,fixed>() ) ,
+      log ( *lExc , "Returned Packet Header from URI " , Quote ( this->uri() ) , ", " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) , IntFmt<hex,fixed>() ) ,
             " does not match that sent " , Integer ( * ( uint32_t* ) ( aSendBufferStart ) , IntFmt<hex,fixed>() ) );
       return lExc;
     }
@@ -367,7 +367,7 @@ namespace uhal
       case R_A_I :
       {
         exception::ValidationError lExc;
-        log ( lExc , "Byte-Order-Transaction undefined in IPbus version 2" );
+        log ( lExc , "Reserved address information transaction is undefined in IPbus version 2" );
         throw lExc;
       }
     }
