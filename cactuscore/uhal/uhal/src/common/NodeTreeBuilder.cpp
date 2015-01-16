@@ -185,7 +185,7 @@ namespace uhal
 
     if ( lExtension == ".xml" )
     {
-      log ( Info() , "XML file" );
+      log ( Info() , "Reading XML address file " , Quote( aPath.c_str() ) );
       pugi::xml_document lXmlDocument;
       pugi::xml_parse_result lLoadResult = lXmlDocument.load_buffer_inplace ( & ( aFile[0] ) , aFile.size() );
 
