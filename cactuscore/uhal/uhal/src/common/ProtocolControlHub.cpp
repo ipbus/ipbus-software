@@ -129,7 +129,7 @@ namespace uhal
     catch ( const std::exception& aExc )
     {
       exception::ParsingTargetURLfailed lExc;
-      log ( lExc , "Boost::ASIO returned address " , Quote ( lAddr ) , " which could not be parsed as " , Quote ( "aaa.bbb.ccc.ddd" ) );
+      log ( lExc , "Boost::ASIO returned address " , Quote ( lAddr ) , " for hostname " , Quote (lIP.first) ,  " which could not be parsed as " , Quote ( "aaa.bbb.ccc.ddd" ) );
       throw lExc;
     }
 
