@@ -314,6 +314,8 @@ namespace uhal
 
   void Node::stream ( std::ostream& aStr , std::size_t aIndent ) const
   {
+    std::ios_base::fmtflags original_flags = std::cout.flags();
+
     aStr << std::setfill ( '0' ) << std::uppercase;
     aStr << '\n' << std::string ( aIndent , ' ' ) << "+ ";
     aStr << "Node \"" << mUid << "\", ";
@@ -394,6 +396,10 @@ namespace uhal
       }
     }
 
+    // Reset the integer base (i.e. std::dec, std::hex, etc) to its original value
+    aStr.flags(original_flags);
+
+    // Recursively print children 
     for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       ( **lIt ).stream ( aStr , aIndent+2 );
