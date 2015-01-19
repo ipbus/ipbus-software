@@ -501,7 +501,7 @@ namespace uhal
     }
 
     exception::WriteAccessDenied lExc;
-    log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
+    log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied write access" );
     throw lExc;
   }
 
@@ -511,7 +511,7 @@ namespace uhal
     if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
       exception::BulkTransferOnSingleRegister lExc;
-      log ( lExc , "Bulk Transfer requested on single register node " , Quote ( mUid ) );
+      log ( lExc , "Bulk Transfer requested on single register node " , Quote ( this->getPath() ) );
       log ( lExc , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
@@ -519,7 +519,7 @@ namespace uhal
     if ( ( mSize != 1 ) && ( aValues.size() >mSize ) )
     {
       exception::BulkTransferRequestedTooLarge lExc;
-      log ( lExc , "Requested bulk write of greater size than the specified endpoint size of node ", Quote ( mUid ) );
+      log ( lExc , "Requested bulk write of greater size than the specified endpoint size of node ", Quote ( this->getPath() ) );
       throw lExc;
     }
 
@@ -530,7 +530,7 @@ namespace uhal
     else
     {
       exception::WriteAccessDenied lExc;
-      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
+      log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied write access" );
       throw lExc;
     }
     
@@ -542,14 +542,14 @@ namespace uhal
     if ( mMode == defs::NON_INCREMENTAL )
     {
       exception::BulkTransferOffsetRequestedForFifo lExc;
-      log ( lExc , "Bulk Transfer Offset requested for non-incremental node " , Quote ( mUid ) );
+      log ( lExc , "Bulk Transfer Offset requested for non-incremental node " , Quote ( this->getPath() ) );
       throw lExc;
     }
 
     if ( mMode == defs::SINGLE ) //We allow the user to call a bulk access of size=1 to a single register
     {
       exception::BulkTransferOffsetRequestedForSingleRegister lExc;
-      log ( lExc , "Bulk Transfer with offset requested on single register node " , Quote ( mUid ) );
+      log ( lExc , "Bulk Transfer with offset requested on single register node " , Quote ( this->getPath() ) );
       log ( lExc , "If you were expecting an incremental write, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
@@ -557,7 +557,7 @@ namespace uhal
     if ( (aValues.size()+aOffset) > mSize )
     {
       exception::BulkTransferRequestedTooLarge lExc;
-      log ( lExc , "Requested bulk write size and offset would overflow the specified endpoint node ", Quote ( mUid ) );
+      log ( lExc , "Requested bulk write size and offset would overflow the specified endpoint node ", Quote ( this->getPath() ) );
       throw lExc;
     }
 
@@ -568,7 +568,7 @@ namespace uhal
     else
     {
       exception::WriteAccessDenied lExc;
-      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied write access" );
+      log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied write access" );
       throw lExc;
     }
     
@@ -590,7 +590,7 @@ namespace uhal
     }
 
     exception::ReadAccessDenied lExc;
-    log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
+    log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied read access" );
     throw lExc;
     
   }
@@ -601,7 +601,7 @@ namespace uhal
     if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
       exception::BulkTransferOnSingleRegister lExc;
-      log ( lExc , "Bulk Transfer requested on single register node ", Quote ( mUid ) );
+      log ( lExc , "Bulk Transfer requested on single register node ", Quote ( this->getPath() ) );
       log ( lExc , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
@@ -609,7 +609,7 @@ namespace uhal
     if ( ( mSize != 1 ) && ( aSize>mSize ) )
     {
       exception::BulkTransferRequestedTooLarge lExc;
-      log ( lExc , "Requested bulk read of greater size than the specified endpoint size of node " , Quote ( mUid ) );
+      log ( lExc , "Requested bulk read of greater size than the specified endpoint size of node " , Quote ( this->getPath() ) );
       throw lExc;
     }
 
@@ -620,7 +620,7 @@ namespace uhal
     else
     {
       exception::ReadAccessDenied lExc;
-      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
+      log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied read access" );
       throw lExc;
     }
     
@@ -632,14 +632,14 @@ namespace uhal
     if ( mMode == defs::NON_INCREMENTAL )
     {
       exception::BulkTransferOffsetRequestedForFifo lExc;
-      log ( lExc , "Bulk Transfer offset requested for non-incremental node " , Quote ( mUid ) );
+      log ( lExc , "Bulk Transfer offset requested for non-incremental node " , Quote ( this->getPath() ) );
       throw lExc;
     }
 
     if ( mMode == defs::SINGLE ) //We do not allow the user to use an offset from a single register
     {
       exception::BulkTransferOffsetRequestedForSingleRegister lExc;
-      log ( lExc , "Bulk Transfer with offset requested on single register node ", Quote ( mUid ) );
+      log ( lExc , "Bulk Transfer with offset requested on single register node ", Quote ( this->getPath() ) );
       log ( lExc , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
       throw lExc;
     }
@@ -647,7 +647,7 @@ namespace uhal
     if ( (aSize+aOffset) > mSize )
     {
       exception::BulkTransferRequestedTooLarge lExc;
-      log ( lExc , "Requested bulk read size and offset would overflow the specified endpoint node " , Quote ( mUid ) );
+      log ( lExc , "Requested bulk read size and offset would overflow the specified endpoint node " , Quote ( this->getPath() ) );
       throw lExc;
     }
 
@@ -658,7 +658,7 @@ namespace uhal
     else
     {
       exception::ReadAccessDenied lExc;
-      log ( lExc , "Node " , Quote ( mUid ) , ": permissions denied read access" );
+      log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied read access" );
       throw lExc;
     }
     
