@@ -52,7 +52,7 @@ BOOST_FUSION_ADAPT_STRUCT (
   ( std::string , mPath )
   ( std::string , mExtension )
   ( uhal::NameValuePairVectorType, mArguments )
-);
+)
 
 
 namespace grammars

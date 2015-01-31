@@ -78,7 +78,7 @@ BOOST_FUSION_ADAPT_STRUCT (
   ( std::string, status_string )
   ( std::string, headers )
   ( std::vector< uint8_t >, content )
-);
+)
 
 
 namespace grammars

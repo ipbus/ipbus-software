@@ -50,8 +50,8 @@ namespace uhal
   /*  namespace exception
   {
     // Exception class to handle the case where we are unable to parse a badly formed IPbus header.
-    ExceptionClass ( UnableToParseHeader , "Exception class to handle the case where we are unable to parse a badly formed IPbus header." );
-    ExceptionClass ( IllegalPacketHeader , "Exception class to handle the case where an illegal packet header is received." );
+    ExceptionClass ( UnableToParseHeader , "Exception class to handle the case where we are unable to parse a badly formed IPbus header." )
+    ExceptionClass ( IllegalPacketHeader , "Exception class to handle the case where an illegal packet header is received." )
   }
   */
 

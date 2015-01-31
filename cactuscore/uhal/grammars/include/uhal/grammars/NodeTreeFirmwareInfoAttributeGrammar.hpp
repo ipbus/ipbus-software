@@ -66,7 +66,7 @@ BOOST_FUSION_ADAPT_STRUCT (
   uhal::NodeTreeFirmwareInfoAttribute,
   ( std::string , mType )
   ( uhal::NameValuePairVectorType, mArguments )
-);
+)
 
 
 namespace grammars

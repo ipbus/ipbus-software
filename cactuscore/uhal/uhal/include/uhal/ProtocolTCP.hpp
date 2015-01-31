@@ -66,13 +66,13 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the TCP connection timed out.
-    ExceptionClass ( TcpTimeout , "Exception class to handle the case where the TCP connection timed out." );
+    ExceptionClass ( TcpTimeout , "Exception class to handle the case where the TCP connection timed out." )
     //! Exception class to handle a failure to create a TCP socket.
-    ExceptionClass ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." );
+    ExceptionClass ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." )
     //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
-    ExceptionClass ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." );
+    ExceptionClass ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." )
     //! Exception class to handle the case where ASIO returned an error.
-    ExceptionClass ( ASIOTcpError , "Exception class to handle the case where ASIO returned an error." );
+    ExceptionClass ( ASIOTcpError , "Exception class to handle the case where ASIO returned an error." )
 
   }
 

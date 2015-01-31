@@ -63,16 +63,16 @@ namespace uhal
     // //! Exception class to handle the case where an Atomic Transaction was requested but could not be performed. Uses the base uhal::exception implementation of what()
     // class AtomicTransactionSize : public exception {};
     //! Exception class to handle the case where pinging of a client failed.
-    ExceptionClass ( PingFailed , "Exception class to handle the case where pinging of a client failed." );
+    ExceptionClass ( PingFailed , "Exception class to handle the case where pinging of a client failed." )
 
     //! Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds.
-    ExceptionClass ( BitsSetWhichAreForbiddenByBitMask , "Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds." );
+    ExceptionClass ( BitsSetWhichAreForbiddenByBitMask , "Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds." )
 
     //! Exception class to handle the case where we were unable to validate the packet.
-    ExceptionClass ( ValidationError , "Exception class to handle the case where we were unable to validate the packet." );
+    ExceptionClass ( ValidationError , "Exception class to handle the case where we were unable to validate the packet." )
 
     //! Exception class to handle a NULL buffer being passed to the transport class.
-    ExceptionClass ( NullBufferException , "Exception class to handle a NULL buffer being passed to the transport class." );
+    ExceptionClass ( NullBufferException , "Exception class to handle a NULL buffer being passed to the transport class." )
 
   }
 
