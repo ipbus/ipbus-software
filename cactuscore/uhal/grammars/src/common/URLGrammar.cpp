@@ -30,9 +30,9 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/grammars/URLGrammar.hpp"
-
 #include <boost/spirit/include/qi.hpp>
+
+#include "uhal/grammars/URLGrammar.hpp"
 
 
 namespace grammars

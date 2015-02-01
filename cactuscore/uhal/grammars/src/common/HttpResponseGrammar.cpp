@@ -30,9 +30,9 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/grammars/HttpResponseGrammar.hpp"
-
 #include <boost/spirit/include/qi.hpp>
+
+#include "uhal/grammars/HttpResponseGrammar.hpp"
 
 
 std::ostream& operator<< ( std::ostream& aStr , const uhal::HttpResponseType& aHttpResponse )
