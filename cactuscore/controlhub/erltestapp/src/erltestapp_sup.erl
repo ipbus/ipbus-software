@@ -1,5 +1,7 @@
 -module(erltestapp_sup).
 
+-compile([{parse_transform, lager_transform}]).
+
 -behaviour(supervisor).
 
 %% API
@@ -24,12 +26,14 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    Pid = spawn_link(?MODULE,talking_proc_loop,[]),
+    spawn_link(?MODULE,talking_proc_loop,[]),
     {ok, { {one_for_one, 5, 10}, []} }.
 
 
 
 talking_proc_loop() ->
     timer:sleep(5000),
+    lager:info("Low-priority log message from proc ~p", [self()]),
     io:format("Hi! this is proc ~p", [self()]),
+    lager:emergency("Super-critical log message from proc ~p", [self()]),
     talking_proc_loop().

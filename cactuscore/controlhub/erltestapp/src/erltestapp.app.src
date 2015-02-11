@@ -5,7 +5,9 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  goldrush,
+                  lager
                  ]},
   {mod, { erltestapp_app, []}},
   {env, []}
