@@ -1,0 +1,12 @@
+{application, erltestapp,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { erltestapp_app, []}},
+  {env, []}
+ ]}.
