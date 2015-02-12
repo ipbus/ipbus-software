@@ -221,6 +221,8 @@ case "$1" in
         export HEART_COMMAND
         mkdir -p $PIPE_DIR
         $ERTS_PATH/run_erl -daemon $PIPE_DIR $RUNNER_LOG_DIR "exec $RUNNER_BASE_DIR/bin/$SCRIPT $START_OPTION $RUN_PARAM" 2>&1
+
+        sleep 15
         ;;
 
     stop)
