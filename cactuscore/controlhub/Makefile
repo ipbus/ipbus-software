@@ -86,7 +86,6 @@ _rpmall: build
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${CACTUS_ROOT}" \
-		--define "tarball_file ${TARBALL_FILE}" \
 		--define "sources_dir ${RPMBUILD_SOURCES_DIR}" \
 		--define "name ${PackageName}" \
 		--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}" \
