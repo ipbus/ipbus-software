@@ -1,0 +1,120 @@
+#########################################################################################
+#
+#  ControlHub Makefile; there are four top-level options for you:
+#     - Do "make" to do a standard release build.
+#     - Do "make dev" if you're just developing the code (completely local build + test).
+#     - Do "make rpm" to build the release RPM (do a normal "make" first!).
+#     - Do "make clean" to clean.
+#
+#  Credit to:
+#     - Richard Carlsson for his erlang-factory presentation that gave inspiration
+#       on how to implement automated testing.
+#     - Erik Rigtorp for inspiration on how to automatically generate some of the
+#       necessary release files.
+#
+#
+#   Robert Frazier
+#   March 2012
+#
+#########################################################################################
+
+
+BUILD_HOME = $(shell pwd)/../..
+
+include $(BUILD_HOME)/config/Makefile.macros
+
+Project = cactuscore
+Package = controlhub
+PackagePath = $(CACTUS_RPM_ROOT)/${Project}/${Package}
+PackageName = cactuscore-controlhub
+
+Packager = Tom Williams
+
+PACKAGE_VER_MAJOR = 2
+PACKAGE_VER_MINOR = 3
+PACKAGE_VER_PATCH = 3
+
+# This is the version number for the RPM packaging.
+PACKAGE_RELEASE = rebar.0
+
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+RPMBUILD_SOURCES_DIR = ${RPMBUILD_DIR}/SOURCES
+
+
+####################  Define path to erlang runtime and compiler  ####################
+UNAME := $(shell uname)
+# Allows me to still develop on Mac OS X with a standard Erlang install
+ifeq ($(UNAME), Darwin)
+ERL=erl
+ERLC=erlc
+else
+#If we're on Linux, use the cactuscore-extern-erlang RPM sources or RPM installation
+ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
+ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
+ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
+else
+ERL=$(CACTUS_ROOT)/bin/erl
+ERLC=$(CACTUS_ROOT)/bin/erlc
+endif
+endif
+######################################################################################
+
+CONTROLHUB_BIN_SCRIPTS = $(wildcard scripts/controlhub_*) 
+
+
+.PHONY: all _all clean  _cleanall build _buildall rpm _rpmall
+
+default: build
+
+all: _all
+build: _all
+buildall: _all
+
+_all:
+	./rebar compile
+	cd rel
+	./rebar generate
+
+
+rpm: _rpmall
+_rpmall: build
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES/{lib,bin},SRPMS}
+	cp -r rel/controlhub ${RPMBUILD_SOURCES_DIR}/lib/
+	cp scripts/init.d ${RPMBUILD_SOURCES_DIR}/controlhub
+	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
+	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
+		--define  "_topdir ${RPMBUILD_DIR}" \
+		--define "_prefix ${CACTUS_ROOT}" \
+		--define "tarball_file ${TARBALL_FILE}" \
+		--define "sources_dir ${RPMBUILD_SOURCES_DIR}" \
+		--define "name ${PackageName}" \
+		--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}" \
+		--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}" \
+		--define "packager ${Packager}" \
+		${PackageName}.rebar.spec
+
+
+doc: _doc
+_doc:
+	$(ERL) -noshell -eval "edoc:application(controlhub, \".\", [{new,true}]), halt(0)."
+
+
+clean: _cleanall
+_cleanall:
+	./rebar clean
+	rm -rf $(RPMBUILD_DIR)
+	rm -f controlhub.script
+	rm -f scripts/erl_controlhub
+	#rm -rf doc/*.html doc/*.css doc/*.png doc/edoc-info doc/unittest
+
+
+############## Nitty gritty ######################
+
+scripts/erl_controlhub:	
+	sed s:%FINAL_ROOTDIR%:${PackagePath}/RPMBUILD/SOURCES/lib/controlhub:  ${RPMBUILD_SOURCES_DIR}/lib/controlhub/erts*/bin/erl.src > $@
+	chmod u+x $@
+
+$(RPMBUILD_DIR):
+	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES/{lib,bin},SRPMS}
+
+
