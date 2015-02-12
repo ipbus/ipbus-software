@@ -80,8 +80,8 @@ rpm: _rpmall
 _rpmall: build
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES/{lib,bin},SRPMS}
 	cp -r rel/controlhub ${RPMBUILD_SOURCES_DIR}/lib/
-	cp scripts/init.d ${RPMBUILD_SOURCES_DIR}/controlhub
-	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
+	cp scripts/init.d.rebar ${RPMBUILD_SOURCES_DIR}/controlhub
+	#cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${CACTUS_ROOT}" \
@@ -106,15 +106,5 @@ _cleanall:
 	rm -f controlhub.script
 	rm -f scripts/erl_controlhub
 	#rm -rf doc/*.html doc/*.css doc/*.png doc/edoc-info doc/unittest
-
-
-############## Nitty gritty ######################
-
-scripts/erl_controlhub:	
-	sed s:%FINAL_ROOTDIR%:${PackagePath}/RPMBUILD/SOURCES/lib/controlhub:  ${RPMBUILD_SOURCES_DIR}/lib/controlhub/erts*/bin/erl.src > $@
-	chmod u+x $@
-
-$(RPMBUILD_DIR):
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES/{lib,bin},SRPMS}
 
 
