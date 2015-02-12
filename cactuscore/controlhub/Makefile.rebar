@@ -40,21 +40,23 @@ PACKAGE_RELEASE = rebar.0
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 RPMBUILD_SOURCES_DIR = ${RPMBUILD_DIR}/SOURCES
 
-
 ####################  Define path to erlang runtime and compiler  ####################
 UNAME := $(shell uname)
 # Allows me to still develop on Mac OS X with a standard Erlang install
 ifeq ($(UNAME), Darwin)
 ERL=erl
 ERLC=erlc
+ESCRIPT=escript
 else
 #If we're on Linux, use the cactuscore-extern-erlang RPM sources or RPM installation
 ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
 ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
 ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
+ESCRIPT=$(shell pwd)/erlang/bin/escript
 else
 ERL=$(CACTUS_ROOT)/bin/erl
 ERLC=$(CACTUS_ROOT)/bin/erlc
+ESCRIPT=${CACTUS_ROOT}/bin/escript
 endif
 endif
 ######################################################################################
@@ -62,7 +64,7 @@ endif
 CONTROLHUB_BIN_SCRIPTS = $(wildcard scripts/controlhub_*) 
 
 
-.PHONY: all _all clean  _cleanall build _buildall rpm _rpmall
+.PHONY: all _all clean  _cleanall build _buildall rpm _rpmall _erlang
 
 default: build
 
@@ -70,10 +72,9 @@ all: _all
 build: _all
 buildall: _all
 
-_all:
-	./rebar compile
-	cd rel
-	./rebar generate
+_all: _erlang
+	${ESCRIPT} ./rebar compile
+	cd rel && ${ESCRIPT} ../rebar generate
 
 
 rpm: _rpmall
@@ -101,10 +102,29 @@ _doc:
 
 clean: _cleanall
 _cleanall:
-	./rebar clean
+	${ESCRIPT} ./rebar clean
 	rm -rf $(RPMBUILD_DIR)
-	rm -f controlhub.script
 	rm -f scripts/erl_controlhub
 	#rm -rf doc/*.html doc/*.css doc/*.png doc/edoc-info doc/unittest
 
+
+
+ERL_TARBALL_FILE=otp_src_R16B01.tar.gz
+ERL_TARBALL_DIR=otp_src_R16B01
+ERL_TARGET_DIR=$(shell pwd)/erlang
+
+_erlang: erlang/.build_done
+erlang/.build_done:
+	mkdir -p erlang
+	$(info Extracting: ${ERL_TARBALL_FILE})
+	source $(BUILD_HOME)/config/progress.sh 'tar -tf ${ERL_TARBALL_FILE} | wc -l' 'tar -xvzf ${ERL_TARBALL_FILE}';
+	cd ${ERL_TARBALL_DIR};                    \
+	CFLAGS="-DOPENSSL_NO_EC=1" ./configure    \
+             --prefix=${ERL_TARGET_DIR}           \
+             --exec-prefix=${ERL_TARGET_DIR}      \
+             --with-ssl                           \
+             --without-javac;                     \
+        make;                                     \
+        make install;                             \
+        date > ${ERL_TARGET_DIR}/.build_done;
 
