@@ -1,0 +1,9 @@
+[uhal-nightly]
+name=CACTUS Project Software Repository
+baseurl=http://www.cern.ch/cactus/nightly/uhal_config_openstack.py/<platform>/RPMS
+enabled=1
+gpgcheck=0
+timeout=120
+
+
+
