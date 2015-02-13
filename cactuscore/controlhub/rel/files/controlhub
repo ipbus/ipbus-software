@@ -222,7 +222,12 @@ case "$1" in
         mkdir -p $PIPE_DIR
         $ERTS_PATH/run_erl -daemon $PIPE_DIR $RUNNER_LOG_DIR "exec $RUNNER_BASE_DIR/bin/$SCRIPT $START_OPTION $RUN_PARAM" 2>&1
 
-        sleep 15
+        sleep 2
+        until $NODETOOL ping < /dev/null > /dev/null
+        do
+           echo "Waiting for node startup ... (" `date` ")"
+           sleep 2
+        done
         ;;
 
     stop)
