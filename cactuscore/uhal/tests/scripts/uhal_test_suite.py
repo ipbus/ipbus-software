@@ -57,7 +57,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
 
     cmds += [["TEST CONTROLHUB START",
               [
-               'for i in `seq 1 500`; do '+controlhub_start+'; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; '+controlhub_status+'; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; '+controlhub_stop+'; done',
+               'for i in `seq 1 200`; do '+controlhub_start+'; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; '+controlhub_status+'; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; '+controlhub_stop+'; done',
 #               'for i in `seq 1 500`; do '+controlhub_start+'; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; '+controlhub_status+'; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; '+controlhub_stop+'; done'
               ]
             ]]
