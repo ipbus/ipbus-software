@@ -58,6 +58,8 @@ main(Args) ->
             io:format("~p\n", [rpc:call(TargetNode, init, restart, [], 60000)]);
         ["reboot"] ->
             io:format("~p\n", [rpc:call(TargetNode, init, reboot, [], 60000)]);
+        ["stats"] ->
+            io:format("~s\n", [rpc:call(TargetNode, ch_stats, report_to_string, [], 60000)]);
         ["rpc", Module, Function | RpcArgs] ->
             case rpc:call(TargetNode,
                           list_to_atom(Module),

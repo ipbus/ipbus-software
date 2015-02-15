@@ -52,7 +52,7 @@ status() {
 }
 
 stats() {
-  ${CACTUSROOT}/bin/controlhub_stats
+  ${CONTROLHUB} stats
 }
 
 case "$1" in

@@ -287,6 +287,17 @@ case "$1" in
         fi
         ;;
 
+    stats)
+        ## See if the VM is alive
+        ping_node
+        ES=$?
+        if [ "$ES" -ne 0 ]; then
+            exit $ES
+        fi
+
+        $NODETOOL stats
+        ;;
+
     attach)
         # Make sure a node is running
         ping_node
