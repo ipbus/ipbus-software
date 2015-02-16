@@ -4,7 +4,8 @@
 %%%
 %%% @since April 2012
 %%%
-%%% @doc Control Hub trace macros. Comment/uncomment and recompile to
+%%% @doc Control Hub logging macros - to remove low-level frequent log messages
+%%%      at compile time (for performance reasons). Comment/uncomment and recompile to
 %%%      deactivate/active as appropriate.  One of the macros (DEBUG_TRACE) is
 %%%      for simple text-based debug messages, and a second (PACKET_TRACE) is 
 %%%      for printing out packet binaries in hex form.
@@ -14,7 +15,7 @@
 
 
 %% Uncomment line below to globally switch on the simple debug trace messages.
-%-define(debug_trace, true).
+%-define(log_debug, true).
 
 %% Uncomment line below to globally switch on packet trace messages.
 %-define(packet_trace, true).
@@ -29,37 +30,25 @@
 %%        DEBUG_TRACE("My message")
 %%      or something like:
 %%        DEBUG_TRACE("Debug Value 1 = ~p, Debug Value 2 = ~p.", [DebugValue1, DebugValue2])
-%% 
+%%      or even:
+%%        DEBUG_TRACE("Short prefix to log msg", "My cool log message, debug value = ~p.", [DebugValue])
 %%      Either enable the macro globally (see top of this file) or...
-%%      Compile module with c(module_name, {d, debug_trace}) to activate debug
+%%      Compile module with c(module_name, {d, log_debug}) to activate debug
 %%      trace messages for that module.
 %% ----------------------------------------------------------------------------
--ifdef(debug_trace).
+-ifdef(log_debug).
 
 -define( CH_LOG_DEBUG(MESSAGE), ch_utils:log(debug, ?MODULE, MESSAGE) ).
 -define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA), ch_utils:log(debug, ?MODULE, MESSAGE, MESSAGE_DATA) ).
--define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(debug, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
+-define( CH_LOG_DEBUG(PREFIX, MESSAGE, MESSAGE_DATA), ch_utils:log({debug, PREFIX}, ?MODULE, MESSAGE, MESSAGE_DATA) ).
 
 -else.
 
 -define( CH_LOG_DEBUG(MESSAGE), void ).
 -define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA), void ).
--define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA, STATE), void ).
+-define( CH_LOG_DEBUG(PREFIX, MESSAGE, MESSAGE_DATA), void ).
 
 -endif.
-
-
--define( CH_LOG_INFO(MESSAGE), ch_utils:log(info, ?MODULE, MESSAGE) ).
--define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA) ).
--define( CH_LOG_INFO(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(info, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
-
--define( CH_LOG_WARN(MESSAGE), ch_utils:log(warning, ?MODULE, MESSAGE) ).
--define( CH_LOG_WARN(MESSAGE, MESSAGE_DATA), ch_utils:log(warning, ?MODULE, MESSAGE, MESSAGE_DATA) ).
--define( CH_LOG_WARN(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(warning, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
-
--define( CH_LOG_ERROR(MESSAGE), ch_utils:log(error, ?MODULE, MESSAGE) ).
--define( CH_LOG_ERROR(MESSAGE, MESSAGE_DATA), ch_utils:log(error, ?MODULE, MESSAGE, MESSAGE_DATA) ).
--define( CH_LOG_ERROR(MESSAGE, MESSAGE_DATA, STATE), ch_utils:log(error, ?MODULE, MESSAGE, MESSAGE_DATA, STATE) ).
 
 
 %% ----------------------------------------------------------------------------
