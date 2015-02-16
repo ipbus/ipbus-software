@@ -38,7 +38,7 @@ start_link() ->
 %%          {error, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    ?CH_LOG_DEBUG("Starting the root supervisor."),
+    ?CH_LOG(notice, "ControlHub root supervisor starting now."),
     StatsServer = {ch_stats, {ch_stats, start_link, []},
 	               permanent, 2000, worker, [ch_stats]},
     DeviceClientRegistry = {ch_device_client_registry, {ch_device_client_registry, start_link,[]},

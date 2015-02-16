@@ -29,7 +29,7 @@
 %%          {error, Reason}
 %% --------------------------------------------------------------------
 start(_Type, _StartArgs) ->
-    ?CH_LOG_DEBUG("Starting the Control Hub application."),
+    ?CH_LOG_INFO("Starting the ControlHub application."),
 %    fprof:trace(start),
     % Start the root supervisor and return its process ID.
     case ch_sup:start_link() of

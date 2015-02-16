@@ -56,7 +56,6 @@
 %% @end
 %% ---------------------------------------------------------------------
 start_link(TcpListenSocket) ->
-    ?CH_LOG_DEBUG("Spawning new transaction manager."),
     proc_lib:spawn_link(?MODULE, tcp_acceptor, [TcpListenSocket]),
     ok.
     
@@ -66,7 +65,7 @@ start_link(TcpListenSocket) ->
 %% the start_link function above.  Need to find a way of refactoring
 %% this module so it doesn't need to be an external function.
 tcp_acceptor(TcpListenSocket) ->
-    ?CH_LOG_DEBUG("Transaction manager born. Waiting for TCP connection..."),
+    ?CH_LOG(debug, "Transaction manager born. Waiting for TCP connection..."),
     % Spawn TCP socket process now in order to reduce latency from gen_tcp:accept returning to entering transaction_manager loop.
     TcpPid = proc_lib:spawn_link(fun tcp_proc_init/0),
     case gen_tcp:accept(TcpListenSocket) of
@@ -77,7 +76,7 @@ tcp_acceptor(TcpListenSocket) ->
                 {ok, {ClientAddr, ClientPort}} ->
                     gen_tcp:controlling_process(Socket, TcpPid),
                     TcpPid ! {start, Socket, self()},
-                    ?CH_LOG_INFO("TCP socket accepted from client at ~s. Socket options: ~w~n",
+                    ?CH_LOG(info, "TCP socket accepted from client at ~s. Socket options: ~w~n",
                                  [ch_utils:ip_port_string(ClientAddr, ClientPort), inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
                     InitialState = #state{tcp_pid=TcpPid, 
                                           socket=Socket,
@@ -92,17 +91,17 @@ tcp_acceptor(TcpListenSocket) ->
                     transaction_manager_loop( InitialState );
                 _Else ->
                     ch_stats:client_disconnected(),
-                    ?CH_LOG_ERROR("Socket error whilst getting peername.")
+                    ?CH_LOG(error, "Socket error whilst getting peername.")
             end;
         {error, _Reason} ->
             ch_tcp_listener:connection_accept_completed(),
             % Something funny happened whilst trying to accept the socket.
-            ?CH_LOG_ERROR("Error (~p) occurred during TCP accept.", [_Reason]);
+            ?CH_LOG(error, "Error (~p) occurred during TCP accept.", [_Reason]);
         _Else ->  % Belt and braces...
             ch_tcp_listener:connection_accept_completed(),
-            ?CH_LOG_ERROR("Unexpected event (~p) occurred during TCP accept.", [_Else])
+            ?CH_LOG(error, "Unexpected event (~p) occurred during TCP accept.", [_Else])
     end,
-    ?CH_LOG_INFO("I am now redundant; exiting normally."),
+    ?CH_LOG(info, "I am now redundant; exiting normally."),
     ok.
 
 
@@ -136,7 +135,7 @@ tcp_proc_loop(Socket, ParentPid) ->
             {inet_reply, Socket, ok} ->
                 void;
             {inet_reply, Socket, SendError} ->
-                ?CH_LOG_ERROR("Error in TCP async send: ~w", [SendError]),
+                ?CH_LOG(error, "Error in TCP async send: ~w", [SendError]),
                 throw({tcp_send_error,SendError});
             {'EXIT', ParentPid, Reason} ->
                 ?CH_LOG_DEBUG("TCP proc shutting down since parent transaction manager ~w terminated with reason: ~w", [ParentPid, Reason]),
@@ -163,7 +162,7 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
                 ch_stats:client_requests_in(S#state.stats_table, NrReqs),
                 transaction_manager_loop( S#state{target_ip_u32=TargetIPU32, target_port=TargetPort, nr_in_flight=(NrInFlight+NrReqs), q_nr_reqs_per_tcp=queue:in(NrReqs,QNrReqsPerTcp)} );
               true ->
-                ?CH_LOG_ERROR("Each TCP chunk should be an integer number of 32-bit words, but received chunk of length ~w bytes for ~s. This TCP chunk will be ignored.", [byte_size(RequestBin), ch_utils:ip_port_string(TargetIPAddrArg, TargetPortArg)]),
+                ?CH_LOG(error, "Each TCP chunk should be an integer number of 32-bit words, but received chunk of length ~w bytes for ~s. This TCP chunk will be ignored.", [byte_size(RequestBin), ch_utils:ip_port_string(TargetIPAddrArg, TargetPortArg)]),
                 ch_stats:client_request_malformed(S#state.stats_table),
                 transaction_manager_loop( S )
             end;
@@ -186,9 +185,9 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
             ch_stats:client_disconnected(),
             if
               NrInFlight > 0 ->
-                ?CH_LOG_WARN("TCP socket was closed early - there is still ~w replies pending for that socket. Presumably the socket was closed by the TCP client.", [NrInFlight + S#state.nr_replies_acc]);
+                ?CH_LOG(warning, "TCP socket was closed early - there is still ~w replies pending for that socket. Presumably the socket was closed by the TCP client.", [NrInFlight + S#state.nr_replies_acc]);
               true ->
-                ?CH_LOG_INFO("TCP socket closed.")
+                ?CH_LOG(info, "TCP socket closed.")
             end;
 
         {tcp_error, Socket, _Reason} ->
@@ -196,13 +195,13 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
             ch_stats:client_disconnected(),
             if
               NrInFlight > 0 ->
-                ?CH_LOG_ERROR("TCP socket error (~p). The ~w pending IPbus reply packets will not be forwarded.", [_Reason, NrInFlight + S#state.nr_replies_acc]);
+                ?CH_LOG(error, "TCP socket error (~p). The ~w pending IPbus reply packets will not be forwarded.", [_Reason, NrInFlight + S#state.nr_replies_acc]);
               true ->
-                ?CH_LOG_WARN("TCP socket error (~p). Currenly no pending IPbus reply packets.", [_Reason])
+                ?CH_LOG(warning, "TCP socket error (~p). Currenly no pending IPbus reply packets.", [_Reason])
             end;
 
         Else ->
-            ?CH_LOG_WARN("Received and ignoring unexpected message: ~p", [Else]),
+            ?CH_LOG(warning, "Received and ignoring unexpected message: ~p", [Else]),
             transaction_manager_loop( S )
     end.
 

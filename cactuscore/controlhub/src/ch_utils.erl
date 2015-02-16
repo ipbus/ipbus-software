@@ -45,14 +45,22 @@ log(Level, Module, MsgFmtString, MsgData, State) ->
 %% @end
 %% -------------------------------------------------------------------------------------
 
-log(Level, Module, MsgFmtString, MsgData) when is_list(MsgData) ->
-    Preamble = io_lib:format("~s ~-7w ~w~w~s -- ", [timestamp_string(now()), Level, self(), Module, mini_state_string(Module)]),
+log(Level, ProcTag, MsgFmtString, MsgData) when is_list(MsgData) ->
+    % Preamble = io_lib:format("~s ~-7w ~w~w~s -- ", [timestamp_string(now()), Level, self(), Module, mini_state_string(Module)]),
+    PreambleString = io_lib:format(" ~p -- ", [Module]),
+    MsgFmt = lists:append(Preamble, MsgFmtString),
     case Level of
+         emergency ->
+             lager:emergency(MsgFmt, MsgData);
+         alert ->
+             lager:alert(MsgFmt, MsgData);
+         critical ->
+             lager:critical(MsgFmt, MsgData);
          error ->   
-             lager:error(lists:append(Preamble, MsgFmtString), MsgData);
+             lager:error(lists:append(Preamble, MsgFmtString), [PreambleString | MsgData]);
          warning ->
              lager:warning(lists:append(Preamble, MsgFmtString), MsgData);
-         _ ->
+          ->
              lager:info(lists:append(Preamble, MsgFmtString), MsgData)
     end,
     ok;

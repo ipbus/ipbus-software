@@ -84,21 +84,17 @@ connection_accept_completed() ->
 %% @end
 %% --------------------------------------------------------------------
 init([]) ->
-    ?CH_LOG_DEBUG("Initialising the TCP listener."),
+    ?CH_LOG(notice, "Initialising the TCP listener (port ~p).", [?CONTROL_HUB_TCP_LISTEN_PORT]),
     process_flag(trap_exit, true),
     case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, lists:keyreplace(active, 1, ?TCP_SOCKET_OPTIONS, {active,false}) ) of
         {ok, TcpListenSocket} ->
             {ok, spawn_acceptor(#state{socket = TcpListenSocket})};
         {error, eaddrinuse} ->
-            FormatStr = "~n*****~nError starting the Control Hub's TCP listener:~n"
-                        "\tport ~p is already in use!~n*****~n~n",
-            error_logger:error_msg(FormatStr, [?CONTROL_HUB_TCP_LISTEN_PORT]),
-            io:format(FormatStr, [?CONTROL_HUB_TCP_LISTEN_PORT]),
-            {stop, "The Control Hub listen port is already in use"};
+            ErrorString = io_lib:format("The ControlHub TCP listen port (~p) is already in use")
+            ?CH_LOG(critical, "~s; ControlHub cannot start correctly!", [ErrorMsg,?CONTROL_HUB_TCP_LISTEN_PORT]),
+            {stop, ErrorString};
         {error, What} ->
-            FormatStr = "~n*****~nError starting the Control Hub's TCP listener:~n\t~p~n*****~n~n",
-       	    error_logger:error_msg(FormatStr, [What]),
-            io:format(FormatStr, [What]),
+            ?CH_LOG(critical,"Unexpected error listening to TCP port ~p -- error message: ~p", [?CONTROL_HUB_TCP_LISTEN_PORT,What]),
             {stop, {"Error starting the Control Hub TCP listener", What}}
     end.    
 
