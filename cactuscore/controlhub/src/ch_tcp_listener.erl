@@ -84,17 +84,17 @@ connection_accept_completed() ->
 %% @end
 %% --------------------------------------------------------------------
 init([]) ->
-    ?CH_LOG(notice, "Initialising the TCP listener (port ~p).", [?CONTROL_HUB_TCP_LISTEN_PORT]),
+    ch_utils:log(notice, "Initialising the TCP listener (port ~p).", [?CONTROL_HUB_TCP_LISTEN_PORT]),
     process_flag(trap_exit, true),
     case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, lists:keyreplace(active, 1, ?TCP_SOCKET_OPTIONS, {active,false}) ) of
         {ok, TcpListenSocket} ->
             {ok, spawn_acceptor(#state{socket = TcpListenSocket})};
         {error, eaddrinuse} ->
-            ErrorString = io_lib:format("The ControlHub TCP listen port (~p) is already in use")
-            ?CH_LOG(critical, "~s; ControlHub cannot start correctly!", [ErrorMsg,?CONTROL_HUB_TCP_LISTEN_PORT]),
+            ErrorString = io_lib:format("The ControlHub TCP listen port (~p) is already in use", [?CONTROL_HUB_TCP_LISTEN_PORT]),
+            ch_utils:log(critical, "~s; ControlHub cannot start correctly!", [ErrorString]),
             {stop, ErrorString};
         {error, What} ->
-            ?CH_LOG(critical,"Unexpected error listening to TCP port ~p -- error message: ~p", [?CONTROL_HUB_TCP_LISTEN_PORT,What]),
+            ch_utils:log(critical,"Unexpected error listening to TCP port ~p -- error message: ~p", [?CONTROL_HUB_TCP_LISTEN_PORT,What]),
             {stop, {"Error starting the Control Hub TCP listener", What}}
     end.    
 
@@ -147,7 +147,7 @@ handle_cast(_Msg, State) ->
 
 % Observe any exit signals that come our way but do nothing with them other than a trace message
 handle_info({'EXIT', _Pid, _Reason}, State) ->
-    ?CH_LOG_DEBUG("Observed transaction manager process ~p shutting down with reason: ~p", [_Pid, _Reason]),
+    ch_utils:log(info, "Observed transaction manager process ~p shutting down with reason: ~p", [_Pid, _Reason]),
     {noreply, State};
 
 %% Default info handler - on unknown info message it does nothing

@@ -11,4 +11,4 @@
 -include_lib("eunit/include/eunit.hrl").
 
 % Trace macro module - needed by ~all.
--include("ch_trace_macros.hrl").
+-include("ch_log.hrl").

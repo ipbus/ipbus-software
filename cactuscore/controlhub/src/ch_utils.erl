@@ -55,11 +55,11 @@ log(Level, MsgFmtString, MsgData) when is_atom(Level) ->
 %% -------------------------------------------------------------------------------------
 %% @doc Prints a log message with data
 %%
-%% @spec implement_log(Level :: log_level(), MsgFmtString :: string(), MsgData :: list()) -> ok 
+%% @spec implement_log(Level :: log_level(), MsgFmt :: string(), MsgData :: list()) -> ok 
 %% @end
 %% -------------------------------------------------------------------------------------
 
-implement_log(Level, MsgFmtString, MsgData) when is_list(MsgFmtString), is_list(MsgData) ->
+implement_log(Level, MsgFmt, MsgData) when is_list(MsgFmt), is_list(MsgData) ->
     case Level of 
          emergency ->
              lager:emergency(MsgFmt, MsgData);
@@ -68,11 +68,15 @@ implement_log(Level, MsgFmtString, MsgData) when is_list(MsgFmtString), is_list(
          critical ->
              lager:critical(MsgFmt, MsgData);
          error ->   
-             lager:error(lists:append(Preamble, MsgFmtString), [PreambleString | MsgData]);
+             lager:error(MsgFmt, MsgData);
          warning ->
-             lager:warning(lists:append(Preamble, MsgFmtString), MsgData);
-          ->
-             lager:info(lists:append(Preamble, MsgFmtString), MsgData)
+             lager:warning(MsgFmt, MsgData);
+         notice ->
+             lager:notice(MsgFmt, MsgData);
+         info ->
+             lager:info(MsgFmt, MsgData);
+         debug ->
+             lager:debug(MsgFmt, MsgData)
     end,
     ok.
 

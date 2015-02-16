@@ -98,7 +98,7 @@ total_device_clients() ->
 init([]) ->
     % Note that our ETS table for holding the index of device clients
     % gets created as part of the standard server state record.
-    ?CH_LOG_DEBUG("Initialising the device client registry."),
+    ch_utils:log(notice, "Initialising the device client registry."),
     % Grab max_in_flight value from configuration file
     {ok, MaxInFlight} = application:get_env(controlhub, max_in_flight),
     % Trap exits - if any device clients spawned by the registry end

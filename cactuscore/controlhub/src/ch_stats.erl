@@ -263,7 +263,7 @@ report_to_string() -> gen_server:call(?MODULE, report_to_string).
 %%          {stop, Reason}
 %% --------------------------------------------------------------------
 init([]) ->
-    ?CH_LOG_DEBUG("Initialising the stats server."),
+    ch_utils:log(notice, "Initialising the stats server."),
     State = #state{previous_udp_stats_table=new_device_client_table(),
                    previous_client_stats_table=new_transaction_manager_table()
                   },

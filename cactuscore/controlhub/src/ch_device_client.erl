@@ -229,7 +229,7 @@ device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_f
             NewS = forward_reply(Pkt, S),
             device_client_loop(send, NewS);
         Other ->
-            ch_utils:log?(warning, "Unexpected message received : ~p ~n~s", [Other, state_as_string(S)]),
+            ch_utils:log(warning, "Unexpected message received : ~p ~n~s", [Other, state_as_string(S)]),
             device_client_loop(send, S)
     after Timeout ->
         if
