@@ -124,7 +124,7 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
     IPTuple = ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32),
     put(target_ip_tuple, IPTuple),   
     put(target_port, PortU16),
-    ?CH_LOG_INFO("Setting up device client (in ch_device_client:init/1). Absolute max nr packets in flight is ~w.", 
+    ch_utils:log(info, "Setting up device client (in ch_device_client:init/1). Absolute max nr packets in flight is ~w.", 
                  [ChMaxInFlight]),
 
     % Try opening ephemeral port and we want data delivered as a binary.
@@ -166,7 +166,7 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %% --------------------------------------------------------------------
 handle_call(_Request, _From, State) ->
-    ?CH_LOG_ERROR("Unexpected call received : ~p", [_Request], State),
+    ch_utils:log(warning, "Unexpected call received : ~p~n~s", [_Request, state_as_string(State)]),
     Reply = ok,
     {reply, Reply, State, ?DEVICE_CLIENT_SHUTDOWN_AFTER}.
 
@@ -185,7 +185,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
     {ReqIPbusVer, _Type, _End} = parse_ipbus_packet(RequestPacket),
     case get_device_status(ReqIPbusVer) of
         {ok, {1,3}, {}} ->
-            ?CH_LOG_INFO("Target speaks IPbus v1.3"),
+            ch_utils:log(info, "Target speaks IPbus v1.3"),
             NewS = S#state{mode = normal,
                            ipbus_v = {1,3},
                            max_in_flight = 1,
@@ -193,8 +193,8 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
                           },
             device_client_loop(recv, send_request(RequestPacket, ClientPid, NewS) );
         {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
-            ?CH_LOG_INFO("Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
-            ?CH_LOG_INFO("Device client is entering new logic."),
+            ch_utils:log(info, "Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
+            ch_utils:log(info, "Device client is entering new logic."),
             NewS = S#state{mode = normal,
                            ipbus_v = {2,0},
                            max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
@@ -202,7 +202,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
                           },
             device_client_loop(send, send_request(RequestPacket, ClientPid, NewS) );
         {error, _, MsgForTransManager} ->
-            ?CH_LOG_ERROR("Target didn't respond correctly to status request in ch_device_client:init/1."),
+            ch_utils:log(error, "Target didn't respond correctly to status request in ch_device_client:init/1."),
             ClientPid ! MsgForTransManager,
             reply_to_all_pending_requests_in_msg_inbox(MsgForTransManager),
             {stop, "Target didn't respond correctly to status request in device client setup.", S}
@@ -210,7 +210,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
 
 %% Default handle cast
 handle_cast(_Msg, State) -> 
-    ?CH_LOG_ERROR("Unexpected cast received : ~p", [_Msg], State),
+    ch_utils:log(warning, "Unexpected cast received : ~p~n~s", [_Msg, state_as_string(State)]),
     {nostop, wrong_clause, State}.
 
 
@@ -229,14 +229,14 @@ device_client_loop(send, S = #state{ socket=Socket, ip_tuple=IP, port=Port, in_f
             NewS = forward_reply(Pkt, S),
             device_client_loop(send, NewS);
         Other ->
-            ?CH_LOG_WARN("Unexpected message received : ~p", [Other]),
+            ch_utils:log?(warning, "Unexpected message received : ~p ~n~s", [Other, state_as_string(S)]),
             device_client_loop(send, S)
     after Timeout ->
         if
           NrInFlight =/= 0 ->
             device_client_loop(timeout, S);
           true ->
-            ?CH_LOG_INFO("No communication has passed through this device client in ~pms ; shutting down now", [?DEVICE_CLIENT_SHUTDOWN_AFTER], S),
+            ch_utils:log(info, "No communication has passed through this device client in ~pms ; shutting down now~s~n", [?DEVICE_CLIENT_SHUTDOWN_AFTER, state_as_string(S)]),
             {stop, normal, S}
         end
     end;
@@ -270,11 +270,11 @@ device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port }) ->
 device_client_loop(timeout, S) ->
     try recover_from_timeout(0, S) of
         {ok, NewState} ->
-            ?CH_LOG_INFO("Timeout recovered!"),
+            ch_utils:log(info, "Timeout recovered!"),
             device_client_loop(send, NewState)
     catch
         throw:{recovery_failed, MsgForTransactionManager} ->
-            ?CH_LOG_ERROR("Irrecoverable TIMEOUT when waiting for response from board."),
+            ch_utils:log(error, "Irrecoverable TIMEOUT when waiting for response from board."),
             Pids = [Pid || {Pid, _, _, _} <- queue:to_list(element(2,S#state.in_flight))],
             lists:foreach(fun(Pid) -> Pid ! MsgForTransactionManager end, Pids),
             reply_to_all_pending_requests_in_msg_inbox(MsgForTransactionManager),
@@ -292,7 +292,7 @@ send_request(ReqPkt, Pid, S = #state{next_id=NextId, in_flight={NrInFlight,InFli
             ch_stats:udp_sent(S#state.stats),
             S#state{ next_id=increment_pkt_id(NextId), in_flight={NrInFlight+1, queue:in({Pid, OrigHdr, NewHdr, Body}, InFlightQ)} };
         Other ->
-            ?CH_LOG_WARN("Request packet from PID ~w is invalid for an IPbus 2.0 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]), 
+            ch_utils:log(warning, "Request packet from PID ~w is invalid for an IPbus 2.0 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]), 
             Pid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_WRONG_PROTOCOL_VERSION, <<>>},
             S
     end;
@@ -304,7 +304,7 @@ send_request(ReqPkt, Pid, S) when S#state.ipbus_v == {1,3} ->
             ch_stats:udp_sent(S#state.stats),
             S#state{in_flight={1,Pid}};
         Other ->
-            ?CH_LOG_WARN("Request packet from PID ~w is invalid for an IPbus 1.3 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]),
+            ch_utils:log(warning, "Request packet from PID ~w is invalid for an IPbus 1.3 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]),
             Pid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_WRONG_PROTOCOL_VERSION, <<>>},
             S
     end.
@@ -328,12 +328,12 @@ forward_reply(Pkt, S = #state{ in_flight={1,TransManagerPid} }) when S#state.ipb
     ch_stats:udp_rcvd(S#state.stats),
     S#state{in_flight={0,void}};
 forward_reply(Pkt, S) ->
-    ?CH_LOG_ERROR("Not expecting any response from board, but received: ~w", [Pkt]),
+    ch_utils:log(error, "Not expecting any response from board, but received: ~w", [Pkt]),
     S.
 
 
 recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {1,3} ->
-    ?CH_LOG_INFO("IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [?UDP_RESPONSE_TIMEOUT]),
+    ch_utils:log(info, "IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [?UDP_RESPONSE_TIMEOUT]),
     receive
         {udp, Socket, IP, Port, Pkt} ->
             NewS = forward_reply(Pkt, S),
@@ -348,7 +348,7 @@ recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, po
     end;
 
 recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}, socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {2,0} ->
-    ?CH_LOG_WARN("Timeout when waiting for response from ~s. "
+    ch_utils:log(warning, "Timeout when waiting for response from ~s. "
                  "Starting packet-loss recovery (attempt ~w) ...", 
                  [ch_utils:ip_port_string(S#state.ip_tuple, S#state.port) , NrFailedAttempts+1]),
     NextIdMinusN = decrement_pkt_id(NextId, NrInFlight),
@@ -356,7 +356,7 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
     % Take recovery action
     Type = case get_device_status(S#state.ipbus_v) of
                {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
-                   ?CH_LOG_INFO("Request packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is ~w instead). "
+                   ch_utils:log(info, "Request packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is ~w instead). "
                                 "Re-sending ~w request packets.", [NrInFlight, NextId, HwNextId, NrInFlight]),
                    lists:foreach(fun(RequestIoData) -> S#state.udp_pid ! {send, RequestIoData}, 
                                                        ch_stats:udp_sent(S#state.stats) end, 
@@ -364,7 +364,7 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
                                 ),
                    request;
                {ok, {2,0}, {_, _, HwNextId}} ->
-                   ?CH_LOG_INFO("Response packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is in fact ~w). "
+                   ch_utils:log(info, "Response packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is in fact ~w). "
                                 "Requesting re-send of last ~w response packets.", [NrInFlight, NextId, HwNextId, NrInFlight]),
                    lists:foreach(fun([ReqHdr, _ReqBody]) -> S#state.udp_pid ! {send, resend_request_pkt(ReqHdr)},
                                                             ch_stats:udp_sent(S#state.stats) end, 
@@ -372,7 +372,7 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
                                 ),
                    response;
                 {error, _Type, MsgForTransManager} ->
-                    ?CH_LOG_ERROR("Status request failed."),
+                    ch_utils:log(error,"Status request failed."),
                     throw({recovery_failed, MsgForTransManager})
            end,
     % Update stats counters
@@ -425,7 +425,7 @@ reply_to_all_pending_requests_in_msg_inbox(ReplyMsg) ->
 
 % Dummy handle_info callback
 handle_info(_Info, State) ->
-    ?CH_LOG_ERROR("Unexpected handle_info message received : ~p", [_Info], State),
+    ch_utils:log(warning, "Unexpected handle_info message received : ~p~n~s", [_Info, State]),
     {stop, wrong_clause, State}.
 
 
@@ -664,7 +664,7 @@ get_device_status(IPbusVer) ->
 %% ------------------------------------------------------------------------------------
 
 get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when NrAttemptsLeft =:= 0 ->
-    ?CH_LOG_ERROR("MAX NUMBER OF TIMEOUTS reached in get_device_status function for IPbus version ~w."
+    ch_utils:log(warning, "MAX NUMBER OF TIMEOUTS reached in get_device_status function for IPbus version ~w."
                   " No response from targets after ~w attempts, each with timeout of ~wms.",
                   [IPbusVer, TotNrAttempts, ?UDP_RESPONSE_TIMEOUT]),
     {error, timeout, {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> } };
@@ -679,7 +679,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     {TargetIPTuple, TargetPort} = target_ip_port(),
     StatusReq13 = binary:copy(<<16#100000f8:32/native>>, 10),
     StatusReq20 = <<16#200000f1:32/big, 0:(15*32)>>,
-    ?CH_LOG_INFO("Sending IPbus status request to target (attempt ~w of ~w).",
+    ch_utils:log(info, "Sending IPbus status request to target (attempt ~w of ~w).",
                  [AttemptNr, TotNrAttempts]),
     case IPbusVer of
          {1,3} when NrAttemptsLeft=:=TotNrAttempts ->
@@ -702,7 +702,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     end,
     receive
         {udp, Socket, TargetIPTuple, TargetPort, <<16#100000fc:32/native, _/binary>>} ->
-            ?CH_LOG_INFO("Received an IPbus 1.3 'status response' from target, on attempt ~w of ~w.",
+            ch_utils:log(info, "Received an IPbus 1.3 'status response' from target, on attempt ~w of ~w.",
                          [AttemptNr, TotNrAttempts]),
             ch_stats:udp_rcvd(get(stats)),
             {ok, {1,3}, {}};
@@ -710,16 +710,16 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
             ch_stats:udp_rcvd(get(stats)),
             case parse_ipbus_packet(ReplyBin) of 
                 {{2,0}, {status, MTU, NBuffers, NextId}, big} ->
-                    ?CH_LOG_INFO("Received an IPbus 2.0 'status response' from target, on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
+                    ch_utils:log(info,"Received an IPbus 2.0 'status response' from target, on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
                                  [AttemptNr, TotNrAttempts, MTU, NBuffers, NextId]),
                     {ok, {2,0}, {MTU, NBuffers, NextId}};
                 _Details ->
-                    ?CH_LOG_ERROR("Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format). parse_ipbus_packet returned ~w",
+                    ch_utils:log(error, "Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format). parse_ipbus_packet returned ~w",
                                  [_Details]),
                     {error, malformed, {device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_MALFORMED_STATUS, <<>>} }
             end
     after ?UDP_RESPONSE_TIMEOUT ->
-        ?CH_LOG_WARN("TIMEOUT waiting for response in get_device_status! No response from target on attempt ~w of ~w, ipbus version ~w.",
+        ch_utils:log(warning, "TIMEOUT waiting for response in get_device_status! No response from target on attempt ~w of ~w, ipbus version ~w.",
                      [AttemptNr, TotNrAttempts, IPbusVer]),
         ch_stats:udp_timeout(get(stats), status),
         get_device_status(IPbusVer, {NrAttemptsLeft-1, TotNrAttempts})
@@ -778,10 +778,10 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
             {inet_reply, Socket, ok} ->
                 void;
             {inet_reply, Socket, SendError} ->
-                ?CH_LOG_ERROR("Error in UDP async send: ~w", [SendError]);%,
+                ch_utils:log(error, "Error in UDP async send: ~w", [SendError]);%,
                 %throw({udp_send_error, SendError});
             {'EXIT', ParentPid, Reason} ->
-                ?CH_LOG_DEBUG("UDP proc shutting down since parent device client ~w terminated with reason: ~w", [ParentPid, Reason]),
+                ch_utils:log(info, "UDP proc shutting down since parent device client ~w terminated with reason: ~w", [ParentPid, Reason]),
                 exit(normal);
             Other ->
                 ParentPid ! Other

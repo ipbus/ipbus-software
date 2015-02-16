@@ -14,42 +14,53 @@
 
 
 %% Exported Functions
--export([log/5, log/4, log/3, ip_port_string/2, tcp_peername_string/1,
+-export([log/3, log/2, ip_port_string/2, tcp_peername_string/1,
          print_binary_as_hex/1, ipv4_u32_addr_to_tuple/1]).
+
+
+
+-type log_level() :: debug | info | notice | warning | error | critical | emergency.
+
 
 
 %%% ------------------------------------------------------------------------------------
 %%% API Functions (public interface)
 %%% ------------------------------------------------------------------------------------
 
+
 %% -------------------------------------------------------------------------------------
-%% @doc Prints a debug/info/warning/error message, with the State appended to the end of
-%%      the message
+%% @doc Prints a log message (no data), and an optional prefix to message
 %%
-%% @spec log(Level, Module :: atom(), MsgFmtString :: string(), MsgData :: list(), State :: tuple()) -> ok
-%%  where
-%%       Level = debug | info | warning | error
+%% @spec log(Level :: (log_level() | {log_level()|string()}), MsgFmtString :: string()) -> ok
 %% @end
 %% -------------------------------------------------------------------------------------
 
-log(Level, Module, MsgFmtString, MsgData, State) ->
-    log(Level, Module, lists:flatten([MsgFmtString, "~n", Module:state_as_string(State)]), MsgData).
+log(LevelAndOptionalPrefix, MsgFmtString) ->
+    log(LevelAndOptionalPrefix, MsgFmtString, []).
 
 
 %% -------------------------------------------------------------------------------------
-%% @doc Prints a debug/info/warning/error message
+%% @doc Prints a log message with data, and an optional prefix to message
 %%
-%% @spec log(Level, Module :: atom(), MsgFmtString :: string(), MsgDataOrState :: (list() | tuple()) ) -> ok
-%%  where
-%%       Level = debug | info | warning | error
+%% @spec log(Level :: (log_level() | {log_level()|string()}), MsgFmtString :: string(), MsgData :: list()) -> ok
 %% @end
 %% -------------------------------------------------------------------------------------
 
-log(Level, ProcTag, MsgFmtString, MsgData) when is_list(MsgData) ->
-    % Preamble = io_lib:format("~s ~-7w ~w~w~s -- ", [timestamp_string(now()), Level, self(), Module, mini_state_string(Module)]),
-    PreambleString = io_lib:format(" ~p -- ", [Module]),
-    MsgFmt = lists:append(Preamble, MsgFmtString),
-    case Level of
+log({Level, PrefixString}, MsgFmtString, MsgData) ->
+    implement_log(Level, [$ , $~, $s, $ , $, | MsgFmtString], [ PrefixString | MsgData]);
+log(Level, MsgFmtString, MsgData) when is_atom(Level) ->
+    implement_log(Level, MsgFmtString, MsgData).
+
+
+%% -------------------------------------------------------------------------------------
+%% @doc Prints a log message with data
+%%
+%% @spec implement_log(Level :: log_level(), MsgFmtString :: string(), MsgData :: list()) -> ok 
+%% @end
+%% -------------------------------------------------------------------------------------
+
+implement_log(Level, MsgFmtString, MsgData) when is_list(MsgFmtString), is_list(MsgData) ->
+    case Level of 
          emergency ->
              lager:emergency(MsgFmt, MsgData);
          alert ->
@@ -63,22 +74,7 @@ log(Level, ProcTag, MsgFmtString, MsgData) when is_list(MsgData) ->
           ->
              lager:info(lists:append(Preamble, MsgFmtString), MsgData)
     end,
-    ok;
-log(Level, Module, MsgFmtString, State) when is_tuple(State) ->
-    log(Level, Module, MsgFmtString, [], State).
-
-
-%% -------------------------------------------------------------------------------------
-%% @doc Prints a debug/info/warning/error log message
-%%
-%% @spec log( Level, Module :: atom(), MsgString :: string() )  ->  ok
-%% where
-%%      Level = debug | info | warnig | error
-%% @end
-%% -------------------------------------------------------------------------------------
-
-log(Level, Module, MsgString) ->
-    log(Level, Module, MsgString, []).
+    ok.
 
 
 %% -------------------------------------------------------------------------------------
