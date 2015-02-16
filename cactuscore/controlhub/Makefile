@@ -73,7 +73,7 @@ build: _all
 buildall: _all
 
 _all: _erlang
-	${ESCRIPT} ./rebar compile
+	${ESCRIPT} ./rebar get-deps compile
 	cd rel && ${ESCRIPT} ../rebar generate
 
 

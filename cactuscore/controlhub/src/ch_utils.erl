@@ -49,11 +49,11 @@ log(Level, Module, MsgFmtString, MsgData) when is_list(MsgData) ->
     Preamble = io_lib:format("~s ~-7w ~w~w~s -- ", [timestamp_string(now()), Level, self(), Module, mini_state_string(Module)]),
     case Level of
          error ->   
-             error_logger:error_msg(lists:append(Preamble, MsgFmtString), MsgData);
+             lager:error(lists:append(Preamble, MsgFmtString), MsgData);
          warning ->
-             error_logger:warning_msg(lists:append(Preamble, MsgFmtString), MsgData);
+             lager:warning(lists:append(Preamble, MsgFmtString), MsgData);
          _ ->
-             error_logger:info_msg(lists:append(Preamble, MsgFmtString), MsgData)
+             lager:info(lists:append(Preamble, MsgFmtString), MsgData)
     end,
     ok;
 log(Level, Module, MsgFmtString, State) when is_tuple(State) ->

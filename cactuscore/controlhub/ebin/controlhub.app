@@ -23,7 +23,10 @@
                  ch_stats,
                  ch_sup,
                  ch_tcp_listener]},
-   {applications, [appmon, kernel, sasl, stdlib]},
+   {applications, [stdlib, kernel, sasl,
+                   appmon,
+                   % For goldrush
+                   syntax_tools, compiler, goldrush, lager]},
    {mod, {controlhub_app, []}},
    {env, [{max_in_flight, 16}]}
  ]
