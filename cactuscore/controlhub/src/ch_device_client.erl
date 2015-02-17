@@ -194,7 +194,6 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
             device_client_loop(recv, send_request(RequestPacket, ClientPid, NewS) );
         {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
             ch_utils:log(info, "Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
-            ch_utils:log(info, "Device client is entering new logic."),
             NewS = S#state{mode = normal,
                            ipbus_v = {2,0},
                            max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
@@ -202,10 +201,10 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
                           },
             device_client_loop(send, send_request(RequestPacket, ClientPid, NewS) );
         {error, _, MsgForTransManager} ->
-            ch_utils:log(error, "Target didn't respond correctly to status request in ch_device_client:init/1."),
+            ch_utils:log(info, "Target didn't respond correctly to status request in ch_device_client:init/1."),
             ClientPid ! MsgForTransManager,
             reply_to_all_pending_requests_in_msg_inbox(MsgForTransManager),
-            {stop, "Target didn't respond correctly to status request in device client setup.", S}
+            {stop, normal, S}
     end;
 
 %% Default handle cast
