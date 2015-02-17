@@ -44,6 +44,7 @@ start(_Type, _StartArgs) ->
 %% Returns: any
 %% --------------------------------------------------------------------
 stop(_State) ->
+    ch_utils:log(notice, "Stopping the ControlHub application."),
     ok.
 
 

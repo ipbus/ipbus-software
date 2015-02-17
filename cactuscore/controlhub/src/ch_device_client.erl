@@ -124,7 +124,7 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
     IPTuple = ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32),
     put(target_ip_tuple, IPTuple),   
     put(target_port, PortU16),
-    ch_utils:log(info, "Setting up device client (in ch_device_client:init/1). Absolute max nr packets in flight is ~w.", 
+    ch_utils:log(debug, "Initialising device client for target at ~w:~w. Absolute max nr packets in flight is ~w.", 
                  [ChMaxInFlight]),
 
     % Try opening ephemeral port and we want data delivered as a binary.
@@ -141,13 +141,13 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
             {ok, #state{socket=Socket, ip_tuple=IPTuple, ip_u32=IPaddrU32, port=PortU16, udp_pid=UdpPid, stats=StatsTable} };
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
-                            get(targetSummary),
+                            target_ip_port(),
                             {errorCode, Reason}
                            },
             {stop, ErrorMessage};
         _ ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
-                            get(targetSummary),
+                            target_ip_port(),
                             {errorCode, unknown}
                            },
             {stop, ErrorMessage}
@@ -185,7 +185,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
     {ReqIPbusVer, _Type, _End} = parse_ipbus_packet(RequestPacket),
     case get_device_status(ReqIPbusVer) of
         {ok, {1,3}, {}} ->
-            ch_utils:log(info, "Target speaks IPbus v1.3"),
+            ch_utils:log({info,log_prefix(S)}, "Device client intialised; target speaks IPbus v1.3"),
             NewS = S#state{mode = normal,
                            ipbus_v = {1,3},
                            max_in_flight = 1,
@@ -193,7 +193,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
                           },
             device_client_loop(recv, send_request(RequestPacket, ClientPid, NewS) );
         {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
-            ch_utils:log(info, "Target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
+            ch_utils:log({info,log_prefix(S)}, "Device client initialised; target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
             NewS = S#state{mode = normal,
                            ipbus_v = {2,0},
                            max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
@@ -201,7 +201,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
                           },
             device_client_loop(send, send_request(RequestPacket, ClientPid, NewS) );
         {error, _, MsgForTransManager} ->
-            ch_utils:log(info, "Target didn't respond correctly to status request in ch_device_client:init/1."),
+            ch_utils:log({info,log_prefix(S)}, "Target didn't respond correctly to status request in ch_device_client:init/1."),
             ClientPid ! MsgForTransManager,
             reply_to_all_pending_requests_in_msg_inbox(MsgForTransManager),
             {stop, normal, S}
@@ -663,9 +663,8 @@ get_device_status(IPbusVer) ->
 %% ------------------------------------------------------------------------------------
 
 get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when NrAttemptsLeft =:= 0 ->
-    ch_utils:log(warning, "MAX NUMBER OF TIMEOUTS reached in get_device_status function for IPbus version ~w."
-                  " No response from targets after ~w attempts, each with timeout of ~wms.",
-                  [IPbusVer, TotNrAttempts, ?UDP_RESPONSE_TIMEOUT]),
+    ch_utils:log(info, "No response from target after ~w IPbus ~w status requests, each with timeout of ~wms.",
+                  [TotNrAttempts, IPbusVer, ?UDP_RESPONSE_TIMEOUT]),
     {error, timeout, {device_client_response, get(target_ip_u32), get(target_port), ?ERRCODE_TARGET_STATUS_TIMEOUT, <<>> } };
 
 get_device_status(IPbusVer, NrAttemptsLeft) when is_integer(NrAttemptsLeft), NrAttemptsLeft > 0 ->
@@ -678,7 +677,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     {TargetIPTuple, TargetPort} = target_ip_port(),
     StatusReq13 = binary:copy(<<16#100000f8:32/native>>, 10),
     StatusReq20 = <<16#200000f1:32/big, 0:(15*32)>>,
-    ch_utils:log(info, "Sending IPbus status request to target (attempt ~w of ~w).",
+    ?CH_LOG_DEBUG("Sending IPbus status request to target (attempt ~w of ~w).",
                  [AttemptNr, TotNrAttempts]),
     case IPbusVer of
          {1,3} when NrAttemptsLeft=:=TotNrAttempts ->
@@ -701,7 +700,7 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
     end,
     receive
         {udp, Socket, TargetIPTuple, TargetPort, <<16#100000fc:32/native, _/binary>>} ->
-            ch_utils:log(info, "Received an IPbus 1.3 'status response' from target, on attempt ~w of ~w.",
+            ch_utils:log(debug, "Received an IPbus 1.3 'status response' from target, on attempt ~w of ~w.",
                          [AttemptNr, TotNrAttempts]),
             ch_stats:udp_rcvd(get(stats)),
             {ok, {1,3}, {}};
@@ -709,16 +708,16 @@ get_device_status(IPbusVer, {NrAttemptsLeft, TotNrAttempts}) when is_integer(NrA
             ch_stats:udp_rcvd(get(stats)),
             case parse_ipbus_packet(ReplyBin) of 
                 {{2,0}, {status, MTU, NBuffers, NextId}, big} ->
-                    ch_utils:log(info,"Received an IPbus 2.0 'status response' from target, on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
+                    ch_utils:log(debug,"Received an IPbus 2.0 'status response' from target, on attempt ~w of ~w. MTU=~w, NBuffers=~w, NextExpdId=~w",
                                  [AttemptNr, TotNrAttempts, MTU, NBuffers, NextId]),
                     {ok, {2,0}, {MTU, NBuffers, NextId}};
                 _Details ->
-                    ch_utils:log(error, "Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format). parse_ipbus_packet returned ~w",
+                    ch_utils:log(warning, "Received a malformed IPbus 2.0 'status response' (correct IPbus packet header, but body wrong format). parse_ipbus_packet returned ~w",
                                  [_Details]),
                     {error, malformed, {device_client_response, TargetIPTuple, TargetPort, ?ERRCODE_MALFORMED_STATUS, <<>>} }
             end
     after ?UDP_RESPONSE_TIMEOUT ->
-        ch_utils:log(warning, "TIMEOUT waiting for response in get_device_status! No response from target on attempt ~w of ~w, ipbus version ~w.",
+        ch_utils:log(debug, "TIMEOUT waiting for response in get_device_status! No response from target on attempt ~w of ~w, ipbus version ~w.",
                      [AttemptNr, TotNrAttempts, IPbusVer]),
         ch_stats:udp_timeout(get(stats), status),
         get_device_status(IPbusVer, {NrAttemptsLeft-1, TotNrAttempts})
@@ -754,6 +753,10 @@ state_as_string(S) when is_record(S, state) ->
                   ).
 
 
+log_prefix(State = #state{ip_tuple={IP1,IP2,IP3,IP4}, port=Port}) when is_record(State, state) ->
+    io_lib:format("Device(?????-~w.~w.~w.~w:~w)", [IP1,IP2,IP3,IP4, Port]).
+
+
 udp_proc_init() ->
     process_flag(trap_exit, true),
     receive
@@ -780,7 +783,11 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
                 ch_utils:log(error, "Error in UDP async send: ~w", [SendError]);%,
                 %throw({udp_send_error, SendError});
             {'EXIT', ParentPid, Reason} ->
-                ch_utils:log(info, "UDP proc shutting down since parent device client ~w terminated with reason: ~w", [ParentPid, Reason]),
+                Level = case Reason of 
+                            normal -> debug;
+                            _ -> notice
+                        end,
+                ch_utils:log(Level, "UDP proc shutting down since parent device client ~w terminated with reason: ~w", [ParentPid, Reason]),
                 exit(normal);
             Other ->
                 ParentPid ! Other

@@ -47,7 +47,7 @@ log(LevelAndOptionalPrefix, MsgFmtString) ->
 %% -------------------------------------------------------------------------------------
 
 log({Level, PrefixString}, MsgFmtString, MsgData) ->
-    implement_log(Level, [$ , $~, $s, $ , $, | MsgFmtString], [ PrefixString | MsgData]);
+    implement_log(Level, [$~, $s, $ , $-, $  | MsgFmtString], [ PrefixString | MsgData]);
 log(Level, MsgFmtString, MsgData) when is_atom(Level) ->
     implement_log(Level, MsgFmtString, MsgData).
 

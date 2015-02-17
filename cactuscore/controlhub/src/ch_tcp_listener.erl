@@ -146,8 +146,8 @@ handle_cast(_Msg, State) ->
 %% --------------------------------------------------------------------
 
 % Observe any exit signals that come our way but do nothing with them other than a trace message
-handle_info({'EXIT', _Pid, _Reason}, State) ->
-    ch_utils:log(info, "Observed transaction manager process ~p shutting down with reason: ~p", [_Pid, _Reason]),
+handle_info({'EXIT', _Pid, _Reason}, State) when _Reason =/= normal ->
+    ch_utils:log(warning, "Observed transaction manager process ~p shutting down with reason: ~p", [_Pid, _Reason]),
     {noreply, State};
 
 %% Default info handler - on unknown info message it does nothing
@@ -160,6 +160,7 @@ handle_info(_Info, State) ->
 %% Returns: any (ignored by gen_server)
 %% --------------------------------------------------------------------
 terminate(_Reason, State) ->
+    ch_utils:log(notice, "TCP listener shutting down."),
     gen_tcp:close(State#state.socket),
     ok.
 

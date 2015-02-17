@@ -25,6 +25,8 @@
 
 -record(state, {tcp_pid         :: pid(),
                 socket,
+                client_ip       :: {non_neg_integer(), non_neg_integer(), non_neg_integer(), non_neg_integer()},
+                client_port     :: non_neg_integer(),
                 target_ip_u32   :: non_neg_integer(),
                 target_port     :: non_neg_integer(),
                 nr_in_flight    :: non_neg_integer(),
@@ -80,6 +82,8 @@ tcp_acceptor(TcpListenSocket) ->
                                  [ch_utils:ip_port_string(ClientAddr, ClientPort), inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
                     InitialState = #state{tcp_pid=TcpPid, 
                                           socket=Socket,
+                                          client_ip = ClientAddr,
+                                          client_port = ClientPort,
                                           target_ip_u32 = unknown,
                                           target_port = unknown,
                                           nr_in_flight = 0,
@@ -138,7 +142,11 @@ tcp_proc_loop(Socket, ParentPid) ->
                 ch_utils:log(error, "Error in TCP async send: ~w", [SendError]),
                 throw({tcp_send_error,SendError});
             {'EXIT', ParentPid, Reason} ->
-                ?CH_LOG_DEBUG("TCP proc shutting down since parent transaction manager ~w terminated with reason: ~w", [ParentPid, Reason]),
+                Level = case Reason of
+                            normal -> debug;
+                            _ -> notice
+                        end,
+                ch_utils:log(Level, "TCP proc shutting down since parent transaction manager ~w terminated with reason: ~w", [ParentPid, Reason]),
                 exit(normal);
             Other ->
                 ParentPid ! Other
@@ -187,7 +195,7 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
               NrInFlight > 0 ->
                 ch_utils:log(warning, "TCP socket was closed early - there is still ~w replies pending for that socket. Presumably the socket was closed by the TCP client.", [NrInFlight + S#state.nr_replies_acc]);
               true ->
-                ch_utils:log(info, "TCP socket closed.")
+                ch_utils:log({info,log_prefix(S)}, "TCP socket closed by remote client.")
             end;
 
         {tcp_error, Socket, _Reason} ->
@@ -233,3 +241,8 @@ enqueue_request(IPaddrU32, PortU16, _NotPid, IPbusRequest) ->
     ?CH_LOG_DEBUG("Looking up device_client PID"),
     {ok, Pid} = ch_device_client_registry:get_pid(IPaddrU32, PortU16),
     enqueue_request(IPaddrU32, PortU16, Pid, IPbusRequest).
+
+
+
+log_prefix(S = #state{client_ip={IP1,IP2,IP3,IP4}, client_port=ClientPort}) ->
+    io_lib:format("TraMgr(~w.~w.~w.~w:~w-????)", [IP1,IP2,IP3,IP4,ClientPort]).
