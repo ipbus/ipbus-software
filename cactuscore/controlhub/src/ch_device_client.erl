@@ -267,13 +267,14 @@ device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port }) ->
 
 % Response timeout clause
 device_client_loop(timeout, S) ->
+    ch_utils:log({debug,log_prefix(S)}, "Timeout when waiting for control packet response. Starting packet-loss recovery ..."),
     try recover_from_timeout(0, S) of
         {ok, NewState} ->
-            ch_utils:log(info, "Timeout recovered!"),
+            ch_utils:log({debug,log_prefix(S)}, "Timeout recovered!"),
             device_client_loop(send, NewState)
     catch
         throw:{recovery_failed, MsgForTransactionManager} ->
-            ch_utils:log(error, "Irrecoverable TIMEOUT when waiting for response from board."),
+            ch_utils:log({error,log_prefix(S)}, "IRRECOVERABLE TIMEOUT when waiting for control response packet from board."),
             Pids = [Pid || {Pid, _, _, _} <- queue:to_list(element(2,S#state.in_flight))],
             lists:foreach(fun(Pid) -> Pid ! MsgForTransactionManager end, Pids),
             reply_to_all_pending_requests_in_msg_inbox(MsgForTransactionManager),
@@ -347,31 +348,28 @@ recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, po
     end;
 
 recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}, socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {2,0} ->
-    ch_utils:log(warning, "Timeout when waiting for response from ~s. "
-                 "Starting packet-loss recovery (attempt ~w) ...", 
-                 [ch_utils:ip_port_string(S#state.ip_tuple, S#state.port) , NrFailedAttempts+1]),
     NextIdMinusN = decrement_pkt_id(NextId, NrInFlight),
     RequestsInFlight = [[NewHdr, Body] || {_Pid, _OrigHdr, NewHdr, Body} <- queue:to_list(InFlightQ)],
     % Take recovery action
     Type = case get_device_status(S#state.ipbus_v) of
                {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
-                   ch_utils:log(info, "Request packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is ~w instead). "
-                                "Re-sending ~w request packets.", [NrInFlight, NextId, HwNextId, NrInFlight]),
+                   ch_utils:log({info,log_prefix(S)}, "Request packet got lost (~w in flight, next expected ID would be ~w without loss, instead it is ~w). "
+                                "Re-sending last ~w request packets (attempt ~w)).", [NrInFlight, NextId, HwNextId, NrInFlight, NrFailedAttempts+1]),
                    lists:foreach(fun(RequestIoData) -> S#state.udp_pid ! {send, RequestIoData}, 
                                                        ch_stats:udp_sent(S#state.stats) end, 
                                  RequestsInFlight
                                 ),
                    request;
                {ok, {2,0}, {_, _, HwNextId}} ->
-                   ch_utils:log(info, "Response packet got lost (~w packets in-flight, next expected packet ID would be ~w without loss, but is in fact ~w). "
-                                "Requesting re-send of last ~w response packets.", [NrInFlight, NextId, HwNextId, NrInFlight]),
+                   ch_utils:log({info,log_prefix(S)}, "Response packet got lost (~w in flight, next expected ID would be ~w without loss, instead it is ~w). "
+                                "Requesting re-send of last ~w response packets (attempt ~w).", [NrInFlight, NextId, HwNextId, NrInFlight, NrFailedAttempts+1]),
                    lists:foreach(fun([ReqHdr, _ReqBody]) -> S#state.udp_pid ! {send, resend_request_pkt(ReqHdr)},
                                                             ch_stats:udp_sent(S#state.stats) end, 
                                  RequestsInFlight
                                 ),
                    response;
                 {error, _Type, MsgForTransManager} ->
-                    ch_utils:log(error,"Status request failed."),
+                    ch_utils:log({error,log_prefix(S)},"Status request failed after control packet timeout (~w in flight, next expected ID should be ~w, recovery attempt ~w).", [NrInFlight, NextId, NrInFlight]),
                     throw({recovery_failed, MsgForTransManager})
            end,
     % Update stats counters
