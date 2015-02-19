@@ -30,6 +30,7 @@
 %% --------------------------------------------------------------------
 start(_Type, _StartArgs) ->
     ch_utils:log(notice, "Starting the ControlHub application."),
+    ch_config:init(),
 %    fprof:trace(start),
     % Start the root supervisor and return its process ID.
     case ch_sup:start_link() of

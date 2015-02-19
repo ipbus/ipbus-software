@@ -12,6 +12,7 @@
  [{description, "Control Hub: multi-client packet routing for IPbus/UDP hardware"},
    {vsn, "2.3.3"},
    {modules, [controlhub_app,
+              ch_config,
               ch_sup,
               ch_device_client_registry,
               ch_device_client,
@@ -28,6 +29,13 @@
                    % For goldrush
                    syntax_tools, compiler, goldrush, lager]},
    {mod, {controlhub_app, []}},
-   {env, [{max_in_flight, 16}]}
+   {env, [% The port on which the Control Hub will listen for TCP connections.
+          {tcp_listen_port, 10203},
+          % The maximum number of UDP packets in flight to any given target.
+          {max_udp_in_flight, 16},
+          % The timeout (ms) used when waiting for a response from a hardware target.
+          {device_response_timeout, 20},
+          % The time (ms) after which a device client process will shut down if not communicating with board
+          {device_client_shutdown_after, 15000}]}
  ]
 }.

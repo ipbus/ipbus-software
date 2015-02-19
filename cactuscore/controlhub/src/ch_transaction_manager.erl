@@ -16,7 +16,6 @@
 %%
 -include("ch_global.hrl").
 -include("ch_timeouts.hrl").
--include("ch_tcp_server_params.hrl").
 -include("ch_error_codes.hrl").
 
 %%
@@ -121,7 +120,7 @@ tcp_proc_init() ->
     receive
         {start, Socket, ParentPid} ->
             link(ParentPid),
-            inet:setopts(Socket, [lists:keyfind(active, 1, ?TCP_SOCKET_OPTIONS)]),
+            inet:setopts(Socket, [lists:keyfind(active, 1, ch_config:get(tcp_socket_opts))]),
             tcp_proc_loop(Socket, ParentPid)
     end.
 

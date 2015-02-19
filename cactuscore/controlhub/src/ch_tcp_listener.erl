@@ -14,7 +14,6 @@
 -behaviour(gen_server).
 
 -include("ch_global.hrl").
--include("ch_tcp_server_params.hrl").
 
 
 %% API exports
@@ -84,17 +83,18 @@ connection_accept_completed() ->
 %% @end
 %% --------------------------------------------------------------------
 init([]) ->
-    ch_utils:log(notice, "Initialising the TCP listener (port ~p).", [?CONTROL_HUB_TCP_LISTEN_PORT]),
+    Port = ch_config:get(tcp_listen_port),
+    ch_utils:log(notice, "Initialising the TCP listener (port ~p).", [Port]),
     process_flag(trap_exit, true),
-    case gen_tcp:listen(?CONTROL_HUB_TCP_LISTEN_PORT, lists:keyreplace(active, 1, ?TCP_SOCKET_OPTIONS, {active,false}) ) of
+    case gen_tcp:listen(Port, lists:keyreplace(active, 1, ch_config:get(tcp_socket_opts), {active,false}) ) of
         {ok, TcpListenSocket} ->
             {ok, spawn_acceptor(#state{socket = TcpListenSocket})};
         {error, eaddrinuse} ->
-            ErrorString = io_lib:format("The ControlHub TCP listen port (~p) is already in use", [?CONTROL_HUB_TCP_LISTEN_PORT]),
+            ErrorString = io_lib:format("The ControlHub TCP listen port (~p) is already in use", [Port]),
             ch_utils:log(critical, "~s; ControlHub cannot start correctly!", [ErrorString]),
             {stop, ErrorString};
         {error, What} ->
-            ch_utils:log(critical,"Unexpected error listening to TCP port ~p -- error message: ~p", [?CONTROL_HUB_TCP_LISTEN_PORT,What]),
+            ch_utils:log(critical,"Unexpected error listening to TCP port ~p -- error message: ~p", [Port,What]),
             {stop, {"Error starting the Control Hub TCP listener", What}}
     end.    
 
