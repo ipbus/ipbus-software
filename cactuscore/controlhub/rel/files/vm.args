@@ -1,5 +1,5 @@
 ## Name of the node
--name controlhub@127.0.0.1
+-sname controlhub
 
 ## Cookie for distributed erlang
 -setcookie ch_cookie
