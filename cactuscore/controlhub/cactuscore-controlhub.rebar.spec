@@ -29,12 +29,15 @@ IPbus packet-router
 # Make directories
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/{bin,lib}
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
-mkdir -p $RPM_BUILD_ROOT/var/log/controlhub
 
 # Copy over files
 #cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 cp -rp %{sources_dir}/controlhub $RPM_BUILD_ROOT/etc/init.d/.
+
+# Link /var/log/controlhub to controlhub log dir
+mkdir -p ${RPM_BUILD_ROOT}/var/log
+ln -s %{_prefix}/lib/controlhub/log ${RPM_BUILD_ROOT}/var/log/controlhub
 
 ## Now update the escript executable paths in various controlhub scripts
 #cd $RPM_BUILD_ROOT%{_prefix}/bin
@@ -53,9 +56,15 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 %clean
 
 
+%pre
+# Can't overwrite dir with a symlink, so remove old log dir first on upgrades
+if [ $1 -gt 1 -a -d /var/log/controlhub ]; then \
+  rm -rf /var/log/controlhub
+fi
+
 %post
 # 1) Must stop ControlHub in case RPM being upgraded (i.e. rpm -U), or in case of error on previous RPM erase
-/etc/init.d/controlhub stop > /dev/null || true
+/etc/init.d/controlhub stop || true
 # 2) Normal ControlHub start steps
 /sbin/chkconfig --add controlhub
 /etc/init.d/controlhub start 
