@@ -75,3 +75,4 @@ fi
 %{_prefix}/lib/*
 /etc/init.d/controlhub
 /var/log/controlhub
+%config(noreplace) %{_prefix}/lib/controlhub/controlhub.config
