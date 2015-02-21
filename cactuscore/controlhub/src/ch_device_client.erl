@@ -366,7 +366,7 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
                {ok, {2,0}, {_, _, HwNextId}} ->
                    ch_utils:log({info,log_prefix(S)}, 
                                 "Requesting re-send of ~w lost response packets (~w in flight, next ID: ~w without loss, ~w in device); attempt ~w.", 
-                                [NrInFlight, NrInFlight, NextId, HwNextId, NrInFlight, NrFailedAttempts+1]),
+                                [NrInFlight, NrInFlight, NextId, HwNextId, NrFailedAttempts+1]),
                    lists:foreach(fun([ReqHdr, _ReqBody]) -> S#state.udp_pid ! {send, resend_request_pkt(ReqHdr)},
                                                             ch_stats:udp_sent(S#state.stats) end, 
                                  RequestsInFlight
