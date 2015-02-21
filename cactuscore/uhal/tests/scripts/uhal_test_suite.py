@@ -460,7 +460,6 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "sudo /sbin/tc qdisc del dev lo root",
                "sudo /sbin/tc -s qdisc ls dev lo",
                "pkill -f \"DummyHardwareUdp.exe\"",
-               "cat /var/log/controlhub.log",
                controlhub_stop]
                 ]]
 
