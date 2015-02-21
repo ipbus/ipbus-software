@@ -201,9 +201,11 @@ case "$1" in
         # Make sure there is not already a node running
         RES=`ping_node`
         if [ "$RES" = "pong" ]; then
-            echo "Node is already running!"
+            echo "ControlHub is already running!"
             exit 1
         fi
+
+        echo -n "Starting ControlHub .."
         case "$1" in
             start)
                 shift
@@ -222,16 +224,26 @@ case "$1" in
         mkdir -p $PIPE_DIR
         $ERTS_PATH/run_erl -daemon $PIPE_DIR $RUNNER_LOG_DIR "exec $RUNNER_BASE_DIR/bin/$SCRIPT $START_OPTION $RUN_PARAM" 2>&1
 
-        sleep 2
-        until $NODETOOL ping < /dev/null > /dev/null
-        do
-           echo "Waiting for node startup ... (" `date` ")"
-           sleep 2
+        # Before exiting, wait until ControlHub is actually running
+        for i in `seq 1 30`; do
+           echo -n "."
+           sleep 1
+           $NODETOOL ping < /dev/null > /dev/null
+           if [ $? = 0 ]; then 
+             echo " ok"
+             # Small extra sleep to ensure TCP port is open
+             sleep 2
+             exit 0
+           fi
         done
+        
+        # Only get here if ControlHub didn't start after N seconds
+        echo "FAILED!"
+        echo "   ===> See run_erl.log or erlang.log files in $RUNNER_LOG_DIR"
+        exit 4 
         ;;
 
     stop)
-        # Wait for the node to completely stop...
         case `uname -s` in
             Darwin)
                 # Make sure we explicitly set this because iTerm.app doesn't for
@@ -239,25 +251,41 @@ case "$1" in
                 COMMAND_MODE=unix2003
         esac
 
+        # Exit early if ControlHub is not actually running
+        RES=`ping_node`
+        if [ "$RES" != "pong" ]; then
+            echo "ControlHub is already stopped!"
+            exit 1
+        fi
+
         # Get the PID from nodetool
         get_pid
         GPR=$?
         if [ "$GPR" -ne 0 ] || [ -z $PID ]; then
+            echo "ERROR retrieving ControlHub PID"
             exit $GPR
         fi
 
         # Tell nodetool to initiate a stop
-        $NODETOOL stop
+        echo -n "Stopping ControlHub .."
+        RES=`$NODETOOL stop`
         ES=$?
         if [ "$ES" -ne 0 ]; then
+            echo " ERROR when stopping node: $RES"
             exit $ES
+        fi
+        if [ "$RES" != "ok" ]; then
+            echo " ERROR runnning remove procedure call: $RES"
+            exit 2
         fi
 
         # Wait for the node to completely stop...
         while `kill -s 0 $PID 2>/dev/null`
         do
+            echo -n "."
             sleep 1
         done
+        echo " ok"
         ;;
 
     restart)
