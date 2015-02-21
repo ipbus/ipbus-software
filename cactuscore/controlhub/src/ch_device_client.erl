@@ -187,7 +187,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
     {ReqIPbusVer, _Type, _End} = parse_ipbus_packet(RequestPacket),
     case get_device_status(ReqIPbusVer, S#state.timeout) of
         {ok, {1,3}, {}} ->
-            ch_utils:log({info,log_prefix(S)}, "Device client intialised; target speaks IPbus v1.3"),
+            ch_utils:log({info,log_prefix(S)}, "Device client intialised, IPbus1.3 target"),
             NewS = S#state{mode = normal,
                            ipbus_v = {1,3},
                            max_in_flight = 1,
@@ -195,7 +195,7 @@ handle_cast({send, RequestPacket, ClientPid}, S) ->
                           },
             device_client_loop(recv, send_request(RequestPacket, ClientPid, NewS) );
         {ok, {2,0}, {_MTU, TargetNrBuffers, NextExpdId}} ->
-            ch_utils:log({info,log_prefix(S)}, "Device client initialised; target speaks IPbus v2.0 (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
+            ch_utils:log({info,log_prefix(S)}, "Device client initialised, IPbus2.0 target (MTU=~w bytes, NrBuffers=~w, NextExpdId=~w)", [_MTU, TargetNrBuffers, NextExpdId]),
             NewS = S#state{mode = normal,
                            ipbus_v = {2,0},
                            max_in_flight = min(TargetNrBuffers, get(abs_max_in_flight)),
@@ -330,12 +330,12 @@ forward_reply(Pkt, S = #state{ in_flight={1,TransManagerPid} }) when S#state.ipb
     ch_stats:udp_rcvd(S#state.stats),
     S#state{in_flight={0,void}};
 forward_reply(Pkt, S) ->
-    ch_utils:log(error, "Not expecting any response from board, but received: ~w", [Pkt]),
+    ch_utils:log({error,log_prefix(S)}, "Not expecting any response from board, but received: ~w", [Pkt]),
     S.
 
 
 recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {1,3} ->
-    ch_utils:log(info, "IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [S#state.timeout]),
+    ch_utils:log({debug,log_prefix(S)}, "IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [S#state.timeout]),
     receive
         {udp, Socket, IP, Port, Pkt} ->
             NewS = forward_reply(Pkt, S),
@@ -355,24 +355,28 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
     % Take recovery action
     Type = case get_device_status(S#state.ipbus_v, S#state.timeout) of
                {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
-                   ch_utils:log({info,log_prefix(S)}, "Request packet got lost (~w in flight, next expected ID would be ~w without loss, instead it is ~w). "
-                                "Re-sending last ~w request packets (attempt ~w)).", [NrInFlight, NextId, HwNextId, NrInFlight, NrFailedAttempts+1]),
+                   ch_utils:log({info,log_prefix(S)}, 
+                                "Re-sending ~w lost request packets (~w in flight, next ID: ~w without loss, ~w in device); attempt ~w.", 
+                                [NrInFlight, NrInFlight, NextId, HwNextId, NrFailedAttempts+1]),
                    lists:foreach(fun(RequestIoData) -> S#state.udp_pid ! {send, RequestIoData}, 
                                                        ch_stats:udp_sent(S#state.stats) end, 
                                  RequestsInFlight
                                 ),
                    request;
                {ok, {2,0}, {_, _, HwNextId}} ->
-                   ch_utils:log({info,log_prefix(S)}, "Response packet got lost (~w in flight, next expected ID would be ~w without loss, instead it is ~w). "
-                                "Requesting re-send of last ~w response packets (attempt ~w).", [NrInFlight, NextId, HwNextId, NrInFlight, NrFailedAttempts+1]),
+                   ch_utils:log({info,log_prefix(S)}, 
+                                "Requesting re-send of ~w lost response packets (~w in flight, next ID: ~w without loss, ~w in device); attempt ~w.", 
+                                [NrInFlight, NrInFlight, NextId, HwNextId, NrInFlight, NrFailedAttempts+1]),
                    lists:foreach(fun([ReqHdr, _ReqBody]) -> S#state.udp_pid ! {send, resend_request_pkt(ReqHdr)},
                                                             ch_stats:udp_sent(S#state.stats) end, 
                                  RequestsInFlight
                                 ),
                    response;
-                {error, _Type, MsgForTransManager} ->
-                    ch_utils:log({error,log_prefix(S)},"Status request failed after control packet timeout (~w in flight, next expected ID should be ~w, recovery attempt ~w).", [NrInFlight, NextId, NrInFlight]),
-                    throw({recovery_failed, MsgForTransManager})
+               {error, _Type, MsgForTransManager} ->
+                   ch_utils:log({error,log_prefix(S)},
+                                "Status request failed after control packet timeout (~w in flight, next expected ID should be ~w), recovery attempt ~w.", 
+                                [NrInFlight, NextId, NrInFlight]),
+                   throw({recovery_failed, MsgForTransManager})
            end,
     % Update stats counters
     if

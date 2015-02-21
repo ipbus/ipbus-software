@@ -77,8 +77,6 @@ tcp_acceptor(TcpListenSocket) ->
                 {ok, {ClientAddr, ClientPort}} ->
                     gen_tcp:controlling_process(Socket, TcpPid),
                     TcpPid ! {start, Socket, self()},
-                    ch_utils:log(info, "TCP socket accepted from client at ~s. Socket options: ~w~n",
-                                 [ch_utils:ip_port_string(ClientAddr, ClientPort), inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]),
                     InitialState = #state{tcp_pid=TcpPid, 
                                           socket=Socket,
                                           client_ip = ClientAddr,
@@ -91,6 +89,8 @@ tcp_acceptor(TcpListenSocket) ->
                                           nr_replies_acc = 0,
                                           stats_table = ch_stats:new_transaction_manager_table(ClientAddr, ClientPort)
                                          },
+                    ch_utils:log({info,log_prefix(InitialState)}, "TCP socket accepted from client."),
+                    ch_utils:log({debug,log_prefix(InitialState)}, "TCP socket options: ~w", [inet:getopts(TcpListenSocket, [active, buffer, low_watermark, high_watermark, recbuf, sndbuf])]), 
                     transaction_manager_loop( InitialState );
                 _Else ->
                     ch_stats:client_disconnected(),
