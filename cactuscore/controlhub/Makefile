@@ -31,11 +31,11 @@ PackageName = cactuscore-controlhub
 Packager = Tom Williams
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 3
-PACKAGE_VER_PATCH = 3
+PACKAGE_VER_MINOR = 4
+PACKAGE_VER_PATCH = 0
 
 # This is the version number for the RPM packaging.
-PACKAGE_RELEASE = rebar.0
+PACKAGE_RELEASE = 0
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 RPMBUILD_SOURCES_DIR = ${RPMBUILD_DIR}/SOURCES
