@@ -41,7 +41,7 @@ ln -s %{_prefix}/lib/controlhub/log ${RPM_BUILD_ROOT}/var/log/controlhub
 
 # Now update the CONTROLHUB_BIN_DIR variable in controlhub scripts
 cd $RPM_BUILD_ROOT%{_prefix}/bin
-sed -i "s|CONTROLHUB_BIN_DIR|%{_prefix}/lib/controlhub/bin|" controlhub_*
+sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=/opt/cactus/lib/controlhub/bin|" controlhub_*
 cd $curdir
 
 
