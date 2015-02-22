@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # -*- tab-width:4;indent-tabs-mode:nil -*-
 # ex: ts=4 sw=4 et
 
@@ -274,10 +274,6 @@ case "$1" in
             echo " ERROR when stopping node: $RES"
             exit $ES
         fi
-        if [ "$RES" != "ok" ]; then
-            echo " ERROR runnning remove procedure call: $RES"
-            exit 2
-        fi
 
         # Wait for the node to completely stop...
         while `kill -s 0 $PID 2>/dev/null`
@@ -315,15 +311,16 @@ case "$1" in
         fi
         ;;
 
-    stats)
-        ## See if the VM is alive
-        ping_node
-        ES=$?
-        if [ "$ES" -ne 0 ]; then
-            exit $ES
-        fi
+    status)
+        ## nodetool will check if VM is alive
+        $NODETOOL status
+        exit $?
+        ;;
 
+    stats)
+        ## nodetool will check if VM is alive
         $NODETOOL stats
+        exit $?
         ;;
 
     attach)
@@ -442,7 +439,7 @@ case "$1" in
         echo $PID
         ;;
     *)
-        echo "Usage: $SCRIPT {start|start_boot <file>|foreground|stop|restart|reboot|ping|console|getpid|console_clean|console_boot <file>|attach|remote_console|upgrade}"
+        echo "Usage: $SCRIPT {start|start_boot <file>|foreground|stop|restart|reboot|ping|status|stats|console|getpid|console_clean|console_boot <file>|attach|remote_console|upgrade}"
         exit 1
         ;;
 esac

@@ -37,29 +37,33 @@ main(Args) ->
         {true, pong} ->
             ok;
         {false,pong} ->
-            io:format("Failed to connect to node ~p .\n", [TargetNode]),
+            io:format("Failed to connect to the ControlHub (node ~p).\n", [TargetNode]),
             halt(1);
         {_, pang} ->
-            io:format("Node ~p not responding to pings.\n", [TargetNode]),
+            io:format("The ControlHub is down.\n", []),
             halt(1)
     end,
 
     case RestArgs of
         ["getpid"] ->
             io:format("~p\n",
-                      [list_to_integer(rpc:call(TargetNode, os, getpid, []))]);
+                      [list_to_integer(safe_rpc(TargetNode, os, getpid, []))]);
         ["ping"] ->
             %% If we got this far, the node already responsed to a
             %% ping, so just dump a "pong"
             io:format("pong\n");
+        ["status"] ->
+            Pid = list_to_integer(safe_rpc(TargetNode, os, getpid, [])),
+            {controlhub, _Desc, Vsn} = lists:keyfind(controlhub, 1, safe_rpc(TargetNode, application, which_applications, [])),
+            io:format("The ControlHub is up (version ~s, pid=~w)~n", [Vsn, Pid]);
         ["stop"] ->
-            io:format("~p\n", [rpc:call(TargetNode, init, stop, [], 60000)]);
+            io:format("~p\n", [safe_rpc(TargetNode, init, stop, [], 60000)]);
         ["restart"] ->
-            io:format("~p\n", [rpc:call(TargetNode, init, restart, [], 60000)]);
+            io:format("~p\n", [safe_rpc(TargetNode, init, restart, [], 60000)]);
         ["reboot"] ->
-            io:format("~p\n", [rpc:call(TargetNode, init, reboot, [], 60000)]);
+            io:format("~p\n", [safe_rpc(TargetNode, init, reboot, [], 60000)]);
         ["stats"] ->
-            io:format("~s\n", [rpc:call(TargetNode, ch_stats, report_to_string, [], 60000)]);
+            io:format("~s\n", [safe_rpc(TargetNode, ch_stats, report_to_string, [], 60000)]);
         ["rpc", Module, Function | RpcArgs] ->
             case rpc:call(TargetNode,
                           list_to_atom(Module),
@@ -181,4 +185,20 @@ consult(Cont, Str, Acc) ->
             end;
         {more, Cont1} ->
             consult(Cont1, eof, Acc)
+    end.
+
+
+%%
+%% Run remote procedural call, and halt with exit code 2 if RPC fails for any reason 
+%%
+-spec safe_rpc(TargetNode :: atom(), Module :: atom(), Func :: atom(), Args :: list()) -> Result :: any() | no_return().
+safe_rpc(TargetNode, Module, Func, Args) ->
+    case rpc:call(TargetNode, Module, Func, Args, 60000) of
+        {badrpc, Reason} ->
+            io:format("ERROR: Remote procedural call failed with reason: ~w~n"
+                      "        Node = ~w , Function = ~w:~w , Args = ~w",
+                      [Reason, TargetNode, Module, Func, Args]),
+            halt(2);
+         Other ->
+            Other
     end.
