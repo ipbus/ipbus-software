@@ -29,7 +29,11 @@
 %%          {error, Reason}
 %% --------------------------------------------------------------------
 start(_Type, _StartArgs) ->
-    ch_utils:log(notice, "Starting the ControlHub application."),
+    Vsn = case application:get_key(vsn) of
+              {ok, Version} -> Version;
+              Else -> io_lib:format("~w", [Else])
+          end,
+    ch_utils:log(notice, "Starting the ControlHub application (version ~s).", [Vsn]),
     ch_config:init(),
 %    fprof:trace(start),
     % Start the root supervisor and return its process ID.
