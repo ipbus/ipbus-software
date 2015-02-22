@@ -10,8 +10,8 @@ PackageName = cactuscore-uhal-uhal
 Packager = Andrew Rose
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 3
-PACKAGE_VER_PATCH = 2
+PACKAGE_VER_MINOR = 4
+PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 0
 
 LIBRARY = lib/libcactus_uhal_uhal.so
