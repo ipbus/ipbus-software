@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#######################################################################################
+# ControlHub start script -- starts the ControlHub if it isn't already running.
+#
+# This script has the following return codes:
+#   * Return code is 0 if the ControlHub started successfully 
+#   * Return code is 1 if the ControlHub was already running.
+#   * Return code is 4 if the ControlHub failed to start.
+#
+# Tom Williams, February 2015
+#######################################################################################
+
+
+CONTROLHUB_BIN_DIR=$(python -c "import os.path; print os.path.dirname(os.path.abspath('$BASH_SOURCE'))")/../rel/controlhub/bin
+
+CONTROLHUB_CMD=${CONTROLHUB_BIN_DIR}/controlhub
+
+${CONTROLHUB_CMD} start
+

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#######################################################################################
+# ControlHub status script -- prints the status of the ControlHub.
+#
+# This script has the following return codes:
+#   * Return code is 0 if the ControlHub is up
+#   * Return code is 1 if down.
+#
+# Tom Williams, February 2015
+#######################################################################################
+
+
+CONTROLHUB_BIN_DIR=$(python -c "import os.path; print os.path.dirname(os.path.abspath('$BASH_SOURCE'))")/../rel/controlhub/bin
+
+CONTROLHUB_CMD=${CONTROLHUB_BIN_DIR}/controlhub
+
+${CONTROLHUB_CMD} status
+

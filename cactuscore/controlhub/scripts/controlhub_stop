@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#######################################################################################
+# ControlHub stop script -- prints packet throughput statistics for the ControlHub.
+#
+# This script has the following return codes:
+#   * Return code is 0 if the Control Hub was stopped successfully.
+#   * Return code is 1 if the Control Hub was already stopped.
+#   * Return code is 2 if there was an error commincating with the ControlHub.
+#   * Return code is 3 if there was a general error during stopping.
+#
+# Tom Williams, February 2015
+#######################################################################################
+
+
+CONTROLHUB_BIN_DIR=$(python -c "import os.path; print os.path.dirname(os.path.abspath('$BASH_SOURCE'))")/../rel/controlhub/bin
+
+CONTROLHUB_CMD=${CONTROLHUB_BIN_DIR}/controlhub
+
+${CONTROLHUB_CMD} stop
+
