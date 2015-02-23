@@ -31,7 +31,7 @@ mkdir -p $RPM_BUILD_ROOT%{_prefix}/{bin,lib}
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
 # Copy over files
-#cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
+cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 cp -rp %{sources_dir}/controlhub $RPM_BUILD_ROOT/etc/init.d/.
 
@@ -79,7 +79,7 @@ fi
 
 %files
 %defattr(-, root, root)
-#%{_prefix}/bin/*
+%{_prefix}/bin/*
 %{_prefix}/lib/*
 /etc/init.d/controlhub
 /var/log/controlhub
