@@ -56,14 +56,14 @@ main(Args) ->
             Pid = list_to_integer(safe_rpc(TargetNode, os, getpid, [])),
             {controlhub, _Desc, Vsn} = lists:keyfind(controlhub, 1, safe_rpc(TargetNode, application, which_applications, [])),
             io:format("The ControlHub is up (version ~s, pid=~w)~n", [Vsn, Pid]);
-        ["stop"] ->
-            io:format("~p\n", [safe_rpc(TargetNode, init, stop, [], 60000)]);
-        ["restart"] ->
-            io:format("~p\n", [safe_rpc(TargetNode, init, restart, [], 60000)]);
-        ["reboot"] ->
-            io:format("~p\n", [safe_rpc(TargetNode, init, reboot, [], 60000)]);
         ["stats"] ->
-            io:format("~s\n", [safe_rpc(TargetNode, ch_stats, report_to_string, [], 60000)]);
+            io:format("~s\n", [safe_rpc(TargetNode, ch_stats, report_to_string, [])]);
+        ["stop"] ->
+            io:format("~p\n", [safe_rpc(TargetNode, init, stop, [])]);
+        ["restart"] ->
+            io:format("~p\n", [safe_rpc(TargetNode, init, restart, [])]);
+        ["reboot"] ->
+            io:format("~p\n", [safe_rpc(TargetNode, init, reboot, [])]);
         ["rpc", Module, Function | RpcArgs] ->
             case rpc:call(TargetNode,
                           list_to_atom(Module),
@@ -103,7 +103,7 @@ main(Args) ->
             end;
         Other ->
             io:format("Other: ~p\n", [Other]),
-            io:format("Usage: nodetool {chkconfig|getpid|ping|stop|restart|reboot|rpc|rpc_infinity|rpcterms}\n")
+            io:format("Usage: nodetool {chkconfig|getpid|ping|status|stats|stop|restart|reboot|rpc|rpc_infinity|rpcterms}\n")
     end,
     net_kernel:stop().
 
