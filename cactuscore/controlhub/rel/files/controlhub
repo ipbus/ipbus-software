@@ -317,6 +317,12 @@ case "$1" in
         exit $?
         ;;
 
+    info)
+        ## nodetool will check if VM is alive
+        $NODETOOL info
+        exit $?
+        ;;
+
     stats)
         ## nodetool will check if VM is alive
         $NODETOOL stats
@@ -439,7 +445,7 @@ case "$1" in
         echo $PID
         ;;
     *)
-        echo "Usage: $SCRIPT {start|start_boot <file>|foreground|stop|restart|reboot|ping|status|stats|console|getpid|console_clean|console_boot <file>|attach|remote_console|upgrade}"
+        echo "Usage: $SCRIPT {start|start_boot <file>|foreground|stop|restart|reboot|ping|status|info|stats|console|getpid|console_clean|console_boot <file>|attach|remote_console|upgrade}"
         exit 1
         ;;
 esac

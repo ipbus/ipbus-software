@@ -56,6 +56,34 @@ main(Args) ->
             Pid = list_to_integer(safe_rpc(TargetNode, os, getpid, [])),
             {controlhub, _Desc, Vsn} = lists:keyfind(controlhub, 1, safe_rpc(TargetNode, application, which_applications, [])),
             io:format("The ControlHub is up (version ~s, pid=~w)~n", [Vsn, Pid]);
+        ["info"] ->
+            io:format("The ControlHub is running. General info ...~n"),
+            InfoList = safe_rpc(TargetNode, ch_stats, get_app_info, []),
+            StartTimestamp = proplists:get_value(controlhub_start_timestamp, InfoList),
+            {{StartYr, StartMonth, StartDay}, {StartHr, StartMin, StartSec}} = calendar:now_to_universal_time(StartTimestamp),
+            StartTimeString = io_lib:format("~B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B UTC", 
+                                            [StartYr, StartMonth, StartDay, StartHr, StartMin, StartSec]),
+            UptimeInSeconds = timer:now_diff(os:timestamp(), StartTimestamp) div 1000000, 
+            UptimeString = io_lib:format("~w days, ~w hours, ~w minutes, ~w seconds", 
+                                         [UptimeInSeconds div (24 * 3600), (UptimeInSeconds div 3600) rem 24, (UptimeInSeconds div 60) rem 60, UptimeInSeconds rem 60]),
+            io:format("    started at ~s~n"
+                      "    uptime: ~s~n"
+                      "    version: ~s~n"
+                      "    config file: ~s~n~n",
+                      [StartTimeString, 
+                       UptimeString, 
+                       proplists:get_value(controlhub_vsn, InfoList, "unknown"),
+                       proplists:get_value(config_file, InfoList)]),
+            io:format("Device client parameters ...~n"
+                      "    max packets in flight to each board = ~w~n"
+                      "    timeout for replies from board = ~wms~n"
+                      "    device client lifetime when inactive = ~wms~n~n",
+                      [proplists:get_value(max_udp_in_flight, InfoList, unknown),
+                       proplists:get_value(device_response_timeout, InfoList, unknown),
+                       proplists:get_value(device_client_shutdown_after, InfoList, unknown)]),
+            io:format("TCP parameters ...~n"
+                      "    Listening on port ~w~n",
+                      [proplists:get_value(tcp_listen_port, InfoList, unknown)]);
         ["stats"] ->
             io:format("~s\n", [safe_rpc(TargetNode, ch_stats, report_to_string, [])]);
         ["stop"] ->
@@ -103,7 +131,7 @@ main(Args) ->
             end;
         Other ->
             io:format("Other: ~p\n", [Other]),
-            io:format("Usage: nodetool {chkconfig|getpid|ping|status|stats|stop|restart|reboot|rpc|rpc_infinity|rpcterms}\n")
+            io:format("Usage: nodetool {chkconfig|getpid|ping|status|info|stats|stop|restart|reboot|rpc|rpc_infinity|rpcterms}\n")
     end,
     net_kernel:stop().
 

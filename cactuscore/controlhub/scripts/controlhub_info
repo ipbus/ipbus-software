@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#######################################################################################
+# ControlHub stats script -- prints values of the configuration parameters used in a running ControlHub instance.
+#
+# This script has the following return codes:
+#   * Return code is 0 if the information was retrieved from the ControlHub successfully.
+#   * Return code is 1 if the ControlHub is down.
+#   * Return code is 2 if there was an error retrieving the information from the ControlHub.
+#
+# Tom Williams, February 2015
+#######################################################################################
+
+
+CONTROLHUB_BIN_DIR=$(python -c "import os.path; print os.path.dirname(os.path.abspath('$BASH_SOURCE'))")/../rel/controlhub/bin
+
+CONTROLHUB_CMD=${CONTROLHUB_BIN_DIR}/controlhub
+
+${CONTROLHUB_CMD} status
+

@@ -13,9 +13,9 @@
 
 %% Exported functions
 
--export([init/0, get/1]).
+-export([init/0, get/1, get_start_time/0]).
 
--type config_param() :: config_file
+-type config_param() :: config_file | app_start_timestamp
                        | tcp_listen_port | tcp_socket_opts
                        | max_udp_in_flight | device_response_timeout | device_client_shutdown_after .
 
@@ -39,6 +39,7 @@
 
 init() -> 
     ets:new(ch_config_table, [set, named_table, {read_concurrency, true}]),
+    set_param(app_start_timestamp, os:timestamp()),
     set_param(config_file, case application:get_env(config_file) of
                                {ok, Value} -> Value; 
                                undefined -> undefined 
@@ -62,6 +63,20 @@ init() ->
 get(Parameter) ->
    [{Parameter, Value}] = ets:lookup(ch_config_table, Parameter),
    Value.
+
+
+
+%% ------------------------------------------------------------------------------------
+%% @doc Returns the timestamp for when ch_config was initialised
+%%
+%% @spec get_start_time() -> erlang:timestamp() 
+%% @end
+%% ------------------------------------------------------------------------------------
+
+-spec get_start_time() -> erlang:timestamp().
+get_start_time() ->
+   ?MODULE:get(app_start_timestamp).
+
 
 
 

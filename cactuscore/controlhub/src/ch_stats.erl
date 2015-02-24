@@ -31,7 +31,8 @@
          get_max_active_clients/0,
          get_cumulative_client_count/0,
          report_to_console/0,
-         report_to_string/0]).
+         report_to_string/0,
+         get_app_info/0]).
 
 %% Behavioural exports - the gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -246,6 +247,36 @@ report_to_console() -> gen_server:cast(?MODULE, report_to_console).
 %% @end
 %% ----------------------------------------------------------------------------
 report_to_string() -> gen_server:call(?MODULE, report_to_string).
+
+
+
+%% ----------------------------------------------------------------------------
+%% @doc Returns lists of tuples containing ControlHub configuration parameters 
+%%
+%% @end
+%% ----------------------------------------------------------------------------
+-spec get_app_info() -> [{controlhub_start_timestamp, erlang:timestamp()}
+                         | {controlhub_vsn, string()}
+                         | {config_file, string()}
+                         | {tcp_listen_port, non_neg_integer()}
+                         | {tcp_socket_opts, [any()]}
+                         | {max_udp_in_flight, non_neg_integer()}
+                         | {device_response_timeout, non_neg_integer()}
+                         | {device_client_shutdown_after, non_neg_integer()}].
+get_app_info() ->
+    Vsn = case application:get_key(controlhub,vsn) of
+              {ok, Version} -> Version;
+              Else -> io_lib:format("ERROR retrieving version~w", [Else])
+          end,
+    [{controlhub_start_timestamp, ch_config:get_start_time()},
+     {controlhub_vsn, Vsn},
+     {config_file, ch_config:get(config_file)},
+     {tcp_listen_port, ch_config:get(tcp_listen_port)},
+     {tcp_socket_opts, ch_config:get(tcp_socket_opts)},
+     {max_udp_in_flight, ch_config:get(max_udp_in_flight)},
+     {device_response_timeout, ch_config:get(device_response_timeout)},
+     {device_client_shutdown_after, ch_config:get(device_client_shutdown_after)}
+    ].
 
 
 
