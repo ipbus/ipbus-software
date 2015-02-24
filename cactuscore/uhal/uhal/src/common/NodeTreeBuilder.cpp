@@ -760,7 +760,15 @@ namespace uhal
 
     if ( lReport.tellp() )
     {
-      boost::filesystem::path lDir ( "/tmp/uhal" );
+      // Add username to the collisions report filepath if environment variable USER is defined
+      std::string lDirName("/tmp");
+      if (char* lUsername = std::getenv("USER"))
+      {
+        lDirName += "/" + std::string(lUsername);
+      }
+      lDirName += "/uhal";
+
+      boost::filesystem::path lDir ( lDirName );
       lDir.make_preferred();
 
       if ( !boost::filesystem::is_directory ( lDir ) )
