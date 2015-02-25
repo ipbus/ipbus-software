@@ -16,8 +16,8 @@ sudo mkdir -p ${TAG_HOME}
 sudo chmod 777 ${TAG_HOME}
 
 PKG_MAJOR=2
-PKG_MINOR=3
-PKG_PATCH=3
+PKG_MINOR=4
+PKG_PATCH=0
 
 TAG_ID="uhal_${PKG_MAJOR}_${PKG_MINOR}_${PKG_PATCH}"
 TAG_TITLE="&mu;HAL (v${PKG_MAJOR}.${PKG_MINOR}.${PKG_PATCH})"
@@ -59,9 +59,6 @@ cd ${HOME}/nightly/doxygen
 echo "Cleaning up target directory"
 rm -r ${DOXYGEN_OUTPUT}/html
 
-# DOXYGEN_MAINPAGE="${CACTUS_SANDBOX}/cactusupgrades/boards/amc13/software/amc13/README.md"
-# DOXYGEN_INPUTS="${CACTUS_SANDBOX}/cactusupgrades/boards/amc13/software/amc13 "
-# DOXYGEN_PROJECT_NAME='AMC13 Software (nightly)'
 DOXYGEN_MAINPAGE="${CACTUS_SANDBOX}/README.md"
 DOXYGEN_INPUTS="${CACTUS_SANDBOX}"
 DOXYGEN_PROJECT_NAME="$TAG_TITLE"
