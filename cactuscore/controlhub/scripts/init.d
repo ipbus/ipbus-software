@@ -45,6 +45,10 @@ status() {
   ${CACTUSROOT}/bin/controlhub_status
 }
 
+info() {
+  ${CACTUSROOT}/bin/controlhub_info
+}
+
 stats() {
   ${CACTUSROOT}/bin/controlhub_stats
 }
@@ -62,12 +66,15 @@ case "$1" in
   'status')
     status
     ;;
+  'info')
+    info
+    ;;
   'stats')
     stats
     ;;
   *)
     # usage
-    echo "Usage: $0 start|stop|restart|status"
+    echo "Usage: $0 start|stop|restart|status|info|stats"
     ;;
 esac
 

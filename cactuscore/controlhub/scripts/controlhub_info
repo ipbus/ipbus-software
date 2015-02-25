@@ -16,5 +16,5 @@ CONTROLHUB_BIN_DIR=$(python -c "import os.path; print os.path.dirname(os.path.ab
 
 CONTROLHUB_CMD=${CONTROLHUB_BIN_DIR}/controlhub
 
-${CONTROLHUB_CMD} status
+${CONTROLHUB_CMD} info
 
