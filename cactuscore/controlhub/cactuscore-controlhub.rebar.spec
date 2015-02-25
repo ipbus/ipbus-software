@@ -57,7 +57,7 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 
 %pre
 # Can't overwrite dir with a symlink, so remove old log dir first on upgrades
-if [ $1 -gt 1 -a -d /var/log/controlhub ]; then \
+if [ -d /var/log/controlhub ]; then \
   rm -rf /var/log/controlhub
 fi
 
