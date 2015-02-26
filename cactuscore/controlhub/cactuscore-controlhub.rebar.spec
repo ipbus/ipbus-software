@@ -47,8 +47,9 @@ cd $curdir
 
 ##Change access rights
 chmod -R 744 $RPM_BUILD_ROOT%{_prefix}/bin
-chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_stats
 chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_status
+chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_info
+chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_stats
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
 
 
