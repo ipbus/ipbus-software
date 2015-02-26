@@ -22,7 +22,6 @@ CACTUSROOT=/opt/cactus
 
 export HOME=$CACTUSROOT
 
-CONTROLHUB=/opt/cactus/lib/controlhub/bin/controlhub
 
 # Default LD_LIBRARY_PATH
 # Can be overridden in the package .conf files
@@ -30,29 +29,28 @@ CONTROLHUB=/opt/cactus/lib/controlhub/bin/controlhub
 LD_LIBRARY_PATH=${CACTUSROOT}/lib
 
 start() {
-#  ${CACTUSROOT}/bin/controlhub_start
-  ${CONTROLHUB} start
+  ${CACTUSROOT}/bin/controlhub_start
 }
 
 stop() {
-#  ${CACTUSROOT}/bin/controlhub_stop
-  ${CONTROLHUB} stop
+  ${CACTUSROOT}/bin/controlhub_stop
 }
 
 restart() {
-#  ${CACTUSROOT}/bin/controlhub_stop
-#  ${CACTUSROOT}/bin/controlhub_start
-  ${CONTROLHUB} stop
-  ${CONTROLHUB} start
+  ${CACTUSROOT}/bin/controlhub_stop
+  ${CACTUSROOT}/bin/controlhub_start
 }
 
 status() {
-#  ${CACTUSROOT}/bin/controlhub_status
-  ${CONTROLHUB} ping
+  ${CACTUSROOT}/bin/controlhub_status
+}
+
+info() {
+  ${CACTUSROOT}/bin/controlhub_info
 }
 
 stats() {
-  ${CONTROLHUB} stats
+  ${CACTUSROOT}/bin/controlhub_stats
 }
 
 case "$1" in
@@ -68,12 +66,15 @@ case "$1" in
   'status')
     status
     ;;
+  'info')
+    info
+    ;;
   'stats')
     stats
     ;;
   *)
     # usage
-    echo "Usage: $0 start|stop|restart|status"
+    echo "Usage: $0 start|stop|restart|status|info|stats"
     ;;
 esac
 
