@@ -70,12 +70,6 @@
 <packagereq type="mandatory">cactusprojects-subsystemworker-devel</packagereq>
 <packagereq type="mandatory">cactusprojects-subsystemworker-debuginfo</packagereq>
 
-<packagereq type="mandatory">cactusprojects-retriexternicutils</packagereq>
-<packagereq type="mandatory">cactusprojects-retriexternicutils-devel</packagereq>
-<packagereq type="mandatory">cactusprojects-retriexternicutils-debuginfo</packagereq>
-<packagereq type="mandatory">cactusprojects-retriretricell</packagereq>
-<packagereq type="mandatory">cactusprojects-retriretricell-devel</packagereq>
-
 <packagereq type="mandatory">cactusprojects-centralcell</packagereq>
 <packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
 <packagereq type="mandatory">cactusprojects-centralcell-debuginfo</packagereq>
@@ -144,12 +138,6 @@
 	<uservisible>true</uservisible>
 	<grouplist></grouplist>
 	<packagelist>
-		<packagereq type="mandatory">cactusprojects-retriexternicutils</packagereq>
-		<packagereq type="mandatory">cactusprojects-retriexternicutils-devel</packagereq>
-		<packagereq type="mandatory">cactusprojects-retriexternicutils-debuginfo</packagereq>
-		<packagereq type="mandatory">cactusprojects-retriretricell</packagereq>
-		<packagereq type="mandatory">cactusprojects-retriretricell-devel</packagereq>
-		
 		<packagereq type="mandatory">cactusprojects-centralcell</packagereq>
 		<packagereq type="mandatory">cactusprojects-centralcell-devel</packagereq>
 		<packagereq type="mandatory">cactusprojects-centralcell-debuginfo</packagereq>
