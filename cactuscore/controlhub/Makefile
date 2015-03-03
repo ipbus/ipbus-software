@@ -91,7 +91,7 @@ _rpmall: build
 		--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}" \
 		--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}" \
 		--define "packager ${Packager}" \
-		${PackageName}.rebar.spec
+		${PackageName}.spec
 
 
 doc: _doc
