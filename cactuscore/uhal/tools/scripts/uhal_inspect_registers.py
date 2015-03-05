@@ -14,22 +14,15 @@ def snapshot(node, regex):
     regValues = []
 
     for name in sorted(node.getNodes(regex)):
-        regValues.append( (name, node.getNode(name).read()) )
+        n = node.getNode(name)
+        if n.getPermission() != uhal.NodePermission.WRITE:
+            regValues.append( (name, n.read()) )
     node.getClient().dispatch()
 
     return regValues
 
 
 if __name__=="__main__":
-    
-    class Args:
-        def __init__(self):
-            self.conn_file = '/opt/cactus/etc/uhal/tests/dummy_connections.xml'
-            self.device_id = 'dummy.udp'
-            self.address_file = ''
-            self.reg_name = 'SUBSYSTEM1'
-            self.regex = '.*'
-    args = Args()
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description=__doc__)
 
