@@ -28,8 +28,9 @@ if __name__=="__main__":
 
     parser.add_argument('device_id', help='Board URI or ID within connections file')
     parser.add_argument('reg_name', help='Register node name')
-    parser.add_argument('-c','--conn_file', default=None, help='Connections file URI (e.g. file://path/to/file.xml)')
-    parser.add_argument('-a','--addr_file', default=None, help='Address file URI (e.g. file://path/to/file.xml)')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-c','--conn_file', default=None, help='Connections file URI (e.g. file://path/to/file.xml)')
+    group.add_argument('-a','--addr_file', default=None, help='Address file URI (e.g. file://path/to/file.xml)')
     parser.add_argument('-r','--regex', default='.*', help='Regex pattern')
 
     args = parser.parse_args()
@@ -37,7 +38,7 @@ if __name__=="__main__":
     # Create HwInterface and print node values
     uhal.setLogLevelTo( uhal.LogLevel.ERROR ) 
     if args.conn_file is None:
-        device = uhal.getDevice("device", args.device_id, args.address_file)
+        device = uhal.getDevice("device", args.device_id, args.addr_file)
     else:
         cm = uhal.ConnectionManager(args.conn_file)
         device = cm.getDevice(args.device_id)
