@@ -1,16 +1,25 @@
 #!/usr/bin/env escript
-%% -*- mode: erlang;erlang-indent-level: 4;indent-tabs-mode: nil -*-
-%% ex: ft=erlang ts=4 sw=4 et
-%%! -sname tmp_controlhub_nodetool -setcookie ch_cookie -hidden
+%% -*- mode: erlang;erlang-indent-level: 4;indent-tabs-mode: nil -*- %% ex: ft=erlang ts=4 sw=4 et
+%%! -setcookie ch_nodetool_cookie -hidden
 %% -------------------------------------------------------------------
 %%
 %% nodetool: Helper Script for interacting with live nodes
 %%
 %% -------------------------------------------------------------------
+
+-record(options, {node_start_arg=undefined, target_name=undefined, target_cookie=undefined}).
+
 main(Args) ->
     ok = start_epmd(),
-    %% Extract the args
-    {RestArgs, TargetNode} = process_args(Args, [], undefined),
+
+    %% Extract the args, and start local nodetool node
+    {RestArgs, NodeOpts} = process_args(Args, [], #options{}),
+
+    %% BE WARNED: The if a cookie has not already been set (e.g. via -setcookie arg on third line of script), then ...
+    %%    ... the net_kernel:start function will assume that ${HOME}/.erlang.cookie is readable if it exists, or that this file can be written
+    {ok, _} = net_kernel:start(NodeOpts#options.node_start_arg),
+    TargetNode = nodename(NodeOpts#options.target_name),
+    erlang:set_cookie(TargetNode, NodeOpts#options.target_cookie),
 
     %% any commands that don't need a running node
     case RestArgs of
@@ -136,23 +145,48 @@ main(Args) ->
     end,
     net_kernel:stop().
 
-process_args([], Acc, TargetNode) ->
-    {lists:reverse(Acc), TargetNode};
-process_args(["-setcookie", Cookie | Rest], Acc, TargetNode) ->
-    %% BE WARNED: The set_cookie function may assume that ${HOME}/.erlang.cookie is readable if it exists, or that this file can be written
-    erlang:set_cookie(node(), list_to_atom(Cookie)),
-    process_args(Rest, Acc, TargetNode);
-process_args(["-name", TargetName | Rest], Acc, _) ->
+
+process_args([], Acc, NodeOpts) ->
+    check_arg_defined(NodeOpts, target_name),
+    check_arg_defined(NodeOpts, target_cookie),
+    check_arg_defined(NodeOpts, node_start_arg),
+    {lists:reverse(Acc), NodeOpts};
+process_args(["-setcookie", Cookie | Rest], Acc, Options) ->
+    process_args(Rest, Acc, Options#options{target_cookie=list_to_atom(Cookie)});
+process_args(["-name", TargetName | Rest], Acc, Options) ->
     ThisNode = append_node_suffix(TargetName, "_maint_"),
-    {ok, _} = net_kernel:start([ThisNode, longnames]),
-    process_args(Rest, Acc, nodename(TargetName));
-process_args(["-sname", TargetName | Rest], Acc, _) ->
+    process_args(Rest, Acc, Options#options{node_start_arg=[ThisNode,longnames], target_name=TargetName});
+process_args(["-sname", TargetName | Rest], Acc, Options) ->
     ThisNode = append_node_suffix(TargetName, "_maint_"),
-    {ok, _} = net_kernel:start([ThisNode, shortnames]),
-    process_args(Rest, Acc, nodename(TargetName));
+    process_args(Rest, Acc, Options#options{node_start_arg=[ThisNode,shortnames], target_name=TargetName});
 process_args([Arg | Rest], Acc, Opts) ->
     process_args(Rest, [Arg | Acc], Opts).
 
+
+check_arg_defined(NodeOpts, node_start_arg) ->
+    case NodeOpts#options.node_start_arg of
+        undefined ->
+            io:format("ERROR: Target node name undefined. Please add the -sname or -name argument~n"),
+            halt(99);
+        _ ->
+            ok
+    end;
+check_arg_defined(NodeOpts, target_name) ->
+    case NodeOpts#options.target_name of
+        undefined ->
+            io:format("ERROR: Target node name undefined. Please add the -sname or -name argument~n"),
+            halt(99);
+        _ ->
+            ok
+    end;
+check_arg_defined(NodeOpts, target_cookie) ->
+    case NodeOpts#options.target_cookie of
+        undefined ->
+            io:format("ERROR: cookie undefined. Please add the -setcookie argument~n"),
+            halt(99);
+        _ ->
+            ok
+    end.
 
 start_epmd() ->
     [] = os:cmd(epmd_path() ++ " -daemon"),
