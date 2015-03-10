@@ -43,15 +43,15 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
         conn_file = "file://" + conn_file
 
     if controlhub_scripts_dir is None:
-        controlhub_start  = "sudo /sbin/service controlhub start"
+        controlhub_start  = "/sbin/service controlhub start"
         controlhub_status = "/sbin/service controlhub status"
         controlhub_stats  = "/sbin/service controlhub stats"
-        controlhub_stop   = "sudo /sbin/service controlhub stop"
+        controlhub_stop   = "/sbin/service controlhub stop"
     else:
-        controlhub_start = "sudo " + join(controlhub_scripts_dir, "controlhub_start")
+        controlhub_start = join(controlhub_scripts_dir, "controlhub_start")
         controlhub_status = join(controlhub_scripts_dir, "controlhub_status")
         controlhub_stats = join(controlhub_scripts_dir, "controlhub_stats")
-        controlhub_stop = "sudo " + join(controlhub_scripts_dir, "controlhub_stop")
+        controlhub_stop = join(controlhub_scripts_dir, "controlhub_stop")
 
     cmds = []
 
