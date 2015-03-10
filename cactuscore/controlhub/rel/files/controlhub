@@ -139,7 +139,7 @@ if [ -z "$RUNNER_SCRIPT_DATA" ]; then
     ROOTDIR=$RUNNER_BASE_DIR
     ERTS_PATH=$RUNNER_BASE_DIR/erts-$ERTS_VSN/bin
     if [ -e "$RUNNER_BASE_DIR/releases/$APP_VSN/nodetool" ]; then
-        NODETOOL="$ERTS_PATH/escript $RUNNER_BASE_DIR/releases/$APP_VSN/nodetool $NAME_ARG $COOKIE_ARG" 
+        NODETOOL="$ERTS_PATH/escript $RUNNER_BASE_DIR/releases/$APP_VSN/nodetool $NAME_ARG $COOKIE_ARG"
     else
         NODETOOL="$ERTS_PATH/escript $ERTS_PATH/nodetool $NAME_ARG $COOKIE_ARG"
     fi
@@ -158,7 +158,7 @@ elif [ "$RUNNER_SCRIPT_DATA" = "slim" ]; then
     unset SYSTEM_HOME_BIN
 
     LOCAL_ERTS_PATH=$RUNNER_BASE_DIR/erts-$ERTS_VSN/bin
-    NODETOOL="$ERTS_PATH/escript $RUNNER_BASE_DIR/releases/$APP_VSN/nodetool $NAME_ARG $COOKIE_ARG" 
+    NODETOOL="$ERTS_PATH/escript $RUNNER_BASE_DIR/releases/$APP_VSN/nodetool $NAME_ARG $COOKIE_ARG"
     unset LOCAL_ERL_PATH
 
     # Setup additional arguments for slim release
@@ -206,7 +206,6 @@ case "$1" in
             exit 1
         fi
 
-        echo -n "Starting ControlHub .."
         case "$1" in
             start)
                 shift
@@ -219,11 +218,46 @@ case "$1" in
                 HEART_OPTION="start_boot"
                 ;;
         esac
-        RUN_PARAM=$(printf "\'%s\' " "$@")
+
         HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT $HEART_OPTION $RUN_PARAM"
         export HEART_COMMAND
-        mkdir -p $PIPE_DIR
-        $ERTS_PATH/run_erl -daemon $PIPE_DIR $RUNNER_LOG_DIR "exec $RUNNER_BASE_DIR/bin/$SCRIPT $START_OPTION $RUN_PARAM" 2>&1
+
+        # If "-redirect_stdio" option used then launch with run_erl (which redirects stdio); otherwise normal simpler launch 
+        case "$1" in
+            -redirect_stdio*)
+                case "$1" in
+                    -redirect_stdio=*)
+                        PIPE_DIR=${1#=*}
+                        RUNNER_LOG_DIR=$PIPE_DIR
+                        ;;
+                esac
+                shift
+
+                echo "ControlHub's input and output streams will be redirected under dirs $PIPE_DIR and $RUNNER_LOG_DIR"
+                mkdir -p $PIPE_DIR
+
+                RUN_PARAM=$(printf "\'%s\' " "$@")
+                HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT $HEART_OPTION $RUN_PARAM"
+                export HEART_COMMAND
+
+                echo -n "Starting ControlHub .."
+                $ERTS_PATH/run_erl -daemon $PIPE_DIR $RUNNER_LOG_DIR "exec $RUNNER_BASE_DIR/bin/$SCRIPT $START_OPTION $RUN_PARAM" 2>&1
+                ;;
+            *)
+                RUN_PARAM=$(printf "\'%s\' " "$@")
+                HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT $HEART_OPTION $RUN_PARAM"
+                export HEART_COMMAND
+
+                echo -n "Starting ControlHub .."
+                START_RES=`$RUNNER_BASE_DIR/bin/$SCRIPT $START_OPTION -detached $RUN_PARAM 2>&1`
+                START_ES=$?
+                if [ "$START_ES" -ne "0" ]; then
+                   echo " ERROR"
+                   echo $START_RES
+                   exit $START_ES
+                fi
+                ;;
+        esac  
 
         # Before exiting, wait until ControlHub is actually running
         for i in `seq 1 30`; do
@@ -240,7 +274,6 @@ case "$1" in
         
         # Only get here if ControlHub didn't start after N seconds
         echo "FAILED!"
-        echo "   ===> See run_erl.log or erlang.log files in $RUNNER_LOG_DIR"
         exit 4 
         ;;
 
