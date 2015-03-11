@@ -26,7 +26,9 @@
                  ch_tcp_listener]},
    {applications, [stdlib, kernel, sasl,
                    appmon,
-                   % For goldrush
+                   % For lager syslog backend
+                   syslog, lager_syslog,
+                   % For lager, which depends on goldrush
                    syntax_tools, compiler, goldrush, lager]},
    {mod, {controlhub_app, []}},
    {env, [% The port on which the Control Hub will listen for TCP connections.
