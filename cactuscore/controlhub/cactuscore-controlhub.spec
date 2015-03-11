@@ -29,11 +29,13 @@ IPbus packet-router
 # Make directories
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/{bin,lib}
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
+mkdir -p $RPM_BUILD_ROOT/etc/rsyslog.d
 
 # Copy over files
 cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 cp -rp %{sources_dir}/controlhub $RPM_BUILD_ROOT/etc/init.d/.
+cp -rp %{sources_dir}/rsyslog.d.conf $RPM_BUILD_ROOT/etc/rsyslog.d/controlhub.conf
 
 # Link /var/log/controlhub to controlhub log dir
 mkdir -p ${RPM_BUILD_ROOT}/var/log
@@ -62,6 +64,8 @@ fi
 %post
 # 1) Must stop ControlHub in case RPM being upgraded (i.e. rpm -U), or in case of error on previous RPM erase
 /etc/init.d/controlhub stop || true
+# 1b) Restart rsyslog so that it picks up configuration file change
+/sbin/service rsyslog restart
 # 2) Normal ControlHub start steps
 /sbin/chkconfig --add controlhub
 /etc/init.d/controlhub start 
@@ -80,5 +84,6 @@ fi
 %{_prefix}/bin/*
 %{_prefix}/lib/*
 /etc/init.d/controlhub
+/etc/rsyslog.d/controlhub.conf
 /var/log/controlhub
 %config(noreplace) %{_prefix}/lib/controlhub/controlhub.config
