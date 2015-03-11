@@ -81,7 +81,7 @@ rpm: _rpmall
 _rpmall: build
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES/{lib,bin},SRPMS}
 	cp -r rel/controlhub ${RPMBUILD_SOURCES_DIR}/lib/
-	cp scripts/init.d.rebar ${RPMBUILD_SOURCES_DIR}/controlhub
+	cp scripts/init.d ${RPMBUILD_SOURCES_DIR}/controlhub
 	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
