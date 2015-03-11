@@ -253,7 +253,7 @@ case "$1" in
                 START_ES=$?
                 if [ "$START_ES" -ne "0" ]; then
                    echo " ERROR"
-                   echo $START_RES
+                   echo -e "${START_RES}"
                    exit $START_ES
                 fi
                 ;;
@@ -412,6 +412,15 @@ case "$1" in
         ;;
 
     console|console_clean|console_boot)
+        # Check for Erlang syntax errors in the config file
+        CHKCONFIG_RES=`$NODETOOL chkconfig $CONFIG_PATH 2>&1`
+        CHKCONFIG_ES=$?
+        if [ "$CHKCONFIG_ES" -ne "0" ]; then
+            echo "ERROR in ControlHub configuration file ${CONFIG_PATH} ..."
+            echo -e "${CHKCONFIG_RES}"
+            exit 4
+        fi 
+
         # .boot file typically just $SCRIPT (ie, the app name)
         # however, for debugging, sometimes start_clean.boot is useful.
         # For e.g. 'setup', one may even want to name another boot script.
