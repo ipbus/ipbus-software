@@ -116,5 +116,6 @@ erlang/.build_done:
              --without-javac;                     \
         make;                                     \
         make install;                             \
+        rm -rf ${ERL_TARBALL_DIR};                \
         date > ${ERL_TARGET_DIR}/.build_done;
 
