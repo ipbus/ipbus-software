@@ -29,6 +29,7 @@ IPbus packet-router
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/{bin,lib}
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 mkdir -p $RPM_BUILD_ROOT/etc/{rsyslog.d,logrotate.d}
+mkdir -p $RPM_BUILD_ROOT/var/log/controlhub
 
 # Copy over files
 cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
@@ -37,27 +38,19 @@ cp -rp %{sources_dir}/controlhub $RPM_BUILD_ROOT/etc/init.d/.
 cp -rp %{sources_dir}/rsyslog.d.conf $RPM_BUILD_ROOT/etc/rsyslog.d/controlhub.conf
 cp -rp %{sources_dir}/logrotate.d.conf $RPM_BUILD_ROOT/etc/logrotate.d/controlhub.conf
 
-# Link /var/log/controlhub to controlhub log dir
-mkdir -p ${RPM_BUILD_ROOT}/var/log
-ln -s %{_prefix}/lib/controlhub/log ${RPM_BUILD_ROOT}/var/log/controlhub
-
-# Now update the CONTROLHUB_BIN_DIR variable in controlhub scripts
+# Update the CONTROLHUB_BIN_DIR variable in controlhub scripts
 sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=%{_prefix}/lib/controlhub/bin|" $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_*
 
-
-##Change access rights
+#Change access rights
 chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_*
-chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib
+chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib $RPM_BUILD_ROOT/var/log/controlhub
 
 
 %clean
 
 
 %pre
-# Can't overwrite dir with a symlink, so remove old log dir first on upgrades
-if [ -d /var/log/controlhub ]; then \
-  rm -rf /var/log/controlhub
-fi
+
 
 %post
 # 1) Must stop ControlHub in case RPM being upgraded (i.e. rpm -U), or in case of error on previous RPM erase
@@ -76,6 +69,7 @@ if [ $1 = 0 ]; then
 fi
 
 %postun
+
 
 %files
 %defattr(-, root, root)
