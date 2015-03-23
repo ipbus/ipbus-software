@@ -83,6 +83,7 @@ fi
 %{_prefix}/lib/*
 /etc/init.d/controlhub
 /etc/rsyslog.d/controlhub.conf
-/etc/logrotate.d/controlhub.conf
 /var/log/controlhub
 %config(noreplace) %{_prefix}/lib/controlhub/controlhub.config
+%config(noreplace) /etc/rsyslog.d/controlhub.conf
+%config(noreplace) /etc/logrotate.d/controlhub.conf
