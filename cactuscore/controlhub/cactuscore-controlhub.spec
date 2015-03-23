@@ -38,6 +38,10 @@ cp -rp %{sources_dir}/controlhub $RPM_BUILD_ROOT/etc/init.d/.
 cp -rp %{sources_dir}/rsyslog.d.conf $RPM_BUILD_ROOT/etc/rsyslog.d/controlhub.conf
 cp -rp %{sources_dir}/logrotate.d.conf $RPM_BUILD_ROOT/etc/logrotate.d/controlhub.conf
 
+# Move user-editable configuration file under /etc
+mv $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/controlhub.config $RPM_BUILD_ROOT/etc/controlhub.config
+sed -i "s|\"controlhub.config\"|\"/etc/controlhub.config\"|" $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/releases/*/sys.config
+
 # Update the CONTROLHUB_BIN_DIR variable in controlhub scripts
 sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=%{_prefix}/lib/controlhub/bin|" $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_*
 
@@ -78,6 +82,6 @@ fi
 /etc/init.d/controlhub
 /etc/rsyslog.d/controlhub.conf
 /var/log/controlhub
-%config(noreplace) %{_prefix}/lib/controlhub/controlhub.config
+%config(noreplace) /etc/controlhub.config
 %config(noreplace) /etc/rsyslog.d/controlhub.conf
 %config(noreplace) /etc/logrotate.d/controlhub.conf
