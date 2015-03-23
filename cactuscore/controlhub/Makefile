@@ -61,9 +61,6 @@ endif
 endif
 ######################################################################################
 
-CONTROLHUB_BIN_SCRIPTS = $(wildcard scripts/controlhub_*) 
-
-
 .PHONY: all _all clean  _cleanall build _buildall rpm _rpmall _erlang
 
 default: build
@@ -95,18 +92,11 @@ _rpmall: build
 		${PackageName}.spec
 
 
-doc: _doc
-_doc:
-	$(ERL) -noshell -eval "edoc:application(controlhub, \".\", [{new,true}]), halt(0)."
-
 
 clean: _cleanall
 _cleanall:
 	${ESCRIPT} ./rebar clean
 	rm -rf $(RPMBUILD_DIR)
-	rm -f scripts/erl_controlhub
-	#rm -rf doc/*.html doc/*.css doc/*.png doc/edoc-info doc/unittest
-
 
 
 ERL_TARBALL_FILE=otp_src_R16B01.tar.gz
