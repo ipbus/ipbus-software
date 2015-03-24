@@ -49,7 +49,6 @@ sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=%{_prefix}/lib/controlhub/bin
 chmod 755 $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_*
 chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib $RPM_BUILD_ROOT/var/log/controlhub
 
-
 %clean
 
 
@@ -57,6 +56,9 @@ chmod -R 755 $RPM_BUILD_ROOT%{_prefix}/lib $RPM_BUILD_ROOT/var/log/controlhub
 
 
 %post
+# 0) Ensure controlhub log is readable by all
+touch /var/log/controlhub/controlhub.log
+chmod 644 /var/log/controlhub/controlhub.log
 # 1) Must stop ControlHub in case RPM being upgraded (i.e. rpm -U), or in case of error on previous RPM erase
 /etc/init.d/controlhub stop || true
 # 1b) Restart rsyslog so that it picks up configuration file change
