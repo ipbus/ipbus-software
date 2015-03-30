@@ -33,7 +33,6 @@
   
   <connection id="dummy.controlhub2bigendian" uri="chtcp-2.0-bigendian://localhost:10203?target=localhost:60001" address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.controlhub2bigendian" uri="chtcp-2.0-bigendian://localhost:10203?target=localhost:60001"  address_table="file://docu_examples_address.xml" />
-
-  <connection blah/>
+  
 </connections>
 
