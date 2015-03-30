@@ -18,7 +18,7 @@
 #include "uhal/Node.hpp"
 
 // pycohal includes
-#include "uhal/pycohal/converters_exceptions.hpp"
+#include "uhal/pycohal/converters.hpp"
 #include "uhal/pycohal/enums_logging.hpp"
 #include "uhal/pycohal/exceptions.hpp"
 

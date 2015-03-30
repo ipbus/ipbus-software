@@ -1,5 +1,5 @@
-#ifndef _uhal_pycohal_converters_exceptions_hpp_
-#define _uhal_pycohal_converters_exceptions_hpp_
+#ifndef _uhal_pycohal_converters_hpp_
+#define _uhal_pycohal_converters_hpp_
 
 #include <iostream>
 #include <vector>
