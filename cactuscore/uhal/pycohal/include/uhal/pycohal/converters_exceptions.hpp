@@ -4,9 +4,6 @@
 #include <iostream>
 #include <vector>
 
-#include "uhal/log/exception.hpp"
-#include "uhal/log/log.hpp"
-
 // The following python boost patch is required to compile on apple
 #include "uhal/pycohal/boost_python.hpp"
 
@@ -45,35 +42,6 @@ namespace pycohal {
   // Registers to boost::python all of the pycohal to-python and from-python converters
   void register_converters();
 
-
-  // EXCEPTIONS //
-
-  ExceptionClass(PycohalLogLevelEnumError, "Exception class to handle errors in translating logging levels");
-
-  PyObject* create_exception_class(const std::string& excName, PyObject* baseTypeObj = PyExc_Exception);
-
-  /// Functor for exception translation.
-  /// Written as functor (rather than function) to avoid storing the PyObject* for python versions of exception classes as global variables (member exception_pyType_ used here instead)
-
-  template<class ExceptionType>
-  class ExceptionTranslator {
-  public:
-    ExceptionTranslator(PyObject* exception_pyType);
-
-    /// Translation function called at the C-python boundary
-    void operator() (const ExceptionType& e) const;
-
-  private:
-    PyObject* exception_pyType_; ///< Pointer to PyObject corresponding to C++ exception class ExceptionType
-  };
-
-  template<class ExceptionType>
-  void wrap_derived_exception(const std::string& exceptionName, PyObject* base_exception_pyType) {
-    PyObject* derived_exception_pyType = pycohal::create_exception_class(exceptionName, base_exception_pyType);
-    boost::python::register_exception_translator<ExceptionType> (pycohal::ExceptionTranslator<ExceptionType> (derived_exception_pyType));
-  }
-
-  void wrap_exceptions();
 }
 
 
@@ -108,23 +76,5 @@ PyObject* pycohal::Converter_boost_unorderedmap_to_dict<U,T>::convert(const boos
 
   return bpy::incref(theDict.ptr());
 }
-
-//-------------------------------//
-// ---  ExceptionTranslator  --- //
-//-------------------------------//
-
-template <class ExceptionType>
-pycohal::ExceptionTranslator<ExceptionType>::ExceptionTranslator(PyObject* exception_pyType) :
-exception_pyType_(exception_pyType) {
-}
-
-template <class ExceptionType>
-void pycohal::ExceptionTranslator<ExceptionType>::operator() (const ExceptionType& e) const {
-  namespace bpy = boost::python;
-  bpy::object pyException(bpy::handle<> (bpy::borrowed(exception_pyType_)));
-  pyException.attr("what") = e.what();
-  PyErr_SetObject(exception_pyType_, pyException.ptr());
-}
-
 
 #endif

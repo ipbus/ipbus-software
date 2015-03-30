@@ -59,36 +59,4 @@ void pycohal::register_converters()
 }
 
 
-PyObject* pycohal::create_exception_class ( const std::string& excName, PyObject* baseTypeObj )
-{
-  std::string scopeName = bpy::extract<std::string> ( bpy::scope().attr ( "__name__" ) );
-  std::string qualifiedExcName = scopeName + "." + excName;
-  PyObject* typeObj = PyErr_NewException ( const_cast<char*> ( qualifiedExcName.c_str() ) , baseTypeObj, 0 );
-
-  if ( !typeObj )
-  {
-    bpy::throw_error_already_set();
-  }
-
-  bpy::scope().attr ( excName.c_str() ) = bpy::handle<> ( bpy::borrowed ( typeObj ) );
-  return typeObj;
-}
-
-
-void pycohal::wrap_exceptions()
-{
-  // Base uhal exception (fallback for derived exceptions not wrapped)
-  PyObject* base_uhal_exception_pyType = pycohal::create_exception_class ( "exception" );
-  bpy::register_exception_translator<uhal::exception::exception> ( pycohal::ExceptionTranslator<uhal::exception::exception> ( base_uhal_exception_pyType ) );
-  // Derived uhal exceptions
-  pycohal::wrap_derived_exception<uhal::exception::NonValidatedMemory> ( "NonValidatedMemory", base_uhal_exception_pyType );
-  pycohal::wrap_derived_exception<uhal::exception::BulkTransferRequestedTooLarge> ( "BulkTransferRequestedTooLarge", base_uhal_exception_pyType );
-  pycohal::wrap_derived_exception<uhal::exception::WriteAccessDenied> ( "WriteAccessDenied", base_uhal_exception_pyType );
-  pycohal::wrap_derived_exception<uhal::exception::ReadAccessDenied> ( "ReadAccessDenied",  base_uhal_exception_pyType );
-  pycohal::wrap_derived_exception<uhal::exception::BitsSetWhichAreForbiddenByBitMask> ( "BitsSetWhichAreForbiddenByBitMask", base_uhal_exception_pyType );
-  pycohal::wrap_derived_exception<uhal::exception::TcpTimeout> ( "TcpTimeout", base_uhal_exception_pyType );
-  pycohal::wrap_derived_exception<uhal::exception::UdpTimeout> ( "UdpTimeout", base_uhal_exception_pyType );
-  pycohal::wrap_derived_exception<pycohal::PycohalLogLevelEnumError> ( "PycohalLogLevelEnumError", base_uhal_exception_pyType );
-}
-
 

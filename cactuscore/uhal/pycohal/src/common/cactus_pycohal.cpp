@@ -20,6 +20,8 @@
 // pycohal includes
 #include "uhal/pycohal/converters_exceptions.hpp"
 #include "uhal/pycohal/enums_logging.hpp"
+#include "uhal/pycohal/exceptions.hpp"
+
 
 using namespace boost::python;
 

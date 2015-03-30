@@ -6,7 +6,7 @@
 
 #include "uhal/definitions.hpp"
 #include "uhal/log/log.hpp"
-#include "uhal/pycohal/converters_exceptions.hpp"
+#include "uhal/pycohal/exceptions.hpp"
 
 
 namespace bpy = boost::python ;
