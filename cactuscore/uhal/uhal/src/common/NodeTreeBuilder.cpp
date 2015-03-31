@@ -771,13 +771,20 @@ namespace uhal
       boost::filesystem::path lDir ( lDirName );
       lDir.make_preferred();
 
-      if ( !boost::filesystem::is_directory ( lDir ) )
-      {
-        if ( !boost::filesystem::create_directory ( lDir ) )
+      try{
+        if ( !boost::filesystem::is_directory ( lDir ) )
         {
-          log ( Error() , "Address overlaps observed - attempted and failed to create directory " , Quote ( "/tmp/uhal" ) );
-          return;
+          if ( !boost::filesystem::create_directories ( lDir ) )
+          {
+            log ( Error() , "Address overlaps observed - attempted and failed to create directory " , Quote ( lDirName ) );
+            return;
+          }
         }
+      }
+      catch(const boost::filesystem::filesystem_error& e)
+      {
+        log ( Error() , "Address overlaps observed - failed to create directory " , Quote ( lDirName ) , " for report file; caught filesystem_error exception with what returning:  ", e.what() );
+        return;
       }
 
       std::string lFilename ( aPath.string() );
