@@ -52,7 +52,7 @@
 /**
 	Macro for simplifying the declaration and definition of derived exception types
 */
-#define ExceptionClass( ClassName , ClassDescription )\
+#define UHAL_DEFINE_EXCEPTION_CLASS( ClassName , ClassDescription )\
  class ClassName : public uhal::exception::exception {\
  public:\
  ClassName() : uhal::exception::exception() {}\

@@ -65,11 +65,11 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the UDP connection timed out.
-    ExceptionClass ( UdpTimeout , "Exception class to handle the case where the UDP connection timed out." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( UdpTimeout , "Exception class to handle the case where the UDP connection timed out." )
     //! Exception class to handle a failure to create a UDP socket.
-    ExceptionClass ( ErrorAtUdpSocketCreation , "Exception class to handle a failure to create a UDP socket." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ErrorAtUdpSocketCreation , "Exception class to handle a failure to create a UDP socket." )
     //! Exception class to handle the case where ASIO returned an error.
-    ExceptionClass ( ASIOUdpError , "Exception class to handle the case where ASIO returned an error." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ASIOUdpError , "Exception class to handle the case where ASIO returned an error." )
   }
 
   //! Transport protocol to transfer an IPbus buffer via UDP

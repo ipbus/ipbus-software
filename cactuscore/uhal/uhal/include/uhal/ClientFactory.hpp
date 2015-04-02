@@ -56,10 +56,10 @@ namespace uhal
     // //! Exception class to handle the case where a protocol already exists in the creator map. Uses the base uhal::exception implementation of what()
     // class ProtocolAlreadyExist : public exception {};
     //! Exception class to handle the case where the protocol requested does not exists in the creator map.
-    ExceptionClass ( ProtocolDoesNotExist , "Exception class to handle the case where the protocol requested does not exists in the creator map." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ProtocolDoesNotExist , "Exception class to handle the case where the protocol requested does not exists in the creator map." )
 
     //! Exception class to handle the case where the factory failed to parse URI.
-    ExceptionClass ( FailedToParseURI , "Exception class to handle the case where the factory failed to parse URI." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( FailedToParseURI , "Exception class to handle the case where the factory failed to parse URI." )
   }
 
   /**

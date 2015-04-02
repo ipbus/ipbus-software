@@ -61,21 +61,21 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where a write was performed on a register which does not allow write access.
-    ExceptionClass ( WriteAccessDenied , "Exception class to handle the case where a write was performed on a register which does not allow write access." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( WriteAccessDenied , "Exception class to handle the case where a write was performed on a register which does not allow write access." )
     //! Exception class to handle the case where a read was performed on a register which does not allow read access.
-    ExceptionClass ( ReadAccessDenied , "Exception class to handle the case where a read was performed on a register which does not allow read access." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ReadAccessDenied , "Exception class to handle the case where a read was performed on a register which does not allow read access." )
     //! Exception class to handle the case where a child ID was requested which does not exist.
-    ExceptionClass ( NoBranchFoundWithGivenUID , "Exception class to handle the case where a child ID was requested which does not exist." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( NoBranchFoundWithGivenUID , "Exception class to handle the case where a child ID was requested which does not exist." )
     //! Exception class to handle the case where a bulk read or write was performed on a single register.
-    ExceptionClass ( BulkTransferOnSingleRegister , "Exception class to handle the case where a bulk read or write was performed on a single register." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( BulkTransferOnSingleRegister , "Exception class to handle the case where a bulk read or write was performed on a single register." )
     //! Exception class to handle the case where requested bulk read or write was too large.
-    ExceptionClass ( BulkTransferRequestedTooLarge , "Exception class to handle the case where requested bulk read or write was too large." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( BulkTransferRequestedTooLarge , "Exception class to handle the case where requested bulk read or write was too large." )
     //! Exception class to handle the case where an offset was requested into a FIFO
-    ExceptionClass ( BulkTransferOffsetRequestedForFifo , "Exception class to handle the case where an offset was requested into a FIFO." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( BulkTransferOffsetRequestedForFifo , "Exception class to handle the case where an offset was requested into a FIFO." )
     //! Exception class to handle the case where an offset was requested into a Single Register
-    ExceptionClass ( BulkTransferOffsetRequestedForSingleRegister , "Exception class to handle the case where an offset was requested into a Single Register." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( BulkTransferOffsetRequestedForSingleRegister , "Exception class to handle the case where an offset was requested into a Single Register." )
     //! Exception class to handle the case of an attempt to cast a node to the wrong type.
-    ExceptionClass ( BadNodeCast , "Exception class to handle the case of an attempt to cast a node to the wrong type." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( BadNodeCast , "Exception class to handle the case of an attempt to cast a node to the wrong type." )
   }
 
 

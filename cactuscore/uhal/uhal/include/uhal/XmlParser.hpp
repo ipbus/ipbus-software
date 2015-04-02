@@ -54,17 +54,17 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where an attribute is both required and forbidden.
-    ExceptionClass ( ContradictoryParserRule , "Exception class to handle the case where an attribute is both required and forbidden." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ContradictoryParserRule , "Exception class to handle the case where an attribute is both required and forbidden." )
     //! Exception class to handle the case where a callback is requested without it being specified.
-    ExceptionClass ( NoActionSpecified , "Exception class to handle the case where a callback is requested without it being specified." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( NoActionSpecified , "Exception class to handle the case where a callback is requested without it being specified." )
     //! Exception class to handle the case where the parser is asked to handle more than 64 attributes.
-    ExceptionClass ( TooManyAttributes , "Exception class to handle the case where the parser is asked to handle more than 64 attributes." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( TooManyAttributes , "Exception class to handle the case where the parser is asked to handle more than 64 attributes." )
     //! Exception class to handle the case where an unknown attribute is parsed.
-    ExceptionClass ( UnknownAttribute , "Exception class to handle the case where an unknown attribute is parsed." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( UnknownAttribute , "Exception class to handle the case where an unknown attribute is parsed." )
     //! Exception class to handle the case where two or more equally strict rules are passed.
-    ExceptionClass ( AmbiguousParserRules , "Exception class to handle the case where two or more equally strict rules are passed." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( AmbiguousParserRules , "Exception class to handle the case where two or more equally strict rules are passed." )
     //! Exception class to handle the case where no rules were parsed.
-    ExceptionClass ( NoRulesPassed , "Exception class to handle the case where no rules were parsed." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( NoRulesPassed , "Exception class to handle the case where no rules were parsed." )
   }
 
   //! Forward declaration of the Parser so we can declare it friend

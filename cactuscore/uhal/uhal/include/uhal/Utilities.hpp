@@ -109,17 +109,17 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the string will not fit into a 32-bit number.
-    ExceptionClass ( StringNumberWillNotFitInto32BitNumber , "Exception class to handle the case where the string will not fit into a 32-bit number." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( StringNumberWillNotFitInto32BitNumber , "Exception class to handle the case where the string will not fit into a 32-bit number." )
     //! Exception class to handle the case where the string is not a comma-delimiter list of URIs.
-    ExceptionClass ( UriListParsingError , "Exception class to handle the case where the string is not a comma-delimiter list of URIs." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( UriListParsingError , "Exception class to handle the case where the string is not a comma-delimiter list of URIs." )
     //! Exception class to handle the case where a URI contains a non-supported protocol.
-    ExceptionClass ( NonSupportedUriProtocol , "Exception class to handle the case where a URI contains a non-supported protocol." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( NonSupportedUriProtocol , "Exception class to handle the case where a URI contains a non-supported protocol." )
     //! Exception class to handle the case where a URI can not be opened.
-    ExceptionClass ( CannotOpenFile , "Exception class to handle the case where a URI can not be opened." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( CannotOpenFile , "Exception class to handle the case where a URI can not be opened." )
     //! Exception class to handle the case where a URI using the 'file://' protocol can not be expanded.
-    ExceptionClass ( FileNotFound , "Exception class to handle the case where a URI using the 'file://' protocol can not be expanded." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( FileNotFound , "Exception class to handle the case where a URI using the 'file://' protocol can not be expanded." )
     //!Exception class to handle the case where expanding a shell expression failed.
-    ExceptionClass ( ExpandingShellExpressionFailed , "Exception class to handle the case where expanding a shell expression failed." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ExpandingShellExpressionFailed , "Exception class to handle the case where expanding a shell expression failed." )
   }
 
   namespace utilities

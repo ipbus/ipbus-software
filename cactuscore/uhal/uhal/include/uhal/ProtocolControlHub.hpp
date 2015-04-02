@@ -56,28 +56,28 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where parsing the target URL failed.
-    ExceptionClass ( ParsingTargetURLfailed , "Exception class to handle the case where parsing the target URL failed." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ParsingTargetURLfailed , "Exception class to handle the case where parsing the target URL failed." )
 
     //! Exception class to handle the case where hostname to IP lookup failed
-    ExceptionClass ( HostnameToIPlookupFailed , "Exception class to handle the case where hostname to IP lookup failed." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( HostnameToIPlookupFailed , "Exception class to handle the case where hostname to IP lookup failed." )
 
     //! Exception class to handle the case where the received header does not match the expected header.
-    ExceptionClass ( XMLfileMissingRequiredParameters , "Exception class to handle the case where the received header does not match the expected header." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( XMLfileMissingRequiredParameters , "Exception class to handle the case where the received header does not match the expected header." )
 
     //! Exception class to handle the case where the target does not respond to the ControlHub
-    ExceptionClass ( ControlHubReturnedWrongAddress , "Exception class to handle the case where the ControlHub returned the wrong IP or Port" )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubReturnedWrongAddress , "Exception class to handle the case where the ControlHub returned the wrong IP or Port" )
 
     //! Exception class to handle the case where the target does not respond to the ControlHub
-    ExceptionClass ( ControlHubTargetTimeout , "Exception class to handle the case where the target does not respond to the ControlHub" )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubTargetTimeout , "Exception class to handle the case where the target does not respond to the ControlHub" )
 
     //! Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub
-    ExceptionClass ( ControlHubInternalTimeout , "Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub" )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubInternalTimeout , "Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub" )
 
     //! Exception class to handle the case where the hardware sent a bad status packet to the ControlHub
-    ExceptionClass ( ControlHubReportedMalformedStatus , "Exception class to handle the case where the hardware sent a bad status packet to the ControlHub" )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubReportedMalformedStatus , "Exception class to handle the case where the hardware sent a bad status packet to the ControlHub" )
 
     //! Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL
-    ExceptionClass ( ControlHubUnknownErrorCode , "Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL" )
+    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubUnknownErrorCode , "Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL" )
   }
 
   /**

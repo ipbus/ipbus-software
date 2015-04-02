@@ -10,7 +10,7 @@
 
 namespace pycohal{
 
-  ExceptionClass(PycohalLogLevelEnumError, "Exception class to handle errors in translating logging levels")
+  UHAL_DEFINE_EXCEPTION_CLASS(PycohalLogLevelEnumError, "Exception class to handle errors in translating logging levels")
 
   //! Defines a Python exception class in the current scope
   /*!
