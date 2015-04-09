@@ -126,12 +126,6 @@ namespace uhal
       */
       virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
 
-      /**
-        	Function which dispatch calls when the reply is received to check that the headers are as expected
-          @param aBuffers a buffer to validate
-        	@return whether the returned packet is valid
-        */
-      virtual  exception::exception* validate ( boost::shared_ptr< Buffers > aBuffers );
 
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected

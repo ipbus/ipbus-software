@@ -196,15 +196,6 @@ namespace uhal
 
 
 
-
-
-  template < typename InnerProtocol >
-  exception::exception* ControlHub< InnerProtocol >::validate ( boost::shared_ptr< Buffers > aBuffers )
-  {
-    return ClientInterface::validate ( aBuffers );
-  }
-
-
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::dispatchExceptionHandler()
   {
