@@ -12,7 +12,7 @@ class Nightly :
     print "Selected group '"+group+"'"
 
     self.DEFAULT_COMMANDS    = ["CLEANUP_WWW_AREA","UNINSTALL","ENVIRONMENT","DEPENDENCIES",
-                       "CHECKOUT","BUILD","RELEASE","INSTALL","TEST_CONTROLHUB",
+                       "CHECKOUT","BUILD","RELEASE","INSTALL","UHAL_ABI","TEST_CONTROLHUB",
                        "TEST_IPbus_1.3_UDP","TEST_IPbus_1.3_TCP","TEST_IPbus_1.3_ControlHub",
                        "TEST_IPbus_2.0_UDP","TEST_IPbus_2.0_TCP",
                        "TEST_IPbus_2.0_ControlHub_No_packet_loss",
@@ -30,6 +30,7 @@ class Nightly :
     self.NIGHTLY_BASE        = join(self.USER_HOME,"www",self.RELATIVE_BASE)
     self.NIGHTLY_RPM_DIR     = join(self.NIGHTLY_BASE,"RPMS")
     self.NIGHTLY_LOG_DIR     = join(self.NIGHTLY_BASE,"logs")
+    self.NIGHTLY_ABI_DIR     = join(self.NIGHTLY_BASE,"abi")
     #The log file name and path should be the same than in the one in the acrontab
     self.CACTUS_PREFIX       = "/opt/cactus"
     self.CONTROLHUB_EBIN_DIR = join(self.CACTUS_PREFIX,"lib/controlhub/lib/controlhub-1.1.0/ebin")
@@ -50,7 +51,7 @@ class Nightly :
         self.pseudo_platform="slc6_x86_64"
 
     ####VARIABLES: analysis of logs
-    self.TITLE             = "uHAL Nightlies: %s " % self.pseudo_platform
+    self.TITLE             = "uHAL Nightlies (2.4.1-1 RPM release branch): %s " % self.pseudo_platform
     self.FROM_EMAIL        = "cactus.service@cern.ch"
     self.WEB_URL           = join("http://cern.ch/"+self.USER_NAME,self.RELATIVE_BASE)
     self.NIGHTLY_LOG_FILE    = join(self.NIGHTLY_LOG_DIR,"nightly.log")
@@ -89,6 +90,7 @@ class Nightly :
                                           join(self.CACTUS_PREFIX,"bin/uhal/tools"),
                                           environ.get("PATH","")])
     
+    environ["CCACHE_DISABLE"] = "1"
     self.importCommands()
 
   def importCommands(self) :
@@ -120,13 +122,13 @@ class Nightly :
                   ["env"]]]
 
     self.COMMANDS += [["DEPENDENCIES",
-                  ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel graphviz graphviz-devel boost boost-devel wxPython e2fsprogs-devel qt qt-devel PyQt PyQt-devel qt-designer"
+                  ["sudo yum -y install arc-server createrepo bzip2-devel zlib-devel ncurses-devel python-devel curl curl-devel abi-compliance-checker graphviz graphviz-devel wxPython e2fsprogs-devel qt qt-devel PyQt PyQt-devel qt-designer"
                   ]]]
 
     CHECKOUT_CMDS = ["sudo mkdir -p %s" % self.BUILD_HOME,
                     "sudo chmod -R 777 %s" % self.BUILD_HOME,
                     "cd %s" % self.BUILD_HOME,
-                    "svn -q co svn+ssh://svn.cern.ch/reps/cactus/trunk",
+                    "svn -q co svn+ssh://svn.cern.ch/reps/cactus/branches/tsw_uhal/ipbus_sw_2_4_1-1 trunk",
     #                 "svn -q co svn+ssh://svn.cern.ch/reps/cactus/branches/uhal_2_0_x ./trunk"
                     ]
 
@@ -150,6 +152,18 @@ class Nightly :
                   ["sed \"s/<platform>/%s/\" uhal.nightly.repo  | sudo tee /etc/yum.repos.d/uhal.repo > /dev/null" % self.pseudo_platform,
                   "sudo yum clean all",
                   "sudo yum -y groupinstall uhal"]]]
+
+    self.NIGHTLY_ABI_DUMP_CONFIG = join(self.NIGHTLY_ABI_DIR,"uhal_abi_config.xml")
+    self.NIGHTLY_ABI_DUMP = join(self.NIGHTLY_ABI_DIR,"abi_dump_uHAL_nightly-%s.abi.tar.gz" % self.pseudo_platform)
+    self.NIGHTLY_ABI_DUMP_LOG = join(self.NIGHTLY_ABI_DIR,"abi_dump_uHAL_nightly-%s.log" % self.pseudo_platform)
+    self.LAST_RELEASE_ABI_DUMP = '`find %s/www/release/uhal_abi_dumps/ -iname "abi_dump_uHAL_*-%s.abi.tar.gz" | sort -V | tail -n 1`' % (self.USER_HOME, self.pseudo_platform)
+    self.COMMANDS += [["UHAL_ABI",
+                       ["mkdir -p %s && rm -f %s/*" % (self.NIGHTLY_ABI_DIR, self.NIGHTLY_ABI_DIR),
+                        "sed \"s/VERSION/nightly/\" uhal_abi_config.xml > %s" % self.NIGHTLY_ABI_DUMP_CONFIG,
+                        "abi-compliance-checker -lib uHAL -dump %s -dump-path %s --log-path %s" % (self.NIGHTLY_ABI_DUMP_CONFIG,self.NIGHTLY_ABI_DUMP,self.NIGHTLY_ABI_DUMP_LOG),
+                        'abi-compliance-checker -lib uHAL -old %s -new %s -logging-mode n -report-path %s' %(self.LAST_RELEASE_ABI_DUMP, self.NIGHTLY_ABI_DUMP, join(self.NIGHTLY_ABI_DIR,"abi_compatibility_report.html"))
+                       ]
+                     ]]
 
     self.COMMANDS += [["TEST_CONTROLHUB",
                 ["sudo chmod +w /var/log",
