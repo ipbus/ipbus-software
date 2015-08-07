@@ -165,6 +165,10 @@ namespace uhal
 
   void NodeTreeBuilder::clearAddressFileCache()
   {
+    for(boost::unordered_map<std::string, const Node*>::const_iterator it=mNodes.begin(); it != mNodes.end(); it++)
+    {
+      delete it->second;
+    } 
     mNodes.clear();
   }
 
