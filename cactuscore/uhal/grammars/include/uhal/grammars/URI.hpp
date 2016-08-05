@@ -33,7 +33,7 @@
 #ifndef _uhal_grammars_URI_hpp_
 #define _uhal_grammars_URI_hpp_
 
-#include <iosfwd>
+#include <iostream>
 #include <string>
 #include <vector>
 

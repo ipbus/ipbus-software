@@ -41,7 +41,11 @@ namespace grammars
     URIGrammar::base_type ( start )
   {
     using namespace boost::spirit;
-    start = protocol > hostname > port > - ( path ) > - ( extension ) > - ( data_pairs_vector );
+    start = protocol > hostname     > port         > - ( path ) > -( extension ) > - ( data_pairs_vector ); //EthernetURI | PCIeURI;
+
+    // EthernetURI = protocol > hostname     > port         > - ( path ) > -( extension ) > - ( data_pairs_vector );
+    // PCIeURI     = protocol > empty_string > empty_string >  path      > empty_string   > - ( data_pairs_vector );
+
     protocol = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( "://" );
     hostname = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( ":" );
     port 	 = + ( qi::char_ - ascii::punct ) ;
@@ -51,6 +55,8 @@ namespace grammars
     data_pairs = data_pairs_1 > data_pairs_2;
     data_pairs_1 = + ( qi::char_ - qi::lit ( "=" ) ) > qi::lit ( "=" );
     data_pairs_2 = * ( qi::char_ - qi::lit ( "&" ) ) >> - ( qi::lit ( "&" ) );
+
+    empty_string = boost::spirit::qi::as_string[ boost::spirit::eps ];
   }
 
 }

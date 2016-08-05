@@ -64,6 +64,12 @@ namespace grammars
     URIGrammar();
     //! Boost spirit parsing rule for parsing a URI
     boost::spirit::qi::rule< std::string::const_iterator,	uhal::URI(), 											boost::spirit::ascii::space_type > start;
+
+
+    boost::spirit::qi::rule< std::string::const_iterator, uhal::URI(),                      boost::spirit::ascii::space_type > EthernetURI;
+    boost::spirit::qi::rule< std::string::const_iterator, uhal::URI(),                      boost::spirit::ascii::space_type > PCIeURI;
+
+
     //! Boost spirit parsing rule for parsing the "protocol" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > protocol;
     //! Boost spirit parsing rule for parsing the "hostname" part of a URI
@@ -82,6 +88,9 @@ namespace grammars
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_1;
     //! Boost spirit parsing rule for parsing the "value" part of the "key-value pairs" part of a URI
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_2;
+
+
+    boost::spirit::qi::rule< std::string::const_iterator, std::string(),                      boost::spirit::ascii::space_type > empty_string;    
   };
 }
 

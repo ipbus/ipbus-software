@@ -115,8 +115,10 @@ int main ( int argc,char* argv[] )
 
 
     // --------------------------------------------------------------------------------
-  }catch( std::exception& aExc ){
+  }catch( const std::exception& aExc ){
     std::cout << aExc.what() << std::endl;
+  }catch( const std::exception* aExc ){
+    std::cout << aExc->what() << std::endl;
   }
 
 }

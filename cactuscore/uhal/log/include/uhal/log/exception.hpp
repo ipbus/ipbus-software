@@ -62,6 +62,9 @@
  std::string description() const throw() { return std::string( ClassDescription ); } \
 };
 
+#define ExceptionClass UHAL_DEFINE_EXCEPTION_CLASS
+
+
 /**
 	Macro version of the member function to wrap the ThrowAsDerivedType but also tell the compiler that this function always throws
 */

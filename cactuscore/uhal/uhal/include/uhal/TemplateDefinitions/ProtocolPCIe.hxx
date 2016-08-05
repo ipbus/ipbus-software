@@ -49,9 +49,9 @@ namespace uhal
   PCIe< InnerProtocol >::PCIe ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri )
   {
-    std::cout << "Id: " << aId << std::endl;
-    std::cout << "URI: " << aUri.mProtocol << std::endl;
-    std::cout << "Path: " << aUri.mPath << std::endl;
+    std::string lPCIePath( '/' + aUri.mPath );
+
+    std::cout << "Id: " << aId << ", Path: " << lPCIePath << std::endl;
   }
 
 
