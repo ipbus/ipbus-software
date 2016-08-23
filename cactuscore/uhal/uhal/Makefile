@@ -43,7 +43,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -g -O3 -Wall -MMD -MP -fPIC\
+CPP_FLAGS = -g -O3 -Wall -Wno-unused-local-typedefs -MMD -MP -fPIC\
 					 -DDISABLE_PACKET_COUNTER_HACK\
 					 -DRUN_ASIO_MULTITHREADED # \
 #					 -fprofile-arcs -ftest-coverage

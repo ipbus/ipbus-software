@@ -54,7 +54,7 @@ INCLUDE_PATH = 	-Iinclude  \
 				-I${UHAL_LOG_INCLUDE_PREFIX}  \
 				-I${UHAL_GRAMMARS_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -g -Wall -MMD -MP -fPIC ${INCLUDE_PATH}
+CPP_FLAGS = -g -Wall -Wno-unused-local-typedefs -MMD -MP -fPIC ${INCLUDE_PATH}
 
 LINK_BINDINGS_FLAGS_COMMON = -shared -fPIC -Wall -g ${LIBRARY_PATH}  ${BINDING_LIBRARIES}
 

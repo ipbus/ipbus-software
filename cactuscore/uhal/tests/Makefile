@@ -54,7 +54,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		-I${UHAL_UHAL_INCLUDE_PREFIX}
 
-CPP_FLAGS = -g -Wall -O3 -MMD -MP -fPIC \
+CPP_FLAGS = -g -Wall -Wno-unused-local-typedefs -O3 -MMD -MP -fPIC \
 #						-fprofile-arcs -ftest-coverage
 
 # Hide c++11-extensions warning when building on osx
