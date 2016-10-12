@@ -49,14 +49,13 @@ ERLC=erlc
 ESCRIPT=escript
 else
 #If we're on Linux, use the cactuscore-extern-erlang RPM sources or RPM installation
+ESCRIPT=$(shell pwd)/erlang/bin/escript
 ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
 ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
 ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
-ESCRIPT=$(shell pwd)/erlang/bin/escript
 else
 ERL=$(CACTUS_ROOT)/bin/erl
 ERLC=$(CACTUS_ROOT)/bin/erlc
-ESCRIPT=${CACTUS_ROOT}/bin/escript
 endif
 endif
 ######################################################################################
