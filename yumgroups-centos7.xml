@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<comps>
+  <group>
+    <id>cactus</id>
+    <name>uhal</name>
+    <default>true</default>
+    <description>uHAL packages of the CACTUS YUM repository</description>
+    <uservisible>true</uservisible>
+    <grouplist></grouplist>
+    <packagelist>
+      <packagereq type="mandatory">cactuscore-extern-pugixml</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-grammars</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-log</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-uhal</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-tests</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-pycohal</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-gui</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-tools</packagereq>
+      <packagereq type="mandatory">cactuscore-controlhub</packagereq>
+    </packagelist>
+  </group>
+
+</comps>
