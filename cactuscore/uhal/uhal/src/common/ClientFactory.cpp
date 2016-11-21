@@ -59,7 +59,7 @@ namespace uhal
       mInstance->add< TCP< ControlHub < IPbus< 1 , 3 , 350 > > , 3 > > ( "chtcp-1.3", "Hardware access via the Control Hub, using IPbus version 1.3" );
       mInstance->add< TCP< ControlHub < IPbus< 2 , 0 , 350 > > , 3 > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
-      mInstance->add< PCIe< IPbus< 2 , 0 , 48000 > > > ( "pcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0" );
+//      mInstance->add< PCIe< IPbus< 2 , 0 , 48000 > > > ( "pcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
 
     }

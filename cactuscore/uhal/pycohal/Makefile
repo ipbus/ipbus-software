@@ -3,9 +3,9 @@ BUILD_HOME = $(shell pwd)/../../..
 include $(BUILD_HOME)/config/Makefile.macros
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 4
+PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 0
-PACKAGE_RELEASE = 0
+PACKAGE_RELEASE = 0.alpha.1
 
 PYTHON_VERSION = $(shell python -c "import sys; sys.stdout.write(sys.version[:3])")
 
