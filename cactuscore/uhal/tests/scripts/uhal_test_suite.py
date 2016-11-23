@@ -703,6 +703,8 @@ if __name__=="__main__":
     BackgroundPid = []
 
     # Run the commands
+    nr_cmds_run = 0
+    nr_cmds_err = 0
     try:
         for section_name, cmds in sections_cmds_to_run:
             print "\n\n" + ("=" * 120)
@@ -719,6 +721,7 @@ if __name__=="__main__":
                 if verbose:
                     print "-" * 120
 
+                nr_cmds_run += 1
                 if cmd.startswith( "DummyHardware" ):
                   background_run_command( cmd , BackgroundPid )
                 else:
@@ -728,6 +731,7 @@ if __name__=="__main__":
                 if len(stdout) and not verbose:
                     print stdout[-1].rstrip("\n")
                 if exit_code:
+                    nr_cmds_err += 1
                     split_name_list = re.split('(\.exe)',cmd)
                     split_name = split_name_list[0]
                     if len( split_name_list ) > 1:
@@ -754,6 +758,7 @@ if __name__=="__main__":
     if run_cmds:
        run_cleanup_commands()
 
-       if quit_on_error:
-           print "\n   TEST SUITE COMPLETED SUCCESSFULLY!  "
+       print "\n   TEST SUITE COMPLETED! ", nr_cmds_run, "commands run," , nr_cmds_err, "errors (non-zero exit codes)"
+       if nr_cmds_err > 0:
+           sys.exit(1)
 
