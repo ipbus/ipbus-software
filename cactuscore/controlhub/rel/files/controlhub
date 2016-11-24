@@ -315,6 +315,15 @@ case "$1" in
             echo -n "."
             sleep 1
         done
+        while true
+        do
+            RES=`ping_node`
+            if [ "$RES" != "pong" ]; then
+                break
+            fi
+            echo -n "-"
+            sleep 1
+        done
         echo " ok"
         ;;
 
