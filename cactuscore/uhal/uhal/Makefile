@@ -43,7 +43,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
 		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
 
-CPP_FLAGS = -g -O3 -Wall -Wno-unused-local-typedefs -MMD -MP -fPIC\
+CPP_FLAGS = -g -O3 -Wall -Wpedantic -MMD -MP -fPIC\
 					 -DDISABLE_PACKET_COUNTER_HACK\
 					 -DRUN_ASIO_MULTITHREADED # \
 #					 -fprofile-arcs -ftest-coverage
@@ -85,7 +85,7 @@ ${LIBRARY}: ${OBJECT_FILES}
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p {lib,obj}
-	g++ ${INCLUDE_PATH} ${CPP_FLAGS} -c $< -o $@
+	g++ ${CPP_FLAGS} ${INCLUDE_PATH} -c $< -o $@
 
 -include $(OBJECT_FILES:.o=.d)
 

@@ -182,7 +182,7 @@ namespace uhal
         return lExc;
       }
 
-      return false;
+      return NULL;
     }
 
     //aReplyStartIt++;
