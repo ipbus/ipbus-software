@@ -10,7 +10,7 @@ namespace uhal {
   namespace tests {
 
     class DummyParentNode : public uhal::Node {
-      UHAL_DERIVEDNODE(DummyParentNode);
+      UHAL_DERIVEDNODE(DummyParentNode)
       public:
 
       ///
@@ -31,7 +31,7 @@ namespace uhal {
      */
 
     class DummyChildNode : public DummyParentNode {
-      UHAL_DERIVEDNODE(DummyChildNode);
+      UHAL_DERIVEDNODE(DummyChildNode)
       public:
         //
         DummyChildNode(const Node& aNode);
