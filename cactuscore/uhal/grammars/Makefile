@@ -28,7 +28,7 @@ INCLUDE_PATH = 	-Iinclude  \
 		-I${UHAL_LOG_INCLUDE_PREFIX}
 
 
-CPP_FLAGS = -g -O3 -Wall -Wno-unused-local-typedefs -MMD -MP -fPIC \
+CPP_FLAGS = -g -O3 -Wall -Wpedantic -MMD -MP -fPIC \
             #-fprofile-arcs -ftest-coverage
 
 LINK_FLAGS = -g -shared -fPIC -Wall -O3\
