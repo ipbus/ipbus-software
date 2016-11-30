@@ -48,7 +48,7 @@ ifeq ($(USE_BACKTRACE),TRUE)
 			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/binutils/\
 			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd/
 	
-	CPP_FLAGS = -g  -Wall -Wpedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
+	CPP_FLAGS = -g  -Wall -pedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
 							#-fprofile-arcs -ftest-coverage
 
 else
@@ -62,7 +62,7 @@ else
 	INCLUDE_PATH = 	-Iinclude  \
 			-I${EXTERN_BOOST_INCLUDE_PREFIX}
 	
-	CPP_FLAGS = -g  -Wall -Wpedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
+	CPP_FLAGS = -g  -Wall -pedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
                         #-fprofile-arcs -ftest-coverage
 
 endif		
