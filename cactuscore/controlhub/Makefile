@@ -92,7 +92,8 @@ ifneq ($(CACTUS_OS),centos7)
 		--define "packager ${Packager}" \
 		${PackageName}.spec
 else
-	cp scripts/controlhub.service ${RPMBUILD_SOURCES_DIR}/
+	cp systemd/controlhub.service ${RPMBUILD_SOURCES_DIR}/
+	cp systemd/controlhub.env ${RPMBUILD_SOURCES_DIR}/
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${CACTUS_ROOT}" \

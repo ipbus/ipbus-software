@@ -28,6 +28,7 @@ IPbus packet-router
 # Make directories
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/{bin,lib}
 mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
+mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
 mkdir -p $RPM_BUILD_ROOT/etc/{rsyslog.d,logrotate.d}
 mkdir -p $RPM_BUILD_ROOT/var/log/controlhub
 
@@ -35,12 +36,16 @@ mkdir -p $RPM_BUILD_ROOT/var/log/controlhub
 cp -rp %{sources_dir}/bin/* $RPM_BUILD_ROOT%{_prefix}/bin/.
 cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 cp -rp %{sources_dir}/controlhub.service $RPM_BUILD_ROOT/usr/lib/systemd/system/
+cp -rp %{sources_dir}/controlhub.env $RPM_BUILD_ROOT/etc/sysconfig/controlhub
 cp -rp %{sources_dir}/rsyslog.d.conf $RPM_BUILD_ROOT/etc/rsyslog.d/controlhub.conf
 cp -rp %{sources_dir}/logrotate.d.conf $RPM_BUILD_ROOT/etc/logrotate.d/controlhub.conf
 
 # Move user-editable configuration file under /etc
 mv $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/controlhub.config $RPM_BUILD_ROOT/etc/controlhub.config
 sed -i "s|\"controlhub.config\"|\"/etc/controlhub.config\"|" $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/releases/*/sys.config
+
+# Update CACTUSROOT in the controlhub systemd environment file
+sed -i "s|^CACTUSROOT=.*|CACTUSROOT=%{_prefix}|" $RPM_BUILD_ROOT/etc/sysconfig/controlhub
 
 # Update the CONTROLHUB_BIN_DIR variable in controlhub scripts
 sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=%{_prefix}/lib/controlhub/bin|" $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_*
@@ -82,6 +87,7 @@ fi
 %{_prefix}/bin/*
 %{_prefix}/lib/*
 /usr/lib/systemd/system/controlhub.service
+/etc/sysconfig/controlhub
 /etc/rsyslog.d/controlhub.conf
 /var/log/controlhub
 %config(noreplace) /etc/controlhub.config

@@ -1,14 +1,14 @@
 [Unit]
 
-Description=IPbus is a protocol for hardware access over ethernet. This service starts up the IPbus ControlHub server daemon.
+Description=The IPbus ControlHub server daemon; mediates simultanous IPbus-based hardware access from multiple control applications.
 Documentation=http://ipbus.web.cern.ch/ipbus/doc/index.html
-Requires=syslog.target network.target
+Requires=network.target
 
 
 [Service]
 Type=forking
 PIDFile=
-
+EnvironmentFile=/etc/sysconfig/controlhub
 ExecStart=/opt/cactus/bin/controlhub_start
 ExecStop=/opt/cactus/bin/controlhub_stop
 
