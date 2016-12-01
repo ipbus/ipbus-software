@@ -1,0 +1,2 @@
+mkdir -p $RPM_BUILD_ROOT/etc/init.d
+cp -rp %{sources_dir}/controlhub $RPM_BUILD_ROOT/etc/init.d/.

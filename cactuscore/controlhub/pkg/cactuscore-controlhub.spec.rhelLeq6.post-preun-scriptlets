@@ -1,0 +1,19 @@
+%post
+# 0) Ensure controlhub log is readable by all
+touch /var/log/controlhub/controlhub.log
+chmod 644 /var/log/controlhub/controlhub.log
+# 1) Must stop ControlHub in case RPM being upgraded (i.e. rpm -U), or in case of error on previous RPM erase
+/etc/init.d/controlhub stop || true
+# 1b) Restart rsyslog so that it picks up configuration file change
+/sbin/service rsyslog restart
+# 2) Normal ControlHub start steps
+/sbin/chkconfig --add controlhub
+/etc/init.d/controlhub start 
+
+
+%preun
+if [ $1 = 0 ]; then
+  /etc/init.d/controlhub stop 
+  /sbin/chkconfig controlhub off
+  /sbin/chkconfig --del controlhub
+fi
