@@ -6,11 +6,12 @@ Requires=network.target
 
 
 [Service]
-Type=forking
-PIDFile=
+Type=Type=forking
+PIDFile=/var/run/controlhub.pid
 EnvironmentFile=/etc/sysconfig/controlhub
-ExecStart=/opt/cactus/bin/controlhub_start
-ExecStop=/opt/cactus/bin/controlhub_stop
+ExecStart=${CACTUSROOT}/bin/controlhub_start
+ExecStartPost=${CACTUSROOT}/lib/controlhub/bin/controlhub getpid > /var/run/controlhub.pid
+ExecStop=${CACTUSROOT}/bin/controlhub_stop
 
 
 [Install]
