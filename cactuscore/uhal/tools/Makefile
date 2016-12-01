@@ -12,7 +12,7 @@ Packager = Kristian Harder, Dave Newbold, Tom Williams
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 0
-PACKAGE_RELEASE = 0.alpha.1
+PACKAGE_RELEASE = 0.alpha.2
 
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
