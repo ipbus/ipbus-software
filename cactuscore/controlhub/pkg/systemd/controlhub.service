@@ -1,0 +1,18 @@
+[Unit]
+
+Description=IPbus ControlHub server daemon (mediates simultanous IPbus-based hardware access from multiple control applications)
+Documentation=http://ipbus.web.cern.ch/ipbus/doc/index.html
+Requires=network.target
+
+
+[Service]
+Type=forking
+PIDFile=/var/run/controlhub.pid
+EnvironmentFile=/etc/sysconfig/controlhub
+ExecStart=__CACTUSROOT__/bin/controlhub_start
+ExecStartPost=/bin/sh -c '__CACTUSROOT__/lib/controlhub/bin/controlhub getpid > /var/run/controlhub.pid'
+ExecStop=__CACTUSROOT__/bin/controlhub_stop
+
+
+[Install]
+WantedBy=default.target runlevel2.target runlevel5.target

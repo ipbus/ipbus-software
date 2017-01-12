@@ -1,0 +1,9 @@
+mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
+mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
+
+cp -rp %{sources_dir}/controlhub.service $RPM_BUILD_ROOT/usr/lib/systemd/system/
+cp -rp %{sources_dir}/controlhub.env $RPM_BUILD_ROOT/etc/sysconfig/controlhub
+
+# Update CACTUSROOT in the controlhub systemd environment file and service file
+sed -i "s|^CACTUSROOT=.*|CACTUSROOT=%{_prefix}|" $RPM_BUILD_ROOT/etc/sysconfig/controlhub
+sed -i "s|__CACTUSROOT__|%{_prefix}|" ${RPM_BUILD_ROOT}/usr/lib/systemd/system/controlhub.service

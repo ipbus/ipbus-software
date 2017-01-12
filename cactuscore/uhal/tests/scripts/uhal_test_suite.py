@@ -33,6 +33,7 @@ import os
 import signal
 import threading
 import re
+import platform
 
 SOFT_TIMEOUT_S = 570
 
@@ -43,10 +44,16 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
         conn_file = "file://" + conn_file
 
     if controlhub_scripts_dir is None:
-        controlhub_start  = "/sbin/service controlhub start"
-        controlhub_status = "/sbin/service controlhub status"
-        controlhub_stats  = "/sbin/service controlhub stats"
-        controlhub_stop   = "/sbin/service controlhub stop"
+        if "centos-7" in platform.platform():
+            controlhub_start  = "sudo systemctl start controlhub"
+            controlhub_status = "sudo systemctl status controlhub"
+            controlhub_stats  = "/opt/cactus/bin/controlhub_stats"
+            controlhub_stop   = "sudo systemctl stop controlhub"
+        else:
+            controlhub_start  = "/sbin/service controlhub start"
+            controlhub_status = "/sbin/service controlhub status"
+            controlhub_stats  = "/sbin/service controlhub stats"
+            controlhub_stop   = "/sbin/service controlhub stop"
     else:
         controlhub_start = join(controlhub_scripts_dir, "controlhub_start")
         controlhub_status = join(controlhub_scripts_dir, "controlhub_status")

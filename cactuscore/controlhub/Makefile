@@ -73,14 +73,29 @@ _all: _erlang
 	cd rel && ${ESCRIPT} ../rebar generate
 
 
+ifeq (${CACTUS_OS}, centos7)
+RPMSPEC_SNIPPET_OS_TAG=rhel7
+else
+RPMSPEC_SNIPPET_OS_TAG=rhelLeq6
+endif
+
 rpm: _rpmall
 _rpmall: build
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES/{lib,bin},SRPMS}
 	cp -r rel/controlhub ${RPMBUILD_SOURCES_DIR}/lib/
-	cp scripts/init.d ${RPMBUILD_SOURCES_DIR}/controlhub
-	cp scripts/rsyslog.d.conf ${RPMBUILD_SOURCES_DIR}/ 
-	cp scripts/logrotate.d.conf ${RPMBUILD_SOURCES_DIR}/
 	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
+	cp pkg/rsyslog.d.conf ${RPMBUILD_SOURCES_DIR}/ 
+	cp pkg/logrotate.d.conf ${RPMBUILD_SOURCES_DIR}/
+ifneq ($(CACTUS_OS),centos7)
+	cp pkg/init.d ${RPMBUILD_SOURCES_DIR}/controlhub
+else
+	cp pkg/systemd/controlhub.service ${RPMBUILD_SOURCES_DIR}/
+	cp pkg/systemd/controlhub.env ${RPMBUILD_SOURCES_DIR}/
+endif	
+	cp pkg/cactuscore-controlhub.spec.template ${PackageName}.spec
+	sed -i -e '/___INSTALL_SCRIPTLET_FINALE___/ {' -e 'r pkg/cactuscore-controlhub.spec.$(RPMSPEC_SNIPPET_OS_TAG).install-scriptlet-finale' -e 'd' -e '}' ${PackageName}.spec
+	sed -i -e '/___POST_PREUN_SCRIPTLETS___/ {' -e 'r pkg/cactuscore-controlhub.spec.$(RPMSPEC_SNIPPET_OS_TAG).post-preun-scriptlets' -e 'd' -e '}' ${PackageName}.spec
+	sed -i -e '/___FILELIST_FINALE___/ {' -e 'r pkg/cactuscore-controlhub.spec.$(RPMSPEC_SNIPPET_OS_TAG).filelist-finale' -e 'd' -e '}' ${PackageName}.spec
 	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD \
 		--define  "_topdir ${RPMBUILD_DIR}" \
 		--define "_prefix ${CACTUS_ROOT}" \
