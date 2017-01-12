@@ -256,7 +256,6 @@ namespace uhal
       // ... and get the reply. First we need a buffer to write the reply in to...
       static const int mDefaultBufferSize ( 65536 );
       typedef std::vector<uint8_t> BufferType;
-      typedef BufferType::iterator BufferTypeIterator;
       BufferType mBuffer ( mDefaultBufferSize , uint8_t ( 0 ) );
       std::size_t lSize ( 0 );
 
