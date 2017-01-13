@@ -2,7 +2,7 @@ import os
 import sys
 from distutils.core import setup
 
-VERSION_STRING = ( os.environ['PACKAGE_VER_MAJOR'] + '.' + os.environ['PACKAGE_VER_MINOR'] + '.' + os.environ['PACKAGE_VER_PATCH'] )
+VERSION_STRING = ( os.environ['PACKAGE_VER_MAJOR'] + '.' + os.environ['PACKAGE_VER_MINOR'] )
 
 
 setup(name = 'cactuscore-uhal-gui',
