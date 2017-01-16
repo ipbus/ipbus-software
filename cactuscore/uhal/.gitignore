@@ -1,0 +1,17 @@
+*/RPMBUILD/
+*/bin/
+*/lib/
+*/obj/
+
+gui/MANIFEST
+gui/build/
+gui/dist/
+
+log/include/uhal/log/log.hpp
+log/include/uhal/log/log.hxx
+log/src/common/log.cpp
+
+pycohal/MANIFEST
+pycohal/build/
+pycohal/dist/
+pycohal/pkg/uhal/_core.so

@@ -1,0 +1,8 @@
+.rebar/
+RPMBUILD/
+cactuscore-controlhub.spec
+deps/
+ebin/*.beam
+erlang/
+otp_src_R16B01/
+rel/controlhub/
