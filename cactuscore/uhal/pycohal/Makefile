@@ -7,7 +7,7 @@ PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 0.alpha.2
 
-PYTHON_VERSION = $(shell python -c "import sys; sys.stdout.write(sys.version[:3])")
+PYTHON_VERSION = $(shell python -c "import sys; print str(sys.version_info[0]) + '.' + str(sys.version_info[1])")
 
 PYTHON_LIB=python${PYTHON_VERSION}
 
