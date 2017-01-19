@@ -500,9 +500,15 @@ namespace uhal
       {
         return mHw->getClient().write ( mAddr , aValue );
       }
-      else
+      else if ( mPermission & defs::READ )
       {
         return mHw->getClient().write ( mAddr , aValue , mMask );
+      }
+      else // Masked write-only register
+      {
+        // RMWbits transaction should not be performed automatically on masked write-only node, since RMW transactions involve reading the register
+        exception::WriteAccessDenied lExc;
+        log ( lExc , "Cannot automatically perform write on write-only masked node " , Quote ( this->getPath() ) , "; masked write would have to be implemented as RMW transaction, which requires read permissions." ); 
       }
     }
 
