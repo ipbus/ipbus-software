@@ -94,8 +94,26 @@ void check_meta_info ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getMode() == uhal::defs::SINGLE );
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getTags() == "" );
   CACTUS_CHECK ( hw.getNode ( "REG_LOWER_MASK" ).getParameters().empty() );
+  //REG_MASKED_READ_ONLY 
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getAddress() == 0x0005 );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getId() == "REG_MASKED_READ_ONLY" );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getPermission() == uhal::defs::READ );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getSize() == 1 );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getMask() == 0xFFFF0000 );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getMode() == uhal::defs::SINGLE );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_READ_ONLY" ).getParameters().empty() );
+  //REG_MASKED_WRITE_ONLY 
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getAddress() == 0x0005 );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getId() == "REG_MASKED_WRITE_ONLY" );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getPermission() == uhal::defs::WRITE );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getSize() == 1 );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getMask() == 0x0000FFFF );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getMode() == uhal::defs::SINGLE );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getTags() == "" );
+  CACTUS_CHECK ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).getParameters().empty() );
   //REG_WITH_PARS
-  CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getAddress() == 0x0005 );
+  CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getAddress() == 0x0006 );
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getId() == "REG_PARS" );
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getPermission() == uhal::defs::READWRITE );
   CACTUS_CHECK ( hw.getNode ( "REG_PARS" ).getSize() == 1 );

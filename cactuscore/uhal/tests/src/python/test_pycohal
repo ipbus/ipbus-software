@@ -580,11 +580,15 @@ class TestCheckPermissions(unittest.TestCase):
         hw = manager.getDevice( DEVICE_ID )
 
         self.assertRaises(uhal.WriteAccessDenied, hw.getNode("REG_READ_ONLY").write, (1) )
+        self.assertRaises(uhal.WriteAccessDenied, hw.getNode("REG_MASKED_READ_ONLY" ).write, (1) )
         self.assertRaises(uhal.ReadAccessDenied, hw.getNode("REG_WRITE_ONLY").read )
+        self.assertRaises(uhal.ReadAccessDenied, hw.getNode("REG_MASKED_WRITE_ONLY").read )
+        self.assertRaises(uhal.WriteAccessDenied, hw.getNode("REG_MASKED_WRITE_ONLY").write, (1) )
 
         x = randuint32()
         hw.getNode("REG_WRITE_ONLY").write(x)
         hw.getNode("REG_READ_ONLY").read()
+        hw.getNode("REG_MASKED_READ_ONLY").read()
         hw.dispatch()
 
 
@@ -709,13 +713,17 @@ class TestMetaInfo(unittest.TestCase):
                                            size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={})
         self.exe_test_node_metainfo(DEVICE_ID, "REG_WRITE_ONLY", ownId="REG_WRITE_ONLY", address=0x0003, permission=uhal.NodePermission.WRITE, description="",
                                            size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={})
-        self.exe_test_node_metainfo(DEVICE_ID, "REG_PARS", ownId="REG_PARS", address=0x0005, permission=uhal.NodePermission.READWRITE, description="",
+        self.exe_test_node_metainfo(DEVICE_ID, "REG_MASKED_READ_ONLY", ownId="REG_MASKED_READ_ONLY", address=0x0005, permission=uhal.NodePermission.READ, description="",
+                                           size=1, mask=0xffff0000, mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={} )
+        self.exe_test_node_metainfo(DEVICE_ID, "REG_MASKED_WRITE_ONLY", ownId="REG_MASKED_WRITE_ONLY", address=0x0005, permission=uhal.NodePermission.WRITE, description="",
+                                           size=1, mask=0x0000ffff, mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={} )
+        self.exe_test_node_metainfo(DEVICE_ID, "REG_PARS", ownId="REG_PARS", address=0x0006, permission=uhal.NodePermission.READWRITE, description="",
                                             size=1, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.SINGLE, tags="", pars={'arg0':'val100','arg1':'val101'})
         self.exe_test_node_metainfo(DEVICE_ID, "MEM", ownId="MEM", address=0x100000, permission=uhal.NodePermission.READWRITE, description="A block memory in an example XML file",
                                            size=262144, mask=uhal.NOMASK(), mode=uhal.BlockReadWriteMode.INCREMENTAL, tags="", pars={})
 
         upperNode = self.manager.getDevice( DEVICE_ID ).getNode()
-        self.assertEqual(len(upperNode.getNodes()), 53)
+        self.assertEqual(len(upperNode.getNodes()), 55)
         self.assertEqual(len(upperNode.getNodes(r".*_MEM")), 2)
 
         self.exe_test_node_iteration( upperNode )

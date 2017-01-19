@@ -11,7 +11,10 @@
     <node id="REG_UPPER_MASK" address="0x0004" mask="0xffff0000" permission="rw"/>
     <node id="REG_LOWER_MASK" address="0x0004" mask="0x0000ffff" permission="rw"/>
 
-    <node id="REG_PARS" address="0x0005" permission="rw" parameters="arg0=val100;arg1=val101" />
+    <node id="REG_MASKED_READ_ONLY" address="0x0005" mask="0xffff0000" permission="r"/>
+    <node id="REG_MASKED_WRITE_ONLY" address="0x0005" mask="0x0000ffff" permission="w"/>
+
+    <node id="REG_PARS" address="0x0006" permission="rw" parameters="arg0=val100;arg1=val101" />
     
     <node id="FIFO" address="0x0100" permission="rw" mode="non-incremental" size="268435456" tags="test" />
 
