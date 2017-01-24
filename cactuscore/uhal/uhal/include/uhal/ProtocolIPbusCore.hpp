@@ -61,7 +61,8 @@ namespace uhal
     RMW_SUM,
     R_A_I,
     NI_READ,
-    NI_WRITE
+    NI_WRITE,
+    CONFIG_SPACE_READ
   };
 }
 
@@ -123,6 +124,22 @@ namespace uhal
       //       */
       //       virtual uint64_t getTimeoutPeriod();
 
+
+      /**
+        Read a single, unmasked, unsigned word from the configuration address space
+        @param aAddr the address of the register to read
+        @return a Validated Memory which wraps the location to which the reply data is to be written
+      */
+      ValWord< uint32_t > readConfigurationSpace ( const uint32_t& aAddr );
+
+      /**
+        Read a single, masked, unsigned word from the configuration address space
+        @param aAddr the address of the register to read
+        @param aMask the mask to apply to the value after reading
+        @return a Validated Memory which wraps the location to which the reply data is to be written
+      */
+      ValWord< uint32_t > readConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask );
+
     protected:
 
       /**
@@ -173,6 +190,13 @@ namespace uhal
       */
       virtual ValVector< uint32_t > implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
+      /**
+      Read a single, masked, unsigned word from the configuration address space
+      @param aAddr the address of the register to read
+      @param aMask the mask to apply to the value after reading
+      @return a Validated Memory which wraps the location to which the reply data is to be written
+      */
+      virtual ValWord< uint32_t > implementReadConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
 
       /**
       Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user

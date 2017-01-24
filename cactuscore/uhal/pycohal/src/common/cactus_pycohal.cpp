@@ -13,6 +13,7 @@
 // uhal includes
 #include "uhal/ClientInterface.hpp"
 #include "uhal/ConnectionManager.hpp"
+#include "uhal/ProtocolIPbusCore.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/Node.hpp"
@@ -161,6 +162,10 @@ namespace pycohal
     }
   };
 
+  uhal::ValWord< uint32_t > readIPbusConfigurationSpace (uhal::IPbusCore& aClient, const uint32_t& aAddr )
+  {
+    return aClient.readConfigurationSpace(aAddr);
+  }
 }//namespace pycohal
 
 
@@ -227,6 +232,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_write_overloads,  
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_writeBlock_overloads, writeBlock, 2, 3 )
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_read_overloads,       read,       1, 2 )
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_readBlock_overloads,  readBlock,  2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_IPbusCore_read_overloads,             read,       1, 2 )
+
 
 // *** N.B: The argument of this BOOST_PYTHON_MODULE macro MUST be the same as the name of the library created, i.e. if creating library file my_py_binds_module.so , imported in python as:
 //                import my_py_binds_module
@@ -320,6 +327,13 @@ BOOST_PYTHON_MODULE ( _core )
          .def ( "getTimeoutPeriod", &uhal::ClientInterface::getTimeoutPeriod )
          .def ( /*__str__*/ self_ns::str ( self ) )
          ;
+
+  class_<uhal::IPbusCore, bases<uhal::ClientInterface>, boost::noncopyable /* no to-python converter (would require a copy CTOR) */,
+         boost::shared_ptr<uhal::IPbusCore> /* all instances are held within boost::shared_ptr */ >("IPbusCore", no_init /* no CTORs */)
+         .def ( "readConfigurationSpace", ( uhal::ValWord<uint32_t> ( uhal::IPbusCore::* ) ( const uint32_t&, const uint32_t& ) ) 0, uhal_IPbusCore_read_overloads() )
+         ;
+  def ("readIPbusConfigurationSpace", pycohal::readIPbusConfigurationSpace);
+
   // Wrap uhal::HwInterface
   class_<uhal::HwInterface> ( "HwInterface", init<const uhal::HwInterface&>() )
   .def ( "getClient", &uhal::HwInterface::getClient, pycohal::norm_ref_return_policy() )

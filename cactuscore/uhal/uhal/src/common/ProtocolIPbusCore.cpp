@@ -66,6 +66,9 @@ std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionTyp
     case uhal::RMW_BITS:
       aStr << "\"Read-Modify-Write Bits\"";
       break;
+    case uhal::CONFIG_SPACE_READ:
+      aStr << "\"Configuration space read\"";
+      break;
   }
 
   return aStr;
@@ -86,6 +89,23 @@ namespace uhal
 
   IPbusCore::~IPbusCore()
   {}
+
+
+
+  ValWord< uint32_t > IPbusCore::readConfigurationSpace ( const uint32_t& aAddr )
+  {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementReadConfigurationSpace ( aAddr );
+  }
+
+  ValWord< uint32_t > IPbusCore::readConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask )
+  {
+    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementReadConfigurationSpace ( aAddr, aMask );
+  }
+
 
 
   // void IPbusCore::preamble ( boost::shared_ptr< Buffers > lBuffers )
@@ -151,7 +171,7 @@ namespace uhal
                       ", for base address ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart+4 ) ), IntFmt< hex , fixed >() ), 
                       ", ", Integer ( lNrSendBytesProcessed+1 ) , " bytes into IPbus send payload" );
         return lExc;
-      }
+     }
 
       if ( lReplyResponseGood )
       {
@@ -198,6 +218,7 @@ namespace uhal
           break;
         case NI_READ:
         case READ:
+        case CONFIG_SPACE_READ:
           aSendBufferStart += ( 2<<2 );
           break;
         case NI_WRITE:
@@ -225,6 +246,7 @@ namespace uhal
         case R_A_I:
         case NI_READ:
         case READ:
+        case CONFIG_SPACE_READ:
         case RMW_SUM:
         case RMW_BITS:
           lNrReplyBytesValidated += ( aReplyStartIt->second + ( aReplyStartIt+1 )->second );
@@ -448,6 +470,32 @@ namespace uhal
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+  ValWord< uint32_t > IPbusCore::implementReadConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask )
+  {
+    log ( Debug() , "Read one unsigned word from configuration space address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    // IPbus packet format is:
+    // HEADER
+    // BASE ADDRESS
+    uint32_t lSendByteCount ( 2 << 2 );
+    // IPbus reply packet format is:
+    // HEADER
+    // WORD
+    uint32_t lReplyByteCount ( 2 << 2 );
+    uint32_t lSendBytesAvailable;
+    uint32_t  lReplyBytesAvailable;
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( CONFIG_SPACE_READ , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 , aMask ) );
+    lBuffers->add ( lReply.first );
+    lReply.second->IPbusHeaders.push_back ( 0 );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->receive ( lReply.second->value );
+    return lReply.first;
+  }
+  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > IPbusCore::implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
