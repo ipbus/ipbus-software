@@ -158,7 +158,7 @@ namespace uhal
         uhal::exception::IPbusCoreResponseCodeSet* lExc = new uhal::exception::IPbusCoreResponseCodeSet();
         log ( *lExc , "Returned Header from URI " , Quote ( this->uri() ) , ", " , Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ),
               " ( transaction id = " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
-              ", transaction type = " , Integer ( ( uint8_t ) ( ( lReplyIPbusTransactionType >> 3 ) ), IntFmt< hex , fixed >() ) ,
+              ", type = " , lReplyIPbusTransactionType ,
               ", word count = " , Integer ( lReplyWordCount ) ,
               " ) had response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicating an error (" ,
               Integer ( lNrReplyBytesValidated+1 ) , " bytes into IPbus reply payload)" );
