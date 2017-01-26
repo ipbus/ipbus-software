@@ -57,6 +57,7 @@ namespace uhal
 {
   // Forward declaration
   class Buffers;
+  class IPbusCore;
 
   namespace exception
   {
@@ -408,6 +409,7 @@ namespace uhal
       //! Timeout period for transactions
       boost::posix_time::time_duration mTimeoutPeriod;
 
+      friend class IPbusCore;
 
     protected:
 

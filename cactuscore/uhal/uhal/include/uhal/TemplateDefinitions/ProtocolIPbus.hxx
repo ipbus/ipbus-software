@@ -122,6 +122,12 @@ namespace uhal
       case NI_WRITE :
         lType = 0x48;
         break;
+      case CONFIG_SPACE_READ :
+      {
+        exception::ValidationError lExc;
+        log ( lExc , "Configuration space read undefined in IPbus version 1" );
+        throw lExc;
+      }
     }
 
     return ( 0x10000000 | ( ( aTransactionId&0x7ff ) <<17 ) | ( ( aWordCount&0x1ff ) <<8 ) | lType | ( aInfoCode&0x7 ) );
@@ -364,6 +370,9 @@ namespace uhal
       case RMW_SUM :
         lType = 0x50;
         break;
+      case CONFIG_SPACE_READ :
+        lType = 0x60;
+        break;
       case R_A_I :
       {
         exception::ValidationError lExc;
@@ -413,6 +422,9 @@ namespace uhal
         break;
       case 0x50 :
         aType = RMW_SUM;
+        break;
+      case 0x60 :
+        aType = CONFIG_SPACE_READ;
         break;
       default:
         log ( Error() , "Unknown IPbus-header " , Integer ( uint8_t ( ( aHeader & 0xF0 ) >>4 ) , IntFmt<hex,fixed>() ) );
