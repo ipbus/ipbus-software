@@ -6,32 +6,49 @@ stages:
   - final_report
 
 
+variables:
+  GITHUB_REPO_API_URL: "https://api.github.com/repos/tswilliams/ipbus-sw-github-beta3"
+  BUILD_OUTPUT_ROOT_DIR: "/afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits"
+  BUILD_OUTPUT_ROOT_URL: "http://www.cern.ch/ipbus/sw/ci/commits"
+
+
+
 github_commit_status:start:
   stage: initial_report
   image: tswilliams/ipbus-sw-dev-cc7:latest
   tags:
     - docker
+  except:
+    - tags
+    - triggers
   when: always
   script:
-    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"pending\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"CI pipeline has started\", \"context\" : \"gitlab-ci\"}' https://api.github.com/repos/tswilliams/ipbus-sw-github-beta3/statuses/${CI_BUILD_REF}"
+    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"pending\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"CI pipeline has started\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"
 
 github_commit_status:end:failure:
   stage: final_report
   image: tswilliams/ipbus-sw-dev-cc7:latest
   tags:
     - docker
+  except:
+    - tags
+    - triggers
   when: on_failure
   script:
-    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"failure\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"Jobs have failed in CI pipeline\", \"context\" : \"gitlab-ci\"}' https://api.github.com/repos/tswilliams/ipbus-sw-github-beta3/statuses/${CI_BUILD_REF}"
+    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"failure\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"Jobs have failed in CI pipeline\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"
 
 github_commit_status:end:success:
   stage: final_report
   image: tswilliams/ipbus-sw-dev-cc7:latest
   tags:
     - docker
+  except:
+    - tags
+    - triggers
   when: on_success
   script:
-    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"success\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"CI pipeline completed successfully!\", \"context\" : \"gitlab-ci\"}' https://api.github.com/repos/tswilliams/ipbus-sw-github-beta3/statuses/${CI_BUILD_REF}"
+    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"success\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"CI pipeline completed successfully!\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"
+
 
 
 doxygen_job:
@@ -70,8 +87,8 @@ doxygen_job:
     - ls -al /tmp
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p /afs/cern.ch/user/i/ipbus/www/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}" 
-    - scp -r ${DOXYGEN_OUTPUT} ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/i/ipbus/www/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}/
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p /afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits/${CI_PIPELINE_ID}_${CI_BUILD_REF}" 
+    - scp -r ${DOXYGEN_OUTPUT} ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits/${CI_PIPELINE_ID}_${CI_BUILD_REF}/
   variables:
     DOXYGEN_MAINPAGE: "cactuscore/uhal/README.md"
     DOXYGEN_INPUTS: "cactuscore/uhal"
@@ -85,7 +102,7 @@ doxygen_job:
 
 
 
-build:cc7:
+build:centos7:
   stage: build
   image: tswilliams/ipbus-sw-dev-cc7:latest
   tags:
@@ -105,14 +122,11 @@ build:cc7:
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - cd cactuscore/extern/pugixml
-    - make
-    - make rpm
+    - make && make rpm
     - cd ../../uhal
-    - make
-    - make rpm
+    - make && make rpm
     - cd ../controlhub
-    - make
-    - make rpm
+    - make && make rpm
     - cd ../..
     - mkdir -p cc7_rpms
     - cp `find . -iname "*.rpm"` cc7_rpms
@@ -121,12 +135,8 @@ build:cc7:
     - createrepo -vg yumgroups-centos7.xml cc7_rpms/
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p /afs/cern.ch/user/i/ipbus/www/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}"
-    - scp -r cc7_rpms ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/i/ipbus/www/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}/centos7_x86_64
-  artifacts:
-    paths:
-    - cc7_rpms
-    expire_in: 1 day
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}"
+    - scp -r cc7_rpms ${KRB_USERNAME}@lxplus:${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}/centos7_x86_64
 
 
 build:slc6:
@@ -156,35 +166,32 @@ build:slc6:
     - createrepo -vg yumgroups-slc6.xml slc6_rpms
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p /afs/cern.ch/user/i/ipbus/www/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}"
-    - scp -r slc6_rpms ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/i/ipbus/www/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}/slc6_x86_64
-  artifacts:
-    paths:
-    - slc6_rpms
-    expire_in: 1 day
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}"
+    - scp -r slc6_rpms ${KRB_USERNAME}@lxplus:${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}/slc6_x86_64
 
 
 
 .job_template: &slc6_test_job
   stage: test
+  image: tswilliams/ipbus-sw-dev-slc6:latest
   except:
     - tags
     - triggers
-  image: tswilliams/ipbus-sw-dev-slc6:latest
   dependencies: []
   before_script:
     - echo "[ipbus-sw-ci]" | sudo tee /etc/yum.repos.d/ipbus-sw.repo
     - echo "name=CACTUS Project Software Repository" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
-    - echo "baseurl=http://www.cern.ch/ipbus/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}/slc6_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
+    - echo "baseurl=${BUILD_OUTPUT_ROOT_URL}/${CI_PIPELINE_ID}_${CI_BUILD_REF}/slc6_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "enabled=1" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "gpgcheck=0" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - sudo yum clean all
     - sudo yum -y groupinstall uhal
-    - rpm -qa | grep cactus
+    - rpm -qa | grep cactus | sort
 
 
-.job_template: &cc7_test_job
+.job_template: &centos7_test_job
   stage: test
+  image: tswilliams/ipbus-sw-test-cc7:latest
   except:
     - tags
     - triggers
@@ -192,14 +199,14 @@ build:slc6:
   before_script:
     - echo "[ipbus-sw-ci]" | sudo tee /etc/yum.repos.d/ipbus-sw.repo
     - echo "name=CACTUS Project Software Repository" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
-    - echo "baseurl=http://www.cern.ch/ipbus/ci/${CI_PIPELINE_ID}_${CI_BUILD_REF}/centos7_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
+    - echo "baseurl=${BUILD_OUTPUT_ROOT_URL}/${CI_PIPELINE_ID}_${CI_BUILD_REF}/centos7_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "enabled=1" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "gpgcheck=0" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - sudo yum clean all
     - sudo yum -y groupinstall uhal
     - sudo yum -y install boost-python
     - sudo yum -y install which
-    - rpm -qa | grep cactus
+    - rpm -qa | grep cactus | sort
 
 
 .job_template:
@@ -236,16 +243,7 @@ build:slc6:
     - export PATH=/opt/cactus/bin/uhal/tests:/opt/cactus/bin/uhal/tools:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - env | grep -v PASSWORD | grep -v TOKEN
-    - which gen_ipbus_addr_decode
-    - python -c "import os; print \"which gen_ipbus_addr_decode:`which gen_ipbus_addr_decode`\"; print os.path.dirname( \"`which gen_ipbus_addr_decode`\" )"
     - uhal_test_suite.py -v -s tools
-
-.job_template:
-  script: &test_controlhub_script
-    - /sbin/service controlhub stop
-    - export PATH=/opt/cactus/bin/uhal/tests:$PATH
-    - env | grep -v PASSWORD | grep -v TOKEN
-    - 'for i in `seq 1 50`; do /sbin/service controlhub start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /sbin/service controlhub status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /sbin/service controlhub stop; done'
 
 
 
@@ -278,43 +276,42 @@ test_controlhub:slc6:
   <<: *slc6_test_job
   tags:
     - docker
-  script: *test_controlhub_script
+  script:
+    - /sbin/service controlhub stop
+    - env | grep -v PASSWORD | grep -v TOKEN
+    - 'for i in `seq 1 50`; do /sbin/service controlhub start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /sbin/service controlhub status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /sbin/service controlhub stop; done'
 
 
-test_core:cc7:
-  <<: *cc7_test_job
-  image: tswilliams/ipbus-sw-test-cc7:latest
+
+test_core:centos7:
+  <<: *centos7_test_job
   tags:
     - docker-ssh
     - docker-cap-sys-admin
     - docker-cap-net-admin
   script: *test_core_script
 
-test_python:cc7:
-  <<: *cc7_test_job
-  image: tswilliams/ipbus-sw-test-cc7:latest
+test_python:centos7:
+  <<: *centos7_test_job
   tags:
     - docker-ssh
     - docker-cap-sys-admin
   script: *test_python_script
 
-test_gui:cc7:
-  <<: *cc7_test_job
-  image: tswilliams/ipbus-sw-test-cc7:latest
+test_gui:centos7:
+  <<: *centos7_test_job
   tags:
     - docker-ssh
   script: *test_gui_script
 
-test_tools:cc7:
-  <<: *cc7_test_job
-  image: tswilliams/ipbus-sw-test-cc7:latest
+test_tools:centos7:
+  <<: *centos7_test_job
   tags:
     - docker-ssh
   script: *test_tools_script
 
-test_controlhub:cc7:
-  <<: *cc7_test_job
-  image: tswilliams/ipbus-sw-test-cc7:latest
+test_controlhub:centos7:
+  <<: *centos7_test_job
   tags:
     - docker-ssh
     - docker-cap-sys-admin
