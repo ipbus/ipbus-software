@@ -16,7 +16,7 @@ sudo mkdir -p ${TAG_HOME}
 sudo chmod 777 ${TAG_HOME}
 
 PKG_MAJOR=2
-PKG_MINOR=4
+PKG_MINOR=5
 PKG_PATCH=0
 
 TAG_ID="uhal_${PKG_MAJOR}_${PKG_MINOR}_${PKG_PATCH}"
