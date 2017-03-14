@@ -7,7 +7,7 @@ stages:
 
 
 variables:
-  GITHUB_REPO_API_URL: "https://api.github.com/repos/tswilliams/ipbus-sw-github-beta3"
+  GITHUB_REPO_API_URL: "https://api.github.com/repos/ipbus/ipbus-software"
   BUILD_OUTPUT_ROOT_DIR: "/afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits"
   BUILD_OUTPUT_ROOT_URL: "http://www.cern.ch/ipbus/sw/ci/commits"
 
