@@ -94,8 +94,8 @@ ${BINDINGS_OBJECT_FILES}: obj/%.o : src/common/%.cpp
 rpm: _rpmall
 _rpmall: ${BINDINGS_LIB}
 	rm -rf /var/tmp/cactus*
-	$(eval LIB_DEPENDENCIES := $(shell ldd ${BINDINGS_LIB} | sed -n 's/\s*\(libboost_python.so[^ ]*\).*/\1/p'))
-	$(eval LIB_DEPENDENCIES += $(shell ldd ${BINDINGS_LIB} | sed -n 's/\s*\(libcactus_uhal_uhal.so[^ ]*\).*/\1/p'))
+	$(eval LIB_DEPENDENCIES := $(shell ldd ${BINDINGS_LIB} | sed -n 's/\s*\(libboost_python.so[^ ]*\).*/\1()(64bit)/p'))
+	$(eval LIB_DEPENDENCIES += $(shell ldd ${BINDINGS_LIB} | sed -n 's/\s*\(libcactus_uhal_uhal.so[^ ]*\).*/\1()(64bit)/p'))
 	$(info LIB_DEPENDENCIES=${LIB_DEPENDENCIES})
 	python setup.py bdist_rpm --binary-only --force-arch=`uname -m` --requires "${LIB_DEPENDENCIES}" \
 	        --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION}
