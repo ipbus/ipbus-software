@@ -11,7 +11,7 @@ URL: http://www.erlang.org/
 Group: CACTUS
 Source: %{tarball_file}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Requires: psmisc
+Requires: psmisc rsyslog logrotate
 
 
 %description
