@@ -5,7 +5,7 @@ chmod 644 /var/log/controlhub/controlhub.log
 # 1) Must stop ControlHub in case RPM being upgraded (i.e. rpm -U), or in case of error on previous RPM erase
 systemctl stop controlhub
 # 1b) Restart rsyslog so that it picks up configuration file change
-/sbin/service rsyslog restart
+systemctl restart rsyslog
 # 2) Normal ControlHub start steps
 systemctl daemon-reload
 systemctl enable controlhub
