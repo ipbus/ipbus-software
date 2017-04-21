@@ -13,6 +13,7 @@
 // uhal includes
 #include "uhal/ClientInterface.hpp"
 #include "uhal/ConnectionManager.hpp"
+#include "uhal/ProtocolControlHub.hpp"
 #include "uhal/ProtocolIPbusCore.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolUDP.hpp"
@@ -161,11 +162,6 @@ namespace pycohal
       return valVec.at ( i );
     }
   };
-
-  uhal::ValWord< uint32_t > readIPbusConfigurationSpace (uhal::IPbusCore& aClient, const uint32_t& aAddr )
-  {
-    return aClient.readConfigurationSpace(aAddr);
-  }
 }//namespace pycohal
 
 
@@ -332,7 +328,37 @@ BOOST_PYTHON_MODULE ( _core )
          boost::shared_ptr<uhal::IPbusCore> /* all instances are held within boost::shared_ptr */ >("IPbusCore", no_init /* no CTORs */)
          .def ( "readConfigurationSpace", ( uhal::ValWord<uint32_t> ( uhal::IPbusCore::* ) ( const uint32_t&, const uint32_t& ) ) 0, uhal_IPbusCore_read_overloads() )
          ;
-  def ("readIPbusConfigurationSpace", pycohal::readIPbusConfigurationSpace);
+
+  class_<uhal::UDP<uhal::IPbus<1, 3, 350> >, bases<uhal::IPbusCore>,
+         boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
+         boost::shared_ptr< uhal::UDP<uhal::IPbus<1, 3, 350> > > // /* all instances are held within boost::shared_ptr */
+          >("_UDP_IPbus_1_3", no_init /* no CTORs */);
+
+  class_<uhal::UDP<uhal::IPbus<2, 0, 350> >, bases<uhal::IPbusCore>,
+         boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
+         boost::shared_ptr< uhal::UDP<uhal::IPbus<2, 0, 350> > > // /* all instances are held within boost::shared_ptr */
+          >("_UDP_IPbus_2_0", no_init /* no CTORs */);
+
+  class_<uhal::TCP<uhal::IPbus<1, 3, 350>, 1>, bases<uhal::IPbusCore>,
+         boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
+         boost::shared_ptr< uhal::TCP<uhal::IPbus<1, 3, 350>, 1> > // /* all instances are held within boost::shared_ptr */
+          >("_TCP_IPbus_1_3", no_init /* no CTORs */);
+
+  class_<uhal::TCP<uhal::IPbus<2, 0, 350>, 1>, bases<uhal::IPbusCore>,
+         boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
+         boost::shared_ptr< uhal::TCP<uhal::IPbus<2, 0, 350>, 1> > // /* all instances are held within boost::shared_ptr */
+          >("_TCP_IPbus_2_0", no_init /* no CTORs */);
+
+  class_<uhal::TCP<uhal::ControlHub<uhal::IPbus<1, 3, 350> >, 3>, bases<uhal::IPbusCore>,
+         boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
+         boost::shared_ptr< uhal::TCP<uhal::ControlHub<uhal::IPbus<1, 3, 350> >, 3> > // /* all instances are held within boost::shared_ptr */
+          >("_TCP_ControlHub_IPbus_1_3", no_init /* no CTORs */);
+
+  class_<uhal::TCP<uhal::ControlHub<uhal::IPbus<2, 0, 350> >, 3>, bases<uhal::IPbusCore>,
+         boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
+         boost::shared_ptr< uhal::TCP<uhal::ControlHub<uhal::IPbus<2, 0, 350> >, 3> > // /* all instances are held within boost::shared_ptr */
+          >("_TCP_ControlHub_IPbus_2_0", no_init /* no CTORs */);
+
 
   // Wrap uhal::HwInterface
   class_<uhal::HwInterface> ( "HwInterface", init<const uhal::HwInterface&>() )
