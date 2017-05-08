@@ -9,6 +9,7 @@
 #include "boost/python/def.hpp"
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 #include "boost/python/wrapper.hpp"
+#include "boost/python/slice.hpp"
 
 // uhal includes
 #include "uhal/ClientInterface.hpp"
@@ -147,7 +148,7 @@ namespace pycohal
       boost::python::throw_error_already_set();
     }
 
-    static const T& get ( const uhal::ValVector<T>& valVec, int i )
+    static const T& getItem ( const uhal::ValVector<T>& valVec, int i )
     {
       if ( i<0 )
       {
@@ -160,6 +161,25 @@ namespace pycohal
       }
 
       return valVec.at ( i );
+    }
+    
+    static std::vector<T> getSlice( const uhal::ValVector<T>& valVec, const slice aSlice ) 
+    {
+      slice::range<typename std::vector<T>::const_iterator> bounds;
+      try {
+        bounds = aSlice.get_indicies<>(valVec.begin(), valVec.end());
+      }
+      catch (std::invalid_argument) {
+        return std::vector<T>();
+      }
+
+      std::vector<T> lSliced;
+      while (bounds.start != bounds.stop) {
+        lSliced.push_back(*bounds.start);
+        std::advance( bounds.start, bounds.step);
+      }
+      lSliced.push_back(*bounds.start);
+      return lSliced;
     }
   };
 }//namespace pycohal
@@ -272,7 +292,8 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "at", &uhal::ValVector<uint32_t>::at, pycohal::const_ref_return_policy() )
   .def ( /*__str__*/ self_ns::str ( self ) )
   .def ( "__len__", &uhal::ValVector<uint32_t>::size )
-  .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::get , pycohal::const_ref_return_policy() )
+  .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getItem , pycohal::const_ref_return_policy() )
+  .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getSlice )
   .def ( "__iter__", boost::python::range ( &uhal::ValVector<uint32_t>::begin , &uhal::ValVector<uint32_t>::end ) )
   ;
   // Wrap uhal::Node
