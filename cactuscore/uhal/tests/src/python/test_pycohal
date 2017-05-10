@@ -426,6 +426,14 @@ class TestBlock(unittest.TestCase):
             self.assertEqual( xx[i], memVals[i-N] )
         # Test ValVector_uint32 iteration
         self.assertEqual( xx, [x for x in memVals] )
+        # Test ValVector_uint32 slicing
+        self.assertEqual( xx, memVals[:] )
+        self.assertEqual( xx[1:2], memVals[1:2] )
+        self.assertEqual( xx[1:100], memVals[1:100] )
+        self.assertEqual( xx[::2], memVals[::2] )
+        self.assertEqual( xx[::-1], memVals[::-1] )
+        self.assertEqual( xx[-12:-2], memVals[-12:-2] )
+
 
     def test_block_write_read(self):
         for N in [1, 1024/4, 1024, 1024*1024/4]:
