@@ -77,7 +77,7 @@ doxygen_job:
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - ./scripts/doxygen/api_dev_uhal.sh "(commit ${CI_COMMIT_SHA})"
+    - ./scripts/doxygen/api_uhal.sh "(commit ${CI_COMMIT_SHA})"
     - ls -al /tmp
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
