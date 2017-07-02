@@ -81,8 +81,8 @@ doxygen_job:
     - ls -al /tmp
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p /afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits/${CI_PIPELINE_ID}_${CI_BUILD_REF}" 
-    - scp -r /tmp/api_uhal ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits/${CI_PIPELINE_ID}_${CI_BUILD_REF}/
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}" 
+    - scp -r /tmp/api_uhal ${KRB_USERNAME}@lxplus:${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}/
   artifacts:
     untracked: true
     when: always
