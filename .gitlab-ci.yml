@@ -76,24 +76,13 @@ doxygen_job:
     - echo "  GSSAPIAuthentication yes" >> ~/.ssh/config
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
   script:
-    - export CACTUS_SANDBOX=`pwd`
-    - export DOXYGEN_MAINPAGE=`pwd`/${DOXYGEN_MAINPAGE}
-    - export DOXYGEN_INPUTS=`pwd`/${DOXYGEN_INPUTS}
     - env | grep -v PASSWORD | grep -v TOKEN
-    - ls ${DOXYGEN_MAINPAGE}
-    - pwd
-    - cd scripts/nightly/doxygen
-    - doxygen cactus-v3.doxy
+    - ./scripts/doxygen/api_uhal.sh "(commit ${CI_COMMIT_SHA})"
     - ls -al /tmp
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p /afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits/${CI_PIPELINE_ID}_${CI_BUILD_REF}" 
-    - scp -r ${DOXYGEN_OUTPUT} ${KRB_USERNAME}@lxplus:/afs/cern.ch/user/i/ipbusci/public/sw-gitlab-ci/commits/${CI_PIPELINE_ID}_${CI_BUILD_REF}/
-  variables:
-    DOXYGEN_MAINPAGE: "cactuscore/uhal/README.md"
-    DOXYGEN_INPUTS: "cactuscore/uhal"
-    DOXYGEN_PROJECT_NAME: "&mu;HAL (nightly)"
-    DOXYGEN_OUTPUT: "/tmp/api_uhal"
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}" 
+    - scp -r /tmp/api_uhal ${KRB_USERNAME}@lxplus:${BUILD_OUTPUT_ROOT_DIR}/${CI_PIPELINE_ID}_${CI_BUILD_REF}/
   artifacts:
     untracked: true
     when: always
