@@ -208,7 +208,7 @@ namespace uhal
       ValVector< uint32_t > readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
       /**
-      	Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
+      	Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the original value to the user
       	@param aAddr the address of the register to read, modify, write
       	@param aANDterm the AND-term to apply to existing value in the target register
       	@param aORterm the OR-term to apply to existing value in the target register
@@ -217,7 +217,7 @@ namespace uhal
       ValWord< uint32_t > rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
 
       /**
-      	Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
+      	Read the value of a register, add the addend, set the register to this new value and return a copy of the original value to the user
       	@param aAddr the address of the register to read, modify, write
       	@param aAddend the addend to add to the existing value in the target register
       	@return a Validated Memory which wraps the location to which the reply data is to be written
