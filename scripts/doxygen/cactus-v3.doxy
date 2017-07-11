@@ -17,7 +17,7 @@ ABBREVIATE_BRIEF       =
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES 
-STRIP_FROM_PATH        = $(CACTUS_SANDBOX)
+STRIP_FROM_PATH        = $(DOXYGEN_UHAL_BASE_DIR)
 STRIP_FROM_INC_PATH    = $(DOXYGEN_STRIP_FROM_INC_PATH)
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = YES
@@ -97,7 +97,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = $(DOXYGEN_MAINPAGE) $(DOXYGEN_INPUTS)
+INPUT                  = $(DOXYGEN_MAINPAGE) $(DOXYGEN_UHAL_BASE_DIR)
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
                          *.hh \
@@ -111,9 +111,8 @@ FILE_PATTERNS          = *.h \
                          *.js \
                          *.md
 RECURSIVE              = YES
-EXCLUDE                = $(CACTUS_SANDBOX)/extern/ \
-                         $(CACTUS_SANDBOX)/uhal/gui \
-                         $(CACTUS_SANDBOX)/uhal/pycohal
+EXCLUDE                = $(DOXYGEN_UHAL_BASE_DIR)/gui \
+                         $(DOXYGEN_UHAL_BASE_DIR)/pycohal
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           =
