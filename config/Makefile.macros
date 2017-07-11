@@ -4,66 +4,81 @@ BUILD_HOME := $(shell cd ${BUILD_HOME}; pwd)
 CACTUS_ROOT ?= /opt/cactus
 CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
+
 CACTUS_PLATFORM=$(shell /usr/bin/python -c "import platform; print platform.platform()")
-CACTUS_OS="unknown.os"
+CACTUS_OS=unknown.os
 
 UNAME=$(strip $(shell uname -s))
-ifeq ($(UNAME),Linux) 
-	ifneq ($(findstring redhat-5,$(CACTUS_PLATFORM)),) 
-		CACTUS_OS=slc5
-	else ifneq ($(findstring redhat-6,$(CACTUS_PLATFORM)),) 
-		CACTUS_OS=slc6
-	else ifneq ($(findstring centos-7,$(CACTUS_PLATFORM)),)
-                CACTUS_OS=centos7
-       endif
-endif
-ifeq ($(UNAME),Darwin) 
-	CACTUS_OS=osx
+ifeq ($(UNAME),Linux)
+    ifneq ($(findstring redhat-5,$(CACTUS_PLATFORM)),)
+        CACTUS_OS=slc5
+    else ifneq ($(findstring redhat-6,$(CACTUS_PLATFORM)),)
+        CACTUS_OS=slc6
+    else ifneq ($(findstring centos-6,$(CACTUS_PLATFORM)),)
+        CACTUS_OS=centos6
+    else ifneq ($(findstring centos-7,$(CACTUS_PLATFORM)),)
+        CACTUS_OS=centos7
+    endif
+else ifeq ($(UNAME),Darwin)
+    CACTUS_OS=osx
 endif
 
 $(info OS Detected: $(CACTUS_OS))
 
+# Set which externals are built by default for each OS
+ifneq ($(CACTUS_OS), centos7)
+    BUILD_ERLANG?=1
+    BUILD_BOOST?=1
+endif
+BUILD_PUGIXML?=1
 
 
 #extern/erlang
-EXTERN_ERLANG_PREFIX = $(CACTUS_RPM_ROOT)/extern/erlang/RPMBUILD/SOURCES
-EXTERN_ERLANG_BIN_PREFIX = ${EXTERN_ERLANG_PREFIX}/bin
+ifeq ($(BUILD_ERLANG), 1)
+    EXTERN_ERLANG_PREFIX = $(CACTUS_RPM_ROOT)/extern/erlang/RPMBUILD/SOURCES
+    EXTERN_ERLANG_BIN_PREFIX = ${EXTERN_ERLANG_PREFIX}/bin
+endif
 
 #extern/boost
-EXTERN_BOOST_PREFIX = $(CACTUS_RPM_ROOT)/extern/boost/RPMBUILD/SOURCES
-EXTERN_BOOST_INCLUDE_PREFIX = ${EXTERN_BOOST_PREFIX}/include
-EXTERN_BOOST_LIB_PREFIX = ${EXTERN_BOOST_PREFIX}/lib
+ifeq ($(BUILD_BOOST), 1)
+    EXTERN_BOOST_PREFIX = $(CACTUS_RPM_ROOT)/extern/boost/RPMBUILD/SOURCES
+    EXTERN_BOOST_INCLUDE_PREFIX = ${EXTERN_BOOST_PREFIX}/include
+    EXTERN_BOOST_LIB_PREFIX = ${EXTERN_BOOST_PREFIX}/lib
+endif
 
 #extern/pugixml
-EXTERN_PUGIXML_PREFIX = $(CACTUS_RPM_ROOT)/extern/pugixml/RPMBUILD/SOURCES
-EXTERN_PUGIXML_INCLUDE_PREFIX = ${EXTERN_PUGIXML_PREFIX}/include
-EXTERN_PUGIXML_LIB_PREFIX = ${EXTERN_PUGIXML_PREFIX}/lib
+ifeq ($(BUILD_PUGIXML), 1)
+    EXTERN_PUGIXML_PREFIX = $(CACTUS_RPM_ROOT)/extern/pugixml/RPMBUILD/SOURCES
+    EXTERN_PUGIXML_INCLUDE_PREFIX = ${EXTERN_PUGIXML_PREFIX}/include
+    EXTERN_PUGIXML_LIB_PREFIX = ${EXTERN_PUGIXML_PREFIX}/lib
+endif
 
-#uhal/grammars
+
+# uhal/grammars
 UHAL_GRAMMARS_PREFIX = $(BUILD_HOME)/uhal/grammars
 UHAL_GRAMMARS_INCLUDE_PREFIX = ${UHAL_GRAMMARS_PREFIX}/include
 UHAL_GRAMMARS_LIB_PREFIX = ${UHAL_GRAMMARS_PREFIX}/lib
 
-#uhal/log
+# uhal/log
 UHAL_LOG_PREFIX = $(BUILD_HOME)/uhal/log
 UHAL_LOG_INCLUDE_PREFIX = ${UHAL_LOG_PREFIX}/include
 UHAL_LOG_LIB_PREFIX = ${UHAL_LOG_PREFIX}/lib
 
-#uhal/uhal
+# uhal/uhal
 UHAL_UHAL_PREFIX = $(BUILD_HOME)/uhal/uhal
 UHAL_UHAL_INCLUDE_PREFIX = ${UHAL_UHAL_PREFIX}/include
 UHAL_UHAL_LIB_PREFIX = ${UHAL_UHAL_PREFIX}/lib
 
-#uhal/uhal
+# uhal/uhal
 UHAL_TESTS_PREFIX = $(BUILD_HOME)/uhal/tests
 UHAL_TESTS_INCLUDE_PREFIX = ${UHAL_TESTS_PREFIX}/include
 UHAL_TESTS_LIB_PREFIX = ${UHAL_TESTS_PREFIX}/lib
 
-#controlhub
+# controlhub
 CONTROLHUB_PREFIX = $(BUILD_HOME)/controlhub/RPMBUILD/SOURCES
 CONTROLHUB_BIN_PREFIX = ${CONTROLHUB_PREFIX}/bin
 CONTROLHUB_LIB_PREFIX = ${CONTROLHUB_PREFIX}/lib
 
-#Python include path  
+# Python include path  
 PYTHON_INCLUDE_PREFIX ?= $(shell python -c "import distutils.sysconfig; print distutils.sysconfig.get_python_inc()")
 PYTHON_LIB_PREFIX ?= $(shell python -c "from distutils.sysconfig import get_python_lib; import os.path; print os.path.split(get_python_lib(standard_lib=True))[0]")
