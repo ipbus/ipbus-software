@@ -1,16 +1,24 @@
-ifeq ($(Set), uhal_client)
-PACKAGES = \
+
+Set?=all
+
+ifeq ($(Set), uhal)
+    PACKAGES = \
         extern/boost \
         extern/pugixml \
         uhal
-else ifeq ($(Set), uhal)
-PACKAGES = \
+else ifeq ($(Set), controlhub)
+    PACKAGES = \
+        extern/erlang \
+        controlhub
+else ifeq ($(Set), all)
+    PACKAGES = \
         extern/boost \
         extern/erlang \
         extern/pugixml \
         uhal \
         controlhub
-        
+else
+    $(error Invalid value for Set variable!)
 endif
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
