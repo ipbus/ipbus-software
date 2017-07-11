@@ -1,7 +1,6 @@
 # Sanitize build home
 BUILD_HOME := $(shell cd ${BUILD_HOME}; pwd)
 
-XDAQ_ROOT ?=/opt/xdaq
 CACTUS_ROOT ?= /opt/cactus
 CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
@@ -68,46 +67,3 @@ CONTROLHUB_LIB_PREFIX = ${CONTROLHUB_PREFIX}/lib
 #Python include path  
 PYTHON_INCLUDE_PREFIX ?= $(shell python -c "import distutils.sysconfig; print distutils.sysconfig.get_python_inc()")
 PYTHON_LIB_PREFIX ?= $(shell python -c "from distutils.sysconfig import get_python_lib; import os.path; print os.path.split(get_python_lib(standard_lib=True))[0]")
-
-#Trigger Supervisor Toolbox Library
-TRIGGER_TS_TOOLBOX_PREFIX = $(BUILD_HOME)/cactuscore/ts/toolbox
-TRIGGER_TS_TOOLBOX_INCLUDE_PREFIX=$(TRIGGER_TS_TOOLBOX_PREFIX)/include
-TRIGGER_TS_TOOLBOX_LIB_PREFIX=$(TRIGGER_TS_TOOLBOX_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#Trigger Supervisor Ajaxell Library
-TRIGGER_TS_AJAXELL_PREFIX = $(BUILD_HOME)/cactuscore/ts/ajaxell
-TRIGGER_TS_AJAXELL_INCLUDE_PREFIX=$(TRIGGER_TS_AJAXELL_PREFIX)/include
-TRIGGER_TS_AJAXELL_LIB_PREFIX=$(TRIGGER_TS_AJAXELL_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#Trigger Supervisor Framework Library
-TRIGGER_TS_FRAMEWORK_PREFIX = $(BUILD_HOME)/cactuscore/ts/framework
-TRIGGER_TS_FRAMEWORK_INCLUDE_PREFIX=$(TRIGGER_TS_FRAMEWORK_PREFIX)/include
-TRIGGER_TS_FRAMEWORK_LIB_PREFIX=$(TRIGGER_TS_FRAMEWORK_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#Trigger Supervisor Level-1 Configuration Editor Library
-TRIGGER_TS_L1CE_PREFIX = $(BUILD_HOME)/cactuscore/ts/l1ce
-TRIGGER_TS_L1CE_INCLUDE_PREFIX=$(TRIGGER_TS_L1CE_PREFIX)/include
-TRIGGER_TS_L1CE_LIB_PREFIX=$(TRIGGER_TS_L1CE_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#Trigger Supervisor Interconnection Test Library
-TRIGGER_TS_ITF_PREFIX = $(BUILD_HOME)/cactuscore/ts/itf
-TRIGGER_TS_ITF_INCLUDE_PREFIX=$(TRIGGER_TS_ITF_PREFIX)/include
-TRIGGER_TS_ITF_LIB_PREFIX=$(TRIGGER_TS_ITF_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#Triger Timing and Control Utility Library for the Trigger Supervisor Applications
-TRIGGER_TTC_TS_TTCUTILS_PREFIX = $(BUILD_HOME)/cactusprojects/ttc/ts/TTCUtils
-TRIGGER_TTC_TS_TTCUTILS_INCLUDE_PREFIX=$(TRIGGER_TTC_TS_TTCUTILS_PREFIX)/include
-TRIGGER_TTC_TS_TTCUTILS_LIB_PREFIX=$(TRIGGER_TTC_TS_TTCUTILS_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#TCDS Library for the Trigger Supervisor Applications
-TRIGGER_TCDS_TS_UTILS_PREFIX = $(BUILD_HOME)/cactusprojects/tcds/ts/TCDSUtils
-TRIGGER_TCDS_TS_UTILS_INCLUDE_PREFIX=$(TRIGGER_TCDS_TS_UTILS_PREFIX)/include
-TRIGGER_TCDS_TS_UTILS_LIB_PREFIX=$(TRIGGER_TCDS_TS_UTILS_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#Trigger Configuration DB
-TRIGGER_CANDELA_PREFIX = $(BUILD_HOME)/cactuscore/candela
-TRIGGER_CANDELA_INCLUDE_PREFIX=$(TRIGGER_CANDELA_PREFIX)/include
-TRIGGER_CANDELA_LIB_PREFIX=$(TRIGGER_CANDELA_PREFIX)/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
-
-#ROOT
-ROOTSYS=/opt/wbm-support-root

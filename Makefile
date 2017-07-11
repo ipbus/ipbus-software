@@ -10,44 +10,6 @@ PACKAGES = \
         cactuscore/extern/pugixml \
         cactuscore/uhal \
         cactuscore/controlhub
-else ifeq ($(Set), ts)
-PACKAGES = \
-        cactuscore/ts \
-        cactuscore/candela \
-        cactusprojects/central \
-	cactusprojects/csctf \
-        cactusprojects/dtsc \
-        cactusprojects/dttf \
-        cactusprojects/gct \
-	cactusprojects/gt \
-        cactusprojects/gmt \
-        cactusprojects/l1page \
-        cactusprojects/retri \
-        cactusprojects/subsystem \
-	cactusprojects/tcds \
-        cactusprojects/ttc 
-else ifeq ($(Set), tsdev)
-PACKAGES = \
-        cactuscore/ts \
-        cactuscore/candela \
-        cactusprojects/subsystem 
-else ifeq ($(Set), tssub)
-PACKAGES = \
-        cactusprojects/central \
-        cactusprojects/csctf \
-        cactusprojects/dtsc \
-        cactusprojects/dttf \
-        cactusprojects/gct \
-        cactusprojects/gt \
-        cactusprojects/gmt \
-        cactusprojects/l1page \
-        cactusprojects/retri \
-        cactusprojects/tcds \
-        cactusprojects/ttc
-#else ifeq ($(Set), tsupgrades)
-#PACKAGES = \
-#	cactusupgrades/projects/ugt \
-#	cactusupgrades/projects/s1calol2
         
 endif
 
