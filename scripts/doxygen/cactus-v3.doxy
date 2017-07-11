@@ -111,10 +111,9 @@ FILE_PATTERNS          = *.h \
                          *.js \
                          *.md
 RECURSIVE              = YES
-EXCLUDE                = $(CACTUS_SANDBOX)/cactuscore/extern/ \
-                         $(CACTUS_SANDBOX)/cactuscore/uhal/gui \
-                         $(CACTUS_SANDBOX)/cactuscore/uhal/pycohal \
-                         $(CACTUS_SANDBOX)/cactusprojects/l1page
+EXCLUDE                = $(CACTUS_SANDBOX)/extern/ \
+                         $(CACTUS_SANDBOX)/uhal/gui \
+                         $(CACTUS_SANDBOX)/uhal/pycohal
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           =

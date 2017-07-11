@@ -30,13 +30,13 @@ export DOXYGEN_PROJECT_NAME="&mu;HAL $1" # '&mu;HAL (nightly)'
 export DOXYGEN_PROJECT_LOGO="${REPO_BASE_DIR}/scripts/doxygen/cactus_logo.png"
 export DOXYGEN_HTML_HEADER="${REPO_BASE_DIR}/scripts/doxygen/header.html"
 export DOXYGEN_HTML_EXTRA_FILES="${REPO_BASE_DIR}/scripts/doxygen/favicon.ico"
-export DOXYGEN_MAINPAGE="${REPO_BASE_DIR}/cactuscore/uhal/README.md"
-export DOXYGEN_INPUTS="${REPO_BASE_DIR}/cactuscore/uhal "
+export DOXYGEN_MAINPAGE="${REPO_BASE_DIR}/uhal/README.md"
+export DOXYGEN_INPUTS="${REPO_BASE_DIR}/uhal "
 export DOXYGEN_EXCLUDE_PATTERNS=''
 export DOXYGEN_OUTPUT=/tmp/api_uhal
 DOXYGEN_STRIP_FROM_INC_PATH=
 for PACKAGE_PATH in log grammars uhal pycohal tests; do
-    DOXYGEN_STRIP_FROM_INC_PATH+="${REPO_BASE_DIR}/cactuscore/uhal/${PACKAGE_PATH}/include "
+    DOXYGEN_STRIP_FROM_INC_PATH+="${REPO_BASE_DIR}/uhal/${PACKAGE_PATH}/include "
 done
 export DOXYGEN_STRIP_FROM_INC_PATH
 

@@ -1,15 +1,15 @@
 ifeq ($(Set), uhal_client)
 PACKAGES = \
-        cactuscore/extern/boost \
-        cactuscore/extern/pugixml \
-        cactuscore/uhal
+        extern/boost \
+        extern/pugixml \
+        uhal
 else ifeq ($(Set), uhal)
 PACKAGES = \
-        cactuscore/extern/boost \
-        cactuscore/extern/erlang \
-        cactuscore/extern/pugixml \
-        cactuscore/uhal \
-        cactuscore/controlhub
+        extern/boost \
+        extern/erlang \
+        extern/pugixml \
+        uhal \
+        controlhub
         
 endif
 

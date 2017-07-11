@@ -5,13 +5,13 @@ USE_BACKTRACE = FALSE
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-BUILD_HOME = $(shell pwd)/../../..
+BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
-Project = cactuscore
+Project = uhal
 Package = uhal/log
-PackagePath = $(CACTUS_RPM_ROOT)/$(Project)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-log
 
 Packager = Andrew Rose
@@ -35,8 +35,8 @@ EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 ifeq ($(USE_BACKTRACE),TRUE)
 
 	LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}\
-									-L$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd\
-									-L$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/libiberty 
+									-L$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd\
+									-L$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty 
 	
 	LIBRARIES = -lpthread \
 			-lboost_thread \
@@ -44,9 +44,9 @@ ifeq ($(USE_BACKTRACE),TRUE)
 	
 	INCLUDE_PATH = 	-Iinclude  \
 			-I${EXTERN_BOOST_INCLUDE_PREFIX} \
-			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/include/\
-			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/binutils/\
-			-I$(BUILD_HOME)/cactuscore/extern/binutils/binutils-2.23/bfd/
+			-I$(BUILD_HOME)/extern/binutils/binutils-2.23/include/\
+			-I$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/\
+			-I$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd/
 	
 	CPP_FLAGS = -g  -Wall -pedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
 							#-fprofile-arcs -ftest-coverage

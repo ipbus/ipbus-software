@@ -19,13 +19,13 @@
 #########################################################################################
 
 
-BUILD_HOME = $(shell pwd)/../..
+BUILD_HOME = $(shell pwd)/..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
-Project = cactuscore
+Project = 
 Package = controlhub
-PackagePath = $(CACTUS_RPM_ROOT)/${Project}/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-controlhub
 
 Packager = Tom Williams

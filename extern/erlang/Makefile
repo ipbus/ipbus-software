@@ -1,10 +1,10 @@
-BUILD_HOME = $(shell pwd)/../../..
+BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
 
-Project = cactuscore
+Project =
 Package = extern/erlang
-PackagePath = $(CACTUS_RPM_ROOT)/$(Project)/${Package}
+PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-extern-erlang
 
 Packager = Robert Frazier
