@@ -30,13 +30,13 @@ export DOXYGEN_PROJECT_NAME="&mu;HAL $1" # '&mu;HAL (nightly)'
 export DOXYGEN_PROJECT_LOGO="${REPO_BASE_DIR}/scripts/doxygen/cactus_logo.png"
 export DOXYGEN_HTML_HEADER="${REPO_BASE_DIR}/scripts/doxygen/header.html"
 export DOXYGEN_HTML_EXTRA_FILES="${REPO_BASE_DIR}/scripts/doxygen/favicon.ico"
-export DOXYGEN_MAINPAGE="${REPO_BASE_DIR}/cactuscore/uhal/README.md"
-export DOXYGEN_INPUTS="${REPO_BASE_DIR}/cactuscore/uhal "
+export DOXYGEN_MAINPAGE="${REPO_BASE_DIR}/uhal/README.md"
+export DOXYGEN_UHAL_BASE_DIR="${REPO_BASE_DIR}/uhal"
 export DOXYGEN_EXCLUDE_PATTERNS=''
 export DOXYGEN_OUTPUT=/tmp/api_uhal
 DOXYGEN_STRIP_FROM_INC_PATH=
 for PACKAGE_PATH in log grammars uhal pycohal tests; do
-    DOXYGEN_STRIP_FROM_INC_PATH+="${REPO_BASE_DIR}/cactuscore/uhal/${PACKAGE_PATH}/include "
+    DOXYGEN_STRIP_FROM_INC_PATH+="${REPO_BASE_DIR}/uhal/${PACKAGE_PATH}/include "
 done
 export DOXYGEN_STRIP_FROM_INC_PATH
 
@@ -46,7 +46,7 @@ echo "  DOXYGEN_PROJECT_LOGO        = ${DOXYGEN_PROJECT_LOGO}"
 echo "  DOXYGEN_HTML_HEADER         = ${DOXYGEN_HTML_HEADER}"
 echo "  DOXYGEN_HTML_EXTRA_FILES    = ${DOXYGEN_HTML_EXTRA_FILES}"
 echo "  DOXYGEN_MAINPAGE            = ${DOXYGEN_MAINPAGE}"
-echo "  DOXYGEN_INPUTS              = ${DOXYGEN_INPUTS}"
+echo "  DOXYGEN_UHAL_BASE_DIR       = ${DOXYGEN_UHAL_BASE_DIR}"
 echo "  DOXYGEN_EXCLUDE_PATTERNS    = ${DOXYGEN_EXCLUDE_PATTERNS}"
 echo "  DOXYGEN_OUTPUT              = ${DOXYGEN_OUTPUT}"
 echo "  DOXYGEN_STRIP_FROM_INC_PATH = ${DOXYGEN_STRIP_FROM_INC_PATH}"

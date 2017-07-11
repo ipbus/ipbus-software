@@ -1,54 +1,24 @@
-ifeq ($(Set), uhal_client)
-PACKAGES = \
-        cactuscore/extern/boost \
-        cactuscore/extern/pugixml \
-        cactuscore/uhal
-else ifeq ($(Set), uhal)
-PACKAGES = \
-        cactuscore/extern/boost \
-        cactuscore/extern/erlang \
-        cactuscore/extern/pugixml \
-        cactuscore/uhal \
-        cactuscore/controlhub
-else ifeq ($(Set), ts)
-PACKAGES = \
-        cactuscore/ts \
-        cactuscore/candela \
-        cactusprojects/central \
-	cactusprojects/csctf \
-        cactusprojects/dtsc \
-        cactusprojects/dttf \
-        cactusprojects/gct \
-	cactusprojects/gt \
-        cactusprojects/gmt \
-        cactusprojects/l1page \
-        cactusprojects/retri \
-        cactusprojects/subsystem \
-	cactusprojects/tcds \
-        cactusprojects/ttc 
-else ifeq ($(Set), tsdev)
-PACKAGES = \
-        cactuscore/ts \
-        cactuscore/candela \
-        cactusprojects/subsystem 
-else ifeq ($(Set), tssub)
-PACKAGES = \
-        cactusprojects/central \
-        cactusprojects/csctf \
-        cactusprojects/dtsc \
-        cactusprojects/dttf \
-        cactusprojects/gct \
-        cactusprojects/gt \
-        cactusprojects/gmt \
-        cactusprojects/l1page \
-        cactusprojects/retri \
-        cactusprojects/tcds \
-        cactusprojects/ttc
-#else ifeq ($(Set), tsupgrades)
-#PACKAGES = \
-#	cactusupgrades/projects/ugt \
-#	cactusupgrades/projects/s1calol2
-        
+
+Set?=all
+
+ifeq ($(Set), uhal)
+    PACKAGES = \
+        extern/boost \
+        extern/pugixml \
+        uhal
+else ifeq ($(Set), controlhub)
+    PACKAGES = \
+        extern/erlang \
+        controlhub
+else ifeq ($(Set), all)
+    PACKAGES = \
+        extern/boost \
+        extern/erlang \
+        extern/pugixml \
+        uhal \
+        controlhub
+else
+    $(error Invalid value for Set variable!)
 endif
 
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
