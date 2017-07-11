@@ -110,13 +110,13 @@ build:centos7:
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - cd cactuscore/extern/pugixml
+    - cd extern/pugixml
     - make && make rpm
     - cd ../../uhal
     - make && make rpm
     - cd ../controlhub
     - make && make rpm
-    - cd ../..
+    - cd ..
     - mkdir -p cc7_rpms
     - cp `find . -iname "*.rpm"` cc7_rpms
     - cp yumgroups-centos7.xml cc7_rpms/
@@ -146,8 +146,8 @@ build:slc6:
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - make -k Set=uhal
-    - make -k Set=uhal rpm
+    - make -k Set=all
+    - make -k Set=all rpm
     - mkdir -p slc6_rpms
     - cp `find . -iname "*.rpm"` slc6_rpms
     - cp yumgroups-slc6.xml slc6_rpms/
