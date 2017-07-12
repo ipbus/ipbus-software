@@ -74,11 +74,6 @@ UHAL_TESTS_PREFIX = $(BUILD_HOME)/uhal/tests
 UHAL_TESTS_INCLUDE_PREFIX = ${UHAL_TESTS_PREFIX}/include
 UHAL_TESTS_LIB_PREFIX = ${UHAL_TESTS_PREFIX}/lib
 
-# controlhub
-CONTROLHUB_PREFIX = $(BUILD_HOME)/controlhub/RPMBUILD/SOURCES
-CONTROLHUB_BIN_PREFIX = ${CONTROLHUB_PREFIX}/bin
-CONTROLHUB_LIB_PREFIX = ${CONTROLHUB_PREFIX}/lib
-
 # Python include path  
 PYTHON_INCLUDE_PREFIX ?= $(shell python -c "import distutils.sysconfig; print distutils.sysconfig.get_python_inc()")
 PYTHON_LIB_PREFIX ?= $(shell python -c "from distutils.sysconfig import get_python_lib; import os.path; print os.path.split(get_python_lib(standard_lib=True))[0]")
