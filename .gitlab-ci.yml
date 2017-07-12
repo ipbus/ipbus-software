@@ -110,13 +110,8 @@ build:centos7:
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - cd extern/pugixml
-    - make && make rpm
-    - cd ../../uhal
-    - make && make rpm
-    - cd ../controlhub
-    - make && make rpm
-    - cd ..
+    - make -k Set=all
+    - make -k Set=all rpm
     - mkdir -p cc7_rpms
     - cp `find . -iname "*.rpm"` cc7_rpms
     - cp yumgroups-centos7.xml cc7_rpms/
