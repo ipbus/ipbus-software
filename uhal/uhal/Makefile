@@ -19,10 +19,11 @@ LIBRARY = lib/libcactus_uhal_uhal.so
 SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
-LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX} \
-		-L${EXTERN_PUGIXML_LIB_PREFIX} \
-		-L${UHAL_GRAMMARS_LIB_PREFIX} \
-		-L${UHAL_LOG_LIB_PREFIX} 
+LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX} \
+		${EXTERN_PUGIXML_LIB_PREFIX} \
+		${UHAL_GRAMMARS_LIB_PREFIX} \
+		${UHAL_LOG_LIB_PREFIX}
+LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
 
 LIBRARIES = 	-lpthread \
 		\
@@ -37,11 +38,12 @@ LIBRARIES = 	-lpthread \
 		-lcactus_uhal_grammars \
 		-lcactus_uhal_log	
 
-INCLUDE_PATH = 	-Iinclude  \
-		-I${UHAL_GRAMMARS_INCLUDE_PREFIX} \
-		-I${UHAL_LOG_INCLUDE_PREFIX} \
-		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
-		-I${EXTERN_PUGIXML_INCLUDE_PREFIX} 
+INCLUDE_PATH = include  \
+		${UHAL_GRAMMARS_INCLUDE_PREFIX} \
+		${UHAL_LOG_INCLUDE_PREFIX} \
+		${EXTERN_BOOST_INCLUDE_PREFIX} \
+		${EXTERN_PUGIXML_INCLUDE_PREFIX} 
+INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
 
 CPP_FLAGS = -g -O3 -Wall -pedantic -MMD -MP -fPIC\
 					 -DDISABLE_PACKET_COUNTER_HACK\

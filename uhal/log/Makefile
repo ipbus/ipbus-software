@@ -34,34 +34,38 @@ EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
 
 ifeq ($(USE_BACKTRACE),TRUE)
 
-	LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}\
-									-L$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd\
-									-L$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty 
+	LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX}\
+			$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd\
+			$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty 
+	LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
 	
 	LIBRARIES = -lpthread \
 			-lboost_thread \
 			-Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive\
 	
-	INCLUDE_PATH = 	-Iinclude  \
-			-I${EXTERN_BOOST_INCLUDE_PREFIX} \
-			-I$(BUILD_HOME)/extern/binutils/binutils-2.23/include/\
-			-I$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/\
-			-I$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd/
-	
+	INCLUDE_PATH = include  \
+			${EXTERN_BOOST_INCLUDE_PREFIX} \
+			$(BUILD_HOME)/extern/binutils/binutils-2.23/include/\
+			$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/\
+			$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd/
+	INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
+
 	CPP_FLAGS = -g  -Wall -pedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
 							#-fprofile-arcs -ftest-coverage
 
 else
 
-	LIBRARY_PATH = 	-L${EXTERN_BOOST_LIB_PREFIX}
+	LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX}
+	LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
 	
 	LIBRARIES = -lpthread \
 			-lboost_thread \
 			-lboost_system
 	
-	INCLUDE_PATH = 	-Iinclude  \
-			-I${EXTERN_BOOST_INCLUDE_PREFIX}
-	
+	INCLUDE_PATH = include  \
+			${EXTERN_BOOST_INCLUDE_PREFIX}
+	INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
+
 	CPP_FLAGS = -g  -Wall -pedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
                         #-fprofile-arcs -ftest-coverage
 

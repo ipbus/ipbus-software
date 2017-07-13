@@ -19,14 +19,14 @@ LIBRARY = lib/libcactus_uhal_grammars.so
 SOURCES = $(wildcard src/common/*.cpp)
 OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
 
-LIBRARY_PATH = 	
+LIBRARY_PATH = -L${UHAL_LOG_LIB_PREFIX}	
 
-LIBRARIES =  -L${UHAL_LOG_LIB_PREFIX} -lcactus_uhal_log
+LIBRARIES =  -lcactus_uhal_log
 
-INCLUDE_PATH = 	-Iinclude  \
-		-I${EXTERN_BOOST_INCLUDE_PREFIX} \
-		-I${UHAL_LOG_INCLUDE_PREFIX}
-
+INCLUDE_PATH = 	include  \
+		${EXTERN_BOOST_INCLUDE_PREFIX} \
+		${UHAL_LOG_INCLUDE_PREFIX}
+INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
 
 CPP_FLAGS = -g -O3 -Wall -pedantic -MMD -MP -fPIC \
             #-fprofile-arcs -ftest-coverage
