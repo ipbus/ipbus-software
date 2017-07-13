@@ -11,7 +11,7 @@ Packager = Andrew Rose, Marc Magrans de Abril
 
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 2
-PACKAGE_RELEASE = 0
+PACKAGE_RELEASE = 1
 
 LIBRARY = libcactus_extern_pugixml.so
 
@@ -39,9 +39,9 @@ _all:
 	g++ -fPIC -O3 -shared -o ${LIBRARY} src/pugixml.cpp;								\
 	date > .build_done;											\
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};	\
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/pugixml};								\
+	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include};								\
 	cp ${LIBRARY} ${RPMBUILD_DIR}/SOURCES/lib;								\
-	cp src/*.hpp ${RPMBUILD_DIR}/SOURCES/include/pugixml;	\
+	cp src/*.hpp ${RPMBUILD_DIR}/SOURCES/include;	\
 	fi;	
 rpm: _rpmall
 _rpmall: 

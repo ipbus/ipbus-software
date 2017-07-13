@@ -100,7 +100,7 @@ build:centos7:
     - tags
     - triggers
   before_script:
-    - sudo yum -y install boost-devel
+    - sudo yum -y install boost-devel pugixml-devel
     - sudo yum -y install createrepo krb5-workstation openssh-clients
     - mkdir -p ~/.ssh
     - echo "HOST lxplus" > ~/.ssh/config

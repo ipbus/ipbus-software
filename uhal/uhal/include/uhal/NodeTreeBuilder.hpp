@@ -51,7 +51,7 @@
 #include "uhal/grammars/NodeTreeParametersGrammar.hpp"
 #include "uhal/grammars/NodeTreeFirmwareInfoAttributeGrammar.hpp"
 
-#include "pugixml/pugixml.hpp"
+#include "pugixml.hpp"
 
 #include "uhal/XmlParser.hpp"
 

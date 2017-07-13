@@ -27,7 +27,7 @@ LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
 
 LIBRARIES = 	-lpthread \
 		\
-		-lcactus_extern_pugixml \
+		-l${PUGIXML_LIB_NAME} \
 		\
 		-lboost_thread \
 		-lboost_system \
