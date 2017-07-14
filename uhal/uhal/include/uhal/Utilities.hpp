@@ -67,7 +67,7 @@
 #include "uhal/grammars/HttpResponseGrammar.hpp"
 #include "uhal/grammars/URLGrammar.hpp"
 
-#include "pugixml/pugixml.hpp"
+#include "pugixml.hpp"
 
 #include "uhal/log/log.hpp"
 #include "uhal/log/exception.hpp"

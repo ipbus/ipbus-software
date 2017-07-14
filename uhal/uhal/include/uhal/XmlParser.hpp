@@ -43,7 +43,7 @@
 #include <deque>
 #include <set>
 
-#include "pugixml/pugixml.hpp"
+#include "pugixml.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/Utilities.hpp"
 #include "uhal/log/exception.hpp"

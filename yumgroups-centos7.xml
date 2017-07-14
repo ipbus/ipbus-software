@@ -8,7 +8,6 @@
     <uservisible>true</uservisible>
     <grouplist></grouplist>
     <packagelist>
-      <packagereq type="mandatory">cactuscore-extern-pugixml</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-grammars</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-log</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-uhal</packagereq>
