@@ -8,8 +8,8 @@ stages:
 
 variables:
   GITHUB_REPO_API_URL: "https://api.github.com/repos/ipbus/ipbus-software"
-  BUILD_OUTPUT_ROOT_DIR: "/eos/user/i/ipbusci/sw-gitlab-ci/commits"
-  BUILD_OUTPUT_ROOT_URL: "http://www.cern.ch/ipbus/sw/ci/commits"
+  OUTPUT_ROOT_DIR: "/eos/user/i/ipbusci/sw-gitlab-ci"
+  OUTPUT_ROOT_URL: "http://www.cern.ch/ipbus/sw/ci"
 
 
 
@@ -57,7 +57,6 @@ doxygen_job:
   tags:
     - docker
   except:
-    - tags
     - triggers
   before_script:
     - sudo yum -y install graphviz
@@ -75,15 +74,17 @@ doxygen_job:
     - echo "  GSSAPITrustDns yes" >> ~/.ssh/config
     - echo "  GSSAPIAuthentication yes" >> ~/.ssh/config
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
+    - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - ./scripts/doxygen/api_uhal.sh "(commit ${CI_COMMIT_SHA})"
+    - ./scripts/doxygen/api_uhal.sh "(${CI_COMMIT_TAG:-commit ${CI_COMMIT_SHA}})"
     - ls -al /tmp
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID}" 
-    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID} ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/latest" 
-    - rsync -av /tmp/api_uhal ${KRB_USERNAME}@lxplus:${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID}/
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${OUTPUT_PIPELINE_DIR}" 
+    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${OUTPUT_PIPELINE_DIR} `dirname ${OUTPUT_PIPELINE_DIR}`/latest" 
+    - rsync -av /tmp/api_uhal ${KRB_USERNAME}@lxplus:${OUTPUT_PIPELINE_DIR}/
   artifacts:
     untracked: true
     when: always
@@ -98,7 +99,6 @@ build:centos7:
   tags:
     - docker
   except:
-    - tags
     - triggers
   before_script:
     - sudo yum -y install boost-devel pugixml-devel
@@ -109,6 +109,8 @@ build:centos7:
     - echo "  GSSAPITrustDns yes" >> ~/.ssh/config
     - echo "  GSSAPIAuthentication yes" >> ~/.ssh/config
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
+    - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - make -k Set=all
@@ -120,9 +122,9 @@ build:centos7:
     - createrepo -vg yumgroups-centos7.xml cc7_rpms/
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID}"
-    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID} ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/latest" 
-    - rsync -av cc7_rpms/ ${KRB_USERNAME}@lxplus:${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID}/centos7_x86_64
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${OUTPUT_PIPELINE_DIR}"
+    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${OUTPUT_PIPELINE_DIR} `dirname ${OUTPUT_PIPELINE_DIR}`/latest" 
+    - rsync -av cc7_rpms/ ${KRB_USERNAME}@lxplus:${OUTPUT_PIPELINE_DIR}/centos7_x86_64
 
 
 build:slc6:
@@ -131,7 +133,6 @@ build:slc6:
   tags:
     - docker
   except:
-    - tags
     - triggers
   before_script:
     - sudo yum -y install createrepo krb5-workstation openssh-clients
@@ -141,6 +142,8 @@ build:slc6:
     - echo "  GSSAPITrustDns yes" >> ~/.ssh/config
     - echo "  GSSAPIAuthentication yes" >> ~/.ssh/config
     - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
+    - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - make -k Set=all
@@ -152,9 +155,9 @@ build:slc6:
     - createrepo -vg yumgroups-slc6.xml slc6_rpms
     - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
     - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID}"
-    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID} ${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/latest" 
-    - rsync -av slc6_rpms/ ${KRB_USERNAME}@lxplus:${BUILD_OUTPUT_ROOT_DIR}/${CI_BUILD_REF}/${CI_PIPELINE_ID}/slc6_x86_64
+    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${OUTPUT_PIPELINE_DIR}"
+    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${OUTPUT_PIPELINE_DIR} `dirname ${OUTPUT_PIPELINE_DIR}`/latest" 
+    - rsync -av slc6_rpms/ ${KRB_USERNAME}@lxplus:${OUTPUT_PIPELINE_DIR}/slc6_x86_64
 
 
 
@@ -162,13 +165,14 @@ build:slc6:
   stage: test
   image: tswilliams/ipbus-sw-dev-slc6:latest
   except:
-    - tags
     - triggers
   dependencies: []
   before_script:
+    - export OUTPUT_PIPELINE_URL=${OUTPUT_ROOT_URL}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_URL=${OUTPUT_PIPELINE_URL/commits/tags} ; fi
     - echo "[ipbus-sw-ci]" | sudo tee /etc/yum.repos.d/ipbus-sw.repo
     - echo "name=CACTUS Project Software Repository" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
-    - echo "baseurl=${BUILD_OUTPUT_ROOT_URL}/${CI_BUILD_REF}/${CI_PIPELINE_ID}/slc6_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
+    - echo "baseurl=${OUTPUT_PIPELINE_URL}/slc6_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "enabled=1" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "gpgcheck=0" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - sudo yum clean all
@@ -180,18 +184,18 @@ build:slc6:
   stage: test
   image: tswilliams/ipbus-sw-test-cc7:latest
   except:
-    - tags
     - triggers
   dependencies: []
   before_script:
+    - export OUTPUT_PIPELINE_URL=${OUTPUT_ROOT_URL}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_URL=${OUTPUT_PIPELINE_URL/commits/tags} ; fi
     - echo "[ipbus-sw-ci]" | sudo tee /etc/yum.repos.d/ipbus-sw.repo
     - echo "name=CACTUS Project Software Repository" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
-    - echo "baseurl=${BUILD_OUTPUT_ROOT_URL}/${CI_BUILD_REF}/${CI_PIPELINE_ID}/centos7_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
+    - echo "baseurl=${OUTPUT_PIPELINE_URL}/centos7_x86_64" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "enabled=1" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - echo "gpgcheck=0" | sudo tee -a /etc/yum.repos.d/ipbus-sw.repo
     - sudo yum clean all
     - sudo yum -y groupinstall uhal
-    - sudo yum -y install boost-python
     - sudo yum -y install which
     - rpm -qa | grep cactus | sort
 
