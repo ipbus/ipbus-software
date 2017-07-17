@@ -1,0 +1,5 @@
+[ipbus-sw-ci]
+name=IPbus software repository for automated build
+baseurl=
+enabled=1
+gpgcheck=0
