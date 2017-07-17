@@ -67,13 +67,7 @@ doxygen_job:
     - cd doxygen-1.8.6
     - ./configure --prefix /usr --docdir /usr/share/doc/doxygen-1.8.6 && make
     - sudo make MAN1DIR=share/man/man1 install
-    - cd ..
-    - mkdir -p ~/.ssh
-    - echo "HOST lxplus" > ~/.ssh/config
-    - echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-    - echo "  GSSAPITrustDns yes" >> ~/.ssh/config
-    - echo "  GSSAPIAuthentication yes" >> ~/.ssh/config
-    - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
+    - mkdir -p ~/.ssh  &&  cp ci/ssh_config ~/.ssh/config
     - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
     - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:
@@ -103,12 +97,7 @@ build:centos7:
   before_script:
     - sudo yum -y install boost-devel pugixml-devel
     - sudo yum -y install createrepo krb5-workstation openssh-clients
-    - mkdir -p ~/.ssh
-    - echo "HOST lxplus" > ~/.ssh/config
-    - echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-    - echo "  GSSAPITrustDns yes" >> ~/.ssh/config
-    - echo "  GSSAPIAuthentication yes" >> ~/.ssh/config
-    - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
+    - mkdir -p ~/.ssh  &&  cp ci/ssh_config ~/.ssh/config
     - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
     - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:
@@ -136,12 +125,7 @@ build:slc6:
     - triggers
   before_script:
     - sudo yum -y install createrepo krb5-workstation openssh-clients
-    - mkdir -p ~/.ssh
-    - echo "HOST lxplus" > ~/.ssh/config
-    - echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-    - echo "  GSSAPITrustDns yes" >> ~/.ssh/config
-    - echo "  GSSAPIAuthentication yes" >> ~/.ssh/config
-    - echo "  GSSAPIDelegateCredentials yes" >> ~/.ssh/config
+    - mkdir -p ~/.ssh  &&  cp ci/ssh_config ~/.ssh/config
     - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
     - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:

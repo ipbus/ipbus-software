@@ -1,0 +1,5 @@
+HOST lxplus
+  StrictHostKeyChecking no
+  GSSAPITrustDns yes
+  GSSAPIAuthentication yes
+  GSSAPIDelegateCredentials yes
