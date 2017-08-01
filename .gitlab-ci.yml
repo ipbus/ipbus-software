@@ -121,7 +121,7 @@ build:slc6:
   image: tswilliams/ipbus-sw-dev-slc6:latest
   variables:
     ADDITIONAL_RPMS_TO_INSTALL: ""
-    YUMGROUPS_FILE: "yumgroups-slc6.xml"
+    YUMGROUPS_FILE: "ci/yumgroups-slc6.xml"
     OUTPUT_REPO_SUBDIR: "slc6_x86_64"
 
 
@@ -130,7 +130,7 @@ build:centos7:
   image: tswilliams/ipbus-sw-dev-cc7:latest
   variables:
     ADDITIONAL_RPMS_TO_INSTALL: "boost-devel pugixml-devel"
-    YUMGROUPS_FILE: "yumgroups-centos7.xml"
+    YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "centos7_x86_64"
 
 

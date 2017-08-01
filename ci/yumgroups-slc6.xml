@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <comps>
   <group>
-    <id>cactus</id>
+    <id>ipbus-sw</id>
     <name>uhal</name>
     <default>true</default>
     <description>uHAL packages of the CACTUS YUM repository</description>
