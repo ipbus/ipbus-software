@@ -335,7 +335,7 @@ forward_reply(Pkt, S = #state{ in_flight={1,TransManagerPid} }) when S#state.ipb
     ch_stats:udp_rcvd(S#state.stats),
     S#state{in_flight={0,void}};
 forward_reply(Pkt, S) ->
-    ch_utils:log({error,log_prefix(S)}, "Not expecting any response from board, but received: ~w", [Pkt]),
+    ch_utils:log({error,log_prefix(S)}, "Not expecting any response from board, but received UDP packet: ~s", [convert_start_of_binary_to_string(Pkt, 12)]),
     S.
 
 
@@ -735,6 +735,21 @@ state_as_string(S) when is_record(S, state) ->
 
 log_prefix(State = #state{local_port=LocalPort, ip_tuple={IP1,IP2,IP3,IP4}, port=TargetPort, next_id=NextPktId}) when is_record(State, state) ->
     io_lib:format("Device(~w-~w.~w.~w.~w:~w, next ID ~w)", [LocalPort, IP1,IP2,IP3,IP4, TargetPort, NextPktId]).
+
+
+convert_start_of_binary_to_string(Bin, NrBytes) when is_binary(Bin), is_integer(NrBytes) ->
+    convert_start_of_binary_to_string(Bin, {NrBytes, 0}, [io_lib:format("~w bytes, starting", [byte_size(Bin)])]).
+
+convert_start_of_binary_to_string(<<_/binary>>, {0, _}, StringAcc) ->
+    lists:flatten(lists:reverse(StringAcc));
+convert_start_of_binary_to_string(Bin, _, StringAcc) when byte_size(Bin) < 1 ->
+    lists:flatten(lists:reverse(StringAcc));
+convert_start_of_binary_to_string(<<FirstByte:8, RestOfBin/binary>>, {NrBytesToRead, NrBytesDone}, StringAcc) ->
+    Prefix = case (NrBytesDone rem 4) of
+                 0 -> " 0x";
+                 _ -> ""
+             end,
+    convert_start_of_binary_to_string(RestOfBin, {NrBytesToRead-1, NrBytesDone+1}, [io_lib:format("~s~2.16.0B", [Prefix, FirstByte]) | StringAcc]).
 
 
 
