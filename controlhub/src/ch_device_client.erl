@@ -43,6 +43,7 @@
 
 -record(state, {mode = setup                 :: mode(),
                 socket,                      % Holds network socket to target device 
+                local_port                   :: non_neg_integer(), 
                 ip_tuple                     :: tuple(),
                 ip_u32                       :: non_neg_integer(),
                 port                         :: non_neg_integer(),
@@ -140,7 +141,11 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
             put(udp_pid, UdpPid),
             gen_udp:controlling_process(Socket, UdpPid),
             UdpPid ! {start, Socket, IPTuple, PortU16, self()},
-            {ok, #state{socket=Socket, ip_tuple=IPTuple, ip_u32=IPaddrU32, port=PortU16, udp_pid=UdpPid, timeout=ch_config:get(device_response_timeout), shutdown_after=ch_config:get(device_client_shutdown_after), stats=StatsTable} };
+            LocalPort = case inet:port(Socket) of
+                {ok, PortNr} -> PortNr;
+                Other -> Other
+            end,
+            {ok, #state{socket=Socket, local_port=LocalPort, ip_tuple=IPTuple, ip_u32=IPaddrU32, port=PortU16, udp_pid=UdpPid, timeout=ch_config:get(device_response_timeout), shutdown_after=ch_config:get(device_client_shutdown_after), stats=StatsTable} };
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             target_ip_port(),
@@ -728,8 +733,9 @@ state_as_string(S) when is_record(S, state) ->
                   ).
 
 
-log_prefix(State = #state{ip_tuple={IP1,IP2,IP3,IP4}, port=Port}) when is_record(State, state) ->
-    io_lib:format("Device(?????-~w.~w.~w.~w:~w)", [IP1,IP2,IP3,IP4, Port]).
+log_prefix(State = #state{local_port=LocalPort, ip_tuple={IP1,IP2,IP3,IP4}, port=TargetPort, next_id=NextPktId}) when is_record(State, state) ->
+    io_lib:format("Device(~w-~w.~w.~w.~w:~w, next ID ~w)", [LocalPort, IP1,IP2,IP3,IP4, TargetPort, NextPktId]).
+
 
 
 udp_proc_init() ->
