@@ -55,9 +55,11 @@
                 in_flight = {0, queue:new()} :: {non_neg_integer(), queue()},
                 queue = queue:new()          :: queue(),
                 max_in_flight                :: non_neg_integer(),
+                last_timeout,
                 stats 
                 }
         ).
+
 
 %%% ====================================================================
 %%% API functions (public interface)
@@ -145,7 +147,7 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
                 {ok, PortNr} -> PortNr;
                 Other -> Other
             end,
-            {ok, #state{socket=Socket, local_port=LocalPort, ip_tuple=IPTuple, ip_u32=IPaddrU32, port=PortU16, udp_pid=UdpPid, timeout=ch_config:get(device_response_timeout), shutdown_after=ch_config:get(device_client_shutdown_after), stats=StatsTable} };
+            {ok, #state{socket=Socket, local_port=LocalPort, ip_tuple=IPTuple, ip_u32=IPaddrU32, port=PortU16, udp_pid=UdpPid, timeout=ch_config:get(device_response_timeout), shutdown_after=ch_config:get(device_client_shutdown_after), last_timeout=none, stats=StatsTable} };
         {error, Reason} when is_atom(Reason) ->
             ErrorMessage = {"Device client couldn't open UDP port to target",
                             target_ip_port(),
@@ -275,17 +277,23 @@ device_client_loop(recv, S = #state{ socket=Socket, ip_tuple=IP, port=Port }) ->
 % Response timeout clause
 device_client_loop(timeout, S) ->
     ch_utils:log({debug,log_prefix(S)}, "Timeout when waiting for control packet response. Starting packet-loss recovery ..."),
-    try recover_from_timeout(0, S) of
+    case recover_from_timeout(0, S) of
         {ok, NewState} ->
             ch_utils:log({debug,log_prefix(S)}, "Timeout recovered!"),
-            device_client_loop(send, NewState)
-    catch
-        throw:{recovery_failed, MsgForTransactionManager} ->
-            ch_utils:log({error,log_prefix(S)}, "IRRECOVERABLE TIMEOUT when waiting for control response packet from board."),
+            device_client_loop(send, NewState);
+        {error, NewState, MsgForTransactionManager} ->
+            Now = erlang:now(),
+            {LostPktId, NrInFlight, RecoveryInfoList} = NewState#state.last_timeout,
+            ch_utils:log({error,log_prefix(S)}, "Irrecoverable timeout for control packet ID ~w, with ~w in flight. ~w recovery attempts, timeout ~wms~s",
+                         [LostPktId, NrInFlight, length(RecoveryInfoList), S#state.timeout, 
+                         lists:flatten([io_lib:format("; ~.1fms ago, ~w lost", [timer:now_diff(Now,Timestamp) / 1000, Type]) || {Timestamp, Type} <- RecoveryInfoList])]),
+            {value, {_, _, ReqHdr, ReqBody}} = queue:peek(element(2, S#state.in_flight)),
+            ReqPkt = <<ReqHdr/binary, ReqBody/binary>>,
+            ch_utils:log({error,log_prefix(S)}, "Irrecoverable timeout for control packet ID ~w - request packet was: ~s", [LostPktId, convert_binary_to_string(ReqPkt, byte_size(ReqPkt), "  0x")]),
             Pids = [Pid || {Pid, _, _, _} <- queue:to_list(element(2,S#state.in_flight))],
             lists:foreach(fun(Pid) -> Pid ! MsgForTransactionManager end, Pids),
             reply_to_all_pending_requests_in_msg_inbox(MsgForTransactionManager),
-            {stop, normal, S}
+            {stop, normal, NewState}            
     end.
 
 
@@ -335,7 +343,16 @@ forward_reply(Pkt, S = #state{ in_flight={1,TransManagerPid} }) when S#state.ipb
     ch_stats:udp_rcvd(S#state.stats),
     S#state{in_flight={0,void}};
 forward_reply(Pkt, S) ->
-    ch_utils:log({error,log_prefix(S)}, "Not expecting any response from board, but received UDP packet: ~s", [convert_start_of_binary_to_string(Pkt, 12)]),
+    LastTimoutSummary = case S#state.last_timeout of
+                            none ->
+                                "No previous timeouts.";
+                            {LostPktId, NrInFlight, [ {Timestamp, Type} | AttemptInfoTail]} ->
+                                io_lib:format("Last timeout was ~.1fms ago, ~w packet ID ~w lost, ~w in flight, ~w recovery attempts.", 
+                                              [timer:now_diff(erlang:now(),Timestamp) / 1000, Type, LostPktId, NrInFlight, length(AttemptInfoTail)+1]);
+                            {LostPktId, NrInFlight, []} ->
+                                io_lib:format("Last timeout was for packet ID ~w, ~w in flight.", [LostPktId, NrInFlight])
+                            end,
+    ch_utils:log({error,log_prefix(S)}, "Not expecting any response from board, but received UDP packet: ~s. ~s", [convert_binary_to_string(Pkt, 12, "  0x"), LastTimoutSummary]),
     S.
 
 
@@ -348,7 +365,7 @@ recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, po
     after S#state.timeout ->
         if 
           (NrFailedAttempts+1) == 3 ->
-            throw({recovery_failed, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}});
+            {error, S, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}};
           true ->
             recover_from_timeout(NrFailedAttempts + 1, S)
         end
@@ -357,58 +374,58 @@ recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, po
 recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrInFlight,InFlightQ}, socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {2,0} ->
     NextIdMinusN = decrement_pkt_id(NextId, NrInFlight),
     RequestsInFlight = [[NewHdr, Body] || {_Pid, _OrigHdr, NewHdr, Body} <- queue:to_list(InFlightQ)],
+    ch_stats:udp_timeout(S#state.stats, if NrFailedAttempts==0 -> normal; true -> resend end),
     % Take recovery action
-    Type = case get_device_status(S#state.ipbus_v, S#state.timeout) of
-               {ok, {2,0}, {_, _, HwNextId}} when HwNextId =:= NextIdMinusN ->
-                   ch_utils:log({info,log_prefix(S)}, 
-                                "Re-sending ~w lost request packets (~w in flight, next ID: ~w without loss, ~w in device); attempt ~w.", 
-                                [NrInFlight, NrInFlight, NextId, HwNextId, NrFailedAttempts+1]),
-                   lists:foreach(fun(RequestIoData) -> S#state.udp_pid ! {send, RequestIoData}, 
-                                                       ch_stats:udp_sent(S#state.stats) end, 
-                                 RequestsInFlight
-                                ),
-                   request;
-               {ok, {2,0}, {_, _, HwNextId}} ->
-                   ch_utils:log({info,log_prefix(S)}, 
-                                "Requesting re-send of ~w lost response packets (~w in flight, next ID: ~w without loss, ~w in device); attempt ~w.", 
-                                [NrInFlight, NrInFlight, NextId, HwNextId, NrFailedAttempts+1]),
-                   lists:foreach(fun([ReqHdr, _ReqBody]) -> S#state.udp_pid ! {send, resend_request_pkt(ReqHdr)},
-                                                            ch_stats:udp_sent(S#state.stats) end, 
-                                 RequestsInFlight
-                                ),
-                   response;
-               {error, _Type, MsgForTransManager} ->
-                   ch_utils:log({error,log_prefix(S)},
-                                "Status request failed after control packet timeout (~w in flight, next expected ID should be ~w), recovery attempt ~w.", 
-                                [NrInFlight, NextId, NrInFlight]),
-                   throw({recovery_failed, MsgForTransManager})
-           end,
-    % Update stats counters
-    if
-      NrFailedAttempts==0 ->
-        ch_stats:udp_timeout(S#state.stats, normal),
-        ch_stats:udp_lost(S#state.stats, Type);
-      true -> 
-        ch_stats:udp_timeout(S#state.stats, resend)
-    end,
-    % Check whether recovered from timeout or not
-    {value, {_, _, ExpdHdr, _}} = queue:peek(InFlightQ),
-    receive
-        {udp, Socket, IP, Port, Pkt = <<ExpdHdr:4/binary, _/binary>>} ->
-            NewS = forward_reply(Pkt, S), 
-            ch_stats:udp_timeout(S#state.stats, recovered),
-            {ok, NewS}
-    after S#state.timeout ->
-        if 
-          (NrFailedAttempts+1) == 5 ->
-            ErrorCode = if 
-                          Type==response -> ?ERRCODE_TARGET_RESEND_TIMEOUT;
-                          true -> ?ERRCODE_TARGET_CONTROL_TIMEOUT
-                        end,
-            throw({recovery_failed, {device_client_response, S#state.ip_u32, S#state.port, ErrorCode, <<>>}});
-          true ->
-            recover_from_timeout(NrFailedAttempts + 1, S)
-        end
+    case get_device_status(S#state.ipbus_v, S#state.timeout) of
+        {ok, {2,0}, {_, _, HwNextId}} ->
+            TypeLost = case HwNextId of NextIdMinusN -> request; _-> response end,
+            if NrFailedAttempts==0 -> ch_stats:udp_lost(S#state.stats, TypeLost); true -> void end,
+            % Re-send request packets, or request that responses are re-sent
+            case TypeLost of 
+                NextIdMinusN ->
+                    ch_utils:log({info,log_prefix(S)}, 
+                                 "Re-sending ~w lost request packets (~w in flight, next ID: ~w without loss, ~w in device); attempt ~w.", 
+                                 [NrInFlight, NrInFlight, NextId, HwNextId, NrFailedAttempts+1]),
+                    lists:foreach(fun(RequestIoData) -> S#state.udp_pid ! {send, RequestIoData}, 
+                                                        ch_stats:udp_sent(S#state.stats) end, 
+                                  RequestsInFlight
+                                 );
+                _ ->
+                    ch_utils:log({info,log_prefix(S)}, 
+                                 "Requesting re-send of ~w lost response packets (~w in flight, next ID: ~w without loss, ~w in device); attempt ~w", 
+                                 [NrInFlight, NrInFlight, NextId, HwNextId, NrFailedAttempts+1]),
+                    lists:foreach(fun([ReqHdr, _ReqBody]) -> S#state.udp_pid ! {send, resend_request_pkt(ReqHdr)},
+                                                             ch_stats:udp_sent(S#state.stats) end, 
+                                   RequestsInFlight
+                                 )
+            end,
+            NewS = case NrFailedAttempts of
+                       0 ->
+                           S#state{last_timeout={NextIdMinusN, NrInFlight, [{erlang:now(), TypeLost}]}};
+                       _ ->
+                           {_, _, AttemptInfoList} = S#state.last_timeout,
+                           S#state{last_timeout={NextIdMinusN, NrInFlight, [{erlang:now(), TypeLost} | AttemptInfoList]}}
+                   end,
+            % Check whether recovered from timeout or not
+            {value, {_, _, ExpdHdr, _}} = queue:peek(InFlightQ),
+            receive
+                {udp, Socket, IP, Port, Pkt = <<ExpdHdr:4/binary, _/binary>>} ->
+                    ch_stats:udp_timeout(S#state.stats, recovered),
+                    {ok, forward_reply(Pkt, NewS)}
+            after S#state.timeout ->
+                if 
+                  (NrFailedAttempts+1) == 5 ->
+                    ErrorCode = case TypeLost of response -> ?ERRCODE_TARGET_RESEND_TIMEOUT; request -> ?ERRCODE_TARGET_CONTROL_TIMEOUT end,
+                    {error, NewS, {device_client_response, S#state.ip_u32, S#state.port, ErrorCode, <<>>}};
+                  true ->
+                    recover_from_timeout(NrFailedAttempts + 1, NewS)
+                end
+            end;
+        {error, _Type, MsgForTransManager} ->
+            ch_utils:log({error,log_prefix(S)},
+                         "Status request failed after control packet timeout (~w in flight, next expected ID should be ~w), recovery attempt ~w.", 
+                         [NrInFlight, NextId, NrInFlight]),
+            {error, S#state{last_timeout={NextIdMinusN, NrInFlight, []}}, MsgForTransManager}
     end.
 
 
@@ -737,19 +754,20 @@ log_prefix(State = #state{local_port=LocalPort, ip_tuple={IP1,IP2,IP3,IP4}, port
     io_lib:format("Device(~w-~w.~w.~w.~w:~w, next ID ~w)", [LocalPort, IP1,IP2,IP3,IP4, TargetPort, NextPktId]).
 
 
-convert_start_of_binary_to_string(Bin, NrBytes) when is_binary(Bin), is_integer(NrBytes) ->
-    convert_start_of_binary_to_string(Bin, {NrBytes, 0}, [io_lib:format("~w bytes, starting", [byte_size(Bin)])]).
 
-convert_start_of_binary_to_string(<<_/binary>>, {0, _}, StringAcc) ->
+convert_binary_to_string(Bin, NrBytes, WordPrefix) when is_binary(Bin), is_integer(NrBytes) ->
+    convert_binary_to_string(Bin, {NrBytes, 0}, WordPrefix, [io_lib:format("~w bytes: ", [byte_size(Bin)])]).
+
+convert_binary_to_string(Bin, _, _Prefix, StringAcc) when byte_size(Bin) < 1 ->
     lists:flatten(lists:reverse(StringAcc));
-convert_start_of_binary_to_string(Bin, _, StringAcc) when byte_size(Bin) < 1 ->
-    lists:flatten(lists:reverse(StringAcc));
-convert_start_of_binary_to_string(<<FirstByte:8, RestOfBin/binary>>, {NrBytesToRead, NrBytesDone}, StringAcc) ->
-    Prefix = case (NrBytesDone rem 4) of
-                 0 -> " 0x";
+convert_binary_to_string(Bin, {0, _}, _Prefix, StringAcc) ->
+    lists:flatten(lists:reverse([" ... " | StringAcc]));
+convert_binary_to_string(<<FirstByte:8, RestOfBin/binary>>, {NrBytesToRead, NrBytesDone}, WordPrefix, StringAcc) ->
+    BytePrefix = case (NrBytesDone rem 4) of
+                 0 -> WordPrefix;
                  _ -> ""
              end,
-    convert_start_of_binary_to_string(RestOfBin, {NrBytesToRead-1, NrBytesDone+1}, [io_lib:format("~s~2.16.0B", [Prefix, FirstByte]) | StringAcc]).
+    convert_binary_to_string(RestOfBin, {NrBytesToRead-1, NrBytesDone+1}, WordPrefix, [io_lib:format("~2.16.0B", [FirstByte]), io_lib:format(BytePrefix, []) | StringAcc]).
 
 
 
