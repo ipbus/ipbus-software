@@ -282,6 +282,7 @@ device_client_loop(timeout, S) ->
             ch_utils:log({debug,log_prefix(S)}, "Timeout recovered!"),
             device_client_loop(send, NewState);
         {error, NewState, MsgForTransactionManager} ->
+            S#state.udp_pid ! {print_incident_packets_then_exit},
             Now = erlang:now(),
             {LostPktId, NrInFlight, RecoveryInfoList} = NewState#state.last_timeout,
             ch_utils:log({error,log_prefix(S)}, "Irrecoverable timeout for control packet ID ~w, with ~w in flight. ~w recovery attempts, timeout ~wms~s",
@@ -811,6 +812,16 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
             {inet_reply, Socket, SendError} ->
                 ch_utils:log(error, "Error in UDP async send: ~w", [SendError]);%,
                 %throw({udp_send_error, SendError});
+            {print_incident_packets_then_exit} ->
+                {IP1, IP2, IP3, IP4} = IP,
+                ch_utils:log(warning, "UDP proc for ~w.~w.~w.~w:~w entering 'print incident packets then exit' mode", [IP1, IP2, IP3, IP4, Port]),
+                receive
+                    {udp, Socket, IP, Port, Packet} ->
+                        ch_utils:log(warning, "UDP proc received packet ~s", [convert_binary_to_string(Packet, 16, "  0x")])
+                    after 10000 -> void
+                end,
+                ch_utils:log(warning, "UDP proc for ~w.~w.~w.~w:~w exiting 'print incident packets then exit' mode", [IP1, IP2, IP3, IP4, Port]),
+                exit(normal);
             {'EXIT', ParentPid, Reason} ->
                 Level = case Reason of 
                             normal -> debug;
