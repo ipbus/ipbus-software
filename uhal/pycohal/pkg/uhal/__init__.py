@@ -1,6 +1,18 @@
 
 import sys
-from _core import *
+
+try:
+   from _core import *
+except ImportError as e:
+    from os import environ
+    if ('LD_LIBRARY_PATH' not in environ) or '/opt/cactus/lib' not in environ['LD_LIBRARY_PATH'].split():
+        new_msg = (e.message +
+                  "\nN.B. ImportError raised when uHAL's __init__.py tries to load python bindings library" +
+                  '\n     Maybe you need to add "/opt/cactus/lib", or some other path, to the "LD_LIBRARY_PATH" environment variable?')
+        raise type(e), type(e)(new_msg), sys.exc_info()[2]
+    else:
+        raise
+
 
 ##################################################
 # Pythonic additions to uhal::exception API
