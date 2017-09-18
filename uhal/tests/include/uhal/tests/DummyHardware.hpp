@@ -41,6 +41,9 @@
 
 #include "uhal/IPbusInspector.hpp"
 
+#include <boost/chrono/chrono_io.hpp>
+#include <boost/thread/thread.hpp>
+
 #include <vector>
 #include <deque>
 
@@ -73,7 +76,7 @@ namespace uhal
         */
         DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) : HostToTargetInspector< IPbus_major , IPbus_minor >() ,
           mMemory (),
-          mReplyDelay ( aReplyDelay ),
+          mReplyDelay ( boost::chrono::seconds(aReplyDelay) ),
           mReceive ( BUFFER_SIZE , 0x00000000 ),
           mReply ( BUFFER_SIZE , 0x00000000 ),
           mReplyHistory ( REPLY_HISTORY_DEPTH , std::make_pair ( 0 , mReply ) ),
@@ -91,11 +94,22 @@ namespace uhal
         virtual ~DummyHardware()
         {
         }
+
+        template <class DurationType>
+        void setReplyDelay(const DurationType& aDelay)
+        {
+          mReplyDelay = aDelay;
+        }
   
         /**
-          Function which "starts" the dummy hardware
+          Function which "starts" the dummy hardware; does not return until the 'stop' method is called
         */
         virtual void run() = 0;
+
+        /**
+          Stops this dummy hardware instance - i.e. makes the 'run' method return
+        */
+        virtual void stop() = 0;
 
         virtual void SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue )
         {
@@ -161,11 +175,11 @@ namespace uhal
             mReplyHistory.pop_front();
           }
   
-          if ( mReplyDelay )
+          if ( mReplyDelay > boost::chrono::microseconds(0) )
           {
-            log ( Info() , "Sleeping for " , Integer ( mReplyDelay ) , "s" );
-            sleep ( mReplyDelay );
-            mReplyDelay = 0;
+            log ( Info() , "Sleeping for " , mReplyDelay );
+            boost::this_thread::sleep_for( mReplyDelay );
+            mReplyDelay = boost::chrono::microseconds(0);
             log ( Info() , "Now replying " );
           }
   
@@ -520,7 +534,7 @@ namespace uhal
         //! The memory space of the virtual hardware
         std::vector< uint32_t > mMemory;
         //! The delay in seconds between the request and reply of the first transaction
-        uint32_t mReplyDelay;
+        boost::chrono::microseconds mReplyDelay;
   
       protected:
         //! The buffer for the incoming IPbus packet
