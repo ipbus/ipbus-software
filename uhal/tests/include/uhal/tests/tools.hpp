@@ -126,6 +126,36 @@ public:
 };
 
 
+/// A very simple timer
+class Timer
+{
+public:
+
+  Timer() :m_start()
+  {
+    gettimeofday ( &m_start, NULL );
+  }
+
+  /// Returns number of elapsed seconds since the timer was instantiated.
+  double elapsedSeconds()
+  {
+    timeval now;
+    gettimeofday ( &now, NULL );
+    time_t sec = now.tv_sec - m_start.tv_sec;
+    suseconds_t usec = now.tv_usec - m_start.tv_usec;
+    return static_cast<double> ( sec + usec/1000000. );
+  }
+
+private:
+  timeval m_start;
+
+}; /* End of class Timer */
+
+
+double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream);
+
+double measureTxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream);
+
 //!timeval difference in micro seconds
 long usdiff ( const timeval& end, const timeval& start );
 

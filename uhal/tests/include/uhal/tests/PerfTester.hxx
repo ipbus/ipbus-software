@@ -141,31 +141,37 @@ namespace uhal
         void outputStandardResults ( double totalSeconds ) const;
 
         /// Returns a random uint32_t in the range [0,maxSize], with 1/x probability distribution -- so that p(x=0) = p(2<=x<4) = p(2^n <= x < 2^n+1)
-        uint32_t getRandomBlockSize ( const uint32_t maxSize ) const;
+        static uint32_t getRandomBlockSize ( const uint32_t maxSize );
 
         /// Returns a buffer of random numbers
-        U32Vec getRandomBuffer ( unsigned size ) const;
+        static U32Vec getRandomBuffer ( unsigned size );
 
         /// Compares a write buffer with one or more ValVec read responses
         bool buffersEqual ( const U32Vec& writeBuffer, const U32ValVec& readBuffer ) const;
 
         /// Validation test -- single-register write/read-back
-        bool validation_test_single_write_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch ) const;
+        static bool validation_test_single_write_read ( uhal::ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose );
 
         /// Validation test -- block write/read-back
-        bool validation_test_block_write_read ( ClientPtr& c, const uint32_t addr, const uint32_t depth, const bool perTransactionDispatch ) const;
+        static bool validation_test_block_write_read ( uhal::ClientInterface& c, const uint32_t addr, const uint32_t depth, const bool perTransactionDispatch, const bool aVerbose );
 
         /// Validation test -- write, RMW bits, read
-        bool validation_test_write_rmwbits_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch ) const;
+        static bool validation_test_write_rmwbits_read ( uhal::ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose );
 
         /// Validation test -- write, RMW sum, read
-        bool validation_test_write_rmwsum_read ( ClientPtr& c, const uint32_t addr, const bool perTransactionDispatch ) const;
+        static bool validation_test_write_rmwsum_read ( uhal::ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose );
 
         // PRIVATE MEMBER FUNCTIONS - IPbus test functions that users can run
 
         void bandwidthRxTest();  ///< Read bandwidth test
         void bandwidthTxTest();  ///< Write bandwidth test
         void validationTest();   ///< Historic basic firmware/software validation test
+
+    public:
+
+        static bool runValidationTest(const std::vector<ClientInterface*>& aClients, const uint32_t aBaseAddr, const uint32_t aDepth, const size_t aNrIterations, const bool aDispatchEachIteration, const bool aVerbose);
+
+    private:
         void sandbox();          ///< An area for a user-definable test
 
         // PRIVATE CLASSES
@@ -239,32 +245,6 @@ namespace uhal
         };
 
     }; /* End of class PerfTester */
-
-
-    /// A very simple timer
-    class Timer
-    {
-      public:
-
-        Timer() :m_start()
-        {
-          gettimeofday ( &m_start, NULL );
-        }
-
-        /// Returns number of elapsed seconds since the timer was instantiated.
-        double elapsedSeconds()
-        {
-          timeval now;
-          gettimeofday ( &now, NULL );
-          time_t sec = now.tv_sec - m_start.tv_sec;
-          suseconds_t usec = now.tv_usec - m_start.tv_usec;
-          return static_cast<double> ( sec + usec/1000000. );
-        }
-
-      private:
-        timeval m_start;
-
-    }; /* End of class Timer */
 
   }  /* End of namespace tests */
 

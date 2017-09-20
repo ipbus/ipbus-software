@@ -98,6 +98,86 @@ DeviceInfo TestFixture::sDeviceInfo(IPBUS_2_0_UDP, 60001, "dummy.udp2");
 std::string TestFixture::sDeviceId = "";
 
 
+double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream)
+{
+  typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
+  Timer myTimer;
+
+  for ( unsigned i = 0; i < aNrIterations ; ++i )
+  {
+    if ( aOutStream )
+    {
+      (*aOutStream) << "Iteration " << i << std::endl;
+    }
+
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->readBlock ( aBaseAddr, aDepth, defs::NON_INCREMENTAL );
+    }
+
+    if ( aDispatchEachIteration )
+    {
+      for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+      {
+        (*lIt)->dispatch();
+      }
+    }
+  }
+
+  if ( !aDispatchEachIteration )
+  {
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->dispatch();
+    }
+  }
+
+  return myTimer.elapsedSeconds();
+}
+
+
+double measureTxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream)
+{
+  typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
+
+  // Send buffer - lots of "cafebabe" (in little-endian)
+  std::vector<uint32_t> sendBuffer ( aDepth, 0xbebafeca );
+  Timer myTimer;
+
+  for ( unsigned i = 0; i < aNrIterations ; ++i )
+  {
+    if ( aOutStream )
+    {
+      (*aOutStream) << "Iteration " << i << std::endl;
+    }
+
+    // Create the packet
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->writeBlock ( aBaseAddr, sendBuffer, defs::NON_INCREMENTAL );
+    }
+
+    if ( aDispatchEachIteration )
+    {
+      for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+      {
+        (*lIt)->dispatch();
+      }
+    }
+  }
+
+  if ( !aDispatchEachIteration )
+  {
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->dispatch();
+    }
+  }
+
+  return myTimer.elapsedSeconds();
+}
+
+
 } // end ns tests
 } // end ns uhal
 
