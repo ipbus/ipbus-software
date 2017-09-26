@@ -44,10 +44,10 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(EmptyDispatchTestSuite)
 
 
-BOOST_FIXTURE_TEST_CASE(empty_dispatch, TestFixture)
+BOOST_AUTO_TEST_CASE(empty_dispatch)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  ConnectionManager manager ( TestFixture::sConnectionFile );
+  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
 }
 
