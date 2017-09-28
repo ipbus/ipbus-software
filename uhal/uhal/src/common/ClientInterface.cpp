@@ -140,7 +140,9 @@ namespace uhal
   {
     std::stringstream lReturn;
     // url is always of the form "protocol://hostname:port"
-    lReturn << mUri.mProtocol << "://" << mUri.mHostname << ":" << mUri.mPort;
+    lReturn << mUri.mProtocol << "://" << mUri.mHostname;
+    if ( !mUri.mPort.empty() )
+      lReturn << ":" << mUri.mPort;
 
     // there is sometimes a path
     if ( mUri.mPath != "" )

@@ -214,7 +214,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwbits_read ( ClientInterfa
 
   oss_values << "Wrote value 0x" << std::hex << x0 << ", then did RMW-bits with AND-term 0x" << a << ", OR-term 0x" << b;
 
-  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos ) );
+  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbuspcie-2.0" ) != string::npos ) );
 
   try
   {
@@ -273,7 +273,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read ( ClientInterfac
 
   oss_values << "Wrote value 0x" << std::hex << x0 << ", then did RMW-sum with ADDEND 0x" << a;
 
-  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos ) );
+  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos )  || ( c.uri().find ( "ipbuspcie-2.0" ) != string::npos ) || ( c.uri().find ( "ipbuspcie-2.0" ) != string::npos ) );
 
   try
   {

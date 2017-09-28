@@ -27,46 +27,48 @@
       Marc Magrans de Abril, CERN
       email: marc.magrans.de.abril <AT> cern.ch
 
+      Tom Williams, Rutherford Appleton Laboratory, Oxfordshire
+      email: tom.williams <AT> cern.ch
+
 ---------------------------------------------------------------------------
 */
 
 /**
 	@file
-	@author Andrew W. Rose
-	@date 2012
+	@author Tom Williams
+	@date September 2017
 */
 
 #ifndef _uhal_ProtocolPCIe_hpp_
 #define _uhal_ProtocolPCIe_hpp_
 
-#include "uhal/ClientInterface.hpp"
-#include "uhal/log/exception.hpp"
-#include "uhal/log/log.hpp"
 
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 
-#include <string>
+#include "uhal/ClientInterface.hpp"
+#include "uhal/log/exception.hpp"
+#include "uhal/ProtocolIPbus.hpp"
+
 
 namespace uhal
 {
 
   namespace exception
   {
-    //! Exceptions get defined here
-    // UHAL_DEFINE_EXCEPTION_CLASS ( UdpTimeout , "Exception class to handle the case where the PCIe connection timed out." )
+    //! Exception class to handle the case in which the PCIe connection timed out.
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeTimeout , ClientTimeout , "Exception class to handle the case in which the PCIe connection timed out." )
+    //! Exception class to handle a failure to read from the specified device files during initialisation
+    UHAL_DEFINE_EXCEPTION_CLASS ( PCIeInitialisationError , "Exception class to handle a failure to read from the specified device files during initialisation." )
   }
 
   //! Transport protocol to transfer an IPbus buffer via PCIe
-  template < typename InnerProtocol >
-  class PCIe : public InnerProtocol
+  class PCIe : public IPbus< 2 , 0 >
   {
-
     public:
-      //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
-
       /**
       	Constructor
       	@param aId the uinique identifier that the client will be given.
@@ -74,26 +76,22 @@ namespace uhal
       */
       PCIe ( const std::string& aId, const URI& aUri );
 
-      /**
-        Copy Constructor
-        This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
-        @param aPCIe a PCIe-protocol object to copy
-      */
+    private:
       PCIe ( const PCIe& aPCIe );
 
       /**
        Assignment operator
        This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-       @param aPCIe a PCIe-protocol object to copy
+       @param aUDP a UDP-protocol object to copy
        @return reference to the current object to allow chaining of assignments
             */
       PCIe& operator= ( const PCIe& aPCIe );
 
-
-      /**
-      	Destructor
-      */
+    public:
+      //!	Destructor
       virtual ~PCIe();
+
+    protected:
 
       /**
       	Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
@@ -108,36 +106,75 @@ namespace uhal
       virtual void Flush( );
 
 
-    protected:
-      /**
-        Function which tidies up this protocol layer in the event of an exception
-       */
+      //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
 
 
     private:
-      /**
-        Initialize performing the next PCIe write operation
-      */
-      void write ( );
+
+      typedef IPbus< 2 , 0 > InnerProtocol;
+
+      typedef boost::chrono::steady_clock SteadyClock_t;
 
       /**
-        Initialize performing the next PCIe read operation
+        Return the maximum size to be sent based on the buffer size in the target
+        @return the maximum size to be sent
       */
-      void read ( );
+      uint32_t getMaxSendSize();
 
-    private:
+      /**
+        Return the maximum size of reply packet based on the buffer size in the target
+        @return the maximum size of reply packet
+      */
+      uint32_t getMaxReplySize();
 
-      //! The send operation currently in progress
-      boost::shared_ptr< Buffers > mDispatchBuffers;
-      //! The receive operation currently in progress or the next to be done
-      boost::shared_ptr< Buffers > mReplyBuffers;
+      //! Set up the connection to the device
+      void connect();
 
+      //! Close the connection to the device
+      void disconnect();
+
+      //! Write request packet to next page in host-to-FPGA device file 
+      void write(const boost::shared_ptr<Buffers>& aBuffers);
+
+      //! Read next pending reply packet appropriate page of FPGA-to-host device file, and validate contents
+      void read();
+
+
+      static void dmaRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
+
+
+      static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues);
+
+      static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);
+
+      static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData);
+
+      //! Host-to-FPGA device file path
+      std::string mDevicePathHostToFPGA;
+      //! FPGA-to-host device file path
+      std::string mDevicePathFPGAToHost;
+
+      //! File desriptor for host-to-FPGA device file
+      int mDeviceFileHostToFPGA;
+      //! File descriptor for FPGA-to-host device file
+      int mDeviceFileFPGAToHost;
+
+
+      uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount;
+
+      //! The list of buffers still awaiting a reply
+      std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
+
+      /**
+        A pointer to an exception object for passing exceptions from the worker thread to the main thread.
+        Exceptions must always be created on the heap (i.e. using `new`) and deletion will be handled in the main thread
+      */
+      uhal::exception::exception* mAsynchronousException;
   };
 
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolPCIe.hxx"
 
 #endif

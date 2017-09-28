@@ -62,12 +62,13 @@ std::map<std::string, DeviceInfo> getDeviceMap()
 {
   std::map<std::string, DeviceInfo> lResult;
 
-  lResult.insert(std::make_pair(std::string("1.3-udp"), DeviceInfo(IPBUS_1_3_UDP, 50001, "dummy.udp")));
-  lResult.insert(std::make_pair(std::string("1.3-tcp"), DeviceInfo(IPBUS_1_3_TCP, 50002, "dummy.tcp")));
-  lResult.insert(std::make_pair(std::string("1.3-hub"), DeviceInfo(IPBUS_1_3_CONTROLHUB, 50001, "dummy.controlhub")));
-  lResult.insert(std::make_pair(std::string("2.0-udp"), DeviceInfo(IPBUS_2_0_UDP, 60001, "dummy.udp2")));
-  lResult.insert(std::make_pair(std::string("2.0-tcp"), DeviceInfo(IPBUS_2_0_TCP, 60002, "dummy.tcp2")));
-  lResult.insert(std::make_pair(std::string("2.0-hub"), DeviceInfo(IPBUS_2_0_CONTROLHUB, 60001, "dummy.controlhub2")));
+  lResult.insert(std::make_pair(std::string("1.3-udp"), DeviceInfo(IPBUS_1_3_UDP, "50001", "dummy.udp")));
+  lResult.insert(std::make_pair(std::string("1.3-tcp"), DeviceInfo(IPBUS_1_3_TCP, "50002", "dummy.tcp")));
+  lResult.insert(std::make_pair(std::string("1.3-hub"), DeviceInfo(IPBUS_1_3_CONTROLHUB, "50001", "dummy.controlhub")));
+  lResult.insert(std::make_pair(std::string("2.0-udp"), DeviceInfo(IPBUS_2_0_UDP, "60001", "dummy.udp2")));
+  lResult.insert(std::make_pair(std::string("2.0-tcp"), DeviceInfo(IPBUS_2_0_TCP, "60002", "dummy.tcp2")));
+  lResult.insert(std::make_pair(std::string("2.0-hub"), DeviceInfo(IPBUS_2_0_CONTROLHUB, "60001", "dummy.controlhub2")));
+  lResult.insert(std::make_pair(std::string("2.0-pcie"), DeviceInfo(IPBUS_2_0_PCIE, "/tmp/uhal_pcie_client2device,/tmp/uhal_pcie_device2client", "dummy.pcie2")));
 
   return lResult;
 }

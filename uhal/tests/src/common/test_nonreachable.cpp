@@ -36,6 +36,7 @@
 
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/ProtocolTCP.hpp"
+#include "uhal/ProtocolPCIe.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 
 #include "uhal/tests/tools.hpp"
@@ -63,6 +64,10 @@ BOOST_AUTO_TEST_CASE(check_nonreachable_device)
     if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
     {
       BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
+    }
+    else if ( hw.uri().find ( "ipbuspcie" ) != std::string::npos )
+    {
+      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::PCIeInitialisationError );
     }
     else
     {
