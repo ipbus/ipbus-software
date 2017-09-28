@@ -11,6 +11,7 @@ All options/arguments are optional:
    -c /path/to/dummy_conns.xml : Full path to dummy_connections.xml (without file:// prefix)
    -s search_string            : If specified, only sections that contain this string will be run (case-insenstive search).
                                  Otherwise, all sections will be run (see section list at end).
+   -p                          : Path containing ControlHub scripts that will be used
    -x                          : Quit on first error
 
 E.g:
@@ -619,7 +620,7 @@ def run_command(cmd, verbose=True):
 if __name__=="__main__":
     # Parse options
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "xhvls:c:", ["help"])
+        opts, args = getopt.getopt(sys.argv[1:], "xhvlp:s:c:", ["help"])
     except getopt.GetoptError, err:
         print __doc__
         sys.exit(2)
@@ -629,6 +630,7 @@ if __name__=="__main__":
     conn_file = "/opt/cactus/etc/uhal/tests/dummy_connections.xml"
     section_search_str = None
     quit_on_error = False
+    controlhub_scripts_dir = None
 
     stdout = []
     exit_code = 0
@@ -652,6 +654,8 @@ if __name__=="__main__":
             section_search_str = value
         elif opt == "-x":
             quit_on_error = True
+        elif opt == "-p":
+            controlhub_scripts_dir = value
 
     if len(args) != 0:
         print "Incorrect usage!"
@@ -662,13 +666,14 @@ if __name__=="__main__":
     print "  connections file:       ",  conn_file
 
     # Find directory for controlhub commands
-    which_controlhub_status = run_command("which controlhub_status", False)
-    if which_controlhub_status[1]:
-        controlhub_scripts_dir = "/opt/cactus/bin"
-    else:
-        controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") )
-    if controlhub_scripts_dir.startswith("/opt/cactus/bin"):
-        controlhub_scripts_dir = None
+    if controlhub_scripts_dir is None:
+        which_controlhub_status = run_command("which controlhub_status", False)
+        if which_controlhub_status[1]:
+            controlhub_scripts_dir = "/opt/cactus/bin"
+        else:
+            controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") )
+        if controlhub_scripts_dir.startswith("/opt/cactus/bin"):
+            controlhub_scripts_dir = None
     print '  ControlHub scripts dir: ', controlhub_scripts_dir
 
     # Get uhal tools template file name
