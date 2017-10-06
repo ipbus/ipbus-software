@@ -651,9 +651,9 @@ class TestMetaInfo(unittest.TestCase):
         devices_list = self.manager.getDevices()
         self.assertTrue( isinstance(devices_list, list) )
         self.assertEqual( len(devices_list), 18 )
-        self.assertEqual( devices_list, sorted(['dummy.udp','dummy.docu.udp','dummy.udp2','dummy.docu.udp2','dummy.udp2bigendian','dummy.docu.udp2bigendian',
-                                                'dummy.tcp','dummy.docu.tcp','dummy.tcp2','dummy.docu.tcp2','dummy.tcp2bigendian','dummy.docu.tcp2bigendian',
-                                                'dummy.controlhub','dummy.docu.controlhub', 'dummy.controlhub2', 'dummy.docu.controlhub2', 'dummy.controlhub2bigendian', 'dummy.docu.controlhub2bigendian']) )
+        self.assertEqual( devices_list, sorted(['dummy.udp','dummy.docu.udp','dummy.udp2','dummy.docu.udp2',
+                                                'dummy.tcp','dummy.docu.tcp','dummy.tcp2','dummy.docu.tcp2',
+                                                'dummy.controlhub','dummy.docu.controlhub', 'dummy.controlhub2', 'dummy.docu.controlhub2']) )
         self.assertEqual( len(self.manager.getDevices(".*udp.*")), 6 )
         # Check for throw when try to create ConnectionManager from non-existant file
         self.assertRaises( uhal.exception, uhal.ConnectionManager, ("some_bad_invalid_string") )
