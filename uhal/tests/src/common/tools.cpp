@@ -35,6 +35,8 @@
 #include "uhal/tests/tools.hpp"
 
 
+#include "uhal/ConnectionManager.hpp"
+#include "uhal/HwInterface.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/tests/UDPDummyHardware.hpp"
 #include "uhal/tests/TCPDummyHardware.hpp"
@@ -60,6 +62,17 @@ DeviceInfo::DeviceInfo(uhal::tests::DeviceType aType, uint16_t aPort, const std:
 TestFixture::TestFixture() :
   hwRunner(createRunner(sDeviceInfo))
 {
+  // FIXME : Ensure that controlhub cache is reset after dummy hardware reboot, but before unit tests (temporary solution)
+  if ( sDeviceInfo.type == IPBUS_2_0_CONTROLHUB ) {
+    ConnectionManager manager ( sConnectionFile );
+    HwInterface hw=manager.getDevice ( sDeviceId );
+    hw.getClient().read(0);
+    try {
+      hw.dispatch();
+    }
+    catch ( ... ) {
+    }
+  }
 }
 
 

@@ -185,7 +185,7 @@ namespace uhal
   
           //
           //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
-          if ( LoggingIncludes ( Debug() ) )
+          if ( LoggingIncludes ( Debug() ) && ! mReply.empty() )
           {
             log ( Debug() , "\n=============================================== SENDING ===============================================" );
             TargetToHostInspector< IPbus_major , IPbus_minor > lTargetToHostDebugger;
@@ -432,6 +432,7 @@ namespace uhal
             {
               mTrafficHistory.push_back ( 5 );
               mTrafficHistory.pop_front();
+              log(Notice(), "Dummy hardware received control packet with ID ", Integer(base_type::mPacketCounter), ", but expected ID ", Integer(lTemp));
               return false;
             }
   

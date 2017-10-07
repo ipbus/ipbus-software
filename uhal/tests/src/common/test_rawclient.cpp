@@ -143,7 +143,6 @@ BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, TestFixture)
        hw.uri().find ( "chtcp-1.3://" ) != std::string::npos )
   {
     BOOST_CHECK_EQUAL ( reg1.value(), ( ( x1 & x2 ) | x3 ) );
-    std::cout << "reg1.value() is " << std::hex << reg1.value() << " and should be " << ( ( x1 & x2 ) | x3 ) << " or " << x1 << " in IPbus 2.0" << std::endl;
   }
   else
   {

@@ -76,7 +76,7 @@ namespace uhal
         {
           if ( !control_packet_header ( ) )
           {
-            return false;
+            return true;
           }
         }
 
