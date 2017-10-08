@@ -53,9 +53,7 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(NonreachableTestSuite)
 
 
-// FIXME: Add duplicate nonreachable test covering ControlHub being nonreachable
-
-BOOST_AUTO_TEST_CASE(check_nonreachable)
+BOOST_AUTO_TEST_CASE(check_nonreachable_device)
 {
   for (size_t i = 0; i < 10; i++) {
     ConnectionManager manager ( TestFixture::sConnectionFile );
@@ -72,22 +70,34 @@ BOOST_AUTO_TEST_CASE(check_nonreachable)
     }
     else
     {
-      try
-      {
-        hw.getNode ( "REG" ).read();
-        hw.dispatch();
-        //Make a mock "TEST_THROW error message and record the failure to throw
-        BOOST_CHECK(false);
-        std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl;
-        uhal::tests::failedTestCount++;
-      }
-      catch ( uhal::exception::exception& e )
-      {
-        // std::cout << "Exception of type " << typeid ( e ).name() << " was thrown" << std::endl;
-        BOOST_CHECK ( ( ( typeid ( e ) ==typeid ( uhal::exception::ControlHubTargetTimeout ) ) || ( typeid ( e ) ==typeid ( uhal::exception::TcpConnectionFailure ) ) ) );
-      }
+      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ControlHubTargetTimeout );
     }
   }
+}
+
+
+HwInterface getHwWithModifiedControlHubPort(const std::string& aConnectionFile, const std::string& aDeviceId)
+{
+  typedef boost::filesystem::path Path_t;
+  const std::string lAddrFilePath = ( Path_t(aConnectionFile).parent_path() / Path_t("dummy_address.xml") ).string();
+
+  const std::string lOriginalUri = ConnectionManager(aConnectionFile).getDevice(aDeviceId).getClient().uri();
+  const std::string lModifiedUri = lOriginalUri.substr(0, lOriginalUri.find("?")-1) + lOriginalUri.substr(lOriginalUri.find("?"));
+
+  return ConnectionManager::getDevice(aDeviceId, lModifiedUri, lAddrFilePath);  
+}
+
+BOOST_AUTO_TEST_CASE(check_nonreachable_controlhub)
+{
+  if ( (TestFixture::sDeviceInfo.type == IPBUS_1_3_CONTROLHUB) || (TestFixture::sDeviceInfo.type == IPBUS_2_0_CONTROLHUB) ) {
+    for (size_t i = 0; i < 10; i++) {
+      HwInterface hw = getHwWithModifiedControlHubPort(TestFixture::sConnectionFile, TestFixture::sDeviceId);
+
+      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpConnectionFailure );
+    }
+  }
+  else
+    BOOST_TEST_MESSAGE("  ***  Skipping check_nonreachable_controlhub test case, since client under test does not talk to ControlHub.  ***");
 }
 
 
