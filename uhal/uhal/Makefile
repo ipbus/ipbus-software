@@ -7,48 +7,75 @@ Package = uhal/uhal
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-uhal
 
-Packager = Andrew Rose
+Packager = Andrew Rose, Tom Williams
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
-LIBRARY = lib/libcactus_uhal_uhal.so
+LIBRARY = cactus_uhal_uhal
 
-SOURCES = $(wildcard src/common/*.cpp)
-OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
-
-LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX} \
-		${EXTERN_PUGIXML_LIB_PREFIX} \
-		${UHAL_GRAMMARS_LIB_PREFIX} \
-		${UHAL_LOG_LIB_PREFIX}
-LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
-
-LIBRARIES = 	-lpthread \
-		\
-		-l${PUGIXML_LIB_NAME} \
-		\
-		-lboost_thread \
-		-lboost_system \
-		-lboost_filesystem \
-		-lboost_regex \
-		-lboost_thread \
-		\
-		-lcactus_uhal_grammars \
-		-lcactus_uhal_log	
 
 INCLUDE_PATH = include  \
 		${UHAL_GRAMMARS_INCLUDE_PREFIX} \
 		${UHAL_LOG_INCLUDE_PREFIX} \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
 		${EXTERN_PUGIXML_INCLUDE_PREFIX} 
-INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
 
-CPP_FLAGS = -g -O3 -Wall -pedantic -MMD -MP -fPIC\
-					 -DDISABLE_PACKET_COUNTER_HACK\
-					 -DRUN_ASIO_MULTITHREADED # \
-#					 -fprofile-arcs -ftest-coverage
+LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX} \
+		${EXTERN_PUGIXML_LIB_PREFIX} \
+		${UHAL_GRAMMARS_LIB_PREFIX} \
+		${UHAL_LOG_LIB_PREFIX}
+
+LIBRARIES = pthread \
+		\
+		${PUGIXML_LIB_NAME} \
+		\
+		boost_thread \
+		boost_system \
+		boost_filesystem \
+		boost_regex \
+		boost_thread \
+		\
+		cactus_uhal_grammars \
+		cactus_uhal_log	
+
+
+
+
+####################################
+###   COMMON DERIVED VARIABLES   ###
+
+
+LIBRARY := lib/lib${LIBRARY}.so
+
+LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
+LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
+
+EXECUTABLE_SOURCES = $(wildcard src/common/*.cxx)
+EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
+EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
+
+INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
+LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
+LIBRARIES := $(addprefix -l,$(LIBRARIES))
+
+CPP_FLAGS = -g -Wall -pedantic -O3 -MMD -MP -fPIC \
+#						-fprofile-arcs -ftest-coverage
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 \
+#										 -lgcov -coverage
+LINK_EXECUTABLE_FLAGS = -Wall -g -O3 \
+#										 -lgcov -coverage
+
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+
+
+#######################################
+###   PACKAGE-SPECIFIC EXTENSIONS   ###
+
+CPP_FLAGS += -DDISABLE_PACKET_COUNTER_HACK\
+		-DRUN_ASIO_MULTITHREADED # \
 #					 -DNO_PREEMPTIVE_DISPATCH 
 
 #CPP_FLAGS += -fdelayed-template-parsing 
@@ -62,10 +89,10 @@ ifeq ($(CACTUS_OS),osx)
 CPP_FLAGS += -Wno-c++11-extensions -fdelayed-template-parsing
 endif 
 
-LINK_FLAGS = -g -shared -fPIC -Wall -O3 ${LIBRARY_PATH} ${LIBRARIES}\
-#										 -lgcov -coverage
 
-RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+########################
+###   COMMON RULES   ###
+
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
 
@@ -83,7 +110,7 @@ _all: ${LIBRARY}
 
 
 ${LIBRARY}: ${OBJECT_FILES}
-	g++ ${LINK_FLAGS} ${OBJECT_FILES} -o $@
+	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 
 ${OBJECT_FILES}: obj/%.o : src/common/%.cpp 
 	mkdir -p {lib,obj}

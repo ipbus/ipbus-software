@@ -7,32 +7,56 @@ Package = uhal/grammars
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-grammars
 
-Packager = Andrew Rose
+Packager = Andrew Rose, Tom Williams
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 1
 
-LIBRARY = lib/libcactus_uhal_grammars.so
+LIBRARY = cactus_uhal_grammars
 
-SOURCES = $(wildcard src/common/*.cpp)
-OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${SOURCES})
-
-LIBRARY_PATH = -L${UHAL_LOG_LIB_PREFIX}	
-
-LIBRARIES =  -lcactus_uhal_log
 
 INCLUDE_PATH = 	include  \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
 		${UHAL_LOG_INCLUDE_PREFIX}
+
+LIBRARY_PATH = ${UHAL_LOG_LIB_PREFIX}	
+
+LIBRARIES = cactus_uhal_log
+
+
+
+####################################
+###   COMMON DERIVED VARIABLES   ###
+
+
+LIBRARY := lib/lib${LIBRARY}.so
+
+LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
+LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
+
+EXECUTABLE_SOURCES = $(wildcard src/common/*.cxx)
+EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
+EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
+
 INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
+LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
+LIBRARIES := $(addprefix -l,$(LIBRARIES))
 
-CPP_FLAGS = -g -O3 -Wall -pedantic -MMD -MP -fPIC \
-            #-fprofile-arcs -ftest-coverage
+CPP_FLAGS = -g -Wall -pedantic -O3 -MMD -MP -fPIC \
+#						-fprofile-arcs -ftest-coverage
+LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g -O3 \
+#										 -lgcov -coverage
+LINK_EXECUTABLE_FLAGS = -Wall -g -O3 \
+#										 -lgcov -coverage
 
-LINK_FLAGS = -g -shared -fPIC -Wall -O3\
-	    #-lgcov -coverage
+RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+
+
+#######################################
+###   PACKAGE-SPECIFIC EXTENSIONS   ###
+
 
 # Hide c++11-extensions warning when building on osx
 ifeq ($(CACTUS_OS),osx)
@@ -40,7 +64,9 @@ CPP_FLAGS += -Wno-c++11-extensions
 endif
 
 
-RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+########################
+###   COMMON RULES   ###
+
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
 
@@ -58,9 +84,9 @@ buildall: _all
 _all: ${LIBRARY}
 
 ${LIBRARY}: ${OBJECT_FILES}
-	g++ ${LINK_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
+	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_PATH} ${LIBRARIES} ${OBJECT_FILES} -o $@
 
-${OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES} 
+${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES} 
 	mkdir -p {lib,obj}
 	g++ ${INCLUDE_PATH} -c $< ${CPP_FLAGS} -o $@
 
