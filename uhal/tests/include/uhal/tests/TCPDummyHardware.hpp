@@ -55,7 +55,8 @@ namespace uhal {
         TCPDummyHardware ( const uint16_t& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
           DummyHardware< IPbus_major , IPbus_minor > ( aReplyDelay , aBigEndianHack ) ,
           mIOservice(),
-          mAcceptor ( mIOservice , boost::asio::ip::tcp::endpoint ( boost::asio::ip::tcp::v4() , aPort ) )
+          mAcceptor ( mIOservice , boost::asio::ip::tcp::endpoint ( boost::asio::ip::tcp::v4() , aPort ) ),
+          mSocket ( mIOservice )
         {
           mAcceptor.listen();
         }
@@ -73,13 +74,27 @@ namespace uhal {
         */
         void run();
   
+        void stop();
+
       private:
+        void handle_accept(const boost::system::error_code& aError);
+
+        void handle_read_chunk_header(const boost::system::error_code& ec, std::size_t length);
+
+        void handle_read_chunk_payload(const boost::system::error_code& ec, std::size_t length);
+
         //! The BOOST ASIO io_service used by the TCP server
         boost::asio::io_service mIOservice;
         //! The TCP acceptor which opens the TCP port and handles the connection
         boost::asio::ip::tcp::acceptor mAcceptor;
+        //! The socket opened by the TCP server 
+        boost::asio::ip::tcp::socket mSocket;
+
         //! The endpoint which sent the UDP datagram
         boost::asio::ip::tcp::endpoint mSenderEndpoint;
+        //! Value of 'byte count' header at start of latest TCP chunk
+        uint32_t mByteCountHeader;
+
     };
   }
 }

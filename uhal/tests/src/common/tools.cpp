@@ -26,16 +26,178 @@
       Andrew Rose, Imperial College, London
       email: awr01 <AT> imperial.ac.uk
 
+      Tom Williams, Rutherford Appleton Laboratory, Oxfordshire
+      email: tom.williams <AT> cern.ch
+
 ---------------------------------------------------------------------------
 */
 
 #include "uhal/tests/tools.hpp"
 
+
+#include "uhal/ConnectionManager.hpp"
+#include "uhal/HwInterface.hpp"
 #include "uhal/log/log.hpp"
+#include "uhal/tests/UDPDummyHardware.hpp"
+#include "uhal/tests/TCPDummyHardware.hpp"
 
 #include <boost/program_options.hpp>
 
+
 namespace po = boost::program_options;
+
+
+namespace uhal {
+namespace tests {
+
+
+DeviceInfo::DeviceInfo(uhal::tests::DeviceType aType, uint16_t aPort, const std::string& aConnectionId) : 
+  type(aType),
+  port(aPort),
+  connectionId(aConnectionId)
+{
+}
+
+
+TestFixture::TestFixture() :
+  hwRunner(createRunner(sDeviceInfo))
+{
+  // FIXME : Ensure that controlhub cache is reset after dummy hardware reboot, but before unit tests (temporary solution)
+  if ( sDeviceInfo.type == IPBUS_2_0_CONTROLHUB ) {
+    ConnectionManager manager ( sConnectionFile );
+    HwInterface hw=manager.getDevice ( sDeviceId );
+    hw.getClient().read(0);
+    try {
+      hw.dispatch();
+    }
+    catch ( ... ) {
+    }
+  }
+}
+
+
+TestFixture::~TestFixture()
+{
+}
+
+
+boost::shared_ptr<DummyHardwareRunnerInterface> TestFixture::createRunner (const DeviceInfo& aDetails)
+{
+  boost::shared_ptr<DummyHardwareRunnerInterface> lResult;
+
+  switch (aDetails.type) {
+    case IPBUS_1_3_UDP :
+    case IPBUS_1_3_CONTROLHUB : 
+      lResult.reset(new DummyHardwareRunner<UDPDummyHardware<1,3> >(aDetails.port, 0, false));
+      break;
+    case IPBUS_1_3_TCP :
+      lResult.reset(new DummyHardwareRunner<TCPDummyHardware<1,3> >(aDetails.port, 0, false));
+      break;
+    case IPBUS_2_0_UDP : 
+    case IPBUS_2_0_CONTROLHUB : 
+      lResult.reset(new DummyHardwareRunner<UDPDummyHardware<2,0> >(aDetails.port, 0, false));
+      break;
+    case IPBUS_2_0_TCP :
+      lResult.reset(new DummyHardwareRunner<TCPDummyHardware<2,0> >(aDetails.port, 0, false));
+      break;
+  }
+
+  return lResult;
+}
+
+
+std::string TestFixture::sConnectionFile = "";
+DeviceInfo TestFixture::sDeviceInfo(IPBUS_2_0_UDP, 60001, "dummy.udp2");
+std::string TestFixture::sDeviceId = "";
+
+
+double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream)
+{
+  typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
+  Timer myTimer;
+
+  for ( unsigned i = 0; i < aNrIterations ; ++i )
+  {
+    if ( aOutStream )
+    {
+      (*aOutStream) << "Iteration " << i << std::endl;
+    }
+
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->readBlock ( aBaseAddr, aDepth, defs::NON_INCREMENTAL );
+    }
+
+    if ( aDispatchEachIteration )
+    {
+      for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+      {
+        (*lIt)->dispatch();
+      }
+    }
+  }
+
+  if ( !aDispatchEachIteration )
+  {
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->dispatch();
+    }
+  }
+
+  return myTimer.elapsedSeconds();
+}
+
+
+double measureTxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream)
+{
+  typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
+
+  // Send buffer - lots of "cafebabe" (in little-endian)
+  std::vector<uint32_t> sendBuffer ( aDepth, 0xbebafeca );
+  Timer myTimer;
+
+  for ( unsigned i = 0; i < aNrIterations ; ++i )
+  {
+    if ( aOutStream )
+    {
+      (*aOutStream) << "Iteration " << i << std::endl;
+    }
+
+    // Create the packet
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->writeBlock ( aBaseAddr, sendBuffer, defs::NON_INCREMENTAL );
+    }
+
+    if ( aDispatchEachIteration )
+    {
+      for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+      {
+        (*lIt)->dispatch();
+      }
+    }
+  }
+
+  if ( !aDispatchEachIteration )
+  {
+    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
+    {
+      (*lIt)->dispatch();
+    }
+  }
+
+  return myTimer.elapsedSeconds();
+}
+
+
+} // end ns tests
+} // end ns uhal
+
+
+uint32_t uhal::tests::failedTestCount = 0;
+uint32_t uhal::tests::passedTestCount = 0;
+
 
 long uhal::tests::usdiff ( const timeval& end, const timeval& start )
 {

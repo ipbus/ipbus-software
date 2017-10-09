@@ -40,6 +40,7 @@ LIBRARIES = 	\
 		-lboost_system \
 		-lboost_thread \
 		-lboost_program_options \
+		-lboost_unit_test_framework \
 		\
 		-l${PUGIXML_LIB_NAME} \
 		-lcactus_uhal_log \

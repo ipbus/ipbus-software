@@ -26,11 +26,15 @@
       Andrew Rose, Imperial College, London
       email: awr01 <AT> imperial.ac.uk
 
+      Tom Williams, Rutherford Appleton Laboratory, Oxfordshire
+      email: tom.williams <AT> cern.ch
+
 ---------------------------------------------------------------------------
 */
 
 #ifndef _uhal_tests_tools_hpp_
 #define _uhal_tests_tools_hpp_
+
 
 #include <stdint.h>
 #include <iostream>
@@ -39,21 +43,131 @@
 #include <exception>
 #include <sys/time.h>
 
-namespace uhal
-{
-  namespace tests
+#include <boost/thread/thread.hpp>
+
+#include "uhal/tests/UDPDummyHardware.hpp"
+
+
+namespace uhal {
+namespace tests {
+
+
+enum DeviceType {
+  IPBUS_1_3_UDP,
+  IPBUS_1_3_TCP,
+  IPBUS_1_3_CONTROLHUB,
+  IPBUS_2_0_UDP, 
+  IPBUS_2_0_TCP,
+  IPBUS_2_0_CONTROLHUB
+};
+
+
+struct DeviceInfo {
+  DeviceInfo(uhal::tests::DeviceType aType, uint16_t aPort, const std::string& aConnectionId);
+  ~DeviceInfo(){}
+
+  DeviceType type;
+  uint16_t port;
+
+  // ID for this device in unit test connection file
+  std::string connectionId;
+};
+
+
+class DummyHardwareRunnerInterface {
+protected:
+  DummyHardwareRunnerInterface(){}
+  ~DummyHardwareRunnerInterface(){}
+
+public:
+  virtual void setReplyDelay (const boost::chrono::microseconds& aDelay) = 0;
+};
+
+
+template <class DummyHardwareType>
+class DummyHardwareRunner : public DummyHardwareRunnerInterface {
+public:
+  DummyHardwareRunner(const uint16_t& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack) :
+    mHw(aPort, aReplyDelay, aBigEndianHack),
+    mHwThread( boost::bind(&DummyHardwareType::run, &mHw))
   {
-
-    //!timeval difference in micro seconds
-    long usdiff ( const timeval& end, const timeval& start );
-
-    //!Return the first argument
-    std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
-
-    uint32_t failedTestCount ( 0 );
-    uint32_t passedTestCount ( 0 );
   }
-}
+
+  ~DummyHardwareRunner()
+  {
+    mHw.stop();
+    mHwThread.join();
+  }
+
+  void setReplyDelay(const boost::chrono::microseconds& aDelay)
+  {
+    mHw.setReplyDelay(aDelay);
+  }
+
+private:
+  DummyHardwareType mHw;
+  boost::thread mHwThread;
+};
+
+
+struct TestFixture {
+  TestFixture();
+  ~TestFixture();
+
+  boost::shared_ptr<DummyHardwareRunnerInterface> hwRunner;
+
+private:
+  static boost::shared_ptr<DummyHardwareRunnerInterface> createRunner (const DeviceInfo& aDeviceInfo);
+
+public:
+  static std::string sConnectionFile;
+  static DeviceInfo sDeviceInfo;
+  static std::string sDeviceId;
+};
+
+
+/// A very simple timer
+class Timer
+{
+public:
+
+  Timer() :m_start()
+  {
+    gettimeofday ( &m_start, NULL );
+  }
+
+  /// Returns number of elapsed seconds since the timer was instantiated.
+  double elapsedSeconds()
+  {
+    timeval now;
+    gettimeofday ( &now, NULL );
+    time_t sec = now.tv_sec - m_start.tv_sec;
+    suseconds_t usec = now.tv_usec - m_start.tv_usec;
+    return static_cast<double> ( sec + usec/1000000. );
+  }
+
+private:
+  timeval m_start;
+
+}; /* End of class Timer */
+
+
+double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream);
+
+double measureTxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream);
+
+//!timeval difference in micro seconds
+long usdiff ( const timeval& end, const timeval& start );
+
+//!Return the first argument
+std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
+
+extern uint32_t failedTestCount;
+extern uint32_t passedTestCount;
+
+
+} // end ns tests
+} // end ns uhal
 
 
 //!Checks if the condition is fullfilled and it does not throw.

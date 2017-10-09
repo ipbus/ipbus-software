@@ -288,15 +288,25 @@ device_client_loop(timeout, S) ->
             ch_utils:log({error,log_prefix(S)}, "Irrecoverable timeout for control packet ID ~w, with ~w in flight. ~w recovery attempts, timeout ~wms~s",
                          [LostPktId, NrInFlight, length(RecoveryInfoList), S#state.timeout, 
                          lists:flatten([io_lib:format("; ~.1fms ago, ~w lost", [timer:now_diff(Now,Timestamp) / 1000, Type]) || {Timestamp, Type, _} <- RecoveryInfoList])]),
-            {value, {_, _, ReqHdr, ReqBody}} = queue:peek(element(2, S#state.in_flight)),
-            ReqPkt = <<ReqHdr/binary, ReqBody/binary>>,
+            ReqPkt = case S#state.ipbus_v of
+                          {1, 3} ->
+                              element(2, element(2, S#state.in_flight));
+                          {2, 0} ->
+                              {value, {_, _, ReqHdr, ReqBody}} = queue:peek(element(2, S#state.in_flight)),
+                              <<ReqHdr/binary, ReqBody/binary>>
+                      end,
             ch_utils:log({error,log_prefix(S)}, "Irrecoverable timeout for control packet ID ~w - request packet was ~s", [LostPktId, convert_binary_to_string(ReqPkt, "  0x")]),
             case RecoveryInfoList of
                 [{_, _, StatusReplyPkt} | _] ->
                     ch_utils:log({error,log_prefix(S)}, "Irrecoverable timeout for control packet ID ~w - last status packet was ~s", [LostPktId, convert_binary_to_string(StatusReplyPkt, "  0x")]);
                 _ -> void 
             end,
-            Pids = [Pid || {Pid, _, _, _} <- queue:to_list(element(2,S#state.in_flight))],
+            Pids = case S#state.ipbus_v of
+                       {1, 3} ->
+                           [element(1, element(2, S#state.in_flight))];
+                       {2, 0} ->
+                           [Pid || {Pid, _, _, _} <- queue:to_list(element(2,S#state.in_flight))]
+                   end,
             lists:foreach(fun(Pid) -> Pid ! MsgForTransactionManager end, Pids),
             reply_to_all_pending_requests_in_msg_inbox(MsgForTransactionManager),
             {stop, normal, NewState}            
@@ -323,7 +333,7 @@ send_request(ReqPkt, Pid, S) when S#state.ipbus_v == {1,3} ->
             ?CH_LOG_DEBUG("IPbus 1.3 request packet from PID ~w is being forwarded to board at ~s.", [Pid, ch_utils:ip_port_string(S#state.ip_tuple, S#state.port)]),
             S#state.udp_pid ! {send, ReqPkt},
             ch_stats:udp_sent(S#state.stats),
-            S#state{in_flight={1,Pid}};
+            S#state{in_flight={1, {Pid, ReqPkt}}};
         Other ->
             ch_utils:log(warning, "Request packet from PID ~w is invalid for an IPbus 1.3 target, and is being ignored. parse_ipbus_control_pkt returned ~w", [Pid, Other]),
             Pid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_WRONG_PROTOCOL_VERSION, <<>>},
@@ -343,11 +353,11 @@ forward_reply(Pkt, S = #state{ in_flight={NrInFlight,InFlightQ} }) when S#state.
             ?CH_LOG_DEBUG("Ignoring received packet with incorrect header (expecting header ~w, could just be genuine out-of-order reply): ~w", [SentHdr, RcvdHdr]),
             S#state{ in_flight={NrInFlight,queue:in_r(SentPktInfo, NewQ)} }
     end;
-forward_reply(Pkt, S = #state{ in_flight={1,TransManagerPid} }) when S#state.ipbus_v == {1,3} ->
+forward_reply(Pkt, S = #state{ in_flight={1,{TransManagerPid,_}} }) when S#state.ipbus_v == {1,3} ->
     ?CH_LOG_DEBUG("IPbus reply from ~s is being forwarded to PID ~w", [ch_utils:ip_port_string(S#state.ip_tuple,S#state.port), TransManagerPid]),
     TransManagerPid ! {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_SUCCESS, Pkt},
     ch_stats:udp_rcvd(S#state.stats),
-    S#state{in_flight={0,void}};
+    S#state{in_flight={0,{void,void}}};
 forward_reply(Pkt, S) ->
     LastTimoutSummary = case S#state.last_timeout of
                             none ->
@@ -364,16 +374,22 @@ forward_reply(Pkt, S) ->
 
 recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, port=Port}) when S#state.ipbus_v == {1,3} ->
     ch_utils:log({debug,log_prefix(S)}, "IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [S#state.timeout]),
+    NewS = case NrFailedAttempts of
+                 0 ->
+                     S#state{last_timeout={0, 1, [{erlang:now(), unknown, <<>>}]}};
+                 _ ->
+                     {_, _, AttemptInfoList} = S#state.last_timeout,
+                     S#state{last_timeout={0, 1, [{erlang:now(), unknown, <<>>} | AttemptInfoList]}}
+           end,
     receive
         {udp, Socket, IP, Port, Pkt} ->
-            NewS = forward_reply(Pkt, S),
-            {ok, NewS}
+            {ok, forward_reply(Pkt, NewS)}
     after S#state.timeout ->
         if 
           (NrFailedAttempts+1) == 3 ->
-            {error, S, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}};
+            {error, NewS, {device_client_response, S#state.ip_u32, S#state.port, ?ERRCODE_TARGET_CONTROL_TIMEOUT, <<>>}};
           true ->
-            recover_from_timeout(NrFailedAttempts + 1, S)
+            recover_from_timeout(NrFailedAttempts + 1, NewS)
         end
     end;
 
