@@ -32,7 +32,10 @@ LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX} \
 LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
 
 LIBRARIES = 	\
-		-lpthread \
+		-lcactus_uhal_uhal \
+		-lcactus_uhal_grammars \
+		-lcactus_uhal_log \
+		-l${PUGIXML_LIB_NAME} \
 		\
 		-lboost_thread \
 		-lboost_filesystem \
@@ -42,12 +45,10 @@ LIBRARIES = 	\
 		-lboost_program_options \
 		-lboost_unit_test_framework \
 		\
-		-l${PUGIXML_LIB_NAME} \
-		-lcactus_uhal_log \
-		-lcactus_uhal_grammars \
-		-lcactus_uhal_uhal	
+		-lpthread \
 
-EXECUTABLE_LIBRARIES = ${LIBRARIES} -lcactus_uhal_tests
+
+EXECUTABLE_LIBRARIES = -lcactus_uhal_tests ${LIBRARIES}
 
 INCLUDE_PATH = include  \
 		${UHAL_LOG_INCLUDE_PREFIX} \
@@ -91,7 +92,7 @@ _all: ${LIBRARY} ${EXECUTABLES}
 
 
 ${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES}
-	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
+	g++ $< ${LINK_EXECUTABLE_FLAGS} -o $@
 
 ${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
 	mkdir -p {bin,obj,lib}
