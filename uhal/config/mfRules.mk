@@ -48,7 +48,7 @@ clean: _cleanall
 _cleanall:
 	rm -rf obj
 	rm -rf bin
-	rm -rf lib
+	rm -rf lib ${LibraryTarget}
 
 .PHONY: all _all build buildall
 all: _all
@@ -60,27 +60,26 @@ _all: ${LibraryTarget} ${Executables} ${ExtraTargets}
 objects: ${LibraryObjectFiles} ${ExecutableObjectFiles}
 
 
+${PackagePath}/obj ${PackagePath}/lib ${PackagePath}/bin :
+	${MakeDir} $@
+
 # Implicit rule for .cpp -> .o 
-${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cpp 
-	${MakeDir} $(@D)
+${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cpp  | ${PackagePath}/obj
 	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 
 # Implicit rule for .cxx -> .o 
-${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx 
-	${MakeDir} $(@D)
+${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | ${PackagePath}/obj
 	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 	
 # Main target: shared library
-${LibraryTarget}: ${LibraryObjectFiles}
-	${MakeDir} $(@D)
+${LibraryTarget}: ${LibraryObjectFiles}  | ${PackagePath}/lib
 	${LD} -shared ${LDFLAGS} ${DependentLibraries} ${LibraryObjectFiles} -o $@
 
 # Include automatically generated dependencies
 -include $(LibraryObjectFiles:.o=.d)
 	
 # Static Pattern rule for binaries
-${Executables} : ${PackagePath}/bin/%.exe : ${PackagePath}/obj/%.o ${LibraryTarget}
-	${MakeDir} $(@D)
+${Executables} : ${PackagePath}/bin/%.exe : ${PackagePath}/obj/%.o ${LibraryTarget}  | ${PackagePath}/bin
 	${LD} ${LDFLAGS} ${ExecutableDependentLibraries} $< -o $@
 
 # Include automatically generated dependencies
