@@ -80,7 +80,7 @@ ${LibraryTarget}: ${LibraryObjectFiles}  | ${PackagePath}/lib
 	
 # Static Pattern rule for binaries
 ${Executables} : ${PackagePath}/bin/%.exe : ${PackagePath}/obj/%.o ${LibraryTarget}  | ${PackagePath}/bin
-	${LD} ${LDFLAGS} ${ExecutableDependentLibraries} $< -o $@
+	${LD} ${LDFLAGS} $< ${ExecutableDependentLibraries} -o $@
 
 # Include automatically generated dependencies
 -include $(ExecutableObjectFiles:.o=.d)
