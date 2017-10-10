@@ -102,7 +102,7 @@ doxygen_job:
     - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - cd .. && mv ipbus-software ipbus-software____ && cd ipbus-software____
+    - cd .. && mv ipbus-software ipbus-software____ && mkdir ipbus-software && cd ipbus-software____
     - make -k Set=all
     - make -k Set=all rpm
     - mkdir -p yumrepo

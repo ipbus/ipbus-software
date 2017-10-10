@@ -26,7 +26,7 @@ _rpmbuild: _setup_update
 	--release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} \
 	--binary-only --force-arch=`uname -m`
 	# Harvest the crop
-	find rpm -name "*.rpm" -exec cp -a \{\} rpm/ \;
+	find ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} ${PackagePath}/rpm \;
 
 
 .PHONY: _setup_update	
