@@ -86,6 +86,7 @@ ${GENERATED_FILES} : ${GENERATOR_EXE}
 	./generator.exe
 
 .PHONY: _generator_clean
-clean: generator_clean
+clean: _generator_clean
+_generator_clean:
 	rm -rf src/common/log.cpp
 	rm -rf include/uhal/log/log.hpp include/uhal/log/log.hxx

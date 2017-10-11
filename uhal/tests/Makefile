@@ -3,7 +3,7 @@ BUILD_HOME = $(shell pwd)/../..
 include $(BUILD_HOME)/config/Makefile.macros
 include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
-Project = uhal
+Project = uhal/tests
 Package = uhal/tests
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-tests
