@@ -17,14 +17,15 @@ _rpmall: _all _setup_update _rpmbuild
 _rpmbuild: _setup_update
 	# Change directory into pkg and copy everything into rpm/pkg
 	cd pkg && \
-	find . -name "*" -exec install -D \{\} ${RPMBUILD_DIR}/\{\} \;
+	  find . -name "*" -exec install -D \{\} ${RPMBUILD_DIR}/\{\} \;
 	# Add a manifest file
 	echo "include */*.so" > ${RPMBUILD_DIR}/MANIFEST.in
 	# Change into rpm/pkg to finally run the customized setup.py
 	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
 	cd ${RPMBUILD_DIR} && CACTUS_ROOT=${CACTUS_ROOT} python ${PackageName}.py bdist_rpm \
-	--release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} \
-	--binary-only --force-arch=`uname -m`
+	  --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} \
+	  --requires "python `find ${RPMBUILD_DIR} -type f -exec file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' '`" \
+	  --binary-only --force-arch=`uname -m`
 	# Harvest the crop
 	find ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} ${PackagePath}/rpm \;
 
