@@ -25,7 +25,7 @@ IncludePaths = include  \
 
 LibraryPaths = ${UHAL_LOG_LIB_PREFIX}	
 
-Libraries = cactus_uhal_log
+Libraries = 
 
 
 # Hide c++11-extensions warning when building on osx

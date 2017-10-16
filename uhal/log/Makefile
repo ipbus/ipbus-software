@@ -49,8 +49,7 @@ else
   LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX}
 	
   Libraries = pthread \
-		boost_thread \
-		boost_system
+		boost_thread
 
   CXXFLAGS += -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
 

@@ -35,7 +35,6 @@ Libraries = pthread \
 		${PUGIXML_LIB_NAME} \
 		\
 		boost_thread \
-		boost_system \
 		boost_filesystem \
 		boost_regex \
 		boost_thread \
