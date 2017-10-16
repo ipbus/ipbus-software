@@ -7,11 +7,12 @@ Project = uhal
 Package = uhal/pycohal
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-pycohal
-PackageURL = https://ipbus.web.cern/ipbus
 PackageDescription = Python bindings for the CACTUS uhal library
 PythonModules = ["uhal"]
 
+PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Tom Williams
+PackagerEmail = tom.williams@cern.ch
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5

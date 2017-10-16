@@ -7,8 +7,8 @@ Project = uhal/tests
 Package = uhal/tests
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-tests
-PackageURL = https://ipbus.web.cern.ch/ipbus
 
+PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Andrew Rose, Marc Magrans de Arbil, Tom Williams
 
 PACKAGE_VER_MAJOR = 2

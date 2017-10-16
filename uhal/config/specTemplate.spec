@@ -88,7 +88,7 @@ fi
 if [ -d %{_packagedir}/lib ]; then
   cd %{_packagedir}/lib; \
 #  find . -name ".svn" -prune -o -name "*" -exec install -D -m 644 {} $RPM_BUILD_ROOT/%{_prefix}/lib/{} \;
-  find . -name "*" -exec $BUILD_HOME/uhal/config/install.sh {} %{_prefix}/lib/{} 655 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
+  find . -name "*" -exec $BUILD_HOME/uhal/config/install.sh {} %{_prefix}/lib/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
 fi
 
 

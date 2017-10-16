@@ -7,12 +7,13 @@ Project = uhal
 Package = uhal/gui
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-gui
-PackageURL = https://ipbus.web.cern.ch/ipbus
-PackageDescription = Python GUI for uTCA HW access based on uHAL
 PythonModules = ["uhal.gui","uhal.gui.guis","uhal.gui.customguis","uhal.gui.utilities","uhal.gui.test"]
 PackageScripts = ["uhal_gui.exe"]
 
+PackageDescription = Python GUI for uTCA HW access based on uHAL
+PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Carlos Ghabrous Larrea, Tom Williams
+PackagerEmail = tom.williams@cern.ch
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 3

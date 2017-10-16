@@ -9,6 +9,7 @@ Package = uhal/log
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-log
 
+PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Andrew Rose, Tom Williams
 
 PACKAGE_VER_MAJOR = 2
