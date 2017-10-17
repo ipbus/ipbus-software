@@ -7,15 +7,17 @@ Project = uhal/tools
 Package = uhal/tools
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-tools
-PackageURL = https://ipbus.web.cern.ch/ipbus
-
-Packager = Kristian Harder, Dave Newbold, Tom Williams
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
 
+PackageSummary = uTCA HW Development Tools that depend on uHAL
+PackageDescription = uTCA HW Development Tools that depend on uHAL
+PackageURL = https://ipbus.web.cern.ch/ipbus
+Packager = Kristian Harder, Dave Newbold, Tom Williams
+PackageBuildArch = noarch
 
 
 .PHONY: _all build clean

@@ -1,4 +1,3 @@
-
 BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
@@ -9,13 +8,16 @@ Package = uhal/log
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-log
 
-PackageURL = https://ipbus.web.cern.ch/ipbus
-Packager = Andrew Rose, Tom Williams
-
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 1
+
+PackageSummary = uHAL Logging Library
+PackageDescription = uHAL Logging Library
+PackageURL = https://ipbus.web.cern.ch/ipbus
+Packager = Andrew Rose, Tom Williams
+
 
 Library = cactus_uhal_log
 

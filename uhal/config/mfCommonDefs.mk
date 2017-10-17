@@ -15,3 +15,6 @@ LDFLAGS = -Wall -g -O3 -fPIC
 
 # Tools
 MakeDir = mkdir -p
+
+
+PYTHON_VERSION ?= $(shell python -c "import distutils.sysconfig;print distutils.sysconfig.get_python_version()")

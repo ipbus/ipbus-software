@@ -4,6 +4,7 @@ ifndef PythonModules
     $(error Python module names missing "PythonModules")
 endif
 PackageScripts ?= []
+PackageDescription ?= None
 
 
 .PHONY: rpm _rpmall
@@ -39,7 +40,7 @@ _setup_update:
 	sed -i 's#__version__#$(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR).$(PACKAGE_VER_PATCH)#' ${RPMBUILD_DIR}/${PackageName}.py
 	sed -i 's#__author__#${Packager}#' ${RPMBUILD_DIR}/${PackageName}.py
 	sed -i 's#__author_email__#${PackagerEmail}#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__description__#${PackageDescription-None}#' ${RPMBUILD_DIR}/${PackageName}.py
+	sed -i 's#__description__#${PackageDescription}#' ${RPMBUILD_DIR}/${PackageName}.py
 	sed -i 's#__url__#${PackageURL}#' ${RPMBUILD_DIR}/${PackageName}.py
 	sed -i 's#__scripts__#${PackageScripts}#' ${RPMBUILD_DIR}/${PackageName}.py
 

@@ -3,8 +3,10 @@ RPMBUILD_DIR=${PackagePath}/rpm/RPMBUILD
 
 BuildDebuginfoRPM ?= 1
 IncludePaths := $(if ${IncludePaths}, ${IncludePaths}, %{nil})
-BUILD_REQUIRES_TAG = $(if ${PackageBuildRequires} ,BuildRequires: ${PackageBuildRequires} ,\# No BuildRequires tag )
-REQUIRES_TAG = $(if ${PackageRequires} ,Requires: ${PackageRequires} ,\# No Requires tag )
+PackageSummary := $(if ${PackageSummary}, ${PackageSummary}, None)
+PackageDescription := $(if ${PackageDescription}, ${PackageDescription}, None)
+BUILD_REQUIRES_TAG = $(if ${PackageBuildRequires}, BuildRequires: ${PackageBuildRequires} ,\# No BuildRequires tag )
+REQUIRES_TAG = $(if ${PackageRequires}, Requires: ${PackageRequires} ,\# No Requires tag )
 
 export BUILD_HOME
 
@@ -33,12 +35,13 @@ _spec_update:
 	sed -i 's#__platform__#None#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__project__#${Project}#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__author__#${Packager}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__summary__#None#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__description__#None#' ${PackagePath}/rpm/${PackageName}.spec
+	sed -i 's#__summary__#${PackageSummary}#' ${PackagePath}/rpm/${PackageName}.spec
+	sed -i 's#__description__#${PackageDescription}#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__url__#${PackageURL}#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__includedirs__#${IncludePaths}#' $(PackagePath)/rpm/$(PackageName).spec
 	sed -i 's|^.*__build_requires__.*|${BUILD_REQUIRES_TAG}|' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's|^.*__requires__.*|${REQUIRES_TAG}|' ${PackagePath}/rpm/${PackageName}.spec
+	sed -i 's|^BuildArch:.*|$(if ${PackageBuildArch},BuildArch: ${PackageBuildArch},\# BuildArch not specified)|' ${PackagePath}/rpm/${PackageName}.spec
 	if [ "${BuildDebuginfoRPM}" == "1" ]; then sed -i '1 i\%define _build_debuginfo_package %{nil}' ${PackagePath}/rpm/${PackageName}.spec; fi
 
 .PHONY: cleanrpm _cleanrpm

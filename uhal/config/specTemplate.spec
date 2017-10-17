@@ -31,6 +31,7 @@ License: GPLv3
 Group: CACTUS
 Source: %{_source}
 URL: %{_url} 
+BuildArch: 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot 
 Prefix: %{_prefix}
 

@@ -8,13 +8,16 @@ Package = uhal/uhal
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-uhal
 
-PackageURL = https://ipbus.web.cern.ch/ipbus
-Packager = Andrew Rose, Tom Williams
-
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1
+
+PackageSummary = uHAL Library
+PackageDescription = uHAL Library
+PackageURL = https://ipbus.web.cern.ch/ipbus
+Packager = Andrew Rose, Tom Williams
+
 
 Library = cactus_uhal_uhal
 
