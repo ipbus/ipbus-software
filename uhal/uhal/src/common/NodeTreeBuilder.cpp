@@ -42,6 +42,14 @@
 #include <boost/filesystem.hpp>
 
 
+#if BOOST_VERSION >= 106000
+// Resolve boost bind placeholders (_1, _2, ...) that moved within boost::laceholders namespace from v1.60
+using boost::placeholders::_1;
+using boost::placeholders::_2;
+using boost::placeholders::_3;
+#endif
+
+
 namespace uhal
 {
 
