@@ -44,7 +44,7 @@ VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
 
 FLAGS = $(ifeq $(MAKEFLAGS) "","",-$(MAKEFLAGS))
 
-TARGETS=clean rpm build 
+TARGETS=all clean build cleanrpm rpm
 
 .PHONY: $(TARGETS) 
 default: build

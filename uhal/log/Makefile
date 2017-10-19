@@ -1,147 +1,94 @@
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# SET TO EITHER TRUE OR FALSE, DEPENDING ON WHETHER YOU WANT TO COMPILE CMSSW INTO CODE
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-USE_BACKTRACE = FALSE
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
 BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
+include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
 Project = uhal
 Package = uhal/log
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-log
 
-Packager = Andrew Rose
-
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 1
 
-LIBRARY = lib/libcactus_uhal_log.so
+PackageSummary = uHAL Logging Library
+PackageDescription = uHAL Logging Library
+PackageURL = https://ipbus.web.cern.ch/ipbus
+Packager = Andrew Rose, Tom Williams
 
-LIBRARY_SOURCES = $(wildcard src/common/*.cpp)
 
-LIBRARY_OBJECT_FILES = $(patsubst src/common/%.cpp,obj/%.o,${LIBRARY_SOURCES})
+Library = cactus_uhal_log
 
-EXECUTABLE_SOURCES = 	src/common/generator.cxx
 
-EXECUTABLE_OBJECT_FILES = $(patsubst src/common/%.cxx,obj/%.o,${EXECUTABLE_SOURCES})
-EXECUTABLES = $(patsubst src/common/%.cxx,bin/%.exe,${EXECUTABLE_SOURCES})
+USE_BACKTRACE ?= FALSE
 
 ifeq ($(USE_BACKTRACE),TRUE)
 
-	LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX}\
-			$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd\
-			$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty 
-	LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
+  LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX}\
+		$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd\
+		$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty 
 	
-	LIBRARIES = -lpthread \
-			-lboost_thread \
-			-Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive\
+  Libraries = pthread \
+		boost_thread
 	
-	INCLUDE_PATH = include  \
-			${EXTERN_BOOST_INCLUDE_PREFIX} \
-			$(BUILD_HOME)/extern/binutils/binutils-2.23/include/\
-			$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/\
-			$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd/
-	INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
+  IncludePaths = include  \
+		${EXTERN_BOOST_INCLUDE_PREFIX} \
+		$(BUILD_HOME)/extern/binutils/binutils-2.23/include/\
+		$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/\
+		$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd/
 
-	CPP_FLAGS = -g  -Wall -pedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
-							#-fprofile-arcs -ftest-coverage
+  CXXFLAGS += -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
+
+  LDFLAGS += -Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive\
 
 else
 
-	LIBRARY_PATH = ${EXTERN_BOOST_LIB_PREFIX}
-	LIBRARY_PATH := $(addprefix -L,$(LIBRARY_PATH))
-	
-	LIBRARIES = -lpthread \
-			-lboost_thread \
-			-lboost_system
-	
-	INCLUDE_PATH = include  \
-			${EXTERN_BOOST_INCLUDE_PREFIX}
-	INCLUDE_PATH := $(addprefix -I,$(INCLUDE_PATH))
+  IncludePaths = include  \
+		${EXTERN_BOOST_INCLUDE_PREFIX}
 
-	CPP_FLAGS = -g  -Wall -pedantic -O3 -MMD -MP -fPIC -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
-                        #-fprofile-arcs -ftest-coverage
+  LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX}
+	
+  Libraries = pthread \
+		boost_thread
+
+  CXXFLAGS += -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
 
 endif		
 
 
 # Hide c++11-extensions warning when building on osx
 ifeq ($(CACTUS_OS),osx)
-CPP_FLAGS += -Wno-c++11-extensions
+  CXXFLAGS += -Wno-c++11-extensions
 endif
 
 
-LINK_LIBRARY_FLAGS = -shared -fPIC -Wall -g ${LIBRARY_PATH} ${LIBRARIES} \
-										 #-lgcov -coverage
+IgnoreSources = src/common/generator.cxx
 
-LINK_EXECUTABLE_FLAGS = -Wall -g\
-										 #-lgcov -coverage 
+include $(BUILD_HOME)/uhal/config/mfRules.mk
+include $(BUILD_HOME)/uhal/config/mfRPMRules.mk
 
-RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
-.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update generator
+# Extra rules for compiling the log.hxx / generator
 
-default: build
+GENERATOR_EXE = ${PackagePath}/generator.exe
+GENERATOR_OBJ = ${PackagePath}/obj/generator.o
+GENERATED_HEADERS = ${PackagePath}/include/uhal/log/log.hpp ${PackagePath}/include/uhal/log/log.hxx
+GENERATED_FILES = ${GENERATED_HEADERS} ${PackagePath}/src/common/log.cpp
 
-clean: _cleanall
-_cleanall:
-	rm -rf ${RPMBUILD_DIR}
-	rm -rf obj
-	rm -rf bin
-	rm -rf lib
-#These files are created by the generator which runs as part of make and so should be removed by make clean
+${LibraryObjectFiles} : ${GENERATED_HEADERS}
+${LibraryTarget} : ${PackagePath}/obj/log.o
+LibraryObjectFiles += ${PackagePath}/obj/log.o
+
+${GENERATOR_EXE} : ${GENERATOR_OBJ}
+	${LD} ${LDFLAGS} $< -o $@
+
+${GENERATED_FILES} : ${GENERATOR_EXE}
+	./generator.exe
+
+.PHONY: _generator_clean
+clean: _generator_clean
+_generator_clean:
 	rm -rf src/common/log.cpp
-	rm -rf include/uhal/log/log.{hpp,hxx}
-
-all: _all
-build: _all
-buildall: _all
-_all: ${EXECUTABLES} ${LIBRARY} 
-
-
-${EXECUTABLES}: bin/%.exe: obj/%.o ${EXECUTABLE_OBJECT_FILES} 
-	g++ ${LINK_EXECUTABLE_FLAGS} $< -o $@
-	./bin/generator.exe	
-	rm -rf obj/log.o
-
-${EXECUTABLE_OBJECT_FILES}: obj/%.o : src/common/%.cxx
-	mkdir -p {bin,obj,lib}
-	g++ -c ${CPP_FLAGS}  ${INCLUDE_PATH}  $< -o $@
-
--include $(EXECUTABLE_OBJECT_FILES:.o=.d)
-
-${LIBRARY}: ${LIBRARY_OBJECT_FILES}
-#Make evaluates the list of files before it starts and does not pick up the existence of the file created during the ${EXECUTABLES} stage. We must, therefore, explicitly specify that it is built.
-	g++ -c ${CPP_FLAGS}  ${INCLUDE_PATH} src/common/log.cpp -o obj/log.o
-#And similarly, we must manually specify the inclusion of the object file created in the line above into the shared object file
-	g++ ${LINK_LIBRARY_FLAGS} ${LIBRARY_OBJECT_FILES} obj/log.o -o $@
-
-${LIBRARY_OBJECT_FILES}: obj/%.o : src/common/%.cpp ${INCLUDES}  
-	mkdir -p {bin,obj,lib}
-	g++ -c ${CPP_FLAGS}  ${INCLUDE_PATH} $< -o $@
-
--include $(LIBRARY_OBJECT_FILES:.o=.d)
-
-rpm: _rpmall
-_rpmall: 
-	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
-	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include/${Package}}
-	cp -p lib/*.so ${RPMBUILD_DIR}/SOURCES/lib/.
-	cp -p include/${Package}/*.{hpp,hxx} ${RPMBUILD_DIR}/SOURCES/include/${Package}/.
-	rpmbuild -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD						\
-			--define  "_topdir ${RPMBUILD_DIR}"						\
-			--define "_prefix ${CACTUS_ROOT}"							\
-			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"					\
-			--define "name ${PackageName}"								\
-			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}"	\
-			--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}"							\
-			--define "packager ${Packager}"								\
-			${PackageName}.spec
-
+	rm -rf include/uhal/log/log.hpp include/uhal/log/log.hxx
