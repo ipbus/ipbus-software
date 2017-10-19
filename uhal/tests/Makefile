@@ -51,10 +51,10 @@ Libraries = \
 
 ExecutableLibraries = \
 		cactus_uhal_tests \
+		${Libraries} \
 		boost_regex \
 		boost_system \
-		${PUGIXML_LIB_NAME} \
-		${Libraries}
+		${PUGIXML_LIB_NAME}
 
 
 # Hide c++11-extensions warning when building on osx
