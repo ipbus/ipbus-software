@@ -35,24 +35,27 @@
 #include "uhal/grammars/HttpResponseGrammar.hpp"
 
 
-std::ostream& operator<< ( std::ostream& aStr , const uhal::HttpResponseType& aHttpResponse )
-{
-  aStr << " > method = " << aHttpResponse.method << "\n";
-  aStr << " > version = " << aHttpResponse.version << "\n";
-  aStr << " > status = " << aHttpResponse.status << "\n";
-  aStr << " > status_string = " << aHttpResponse.status_string << "\n";
-  aStr << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
-  aStr << " > Content =\n";
+namespace uhal {
 
-  for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::HttpResponseType& aHttpResponse )
   {
-    aStr << char ( *lIt );
+    aStr << " > method = " << aHttpResponse.method << "\n";
+    aStr << " > version = " << aHttpResponse.version << "\n";
+    aStr << " > status = " << aHttpResponse.status << "\n";
+    aStr << " > status_string = " << aHttpResponse.status_string << "\n";
+    aStr << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
+    aStr << " > Content =\n";
+
+    for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
+    {
+      aStr << char ( *lIt );
+    }
+
+    aStr << std::endl;
+    return aStr;
   }
 
-  aStr << std::endl;
-  return aStr;
 }
-
 
 
 // namespace uhal

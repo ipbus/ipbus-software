@@ -196,37 +196,39 @@ namespace uhal
       void print ( std::ostream& aStr ) const;
   };
 
-}
 
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint8_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint8_t , FORMAT >& aInt );
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int8_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int8_t , FORMAT >& aInt );
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint16_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint16_t , FORMAT >& aInt );
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int16_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int16_t , FORMAT >& aInt );
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint32_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint32_t , FORMAT >& aInt );
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int32_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int32_t , FORMAT >& aInt );
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint64_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint64_t , FORMAT >& aInt );
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int64_t , FORMAT >& aInt );
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int64_t , FORMAT >& aInt );
 
 #ifdef __APPLE__ 
-template< typename FORMAT > 
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< size_t , FORMAT >& aInt ); 
+  template< typename FORMAT > 
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< size_t , FORMAT >& aInt ); 
 #endif 
+
+}
+
 
 #include <uhal/log/log_inserters.integer.hxx>
 

@@ -64,15 +64,15 @@ namespace uhal
     NI_WRITE,
     CONFIG_SPACE_READ
   };
-}
 
-/**
-  Streaming operator for formatting objects of the uhal::eIPbusTransactionType
-  @param aStr a stream to which to append the formatted data
-  @param aIPbusTransactionType an enum object to be formatted
-  @return a reference to the stream for chaining stram calls
-*/
-std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType );
+  /**
+    Streaming operator for formatting objects of the uhal::eIPbusTransactionType
+    @param aStr a stream to which to append the formatted data
+    @param aIPbusTransactionType an enum object to be formatted
+    @return a reference to the stream for chaining stram calls
+  */
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType );
+}
 
 
 namespace uhal

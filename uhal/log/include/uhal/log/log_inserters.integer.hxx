@@ -252,71 +252,70 @@ namespace uhal
   }
 
 
-}
 
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint8_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int8_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint8_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint16_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int8_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int16_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint16_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint32_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int16_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int32_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint32_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint64_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int32_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
-
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< uint64_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
-
-template< typename FORMAT >
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int64_t , FORMAT >& aInt )
-{
-  aInt.print ( aStr );
-  return aStr;
-}
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int64_t , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
 
 #ifdef __APPLE__ 
-template< typename FORMAT > 
-std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< size_t , FORMAT >& aInt ) 
-{ 
-  aInt.print ( aStr ); 
-  return aStr; 
-} 
-#endif 
+  template< typename FORMAT > 
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< size_t , FORMAT >& aInt ) 
+  { 
+    aInt.print ( aStr ); 
+    return aStr; 
+  }
+#endif
+
+}

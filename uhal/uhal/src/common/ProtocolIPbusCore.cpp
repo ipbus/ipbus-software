@@ -38,45 +38,45 @@
 #include "uhal/log/log.hpp"
 
 
-std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType )
-{
-  switch ( aIPbusTransactionType )
-  {
-    case uhal::B_O_T:
-      aStr << "\"Byte Order Transaction\"";
-      break;
-    case uhal::R_A_I:
-      aStr << "\"Reserved Address Information\"";
-      break;
-    case uhal::NI_READ:
-      aStr << "\"Non-incrementing Read\"";
-      break;
-    case uhal::READ:
-      aStr << "\"Incrementing Read\"";
-      break;
-    case uhal::NI_WRITE:
-      aStr << "\"Non-incrementing Write\"";
-      break;
-    case uhal::WRITE:
-      aStr << "\"Incrementing Write\"";
-      break;
-    case uhal::RMW_SUM:
-      aStr << "\"Read-Modify-Write Sum\"";
-      break;
-    case uhal::RMW_BITS:
-      aStr << "\"Read-Modify-Write Bits\"";
-      break;
-    case uhal::CONFIG_SPACE_READ:
-      aStr << "\"Configuration space read\"";
-      break;
-  }
-
-  return aStr;
-}
-
-
 namespace uhal
 {
+
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType )
+  {
+    switch ( aIPbusTransactionType )
+    {
+      case uhal::B_O_T:
+        aStr << "\"Byte Order Transaction\"";
+        break;
+      case uhal::R_A_I:
+        aStr << "\"Reserved Address Information\"";
+        break;
+      case uhal::NI_READ:
+        aStr << "\"Non-incrementing Read\"";
+        break;
+      case uhal::READ:
+        aStr << "\"Incrementing Read\"";
+        break;
+      case uhal::NI_WRITE:
+        aStr << "\"Non-incrementing Write\"";
+        break;
+      case uhal::WRITE:
+        aStr << "\"Incrementing Write\"";
+        break;
+      case uhal::RMW_SUM:
+        aStr << "\"Read-Modify-Write Sum\"";
+        break;
+      case uhal::RMW_BITS:
+        aStr << "\"Read-Modify-Write Bits\"";
+        break;
+      case uhal::CONFIG_SPACE_READ:
+        aStr << "\"Configuration space read\"";
+        break;
+    }
+
+    return aStr;
+  }
+
 
 
   IPbusCore::IPbusCore ( const std::string& aId, const URI& aUri , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize , const boost::posix_time::time_duration& aTimeoutPeriod ) :

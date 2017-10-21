@@ -35,21 +35,24 @@
 #include <iostream>
 
 
-std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI )
-{
-  aStr << " > protocol : " << aURI.mProtocol << "\n";
-  aStr << " > hostname : " << aURI.mHostname << "\n";
-  aStr << " > port : " << aURI.mPort << "\n";
-  aStr << " > path : " << aURI.mPath << "\n";
-  aStr << " > extension : " << aURI.mExtension << "\n";
-  aStr << " > arguments :\n";
+namespace uhal {
 
-  for ( uhal::NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin() ; lIt != aURI.mArguments.end() ; ++lIt )
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI )
   {
-    aStr << "   > " << lIt->first << " = " << lIt->second << "\n";
+    aStr << " > protocol : " << aURI.mProtocol << "\n";
+    aStr << " > hostname : " << aURI.mHostname << "\n";
+    aStr << " > port : " << aURI.mPort << "\n";
+    aStr << " > path : " << aURI.mPath << "\n";
+    aStr << " > extension : " << aURI.mExtension << "\n";
+    aStr << " > arguments :\n";
+
+    for ( uhal::NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin() ; lIt != aURI.mArguments.end() ; ++lIt )
+    {
+      aStr << "   > " << lIt->first << " = " << lIt->second << "\n";
+    }
+
+    aStr << std::flush;
+    return aStr;
   }
 
-  aStr << std::flush;
-  return aStr;
 }
-
