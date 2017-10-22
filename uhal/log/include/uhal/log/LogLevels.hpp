@@ -17,7 +17,7 @@ void insert ( std::ostream& aStr , const U& aU )
 // While on linux the 'warning' attribute is defined, it is not in OSX 10.9 clang.
 // On the other hand clang's 'deprecated' is messageless in g++, while it supports messages in clang.
 // To make the story short, log_insert_warning uses the most appropriated attribute for the system in use.
-#ifndef __APPLE__
+#ifndef __clang__
 #define log_insert_warning warning
 #else
 #define log_insert_warning deprecated

@@ -5,7 +5,7 @@ $(info Using BUILD_HOME=${BUILD_HOME})
 
 # Compilers
 CPP = g++
-LD = g++
+LD = ${CPP}
 
 # Compiler flags
 CXXFLAGS = -g -Wall -pedantic -O3 -MMD -MP -fPIC

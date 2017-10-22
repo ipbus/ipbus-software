@@ -45,7 +45,7 @@ void write_read_masked ( const std::string& connection, const std::string& id )
   ConnectionManager manager ( connection );
   HwInterface hw=manager.getDevice ( id );
   uint32_t x = static_cast<uint32_t> ( rand() );
-  hw.getNode ( "REG_LOWER_MASK" ).write ( x && 0xFFFF );
+  hw.getNode ( "REG_LOWER_MASK" ).write ( x & 0xFFFF );
   hw.getNode ( "REG_UPPER_MASK" ).write ( x >> 16 );
   CACTUS_TEST_THROW ( hw.getNode ( "REG_LOWER_MASK" ).write ( 0x1FFFF ),uhal::exception::exception );
   CACTUS_TEST_THROW ( hw.getNode ( "REG_UPPER_MASK" ).write ( 0x1FFFF ),uhal::exception::exception );
@@ -60,7 +60,7 @@ void write_read_masked ( const std::string& connection, const std::string& id )
   CACTUS_CHECK ( reg_l.value() <= 0xFFFF );
   CACTUS_CHECK ( reg_u.value() <= 0xFFFF );
   CACTUS_CHECK ( reg_l.valid() && reg_u.valid() );
-  CACTUS_CHECK ( reg_l.value() == ( x && 0xFFFF ) );
+  CACTUS_CHECK ( reg_l.value() == ( x & 0xFFFF ) );
   CACTUS_CHECK ( reg_u.value() == ( x >> 16 ) );
 }
 

@@ -3,8 +3,6 @@
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/Node.hpp"
-#include "uhal/ProtocolTCP.hpp"
-#include "uhal/ProtocolUDP.hpp"
 #include "uhal/ValMem.hpp"
 
 

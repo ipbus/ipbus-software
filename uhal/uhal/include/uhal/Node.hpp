@@ -379,14 +379,11 @@ namespace uhal
 
       //! Helper to assist look-up of a particular child node, given a name
       boost::unordered_map< std::string , Node* > mChildrenMap;
-
-
-
   };
 
+  std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode );
 }
 
-std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode );
 
 #include "uhal/TemplateDefinitions/Node.hxx"
 

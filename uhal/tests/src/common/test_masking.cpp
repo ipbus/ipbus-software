@@ -55,7 +55,7 @@ BOOST_FIXTURE_TEST_CASE(write_read_masked, TestFixture)
   ConnectionManager manager ( sConnectionFile );
   HwInterface hw=manager.getDevice ( sDeviceId );
   uint32_t x = static_cast<uint32_t> ( rand() );
-  hw.getNode ( "REG_LOWER_MASK" ).write ( x && 0xFFFF );
+  hw.getNode ( "REG_LOWER_MASK" ).write ( x & 0xFFFF );
   hw.getNode ( "REG_UPPER_MASK" ).write ( x >> 16 );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_LOWER_MASK" ).write ( 0x1FFFF ),uhal::exception::exception );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_UPPER_MASK" ).write ( 0x1FFFF ),uhal::exception::exception );
@@ -70,7 +70,7 @@ BOOST_FIXTURE_TEST_CASE(write_read_masked, TestFixture)
   BOOST_CHECK ( reg_l.value() <= 0xFFFF );
   BOOST_CHECK ( reg_u.value() <= 0xFFFF );
   BOOST_CHECK ( reg_l.valid() && reg_u.valid() );
-  BOOST_CHECK_EQUAL ( reg_l.value(), ( x && 0xFFFF ) );
+  BOOST_CHECK_EQUAL ( reg_l.value(), ( x & 0xFFFF ) );
   BOOST_CHECK_EQUAL ( reg_u.value(), ( x >> 16 ) );
 }
 

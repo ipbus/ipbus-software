@@ -35,6 +35,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/placeholders.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 

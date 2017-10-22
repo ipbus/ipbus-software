@@ -59,10 +59,9 @@ namespace uhal
     //! The "key1=val1&key2=val2&key3=val3" part of a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"	stored as a vector of key/val pairs
     NameValuePairVectorType mArguments;
   };
+
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI );
 }
-
-
-std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI );
 
 
 #endif
