@@ -41,22 +41,15 @@ RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 RPMBUILD_SOURCES_DIR = ${RPMBUILD_DIR}/SOURCES
 
 ####################  Define path to erlang runtime and compiler  ####################
-UNAME := $(shell uname)
-# Allows me to still develop on Mac OS X with a standard Erlang install
-ifeq ($(UNAME), Darwin)
+# Default : User erl, erlc & escript found in $PATH
 ERL=erl
 ERLC=erlc
 ESCRIPT=escript
-else
-#If we're on Linux, use the cactuscore-extern-erlang RPM sources or RPM installation
-ESCRIPT=$(shell pwd)/erlang/bin/escript
-ifeq ($(shell test -d ${EXTERN_ERLANG_BIN_PREFIX} && echo OK),OK)
-ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
-ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
-else
-ERL=$(CACTUS_ROOT)/bin/erl
-ERLC=$(CACTUS_ROOT)/bin/erlc
-endif
+# If we're rebuilding Erlang using tarball from repo, then use that copy
+ifeq ($(BUILD_ERLANG), 1)
+    ERL=$(EXTERN_ERLANG_BIN_PREFIX)/erl
+    ERLC=$(EXTERN_ERLANG_BIN_PREFIX)/erlc
+    ESCRIPT=$(shell pwd)/erlang/bin/escript
 endif
 ######################################################################################
 
@@ -68,9 +61,13 @@ all: _all
 build: _all
 buildall: _all
 
-_all: _erlang
+_all:
 	${ESCRIPT} ./rebar get-deps compile
 	cd rel && ${ESCRIPT} ../rebar generate
+
+ifeq ($(BUILD_ERLANG), 1)
+    _all: _erlang
+endif
 
 
 ifeq (${CACTUS_OS}, centos7)
