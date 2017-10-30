@@ -2,6 +2,7 @@
 stages:
   - initial_report
   - build
+  - publish_build
   - test
   - final_report
 
@@ -36,6 +37,7 @@ github_commit_status:end:failure:
   when: on_failure
   script:
     - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"failure\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"Jobs have failed in CI pipeline\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"
+  dependencies: []
 
 github_commit_status:end:success:
   stage: final_report
@@ -48,7 +50,7 @@ github_commit_status:end:success:
   when: on_success
   script:
     - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"success\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"CI pipeline completed successfully!\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"
-
+  dependencies: []
 
 
 doxygen_job:
@@ -60,32 +62,25 @@ doxygen_job:
     - triggers
   before_script:
     - sudo rpm --rebuilddb && sudo yum clean all 
-    - sudo yum -y install graphviz
-    - sudo yum -y install make krb5-workstation openssh-clients
+    - sudo yum -y install graphviz make
     - sudo yum -y remove doxygen
     - curl -O https://svnweb.cern.ch/trac/cactus/export/47232/trunk/scripts/nightly/doxygen/doxygen-1.8.6.src.tar.gz
     - tar xzf doxygen-1.8.6.src.tar.gz
     - cd doxygen-1.8.6
     - ./configure --prefix /usr --docdir /usr/share/doc/doxygen-1.8.6 && make
     - sudo make MAN1DIR=share/man/man1 install
-    - mkdir -p ~/.ssh  &&  cp ${CI_PROJECT_DIR}/ci/ssh_config ~/.ssh/config
-    - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
-    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - cd ${CI_PROJECT_DIR}
     - ./scripts/doxygen/api_uhal.sh "(${CI_COMMIT_TAG:-commit ${CI_COMMIT_SHA}})"
     - ls -al /tmp
-    - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
-    - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${OUTPUT_PIPELINE_DIR}" 
-    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${OUTPUT_PIPELINE_DIR} `dirname ${OUTPUT_PIPELINE_DIR}`/latest" 
-    - rsync -av /tmp/api_uhal ${KRB_USERNAME}@lxplus:${OUTPUT_PIPELINE_DIR}/
+    - mkdir -p ${CI_PROJECT_DIR}/ci_build_results/
+    - mv /tmp/api_uhal ${CI_PROJECT_DIR}/ci_build_results/api_uhal
   artifacts:
-    untracked: true
+    paths:
+      - ci_build_results/api_uhal
     when: always
     expire_in: 1 day
-  allow_failure: true
 
 
 
@@ -98,25 +93,22 @@ doxygen_job:
     - triggers
   before_script:
     - sudo rpm --rebuilddb && sudo yum clean all 
-    - sudo yum -y install createrepo krb5-workstation openssh-clients ${ADDITIONAL_RPMS_TO_INSTALL}
-    - mkdir -p ~/.ssh  &&  cp ci/ssh_config ~/.ssh/config
-    - export OUTPUT_PIPELINE_DIR=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
-    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_DIR=${OUTPUT_PIPELINE_DIR/commits/tags} ; fi
+    - sudo yum -y install createrepo ${ADDITIONAL_RPMS_TO_INSTALL}
   script:
+    - export REPO_DIR=${CI_PROJECT_DIR}/ci_build_results/repos/${OUTPUT_REPO_SUBDIR}
     - env | grep -v PASSWORD | grep -v TOKEN
     - cd .. && sudo rm -rf ipbus-software____ && mv ipbus-software ipbus-software____ && mkdir ipbus-software && cd ipbus-software____
     - make -k Set=all
     - make -k Set=all rpm
-    - mkdir -p yumrepo
-    - cp `find . -iname "*.rpm"` yumrepo
-    - cp ${YUMGROUPS_FILE} yumrepo/yumgroups.xml
-    - ls yumrepo
-    - createrepo -vg yumgroups.xml yumrepo
-    - echo "${KRB_PASSWORD}" | kinit ${KRB_USERNAME}@CERN.CH
-    - klist
-    - ssh ${KRB_USERNAME}@lxplus "mkdir -p ${OUTPUT_PIPELINE_DIR}/repos"
-    - ssh ${KRB_USERNAME}@lxplus "ln -sfn ${OUTPUT_PIPELINE_DIR} `dirname ${OUTPUT_PIPELINE_DIR}`/latest" 
-    - rsync -av yumrepo/ ${KRB_USERNAME}@lxplus:${OUTPUT_PIPELINE_DIR}/repos/${OUTPUT_REPO_SUBDIR}
+    - mkdir -p ${REPO_DIR} 
+    - cp `find . -iname "*.rpm"` ${REPO_DIR} && cp ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
+    - ls ${REPO_DIR}
+    - createrepo -vg yumgroups.xml ${REPO_DIR}
+  artifacts:
+    paths:
+      - ci_build_results/repos/${OUTPUT_REPO_SUBDIR}
+    when: always
+    expire_in: 1 day
 
 
 build:slc6:
@@ -135,6 +127,28 @@ build:centos7:
     ADDITIONAL_RPMS_TO_INSTALL: "boost-devel pugixml-devel"
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "centos7_x86_64"
+
+
+
+
+publish_build_job:
+  stage: publish_build
+  image: gitlab-registry.cern.ch/ci-tools/ci-web-deployer:latest
+  variables:
+    CI_OUTPUT_DIR: "ci_build_results/"
+  before_script:
+    - yum -y install openssh-clients
+    - export EOS_PATH=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export EOS_PATH=${OUTPUT_PIPELINE_URL/commits/tags} ; fi
+  script:
+    - env | grep -v PASSWORD | grep -v TOKEN | sort
+    - echo "${EOS_ACCOUNT_PASSWORD}" | kinit ${EOS_ACCOUNT_USERNAME}@CERN.CH
+    - klist
+    - ssh -F ${CI_PROJECT_DIR}/ci/ssh_config ${EOS_ACCOUNT_USERNAME}@lxplus "rm -rf ${EOS_PATH} && mkdir -p ${EOS_PATH}"
+    - ssh -F ${CI_PROJECT_DIR}/ci/ssh_config ${EOS_ACCOUNT_USERNAME}@lxplus "ln -sfnv ${EOS_PATH} `dirname ${EOS_PATH}`/latest"
+    - kdestroy
+    - ls -lt ${CI_OUTPUT_DIR}
+    - deploy-eos
 
 
 
