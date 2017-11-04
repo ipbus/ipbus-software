@@ -17,6 +17,7 @@ PackageSummary = uHAL Library Tests
 PackageDescription = uHAL Library Tests
 PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Andrew Rose, Marc Magrans de Arbil, Tom Williams
+PackageRequires = which iproute
 
 
 Library = cactus_uhal_tests

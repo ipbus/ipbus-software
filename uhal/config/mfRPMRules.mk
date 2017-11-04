@@ -5,8 +5,8 @@ BuildDebuginfoRPM ?= 1
 IncludePaths := $(if ${IncludePaths}, ${IncludePaths}, %{nil})
 PackageSummary := $(if ${PackageSummary}, ${PackageSummary}, None)
 PackageDescription := $(if ${PackageDescription}, ${PackageDescription}, None)
-BUILD_REQUIRES_TAG = $(if ${PackageBuildRequires}, BuildRequires: ${PackageBuildRequires} ,\# No BuildRequires tag )
-REQUIRES_TAG = $(if ${PackageRequires}, Requires: ${PackageRequires} ,\# No Requires tag )
+BUILD_REQUIRES_TAG = $(if ${PackageBuildRequires} ,BuildRequires: ${PackageBuildRequires} ,\# No BuildRequires tag )
+REQUIRES_TAG = $(if ${PackageRequires} ,Requires: ${PackageRequires} ,\# No Requires tag )
 
 export BUILD_HOME
 
