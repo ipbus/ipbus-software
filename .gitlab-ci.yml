@@ -55,20 +55,11 @@ github_commit_status:end:success:
 
 doxygen_job:
   stage: build
-  image: tswilliams/ipbus-sw-dev-cc7:latest
+  image: gitlab-registry.cern.ch/ipbus/ipbus-docker/ipbus-sw-doxygen:master__doxygen1.8.13
   tags:
     - docker
   except:
     - triggers
-  before_script:
-    - sudo rpm --rebuilddb && sudo yum clean all 
-    - sudo yum -y install graphviz make
-    - sudo yum -y remove doxygen
-    - curl -O https://svnweb.cern.ch/trac/cactus/export/47232/trunk/scripts/nightly/doxygen/doxygen-1.8.6.src.tar.gz
-    - tar xzf doxygen-1.8.6.src.tar.gz
-    - cd doxygen-1.8.6
-    - ./configure --prefix /usr --docdir /usr/share/doc/doxygen-1.8.6 && make
-    - sudo make MAN1DIR=share/man/man1 install
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - cd ${CI_PROJECT_DIR}
