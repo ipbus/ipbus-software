@@ -17,7 +17,7 @@ variables:
 
 github_commit_status:start:
   stage: initial_report
-  image: tswilliams/ipbus-sw-dev-cc7:latest
+  image: cern/cc7-base:20170113
   tags:
     - docker
   except:
@@ -29,7 +29,7 @@ github_commit_status:start:
 
 github_commit_status:end:failure:
   stage: final_report
-  image: tswilliams/ipbus-sw-dev-cc7:latest
+  image: cern/cc7-base:20170113
   tags:
     - docker
   except:
@@ -42,7 +42,7 @@ github_commit_status:end:failure:
 
 github_commit_status:end:success:
   stage: final_report
-  image: tswilliams/ipbus-sw-dev-cc7:latest
+  image: cern/cc7-base:20170113
   tags:
     - docker
   except:
