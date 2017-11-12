@@ -26,7 +26,7 @@ endif
 $(info OS Detected: $(CACTUS_OS))
 
 # Set which externals are built by default for each OS
-ifneq ($(CACTUS_OS), centos7)
+ifeq ($(CACTUS_OS), slc6)
     BUILD_ERLANG?=1
     BUILD_BOOST?=1
     BUILD_PUGIXML?=1
