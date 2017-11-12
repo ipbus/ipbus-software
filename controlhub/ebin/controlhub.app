@@ -25,7 +25,7 @@
                  ch_sup,
                  ch_tcp_listener]},
    {applications, [stdlib, kernel, sasl,
-                   appmon,
+                   observer,
                    % For lager syslog backend
                    syslog, lager_syslog,
                    % For lager, which depends on goldrush

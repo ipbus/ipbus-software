@@ -61,6 +61,19 @@
         ).
 
 
+-ifdef(old_erlang_time_api).
+
+-define(GET_MONOTONIC_TIME, erlang:now() ).
+-define(CALC_MONOTONIC_TIME_DIFF(T2,T1), timer:now_diff(T2,T1) ).
+
+-else.
+
+-define(GET_MONOTONIC_TIME, erlang:monotonic_time(microsecond) ).
+-define(CALC_MONOTONIC_TIME_DIFF(T2,T1), (T2 - T1) ).
+
+-endif.
+
+
 %%% ====================================================================
 %%% API functions (public interface)
 %%% ====================================================================
@@ -283,11 +296,11 @@ device_client_loop(timeout, S) ->
             device_client_loop(send, NewState);
         {error, NewState, MsgForTransactionManager} ->
             S#state.udp_pid ! {print_incident_packets_then_exit},
-            Now = erlang:now(),
+            Now = ?GET_MONOTONIC_TIME,
             {LostPktId, NrInFlight, RecoveryInfoList} = NewState#state.last_timeout,
             ch_utils:log({error,log_prefix(S)}, "Irrecoverable timeout for control packet ID ~w, with ~w in flight. ~w recovery attempts, timeout ~wms~s",
                          [LostPktId, NrInFlight, length(RecoveryInfoList), S#state.timeout, 
-                         lists:flatten([io_lib:format("; ~.1fms ago, ~w lost", [timer:now_diff(Now,Timestamp) / 1000, Type]) || {Timestamp, Type, _} <- RecoveryInfoList])]),
+                         lists:flatten([io_lib:format("; ~.1fms ago, ~w lost", [?CALC_MONOTONIC_TIME_DIFF(Now,Timestamp) / 1000, Type]) || {Timestamp, Type, _} <- RecoveryInfoList])]),
             ReqPkt = case S#state.ipbus_v of
                           {1, 3} ->
                               element(2, element(2, S#state.in_flight));
@@ -364,7 +377,7 @@ forward_reply(Pkt, S) ->
                                 "No previous timeouts.";
                             {LostPktId, NrInFlight, [ {Timestamp, Type, _StatusReplyPkt} | AttemptInfoTail]} ->
                                 io_lib:format("Last timeout was ~.1fms ago, ~w packet ID ~w lost, ~w in flight, ~w recovery attempts.", 
-                                              [timer:now_diff(erlang:now(),Timestamp) / 1000, Type, LostPktId, NrInFlight, length(AttemptInfoTail)+1]);
+                                              [?CALC_MONOTONIC_TIME_DIFF(?GET_MONOTONIC_TIME,Timestamp) / 1000, Type, LostPktId, NrInFlight, length(AttemptInfoTail)+1]);
                             {LostPktId, NrInFlight, []} ->
                                 io_lib:format("Last timeout was for packet ID ~w, ~w in flight.", [LostPktId, NrInFlight])
                             end,
@@ -376,10 +389,10 @@ recover_from_timeout(NrFailedAttempts, S = #state{socket=Socket, ip_tuple=IP, po
     ch_utils:log({debug,log_prefix(S)}, "IPbus 1.3 target, so wait an extra ~w ms for reply packet to come.", [S#state.timeout]),
     NewS = case NrFailedAttempts of
                  0 ->
-                     S#state{last_timeout={0, 1, [{erlang:now(), unknown, <<>>}]}};
+                     S#state{last_timeout={0, 1, [{?GET_MONOTONIC_TIME, unknown, <<>>}]}};
                  _ ->
                      {_, _, AttemptInfoList} = S#state.last_timeout,
-                     S#state{last_timeout={0, 1, [{erlang:now(), unknown, <<>>} | AttemptInfoList]}}
+                     S#state{last_timeout={0, 1, [{?GET_MONOTONIC_TIME, unknown, <<>>} | AttemptInfoList]}}
            end,
     receive
         {udp, Socket, IP, Port, Pkt} ->
@@ -423,10 +436,10 @@ recover_from_timeout(NrFailedAttempts, S = #state{next_id=NextId, in_flight={NrI
             end,
             NewS = case NrFailedAttempts of
                        0 ->
-                           S#state{last_timeout={NextIdMinusN, NrInFlight, [{erlang:now(), TypeLost, StatusReplyPkt}]}};
+                           S#state{last_timeout={NextIdMinusN, NrInFlight, [{?GET_MONOTONIC_TIME, TypeLost, StatusReplyPkt}]}};
                        _ ->
                            {_, _, AttemptInfoList} = S#state.last_timeout,
-                           S#state{last_timeout={NextIdMinusN, NrInFlight, [{erlang:now(), TypeLost, StatusReplyPkt} | AttemptInfoList]}}
+                           S#state{last_timeout={NextIdMinusN, NrInFlight, [{?GET_MONOTONIC_TIME, TypeLost, StatusReplyPkt} | AttemptInfoList]}}
                    end,
             % Check whether recovered from timeout or not
             {value, {_, _, ExpdHdr, _}} = queue:peek(InFlightQ),

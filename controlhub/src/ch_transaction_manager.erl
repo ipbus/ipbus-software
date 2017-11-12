@@ -29,7 +29,7 @@
                 target_ip_u32   :: non_neg_integer(),
                 target_port     :: non_neg_integer(),
                 nr_in_flight    :: non_neg_integer(),
-                q_nr_reqs_per_tcp :: queue(),
+                q_nr_reqs_per_tcp, % :: queue(),
                 reply_io_list   :: list(),
                 nr_replies_acc  :: non_neg_integer(),
                 stats_table
