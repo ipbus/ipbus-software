@@ -73,7 +73,7 @@ ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | ${PackagePath}/obj
 	
 # Main target: shared library
 ${LibraryTarget}: ${LibraryObjectFiles}  | ${PackagePath}/lib
-	${LD} -shared ${LDFLAGS} ${DependentLibraries} ${LibraryObjectFiles} -o $@
+	${LD} -shared ${LDFLAGS} ${LibraryObjectFiles} ${DependentLibraries} -o $@
 
 # Include automatically generated dependencies
 -include $(LibraryObjectFiles:.o=.d)
