@@ -40,10 +40,10 @@ LibraryPaths = \
 		${PYTHON_LIB_PREFIX}
 
 Libraries = \
-		pthread \
-		dl \
-		util \
-		${PYTHON_LIB} \
+		cactus_uhal_uhal \
+		cactus_uhal_log \
+		cactus_uhal_grammars \
+		${PUGIXML_LIB_NAME} \
 		\
 		boost_filesystem \
 		boost_python \
@@ -51,10 +51,9 @@ Libraries = \
 		boost_system \
 		boost_thread \
 		\
-		${PUGIXML_LIB_NAME} \
-		cactus_uhal_grammars \
-		cactus_uhal_log \
-		cactus_uhal_uhal
+		pthread \
+		dl \
+		util
 
 
 CXXFLAGS += -ftemplate-depth-128 -O0 -rdynamic -finline-functions -Wno-inline -DNDEBUG \

@@ -68,7 +68,7 @@
 
 -else.
 
--define(GET_MONOTONIC_TIME, erlang:monotonic_time(microsecond) ).
+-define(GET_MONOTONIC_TIME, erlang:monotonic_time(micro_seconds) ).
 -define(CALC_MONOTONIC_TIME_DIFF(T2,T1), (T2 - T1) ).
 
 -endif.

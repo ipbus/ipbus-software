@@ -77,7 +77,18 @@ doxygen_job:
 
 
 
-.job_template: &build_job
+.job_template: &simple_build_job
+  stage: build
+  tags:
+    - docker
+  except:
+    - triggers
+  script:
+    - env | grep -v PASSWORD | grep -v TOKEN
+    - make -k Set=all
+
+
+.job_template: &build_rpm_yumrepo_job
   stage: build
   tags:
     - docker
@@ -102,7 +113,7 @@ doxygen_job:
 
 
 build:slc6:
-  <<: *build_job
+  <<: *build_rpm_yumrepo_job
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-slc6:2017-11-04
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-slc6.xml"
@@ -110,13 +121,23 @@ build:slc6:
 
 
 build:centos7:
-  <<: *build_job
+  <<: *build_rpm_yumrepo_job
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-cc7:2017-11-04__boost1.53.0_pugixml1.8
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "centos7_x86_64"
 
 
+build:fedora26:
+  <<: *simple_build_job
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2017-11-04__erlang19.3.6.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  variables:
+    YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
+    OUTPUT_REPO_SUBDIR: "fedora26_x86_64"
+
+build:ubuntu16:
+  <<: *simple_build_job
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
 
 
 publish_build_job:
