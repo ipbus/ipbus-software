@@ -84,10 +84,8 @@ namespace uhal
     //     UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." )
     //! Exception class to handle the case where the IPbus transaction header response code indicated an error.
     UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
-    //! Exception class to handle the case where the IPbus transaction type came back as the wrong type.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusTransactionTypeIncorrect , "Exception class to handle the case where the IPbus transaction type came back as the wrong type." )
-    //! Exception class to handle the case where the IPbus transaction id came back as incorrect.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusTransactionIdIncorrect , "Exception class to handle the case where the IPbus transaction id came back as incorrect." )
+    //! Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned.
+    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
 
   }
 
