@@ -203,7 +203,8 @@ namespace uhal
               " (ID = " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
               ", type = " , lReplyIPbusTransactionType ,
               ", word count = " , Integer ( lReplyWordCount ) ,
-              ") has response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) , " indicating an error (" ,
+              ") has response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) ,
+              " = '", TranslatedFmt<uint8_t>(lReplyResponseGood, getInfoCodeTranslator()) , "' indicating an error (" ,
               Integer ( lNrReplyBytesValidated+1 ) , " bytes into IPbus reply payload)" );
         log ( *lExc , "Original sent header was ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) ,
                       ", for base address ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart+4 ) ), IntFmt< hex , fixed >() ), 
