@@ -31,7 +31,7 @@
 */
 
 #include "uhal/Buffers.hpp"
-
+#include "uhal/ProtocolIPbusCore.hpp"
 
 namespace uhal
 {
@@ -158,31 +158,16 @@ namespace uhal
       if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 )
       {
         uhal::exception::ControlHubTargetTimeout* lExc = new uhal::exception::ControlHubTargetTimeout();
-        log ( *lExc , "The ControlHub did not receive any response from the target with URI: ", this->uri() );
-        log ( *lExc , "ControlHub error code is: ", Integer ( lErrorCode ) );
+        log ( *lExc , "The ControlHub did not receive any response from the target with URI ", Quote(this->uri()) );
+        log ( *lExc , "ControlHub returned error code ", Integer ( lErrorCode ), " = ", TranslatedFmt<uint16_t>(lErrorCode, translateErrorCode));
         return lExc ;
       }
-      else if ( lErrorCode == 2 )
-      {
-        uhal::exception::ControlHubInternalTimeout* lExc = new uhal::exception::ControlHubInternalTimeout();
-        log ( *lExc, "Internal timeout within the ControlHub for target with URI: ", this->uri() );
-        return lExc;
-      }
-      else if ( lErrorCode == 5 )
-      {
-        uhal::exception::ControlHubReportedMalformedStatus* lExc = new uhal::exception::ControlHubReportedMalformedStatus();
-        log ( *lExc , "ControlHub received malformed status packet from target with URI: " , this->uri() );
-        return lExc;
-      }
-      else
-      {
-        uhal::exception::ControlHubUnknownErrorCode* lExc = new uhal::exception::ControlHubUnknownErrorCode();
-        log ( *lExc , "Control Hub returned an unknown error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ),
-              " for target with URI " , this->uri() , ". Please report this at https://svnweb.cern.ch/trac/cactus/newticket" );
-        return lExc;
-      }
 
-      return NULL;
+      uhal::exception::ControlHubErrorCodeSet* lExc = new uhal::exception::ControlHubErrorCodeSet();
+      log ( *lExc , "The ControlHub returned error code " , Integer ( lErrorCode, IntFmt< hex , fixed >() ),
+            " = ", TranslatedFmt<uint16_t>(lErrorCode, translateErrorCode),
+            " for target with URI " , Quote(this->uri()) );
+      return lExc;
     }
 
     //aReplyStartIt++;
@@ -205,6 +190,37 @@ namespace uhal
       mPreambles.clear();
     }
     InnerProtocol::dispatchExceptionHandler();
+  }
+
+
+  template < typename InnerProtocol >
+  void ControlHub< InnerProtocol >::translateErrorCode(std::ostream& aStream, const uint16_t& aErrorCode)
+  {
+    switch (aErrorCode) {
+      case 0:
+        aStream << "success";
+        break;
+      case 1:
+        aStream << "no reply to control packet";
+        break;
+      case 2:
+        aStream << "internal timeout within ControlHub";
+        break;
+      case 3:
+        aStream << "no reply to status packet";
+        break;
+      case 4:
+        aStream << "no reply to resend request";
+        break;
+      case 5:
+        aStream << "malformed status packet received";
+        break;
+      case 6:
+        aStream << "request uses incorrect protocol version";
+        break;
+      default:
+        aStream << "UNKNOWN";
+    }
   }
 
   //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

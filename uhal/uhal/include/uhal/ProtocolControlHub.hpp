@@ -70,14 +70,8 @@ namespace uhal
     //! Exception class to handle the case where the target does not respond to the ControlHub
     UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubTargetTimeout , "Exception class to handle the case where the target does not respond to the ControlHub" )
 
-    //! Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub
-    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubInternalTimeout , "Exception class to handle the case where there in a timeout in communication between the processes running within the ControlHub" )
-
-    //! Exception class to handle the case where the hardware sent a bad status packet to the ControlHub
-    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubReportedMalformedStatus , "Exception class to handle the case where the hardware sent a bad status packet to the ControlHub" )
-
-    //! Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL
-    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubUnknownErrorCode , "Exception class to handle the case where the error code sent by the ControlHub is unknown to uHAL" )
+    //! Exception class to handle cases in which the ControlHub returns a non-zero error code (excluding target timeouts)
+    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubErrorCodeSet, "Exception class to handle cases in which the ControlHub returns a non-zero error code (excluding target timeouts)" )
   }
 
   /**
@@ -159,6 +153,8 @@ namespace uhal
 
 
     private:
+      static void translateErrorCode(std::ostream& aStream, const uint16_t& aErrorCode);
+
       //! The IP address of the target device that is connected to the Control Hub
       uint32_t mDeviceIPaddress;
 
