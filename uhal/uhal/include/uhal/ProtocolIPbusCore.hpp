@@ -42,6 +42,7 @@
 #include <deque>
 
 #include "boost/date_time/posix_time/posix_time_duration.hpp"
+#include "boost/function.hpp"
 
 #include "uhal/ClientInterface.hpp"
 
@@ -260,6 +261,8 @@ namespace uhal
 
     private:
 
+      virtual boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() = 0;
+
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint32_t mTransactionCounter;
 
@@ -273,8 +276,37 @@ namespace uhal
   };
 
 
+  template<typename T>
+  struct TranslatedFmt {
+  public:
+    TranslatedFmt(const T& aData, const boost::function<void (std::ostream&, const T&)>& aFunction);
+    ~TranslatedFmt();
 
+    const T& mData;
+    const boost::function<void (std::ostream&, const T&)>& mFunc;
+  };
+
+  template <typename T>
+  TranslatedFmt<T>::TranslatedFmt(const T& aData, const boost::function<void (std::ostream&, const T&)>& aFunction) :
+    mData(aData),
+    mFunc(aFunction)
+  {
+  }
+
+  template <typename T>
+  TranslatedFmt<T>::~TranslatedFmt()
+  {
+  }
+
+  template <typename T>
+  std::ostream& operator<<(std::ostream& aStream, const TranslatedFmt<T>& aFmt)
+  {
+    aFmt.mFunc(aStream, aFmt.mData);
+    return aStream;
+  }
 }
+
+
 
 
 #endif

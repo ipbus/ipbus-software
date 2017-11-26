@@ -164,6 +164,10 @@ namespace uhal
 
       virtual void dispatchExceptionHandler();
 
+  private:
+      boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
+
+      static void translateInfoCode(std::ostream& aStream, const uint8_t& aErrorCode);
       // std::vector< uint32_t > mSendPadding;
       // std::vector< uint32_t > mReplyPadding;
 
@@ -302,6 +306,10 @@ namespace uhal
       virtual void dispatchExceptionHandler();
 
     private:
+      boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
+
+      static void translateInfoCode(std::ostream& aStream, const uint8_t& aErrorCode);
+
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint16_t mPacketCounter;
 

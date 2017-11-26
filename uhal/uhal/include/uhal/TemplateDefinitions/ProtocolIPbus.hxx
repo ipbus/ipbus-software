@@ -207,6 +207,22 @@ namespace uhal
     IPbusCore::dispatchExceptionHandler();
   }
 
+  template< uint8_t IPbus_minor, uint32_t buffer_size>
+  void IPbus< 1 , IPbus_minor , buffer_size >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode) {
+    switch (aInfoCode) {
+      case 0:
+        aStream << "success";
+        break;
+      case 1:
+        aStream << "partial";
+        break;
+      case 2:
+        aStream << "failure";
+        break;
+      default:
+        aStream << "UNKNOWN";
+    }
+  }
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -460,6 +476,36 @@ namespace uhal
 #endif
     mReceivePacketHeader.clear();
     IPbusCore::dispatchExceptionHandler();
+  }
+
+  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
+  void IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode)
+  {
+    switch (aInfoCode) {
+      case 0:
+        aStream << "success";
+        break;
+      case 1:
+        aStream << "bad header";
+        break;
+      case 4:
+        aStream << "bus error on read";
+        break;
+      case 5:
+        aStream << "bus error on write";
+        break;
+      case 6:
+        aStream << "bus timeout on read";
+        break;
+      case 7:
+        aStream << "bus timeout on wite";
+        break;
+      case 0xf:
+        aStream << "outbound request";
+        break;
+      default:
+        aStream << "UNKNOWN";
+    }
   }
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
