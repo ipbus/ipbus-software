@@ -74,6 +74,13 @@
 -endif.
 
 
+-ifdef(orig_udp_port_command_format).
+-define(GEN_UDP_PORT_COMMAND_PREFIX, []).
+-else.
+-define(GEN_UDP_PORT_COMMAND_PREFIX, [1]).
+-endif.
+
+
 %%% ====================================================================
 %%% API functions (public interface)
 %%% ====================================================================
@@ -835,7 +842,7 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
         receive 
             {send, Pkt} ->
                 {IP1, IP2, IP3, IP4} = IP,
-                true = erlang:port_command(Socket, [[((Port) bsr 8) band 16#ff, (Port) band 16#ff], [IP1 band 16#ff, IP2 band 16#ff, IP3 band 16#ff, IP4 band 16#ff], Pkt]);
+                true = erlang:port_command(Socket, [?GEN_UDP_PORT_COMMAND_PREFIX, [((Port) bsr 8) band 16#ff, (Port) band 16#ff], [IP1 band 16#ff, IP2 band 16#ff, IP3 band 16#ff, IP4 band 16#ff], Pkt]);
             {inet_reply, Socket, ok} ->
                 void;
             {inet_reply, Socket, SendError} ->
