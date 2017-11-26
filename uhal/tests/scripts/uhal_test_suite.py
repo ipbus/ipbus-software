@@ -78,7 +78,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_empty_dispatch.exe -c %s -d dummy.udp" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-1.3://localhost:50001",
@@ -96,7 +96,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
                "test_dummy_derivednode.exe -c %s -d dummy.udp" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-1.3://localhost:50001",
-               "pkill -f \"DummyHardwareUdp.exe\""]
+               "KILL_BACKGROUND_PROCS"]
             ]]
 
     cmds += [["TEST IPBUS 1.3 TCP",
@@ -107,7 +107,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "DummyHardwareTcp.exe --version 1 --port 50002 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.tcp" % (conn_file),
               "test_dummy_empty_dispatch.exe -c %s -d dummy.tcp" % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                # NORMAL TESTS
                "DummyHardwareTcp.exe --version 1 --port 50002",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-1.3://localhost:50002",
@@ -125,7 +125,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
                "test_dummy_derivednode.exe -c %s -d dummy.tcp"  % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-1.3://localhost:50002",
-               "pkill -f \"DummyHardwareTcp.exe\""]
+               "KILL_BACKGROUND_PROCS"]
              ]]
 
     cmds += [["TEST IPBUS 1.3 CONTROLHUB",
@@ -145,7 +145,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_empty_dispatch.exe -c %s -d dummy.controlhub" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stop,
                #CONTROL HUB TESTS
                "DummyHardwareUdp.exe --version 1 --port 50001",
@@ -166,7 +166,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
                "test_dummy_derivednode.exe -c %s -d dummy.controlhub" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop]
                 ]]
@@ -179,7 +179,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_empty_dispatch.exe -c %s -d dummy.udp2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                # NORMAL TESTS
                "DummyHardwareUdp.exe --version 2 --port 60001",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0://localhost:60001",
@@ -197,7 +197,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
                "test_dummy_derivednode.exe -c %s -d dummy.udp2" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-2.0://localhost:60001",
-               "pkill -f \"DummyHardwareUdp.exe\""]
+               "KILL_BACKGROUND_PROCS"]
             ]]
 
     cmds += [["TEST IPBUS 2.0 TCP",
@@ -208,7 +208,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "DummyHardwareTcp.exe --version 2 --port 60002 --delay 2",
                "test_dummy_timeout.exe -c %s -d dummy.tcp2" % (conn_file),
                "test_dummy_empty_dispatch.exe -c %s -d dummy.tcp2" % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                # NORMAL TESTS
                "DummyHardwareTcp.exe --version 2 --port 60002",
                "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0://localhost:60002",
@@ -226,7 +226,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
                "test_dummy_derivednode.exe -c %s -d dummy.tcp2"  % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-2.0://localhost:60002",
-               "pkill -f \"DummyHardwareTcp.exe\""]
+               "KILL_BACKGROUND_PROCS"]
              ]]
 
     cmds += [["TEST IPBUS 2.0 CONTROLHUB - normal",
@@ -246,7 +246,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                controlhub_status,
                "test_dummy_timeout.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_empty_dispatch.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stop,
                #CONTROL HUB TESTS
                "DummyHardwareUdp.exe --version 2 --port 60001",
@@ -267,7 +267,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
                "test_dummy_derivednode.exe -c %s -d dummy.controlhub2" % (conn_file),
                "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop]
                 ]]
@@ -276,33 +276,33 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
               [ # UDP 2
                "DummyHardwareUdp.exe --version 1 --port 50001",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # TCP 2
                "DummyHardwareTcp.exe --version 1 --port 50002",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # ControlHub 2
                "DummyHardwareUdp.exe --version 1 --port 50001",
                controlhub_start,
                controlhub_status,
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop,
                 # UDP 2
                "DummyHardwareUdp.exe --version 2 --port 60001",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # TCP 2
                "DummyHardwareTcp.exe --version 2 --port 60002",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # ControlHub 2
                "DummyHardwareUdp.exe --version 2 --port 60001",
                controlhub_start,
                controlhub_status,
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop]
               ]]
@@ -311,33 +311,33 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
               [# UDP 2 with ASYNC EXCEPTION
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # TCP 2 with ASYNC EXCEPTION
                "DummyHardwareTcp.exe --version 1 --port 50002 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # ControlHub 2 with ASYNC EXCEPTION
                "DummyHardwareUdp.exe --version 1 --port 50001 --delay 100",
                controlhub_start,
                controlhub_status,
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop,
                 # UDP 2 with ASYNC EXCEPTION
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # TCP 2 with ASYNC EXCEPTION
                "DummyHardwareTcp.exe --version 2 --port 60002 --delay 100",
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
-               "pkill -f \"DummyHardwareTcp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                 # ControlHub 2 with ASYNC EXCEPTION
                "DummyHardwareUdp.exe --version 2 --port 60001 --delay 100",
                controlhub_start,
                controlhub_status,
                "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop]
                 ]]
@@ -384,14 +384,14 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                # Clean up
                "sudo /sbin/tc qdisc del dev lo root",
                "sudo /sbin/tc -s qdisc ls dev lo",
-               "pkill -f \"DummyHardwareUdp.exe\"",
+               "KILL_BACKGROUND_PROCS",
                controlhub_stop]
                 ]]
 
     cmds += [["TEST PYCOHAL",
               ["DummyHardwareUdp.exe --version 1 --port 50001",
                "test_pycohal -c %s -v" % (conn_file),
-               "pkill -f \"DummyHardwareUdp.exe\""]
+               "KILL_BACKGROUND_PROCS"]
             ]]
 
     cmds += [["TEST uHAL GUI",
@@ -410,9 +410,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
 def cleanup_cmds():
     """Return list of cleanup commands to be used in case test script interupted - e.g. by ctrl-c"""
 
-    cmds = ["pkill -f \"DummyHardwareUdp.exe\"",
-            "pkill -f \"DummyHardwareTcp.exe\"",
-            "sudo controlhub_stop",
+    cmds = ["sudo controlhub_stop",
             "sudo /sbin/tc qdisc del dev lo root"]
     return cmds
 
@@ -452,15 +450,15 @@ def get_dummyhardware_status( cmd ):
   else:
     return StdOut+" DummyHardwares running"
 
-def background_run_command(cmd , Pid):
+def background_run_command(cmd , proc_list):
     """
     Run command in separate thread, ignoring stdout and stderr
     """
-    def runInThread(cmd , Pid):
+    def runInThread(cmd , proc_list):
       t0 = time.time()
       p = subprocess.Popen( cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, shell=True, preexec_fn=os.setsid )
 
-      Pid.append( p.pid )
+      proc_list.append( p )
       p.wait()
 
       exit_code = p.poll()
@@ -477,7 +475,7 @@ def background_run_command(cmd , Pid):
         print "+ Background command '%s' completed successfully, time elapsed: %s seconds" % (cmd, cmd_duration)
 
     print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Background running ", cmd
-    thread = threading.Thread( target=runInThread , args=( cmd , Pid ) )
+    thread = threading.Thread( target=runInThread , args=( cmd , proc_list ) )
     thread.start()
 
 
@@ -629,7 +627,7 @@ if __name__=="__main__":
     else:
         print "\nN.B: Commands will only be listed, not run"
 
-    BackgroundPid = []
+    background_procs = []
 
     # Run the commands
     nr_cmds_run = 0
@@ -651,11 +649,25 @@ if __name__=="__main__":
                     print "-" * 120
 
                 nr_cmds_run += 1
+
+                if cmd == "KILL_BACKGROUND_PROCS":
+                    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Killing background processes"
+                    while len(background_procs) > 0:
+                        p = background_procs.pop()
+                        print "  Terminating PID", p.pid
+                        os.killpg(p.pid, signal.SIGTERM)
+                        p.wait()
+                    time.sleep(2)
+                    continue
+
                 if cmd.startswith( "DummyHardware" ):
-                  background_run_command( cmd , BackgroundPid )
-                else:
-                  print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
-                  stdout, exit_code, cmd_duration = run_command(cmd, verbose)
+                    background_run_command( cmd , background_procs )
+                    print "     (Brief sleep after dummy H/W command)"
+                    time.sleep(0.5)
+                    continue
+
+                print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+                stdout, exit_code, cmd_duration = run_command(cmd, verbose)
 
                 if len(stdout) and not verbose:
                     print stdout[-1].rstrip("\n")
@@ -675,12 +687,11 @@ if __name__=="__main__":
                 else:
                     print "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
 
-                if "DummyHardware" in cmd:
-                    print "     (Brief sleep after dummy H/W command)"
-                    time.sleep(0.5)
-
     except KeyboardInterrupt:
         print "\n+ Ctrl-C detected."
+        for p in background_procs:
+            print "  Terminating PID", p.pid
+            os.killpg(p.pid, signal.SIGTERM)
         run_cleanup_commands()
         sys.exit()
 
