@@ -77,7 +77,7 @@ doxygen_job:
 
 
 
-.job_template: &simple_build_job
+.job_template: &simple_build_test_job
   stage: build
   tags:
     - docker
@@ -86,6 +86,10 @@ doxygen_job:
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - make -k Set=all
+    - source uhal/tests/setup.sh
+    - python uhal/tests/scripts/uhal_test_suite.py -v -c uhal/tests/etc/uhal/tests/dummy_connections.xml -s "2.0 udp"
+    - python uhal/tests/scripts/uhal_test_suite.py -v -c uhal/tests/etc/uhal/tests/dummy_connections.xml -s "pycohal"
+    - python uhal/tests/scripts/uhal_test_suite.py -v -c uhal/tests/etc/uhal/tests/dummy_connections.xml -s "2.0 controlhub - normal"
 
 
 .job_template: &build_rpm_yumrepo_job
@@ -129,14 +133,14 @@ build:centos7:
 
 
 build:fedora26:
-  <<: *simple_build_job
+  <<: *simple_build_test_job
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2017-11-04__erlang19.3.6.3_gcc7.1.1_boost1.63.0_pugixml1.8
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "fedora26_x86_64"
 
 build:ubuntu16:
-  <<: *simple_build_job
+  <<: *simple_build_test_job
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
 
 
