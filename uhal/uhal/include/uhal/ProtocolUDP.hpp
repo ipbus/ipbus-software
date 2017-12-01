@@ -129,6 +129,19 @@ namespace uhal
 
 
     private:
+
+      /**
+        Return the maximum size to be sent based on the buffer size in the target
+        @return the maximum size to be sent
+      */
+      uint32_t getMaxSendSize();
+
+      /**
+        Return the maximum size of reply packet based on the buffer size in the target
+        @return the maximum size of reply packet
+      */
+      uint32_t getMaxReplySize();
+
       /**
         Set up the UDP socket
       */

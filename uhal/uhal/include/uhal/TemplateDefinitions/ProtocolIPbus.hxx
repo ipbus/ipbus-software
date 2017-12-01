@@ -41,34 +41,34 @@ namespace uhal
 {
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  IPbus< 1 , IPbus_minor , buffer_size >::IPbus ( const std::string& aId, const URI& aUri ) :
-    IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) )
+  template< uint8_t IPbus_minor >
+  IPbus< 1 , IPbus_minor >::IPbus ( const std::string& aId, const URI& aUri ) :
+    IPbusCore ( aId , aUri , boost::posix_time::seconds ( 1 ) )
     // , mSendPadding ( 8 , implementCalculateHeader ( B_O_T , 0 , 0 ) ),
     // mReplyPadding ( 8 , 0x00000000 )
   {
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  IPbus< 1 , IPbus_minor , buffer_size >::~IPbus()
+  template< uint8_t IPbus_minor >
+  IPbus< 1 , IPbus_minor >::~IPbus()
   {
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::preamble ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::getPreambleSize()
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::getPreambleSize()
   {
     return 1;
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     uint32_t lWords ( aBuffers->sendCounter()  >> 2 );
     //IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
@@ -91,8 +91,8 @@ namespace uhal
     }
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -134,14 +134,14 @@ namespace uhal
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
+    return ( IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 1 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -188,27 +188,27 @@ namespace uhal
     return true;
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 1 , IPbus_minor , buffer_size >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 1 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    return IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 1 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::dispatchExceptionHandler()
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::dispatchExceptionHandler()
   {
     log ( Info() , ThisLocation() );
     IPbusCore::dispatchExceptionHandler();
   }
 
-  template< uint8_t IPbus_minor, uint32_t buffer_size>
-  void IPbus< 1 , IPbus_minor , buffer_size >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode) {
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode) {
     switch (aInfoCode) {
       case 0:
         aStream << "success";
@@ -228,9 +228,9 @@ namespace uhal
 
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  IPbus< 2 , IPbus_minor , buffer_size >::IPbus ( const std::string& aId, const URI& aUri ) :
-    IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) ),
+  template< uint8_t IPbus_minor >
+  IPbus< 2 , IPbus_minor >::IPbus ( const std::string& aId, const URI& aUri ) :
+    IPbusCore ( aId , aUri , boost::posix_time::seconds ( 1 ) ),
     mPacketCounter (
 #ifndef DISABLE_PACKET_COUNTER_HACK
       1
@@ -242,13 +242,13 @@ namespace uhal
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  IPbus< 2 , IPbus_minor , buffer_size >::~IPbus()
+  template< uint8_t IPbus_minor >
+  IPbus< 2 , IPbus_minor >::~IPbus()
   {
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     aBuffers->send ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
 #ifndef DISABLE_PACKET_COUNTER_HACK
@@ -262,22 +262,22 @@ namespace uhal
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::getPreambleSize()
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::getPreambleSize()
   {
     return 1;
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
   }
 
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  exception::exception* IPbus< 2 , IPbus_minor , buffer_size >::validate ( uint8_t* aSendBufferStart ,
+  template< uint8_t IPbus_minor >
+  exception::exception* IPbus< 2 , IPbus_minor >::validate ( uint8_t* aSendBufferStart ,
       uint8_t* aSendBufferEnd ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
@@ -304,8 +304,8 @@ namespace uhal
 
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -350,15 +350,15 @@ namespace uhal
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
+    return ( IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 2 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 2 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -402,20 +402,20 @@ namespace uhal
     return true;
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 2 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 2 , IPbus_minor , buffer_size >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 2 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    return IPbus< 2 , IPbus_minor , buffer_size >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 2 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >::dispatchExceptionHandler()
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >::dispatchExceptionHandler()
   {
     log ( Info() , ThisLocation() );
 #ifndef DISABLE_PACKET_COUNTER_HACK
@@ -427,8 +427,8 @@ namespace uhal
     IPbusCore::dispatchExceptionHandler();
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 2 , IPbus_minor , buffer_size >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode)
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode)
   {
     switch (aInfoCode) {
       case 0:

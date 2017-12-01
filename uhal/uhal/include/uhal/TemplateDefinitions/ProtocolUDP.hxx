@@ -187,6 +187,19 @@ namespace uhal
   }
 
 
+  template < typename InnerProtocol >
+  uint32_t UDP< InnerProtocol >::getMaxSendSize()
+  {
+    return (350 * 4);
+  }
+
+
+  template < typename InnerProtocol >
+  uint32_t UDP< InnerProtocol >::getMaxReplySize()
+  {
+    return (350 * 4);
+  }
+
 
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::connect()

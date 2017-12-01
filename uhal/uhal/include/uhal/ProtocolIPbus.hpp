@@ -51,13 +51,13 @@ namespace uhal
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 0>
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class IPbus;
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  class IPbus < 1 , IPbus_minor, buffer_size > : public IPbusCore
+  template< uint8_t IPbus_minor >
+  class IPbus < 1 , IPbus_minor > : public IPbusCore
   {
 
     public:
@@ -183,8 +183,8 @@ namespace uhal
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  class IPbus < 2 , IPbus_minor, buffer_size > : public IPbusCore
+  template< uint8_t IPbus_minor >
+  class IPbus < 2 , IPbus_minor > : public IPbusCore
   {
 
     public:

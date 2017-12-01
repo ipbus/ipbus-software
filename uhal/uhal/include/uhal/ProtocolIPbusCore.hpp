@@ -100,11 +100,9 @@ namespace uhal
       	Default constructor
       	@param aId the uinique identifier that the client will be given.
       	@param aUri a struct containing the full URI of the target.
-       	@param aMaxSendSize The size of the buffer in the target device for receiving data packets from uhal
-      	@param aMaxReplySize The size of the buffer in the target device for sending data packets to uhal
       	@param aTimeoutPeriod the default timeout period (can be changed later)
       */
-      IPbusCore ( const std::string& aId, const URI& aUri , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize , const boost::posix_time::time_duration& aTimeoutPeriod );
+      IPbusCore ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod );
 
       /**
       	Destructor
@@ -140,17 +138,6 @@ namespace uhal
       ValWord< uint32_t > readConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask );
 
     protected:
-
-      /**
-        Return the maximum size to be sent based on the buffer size in the target
-        @return the maximum size to be sent
-      */
-      virtual uint32_t getMaxSendSize();
-      /**
-        Return the maximum size of reply packet based on the buffer size in the target
-        @return the maximum size of reply packet
-      */
-      virtual uint32_t getMaxReplySize();
 
       /**
       Send a byte order transaction
@@ -265,14 +252,6 @@ namespace uhal
 
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint32_t mTransactionCounter;
-
-      //! The size of the buffer in the target device for receiving IPbus data packets from uhal
-      uint32_t mMaxSendSize;
-
-      //! The size of the buffer in the target device for sending IPbus data packets to uhal
-      uint32_t mMaxReplySize;
-
-
   };
 
 

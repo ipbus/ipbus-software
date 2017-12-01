@@ -192,6 +192,19 @@ namespace uhal
   }
 
 
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
+  uint32_t TCP< InnerProtocol , nr_buffers_per_send >::getMaxSendSize()
+  {
+    return (350 * 4);
+  }
+
+ 
+  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
+  uint32_t TCP< InnerProtocol , nr_buffers_per_send >::getMaxReplySize()
+  {
+    return (350 * 4);
+  }
+
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::connect()
