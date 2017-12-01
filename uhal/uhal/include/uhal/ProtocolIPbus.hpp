@@ -51,7 +51,7 @@ namespace uhal
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 0 , bool BigEndianHack = false>
+  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 0>
   class IPbus;
 
 
@@ -183,8 +183,8 @@ namespace uhal
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  class IPbus < 2 , IPbus_minor, buffer_size , BigEndianHack > : public IPbusCore
+  template< uint8_t IPbus_minor , uint32_t buffer_size >
+  class IPbus < 2 , IPbus_minor, buffer_size > : public IPbusCore
   {
 
     public:
