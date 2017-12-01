@@ -30,6 +30,11 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/ProtocolUDP.hpp"
+
+
+#include <sys/time.h>
+
 #include <boost/bind/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/asio/connect.hpp>
@@ -38,10 +43,10 @@
 #include <boost/asio/placeholders.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include "uhal/Buffers.hpp"
 #include "uhal/IPbusInspector.hpp"
-// #include "uhal/logo.hpp"
+#include "uhal/ProtocolIPbus.hpp"
 
-#include <sys/time.h>
 
 namespace uhal
 {
@@ -71,56 +76,6 @@ namespace uhal
   {
     mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
   }
-
-
-
-  template < typename InnerProtocol >
-  UDP< InnerProtocol >::UDP ( const UDP< InnerProtocol >& aUDP ) :
-    mIOservice ( ),
-    mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
-    mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUDP.mUri.mHostname , aUDP.mUri.mPort ) ) ),
-    mDeadlineTimer ( mIOservice ),
-    mReplyMemory ( 1500 , 0x00000000 ),
-#ifdef RUN_ASIO_MULTITHREADED
-    mIOserviceWork ( mIOservice ),
-    mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
-    mDispatchQueue(),
-    mReplyQueue(),
-    mPacketsInFlight ( 0 ),
-#endif
-    //    mDispatchBuffers ( NULL ),
-    //    mReplyBuffers ( NULL ),
-    mAsynchronousException ( NULL )
-  {
-    mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
-  }
-
-
-  template < typename InnerProtocol >
-  UDP< InnerProtocol >& UDP< InnerProtocol >::operator= ( const UDP< InnerProtocol >& aUDP )
-  {
-    mEndpoint =  *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUDP.mUri.mHostname , aUDP.mUri.mPort ) );
-    mSocket.close();
-
-    while ( mSocket.is_open() )
-      {}
-
-#ifdef RUN_ASIO_MULTITHREADED
-    ClientInterface::returnBufferToPool ( mDispatchQueue );
-    ClientInterface::returnBufferToPool ( mReplyQueue );
-    mPacketsInFlight = 0;
-#endif
-
-    if ( mAsynchronousException )
-    {
-      delete mAsynchronousException;
-      mAsynchronousException = NULL;
-    }
-
-    mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
-  }
-
-
 
 
   template < typename InnerProtocol >
@@ -651,5 +606,8 @@ namespace uhal
 #endif
   }
 
+
+  template class UDP< IPbus< 1 , 3 > >;
+  template class UDP< IPbus< 2 , 0 > >;
 }
 

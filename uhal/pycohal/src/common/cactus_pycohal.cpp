@@ -15,7 +15,7 @@
 #include "uhal/ClientInterface.hpp"
 #include "uhal/ConnectionManager.hpp"
 #include "uhal/ProtocolControlHub.hpp"
-#include "uhal/ProtocolIPbusCore.hpp"
+#include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/Node.hpp"

@@ -321,6 +321,5 @@ namespace uhal
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolIPbus.hxx"
 
 #endif

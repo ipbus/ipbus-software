@@ -30,6 +30,11 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/ProtocolTCP.hpp"
+
+
+#include <sys/time.h>
+
 #include <boost/bind/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/asio/connect.hpp>
@@ -38,11 +43,11 @@
 #include <boost/asio/placeholders.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-
+#include "uhal/Buffers.hpp"
 #include "uhal/IPbusInspector.hpp"
-// #include "uhal/logo.hpp"
+#include "uhal/ProtocolIPbus.hpp"
+#include "uhal/ProtocolControlHub.hpp"
 
-#include <sys/time.h>
 
 namespace uhal
 {
@@ -71,66 +76,6 @@ namespace uhal
   {
     mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
   }
-
-
-
-  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
-  TCP< InnerProtocol , nr_buffers_per_send >::TCP ( const TCP< InnerProtocol , nr_buffers_per_send >& aTCP ) :
-    mIOservice ( ),
-    mSocket ( mIOservice ),
-    mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aTCP.mUri.mHostname , aTCP.mUri.mPort ) ) ),
-    mDeadlineTimer ( mIOservice ),
-    //     mReplyMemory ( 65536 , 0x00000000 ),
-#ifdef RUN_ASIO_MULTITHREADED
-    mIOserviceWork ( mIOservice ),
-    mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
-    mDispatchQueue(),
-    mReplyQueue(),
-    mPacketsInFlight ( 0 ),
-#endif
-    mAsynchronousException ( NULL )
-  {
-    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
-  }
-
-
-  template < typename InnerProtocol , std::size_t nr_buffers_per_send >
-  TCP< InnerProtocol, nr_buffers_per_send >& TCP< InnerProtocol , nr_buffers_per_send >::operator= ( const TCP< InnerProtocol , nr_buffers_per_send >& aTCP )
-  {
-    mEndpoint =  boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aTCP.mUri.mHostname , aTCP.mUri.mPort ) );
-
-    try
-    {
-      mSocket.close();
-
-      while ( mSocket.is_open() )
-        {}
-    }
-    catch ( const std::exception& aExc )
-    {
-      exception::ASIOTcpError lExc;
-      log ( lExc , "Error " , Quote ( aExc.what() ) , " encountered when closing TCP socket for URI: ", this->uri() );
-      throw lExc;
-    }
-
-#ifdef RUN_ASIO_MULTITHREADED
-    ClientInterface::returnBufferToPool ( mDispatchQueue );
-    ClientInterface::returnBufferToPool ( mReplyQueue );
-    ClientInterface::returnBufferToPool ( mDispatchBuffers );
-    ClientInterface::returnBufferToPool ( mReplyBuffers );
-    mPacketsInFlight = 0;
-#endif
-
-    if ( mAsynchronousException )
-    {
-      delete mAsynchronousException;
-      mAsynchronousException = NULL;
-    }
-
-    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
-  }
-
-
 
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
@@ -814,5 +759,11 @@ namespace uhal
 #endif
   }
 
+
+  template class TCP< IPbus< 1 , 3 > , 1 >;
+  template class TCP< IPbus< 2 , 0 > , 1 >;
+
+  template class TCP< ControlHub < IPbus< 1 , 3 > > , 3 >;
+  template class TCP< ControlHub < IPbus< 2 , 0 > > , 3 >;
 }
 

@@ -30,11 +30,15 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/ProtocolIPbus.hpp"
+
+
 #include "boost/date_time/gregorian/gregorian.hpp"
 
 #include <arpa/inet.h>
 
 #include "uhal/Buffers.hpp"
+#include "uhal/log/log.hpp"
 
 
 namespace uhal
@@ -459,6 +463,9 @@ namespace uhal
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+  template class IPbus<1, 3>;
+  template class IPbus<2, 0>;
 }
 
 

@@ -81,20 +81,13 @@ namespace uhal
   class TCP : public InnerProtocol
   {
 
-    public:
-      /**
-      	Constructor
-      	@param aId the unique identifier that the client will be given.
-      	@param aUri a struct containing the full URI of the target.
-      */
-      TCP ( const std::string& aId, const URI& aUri );
-
+    private:
       /**
         Copy Constructor
         This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
         @param aTCP a TCP-protocol object to copy
       */
-      TCP ( const TCP& aTCP );
+      TCP ( const TCP& aTCP ); // non-copyable
 
       /**
        Assignment operator
@@ -102,8 +95,15 @@ namespace uhal
        @param aTCP a TCP-protocol object to copy
        @return reference to the current object to allow chaining of assignments
             */
-      TCP& operator= ( const TCP& aTCP );
+      TCP& operator= ( const TCP& aTCP ); // non-assignable
 
+    public:
+      /**
+      	Constructor
+      	@param aId the unique identifier that the client will be given.
+      	@param aUri a struct containing the full URI of the target.
+      */
+      TCP ( const std::string& aId, const URI& aUri );
 
       /**
       	Destructor
@@ -279,6 +279,5 @@ namespace uhal
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolTCP.hxx"
 
 #endif

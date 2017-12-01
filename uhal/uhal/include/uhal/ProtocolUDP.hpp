@@ -77,6 +77,22 @@ namespace uhal
   class UDP : public InnerProtocol
   {
 
+    private:
+      /**
+        Copy Constructor
+        This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
+        @param aUDP a UDP-protocol object to copy
+      */
+      UDP ( const UDP& aUDP ); // non-copyable
+
+      /**
+       Assignment operator
+       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
+       @param aUDP a UDP-protocol object to copy
+       @return reference to the current object to allow chaining of assignments
+            */
+      UDP& operator= ( const UDP& aUDP ); // non-assignable
+
     public:
       //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
 
@@ -86,22 +102,6 @@ namespace uhal
       	@param aUri a struct containing the full URI of the target.
       */
       UDP ( const std::string& aId, const URI& aUri );
-
-      /**
-        Copy Constructor
-        This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
-        @param aUDP a UDP-protocol object to copy
-      */
-      UDP ( const UDP& aUDP );
-
-      /**
-       Assignment operator
-       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-       @param aUDP a UDP-protocol object to copy
-       @return reference to the current object to allow chaining of assignments
-            */
-      UDP& operator= ( const UDP& aUDP );
-
 
       /**
       	Destructor
@@ -254,6 +254,5 @@ namespace uhal
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolUDP.hxx"
 
 #endif

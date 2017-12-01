@@ -191,6 +191,4 @@ namespace uhal
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolControlHub.hxx"
-
 #endif
