@@ -30,8 +30,9 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/IPbusInspector.hpp"
 
-// Using the uhal namespace
+
 namespace uhal
 {
 
@@ -187,24 +188,24 @@ namespace uhal
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | BOT, transaction ID " , Integer ( mTransactionId ) );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>::ni_read ( const uint32_t& aAddress )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
     log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void  HostToTargetInspector<IPbus_major , IPbus_minor>::read ( const uint32_t& aAddress )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
     log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>::ni_write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
@@ -217,8 +218,8 @@ namespace uhal
     }
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>::write ( const uint32_t& aAddress , std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
@@ -231,8 +232,8 @@ namespace uhal
     }
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void  HostToTargetInspector<IPbus_major , IPbus_minor>::rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write sum, transaction ID " , Integer ( mTransactionId ) );
@@ -240,8 +241,8 @@ namespace uhal
     log ( Notice() , Integer ( aAddend, IntFmt<hex,fixed>() ) , " |  > Addend" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>::rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write bits, transaction ID " , Integer ( mTransactionId ) );
@@ -250,8 +251,8 @@ namespace uhal
     log ( Notice() , Integer ( aOrTerm, IntFmt<hex,fixed>() ) , " |  > Or-term" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>::unknown_type()
   {
     log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown Transaction Header" );
@@ -259,29 +260,28 @@ namespace uhal
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
-
   bool HostToTargetInspector<IPbus_major , IPbus_minor>::control_packet_header ()
   {
     log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , Packet Counter " , Integer ( mPacketCounter ) );
     return true;
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>::status_packet_header()
   {
     log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Status Packet Header" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>::resend_packet_header()
   {
     log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Resend Request Packet Header" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void HostToTargetInspector<IPbus_major , IPbus_minor>:: unknown_packet_header()
   {
     log ( Error() , Integer ( mPacketHeader, IntFmt<hex,fixed>() ) , " | Unknown Packet Header" );
@@ -306,7 +306,6 @@ namespace uhal
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   TargetToHostInspector<IPbus_major , IPbus_minor>::~TargetToHostInspector( ) {}
-
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
@@ -417,11 +416,13 @@ namespace uhal
     return true;
   }
 
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::bot()
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | BOT, transaction ID " , Integer ( mTransactionId ) );
   }
+
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::ni_read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
@@ -435,6 +436,7 @@ namespace uhal
     }
   }
 
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd )
   {
@@ -447,17 +449,20 @@ namespace uhal
     }
   }
 
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::ni_write ( )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Non-incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
   }
 
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::write ( )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing write, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
   }
+
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::rmw_sum ( const uint32_t& aNewValue )
@@ -466,6 +471,7 @@ namespace uhal
     log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
   }
 
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::rmw_bits ( const uint32_t& aNewValue )
   {
@@ -473,32 +479,38 @@ namespace uhal
     log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
   }
 
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::unknown_type()
   {
     log ( Error() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Unknown Transaction Header" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   bool TargetToHostInspector<IPbus_major , IPbus_minor>::control_packet_header ()
   {
     log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Control (Instruction) Packet Header , Packet Counter " , Integer ( mPacketCounter ) );
     return true;
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::status_packet_header()
   {
     log ( Notice() , Integer ( mPacketHeader , IntFmt<hex,fixed>() ) , " | Status Packet Header" );
   }
 
-  template< uint8_t IPbus_major , uint8_t IPbus_minor >
 
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   void TargetToHostInspector<IPbus_major , IPbus_minor>::unknown_packet_header()
   {
     log ( Error() , Integer ( mPacketHeader, IntFmt<hex,fixed>() ) , " | Unknown Packet Header" );
   }
 
+
+  template class HostToTargetInspector<1, 3>;
+  template class HostToTargetInspector<2, 0>;
+  template class TargetToHostInspector<1, 3>;
+  template class TargetToHostInspector<2, 0>;
 }

@@ -286,6 +286,6 @@ namespace uhal
 
   };
 }
-#include "uhal/TemplateDefinitions/IPbusInspector.hxx"
+
 
 #endif
