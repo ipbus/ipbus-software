@@ -51,11 +51,9 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
-#ifdef RUN_ASIO_MULTITHREADED
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#endif
 
 #include <string>
 
@@ -206,7 +204,6 @@ namespace uhal
       //! The mechanism for providing the time-out
       boost::asio::deadline_timer mDeadlineTimer;
 
-#ifdef RUN_ASIO_MULTITHREADED
       /// Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
       boost::asio::io_service::work mIOserviceWork;
 
@@ -233,7 +230,6 @@ namespace uhal
       boost::condition_variable mConditionalVariable;
       //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received
       bool mFlushDone;
-#endif
 
       /**
         Variable storing "number of bytes to follow" field for the TCP chunk currently being sent.
@@ -250,7 +246,6 @@ namespace uhal
       */
       uint32_t mReplyByteCounter;
 
-#ifdef RUN_ASIO_MULTITHREADED
       /**
         When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
         @todo Tom Williams needs to check this and expand
@@ -261,12 +256,6 @@ namespace uhal
         @todo Tom Williams needs to check this and expand
       */
       std::vector< boost::shared_ptr< Buffers > > mReplyBuffers;
-#else
-      //! The write operation currently in progress
-      boost::shared_ptr< Buffers > mDispatchBuffers;
-      //! The read operation currently in progress or the next to be done
-      boost::shared_ptr< Buffers > mReplyBuffers;
-#endif
 
       /**
         A pointer to an exception object for passing exceptions from the worker thread to the main thread.

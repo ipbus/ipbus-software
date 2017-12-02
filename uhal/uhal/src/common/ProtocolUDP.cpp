@@ -62,14 +62,12 @@ namespace uhal
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( 1500 , 0x00000000 ),
-#ifdef RUN_ASIO_MULTITHREADED
     mIOserviceWork ( mIOservice ),
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
     mFlushDone ( true ),
-#endif
     //    mDispatchBuffers ( NULL ),
     //    mReplyBuffers ( NULL ),
     mAsynchronousException ( NULL )
@@ -89,12 +87,10 @@ namespace uhal
         {}
 
       mIOservice.stop();
-#ifdef RUN_ASIO_MULTITHREADED
       mDispatchThread.join();
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
-#endif
     }
     catch ( const std::exception& aExc )
     {
@@ -107,9 +103,7 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
 
     if ( mAsynchronousException )
     {
@@ -123,7 +117,6 @@ namespace uhal
     }
 
 
-#ifdef RUN_ASIO_MULTITHREADED
     if ( mDispatchBuffers || mPacketsInFlight == this->getMaxNumberOfBuffers() )
     {
       mDispatchQueue.push_back ( aBuffers );
@@ -134,11 +127,6 @@ namespace uhal
       mDispatchBuffers = aBuffers;
       write ( );
     }
-
-#else
-    mDispatchBuffers = aBuffers;
-    write ( );
-#endif
   }
 
 
@@ -200,28 +188,14 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-#ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
     mPacketsInFlight++;
-#else
-    boost::system::error_code lErrorCode = boost::asio::error::would_block;
-    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
-
-    do
-    {
-      mIOservice.run_one();
-    }
-    while ( lErrorCode == boost::asio::error::would_block );
-
-    write_callback ( lErrorCode );
-#endif
   }
 
 
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
-#ifdef RUN_ASIO_MULTITHREADED
     //     if( !mDispatchBuffers)
     //     {
     //       log( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
@@ -289,12 +263,6 @@ namespace uhal
     {
       mDispatchBuffers.reset();
     }
-
-#else
-    mReplyBuffers = mDispatchBuffers;
-    mDispatchBuffers.reset();
-    read ( );
-#endif
   }
 
 
@@ -319,20 +287,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-#ifdef RUN_ASIO_MULTITHREADED
     mSocket.async_receive ( lAsioReplyBuffer , 0 , boost::bind ( &UDP<InnerProtocol>::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
-#else
-    boost::system::error_code lErrorCode = boost::asio::error::would_block;
-    mSocket.async_receive ( lAsioReplyBuffer , 0 , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
-
-    do
-    {
-      mIOservice.run_one();
-    }
-    while ( lErrorCode == boost::asio::error::would_block );
-
-    read_callback ( lErrorCode );
-#endif
   }
 
 
@@ -340,9 +295,7 @@ namespace uhal
   void UDP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
     {
-#ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
       if ( mAsynchronousException )
       {
         NotifyConditionalVariable ( true );
@@ -378,9 +331,8 @@ namespace uhal
     if ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) )
     {
       mSocket.close();
-#ifdef RUN_ASIO_MULTITHREADED
+
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
       mAsynchronousException = new exception::ASIOUdpError();
       log ( *mAsynchronousException , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from UDP target with URI: " , this->uri() );
 
@@ -424,22 +376,17 @@ namespace uhal
     {
       if ( uhal::exception::exception* lExc = ClientInterface::validate ( mReplyBuffers ) ) //Control of the pointer has been passed back to the client interface
       {
-#ifdef RUN_ASIO_MULTITHREADED
         boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
         mAsynchronousException = lExc;
       }
     }
     catch ( exception::exception& aExc )
     {
-#ifdef RUN_ASIO_MULTITHREADED
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-#endif
       mAsynchronousException = new exception::ValidationError ();
       log ( *mAsynchronousException , "Exception caught during reply validation for UDP device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
     }
 
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
@@ -475,10 +422,6 @@ namespace uhal
       mDeadlineTimer.expires_from_now( boost::posix_time::seconds(60) );
       NotifyConditionalVariable ( true );
     }
-
-#else
-    mReplyBuffers.reset();
-#endif
   }
 
 
@@ -489,14 +432,11 @@ namespace uhal
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( this->mTransportLayerMutex );
-#endif 
 
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
       // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
-#ifdef RUN_ASIO_MULTITHREADED
       if (  mDispatchBuffers || mReplyBuffers )
       {
         log ( Warning() , "Closing UDP socket for URI " , Quote ( this->uri() ) , " since deadline has passed" );
@@ -505,7 +445,7 @@ namespace uhal
       {
         log ( Debug() , "Closing UDP socket for URI " , Quote ( this->uri() ) , " since no communication in last 60 seconds" );
       }
-#endif
+
       // The deadline has passed. The socket is closed so that any outstanding
       // asynchronous operations are cancelled.
       mSocket.close();
@@ -524,14 +464,12 @@ namespace uhal
   void UDP< InnerProtocol >::Flush( )
   {
     WaitOnConditionalVariable();
-#ifdef RUN_ASIO_MULTITHREADED
 
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
     if ( mAsynchronousException )
     {
       mAsynchronousException->ThrowAsDerivedType();
     }
-#endif
   }
 
 
@@ -562,11 +500,10 @@ namespace uhal
       mAsynchronousException = NULL;
     }
 
-#ifdef RUN_ASIO_MULTITHREADED
     ClientInterface::returnBufferToPool ( mDispatchQueue );
     ClientInterface::returnBufferToPool ( mReplyQueue );
     mPacketsInFlight = 0;
-#endif
+
     ClientInterface::returnBufferToPool ( mDispatchBuffers );
     mDispatchBuffers.reset();
     ClientInterface::returnBufferToPool ( mReplyBuffers );
@@ -582,28 +519,23 @@ namespace uhal
   template < typename InnerProtocol  >
   void UDP< InnerProtocol >::NotifyConditionalVariable ( const bool& aValue )
   {
-#ifdef RUN_ASIO_MULTITHREADED
     {
       boost::lock_guard<boost::mutex> lLock ( mConditionalVariableMutex );
       mFlushDone = aValue;
     }
     mConditionalVariable.notify_one();
-#endif
   }
 
 
   template < typename InnerProtocol  >
   void UDP< InnerProtocol >::WaitOnConditionalVariable()
   {
-#ifdef RUN_ASIO_MULTITHREADED
     boost::unique_lock<boost::mutex> lLock ( mConditionalVariableMutex );
 
     while ( !mFlushDone )
     {
       mConditionalVariable.wait ( lLock );
     }
-
-#endif
   }
 
 

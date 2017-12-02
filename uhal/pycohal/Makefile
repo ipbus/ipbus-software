@@ -56,9 +56,7 @@ Libraries = \
 		util
 
 
-CXXFLAGS += -ftemplate-depth-128 -O0 -rdynamic -finline-functions -Wno-inline -DNDEBUG \
-		-DDISABLE_PACKET_COUNTER_HACK \
-		-DRUN_ASIO_MULTITHREADED
+CXXFLAGS += -ftemplate-depth-128 -O0 -rdynamic -finline-functions -Wno-inline -DNDEBUG
 
 ifeq (${CACTUS_OS},osx)
   CXXFLAGS += -Wno-c++11-extensions

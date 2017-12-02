@@ -189,9 +189,7 @@ namespace uhal
       }
 
       {
-#ifdef RUN_ASIO_MULTITHREADED
         boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
         mNoPreemptiveDispatchBuffers.clear();
       }
 
@@ -259,9 +257,7 @@ namespace uhal
   void ClientInterface::returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers )
   {
     // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
 
     if ( aBuffers )
     {
@@ -275,9 +271,7 @@ namespace uhal
 
   void ClientInterface::returnBufferToPool ( std::deque< boost::shared_ptr< Buffers > >& aBuffers )
   {
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
 
     for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
     {
@@ -293,9 +287,7 @@ namespace uhal
 
   void ClientInterface::returnBufferToPool ( std::vector< boost::shared_ptr<Buffers> >& aBuffers )
   {
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
 
     for ( std::vector < boost::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
     {
@@ -311,9 +303,7 @@ namespace uhal
 
   void ClientInterface::returnBufferToPool ( std::deque< std::vector< boost::shared_ptr<Buffers> > >& aBuffers )
   {
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
 
     for ( std::deque < std::vector < boost::shared_ptr< Buffers > > >::iterator lIt1 = aBuffers.begin(); lIt1 != aBuffers.end(); ++lIt1 )
     {
@@ -425,9 +415,7 @@ namespace uhal
     {
       {
         // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-#ifdef RUN_ASIO_MULTITHREADED
         boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
 
         if ( mBuffers.size() == 0 )
         {
@@ -452,9 +440,7 @@ namespace uhal
   void ClientInterface::deleteBuffers()
   {
     // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-#ifdef RUN_ASIO_MULTITHREADED
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-#endif
     /*    for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = mBuffers.begin(); lIt != mBuffers.end(); ++lIt )
         {
           if ( *lIt )

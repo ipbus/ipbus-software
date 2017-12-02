@@ -386,10 +386,8 @@ namespace uhal
       //! A MutEx lock used to make sure the access functions are thread safe
       boost::mutex mUserSideMutex;
       
-#ifdef RUN_ASIO_MULTITHREADED
       //! A MutEx lock used to make sure the access to the buffers is thread safe
       boost::mutex mBufferMutex;
-#endif
 
       //! A memory pool of buffers which will be dispatched
       std::deque < boost::shared_ptr< Buffers > > mBuffers;

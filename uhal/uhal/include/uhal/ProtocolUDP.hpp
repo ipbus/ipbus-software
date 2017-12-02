@@ -51,11 +51,9 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
-#ifdef RUN_ASIO_MULTITHREADED
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#endif
 
 #include <string>
 
@@ -212,7 +210,6 @@ namespace uhal
       */
       std::vector<uint8_t> mReplyMemory;
 
-#ifdef RUN_ASIO_MULTITHREADED
       /// Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
       boost::asio::io_service::work mIOserviceWork;
 
@@ -236,7 +233,6 @@ namespace uhal
       boost::condition_variable mConditionalVariable;
       //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received
       bool mFlushDone;
-#endif
 
       //! The send operation currently in progress
       boost::shared_ptr< Buffers > mDispatchBuffers;
