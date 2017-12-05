@@ -30,15 +30,18 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/Utilities.hpp"
+#include "uhal/ClientFactory.hpp"
 
+
+#include <boost/spirit/include/qi.hpp>
+
+#include "uhal/grammars/URLGrammar.hpp"
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 #include "uhal/ProtocolPCIe.hpp"
 
-#include "uhal/ClientFactory.hpp"
 
 
 namespace uhal

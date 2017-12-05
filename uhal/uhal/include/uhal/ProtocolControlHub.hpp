@@ -43,8 +43,6 @@
 #include "uhal/log/exception.hpp"
 #include "uhal/log/log.hpp"
 
-#include "uhal/Utilities.hpp"
-
 #include <iostream>
 #include <iomanip>
 

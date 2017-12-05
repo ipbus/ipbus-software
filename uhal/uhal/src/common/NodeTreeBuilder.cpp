@@ -32,10 +32,15 @@
 
 #include "uhal/NodeTreeBuilder.hpp"
 
+
+#include <fstream>
+
 #include "uhal/DerivedNodeFactory.hpp"
-#include "uhal/Utilities.hpp"
+#include "uhal/utilities/files.hpp"
+#include "uhal/utilities/xml.hpp"
 #include "uhal/log/log.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string/replace.hpp>

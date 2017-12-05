@@ -30,11 +30,12 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/ValMem.hpp"
 
-#include <uhal/ValMem.hpp>
 
 #include "uhal/log/log.hpp"
-#include "uhal/Utilities.hpp"
+#include "uhal/utilities/bits.hpp"
+
 
 namespace uhal
 {

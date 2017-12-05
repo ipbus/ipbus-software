@@ -43,7 +43,6 @@
 
 #include "uhal/Buffers.hpp"
 #include "uhal/ProtocolIPbus.hpp"
-#include "uhal/Utilities.hpp"
 
 
 namespace uhal

@@ -32,9 +32,15 @@
 
 #include "uhal/ClientInterface.hpp"
 
-#include "uhal/Buffers.hpp"
-#include "uhal/Utilities.hpp"
+
 #include <sstream>
+
+#include "boost/thread/lock_guard.hpp"
+
+#include "uhal/Buffers.hpp"
+#include "uhal/log/log.hpp"
+#include "uhal/utilities/bits.hpp"
+
 
 namespace uhal
 {
