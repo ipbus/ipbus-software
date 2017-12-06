@@ -36,7 +36,16 @@
 #include "uhal/utilities/xml.hpp"
 
 
+#include <ctype.h>
+#include <sstream>
+
+#include "pugixml.hpp"
+
+#include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log_inserters.quote.hpp"
+
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

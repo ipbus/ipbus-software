@@ -35,7 +35,7 @@
 
 #include <boost/spirit/include/qi.hpp>
 
-#include "uhal/grammars/URLGrammar.hpp"
+#include "uhal/grammars/URIGrammar.hpp"
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolIPbus.hpp"

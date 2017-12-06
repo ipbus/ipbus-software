@@ -36,11 +36,16 @@
 	@date 2013
 */
 
-#ifndef IPbusInspector_hpp
-#define IPbusInspector_hpp
+#ifndef _uhal_IPbusInspector_hpp_
+#define _uhal_IPbusInspector_hpp_
 
+
+#include <stdint.h>
+#include <vector>
+
+#include "uhal/ProtocolIPbusCore.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
 #include "uhal/log/log.hpp"
-#include "uhal/ProtocolIPbus.hpp"
 
 
 // Using the uhal namespace

@@ -39,8 +39,14 @@
 #ifndef _uhal_HwInterface_hpp_
 #define _uhal_HwInterface_hpp_
 
-#include "uhal/Node.hpp"
+#include <stdint.h>
+#include <string>
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include "uhal/ClientInterface.hpp"
+#include "uhal/Node.hpp"
 
 
 namespace uhal

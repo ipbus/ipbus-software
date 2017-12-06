@@ -62,7 +62,7 @@
 
 #include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
 #include "uhal/grammars/HttpResponseGrammar.hpp"
-#include "uhal/grammars/URLGrammar.hpp"
+#include "uhal/grammars/URIGrammar.hpp"
 
 #include "pugixml.hpp"
 

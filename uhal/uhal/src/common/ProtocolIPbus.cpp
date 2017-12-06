@@ -33,12 +33,16 @@
 #include "uhal/ProtocolIPbus.hpp"
 
 
-#include "boost/date_time/gregorian/gregorian.hpp"
-
-#include <arpa/inet.h>
+#include <stdint.h>
+#include <ostream>
 
 #include "uhal/Buffers.hpp"
+#include "uhal/ClientInterface.hpp"
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log_inserters.location.hpp" 
 #include "uhal/log/log.hpp"
+#include "uhal/ValMem.hpp"
 
 
 namespace uhal

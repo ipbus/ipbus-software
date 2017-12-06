@@ -30,6 +30,12 @@
 ---------------------------------------------------------------------------
 */
 
+
+#include <exception>
+#include <string>
+
+#include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log_inserters.type.hpp"
 #include "uhal/log/log.hpp"
 
 

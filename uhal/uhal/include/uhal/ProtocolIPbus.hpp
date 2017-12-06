@@ -39,15 +39,25 @@
 #ifndef _uhal_ProtocolIPbus_hpp_
 #define _uhal_ProtocolIPbus_hpp_
 
+
 #include <deque>
+#include <iosfwd>
+#include <stdint.h>
+#include <string>
+#include <utility>
+
+#include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbusCore.hpp"
 
-#include "boost/date_time/posix_time/posix_time_duration.hpp"
 
-#include "uhal/ClientInterface.hpp"
+// Forward declarations
+namespace boost { template <class Y> class shared_ptr; }
+
 
 namespace uhal
 {
+  class Buffers;
+  struct URI;
 
 
   //! A class which provides the version-specific functionality for IPbus

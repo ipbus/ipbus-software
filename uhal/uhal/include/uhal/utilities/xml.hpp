@@ -43,11 +43,16 @@
 #include <vector>
 
 #include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-
-#include "pugixml.hpp"
 
 #include "uhal/log/exception.hpp"
+
+
+// Forward declarations
+namespace pugi
+{
+  class xml_node;
+  struct xml_parse_result;
+}
 
 
 namespace uhal

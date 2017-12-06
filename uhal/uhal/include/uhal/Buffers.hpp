@@ -41,7 +41,9 @@
 
 
 #include <deque>
-//#include "uhal/IPbusPacketInfo.hpp"
+#include <stdint.h>         // for uint32_t, uint8_t
+#include <utility>          // for pair
+#include <vector>           // for vector
 
 #include "uhal/ValMem.hpp"
 

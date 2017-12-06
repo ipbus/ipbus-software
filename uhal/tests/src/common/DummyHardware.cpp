@@ -41,6 +41,8 @@
 #include <boost/chrono/chrono_io.hpp>
 #include <boost/thread/thread.hpp>
 
+#include "uhal/ProtocolIPbus.hpp"
+
 
 namespace uhal
 {

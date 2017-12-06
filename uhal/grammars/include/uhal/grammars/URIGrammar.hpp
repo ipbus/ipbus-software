@@ -33,11 +33,16 @@
 #ifndef _uhal_grammars_URIGrammar_hpp_
 #define _uhal_grammars_URIGrammar_hpp_
 
-#include <boost/fusion/adapted/std_pair.hpp>
-#include <boost/spirit/include/qi_grammar.hpp>
+
 
 #include <string>
+#include <utility>   // for pair
 #include <vector>
+
+#include <boost/fusion/adapted/std_pair.hpp>
+#include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <boost/spirit/include/qi_char.hpp>
+#include <boost/spirit/include/qi_grammar.hpp>
 
 #include "uhal/grammars/URI.hpp"
 

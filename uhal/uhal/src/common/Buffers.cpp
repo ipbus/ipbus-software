@@ -33,6 +33,9 @@
 #include "uhal/Buffers.hpp"
 
 
+#include <string.h>
+
+
 namespace uhal
 {
 

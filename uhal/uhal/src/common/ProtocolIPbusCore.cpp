@@ -32,8 +32,6 @@
 
 #include "uhal/ProtocolIPbusCore.hpp"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 #include "uhal/Buffers.hpp"
 #include "uhal/log/log.hpp"
 

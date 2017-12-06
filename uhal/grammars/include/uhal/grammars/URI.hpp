@@ -33,8 +33,10 @@
 #ifndef _uhal_grammars_URI_hpp_
 #define _uhal_grammars_URI_hpp_
 
-#include <iostream>
+
+#include <iosfwd>
 #include <string>
+#include <utility>   // for pair
 #include <vector>
 
 

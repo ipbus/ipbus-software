@@ -39,15 +39,26 @@
 #ifndef _uhal_ProtocolIPbusCore_hpp_
 #define _uhal_ProtocolIPbusCore_hpp_
 
-#include <deque>
 
-#include "boost/date_time/posix_time/posix_time_duration.hpp"
+#include <deque>
+#include <iosfwd>
+#include <stdint.h>
+#include <utility>
+#include <vector>
+
 #include "boost/function.hpp"
 
 #include "uhal/ClientInterface.hpp"
+#include "uhal/definitions.hpp"
+#include "uhal/log/exception.hpp"
+#include "uhal/ValMem.hpp"
+
 
 namespace uhal
 {
+  // Forward declaration
+  struct URI;
+
 
   /**
   	Enumerated type to define the IPbus transaction type.

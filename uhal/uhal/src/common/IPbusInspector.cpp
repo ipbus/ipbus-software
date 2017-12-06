@@ -33,6 +33,10 @@
 #include "uhal/IPbusInspector.hpp"
 
 
+#include "uhal/ProtocolIPbus.hpp"
+#include "uhal/log/LogLevels.hpp"
+
+
 namespace uhal
 {
 

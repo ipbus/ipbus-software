@@ -39,12 +39,12 @@
 #ifndef _uhal_ProtocolTCP_hpp_
 #define _uhal_ProtocolTCP_hpp_
 
-#include "uhal/ClientInterface.hpp"
-#include "uhal/log/exception.hpp"
-#include "uhal/log/log.hpp"
 
+#include <deque>
 #include <iostream>
-#include <iomanip>
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/asio/io_service.hpp>
@@ -55,10 +55,14 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 
-#include <string>
+#include "uhal/log/exception.hpp"
+
 
 namespace uhal
 {
+  // Forward declarations
+  class Buffers;
+  struct URI;
 
 
   namespace exception

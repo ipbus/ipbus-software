@@ -44,7 +44,13 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include "uhal/Buffers.hpp"
+#include "uhal/grammars/URI.hpp"
 #include "uhal/IPbusInspector.hpp"
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log_inserters.location.hpp"
+#include "uhal/log/log_inserters.quote.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 

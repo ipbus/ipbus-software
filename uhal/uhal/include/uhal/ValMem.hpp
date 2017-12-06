@@ -40,12 +40,16 @@
 #ifndef _uhal_ValMem_hpp_
 #define _uhal_ValMem_hpp_
 
-#include "uhal/log/exception.hpp"
-#include "uhal/definitions.hpp"
+#include <cstddef>                 // for size_t
+#include <deque>
+#include <vector>
+#include <stdint.h>                // for uint32_t, uint8_t
+
 #include <boost/shared_ptr.hpp>
 
-#include <vector>
-#include <deque>
+#include "uhal/log/exception.hpp"
+#include "uhal/definitions.hpp"
+
 
 
 //! @todo Need to discuss and finalize which methods in ValWord and ValVector check validity and which don't. Currently it seems a little ad-hoc.
