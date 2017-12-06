@@ -51,17 +51,21 @@
 /**
 	Macro for simplifying the declaration and definition of derived exception types
 */
-#define UHAL_DEFINE_EXCEPTION_CLASS( ClassName , ClassDescription )\
- class ClassName : public uhal::exception::exception {\
+#define UHAL_DEFINE_DERIVED_EXCEPTION_CLASS( ClassName , BaseClassName, ClassDescription )\
+ class ClassName : public BaseClassName {\
  public:\
- ClassName() : uhal::exception::exception() {}\
+ ClassName() : BaseClassName() {}\
  void ThrowAsDerivedType_(){ throw ClassName(*this); } \
  exception* clone(){ return new ClassName(*this); } \
  protected:\
  std::string description() const throw() { return std::string( ClassDescription ); } \
 };
 
+#define UHAL_DEFINE_EXCEPTION_CLASS( ClassName , ClassDescription ) UHAL_DEFINE_DERIVED_EXCEPTION_CLASS(ClassName, uhal::exception::exception, ClassDescription)
+
 #define ExceptionClass UHAL_DEFINE_EXCEPTION_CLASS
+
+
 
 
 /**

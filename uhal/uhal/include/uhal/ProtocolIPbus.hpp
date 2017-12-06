@@ -188,7 +188,7 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbus2PacketHeaderMismatch , "Exception class to handle the case where the IPbus 2.0 packet header does not match that sent." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbus2PacketHeaderMismatch, PacketLevelError, "Exception class to handle the case where the IPbus 2.0 packet header does not match that sent." )
   }
 
 

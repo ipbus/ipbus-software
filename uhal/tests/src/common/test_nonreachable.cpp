@@ -60,17 +60,13 @@ BOOST_AUTO_TEST_CASE(check_nonreachable_device)
     HwInterface hw = manager.getDevice ( TestFixture::sDeviceId );
 
     // Check we get an exception corresponding to target being unreachable
-    if ( hw.uri().find ( "ipbusudp" ) != std::string::npos )
+    if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
     {
-      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
-    }
-    else if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
-    {
-      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpConnectionFailure );
+      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
     }
     else
     {
-      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ControlHubTargetTimeout );
+      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ClientTimeout );
     }
   }
 }
@@ -93,7 +89,7 @@ BOOST_AUTO_TEST_CASE(check_nonreachable_controlhub)
     for (size_t i = 0; i < 10; i++) {
       HwInterface hw = getHwWithModifiedControlHubPort(TestFixture::sConnectionFile, TestFixture::sDeviceId);
 
-      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpConnectionFailure );
+      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
     }
   }
   else

@@ -55,6 +55,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 
+#include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
 
 
@@ -68,13 +69,13 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the TCP connection timed out.
-    UHAL_DEFINE_EXCEPTION_CLASS ( TcpTimeout , "Exception class to handle the case where the TCP connection timed out." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( TcpTimeout , ClientTimeout , "Exception class to handle the case where the TCP connection timed out." )
     //! Exception class to handle a failure to create a TCP socket.
-    UHAL_DEFINE_EXCEPTION_CLASS ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ErrorAtTcpSocketCreation , TransportLayerError , "Exception class to handle a failure to create a TCP socket." )
     //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
-    UHAL_DEFINE_EXCEPTION_CLASS ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( TcpConnectionFailure , TransportLayerError , "Exception class to handle the case where the TCP connection was refused or aborted." )
     //! Exception class to handle the case where ASIO returned an error.
-    UHAL_DEFINE_EXCEPTION_CLASS ( ASIOTcpError , "Exception class to handle the case where ASIO returned an error." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ASIOTcpError , TransportLayerError , "Exception class to handle the case where ASIO returned an error." )
 
   }
 

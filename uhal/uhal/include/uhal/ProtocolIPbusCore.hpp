@@ -92,12 +92,12 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreUnparsableTransactionHeader , "Exception class to handle the case where the IPbus transaction header could not be parsed." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreUnparsableTransactionHeader , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header could not be parsed." )
     //     UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." )
     //! Exception class to handle the case where the IPbus transaction header response code indicated an error.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
     //! Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , TransactionLevelError, "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
 
   }
 
