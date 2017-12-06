@@ -31,7 +31,7 @@
 */
 
 
-#include <uhal/log/log.hpp>
+#include <ostream>  // for operator<<, ostream
 
 namespace uhal
 {

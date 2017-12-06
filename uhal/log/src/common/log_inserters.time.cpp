@@ -30,13 +30,13 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/log/log_inserters.time.hpp"
 
-#include <uhal/log/log_inserters.time.hpp>
+
 #include <iomanip>
+#include <stdio.h>  // for NULL
+#include <time.h>   // for tm
 
-// #include <uhal/log/log_inserters.integer.hpp>
-
-// #include <uhal/log/log.hpp>
 
 
 namespace uhal

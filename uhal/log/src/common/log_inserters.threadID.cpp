@@ -30,9 +30,11 @@
 ---------------------------------------------------------------------------
 */
 
-#include <uhal/log/log_inserters.threadID.hpp>
+#include "uhal/log/log_inserters.threadID.hpp"
 
-#include "boost/thread.hpp"
+
+#include "boost/thread/thread.hpp"
+
 
 namespace uhal
 {

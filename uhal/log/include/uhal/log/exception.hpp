@@ -42,7 +42,6 @@
 #include <exception>
 #include <string>
 #include <sys/time.h>
-#include <time.h>
 
 #ifdef USE_BACKTRACE
 #include "boost/thread.hpp"

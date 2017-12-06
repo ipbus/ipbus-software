@@ -31,11 +31,12 @@
 */
 
 
-#include <uhal/log/log.hpp>
-
 #ifdef __GNUG__
 #include <cxxabi.h>
 #endif
+#include <ostream>   // for operator<<, ostream, size_t
+#include <typeinfo>  // for type_info
+
 
 namespace uhal
 {

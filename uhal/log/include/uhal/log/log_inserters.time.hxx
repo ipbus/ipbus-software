@@ -31,7 +31,14 @@
 */
 
 
-// #include <uhal/log/log.hpp>
+#include <ostream>       // for operator<<, ostream
+#include <time.h>        // for tm
+
+
+// Forward declarations
+struct timeval;
+struct tm;
+
 
 namespace uhal
 {

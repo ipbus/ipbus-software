@@ -32,9 +32,9 @@
 */
 
 #include "uhal/log/GccOutputCleaner.hpp"
-#include <iostream>
-#include <sstream>
+
 #include <algorithm>
+#include <sstream>
 
 
 std::string GccOutputCleaner::SquareBracketStyle ( const uint32_t& aIndex )

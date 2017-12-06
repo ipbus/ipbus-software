@@ -31,7 +31,10 @@
 */
 
 
-#include <uhal/log/log.hpp>
+#include <stdint.h>                          // for uint32_t, uint8_t, uint16_t, int32_t, ...
+#include <ostream>                           // for ostream, basic_ostream::put
+#include "uhal/log/log_inserter_helper.hpp"  // for RefWrapper
+
 
 namespace uhal
 {

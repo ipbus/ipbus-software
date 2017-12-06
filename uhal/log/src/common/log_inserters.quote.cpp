@@ -30,10 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/log/log_inserters.quote.hpp"
 
-#include <uhal/log/log_inserters.quote.hpp>
-
-#include <uhal/log/log.hpp>
 
 namespace uhal
 {

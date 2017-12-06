@@ -30,15 +30,19 @@
 ---------------------------------------------------------------------------
 */
 
-#include <stdint.h>
 
-#include <sstream>
-#include <iostream>
+#include <cctype>
+#include <exception>
 #include <fstream>
+#include <iostream>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string>
+#include <sstream>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+
 
 static const std::string gLogLevelsChar[] = { "Fatal" , "Error" , "Warning" , "Notice" , "Info" , "Debug" };
 static const uint32_t gNumberEntries ( 6 );
@@ -58,30 +62,53 @@ std::string gDivider (	"// " + std::string ( 150,'=' ) + "\n" +
 void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
   aHppFile	<< "\n"
-            << "#ifndef _log_hpp_\n"
-            << "#define _log_hpp_\n"
+            << "#ifndef _uhal_log_log_hpp_\n"
+            << "#define _uhal_log_log_hpp_\n"
             << "\n"
+            << "#include <iosfwd>  // for ostream\n"
+            << "#include <boost/thread/mutex.hpp>\n"
+            << "#include <boost/thread/lock_guard.hpp>\n"
             << "#include <uhal/log/log_inserters.hpp>\n"
             << "#include <uhal/log/LogLevels.hpp>\n"
             << "#include <uhal/log/exception.hpp>\n"
-            << "#include <boost/thread/mutex.hpp>\n"
-            << "#include <boost/thread/lock_guard.hpp>\n"
             << "\n"
             //            << "#define logging() logger log( ThisLocation() );\n"
             << "#define logging()\n"
             << "\n"
+            << "namespace boost { class mutex; }\n"
+            << "\n"
             << "namespace uhal{\n"
+            << "\n"
+            << "class DebugLevel;\n"
+            << "class InfoLevel;\n"
+            << "class NoticeLevel;\n"
+            << "class WarningLevel;\n"
+            << "class ErrorLevel;\n"
+            << "class FatalLevel;\n"
             << "\n"
             << gDivider
             << "\n";
   aHxxFile	<< "\n"
+            << "#include <sstream>                         // for ostream, stringstream, endl\n"
+            << "#include <string>                          // for operator+, basic_string\n"
+            << "\n"
+            << "#include <boost/thread/lock_guard.hpp>     // for lock_guard\n"
+            << "#include <boost/thread/mutex.hpp>          // for mutex\n"
+            << "\n"
+            << "#include \"uhal/log/exception.hpp\"          // for exception\n"
+            << "#include \"uhal/log/LogLevels.hpp\"          // for insert, ErrorLevel, DebugL...\n"
+            << "#include \"uhal/log/log_inserters.quote.hpp\"  // for operator<<\n"
+            << "\n"
             << "namespace uhal{\n"
             << "\n"
             << gDivider
             << "\n";
   aCppFile	<< "\n"
-            << "#include <uhal/log/log.hpp>\n"
-            << "#include <uhal/log/log_inserters.quote.hpp>\n"
+            << "#include <stdlib.h>                          // for getenv\n"
+            << "#include <boost/thread/mutex.hpp>            // for mutex\n"
+            << "#include \"uhal/log/LogLevels.hpp\"            // for BaseLogLevel, Info, Info...\n"
+            << "#include \"uhal/log/log.hpp\"                  // for log\n"
+            << "#include \"uhal/log/log_inserters.quote.hpp\"  // for operator<<, Quote\n"
             << "\n"
             << "namespace uhal{\n"
             << "\n"
@@ -431,7 +458,7 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
 void fileFooters ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofstream& aCppFile )
 {
   aHppFile	<< "}\n\n"
-            << "#include <uhal/log/log.hxx>\n"
+            << "#include \"uhal/log/log.hxx\"\n"
             << "#endif\n\n";
   aHxxFile	<< "}\n"
             << "\n";

@@ -230,6 +230,6 @@ namespace uhal
 }
 
 
-#include <uhal/log/log_inserters.integer.hxx>
+#include "uhal/log/log_inserters.integer.hxx"
 
 #endif
