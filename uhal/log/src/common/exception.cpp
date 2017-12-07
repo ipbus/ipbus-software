@@ -36,18 +36,20 @@
 	@date 2012
 */
 
+#include "uhal/log/exception.hpp"
+
+
+#include <cstring>
+#include <iostream>
+#include <sstream>
+#include <stdlib.h>
+
 #ifdef USE_BACKTRACE
 #include "uhal/log/BacktraceSymbols.hpp"
 #include "uhal/log/GccOutputCleaner.hpp"
 #endif
 
-#include "uhal/log/exception.hpp"
-#include "boost/lexical_cast.hpp"
-#include <iostream>
 
-#ifdef __GNUG__
-#include <cxxabi.h>
-#endif
 
 namespace uhal
 {

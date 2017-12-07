@@ -39,43 +39,62 @@
 #ifndef _uhal_ProtocolUDP_hpp_
 #define _uhal_ProtocolUDP_hpp_
 
-#include "uhal/ClientInterface.hpp"
-#include "uhal/log/exception.hpp"
-#include "uhal/log/log.hpp"
 
+#include <deque>
 #include <iostream>
-#include <iomanip>
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
-#ifdef RUN_ASIO_MULTITHREADED
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#endif
 
-#include <string>
+#include "uhal/ClientInterface.hpp"
+#include "uhal/log/exception.hpp"
+
 
 namespace uhal
 {
+  // Forward declarations
+  class Buffers;
+  struct URI;
 
   namespace exception
   {
     //! Exception class to handle the case where the UDP connection timed out.
-    UHAL_DEFINE_EXCEPTION_CLASS ( UdpTimeout , "Exception class to handle the case where the UDP connection timed out." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( UdpTimeout , ClientTimeout , "Exception class to handle the case where the UDP connection timed out." )
     //! Exception class to handle a failure to create a UDP socket.
-    UHAL_DEFINE_EXCEPTION_CLASS ( ErrorAtUdpSocketCreation , "Exception class to handle a failure to create a UDP socket." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ErrorAtUdpSocketCreation , TransportLayerError , "Exception class to handle a failure to create a UDP socket." )
     //! Exception class to handle the case where ASIO returned an error.
-    UHAL_DEFINE_EXCEPTION_CLASS ( ASIOUdpError , "Exception class to handle the case where ASIO returned an error." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ASIOUdpError , TransportLayerError , "Exception class to handle the case where ASIO returned an error." )
   }
 
   //! Transport protocol to transfer an IPbus buffer via UDP
   template < typename InnerProtocol >
   class UDP : public InnerProtocol
   {
+
+    private:
+      /**
+        Copy Constructor
+        This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
+        @param aUDP a UDP-protocol object to copy
+      */
+      UDP ( const UDP& aUDP ); // non-copyable
+
+      /**
+       Assignment operator
+       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
+       @param aUDP a UDP-protocol object to copy
+       @return reference to the current object to allow chaining of assignments
+            */
+      UDP& operator= ( const UDP& aUDP ); // non-assignable
 
     public:
       //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
@@ -86,22 +105,6 @@ namespace uhal
       	@param aUri a struct containing the full URI of the target.
       */
       UDP ( const std::string& aId, const URI& aUri );
-
-      /**
-        Copy Constructor
-        This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
-        @param aUDP a UDP-protocol object to copy
-      */
-      UDP ( const UDP& aUDP );
-
-      /**
-       Assignment operator
-       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-       @param aUDP a UDP-protocol object to copy
-       @return reference to the current object to allow chaining of assignments
-            */
-      UDP& operator= ( const UDP& aUDP );
-
 
       /**
       	Destructor
@@ -129,6 +132,19 @@ namespace uhal
 
 
     private:
+
+      /**
+        Return the maximum size to be sent based on the buffer size in the target
+        @return the maximum size to be sent
+      */
+      uint32_t getMaxSendSize();
+
+      /**
+        Return the maximum size of reply packet based on the buffer size in the target
+        @return the maximum size of reply packet
+      */
+      uint32_t getMaxReplySize();
+
       /**
         Set up the UDP socket
       */
@@ -199,7 +215,6 @@ namespace uhal
       */
       std::vector<uint8_t> mReplyMemory;
 
-#ifdef RUN_ASIO_MULTITHREADED
       /// Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
       boost::asio::io_service::work mIOserviceWork;
 
@@ -223,7 +238,6 @@ namespace uhal
       boost::condition_variable mConditionalVariable;
       //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received
       bool mFlushDone;
-#endif
 
       //! The send operation currently in progress
       boost::shared_ptr< Buffers > mDispatchBuffers;
@@ -241,6 +255,5 @@ namespace uhal
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolUDP.hxx"
 
 #endif

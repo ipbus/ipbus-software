@@ -31,10 +31,11 @@
 */
 
 
-#include <uhal/log/log_inserters.location.hpp>
-#include <uhal/log/log_inserters.quote.hpp>
+#include "uhal/log/log_inserters.location.hpp"
 
-#include <uhal/log/log.hpp>
+
+#include "uhal/log/log_inserters.quote.hpp"
+
 
 namespace uhal
 {

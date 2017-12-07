@@ -39,40 +39,43 @@
 #ifndef _uhal_ProtocolTCP_hpp_
 #define _uhal_ProtocolTCP_hpp_
 
-#include "uhal/ClientInterface.hpp"
-#include "uhal/log/exception.hpp"
-#include "uhal/log/log.hpp"
 
+#include <deque>
 #include <iostream>
-#include <iomanip>
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
-#ifdef RUN_ASIO_MULTITHREADED
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
-#endif
 
-#include <string>
+#include "uhal/ClientInterface.hpp"
+#include "uhal/log/exception.hpp"
+
 
 namespace uhal
 {
+  // Forward declarations
+  class Buffers;
+  struct URI;
 
 
   namespace exception
   {
     //! Exception class to handle the case where the TCP connection timed out.
-    UHAL_DEFINE_EXCEPTION_CLASS ( TcpTimeout , "Exception class to handle the case where the TCP connection timed out." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( TcpTimeout , ClientTimeout , "Exception class to handle the case where the TCP connection timed out." )
     //! Exception class to handle a failure to create a TCP socket.
-    UHAL_DEFINE_EXCEPTION_CLASS ( ErrorAtTcpSocketCreation , "Exception class to handle a failure to create a TCP socket." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ErrorAtTcpSocketCreation , TransportLayerError , "Exception class to handle a failure to create a TCP socket." )
     //! Exception class to handle the case where the error flag was raised in the asynchronous callback system.
-    UHAL_DEFINE_EXCEPTION_CLASS ( TcpConnectionFailure , "Exception class to handle the case where the TCP connection was refused or aborted." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( TcpConnectionFailure , TransportLayerError , "Exception class to handle the case where the TCP connection was refused or aborted." )
     //! Exception class to handle the case where ASIO returned an error.
-    UHAL_DEFINE_EXCEPTION_CLASS ( ASIOTcpError , "Exception class to handle the case where ASIO returned an error." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ASIOTcpError , TransportLayerError , "Exception class to handle the case where ASIO returned an error." )
 
   }
 
@@ -81,20 +84,13 @@ namespace uhal
   class TCP : public InnerProtocol
   {
 
-    public:
-      /**
-      	Constructor
-      	@param aId the unique identifier that the client will be given.
-      	@param aUri a struct containing the full URI of the target.
-      */
-      TCP ( const std::string& aId, const URI& aUri );
-
+    private:
       /**
         Copy Constructor
         This creates a new socket, dispatch queue, dispatch thread, etc. which connects to the same target ip/port
         @param aTCP a TCP-protocol object to copy
       */
-      TCP ( const TCP& aTCP );
+      TCP ( const TCP& aTCP ); // non-copyable
 
       /**
        Assignment operator
@@ -102,8 +98,15 @@ namespace uhal
        @param aTCP a TCP-protocol object to copy
        @return reference to the current object to allow chaining of assignments
             */
-      TCP& operator= ( const TCP& aTCP );
+      TCP& operator= ( const TCP& aTCP ); // non-assignable
 
+    public:
+      /**
+      	Constructor
+      	@param aId the unique identifier that the client will be given.
+      	@param aUri a struct containing the full URI of the target.
+      */
+      TCP ( const std::string& aId, const URI& aUri );
 
       /**
       	Destructor
@@ -131,6 +134,18 @@ namespace uhal
 
 
     private:
+
+      /**
+        Return the maximum size to be sent based on the buffer size in the target
+        @return the maximum size to be sent
+      */
+      uint32_t getMaxSendSize();
+
+      /**
+        Return the maximum size of reply packet based on the buffer size in the target
+        @return the maximum size of reply packet
+      */
+      uint32_t getMaxReplySize();
 
       /**
         Make the TCP connection
@@ -194,7 +209,6 @@ namespace uhal
       //! The mechanism for providing the time-out
       boost::asio::deadline_timer mDeadlineTimer;
 
-#ifdef RUN_ASIO_MULTITHREADED
       /// Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
       boost::asio::io_service::work mIOserviceWork;
 
@@ -221,7 +235,6 @@ namespace uhal
       boost::condition_variable mConditionalVariable;
       //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received
       bool mFlushDone;
-#endif
 
       /**
         Variable storing "number of bytes to follow" field for the TCP chunk currently being sent.
@@ -238,7 +251,6 @@ namespace uhal
       */
       uint32_t mReplyByteCounter;
 
-#ifdef RUN_ASIO_MULTITHREADED
       /**
         When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
         @todo Tom Williams needs to check this and expand
@@ -249,12 +261,6 @@ namespace uhal
         @todo Tom Williams needs to check this and expand
       */
       std::vector< boost::shared_ptr< Buffers > > mReplyBuffers;
-#else
-      //! The write operation currently in progress
-      boost::shared_ptr< Buffers > mDispatchBuffers;
-      //! The read operation currently in progress or the next to be done
-      boost::shared_ptr< Buffers > mReplyBuffers;
-#endif
 
       /**
         A pointer to an exception object for passing exceptions from the worker thread to the main thread.
@@ -267,6 +273,5 @@ namespace uhal
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolTCP.hxx"
 
 #endif

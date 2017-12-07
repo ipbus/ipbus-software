@@ -39,15 +39,26 @@
 #ifndef _uhal_ProtocolIPbusCore_hpp_
 #define _uhal_ProtocolIPbusCore_hpp_
 
-#include <deque>
 
-#include "boost/date_time/posix_time/posix_time_duration.hpp"
+#include <deque>
+#include <iosfwd>
+#include <stdint.h>
+#include <utility>
+#include <vector>
+
 #include "boost/function.hpp"
 
 #include "uhal/ClientInterface.hpp"
+#include "uhal/definitions.hpp"
+#include "uhal/log/exception.hpp"
+#include "uhal/ValMem.hpp"
+
 
 namespace uhal
 {
+  // Forward declaration
+  struct URI;
+
 
   /**
   	Enumerated type to define the IPbus transaction type.
@@ -81,12 +92,12 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreUnparsableTransactionHeader , "Exception class to handle the case where the IPbus transaction header could not be parsed." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreUnparsableTransactionHeader , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header could not be parsed." )
     //     UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." )
     //! Exception class to handle the case where the IPbus transaction header response code indicated an error.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
     //! Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , TransactionLevelError, "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
 
   }
 
@@ -100,11 +111,9 @@ namespace uhal
       	Default constructor
       	@param aId the uinique identifier that the client will be given.
       	@param aUri a struct containing the full URI of the target.
-       	@param aMaxSendSize The size of the buffer in the target device for receiving data packets from uhal
-      	@param aMaxReplySize The size of the buffer in the target device for sending data packets to uhal
       	@param aTimeoutPeriod the default timeout period (can be changed later)
       */
-      IPbusCore ( const std::string& aId, const URI& aUri , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize , const boost::posix_time::time_duration& aTimeoutPeriod );
+      IPbusCore ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod );
 
       /**
       	Destructor
@@ -140,17 +149,6 @@ namespace uhal
       ValWord< uint32_t > readConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask );
 
     protected:
-
-      /**
-        Return the maximum size to be sent based on the buffer size in the target
-        @return the maximum size to be sent
-      */
-      virtual uint32_t getMaxSendSize();
-      /**
-        Return the maximum size of reply packet based on the buffer size in the target
-        @return the maximum size of reply packet
-      */
-      virtual uint32_t getMaxReplySize();
 
       /**
       Send a byte order transaction
@@ -265,14 +263,6 @@ namespace uhal
 
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint32_t mTransactionCounter;
-
-      //! The size of the buffer in the target device for receiving IPbus data packets from uhal
-      uint32_t mMaxSendSize;
-
-      //! The size of the buffer in the target device for sending IPbus data packets to uhal
-      uint32_t mMaxReplySize;
-
-
   };
 
 

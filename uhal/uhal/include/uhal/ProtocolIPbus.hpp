@@ -39,25 +39,35 @@
 #ifndef _uhal_ProtocolIPbus_hpp_
 #define _uhal_ProtocolIPbus_hpp_
 
+
 #include <deque>
+#include <iosfwd>
+#include <stdint.h>
+#include <string>
+#include <utility>
+
+#include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbusCore.hpp"
 
-#include "boost/date_time/posix_time/posix_time_duration.hpp"
 
-#include "uhal/ClientInterface.hpp"
+// Forward declarations
+namespace boost { template <class Y> class shared_ptr; }
+
 
 namespace uhal
 {
+  class Buffers;
+  struct URI;
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_major , uint8_t IPbus_minor , uint32_t buffer_size = 0 , bool BigEndianHack = false>
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class IPbus;
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  class IPbus < 1 , IPbus_minor, buffer_size > : public IPbusCore
+  template< uint8_t IPbus_minor >
+  class IPbus < 1 , IPbus_minor > : public IPbusCore
   {
 
     public:
@@ -178,13 +188,13 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.
-    UHAL_DEFINE_EXCEPTION_CLASS ( IPbus2PacketHeaderMismatch , "Exception class to handle the case where the IPbus 2.0 packet header does not match that sent." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbus2PacketHeaderMismatch, PacketLevelError, "Exception class to handle the case where the IPbus 2.0 packet header does not match that sent." )
   }
 
 
   //! A class which provides the version-specific functionality for IPbus
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  class IPbus < 2 , IPbus_minor, buffer_size , BigEndianHack > : public IPbusCore
+  template< uint8_t IPbus_minor >
+  class IPbus < 2 , IPbus_minor > : public IPbusCore
   {
 
     public:
@@ -321,6 +331,5 @@ namespace uhal
 
 }
 
-#include "uhal/TemplateDefinitions/ProtocolIPbus.hxx"
 
 #endif

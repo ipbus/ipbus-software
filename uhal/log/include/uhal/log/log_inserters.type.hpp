@@ -64,6 +64,7 @@ namespace uhal
 
 }
 
-#include <uhal/log/log_inserters.type.hxx>
+
+#include "uhal/log/log_inserters.type.hxx"
 
 #endif

@@ -61,18 +61,7 @@ BOOST_FIXTURE_TEST_CASE(check_timeout, TestFixture)
   HwInterface hw = manager.getDevice ( sDeviceId );
 
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
-  if ( hw.uri().find ( "ipbusudp" ) != std::string::npos )
-  {
-    BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::UdpTimeout );
-  }
-  else if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
-  {
-    BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TcpTimeout );
-  }
-  else
-  {
-    BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ControlHubTargetTimeout );
-  }
+  BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ClientTimeout );
 
   const size_t sleepAfterFirstDispatch = 3;
   std::cout << "Sleeping for " << sleepAfterFirstDispatch << " seconds to allow DummyHardware to clear itself" << std::endl;

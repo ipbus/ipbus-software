@@ -27,26 +27,57 @@
       Marc Magrans de Abril, CERN
       email: marc.magrans.de.abril <AT> cern.ch
 
+      Tom Williams, Rutherford Appleton Laboratory, Oxfordshire
+      email: tom.williams <AT> cern.ch
+
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
+#include "uhal/utilities/bits.hpp"
 
 
-#include <boost/spirit/include/qi.hpp>
 
-
-namespace grammars
+namespace uhal
 {
-  SemicolonDelimitedUriListGrammar::SemicolonDelimitedUriListGrammar() :
-    SemicolonDelimitedUriListGrammar::base_type ( data_pairs_vector )
+  namespace utilities
   {
-    using namespace boost::spirit;
-    data_pairs_vector = *data_pairs;
-    data_pairs = data_pairs_1 > data_pairs_2;
-    data_pairs_1 = *qi::lit ( ";" ) >> + ( qi::char_ - "://" ) > "://";
-    data_pairs_2 = * ( qi::char_ - qi::lit ( ";" ) ) >> *qi::lit ( ";" );
+    unsigned int TrailingRightBits ( uint32_t aValue )
+    {
+      // unsigned int lReturn = sizeof ( aValue ) * 8; // lReturn will be the number of zero bits on the right
+      unsigned int lReturn = sizeof ( aValue ) << 3; // lReturn will be the number of zero bits on the right
+      aValue &= -signed ( aValue );
+
+      if ( aValue )
+      {
+        lReturn--;
+      }
+
+      if ( aValue & 0x0000FFFF )
+      {
+        lReturn -= 16;
+      }
+
+      if ( aValue & 0x00FF00FF )
+      {
+        lReturn -= 8;
+      }
+
+      if ( aValue & 0x0F0F0F0F )
+      {
+        lReturn -= 4;
+      }
+
+      if ( aValue & 0x33333333 )
+      {
+        lReturn -= 2;
+      }
+
+      if ( aValue & 0x55555555 )
+      {
+        lReturn -= 1;
+      }
+
+      return lReturn;
+    }
   }
-
 }
-

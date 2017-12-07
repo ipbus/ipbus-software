@@ -27,26 +27,32 @@
       Marc Magrans de Abril, CERN
       email: marc.magrans.de.abril <AT> cern.ch
 
+      Tom Williams, Rutherford Appleton Laboratory, Oxfordshire
+      email: tom.williams <AT> cern.ch
+
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
+
+#ifndef _uhal_utilities_bits_hpp_
+#define _uhal_utilities_bits_hpp_
 
 
-#include <boost/spirit/include/qi.hpp>
+#include <stdint.h>
 
 
-namespace grammars
+namespace uhal
 {
-  SemicolonDelimitedUriListGrammar::SemicolonDelimitedUriListGrammar() :
-    SemicolonDelimitedUriListGrammar::base_type ( data_pairs_vector )
+  namespace utilities
   {
-    using namespace boost::spirit;
-    data_pairs_vector = *data_pairs;
-    data_pairs = data_pairs_1 > data_pairs_2;
-    data_pairs_1 = *qi::lit ( ";" ) >> + ( qi::char_ - "://" ) > "://";
-    data_pairs_2 = * ( qi::char_ - qi::lit ( ";" ) ) >> *qi::lit ( ";" );
+    /**
+      Helper function to calculate the number of zero-bits at the righthand end of a 32-bit number
+      @param aValue a 32-bit number whose trailing zero-bits are to be counted
+      @return the number of trailing zero-bits
+    */
+    unsigned int TrailingRightBits ( uint32_t aValue );
   }
-
 }
 
+
+#endif

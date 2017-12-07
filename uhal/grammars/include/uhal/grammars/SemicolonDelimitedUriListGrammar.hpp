@@ -33,11 +33,14 @@
 #ifndef _uhal_SemicolonDelimitedUriListGrammar_hpp_
 #define _uhal_SemicolonDelimitedUriListGrammar_hpp_
 
-#include <boost/fusion/adapted/std_pair.hpp>
-#include <boost/spirit/include/qi_grammar.hpp>
 
 #include <string>
+#include <utility>   // for pair
 #include <vector>
+
+#include <boost/fusion/adapted/std_pair.hpp>
+#include <boost/spirit/include/qi_char.hpp>
+#include <boost/spirit/include/qi_grammar.hpp>
 
 
 namespace grammars

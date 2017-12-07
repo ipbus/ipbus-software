@@ -36,7 +36,6 @@
 #include "uhal/HwInterface.hpp"
 #include "uhal/ValMem.hpp"
 #include "uhal/NodeTreeBuilder.hpp"
-#include "uhal/Utilities.hpp"
 
 #include <boost/regex.hpp>
 

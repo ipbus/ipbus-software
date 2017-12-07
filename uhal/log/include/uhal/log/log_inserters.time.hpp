@@ -34,14 +34,19 @@
 #ifndef _log_inserters_time_hpp_
 #define _log_inserters_time_hpp_
 
-#include <uhal/log/log_inserter_helper.hpp>
-
-#include <sys/time.h>
-#include <time.h>
-#include <stdio.h>
-#include <stdint.h>
 
 #include <iostream>
+#include <stdint.h>
+#include <sys/time.h>
+
+
+#include "uhal/log/log_inserter_helper.hpp"
+
+
+// Forward declarations
+struct timeval;
+struct tm;
+
 
 namespace uhal
 {
@@ -266,6 +271,7 @@ namespace uhal
 
 }
 
-#include <uhal/log/log_inserters.time.hxx>
+
+#include "uhal/log/log_inserters.time.hxx"
 
 #endif

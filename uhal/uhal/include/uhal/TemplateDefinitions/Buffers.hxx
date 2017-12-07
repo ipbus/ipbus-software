@@ -30,7 +30,12 @@
 ---------------------------------------------------------------------------
 */
 
-#include <memory.h>
+
+#include <stdint.h>  // for uint32_t, uint8_t
+#include <string.h>  // for memcpy
+#include <deque>     // for deque
+#include <utility>   // for make_pair, pair
+#include <vector>    // for vector
 
 
 namespace uhal

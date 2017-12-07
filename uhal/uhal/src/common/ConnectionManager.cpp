@@ -36,7 +36,8 @@
 #include "uhal/NodeTreeBuilder.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/ClientFactory.hpp"
-#include "uhal/Utilities.hpp"
+#include "uhal/utilities/files.hpp"
+#include "uhal/utilities/xml.hpp"
 
 #include "uhal/log/log.hpp"
 

@@ -30,45 +30,53 @@
 ---------------------------------------------------------------------------
 */
 
-#include "boost/date_time/gregorian/gregorian.hpp"
+#include "uhal/ProtocolIPbus.hpp"
 
-#include <arpa/inet.h>
+
+#include <stdint.h>
+#include <ostream>
 
 #include "uhal/Buffers.hpp"
+#include "uhal/ClientInterface.hpp"
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log_inserters.location.hpp" 
+#include "uhal/log/log.hpp"
+#include "uhal/ValMem.hpp"
 
 
 namespace uhal
 {
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  IPbus< 1 , IPbus_minor , buffer_size >::IPbus ( const std::string& aId, const URI& aUri ) :
-    IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) )
+  template< uint8_t IPbus_minor >
+  IPbus< 1 , IPbus_minor >::IPbus ( const std::string& aId, const URI& aUri ) :
+    IPbusCore ( aId , aUri , boost::posix_time::seconds ( 1 ) )
     // , mSendPadding ( 8 , implementCalculateHeader ( B_O_T , 0 , 0 ) ),
     // mReplyPadding ( 8 , 0x00000000 )
   {
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  IPbus< 1 , IPbus_minor , buffer_size >::~IPbus()
+  template< uint8_t IPbus_minor >
+  IPbus< 1 , IPbus_minor >::~IPbus()
   {
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::preamble ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::getPreambleSize()
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::getPreambleSize()
   {
     return 1;
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     uint32_t lWords ( aBuffers->sendCounter()  >> 2 );
     //IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
@@ -91,8 +99,8 @@ namespace uhal
     }
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -134,14 +142,14 @@ namespace uhal
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
+    return ( IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 1 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -188,27 +196,27 @@ namespace uhal
     return true;
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  uint32_t IPbus< 1 , IPbus_minor , buffer_size >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 1 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 1 , IPbus_minor , buffer_size >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  bool IPbus< 1 , IPbus_minor , buffer_size >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 1 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    return IPbus< 1 , IPbus_minor , buffer_size >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 1 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size >
-  void IPbus< 1 , IPbus_minor , buffer_size >::dispatchExceptionHandler()
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::dispatchExceptionHandler()
   {
     log ( Info() , ThisLocation() );
     IPbusCore::dispatchExceptionHandler();
   }
 
-  template< uint8_t IPbus_minor, uint32_t buffer_size>
-  void IPbus< 1 , IPbus_minor , buffer_size >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode) {
+  template< uint8_t IPbus_minor >
+  void IPbus< 1 , IPbus_minor >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode) {
     switch (aInfoCode) {
       case 0:
         aStream << "success";
@@ -228,9 +236,9 @@ namespace uhal
 
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::IPbus ( const std::string& aId, const URI& aUri ) :
-    IPbusCore ( aId , aUri , buffer_size , buffer_size , boost::posix_time::seconds ( 1 ) ),
+  template< uint8_t IPbus_minor >
+  IPbus< 2 , IPbus_minor >::IPbus ( const std::string& aId, const URI& aUri ) :
+    IPbusCore ( aId , aUri , boost::posix_time::seconds ( 1 ) ),
     mPacketCounter (
 #ifndef DISABLE_PACKET_COUNTER_HACK
       1
@@ -239,32 +247,16 @@ namespace uhal
 #endif
     )
   {
-    if ( BigEndianHack )
-    {
-      boost::gregorian::date lExpiryDate ( 2014, boost::gregorian::May , 1 );
-      boost::gregorian::date lUTCtoday ( boost::gregorian::day_clock::universal_day() );
-      boost::gregorian::date_duration lTimeToExpiry ( lExpiryDate - lUTCtoday );
-
-      if ( lTimeToExpiry.is_negative() )
-      {
-        log ( Error , "Support for the big-endian hack expired on 1st May 2014. Please update either your software, your firmware or both to use the native-endian variant. The trunk of the IPbus firmware has supported native endian communication since the end of June 2013, although the ipbus_2_0_v1 tag is recommended as it includes many bugfixes. To update your software to use native-endian communication remove \"-bigendian\" from the protocol part of the URI." );
-        sleep ( 60 );
-      }
-      else
-      {
-        log ( Warning , "Support for the big-endian hack will expire on 1st May 2014; functionality will be limited after this date. Please update either your software, your firmware or both to use the native-endian variant. The trunk of the IPbus firmware has supported native endian communication since the end of June 2013, although the ipbus_2_0_v1 tag is recommended as it includes many bugfixes. To update your software to use native-endian communication remove \"-bigendian\" from the protocol part of the URI." );
-      }
-    }
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::~IPbus()
+  template< uint8_t IPbus_minor >
+  IPbus< 2 , IPbus_minor >::~IPbus()
   {
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  void IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     aBuffers->send ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
 #ifndef DISABLE_PACKET_COUNTER_HACK
@@ -278,61 +270,26 @@ namespace uhal
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::getPreambleSize()
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::getPreambleSize()
   {
     return 1;
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  void IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
-    if ( BigEndianHack )
-    {
-      uint32_t* lPtr ( reinterpret_cast<uint32_t*> ( aBuffers->getSendBuffer() ) + this->getPreambleSize() - 1 );
-      uint32_t lSize ( ( aBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 );
-
-      for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
-      {
-        *lPtr = htonl ( *lPtr );
-      }
-    }
   }
 
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  exception::exception* IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::validate ( uint8_t* aSendBufferStart ,
+  template< uint8_t IPbus_minor >
+  exception::exception* IPbus< 2 , IPbus_minor >::validate ( uint8_t* aSendBufferStart ,
       uint8_t* aSendBufferEnd ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    if ( BigEndianHack )
-    {
-      uint32_t* lPtr;
-      uint32_t lSize;
-
-      for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt ( aReplyStartIt ) ; lIt != aReplyEndIt ; ++lIt )
-      {
-        lPtr = reinterpret_cast<uint32_t*> ( lIt->first );
-        lSize = ( lIt->second >> 2 );
-
-        for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
-        {
-          *lPtr = ntohl ( *lPtr );
-        }
-      }
-
-      lPtr = reinterpret_cast<uint32_t*> ( aSendBufferStart ); //aBuffers->getSendBuffer() ) + this->getPreambleSize() - 1;
-      lSize = reinterpret_cast<uint32_t*> ( aSendBufferEnd ) - lPtr; //( aBuffers->sendCounter()  >> 2 ) - this->getPreambleSize() + 1 ;
-
-      for ( uint32_t i ( 0 ); i!= lSize ; ++i , ++lPtr )
-      {
-        *lPtr = ntohl ( *lPtr );
-      }
-    }
-
     //log ( Debug() , ThisLocation() );
     //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
@@ -355,8 +312,8 @@ namespace uhal
 
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -401,15 +358,15 @@ namespace uhal
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
+    return ( IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
   }
 
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  bool IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 2 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -453,20 +410,20 @@ namespace uhal
     return true;
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  uint32_t IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 2 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  bool IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  template< uint8_t IPbus_minor >
+  bool IPbus< 2 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    return IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 2 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  void IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::dispatchExceptionHandler()
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >::dispatchExceptionHandler()
   {
     log ( Info() , ThisLocation() );
 #ifndef DISABLE_PACKET_COUNTER_HACK
@@ -478,8 +435,8 @@ namespace uhal
     IPbusCore::dispatchExceptionHandler();
   }
 
-  template< uint8_t IPbus_minor , uint32_t buffer_size , bool BigEndianHack >
-  void IPbus< 2 , IPbus_minor , buffer_size , BigEndianHack >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode)
+  template< uint8_t IPbus_minor >
+  void IPbus< 2 , IPbus_minor >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode)
   {
     switch (aInfoCode) {
       case 0:
@@ -510,6 +467,9 @@ namespace uhal
 
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
+  template class IPbus<1, 3>;
+  template class IPbus<2, 0>;
 }
 
 

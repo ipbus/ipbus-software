@@ -16,6 +16,8 @@ ExecutableObjectFiles = $(patsubst src/common/%.cxx,${PackagePath}/obj/%.o,${Exe
 # And binaries
 Executables = $(patsubst src/common/%.cxx,${PackagePath}/bin/%.exe,${ExecutableSourcesFiltered})
 
+ObjectSubDirPaths = $(sort $(foreach filePath,${LibraryObjectFiles} ${ExecutableObjectFiles}, $(dir ${filePath})))
+
 # $(info LibrarySourcesFiltered = ${LibrarySourcesFiltered})
 # $(info ExecutableSourcesFiltered = ${ExecutableSourcesFiltered})
 # $(info ExecutableObjectFiles = ${ExecutableObjectFiles})
@@ -59,16 +61,17 @@ _all: ${LibraryTarget} ${Executables} ${ExtraTargets}
 .PHONY: objects
 objects: ${LibraryObjectFiles} ${ExecutableObjectFiles}
 
-
-${PackagePath}/obj ${PackagePath}/lib ${PackagePath}/bin :
+${PackagePath}/obj ${PackagePath}/lib ${PackagePath}/bin ${ObjectSubDirPaths}:
 	${MakeDir} $@
 
 # Implicit rule for .cpp -> .o 
-${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cpp  | ${PackagePath}/obj
+.SECONDEXPANSION:
+${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cpp  | $$(dir ${PackagePath}/obj/%.o)
 	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 
 # Implicit rule for .cxx -> .o 
-${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | ${PackagePath}/obj
+.SECONDEXPANSION:
+${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | $$(dir ${PackagePath}/obj/%.o)
 	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 	
 # Main target: shared library

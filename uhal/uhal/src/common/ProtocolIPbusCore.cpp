@@ -32,8 +32,6 @@
 
 #include "uhal/ProtocolIPbusCore.hpp"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 #include "uhal/Buffers.hpp"
 #include "uhal/log/log.hpp"
 
@@ -79,11 +77,9 @@ namespace uhal
 
 
 
-  IPbusCore::IPbusCore ( const std::string& aId, const URI& aUri , const uint32_t& aMaxSendSize , const uint32_t& aMaxReplySize , const boost::posix_time::time_duration& aTimeoutPeriod ) :
+  IPbusCore::IPbusCore ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod ) :
     ClientInterface ( aId , aUri , aTimeoutPeriod ),
-    mTransactionCounter ( 0x00000000 ),
-    mMaxSendSize ( aMaxSendSize<<2 ),
-    mMaxReplySize ( aMaxReplySize<<2 )
+    mTransactionCounter ( 0x00000000 )
   {}
 
 
@@ -561,17 +557,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-
-  uint32_t IPbusCore::getMaxSendSize()
-  {
-    return mMaxSendSize;
-  }
-
-  uint32_t IPbusCore::getMaxReplySize()
-  {
-    return mMaxReplySize;
-  }
 
 
   void IPbusCore::dispatchExceptionHandler()

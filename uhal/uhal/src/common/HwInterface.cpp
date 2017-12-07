@@ -30,8 +30,13 @@
 ---------------------------------------------------------------------------
 */
 
-
 #include "uhal/HwInterface.hpp"
+
+
+#include <deque>
+
+#include "uhal/ClientInterface.hpp"
+#include "uhal/Node.hpp"
 
 
 namespace uhal

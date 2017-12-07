@@ -1,7 +1,9 @@
-#include <uhal/log/LogLevels.hpp>
 
-#include <uhal/log/log_inserters.time.hpp>
-#include <uhal/log/log_inserters.threadID.hpp>
+#include "uhal/log/LogLevels.hpp"
+
+
+#include "uhal/log/log_inserters.time.hpp"
+#include "uhal/log/log_inserters.threadID.hpp"
 
 
 void insert ( std::ostream& aStr , const uint32_t& aUint )

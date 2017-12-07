@@ -30,8 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
+#include "uhal/log/log_inserters.integer.hpp"
 
-#include <uhal/log/log_inserters.integer.hpp>
 
 namespace uhal
 {

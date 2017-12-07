@@ -33,11 +33,14 @@
 #ifndef _uhal_NodeTreeParametersGrammar_hpp_
 #define _uhal_NodeTreeParametersGrammar_hpp_
 
-#include <boost/fusion/adapted/std_pair.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/spirit/include/qi_grammar.hpp>
 
 #include <string>
+#include <utility>   // for pair
+
+#include <boost/fusion/adapted/std_pair.hpp>
+#include <boost/spirit/include/qi_char.hpp>
+#include <boost/spirit/include/qi_grammar.hpp>
+#include <boost/unordered_map.hpp>
 
 
 namespace grammars

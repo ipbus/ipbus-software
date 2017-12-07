@@ -30,14 +30,14 @@
 ---------------------------------------------------------------------------
 */
 
-
 #ifndef _log_inserters_quote_hpp_
 #define _log_inserters_quote_hpp_
 
+
+#include <iostream>
+
 #include <uhal/log/log_inserter_helper.hpp>
 
-#include <stdint.h>
-#include <iostream>
 
 namespace uhal
 {
@@ -68,6 +68,7 @@ namespace uhal
 
 }
 
-#include <uhal/log/log_inserters.quote.hxx>
+
+#include "uhal/log/log_inserters.quote.hxx"
 
 #endif

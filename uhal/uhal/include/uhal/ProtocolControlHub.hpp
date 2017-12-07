@@ -43,12 +43,11 @@
 #include "uhal/log/exception.hpp"
 #include "uhal/log/log.hpp"
 
-#include "uhal/Utilities.hpp"
-
 #include <iostream>
 #include <iomanip>
 
 #include <string>
+
 
 namespace uhal
 {
@@ -68,10 +67,10 @@ namespace uhal
     UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubReturnedWrongAddress , "Exception class to handle the case where the ControlHub returned the wrong IP or Port" )
 
     //! Exception class to handle the case where the target does not respond to the ControlHub
-    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubTargetTimeout , "Exception class to handle the case where the target does not respond to the ControlHub" )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ControlHubTargetTimeout , ClientTimeout , "Exception class to handle the case where the target does not respond to the ControlHub" )
 
     //! Exception class to handle cases in which the ControlHub returns a non-zero error code (excluding target timeouts)
-    UHAL_DEFINE_EXCEPTION_CLASS ( ControlHubErrorCodeSet, "Exception class to handle cases in which the ControlHub returns a non-zero error code (excluding target timeouts)" )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( ControlHubErrorCodeSet, PacketLevelError , "Exception class to handle cases in which the ControlHub returns a non-zero error code (excluding target timeouts)" )
   }
 
   /**
@@ -190,7 +189,5 @@ namespace uhal
 
 
 }
-
-#include "uhal/TemplateDefinitions/ProtocolControlHub.hxx"
 
 #endif

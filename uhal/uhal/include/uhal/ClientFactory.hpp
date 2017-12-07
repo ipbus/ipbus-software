@@ -45,6 +45,7 @@
 #include "uhal/log/log.hpp"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 #include <map>
 
