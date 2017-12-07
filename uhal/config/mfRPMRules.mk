@@ -8,6 +8,8 @@ PackageDescription := $(if ${PackageDescription}, ${PackageDescription}, None)
 BUILD_REQUIRES_TAG = $(if ${PackageBuildRequires} ,BuildRequires: ${PackageBuildRequires} ,\# No BuildRequires tag )
 REQUIRES_TAG = $(if ${PackageRequires} ,Requires: ${PackageRequires} ,\# No Requires tag )
 
+RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CPP_VERSION_TAG},.${CPP_VERSION_TAG},)
+
 export BUILD_HOME
 
 .PHONY: rpm _rpmall
@@ -27,7 +29,7 @@ _spec_update:
 	sed -i 's#__package__#${Package}#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__packagename__#${PackageName}#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__version__#$(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR).$(PACKAGE_VER_PATCH)#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__release__#${PACKAGE_RELEASE}.${CACTUS_OS}#' ${PackagePath}/rpm/${PackageName}.spec
+	sed -i 's#__release__#${PACKAGE_RELEASE}.${RPM_RELEASE_SUFFIX}#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__prefix__#${CACTUS_ROOT}#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__sources_dir__#${RPMBUILD_DIR}/SOURCES#' ${PackagePath}/rpm/${PackageName}.spec
 	sed -i 's#__packagedir__#${PackagePath}#' ${PackagePath}/rpm/${PackageName}.spec
