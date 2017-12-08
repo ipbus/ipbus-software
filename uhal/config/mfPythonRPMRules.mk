@@ -24,7 +24,7 @@ _rpmbuild: _setup_update
 	# Change into rpm/pkg to finally run the customized setup.py
 	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
 	cd ${RPMBUILD_DIR} && CACTUS_ROOT=${CACTUS_ROOT} python ${PackageName}.py bdist_rpm \
-	  --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} \
+	  --release ${PACKAGE_RELEASE}.${CACTUS_OS}.${CPP_VERSION_TAG}.python${PYTHON_VERSION} \
 	  --requires "python `find ${RPMBUILD_DIR} -type f -exec file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' '`" \
 	  --binary-only --force-arch=`uname -m`
 	# Harvest the crop
