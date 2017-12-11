@@ -135,25 +135,27 @@ void PCIeDummyHardware::run()
     std::vector<uint32_t> lPageHeader;
     dmaBlockingRead(mDeviceFileHostToFPGA, 0x0, 1, lPageHeader);
 
-    if (lPageHeader.at(0) >= mWordsPerPage) {
-      log(Fatal(), "PCIeDummyHardware::run  -  returning early since receiving ", Integer(lPageHeader.at(0)), "-word packet, but there's only ", Integer(mWordsPerPage), " words per page");
+    const uint32_t lNrWordsInRequestPacket = (lPageHeader.at(0) >> 16) + (lPageHeader.at(0) & 0xFFFF);
+
+    if (lNrWordsInRequestPacket >= mWordsPerPage) {
+      log(Fatal(), "PCIeDummyHardware::run  -  returning early since receiving ", Integer(lNrWordsInRequestPacket), "-word packet, but there's only ", Integer(mWordsPerPage), " words per page");
       return;
     }
 
     log(Info(), "IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), " : reading ", Integer(lPageHeader.at(0)), "-word packet");
     mReceive.clear();
-    dmaBlockingRead(mDeviceFileHostToFPGA, 0x0, lPageHeader.at(0), mReceive);
+    dmaBlockingRead(mDeviceFileHostToFPGA, 0x0, lNrWordsInRequestPacket, mReceive);
 
     // std::cout << "Received:" << std::endl;
     // for(size_t i=0; i<mReceive.size(); i++)
     //   std::cout  << " @" << i << "   0x" << std::hex << mReceive.at(i) << std::dec << std::endl;
 
     mReply.clear();
-    AnalyzeReceivedAndCreateReply(4 * lPageHeader.at(0));
+    AnalyzeReceivedAndCreateReply(4 * lNrWordsInRequestPacket);
 
     log(Info(), "IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), " : writing ", Integer(mReply.size()), "-word reply to page ", Integer(mNextPageIndex));
     lPageHeader.clear();
-    lPageHeader.push_back(mReply.size());
+    lPageHeader.push_back(0x10000 | ((mReply.size() - 1) & 0xFFFF));
 
     dmaWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage, lPageHeader); // FIXME: Define template dmaWrite method that takes const T& as final argument, so that don't have to define vector
     dmaWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage + 1, mReply);

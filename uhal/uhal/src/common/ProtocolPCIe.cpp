@@ -212,15 +212,15 @@ std::ostream& operator<<(std::ostream& aStream, const PacketFmt& aPacket)
 
 void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
 {
-  const uint32_t lNrWordsInPacket = aBuffers->sendCounter() / 4;
-  log (Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(lNrWordsInPacket), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDevicePathHostToFPGA));
+  log (Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDevicePathHostToFPGA));
 
+  const uint32_t lHeaderWord = (0x10000 | (((aBuffers->sendCounter() / 4) - 1) & 0xFFFF));
   std::vector<std::pair<const uint8_t*, size_t> > lDataToWrite;
-  lDataToWrite.push_back( std::make_pair(reinterpret_cast<const uint8_t*>(&lNrWordsInPacket), sizeof lNrWordsInPacket) );
+  lDataToWrite.push_back( std::make_pair(reinterpret_cast<const uint8_t*>(&lHeaderWord), sizeof lHeaderWord) );
   lDataToWrite.push_back( std::make_pair(aBuffers->getSendBuffer(), aBuffers->sendCounter()) );
   dmaWrite(mDeviceFileHostToFPGA, mIndexNextPage * 4 * mPageSize, lDataToWrite);
 
-  log (Debug(), "Writing " , Integer(lNrWordsInPacket), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", PacketFmt(lDataToWrite));
+  log (Debug(), "Writing " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", PacketFmt(lDataToWrite));
 
   mIndexNextPage = (mIndexNextPage + 1) % mNumberOfPages;
   mReplyQueue.push_back(aBuffers);
@@ -270,7 +270,10 @@ void PCIe::read()
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );
-  size_t lNrWordsInPacket = lPageContents.at(0);
+  size_t lNrWordsInPacket = (lPageContents.at(0) >> 16) + (lPageContents.at(0) & 0xFFFF);
+  if (lNrWordsInPacket != (lBuffers->replyCounter() >> 2))
+    log (Warning(), "Expected reply packet to contain ", Integer(lBuffers->replyCounter() >> 2), " words, but it actually contains ", Integer(lNrWordsInPacket), " words");
+
   size_t lNrBytesCopied = 0;
   for ( std::deque< std::pair< uint8_t* , uint32_t > >::const_iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
   {
