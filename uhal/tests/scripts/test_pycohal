@@ -650,10 +650,11 @@ class TestMetaInfo(unittest.TestCase):
         """Run meta-info tests for ConnectionManager class."""
         devices_list = self.manager.getDevices()
         self.assertTrue( isinstance(devices_list, list) )
-        self.assertEqual( len(devices_list), 12 )
+        self.assertEqual( len(devices_list), 14 )
         self.assertEqual( devices_list, sorted(['dummy.udp','dummy.docu.udp','dummy.udp2','dummy.docu.udp2',
                                                 'dummy.tcp','dummy.docu.tcp','dummy.tcp2','dummy.docu.tcp2',
-                                                'dummy.controlhub','dummy.docu.controlhub', 'dummy.controlhub2', 'dummy.docu.controlhub2']) )
+                                                'dummy.controlhub','dummy.docu.controlhub', 'dummy.controlhub2', 'dummy.docu.controlhub2',
+                                                'dummy.pcie2', 'dummy.docu.pcie2']) )
         self.assertEqual( len(self.manager.getDevices(".*udp.*")), 4 )
         # Check for throw when try to create ConnectionManager from non-existant file
         self.assertRaises( uhal.exception, uhal.ConnectionManager, ("some_bad_invalid_string") )
