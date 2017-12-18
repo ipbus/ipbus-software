@@ -11,7 +11,7 @@ PackageName = cactuscore-uhal-log
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 0
-PACKAGE_RELEASE = 1
+PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageSummary = uHAL Logging Library
 PackageDescription = uHAL Logging Library

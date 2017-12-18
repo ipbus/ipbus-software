@@ -100,11 +100,12 @@ doxygen_job:
     - triggers
   before_script:
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_build_results/repos/${OUTPUT_REPO_SUBDIR}
+    - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - cd .. && sudo rm -rf ipbus-software____ && mv ipbus-software ipbus-software____ && mkdir ipbus-software && cd ipbus-software____
     - make -k Set=all
-    - make -k Set=all rpm
+    - make -k Set=all PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - mkdir -p ${REPO_DIR} 
     - cp `find . -iname "*.rpm"` ${REPO_DIR} && cp ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
     - ls ${REPO_DIR}
