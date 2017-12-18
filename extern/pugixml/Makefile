@@ -11,7 +11,7 @@ Packager = Andrew Rose, Marc Magrans de Abril
 
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 2
-PACKAGE_RELEASE = 1
+PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 LIBRARY = libcactus_extern_pugixml.so
 
