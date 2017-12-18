@@ -34,7 +34,7 @@
 
 
 /* 
- * File:   run_unit_tests.cxx
+ * File:   run_uhal_tests.cxx
  * Author: Tom Williams
  * Date:   September 2017
  */

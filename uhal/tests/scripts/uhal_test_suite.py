@@ -71,7 +71,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
             ]]
 
     cmds += [["TEST IPBUS 1.3 UDP",
-              ["run_unit_tests.exe -c %s -d 1.3-udp --log_level=test_suite" % (conn_file),
+              ["run_uhal_tests.exe -c %s -d 1.3-udp --log_level=test_suite" % (conn_file),
                # SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
                # TIMEOUT TEST
@@ -100,7 +100,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
             ]]
 
     cmds += [["TEST IPBUS 1.3 TCP",
-              ["run_unit_tests.exe -c %s -d 1.3-tcp --log_level=test_suite" % (conn_file),
+              ["run_uhal_tests.exe -c %s -d 1.3-tcp --log_level=test_suite" % (conn_file),
                # SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.tcp" % (conn_file),
                # TIMEOUT TESTS
@@ -131,7 +131,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
     cmds += [["TEST IPBUS 1.3 CONTROLHUB",
               [controlhub_start,
                controlhub_status,
-               "run_unit_tests.exe -c %s -d 1.3-hub --log_level=test_suite" % (conn_file),
+               "run_uhal_tests.exe -c %s -d 1.3-hub --log_level=test_suite" % (conn_file),
                controlhub_stop,
                # SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
@@ -172,7 +172,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                 ]]
 
     cmds += [["TEST IPBUS 2.0 UDP",
-              ["run_unit_tests.exe -c %s -d 2.0-udp --log_level=test_suite" % (conn_file),
+              ["run_uhal_tests.exe -c %s -d 2.0-udp --log_level=test_suite" % (conn_file),
                # SERVER NOT REACHABLE TEST
                "test_dummy_nonreachable.exe -c %s -d dummy.udp2" % (conn_file),
                # TIMEOUT TEST
@@ -201,7 +201,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
             ]]
 
     cmds += [["TEST IPBUS 2.0 TCP",
-              ["run_unit_tests.exe -c %s -d 2.0-tcp --log_level=test_suite" % (conn_file),
+              ["run_uhal_tests.exe -c %s -d 2.0-tcp --log_level=test_suite" % (conn_file),
                # SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.tcp2" % (conn_file),
                # TIMEOUT TESTS
@@ -232,7 +232,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
     cmds += [["TEST IPBUS 2.0 CONTROLHUB - normal",
               [controlhub_start,
                controlhub_status,
-               "run_unit_tests.exe -c %s -d 2.0-hub --log_level=test_suite" % (conn_file),
+               "run_uhal_tests.exe -c %s -d 2.0-hub --log_level=test_suite" % (conn_file),
                controlhub_stop,
                # SERVER NOT REACHABLE TESTS
                "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
