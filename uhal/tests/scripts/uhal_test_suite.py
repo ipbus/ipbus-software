@@ -71,277 +71,33 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
             ]]
 
     cmds += [["TEST IPBUS 1.3 UDP",
-              ["run_uhal_tests.exe -c %s -d 1.3-udp --log_level=test_suite" % (conn_file),
-               # SERVER NOT REACHABLE TEST
-               "test_dummy_nonreachable.exe -c %s -d dummy.udp" % (conn_file),
-               # TIMEOUT TEST
-               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2",
-               "test_dummy_timeout.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_empty_dispatch.exe -c %s -d dummy.udp" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               # NORMAL TESTS
-               "DummyHardwareUdp.exe --version 1 --port 50001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-1.3://localhost:50001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-1.3://localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbusudp-1.3://localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-1.3://localhost:50001",
-               "test_dummy_single.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_block.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_docu_examples.exe -c %s -d dummy.docu.udp" % (conn_file),
-               "test_dummy_check_permissions.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_hierarchy.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_multithreaded.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_metainfo.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_navigation.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_rawclient.exe -c %s -d dummy.udp" % (conn_file),
-               "test_dummy_derivednode.exe -c %s -d dummy.udp" % (conn_file),
-               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-1.3://localhost:50001",
-               "KILL_BACKGROUND_PROCS"]
+              ["run_uhal_tests.exe -c %s -d 1.3-udp --log_level=test_suite" % (conn_file)]
             ]]
 
     cmds += [["TEST IPBUS 1.3 TCP",
-              ["run_uhal_tests.exe -c %s -d 1.3-tcp --log_level=test_suite" % (conn_file),
-               # SERVER NOT REACHABLE TESTS
-               "test_dummy_nonreachable.exe -c %s -d dummy.tcp" % (conn_file),
-               # TIMEOUT TESTS
-               "DummyHardwareTcp.exe --version 1 --port 50002 --delay 2",
-               "test_dummy_timeout.exe -c %s -d dummy.tcp" % (conn_file),
-              "test_dummy_empty_dispatch.exe -c %s -d dummy.tcp" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               # NORMAL TESTS
-               "DummyHardwareTcp.exe --version 1 --port 50002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-1.3://localhost:50002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-1.3://localhost:50002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbustcp-1.3://localhost:50002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-1.3://localhost:50002",
-               "test_dummy_single.exe -c %s -d dummy.tcp" % (conn_file),
-               "test_dummy_block.exe -c %s -d dummy.tcp" % (conn_file),
-               "test_dummy_docu_examples.exe -c %s -d dummy.docu.tcp" % (conn_file),
-               "test_dummy_check_permissions.exe -c %s -d dummy.tcp" % (conn_file),
-               "test_dummy_hierarchy.exe -c %s -d dummy.tcp" % (conn_file),
-               "test_dummy_multithreaded.exe -c %s -d dummy.tcp" % (conn_file),
-               "test_dummy_metainfo.exe -c %s -d dummy.tcp" % (conn_file),
-               "test_dummy_navigation.exe -c %s -d dummy.tcp" % (conn_file),
-               "test_dummy_rawclient.exe -c %s -d dummy.tcp"  % (conn_file),
-               "test_dummy_derivednode.exe -c %s -d dummy.tcp"  % (conn_file),
-               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-1.3://localhost:50002",
-               "KILL_BACKGROUND_PROCS"]
+              ["run_uhal_tests.exe -c %s -d 1.3-tcp --log_level=test_suite" % (conn_file)]
              ]]
 
     cmds += [["TEST IPBUS 1.3 CONTROLHUB",
               [controlhub_start,
                controlhub_status,
                "run_uhal_tests.exe -c %s -d 1.3-hub --log_level=test_suite" % (conn_file),
-               controlhub_stop,
-               # SERVER NOT REACHABLE TESTS
-               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
-               controlhub_start,
-               controlhub_status,
-               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub" % (conn_file),
-               controlhub_stop,
-               # TIMEOUT TESTS
-               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 2",
-               controlhub_start,
-               controlhub_status,
-               "test_dummy_timeout.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_empty_dispatch.exe -c %s -d dummy.controlhub" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               controlhub_stop,
-               #CONTROL HUB TESTS
-               "DummyHardwareUdp.exe --version 1 --port 50001",
-               controlhub_start,
-               controlhub_status,
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "test_dummy_single.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_block.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub" % (conn_file),
-               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_metainfo.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_navigation.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_rawclient.exe -c %s -d dummy.controlhub" % (conn_file),
-               "test_dummy_derivednode.exe -c %s -d dummy.controlhub" % (conn_file),
-               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-1.3://localhost:10203?target=localhost:50001",
-               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop]
                 ]]
 
     cmds += [["TEST IPBUS 2.0 UDP",
-              ["run_uhal_tests.exe -c %s -d 2.0-udp --log_level=test_suite" % (conn_file),
-               # SERVER NOT REACHABLE TEST
-               "test_dummy_nonreachable.exe -c %s -d dummy.udp2" % (conn_file),
-               # TIMEOUT TEST
-               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2",
-               "test_dummy_timeout.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_empty_dispatch.exe -c %s -d dummy.udp2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               # NORMAL TESTS
-               "DummyHardwareUdp.exe --version 2 --port 60001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0://localhost:60001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-2.0://localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbusudp-2.0://localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbusudp-2.0://localhost:60001",
-               "test_dummy_single.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_block.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_docu_examples.exe -c %s -d dummy.docu.udp2" % (conn_file),
-               "test_dummy_check_permissions.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_hierarchy.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_multithreaded.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_metainfo.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_navigation.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_rawclient.exe -c %s -d dummy.udp2" % (conn_file),
-               "test_dummy_derivednode.exe -c %s -d dummy.udp2" % (conn_file),
-               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbusudp-2.0://localhost:60001",
-               "KILL_BACKGROUND_PROCS"]
+              ["run_uhal_tests.exe -c %s -d 2.0-udp --log_level=test_suite" % (conn_file)]
             ]]
 
     cmds += [["TEST IPBUS 2.0 TCP",
-              ["run_uhal_tests.exe -c %s -d 2.0-tcp --log_level=test_suite" % (conn_file),
-               # SERVER NOT REACHABLE TESTS
-               "test_dummy_nonreachable.exe -c %s -d dummy.tcp2" % (conn_file),
-               # TIMEOUT TESTS
-               "DummyHardwareTcp.exe --version 2 --port 60002 --delay 2",
-               "test_dummy_timeout.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_empty_dispatch.exe -c %s -d dummy.tcp2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               # NORMAL TESTS
-               "DummyHardwareTcp.exe --version 2 --port 60002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d ipbustcp-2.0://localhost:60002",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d ipbustcp-2.0://localhost:60002",
-               "test_dummy_single.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_block.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_docu_examples.exe -c %s -d dummy.docu.tcp2" % (conn_file),
-               "test_dummy_check_permissions.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_hierarchy.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_multithreaded.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_metainfo.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_navigation.exe -c %s -d dummy.tcp2" % (conn_file),
-               "test_dummy_rawclient.exe -c %s -d dummy.tcp2"  % (conn_file),
-               "test_dummy_derivednode.exe -c %s -d dummy.tcp2"  % (conn_file),
-               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d ipbustcp-2.0://localhost:60002",
-               "KILL_BACKGROUND_PROCS"]
+              ["run_uhal_tests.exe -c %s -d 2.0-tcp --log_level=test_suite" % (conn_file)]
              ]]
 
     cmds += [["TEST IPBUS 2.0 CONTROLHUB - normal",
               [controlhub_start,
                controlhub_status,
                "run_uhal_tests.exe -c %s -d 2.0-hub --log_level=test_suite" % (conn_file),
-               controlhub_stop,
-               # SERVER NOT REACHABLE TESTS
-               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
-               controlhub_start,
-               controlhub_status,
-               "test_dummy_nonreachable.exe -c %s -d dummy.controlhub2" % (conn_file),
-               controlhub_stop,
-               # TIMEOUT TESTS
-               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 2",
-               controlhub_start,
-               controlhub_status,
-               "test_dummy_timeout.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_empty_dispatch.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               controlhub_stop,
-               #CONTROL HUB TESTS
-               "DummyHardwareUdp.exe --version 2 --port 60001",
-               controlhub_start,
-               controlhub_status,
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "PerfTester.exe -t BandwidthTx -b 0x01 -w 262144 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 1 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "PerfTester.exe -t BandwidthRx -b 0x01 -w 262144 -i 100 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "test_dummy_single.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_block.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_docu_examples.exe -c %s -d dummy.docu.controlhub2" % (conn_file),
-               "test_dummy_check_permissions.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_hierarchy.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_metainfo.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_navigation.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_rawclient.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "test_dummy_derivednode.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "PerfTester.exe -t Validation -b 0x1000 -w 1024 -i 2000 -d chtcp-2.0://localhost:10203?target=localhost:60001",
-               "KILL_BACKGROUND_PROCS",
-               controlhub_stats,
-               controlhub_stop]
-                ]]
-
-    cmds += [["TEST IPBUS 2.0 PCIe",
-              ["run_unit_tests.exe -c %s -d 2.0-pcie --log_level=test_suite" % (conn_file)]
-            ]]
-
-    cmds += [["TEST VALGRIND",
-              [ # UDP 2
-               "DummyHardwareUdp.exe --version 1 --port 50001",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # TCP 2
-               "DummyHardwareTcp.exe --version 1 --port 50002",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # ControlHub 2
-               "DummyHardwareUdp.exe --version 1 --port 50001",
-               controlhub_start,
-               controlhub_status,
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               controlhub_stats,
-               controlhub_stop,
-                # UDP 2
-               "DummyHardwareUdp.exe --version 2 --port 60001",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # TCP 2
-               "DummyHardwareTcp.exe --version 2 --port 60002",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # ControlHub 2
-               "DummyHardwareUdp.exe --version 2 --port 60001",
-               controlhub_start,
-               controlhub_status,
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               controlhub_stats,
-               controlhub_stop]
-              ]]
-
-    cmds += [["TEST VALGRIND2",
-              [# UDP 2 with ASYNC EXCEPTION
-               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 100",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # TCP 2 with ASYNC EXCEPTION
-               "DummyHardwareTcp.exe --version 1 --port 50002 --delay 100",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # ControlHub 2 with ASYNC EXCEPTION
-               "DummyHardwareUdp.exe --version 1 --port 50001 --delay 100",
-               controlhub_start,
-               controlhub_status,
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-               controlhub_stats,
-               controlhub_stop,
-                # UDP 2 with ASYNC EXCEPTION
-               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 100",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.udp2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # TCP 2 with ASYNC EXCEPTION
-               "DummyHardwareTcp.exe --version 2 --port 60002 --delay 100",
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.tcp2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
-                # ControlHub 2 with ASYNC EXCEPTION
-               "DummyHardwareUdp.exe --version 2 --port 60001 --delay 100",
-               controlhub_start,
-               controlhub_status,
-               "valgrind --tool=memcheck --leak-check=yes --show-reachable=yes test_dummy_valgrind.exe -c %s -d dummy.controlhub2" % (conn_file),
-               "KILL_BACKGROUND_PROCS",
                controlhub_stats,
                controlhub_stop]
                 ]]
@@ -358,17 +114,10 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "test_dummy_multithreaded.exe -c %s -d dummy.controlhub2" % (conn_file),
                controlhub_stats,
                "sudo /sbin/tc qdisc add dev lo root netem loss 0.0001%",
                "sudo /sbin/tc -s qdisc ls dev lo",
                # Main tests - no packet loss reference
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
@@ -376,11 +125,6 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                # Main tests
                "sudo /sbin/tc qdisc change dev lo root netem loss 0.5%",
                "sudo /sbin/tc -s qdisc ls dev lo",
-#               "sudo /sbin/iptables -I INPUT -i lo -p udp -m statistic --mode random --probability 0.005 -j DROP",
-#               "sudo /sbin/iptables -I INPUT -i lo -p udp -m statistic --mode nth --every 200 --packet 100 -j DROP",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
-#               "PerfTester.exe -t BandwidthTx -b 0x01 -w 3000 -i 5000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
                "PerfTester.exe t BandwidthTx -b 0x01 -w 1   -i 50000 -p -d chtcp-2.0://localhost:10203?target=localhost:60001",
@@ -391,6 +135,10 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                "KILL_BACKGROUND_PROCS",
                controlhub_stop]
                 ]]
+
+    cmds += [["TEST IPBUS 2.0 PCIe",
+              ["run_unit_tests.exe -c %s -d 2.0-pcie --log_level=test_suite" % (conn_file)]
+            ]]
 
     cmds += [["TEST PYCOHAL",
               ["DummyHardwareUdp.exe --version 1 --port 50001",
