@@ -46,8 +46,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "uhal/tests/UDPDummyHardware.hpp"
 #include "uhal/tests/PCIeDummyHardware.hpp"
+
 
 
 namespace uhal {
@@ -55,6 +55,7 @@ class HwInterface;
 
 namespace tests {
 
+class PCIeDummyHardware;
 
 enum DeviceType {
   IPBUS_1_3_UDP,
@@ -174,115 +175,8 @@ double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint3
 
 double measureTxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream);
 
-//!timeval difference in micro seconds
-long usdiff ( const timeval& end, const timeval& start );
-
-//!Return the first argument
-std::map<std::string,std::string> default_arg_parsing ( int argc,char* argv[] );
-
-extern uint32_t failedTestCount;
-extern uint32_t passedTestCount;
-
 
 } // end ns tests
 } // end ns uhal
 
-
-//!Checks if the condition is fullfilled and it does not throw.
-#define CACTUS_CHECK(cond) \
-  do {	\
-    std::cout << std::dec; \
-    std::cerr << std::dec; \
-    try {								\
-      if (cond) { \
-	      std::cout << "CHECK PASSED: " << #cond << std::endl; \
-	      uhal::tests::passedTestCount++;				\
-      }  else  {							\
-		std::cerr << "CHECK FAILED @" << __FILE__ << ":" << __LINE__ << std::endl; \
-		uhal::tests::failedTestCount++;				\
-      }									\
-    } catch(std::exception& e) {						\
-      std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    } catch(...) {							\
-      std::cerr << "CHECK FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    }									\
-  } while(0)
-
-//!Test that the expression is executed without exceptions and measures the execution time
-#define CACTUS_TEST(expr)				\
-  do {						\
-    std::cout << std::dec; \
-    std::cerr << std::dec; \
-    try{          \
-      timeval start,end;      \
-      gettimeofday ( &start, NULL );    \
-      expr;         \
-      gettimeofday ( &end, NULL );          \
-      std::cout << "TEST COMPLETED in " <<  uhal::tests::usdiff(end,start) << " usec: " << #expr << std::endl; \
-    } catch(std::exception& e) {          \
-      std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-      uhal::tests::failedTestCount++;         \
-    } catch(...) {              \
-      std::cerr << "TEST FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-      uhal::tests::failedTestCount++;         \
-    }  \
-  } while(0)
-
-
-
-#define CACTUS_TEST_NOTHROW(expr)				\
-  do {						\
-    std::cout << std::dec; \
-    std::cerr << std::dec; \
-    try{					\
-      expr;					\
-      std::cout << "TEST_NOTHROW PASSED: "  << #expr << std::endl; \
-      uhal::tests::passedTestCount++;					\
-    } catch(std::exception& e) {					\
-      std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << ": " << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    } catch(...) {							\
-      std::cerr << "TEST_NOTHROW FAILED by THROWING @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << ": " << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    }									\
-  } while(0)
-
-//!Test that the expression throws a specific signature
-#define CACTUS_TEST_THROW(expr,signature)		\
-  do {						\
-    std::cout << std::dec; \
-    std::cerr << std::dec; \
-    try{					\
-      expr;								\
-      std::cerr << "TEST_THROW FAILED by NOT THROWING @" << __FILE__ << ":" << __LINE__ << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    } catch(signature& e) {					\
-      std::cout << "TEST_THROW PASSED: " << #expr << std::endl; \
-      uhal::tests::passedTestCount++;					\
-    } catch(std::exception& e) {						\
-      std::cerr << "TEST_THROW FAILED by NOT THROWING REQUIRED TYPE '" << #signature << "' @" << __FILE__ << ":" << __LINE__ << " with what() returning:" << e.what() << std::endl; \
-      uhal::tests::failedTestCount++;					\
-    }	catch(...) {							\
-      std::cerr << "TEST_THROW FAILED by NOT THROWING REQUIRED TYPE '" << #signature << "' @" << __FILE__ << ":" << __LINE__ << " with unknown exception type." << std::endl; \
-      uhal::tests::failedTestCount++;		\
-    }									\
-  } while(0)
-
 #endif
-
-#define CACTUS_TEST_RESULT()  \
-  do { \
-    std::cout << std::dec; \
-    std::cerr << std::dec; \
-    if( uhal::tests::failedTestCount == 0 ){				\
-      std::cout << "TEST PASSED, " << __FILE__ << ", ALL " << uhal::tests::passedTestCount << " TESTS PASSED." << std::endl; \
-      return 0; \
-    }else{  \
-      std::cerr << "TEST FAILED, " << __FILE__ << ", " << uhal::tests::failedTestCount << " TESTS FAILED," << uhal::tests::passedTestCount << " TESTS PASSED." << std::endl; \
-      return 1; \
-    } \
-  } while(0)
-
-
