@@ -49,10 +49,10 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE( CheckPermissionsTestSuite )
 
 
-BOOST_FIXTURE_TEST_CASE(check_permissions, TestFixture)
+BOOST_FIXTURE_TEST_CASE(check_permissions, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_THROW ( hw.getNode ( "REG_READ_ONLY" ).write ( 1 ),uhal::exception::WriteAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_READ_ONLY" ).write ( 1 ),uhal::exception::WriteAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_WRITE_ONLY" ).read(),uhal::exception::ReadAccessDenied );

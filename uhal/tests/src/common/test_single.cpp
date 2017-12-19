@@ -53,10 +53,10 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE( SingleReadWriteTestSuite )
 
 
-BOOST_FIXTURE_TEST_CASE(connect_write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(connect_write_read, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   // hw.ping();
   uint32_t x1 = static_cast<uint32_t> ( rand() );
   uint32_t x2 = static_cast<uint32_t> ( rand() );
@@ -75,7 +75,7 @@ BOOST_FIXTURE_TEST_CASE(connect_write_read, TestFixture)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, DummyHardwareFixture)
 {
   //get location of address file. Assumption: it is located with the connection file
   std::string address_file;
@@ -85,11 +85,7 @@ BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, TestFixture)
     address_file = ( conn_fn.parent_path() /fn ).string();
   }
   //get the parameters from the file
-  std::string uri;
-  {
-    ConnectionManager manager ( sConnectionFile );
-    uri = manager.getDevice ( sDeviceId ).uri();
-  }
+  std::string uri = getHwInterface().uri();
   HwInterface hw=ConnectionManager::getDevice ( "test_device_id", uri, address_file );
   uint32_t x = static_cast<uint32_t> ( rand() );
   hw.getNode ( "REG" ).write ( x );
@@ -102,11 +98,11 @@ BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, TestFixture)
 }
 
 
-BOOST_AUTO_TEST_CASE(search_device_id)
+BOOST_FIXTURE_TEST_CASE(search_device_id, MinimalFixture)
 {
-  ConnectionManager manager (TestFixture::sConnectionFile);
-  std::vector<std::string> ids = manager.getDevices ( "^" + TestFixture::sDeviceId + "$" );
-  BOOST_CHECK ( std::find ( ids.begin(),ids.end(),TestFixture::sDeviceId ) != ids.end() );
+  ConnectionManager manager (sConnectionFile);
+  std::vector<std::string> ids = manager.getDevices ( "^" + sDeviceId + "$" );
+  BOOST_CHECK ( std::find ( ids.begin(),ids.end(),sDeviceId ) != ids.end() );
 }
 
 

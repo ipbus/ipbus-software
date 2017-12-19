@@ -71,7 +71,7 @@ std::vector<size_t> getBlockUnitTestDepths()
 BOOST_AUTO_TEST_SUITE( BlockReadWriteTestSuite )
 
 
-BOOST_FIXTURE_TEST_CASE(block_write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(block_write_read, DummyHardwareFixture)
 {
   std::vector<size_t> lDepths = getBlockUnitTestDepths();
 
@@ -79,8 +79,7 @@ BOOST_FIXTURE_TEST_CASE(block_write_read, TestFixture)
     const size_t N = lDepths.at(i);
     BOOST_TEST_MESSAGE("  N = " << N);
 
-    ConnectionManager manager ( sConnectionFile );
-    HwInterface hw=manager.getDevice ( sDeviceId );
+    HwInterface hw = getHwInterface();
 
     std::vector<uint32_t> xx;
     xx.reserve ( N );
@@ -119,7 +118,7 @@ BOOST_FIXTURE_TEST_CASE(block_write_read, TestFixture)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(fifo_write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(fifo_write_read, DummyHardwareFixture)
 {
   std::vector<size_t> lDepths = getBlockUnitTestDepths();
   lDepths.push_back(N_200MB);
@@ -128,8 +127,7 @@ BOOST_FIXTURE_TEST_CASE(fifo_write_read, TestFixture)
     const size_t N = lDepths.at(i);
     BOOST_TEST_MESSAGE("  N = " << N);
 
-    ConnectionManager manager ( sConnectionFile );
-    HwInterface hw=manager.getDevice ( sDeviceId );
+    HwInterface hw = getHwInterface();
     // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
     std::vector<uint32_t> xx;
     xx.reserve ( N );
@@ -156,7 +154,7 @@ BOOST_FIXTURE_TEST_CASE(fifo_write_read, TestFixture)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(block_offset_write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(block_offset_write_read, DummyHardwareFixture)
 {
   std::vector<size_t> lDepths = getBlockUnitTestDepths();
 
@@ -164,8 +162,7 @@ BOOST_FIXTURE_TEST_CASE(block_offset_write_read, TestFixture)
     const size_t N = lDepths.at(i);
     BOOST_TEST_MESSAGE("  N = " << N);
 
-    ConnectionManager manager ( sConnectionFile );
-    HwInterface hw=manager.getDevice ( sDeviceId );
+    HwInterface hw = getHwInterface();
 
     std::vector<uint32_t> xx,yy;
     xx.reserve ( N );
@@ -234,10 +231,9 @@ BOOST_FIXTURE_TEST_CASE(block_offset_write_read, TestFixture)
 }
 
 
-BOOST_AUTO_TEST_CASE(block_access_type_violations)
+BOOST_FIXTURE_TEST_CASE(block_access_type_violations, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
   std::vector<uint32_t> xx;
 
   //We allow the user to call a bulk access of size=1 to a single register
@@ -259,10 +255,9 @@ BOOST_AUTO_TEST_CASE(block_access_type_violations)
 }
 
 
-BOOST_AUTO_TEST_CASE(block_bigger_than_size_attribute)
+BOOST_FIXTURE_TEST_CASE(block_bigger_than_size_attribute, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
   std::vector<uint32_t> xx;
   xx.resize ( N_1MB );
   BOOST_CHECK_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
@@ -270,10 +265,9 @@ BOOST_AUTO_TEST_CASE(block_bigger_than_size_attribute)
 }
 
 
-BOOST_AUTO_TEST_CASE(block_offset_bigger_than_size_attribute)
+BOOST_FIXTURE_TEST_CASE(block_offset_bigger_than_size_attribute, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
   std::vector<uint32_t> xx;
   // Size OK but offset too large
   xx.resize ( N_4B );

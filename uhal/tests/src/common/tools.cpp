@@ -67,7 +67,26 @@ DummyHardwareRunner<PCIeDummyHardware>::DummyHardwareRunner(const std::string& a
 }
 
 
-TestFixture::TestFixture() :
+MinimalFixture::MinimalFixture()
+{
+}
+
+MinimalFixture::~MinimalFixture()
+{
+}
+
+uhal::HwInterface MinimalFixture::getHwInterface() const
+{
+  ConnectionManager manager(sConnectionFile);
+  return manager.getDevice(sDeviceId);
+}
+
+std::string MinimalFixture::sConnectionFile = "";
+DeviceInfo MinimalFixture::sDeviceInfo(IPBUS_2_0_UDP, "60001", "dummy.udp2");
+std::string MinimalFixture::sDeviceId = "";
+
+
+DummyHardwareFixture::DummyHardwareFixture() :
   hwRunner(createRunner(sDeviceInfo))
 {
   // FIXME : Ensure that controlhub cache is reset after dummy hardware reboot, but before unit tests (temporary solution)
@@ -84,12 +103,12 @@ TestFixture::TestFixture() :
 }
 
 
-TestFixture::~TestFixture()
+DummyHardwareFixture::~DummyHardwareFixture()
 {
 }
 
 
-boost::shared_ptr<DummyHardwareRunnerInterface> TestFixture::createRunner (const DeviceInfo& aDetails)
+boost::shared_ptr<DummyHardwareRunnerInterface> DummyHardwareFixture::createRunner (const DeviceInfo& aDetails)
 {
   boost::shared_ptr<DummyHardwareRunnerInterface> lResult;
 
@@ -115,11 +134,6 @@ boost::shared_ptr<DummyHardwareRunnerInterface> TestFixture::createRunner (const
 
   return lResult;
 }
-
-
-std::string TestFixture::sConnectionFile = "";
-DeviceInfo TestFixture::sDeviceInfo(IPBUS_2_0_UDP, "60001", "dummy.udp2");
-std::string TestFixture::sDeviceId = "";
 
 
 double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream)

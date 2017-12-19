@@ -84,30 +84,27 @@ void report_tx_performance(ClientInterface& aClient, const uint32_t aBaseAddr, c
 BOOST_AUTO_TEST_SUITE( SoakTestSuite )
 
 
-BOOST_FIXTURE_TEST_CASE(bandwidth_rx, TestFixture)
+BOOST_FIXTURE_TEST_CASE(bandwidth_rx, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
 
   BOOST_CHECK_NO_THROW( report_rx_performance(hw.getClient(), 0x01, 1, 100, true) );
   BOOST_CHECK_NO_THROW( report_rx_performance(hw.getClient(), 0x01, 262144, 100, true) );
 }
 
 
-BOOST_FIXTURE_TEST_CASE(bandwidth_tx, TestFixture)
+BOOST_FIXTURE_TEST_CASE(bandwidth_tx, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
 
   BOOST_CHECK_NO_THROW( report_tx_performance(hw.getClient(), 0x01, 1, 100, true) );
   BOOST_CHECK_NO_THROW( report_tx_performance(hw.getClient(), 0x01, 262144, 100, true) );
 }
 
 
-BOOST_FIXTURE_TEST_CASE(quick_soak, TestFixture)
+BOOST_FIXTURE_TEST_CASE(quick_soak, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
 
   std::vector<ClientInterface*> lClients;
   lClients.push_back(&hw.getClient());

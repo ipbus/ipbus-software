@@ -49,10 +49,9 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(NodeMetainfoTestSuite)
 
 
-BOOST_AUTO_TEST_CASE(check_meta_info)
+BOOST_FIXTURE_TEST_CASE(check_meta_info, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
 
   boost::unordered_map<std::string,std::string> lPars;
   boost::unordered_map<std::string,std::string>::iterator iPar;

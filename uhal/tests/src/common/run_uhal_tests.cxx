@@ -99,7 +99,7 @@ main( int argc, char* argv[] )
   po::options_description lDesc ( "Allowed options" );
   lDesc.add_options()
   ( "help,h", "produce help message" )
-  ( "connection-file,c", po::value<std::string>(&TestFixture::sConnectionFile)->required(), "Connection file URI" )
+  ( "connection-file,c", po::value<std::string>(&MinimalFixture::sConnectionFile)->required(), "Connection file URI" )
   ( "device-type,d", po::value<std::string>(&lDeviceType)->required(), ("Device type. Possible values: " + getAvailableDevices()).c_str() )
   ( "verbose,v", "Verbose output" )
   ( "very-verbose,V", "Very verbose output" )
@@ -136,13 +136,13 @@ main( int argc, char* argv[] )
     exit (1);
   }
   else
-    TestFixture::sDeviceInfo = lDeviceMap.find(lDeviceType)->second;
+    MinimalFixture::sDeviceInfo = lDeviceMap.find(lDeviceType)->second;
 
 
   std::cout << "Supplied arguments ..." << std::endl;
-  std::cout << "   connection file = " << TestFixture::sConnectionFile << std::endl;
+  std::cout << "   connection file = " << MinimalFixture::sConnectionFile << std::endl;
   std::cout << "   device type     = " << lDeviceType << std::endl;
-  TestFixture::sDeviceId = TestFixture::sDeviceInfo.connectionId;
+  MinimalFixture::sDeviceId = MinimalFixture::sDeviceInfo.connectionId;
 
   std::cout << "Log level set to ";
   if ( vm.count ( "very-verbose" ) ) {

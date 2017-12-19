@@ -70,8 +70,9 @@ void job_multiple ( const std::string& connection, const std::string& id )
   {
     log ( Info() , "Iteration " , Integer ( iter ) );
     ConnectionManager manager ( connection );
-    HwInterface hw=manager.getDevice ( id );
+    HwInterface hw = manager.getDevice ( id );
     hw.setTimeoutPeriod ( TIMEOUT_S*1000 );
+
     uint32_t x = static_cast<uint32_t> ( rand() );
     hw.getNode ( "REG" ).write ( x );
     ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
@@ -96,7 +97,7 @@ void job_multiple ( const std::string& connection, const std::string& id )
 }
 
 
-BOOST_FIXTURE_TEST_CASE(multiple_hwinterfaces, TestFixture)
+BOOST_FIXTURE_TEST_CASE(multiple_hwinterfaces, DummyHardwareFixture)
 {
   if (sDeviceInfo.type != IPBUS_2_0_PCIE)
   {
@@ -133,26 +134,26 @@ void job_single ( HwInterface& hw )
     std::vector<uint32_t> xx;
 
     for ( size_t i=0; i!= N_SIZE; ++i )
-{
-  xx.push_back ( static_cast<uint32_t> ( rand() ) );
-  }
-  hw.getNode ( "MEM" ).writeBlock ( xx );
-  ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
-  hw.dispatch();
-  BOOST_CHECK ( reg.valid() );
-  BOOST_CHECK ( mem.valid() );
-  BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
+    {
+      xx.push_back ( static_cast<uint32_t> ( rand() ) );
+    }
+
+    hw.getNode ( "MEM" ).writeBlock ( xx );
+    ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+    hw.dispatch();
+    BOOST_CHECK ( reg.valid() );
+    BOOST_CHECK ( mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
   );
   //can not check content in the mutlithreaded case
 }
 
 
-BOOST_FIXTURE_TEST_CASE(single_hwinterface, TestFixture)
+BOOST_FIXTURE_TEST_CASE(single_hwinterface, DummyHardwareFixture)
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
-    ConnectionManager manager ( TestFixture::sConnectionFile );
-    HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+    HwInterface hw = getHwInterface();
     std::vector<boost::thread*> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )
@@ -178,25 +179,25 @@ void job_single_copied ( HwInterface hw )
     std::vector<uint32_t> xx;
 
     for ( size_t i=0; i!= N_SIZE; ++i )
-{
-  xx.push_back ( static_cast<uint32_t> ( 0xDEADBEEF /*rand()*/ ) );
-  }
-  hw.getNode ( "MEM" ).writeBlock ( xx );
-  ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
-  hw.dispatch();
-  BOOST_CHECK ( reg.valid() );
-  BOOST_CHECK ( mem.valid() );
-  BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
+    {
+      xx.push_back ( static_cast<uint32_t> ( 0xDEADBEEF /*rand()*/ ) );
+    }
+
+    hw.getNode ( "MEM" ).writeBlock ( xx );
+    ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+    hw.dispatch();
+    BOOST_CHECK ( reg.valid() );
+    BOOST_CHECK ( mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
   );
 }
 
 
-BOOST_FIXTURE_TEST_CASE(single_copied_hwinterface, TestFixture)
+BOOST_FIXTURE_TEST_CASE(single_copied_hwinterface, DummyHardwareFixture)
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
-    ConnectionManager manager ( TestFixture::sConnectionFile );
-    HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+    HwInterface hw = getHwInterface();
     std::vector<boost::thread*> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )

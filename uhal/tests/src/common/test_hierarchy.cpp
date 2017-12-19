@@ -52,10 +52,10 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(NodeHierarchyTestSuite)
 
 
-BOOST_FIXTURE_TEST_CASE(write_read_hierarchy, TestFixture)
+BOOST_FIXTURE_TEST_CASE(write_read_hierarchy, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   //check non-overlapping addresses
   BOOST_REQUIRE ( hw.getNode ( "SUBSYSTEM1.REG" ).getAddress() != hw.getNode ( "SUBSYSTEM2.REG" ).getAddress() );
   BOOST_REQUIRE ( hw.getNode ( "SUBSYSTEM1.MEM" ).getAddress() != hw.getNode ( "SUBSYSTEM2.MEM" ).getAddress() );

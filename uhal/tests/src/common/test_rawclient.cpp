@@ -54,10 +54,10 @@ BOOST_AUTO_TEST_SUITE(RawClientTestSuite)
 
 
 
-BOOST_FIXTURE_TEST_CASE(single_write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(single_write_read, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   ClientInterface* c = &hw.getClient();
   uint32_t x = static_cast<uint32_t> ( rand() );
   uint32_t addr = hw.getNode ( "REG" ).getAddress();
@@ -87,11 +87,10 @@ BOOST_FIXTURE_TEST_CASE(single_write_read, TestFixture)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(mem_write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(mem_write_read, DummyHardwareFixture)
 {
   const uint32_t N =1024*1024/4;
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
   ClientInterface* c = &hw.getClient();
   std::vector<uint32_t> xx;
 
@@ -122,10 +121,9 @@ BOOST_FIXTURE_TEST_CASE(mem_write_read, TestFixture)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, TestFixture)
+BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
   ClientInterface* c = &hw.getClient();
   uint32_t addr = hw.getNode ( "REG_UPPER_MASK" ).getAddress();
   uint32_t x1 = static_cast<uint32_t> ( rand() );
@@ -151,11 +149,10 @@ BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, TestFixture)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(mem_rmw_sum, TestFixture)
+BOOST_FIXTURE_TEST_CASE(mem_rmw_sum, DummyHardwareFixture)
 {
   const uint32_t N =1024;
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
   ClientInterface* c = &hw.getClient();
   uint32_t total = 0;
   std::vector<uint32_t> xx;

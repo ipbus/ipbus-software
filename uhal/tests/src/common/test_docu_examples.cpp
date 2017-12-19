@@ -47,7 +47,7 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(AddrTableDocuExamplesTestSuite)
 
 
-BOOST_FIXTURE_TEST_CASE(test_docu_addr_table_examples, TestFixture)
+BOOST_FIXTURE_TEST_CASE(test_docu_addr_table_examples, DummyHardwareFixture)
 {
   ConnectionManager manager ( sConnectionFile );
   // This line is majority of the test (i.e. load the addr table without exception).

@@ -34,11 +34,6 @@
 
 #include "uhal/uhal.hpp"
 
-#include "uhal/ProtocolUDP.hpp"
-#include "uhal/ProtocolTCP.hpp"
-#include "uhal/ProtocolPCIe.hpp"
-#include "uhal/ProtocolControlHub.hpp"
-
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -54,20 +49,15 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(NonreachableTestSuite)
 
 
-BOOST_AUTO_TEST_CASE(check_nonreachable_device)
+BOOST_FIXTURE_TEST_CASE(check_nonreachable_device, MinimalFixture)
 {
   for (size_t i = 0; i < 10; i++) {
-    ConnectionManager manager ( TestFixture::sConnectionFile );
-    HwInterface hw = manager.getDevice ( TestFixture::sDeviceId );
+    HwInterface hw = getHwInterface();
 
     // Check we get an exception corresponding to target being unreachable
-    if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
+    if ( (hw.uri().find ( "ipbustcp" ) != std::string::npos ) || (hw.uri().find ( "ipbuspcie" ) != std::string::npos) )
     {
       BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
-    }
-    else if ( hw.uri().find ( "ipbuspcie" ) != std::string::npos )
-    {
-      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::PCIeInitialisationError );
     }
     else
     {
@@ -88,11 +78,11 @@ HwInterface getHwWithModifiedControlHubPort(const std::string& aConnectionFile, 
   return ConnectionManager::getDevice(aDeviceId, lModifiedUri, lAddrFilePath);  
 }
 
-BOOST_AUTO_TEST_CASE(check_nonreachable_controlhub)
+BOOST_FIXTURE_TEST_CASE(check_nonreachable_controlhub, MinimalFixture)
 {
-  if ( (TestFixture::sDeviceInfo.type == IPBUS_1_3_CONTROLHUB) || (TestFixture::sDeviceInfo.type == IPBUS_2_0_CONTROLHUB) ) {
+  if ( (sDeviceInfo.type == IPBUS_1_3_CONTROLHUB) || (sDeviceInfo.type == IPBUS_2_0_CONTROLHUB) ) {
     for (size_t i = 0; i < 10; i++) {
-      HwInterface hw = getHwWithModifiedControlHubPort(TestFixture::sConnectionFile, TestFixture::sDeviceId);
+      HwInterface hw = getHwWithModifiedControlHubPort(sConnectionFile, sDeviceId);
 
       BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
     }

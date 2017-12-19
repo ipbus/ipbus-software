@@ -50,10 +50,10 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(MaskedNodeTestSuite)
 
 
-BOOST_FIXTURE_TEST_CASE(write_read_masked, TestFixture)
+BOOST_FIXTURE_TEST_CASE(write_read_masked, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   uint32_t x = static_cast<uint32_t> ( rand() );
   hw.getNode ( "REG_LOWER_MASK" ).write ( x & 0xFFFF );
   hw.getNode ( "REG_UPPER_MASK" ).write ( x >> 16 );

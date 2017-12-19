@@ -51,6 +51,8 @@
 
 
 namespace uhal {
+class HwInterface;
+
 namespace tests {
 
 
@@ -117,19 +119,28 @@ template<>
 DummyHardwareRunner<PCIeDummyHardware>::DummyHardwareRunner(const std::string& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack); 
 
 
-struct TestFixture {
-  TestFixture();
-  ~TestFixture();
+
+
+struct MinimalFixture {
+  MinimalFixture();
+  ~MinimalFixture();
+
+  uhal::HwInterface getHwInterface() const;
+
+  static std::string sConnectionFile;
+  static DeviceInfo sDeviceInfo;
+  static std::string sDeviceId;
+};
+
+
+struct DummyHardwareFixture : public MinimalFixture {
+  DummyHardwareFixture();
+  ~DummyHardwareFixture();
 
   boost::shared_ptr<DummyHardwareRunnerInterface> hwRunner;
 
 private:
   static boost::shared_ptr<DummyHardwareRunnerInterface> createRunner (const DeviceInfo& aDeviceInfo);
-
-public:
-  static std::string sConnectionFile;
-  static DeviceInfo sDeviceInfo;
-  static std::string sDeviceId;
 };
 
 

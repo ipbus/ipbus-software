@@ -44,17 +44,16 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(EmptyDispatchTestSuite)
 
 
-BOOST_AUTO_TEST_CASE(empty_dispatch)
+BOOST_FIXTURE_TEST_CASE(empty_dispatch, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
 }
 
-BOOST_FIXTURE_TEST_CASE(empty_dispatch_after_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(empty_dispatch_after_read, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_NO_THROW ( ValWord< uint32_t > r = hw.getNode ( "REG" ).read() );
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
   BOOST_CHECK_NO_THROW ( hw.dispatch() );

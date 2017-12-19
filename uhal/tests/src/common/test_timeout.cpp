@@ -54,12 +54,10 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(TimeoutTestSuite)
 
 
-BOOST_FIXTURE_TEST_CASE(check_timeout, TestFixture)
+BOOST_FIXTURE_TEST_CASE(check_timeout, DummyHardwareFixture)
 {
   hwRunner->setReplyDelay( boost::chrono::seconds(2) );
-
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw = manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
 
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
   BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ClientTimeout );

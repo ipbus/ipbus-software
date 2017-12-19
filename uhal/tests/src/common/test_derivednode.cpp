@@ -51,10 +51,9 @@ namespace tests {
 BOOST_AUTO_TEST_SUITE(DerivedNodeTestSuite)
 
 
-BOOST_AUTO_TEST_CASE(derivednode_building)
+BOOST_FIXTURE_TEST_CASE(derivednode_building, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
 
   // Check node casting
   BOOST_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDNODE") )    == typeid(tests::DummyParentNode) );

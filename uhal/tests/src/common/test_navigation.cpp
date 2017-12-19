@@ -63,10 +63,10 @@ void iteration ( const uhal::Node& parentNode )
   }
 }
 
-BOOST_AUTO_TEST_CASE(navigation_and_traversal)
+BOOST_FIXTURE_TEST_CASE(navigation_and_traversal, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
+
   std::vector<std::string> ids = hw.getNodes();
   BOOST_CHECK ( std::find ( ids.begin(),ids.end(),"REG" ) != ids.end() );
   BOOST_CHECK ( std::find ( ids.begin(),ids.end(),"MEM" ) != ids.end() );
@@ -97,10 +97,10 @@ BOOST_AUTO_TEST_CASE(navigation_and_traversal)
 }
 
 
-BOOST_FIXTURE_TEST_CASE(write_read, TestFixture)
+BOOST_FIXTURE_TEST_CASE(write_read, DummyHardwareFixture)
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_EQUAL ( hw.getNode ( "SUBSYSTEM1.SUBMODULE.REG" ).getAddress(),
                       hw.getNode ( "SUBSYSTEM1" ).getNode ( "SUBMODULE" ).getNode ( "REG" ).getAddress() );
   BOOST_CHECK_EQUAL ( hw.getNode ( "SUBSYSTEM1.SUBMODULE.REG" ).getMask(),
@@ -121,10 +121,10 @@ BOOST_FIXTURE_TEST_CASE(write_read, TestFixture)
 }
 
 
-BOOST_AUTO_TEST_CASE(empty_node_id)
+BOOST_FIXTURE_TEST_CASE(empty_node_id, MinimalFixture)
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_EQUAL ( &hw.getNode ( "" ), &hw.getNode() );
   BOOST_CHECK_EQUAL ( &hw.getNode ( "SUBSYSTEM1" ).getNode ( "" ), &hw.getNode ( "SUBSYSTEM1" ) );
 }
