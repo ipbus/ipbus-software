@@ -32,54 +32,53 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/uhal.hpp"
+#ifndef _uhal_tests_PCIeDummyHardware_hpp_
+#define  _uhal_tests_PCIeDummyHardware_hpp_
 
-#include "uhal/ProtocolUDP.hpp"
-#include "uhal/ProtocolTCP.hpp"
-#include "uhal/ProtocolPCIe.hpp"
-#include "uhal/ProtocolControlHub.hpp"
 
-#include "uhal/tests/tools.hpp"
-
-#include <boost/test/unit_test.hpp>
-
-#include <iostream>
-#include <cstdlib>
-#include <typeinfo>
+#include "uhal/tests/DummyHardware.hpp"
 
 
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(TimeoutTestSuite)
-
-
-BOOST_FIXTURE_TEST_CASE(check_timeout, TestFixture)
+class PCIeDummyHardware : public DummyHardware<2, 0>
 {
-  hwRunner->setReplyDelay( boost::chrono::seconds(2) );
+public:
+  typedef DummyHardware<2, 0> base_type;
 
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw = manager.getDevice ( sDeviceId );
+  PCIeDummyHardware(const std::string& aDevicePathHostToFPGA, const std::string& aDevicePathFPGAToHost, const uint32_t& aReplyDelay, const bool& aBigEndianHack);
 
-  // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
-  BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ClientTimeout );
+  ~PCIeDummyHardware();
 
-  const size_t sleepAfterFirstDispatch = 3;
-  std::cout << "Sleeping for " << sleepAfterFirstDispatch << " seconds to allow DummyHardware to clear itself" << std::endl;
-  sleep ( sleepAfterFirstDispatch );
-  // Check we can continue as normal without further exceptions.
-  uint32_t x = static_cast<uint32_t> ( rand() );
-  ValWord<uint32_t> y;
-  BOOST_CHECK_NO_THROW (
-    hw.getNode ( "REG" ).write ( x );
-    y = hw.getNode ( "REG" ).read();
-    hw.dispatch();
-  );
-  BOOST_CHECK ( x == y );
-}
+  void run();
+
+  void stop();
+
+private:
+  static void dmaRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
+
+  static void dmaBlockingRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
 
 
-BOOST_AUTO_TEST_SUITE_END()
+  static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues);
+
+  static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);
+
+
+  std::string mDevicePathHostToFPGA, mDevicePathFPGAToHost;
+
+  const uint32_t mNumberOfPages;
+  const uint32_t mWordsPerPage;
+  uint32_t mNextPageIndex;
+  uint32_t mPublishedPageCount;
+
+  bool mStop;
+
+  int mDeviceFileHostToFPGA, mDeviceFileHostToFPGA_slave, mDeviceFileFPGAToHost;
+};
 
 } // end ns tests
 } // end ns uhal
+
+#endif

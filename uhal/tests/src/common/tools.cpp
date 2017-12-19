@@ -51,10 +51,18 @@ namespace uhal {
 namespace tests {
 
 
-DeviceInfo::DeviceInfo(uhal::tests::DeviceType aType, uint16_t aPort, const std::string& aConnectionId) : 
+DeviceInfo::DeviceInfo(uhal::tests::DeviceType aType, const std::string& aPort, const std::string& aConnectionId) : 
   type(aType),
   port(aPort),
   connectionId(aConnectionId)
+{
+}
+
+
+template<>
+DummyHardwareRunner<PCIeDummyHardware>::DummyHardwareRunner(const std::string& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack) : 
+  mHw(aPort.substr(0, aPort.find(",")), aPort.substr(aPort.find(",")+1), aReplyDelay, aBigEndianHack),
+  mHwThread( boost::bind(&PCIeDummyHardware::run, &mHw))
 {
 }
 
@@ -100,6 +108,9 @@ boost::shared_ptr<DummyHardwareRunnerInterface> TestFixture::createRunner (const
     case IPBUS_2_0_TCP :
       lResult.reset(new DummyHardwareRunner<TCPDummyHardware<2,0> >(aDetails.port, 0, false));
       break;
+    case IPBUS_2_0_PCIE : 
+      lResult.reset(new DummyHardwareRunner<PCIeDummyHardware>(aDetails.port, 0, false));
+      break;
   }
 
   return lResult;
@@ -107,7 +118,7 @@ boost::shared_ptr<DummyHardwareRunnerInterface> TestFixture::createRunner (const
 
 
 std::string TestFixture::sConnectionFile = "";
-DeviceInfo TestFixture::sDeviceInfo(IPBUS_2_0_UDP, 60001, "dummy.udp2");
+DeviceInfo TestFixture::sDeviceInfo(IPBUS_2_0_UDP, "60001", "dummy.udp2");
 std::string TestFixture::sDeviceId = "";
 
 

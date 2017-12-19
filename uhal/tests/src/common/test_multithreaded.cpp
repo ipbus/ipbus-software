@@ -98,24 +98,29 @@ void job_multiple ( const std::string& connection, const std::string& id )
 
 BOOST_FIXTURE_TEST_CASE(multiple_hwinterfaces, TestFixture)
 {
-  std::vector<boost::thread*> jobs;
-
-  for ( size_t i=0; i!=N_THREADS; ++i )
+  if (sDeviceInfo.type != IPBUS_2_0_PCIE)
   {
-    log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-    jobs.push_back ( new boost::thread ( job_multiple, sConnectionFile, sDeviceId ) );
-  }
+    std::vector<boost::thread*> jobs;
 
-  for ( size_t i=0; i!=N_THREADS; ++i )
-  {
-    log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-    //boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
-    //CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
-    jobs[i]->join();
-    delete jobs[i];
-  }
+    for ( size_t i=0; i!=N_THREADS; ++i )
+    {
+      log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
+      jobs.push_back ( new boost::thread ( job_multiple, sConnectionFile, sDeviceId ) );
+    }
 
-  log ( Warning() , ThisLocation() );
+    for ( size_t i=0; i!=N_THREADS; ++i )
+    {
+      log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
+      //boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
+      //CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
+      jobs[i]->join();
+      delete jobs[i];
+    }
+
+    log ( Warning() , ThisLocation() );  
+  }
+  else
+    std::cout << "  **  Skipping multiple HwInterface test for PCIe  **" << std::endl;
 }
 
 

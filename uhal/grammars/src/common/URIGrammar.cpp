@@ -43,14 +43,14 @@ namespace grammars
     URIGrammar::base_type ( start )
   {
     using namespace boost::spirit;
-    start = protocol > hostname     > port         > - ( path ) > -( extension ) > - ( data_pairs_vector ); //EthernetURI | PCIeURI;
+    start = protocol > hostname     > - ( port )   > - ( path ) > -( extension ) > - ( data_pairs_vector ); //EthernetURI | PCIeURI;
 
     // EthernetURI = protocol > hostname     > port         > - ( path ) > -( extension ) > - ( data_pairs_vector );
     // PCIeURI     = protocol > empty_string > empty_string >  path      > empty_string   > - ( data_pairs_vector );
 
     protocol = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( "://" );
-    hostname = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( ":" );
-    port 	 = + ( qi::char_ - ascii::punct ) ;
+    hostname = + ( qi::char_ - qi::lit ( ":" ) ) ;
+    port 	 = qi::lit ( ":" ) > + ( qi::char_ - ascii::punct ) ;
     path 				= qi::lit ( "/" ) > + ( qi::char_ - qi::lit ( "." ) - qi::lit ( "?" ) );
     extension 			= qi::lit ( "." ) > + ( qi::char_ - qi::lit ( "?" ) ) ;
     data_pairs_vector 	= qi::lit ( "?" ) > *data_pairs;

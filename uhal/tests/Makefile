@@ -53,6 +53,7 @@ Libraries = \
 ExecutableLibraries = \
 		cactus_uhal_tests \
 		${Libraries} \
+		boost_chrono \
 		boost_regex \
 		boost_system \
 		${PUGIXML_LIB_NAME}

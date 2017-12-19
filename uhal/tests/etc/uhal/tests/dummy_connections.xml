@@ -24,6 +24,9 @@
 
   <connection id="dummy.controlhub2" uri="chtcp-2.0://localhost:10203?target=localhost:60001"	address_table="file://dummy_address.xml" />
   <connection id="dummy.docu.controlhub2" uri="chtcp-2.0://localhost:10203?target=localhost:60001"  address_table="file://docu_examples_address.xml" />
-  
+ 
+  <connection id="dummy.pcie2" uri="ipbuspcie-2.0:///tmp/uhal_pcie_client2device,/tmp/uhal_pcie_device2client" address_table="file://dummy_address.xml"/>
+  <connection id="dummy.docu.pcie2" uri="ipbuspcie-2.0:///tmp/uhal_pcie_client2device,/tmp/uhal_pcie_device2client" address_table="file://docu_examples_address.xml"/>
+
 </connections>
 

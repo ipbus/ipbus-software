@@ -43,9 +43,11 @@
 #include <exception>
 #include <sys/time.h>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>
 
 #include "uhal/tests/UDPDummyHardware.hpp"
+#include "uhal/tests/PCIeDummyHardware.hpp"
 
 
 namespace uhal {
@@ -58,16 +60,17 @@ enum DeviceType {
   IPBUS_1_3_CONTROLHUB,
   IPBUS_2_0_UDP, 
   IPBUS_2_0_TCP,
-  IPBUS_2_0_CONTROLHUB
+  IPBUS_2_0_CONTROLHUB,
+  IPBUS_2_0_PCIE
 };
 
 
 struct DeviceInfo {
-  DeviceInfo(uhal::tests::DeviceType aType, uint16_t aPort, const std::string& aConnectionId);
+  DeviceInfo(uhal::tests::DeviceType aType, const std::string& aPort, const std::string& aConnectionId);
   ~DeviceInfo(){}
 
   DeviceType type;
-  uint16_t port;
+  std::string port;
 
   // ID for this device in unit test connection file
   std::string connectionId;
@@ -87,8 +90,8 @@ public:
 template <class DummyHardwareType>
 class DummyHardwareRunner : public DummyHardwareRunnerInterface {
 public:
-  DummyHardwareRunner(const uint16_t& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack) :
-    mHw(aPort, aReplyDelay, aBigEndianHack),
+  DummyHardwareRunner(const std::string& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack) :
+    mHw(boost::lexical_cast<uint16_t>(aPort), aReplyDelay, aBigEndianHack),
     mHwThread( boost::bind(&DummyHardwareType::run, &mHw))
   {
   }
@@ -108,6 +111,10 @@ private:
   DummyHardwareType mHw;
   boost::thread mHwThread;
 };
+
+
+template<>
+DummyHardwareRunner<PCIeDummyHardware>::DummyHardwareRunner(const std::string& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack); 
 
 
 struct TestFixture {

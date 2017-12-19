@@ -211,6 +211,7 @@ publish_build_job:
     - uhal_test_suite.py -v -s "1.3 controlhub" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - uhal_test_suite.py -v -s "2.0 udp"
     - uhal_test_suite.py -v -s "2.0 tcp"
+    - uhal_test_suite.py -v -s "2.0 pcie"
     - uhal_test_suite.py -v -s "2.0 controlhub - normal" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
 
