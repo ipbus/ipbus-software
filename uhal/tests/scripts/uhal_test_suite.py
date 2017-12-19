@@ -272,6 +272,10 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                controlhub_stop]
                 ]]
 
+    cmds += [["TEST IPBUS 2.0 PCIe",
+              ["run_unit_tests.exe -c %s -d 2.0-pcie --log_level=test_suite" % (conn_file)]
+            ]]
+
     cmds += [["TEST VALGRIND",
               [ # UDP 2
                "DummyHardwareUdp.exe --version 1 --port 50001",
