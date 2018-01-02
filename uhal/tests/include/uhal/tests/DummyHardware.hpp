@@ -135,7 +135,13 @@ namespace uhal
           @param aAddress the base address of the read
         */
         void read ( const uint32_t& aAddress );
-  
+
+        /**
+          Analyse request and create reply when an incrementing "configuration space" read is observed
+          @param aAddress the base address of the read
+        */
+        void readConfigurationSpace ( const uint32_t& aAddress );
+
         /**
           Analyse request and create reply when a non-incrementing write is observed
           @param aAddress the base address of the write
@@ -196,6 +202,9 @@ namespace uhal
       private:
         //! The memory space of the virtual hardware
         std::vector< uint32_t > mMemory;
+
+        //! The configuration space within the virtual hardware
+        std::vector< uint32_t > mConfigurationSpace;
   
       protected:
         //! The buffer for the incoming IPbus packet

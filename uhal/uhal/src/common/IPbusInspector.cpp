@@ -136,6 +136,10 @@ namespace uhal
               lAddress = *aIt++;
               read ( lAddress );
               break;
+            case CONFIG_SPACE_READ:
+              lAddress = *aIt++;
+              readConfigurationSpace( lAddress );
+              break;
             case NI_WRITE:
               lAddress = *aIt++;
               lPayloadBegin = aIt;
@@ -205,6 +209,14 @@ namespace uhal
   void  HostToTargetInspector<IPbus_major , IPbus_minor>::read ( const uint32_t& aAddress )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
+    log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
+  }
+
+
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  void  HostToTargetInspector<IPbus_major , IPbus_minor>::readConfigurationSpace ( const uint32_t& aAddress )
+  {
+    log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Incrementing 'configuration space' read, size " , Integer ( mWordCounter ) , ", transaction ID " , Integer ( mTransactionId ) );
     log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
   }
 

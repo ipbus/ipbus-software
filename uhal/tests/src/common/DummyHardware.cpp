@@ -53,8 +53,9 @@ namespace uhal
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
     DummyHardware<IPbus_major, IPbus_minor>::DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
       DummyHardwareInterface( boost::chrono::seconds(aReplyDelay) ),
-      HostToTargetInspector< IPbus_major , IPbus_minor >() ,
+      HostToTargetInspector< IPbus_major , IPbus_minor >(),
       mMemory (),
+      mConfigurationSpace(),
       mReceive ( BUFFER_SIZE , 0x00000000 ),
       mReply ( BUFFER_SIZE , 0x00000000 ),
       mReplyHistory ( REPLY_HISTORY_DEPTH , std::make_pair ( 0 , mReply ) ),
@@ -64,6 +65,8 @@ namespace uhal
       mSentControlPacketHeaderHistory ( 4 , 0x00000000 ),
       mBigEndianHack ( aBigEndianHack )
     {
+      for (size_t i = 0; i < 10; i++)
+        mConfigurationSpace.push_back( (uint16_t(getpid()) << 16) | i );
     }
 
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
@@ -217,6 +220,24 @@ namespace uhal
       for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
       {
         mReply.push_back ( GetEndpoint( lAddress++ ) );
+      }
+    }
+
+
+    template< uint8_t IPbus_major , uint8_t IPbus_minor >
+    void DummyHardware<IPbus_major, IPbus_minor>::readConfigurationSpace ( const uint32_t& aAddress )
+    {
+      mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
+      mReceivedControlPacketHeaderHistory.pop_front();
+      uint32_t lAddress ( aAddress );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+      mReply.push_back ( lExpected );
+      mSentControlPacketHeaderHistory.push_back ( lExpected );
+      mSentControlPacketHeaderHistory.pop_front();
+
+      for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
+      {
+        mReply.push_back ( mConfigurationSpace.at( lAddress++ ) );
       }
     }
 

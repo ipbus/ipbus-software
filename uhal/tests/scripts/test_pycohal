@@ -577,6 +577,40 @@ class TestRawClient(unittest.TestCase):
         self.assertEqual(total, reg.value())
 
 
+class TestConfigSpace(unittest.TestCase):
+    """
+    TestCase sub-class checking read behaviour for a single register in configuration space.
+    Analogous to C++ code in test_config_space.cpp
+    """
+
+    def test_read_fullWord(self):
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        client = manager.getDevice( DEVICE_ID ).getClient()
+
+        for i in range(10):
+            if "-1.3://" in client.uri():
+                self.assertRaises(uhal.ValidationError, client.readConfigurationSpace, i)
+            else:
+                x = client.readConfigurationSpace(i)
+                client.dispatch()
+                self.assertEqual(x.value() & 0xFFFF, i)
+
+    def test_read_masked(self):
+        manager = uhal.ConnectionManager( CONNECTIONS_FILE )
+        client = manager.getDevice( DEVICE_ID ).getClient()
+
+        for i in range(10):
+            if "-1.3://" in client.uri():
+                self.assertRaises(uhal.ValidationError, client.readConfigurationSpace, i, 0xFF)
+            else:
+                x_lower = client.readConfigurationSpace(i, 0xFF)
+                x_mid = client.readConfigurationSpace(i, 0xFFFF00)
+                client.dispatch()
+                self.assertEqual(x_lower.value(), i & 0xFF)
+                self.assertEqual(x_mid.value(), (i & 0xFFFF00) >> 8)
+
+
+
 class TestCheckPermissions(unittest.TestCase):
     """
     TestCase sub-class checking that node permissions defined in xml file are enforced correctly.

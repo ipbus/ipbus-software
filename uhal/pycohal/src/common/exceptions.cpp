@@ -42,6 +42,7 @@ void pycohal::wrap_exceptions() {
   wrap_exception_class<uhal::exception::WriteAccessDenied> ( "WriteAccessDenied", baseExceptionPyType );
   wrap_exception_class<uhal::exception::ReadAccessDenied> ( "ReadAccessDenied",  baseExceptionPyType );
   wrap_exception_class<uhal::exception::BitsSetWhichAreForbiddenByBitMask> ( "BitsSetWhichAreForbiddenByBitMask", baseExceptionPyType );
+  wrap_exception_class<uhal::exception::ValidationError> ( "ValidationError", baseExceptionPyType );
   wrap_exception_class<uhal::exception::TcpTimeout> ( "TcpTimeout", baseExceptionPyType );
   wrap_exception_class<uhal::exception::UdpTimeout> ( "UdpTimeout", baseExceptionPyType );
   wrap_exception_class<pycohal::PycohalLogLevelEnumError> ( "PycohalLogLevelEnumError", baseExceptionPyType );
