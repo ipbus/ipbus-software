@@ -50,6 +50,10 @@
 
 #include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
+#if BOOST_VERSION >= 105900
+  #include <boost/test/tree/traverse.hpp>
+  #include <boost/test/tree/visitor.hpp>
+#endif
 
 #include "uhal/tests/definitions.hpp"
 #include "uhal/tests/fixtures.hpp"
