@@ -46,10 +46,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE( CheckPermissionsTestSuite )
 
-
-BOOST_FIXTURE_TEST_CASE(check_permissions, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(CheckPermissionsTestSuite, check_permissions, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -65,9 +63,8 @@ BOOST_FIXTURE_TEST_CASE(check_permissions, DummyHardwareFixture)
   ValWord< uint32_t > mem2 = hw.getNode ( "REG_MASKED_READ_ONLY" ).read();
   hw.dispatch();
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

@@ -41,16 +41,16 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(EmptyDispatchTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(empty_dispatch, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(EmptyDispatchTestSuite, empty_dispatch, MinimalFixture,
 {
   HwInterface hw = getHwInterface();
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
 }
+)
 
-BOOST_FIXTURE_TEST_CASE(empty_dispatch_after_read, DummyHardwareFixture)
+
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(EmptyDispatchTestSuite, empty_dispatch_after_read, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -58,9 +58,8 @@ BOOST_FIXTURE_TEST_CASE(empty_dispatch_after_read, DummyHardwareFixture)
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

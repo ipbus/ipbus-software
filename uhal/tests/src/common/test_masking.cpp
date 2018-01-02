@@ -47,10 +47,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(MaskedNodeTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(write_read_masked, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MaskedNodeTestSuite, write_read_masked, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -73,9 +71,8 @@ BOOST_FIXTURE_TEST_CASE(write_read_masked, DummyHardwareFixture)
   BOOST_CHECK_EQUAL ( reg_l.value(), ( x & 0xFFFF ) );
   BOOST_CHECK_EQUAL ( reg_u.value(), ( x >> 16 ) );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

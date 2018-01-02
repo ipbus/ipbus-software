@@ -44,14 +44,12 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(AddrTableDocuExamplesTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(test_docu_addr_table_examples, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(AddrTableDocuExamplesTestSuite, test_docu_addr_table_examples, DummyHardwareFixture,
 {
   ConnectionManager manager ( sConnectionFile );
   // This line is majority of the test (i.e. load the addr table without exception).
-  HwInterface hw=manager.getDevice ( "dummy.docu" + sDeviceId.substr(5) );
+  HwInterface hw=manager.getDevice ( "dummy.docu" + deviceId.substr(5) );
   // ***** "Single Register Address Table" example *****
   BOOST_CHECK_NO_THROW
   (
@@ -89,9 +87,8 @@ BOOST_FIXTURE_TEST_CASE(test_docu_addr_table_examples, DummyHardwareFixture)
     hw.dispatch();
   );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns tests

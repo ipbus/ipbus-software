@@ -81,28 +81,27 @@ void report_tx_performance(ClientInterface& aClient, const uint32_t aBaseAddr, c
 }
 
 
-BOOST_AUTO_TEST_SUITE( SoakTestSuite )
-
-
-BOOST_FIXTURE_TEST_CASE(bandwidth_rx, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SoakTestSuite, bandwidth_rx, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
   BOOST_CHECK_NO_THROW( report_rx_performance(hw.getClient(), 0x01, 1, 100, true) );
   BOOST_CHECK_NO_THROW( report_rx_performance(hw.getClient(), 0x01, 262144, 100, true) );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(bandwidth_tx, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SoakTestSuite, bandwidth_tx, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
   BOOST_CHECK_NO_THROW( report_tx_performance(hw.getClient(), 0x01, 1, 100, true) );
   BOOST_CHECK_NO_THROW( report_tx_performance(hw.getClient(), 0x01, 262144, 100, true) );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(quick_soak, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SoakTestSuite, quick_soak, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -111,9 +110,8 @@ BOOST_FIXTURE_TEST_CASE(quick_soak, DummyHardwareFixture)
 
   BOOST_CHECK( PerfTester::runValidationTest(lClients, 0x1000, 1024, 2000, false, false) );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

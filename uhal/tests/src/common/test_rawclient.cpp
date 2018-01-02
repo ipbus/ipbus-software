@@ -50,11 +50,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(RawClientTestSuite)
 
-
-
-BOOST_FIXTURE_TEST_CASE(single_write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, single_write_read, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -85,9 +82,10 @@ BOOST_FIXTURE_TEST_CASE(single_write_read, DummyHardwareFixture)
   BOOST_CHECK ( reg3.valid() );
   BOOST_CHECK_EQUAL ( reg3.value(), y );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(mem_write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_write_read, DummyHardwareFixture,
 {
   const uint32_t N =1024*1024/4;
   HwInterface hw = getHwInterface();
@@ -119,9 +117,10 @@ BOOST_FIXTURE_TEST_CASE(mem_write_read, DummyHardwareFixture)
 
   BOOST_CHECK ( correct_block_write_read );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_rmw_bits, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
   ClientInterface* c = &hw.getClient();
@@ -147,9 +146,10 @@ BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, DummyHardwareFixture)
     BOOST_CHECK_EQUAL ( reg1.value(), x1 );
   }
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(mem_rmw_sum, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_rmw_sum, DummyHardwareFixture,
 {
   const uint32_t N =1024;
   HwInterface hw = getHwInterface();
@@ -200,9 +200,8 @@ BOOST_FIXTURE_TEST_CASE(mem_rmw_sum, DummyHardwareFixture)
 
   BOOST_CHECK_EQUAL ( reg.value(), total );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

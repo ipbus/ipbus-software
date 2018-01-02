@@ -51,10 +51,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(TimeoutTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(check_timeout, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(TimeoutTestSuite, check_timeout, DummyHardwareFixture,
 {
   hwRunner->setReplyDelay( boost::chrono::seconds(2) );
   HwInterface hw = getHwInterface();
@@ -75,9 +73,8 @@ BOOST_FIXTURE_TEST_CASE(check_timeout, DummyHardwareFixture)
   );
   BOOST_CHECK ( x == y );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

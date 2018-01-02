@@ -48,10 +48,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(DerivedNodeTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(derivednode_building, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(DerivedNodeTestSuite, derivednode_building, MinimalFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -63,9 +61,8 @@ BOOST_FIXTURE_TEST_CASE(derivednode_building, MinimalFixture)
   BOOST_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDMODULE4") ) == typeid(tests::DummyChildNode) );
   BOOST_CHECK( typeid( hw.getNode("SUBSYSTEM3.BADNODE") ) == typeid(uhal::Node) );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

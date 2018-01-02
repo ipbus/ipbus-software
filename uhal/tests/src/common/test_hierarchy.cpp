@@ -49,10 +49,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(NodeHierarchyTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(write_read_hierarchy, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeHierarchyTestSuite, write_read_hierarchy, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -117,9 +115,8 @@ BOOST_FIXTURE_TEST_CASE(write_read_hierarchy, DummyHardwareFixture)
   BOOST_CHECK_EQUAL ( mem2.size(), N_1MB );
   BOOST_CHECK ( correct_block_write_read_subsystem2 );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

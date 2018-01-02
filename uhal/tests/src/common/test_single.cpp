@@ -50,10 +50,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE( SingleReadWriteTestSuite )
 
-
-BOOST_FIXTURE_TEST_CASE(connect_write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, connect_write_read, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -73,9 +71,10 @@ BOOST_FIXTURE_TEST_CASE(connect_write_read, DummyHardwareFixture)
   BOOST_CHECK_EQUAL ( mem1.value(), x1 );
   BOOST_CHECK_EQUAL ( mem2.value(), x2 );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, on_the_fly_connect_write_read, DummyHardwareFixture,
 {
   //get location of address file. Assumption: it is located with the connection file
   std::string address_file;
@@ -96,17 +95,17 @@ BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, DummyHardwareFixture)
   BOOST_CHECK ( mem.valid() );
   BOOST_CHECK_EQUAL ( mem.value(), x );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(search_device_id, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, search_device_id, MinimalFixture,
 {
   ConnectionManager manager (sConnectionFile);
-  std::vector<std::string> ids = manager.getDevices ( "^" + sDeviceId + "$" );
-  BOOST_CHECK ( std::find ( ids.begin(),ids.end(),sDeviceId ) != ids.end() );
+  std::vector<std::string> ids = manager.getDevices ( "^" + deviceId + "$" );
+  BOOST_CHECK ( std::find ( ids.begin(),ids.end(), deviceId ) != ids.end() );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

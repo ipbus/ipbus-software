@@ -46,10 +46,8 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(NonreachableTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(check_nonreachable_device, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NonreachableTestSuite, check_nonreachable_device, MinimalFixture,
 {
   for (size_t i = 0; i < 10; i++) {
     HwInterface hw = getHwInterface();
@@ -65,6 +63,7 @@ BOOST_FIXTURE_TEST_CASE(check_nonreachable_device, MinimalFixture)
     }
   }
 }
+)
 
 
 HwInterface getHwWithModifiedControlHubPort(const std::string& aConnectionFile, const std::string& aDeviceId)
@@ -78,11 +77,11 @@ HwInterface getHwWithModifiedControlHubPort(const std::string& aConnectionFile, 
   return ConnectionManager::getDevice(aDeviceId, lModifiedUri, lAddrFilePath);  
 }
 
-BOOST_FIXTURE_TEST_CASE(check_nonreachable_controlhub, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NonreachableTestSuite, check_nonreachable_controlhub, MinimalFixture,
 {
-  if ( (sDeviceInfo.type == IPBUS_1_3_CONTROLHUB) || (sDeviceInfo.type == IPBUS_2_0_CONTROLHUB) ) {
+  if ( (deviceType == IPBUS_1_3_CONTROLHUB) || (deviceType == IPBUS_2_0_CONTROLHUB) ) {
     for (size_t i = 0; i < 10; i++) {
-      HwInterface hw = getHwWithModifiedControlHubPort(sConnectionFile, sDeviceId);
+      HwInterface hw = getHwWithModifiedControlHubPort(sConnectionFile, deviceId);
 
       BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
     }
@@ -90,9 +89,8 @@ BOOST_FIXTURE_TEST_CASE(check_nonreachable_controlhub, MinimalFixture)
   else
     BOOST_TEST_MESSAGE("  ***  Skipping check_nonreachable_controlhub test case, since client under test does not talk to ControlHub.  ***");
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

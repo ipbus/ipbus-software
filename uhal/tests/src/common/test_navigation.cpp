@@ -49,8 +49,6 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(NodeNavigationTestSuite)
-
 
 void iteration ( const uhal::Node& parentNode )
 { 
@@ -63,7 +61,7 @@ void iteration ( const uhal::Node& parentNode )
   }
 }
 
-BOOST_FIXTURE_TEST_CASE(navigation_and_traversal, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeNavigationTestSuite, navigation_and_traversal, MinimalFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -95,9 +93,10 @@ BOOST_FIXTURE_TEST_CASE(navigation_and_traversal, MinimalFixture)
   BOOST_CHECK_NO_THROW ( iteration ( hw.getNode() ) );
   BOOST_CHECK_NO_THROW ( iteration ( hw.getNode("SUBSYSTEM1") ) );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeNavigationTestSuite, write_read, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
 
@@ -119,18 +118,18 @@ BOOST_FIXTURE_TEST_CASE(write_read, DummyHardwareFixture)
   hw.dispatch();
   BOOST_CHECK_EQUAL ( reg.value(), x );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(empty_node_id, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeNavigationTestSuite, empty_node_id, MinimalFixture,
 {
   HwInterface hw = getHwInterface();
 
   BOOST_CHECK_EQUAL ( &hw.getNode ( "" ), &hw.getNode() );
   BOOST_CHECK_EQUAL ( &hw.getNode ( "SUBSYSTEM1" ).getNode ( "" ), &hw.getNode ( "SUBSYSTEM1" ) );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

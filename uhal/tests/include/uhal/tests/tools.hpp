@@ -46,7 +46,111 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>
 
+#include "uhal/ConnectionManager.hpp"
+#include "uhal/HwInterface.hpp"
 #include "uhal/tests/PCIeDummyHardware.hpp"
+#include "uhal/tests/TCPDummyHardware.hpp"
+#include "uhal/tests/UDPDummyHardware.hpp"
+
+
+#define UHAL_TESTS_DEFINE_CLIENT_TEST_CASES( test_suite_name , test_case_name , test_fixture, test_case_contents ) \
+  \
+  BOOST_AUTO_TEST_SUITE( ipbusudp_1_3 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_1_3_UDP> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  \
+  BOOST_AUTO_TEST_SUITE( ipbustcp_1_3 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_1_3_TCP> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  \
+  BOOST_AUTO_TEST_SUITE( chtcp_1_3 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_1_3_CONTROLHUB> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  \
+  BOOST_AUTO_TEST_SUITE( ipbusudp_2_0 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_2_0_UDP> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  \
+  BOOST_AUTO_TEST_SUITE( ipbustcp_2_0 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_2_0_TCP> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  \
+  BOOST_AUTO_TEST_SUITE( chtcp_2_0 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_2_0_CONTROLHUB> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  \
+  BOOST_AUTO_TEST_SUITE( ipbuspcie_2_0 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_2_0_PCIE> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END()
 
 
 
@@ -68,24 +172,13 @@ enum DeviceType {
 };
 
 
-struct DeviceInfo {
-  DeviceInfo(uhal::tests::DeviceType aType, const std::string& aPort, const std::string& aConnectionId);
-  ~DeviceInfo(){}
-
-  DeviceType type;
-  std::string port;
-
-  // ID for this device in unit test connection file
-  std::string connectionId;
-};
-
-
 class DummyHardwareRunnerInterface {
 protected:
   DummyHardwareRunnerInterface(){}
-  ~DummyHardwareRunnerInterface(){}
 
 public:
+  virtual ~DummyHardwareRunnerInterface(){}
+
   virtual void setReplyDelay (const boost::chrono::microseconds& aDelay) = 0;
 };
 
@@ -93,8 +186,8 @@ public:
 template <class DummyHardwareType>
 class DummyHardwareRunner : public DummyHardwareRunnerInterface {
 public:
-  DummyHardwareRunner(const std::string& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack) :
-    mHw(boost::lexical_cast<uint16_t>(aPort), aReplyDelay, aBigEndianHack),
+  DummyHardwareRunner(const uint16_t aPort , const uint32_t aReplyDelay, const bool  aBigEndianHack) :
+    mHw(aPort, aReplyDelay, aBigEndianHack),
     mHwThread( boost::bind(&DummyHardwareType::run, &mHw))
   {
   }
@@ -116,32 +209,165 @@ private:
 };
 
 
-template<>
-DummyHardwareRunner<PCIeDummyHardware>::DummyHardwareRunner(const std::string& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack); 
+template <>
+class DummyHardwareRunner<PCIeDummyHardware> : public DummyHardwareRunnerInterface {
+public:
+  DummyHardwareRunner(const std::string& aClientToHwFile, const std::string& aHwToClientFile, const uint32_t aReplyDelay, const bool aBigEndianHack) : 
+    mHw(aClientToHwFile, aHwToClientFile, aReplyDelay, aBigEndianHack),
+    mHwThread(boost::bind(&PCIeDummyHardware::run, &mHw))
+  {
+  }
+
+  ~DummyHardwareRunner()
+  {
+    mHw.stop();
+    mHwThread.join();
+  }
+
+  void setReplyDelay(const boost::chrono::microseconds& aDelay)
+  {
+    mHw.setReplyDelay(aDelay);
+  }
+
+private:
+  PCIeDummyHardware mHw;
+  boost::thread mHwThread; 
+};
 
 
 
+struct AbstractFixture {
+protected:
+  AbstractFixture() {}
+  virtual ~AbstractFixture() {}
 
-struct MinimalFixture {
+public:
+  static std::string sConnectionFile;
+};
+
+template <DeviceType type> struct MinimalFixture;
+
+
+template <DeviceType type>
+struct MinimalFixture : public AbstractFixture {
   MinimalFixture();
+  virtual ~MinimalFixture();
+
+  uhal::HwInterface getHwInterface() const;
+
+  static const DeviceType deviceType;
+
+protected:
+  uint16_t devicePort;
+  std::string deviceId;
+};
+
+
+template <>
+struct MinimalFixture<IPBUS_2_0_PCIE> : public AbstractFixture {
+  MinimalFixture(); 
   ~MinimalFixture();
 
   uhal::HwInterface getHwInterface() const;
 
-  static std::string sConnectionFile;
-  static DeviceInfo sDeviceInfo;
-  static std::string sDeviceId;
+  static const DeviceType deviceType;
+  std::string hardwareToClientFile;
+  std::string clientToHardwareFile;
+  std::string deviceId;
 };
 
+template <DeviceType type>
+const DeviceType MinimalFixture<type>::deviceType = type;
 
-struct DummyHardwareFixture : public MinimalFixture {
+template <>
+MinimalFixture<IPBUS_1_3_UDP>::MinimalFixture();
+
+template <>
+MinimalFixture<IPBUS_1_3_TCP>::MinimalFixture();
+
+template <>
+MinimalFixture<IPBUS_1_3_CONTROLHUB>::MinimalFixture();
+
+template <>
+MinimalFixture<IPBUS_2_0_UDP>::MinimalFixture();
+
+template <>
+MinimalFixture<IPBUS_2_0_TCP>::MinimalFixture();
+
+template <>
+MinimalFixture<IPBUS_2_0_CONTROLHUB>::MinimalFixture();
+
+
+template <DeviceType type>
+MinimalFixture<type>::~MinimalFixture()
+{
+}
+
+template <DeviceType type>
+HwInterface MinimalFixture<type>::getHwInterface() const
+{
+  ConnectionManager manager(sConnectionFile);
+  return manager.getDevice(deviceId);
+}
+
+
+
+
+template <DeviceType type>
+struct DummyHardwareFixture : public MinimalFixture<type> {
   DummyHardwareFixture();
   ~DummyHardwareFixture();
 
   boost::shared_ptr<DummyHardwareRunnerInterface> hwRunner;
 
 private:
-  static boost::shared_ptr<DummyHardwareRunnerInterface> createRunner (const DeviceInfo& aDeviceInfo);
+  static DummyHardwareRunnerInterface* createRunner (const uint16_t aPort);
+};
+
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_1_3_UDP>::createRunner (const uint16_t aPort);
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_1_3_CONTROLHUB>::createRunner (const uint16_t aPort);
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_1_3_TCP>::createRunner (const uint16_t aPort);
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_2_0_UDP>::createRunner (const uint16_t aPort);
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_2_0_CONTROLHUB>::createRunner (const uint16_t aPort);
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_2_0_TCP>::createRunner (const uint16_t aPort);
+
+
+template <DeviceType type>
+DummyHardwareFixture<type>::DummyHardwareFixture() :
+  MinimalFixture<type>(),
+  hwRunner(createRunner(this->devicePort))
+{
+}
+
+
+template <>
+DummyHardwareFixture<IPBUS_2_0_CONTROLHUB>::DummyHardwareFixture();
+
+
+template <DeviceType type>
+DummyHardwareFixture<type>::~DummyHardwareFixture()
+{
+}
+
+
+template <>
+struct DummyHardwareFixture<IPBUS_2_0_PCIE> : public MinimalFixture<IPBUS_2_0_PCIE> {
+  DummyHardwareFixture();
+  ~DummyHardwareFixture();
+
+  boost::shared_ptr<DummyHardwareRunnerInterface> hwRunner;
 };
 
 

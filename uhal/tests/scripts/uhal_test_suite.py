@@ -71,33 +71,33 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
             ]]
 
     cmds += [["TEST IPBUS 1.3 UDP",
-              ["run_uhal_tests.exe -c %s -d 1.3-udp --log_level=test_suite" % (conn_file)]
+              ["run_uhal_tests.exe -c %s --run_test=ipbusudp_1_3 --log_level=test_suite" % (conn_file)]
             ]]
 
     cmds += [["TEST IPBUS 1.3 TCP",
-              ["run_uhal_tests.exe -c %s -d 1.3-tcp --log_level=test_suite" % (conn_file)]
+              ["run_uhal_tests.exe -c %s --run_test=ipbustcp_1_3 --log_level=test_suite" % (conn_file)]
              ]]
 
     cmds += [["TEST IPBUS 1.3 CONTROLHUB",
               [controlhub_start,
                controlhub_status,
-               "run_uhal_tests.exe -c %s -d 1.3-hub --log_level=test_suite" % (conn_file),
+               "run_uhal_tests.exe -c %s --run_test=chtcp_1_3 --log_level=test_suite" % (conn_file),
                controlhub_stats,
                controlhub_stop]
                 ]]
 
     cmds += [["TEST IPBUS 2.0 UDP",
-              ["run_uhal_tests.exe -c %s -d 2.0-udp --log_level=test_suite" % (conn_file)]
+              ["run_uhal_tests.exe -c %s --run_test=ipbusudp_2_0 --log_level=test_suite" % (conn_file)]
             ]]
 
     cmds += [["TEST IPBUS 2.0 TCP",
-              ["run_uhal_tests.exe -c %s -d 2.0-tcp --log_level=test_suite" % (conn_file)]
+              ["run_uhal_tests.exe -c %s --run_test=ipbustcp_2_0 --log_level=test_suite" % (conn_file)]
              ]]
 
     cmds += [["TEST IPBUS 2.0 CONTROLHUB - normal",
               [controlhub_start,
                controlhub_status,
-               "run_uhal_tests.exe -c %s -d 2.0-hub --log_level=test_suite" % (conn_file),
+               "run_uhal_tests.exe -c %s --run_test=chtcp_2_0 --log_level=test_suite" % (conn_file),
                controlhub_stats,
                controlhub_stop]
                 ]]
@@ -137,7 +137,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                 ]]
 
     cmds += [["TEST IPBUS 2.0 PCIe",
-              ["run_unit_tests.exe -c %s -d 2.0-pcie --log_level=test_suite" % (conn_file)]
+              ["run_unit_tests.exe -c %s --run_test=ipbuspcie_2_0 --log_level=test_suite" % (conn_file)]
             ]]
 
     cmds += [["TEST PYCOHAL",

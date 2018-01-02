@@ -59,8 +59,6 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(MultithreadedTestSuite)
-
 
 void job_multiple ( const std::string& connection, const std::string& id )
 {
@@ -97,16 +95,16 @@ void job_multiple ( const std::string& connection, const std::string& id )
 }
 
 
-BOOST_FIXTURE_TEST_CASE(multiple_hwinterfaces, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterfaces, DummyHardwareFixture,
 {
-  if (sDeviceInfo.type != IPBUS_2_0_PCIE)
+  if (deviceType != IPBUS_2_0_PCIE)
   {
     std::vector<boost::thread*> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
       log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-      jobs.push_back ( new boost::thread ( job_multiple, sConnectionFile, sDeviceId ) );
+      jobs.push_back ( new boost::thread ( job_multiple, sConnectionFile, deviceId ) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )
@@ -123,6 +121,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_hwinterfaces, DummyHardwareFixture)
   else
     std::cout << "  **  Skipping multiple HwInterface test for PCIe  **" << std::endl;
 }
+)
 
 
 void job_single ( HwInterface& hw )
@@ -149,7 +148,7 @@ void job_single ( HwInterface& hw )
 }
 
 
-BOOST_FIXTURE_TEST_CASE(single_hwinterface, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_hwinterface, DummyHardwareFixture,
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
@@ -168,6 +167,7 @@ BOOST_FIXTURE_TEST_CASE(single_hwinterface, DummyHardwareFixture)
     }
   }
 }
+)
 
 
 void job_single_copied ( HwInterface hw )
@@ -193,7 +193,7 @@ void job_single_copied ( HwInterface hw )
 }
 
 
-BOOST_FIXTURE_TEST_CASE(single_copied_hwinterface, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_copied_hwinterface, DummyHardwareFixture,
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
@@ -212,9 +212,8 @@ BOOST_FIXTURE_TEST_CASE(single_copied_hwinterface, DummyHardwareFixture)
     }
   }
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

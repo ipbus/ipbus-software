@@ -68,10 +68,7 @@ std::vector<size_t> getBlockUnitTestDepths()
 }
 
 
-BOOST_AUTO_TEST_SUITE( BlockReadWriteTestSuite )
-
-
-BOOST_FIXTURE_TEST_CASE(block_write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_write_read, DummyHardwareFixture,
 {
   std::vector<size_t> lDepths = getBlockUnitTestDepths();
 
@@ -116,9 +113,10 @@ BOOST_FIXTURE_TEST_CASE(block_write_read, DummyHardwareFixture)
     }
   }
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(fifo_write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, fifo_write_read, DummyHardwareFixture,
 {
   std::vector<size_t> lDepths = getBlockUnitTestDepths();
   lDepths.push_back(N_200MB);
@@ -152,9 +150,10 @@ BOOST_FIXTURE_TEST_CASE(fifo_write_read, DummyHardwareFixture)
     //The FIFO implementation on the dummy HW is a single memory location so there is not much to check
   }
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(block_offset_write_read, DummyHardwareFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_offset_write_read, DummyHardwareFixture,
 {
   std::vector<size_t> lDepths = getBlockUnitTestDepths();
 
@@ -164,8 +163,9 @@ BOOST_FIXTURE_TEST_CASE(block_offset_write_read, DummyHardwareFixture)
 
     HwInterface hw = getHwInterface();
 
-    std::vector<uint32_t> xx,yy;
+    std::vector<uint32_t> xx;
     xx.reserve ( N );
+    std::vector<uint32_t> yy;
     yy.reserve ( N );
     for ( size_t i=0; i!= N; ++i )
     {
@@ -229,9 +229,10 @@ BOOST_FIXTURE_TEST_CASE(block_offset_write_read, DummyHardwareFixture)
     }
   }
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(block_access_type_violations, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_access_type_violations, MinimalFixture,
 {
   HwInterface hw = getHwInterface();
   std::vector<uint32_t> xx;
@@ -253,9 +254,10 @@ BOOST_FIXTURE_TEST_CASE(block_access_type_violations, MinimalFixture)
   BOOST_CHECK_THROW ( ValVector< uint32_t > mem = hw.getNode ( "FIFO" ).readBlockOffset ( N_1kB , 1 ) , uhal::exception::BulkTransferOffsetRequestedForFifo );
 
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(block_bigger_than_size_attribute, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_bigger_than_size_attribute, MinimalFixture,
 {
   HwInterface hw = getHwInterface();
   std::vector<uint32_t> xx;
@@ -263,9 +265,10 @@ BOOST_FIXTURE_TEST_CASE(block_bigger_than_size_attribute, MinimalFixture)
   BOOST_CHECK_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
   BOOST_CHECK_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlock ( N_1MB ) , uhal::exception::BulkTransferRequestedTooLarge );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(block_offset_bigger_than_size_attribute, MinimalFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_offset_bigger_than_size_attribute, MinimalFixture,
 {
   HwInterface hw = getHwInterface();
   std::vector<uint32_t> xx;
@@ -278,9 +281,8 @@ BOOST_FIXTURE_TEST_CASE(block_offset_bigger_than_size_attribute, MinimalFixture)
   BOOST_CHECK_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlockOffset ( xx , 1 ) , uhal::exception::BulkTransferRequestedTooLarge );
   BOOST_CHECK_THROW ( ValVector< uint32_t > mem = hw.getNode ( "SMALL_MEM" ).readBlockOffset ( N_1kB , 1 ) , uhal::exception::BulkTransferRequestedTooLarge );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

@@ -40,7 +40,6 @@
 #include "uhal/ConnectionManager.hpp"
 #include "uhal/HwInterface.hpp"
 #include "uhal/log/log.hpp"
-#include "uhal/tests/PCIeDummyHardware.hpp"
 #include "uhal/tests/TCPDummyHardware.hpp"
 #include "uhal/tests/UDPDummyHardware.hpp"
 
@@ -52,48 +51,117 @@ namespace uhal {
 namespace tests {
 
 
-DeviceInfo::DeviceInfo(uhal::tests::DeviceType aType, const std::string& aPort, const std::string& aConnectionId) : 
-  type(aType),
-  port(aPort),
-  connectionId(aConnectionId)
+std::string AbstractFixture::sConnectionFile = "";
+
+template <>
+MinimalFixture<IPBUS_1_3_UDP>::MinimalFixture() : 
+  devicePort(50001),
+  deviceId("dummy.udp")
+{
+}
+
+template <>
+MinimalFixture<IPBUS_1_3_TCP>::MinimalFixture() :
+  devicePort(50002),
+  deviceId("dummy.tcp")
+{
+}
+
+template <>
+MinimalFixture<IPBUS_1_3_CONTROLHUB>::MinimalFixture() :
+  devicePort(50001),
+  deviceId("dummy.controlhub")
+{
+}
+
+template <>
+MinimalFixture<IPBUS_2_0_UDP>::MinimalFixture() :
+  devicePort(60001),
+  deviceId("dummy.udp2")
+{
+}
+
+template <>
+MinimalFixture<IPBUS_2_0_TCP>::MinimalFixture() :
+  devicePort(60002),
+  deviceId("dummy.tcp2")
+{
+}
+
+template <>
+MinimalFixture<IPBUS_2_0_CONTROLHUB>::MinimalFixture() :
+  devicePort(60001),
+  deviceId("dummy.controlhub2")
+{
+}
+
+MinimalFixture<IPBUS_2_0_PCIE>::MinimalFixture() :
+  hardwareToClientFile("/tmp/uhal_pcie_device2client"),
+  clientToHardwareFile("/tmp/uhal_pcie_client2device"),
+  deviceId("dummy.pcie2")
 {
 }
 
 
-template<>
-DummyHardwareRunner<PCIeDummyHardware>::DummyHardwareRunner(const std::string& aPort , const uint32_t& aReplyDelay, const bool& aBigEndianHack) : 
-  mHw(aPort.substr(0, aPort.find(",")), aPort.substr(aPort.find(",")+1), aReplyDelay, aBigEndianHack),
-  mHwThread( boost::bind(&PCIeDummyHardware::run, &mHw))
+MinimalFixture<IPBUS_2_0_PCIE>::~MinimalFixture()
 {
 }
 
 
-MinimalFixture::MinimalFixture()
-{
-}
-
-MinimalFixture::~MinimalFixture()
-{
-}
-
-uhal::HwInterface MinimalFixture::getHwInterface() const
+HwInterface MinimalFixture<IPBUS_2_0_PCIE>::getHwInterface() const
 {
   ConnectionManager manager(sConnectionFile);
-  return manager.getDevice(sDeviceId);
+  return manager.getDevice(deviceId);
 }
 
-std::string MinimalFixture::sConnectionFile = "";
-DeviceInfo MinimalFixture::sDeviceInfo(IPBUS_2_0_UDP, "60001", "dummy.udp2");
-std::string MinimalFixture::sDeviceId = "";
+
+const DeviceType MinimalFixture<IPBUS_2_0_PCIE>::deviceType = IPBUS_2_0_PCIE;
 
 
-DummyHardwareFixture::DummyHardwareFixture() :
-  hwRunner(createRunner(sDeviceInfo))
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_1_3_UDP>::createRunner (const uint16_t aPort)
+{
+  return new DummyHardwareRunner<UDPDummyHardware<1,3> >(aPort, 0, false);
+}
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_1_3_CONTROLHUB>::createRunner (const uint16_t aPort)
+{
+  return new DummyHardwareRunner<UDPDummyHardware<1,3> >(aPort, 0, false);
+}
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_1_3_TCP>::createRunner (const uint16_t aPort)
+{
+  return new DummyHardwareRunner<TCPDummyHardware<1,3> >(aPort, 0, false);
+}
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_2_0_UDP>::createRunner (const uint16_t aPort)
+{
+  return new DummyHardwareRunner<UDPDummyHardware<2,0> >(aPort, 0, false);
+}
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_2_0_CONTROLHUB>::createRunner (const uint16_t aPort)
+{
+  return new DummyHardwareRunner<UDPDummyHardware<2,0> >(aPort, 0, false);
+}
+
+template <>
+DummyHardwareRunnerInterface* DummyHardwareFixture<IPBUS_2_0_TCP>::createRunner (const uint16_t aPort)
+{
+  return new DummyHardwareRunner<TCPDummyHardware<2,0> >(aPort, 0, false);
+}
+
+
+template <>
+DummyHardwareFixture<IPBUS_2_0_CONTROLHUB>::DummyHardwareFixture() :
+  hwRunner(createRunner(devicePort))
 {
   // FIXME : Ensure that controlhub cache is reset after dummy hardware reboot, but before unit tests (temporary solution)
-  if ( sDeviceInfo.type == IPBUS_2_0_CONTROLHUB ) {
-    ConnectionManager manager ( sConnectionFile );
-    HwInterface hw=manager.getDevice ( sDeviceId );
+  if ( deviceType == IPBUS_2_0_CONTROLHUB ) {
+    HwInterface hw = getHwInterface();
     hw.getClient().read(0);
     try {
       hw.dispatch();
@@ -104,36 +172,13 @@ DummyHardwareFixture::DummyHardwareFixture() :
 }
 
 
-DummyHardwareFixture::~DummyHardwareFixture()
+DummyHardwareFixture<IPBUS_2_0_PCIE>::DummyHardwareFixture() :
+  hwRunner(new DummyHardwareRunner<PCIeDummyHardware>(clientToHardwareFile, hardwareToClientFile, 0, false))
 {
 }
 
-
-boost::shared_ptr<DummyHardwareRunnerInterface> DummyHardwareFixture::createRunner (const DeviceInfo& aDetails)
+DummyHardwareFixture<IPBUS_2_0_PCIE>::~DummyHardwareFixture() 
 {
-  boost::shared_ptr<DummyHardwareRunnerInterface> lResult;
-
-  switch (aDetails.type) {
-    case IPBUS_1_3_UDP :
-    case IPBUS_1_3_CONTROLHUB : 
-      lResult.reset(new DummyHardwareRunner<UDPDummyHardware<1,3> >(aDetails.port, 0, false));
-      break;
-    case IPBUS_1_3_TCP :
-      lResult.reset(new DummyHardwareRunner<TCPDummyHardware<1,3> >(aDetails.port, 0, false));
-      break;
-    case IPBUS_2_0_UDP : 
-    case IPBUS_2_0_CONTROLHUB : 
-      lResult.reset(new DummyHardwareRunner<UDPDummyHardware<2,0> >(aDetails.port, 0, false));
-      break;
-    case IPBUS_2_0_TCP :
-      lResult.reset(new DummyHardwareRunner<TCPDummyHardware<2,0> >(aDetails.port, 0, false));
-      break;
-    case IPBUS_2_0_PCIE : 
-      lResult.reset(new DummyHardwareRunner<PCIeDummyHardware>(aDetails.port, 0, false));
-      break;
-  }
-
-  return lResult;
 }
 
 

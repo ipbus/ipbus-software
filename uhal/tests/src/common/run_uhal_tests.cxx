@@ -55,54 +55,61 @@
 #include "uhal/log/log.hpp"
 
 
-using namespace uhal::tests;
-
-
-std::map<std::string, DeviceInfo> getDeviceMap()
+// Inspired by https://stackoverflow.com/questions/25385011/getting-all-boost-test-suites-test-cases
+struct ListWritingVisitor : boost::unit_test::test_tree_visitor
 {
-  std::map<std::string, DeviceInfo> lResult;
+  size_t level;
+  size_t maxDepth;
 
-  lResult.insert(std::make_pair(std::string("1.3-udp"), DeviceInfo(IPBUS_1_3_UDP, "50001", "dummy.udp")));
-  lResult.insert(std::make_pair(std::string("1.3-tcp"), DeviceInfo(IPBUS_1_3_TCP, "50002", "dummy.tcp")));
-  lResult.insert(std::make_pair(std::string("1.3-hub"), DeviceInfo(IPBUS_1_3_CONTROLHUB, "50001", "dummy.controlhub")));
-  lResult.insert(std::make_pair(std::string("2.0-udp"), DeviceInfo(IPBUS_2_0_UDP, "60001", "dummy.udp2")));
-  lResult.insert(std::make_pair(std::string("2.0-tcp"), DeviceInfo(IPBUS_2_0_TCP, "60002", "dummy.tcp2")));
-  lResult.insert(std::make_pair(std::string("2.0-hub"), DeviceInfo(IPBUS_2_0_CONTROLHUB, "60001", "dummy.controlhub2")));
-  lResult.insert(std::make_pair(std::string("2.0-pcie"), DeviceInfo(IPBUS_2_0_PCIE, "/tmp/uhal_pcie_client2device,/tmp/uhal_pcie_device2client", "dummy.pcie2")));
+  ListWritingVisitor(const size_t aMaxDepth) :
+    level(0),
+    maxDepth(aMaxDepth == 0 ? std::numeric_limits<size_t>::max() : aMaxDepth)
+  {}
 
-  return lResult;
-}
-
-std::string getAvailableDevices()
-{
-  std::map<std::string, DeviceInfo> lDeviceMap = getDeviceMap();
-  std::string lPossibleDeviceTypes;
-
-  for(std::map<std::string, DeviceInfo>::const_iterator lIt=lDeviceMap.begin(); lIt != lDeviceMap.end(); lIt++) {
-    lPossibleDeviceTypes += ("'" + lIt->first + "'");
-    if (lIt != --lDeviceMap.end())
-      lPossibleDeviceTypes += ", ";
+  void visit( boost::unit_test::test_case const& test )
+  {
+    if ((level+1) <= maxDepth)
+      std::cout << std::string(2 * (level > 2 ? level - 2 : 0), ' ') << "  └> " << test.p_name << std::endl;
   }
 
-  return lPossibleDeviceTypes;
-}
+  bool test_suite_start( boost::unit_test::test_suite const& suite )
+  {
+    level += 1;
 
+    if (level <= maxDepth)
+      std::cout << std::string(2 * (level > 2 ? level - 2 : 0), ' ') << (level > 1 ? "└ " : "") << suite.p_name << std::endl;
+    return true;
+  }
+
+  void test_suite_finish( boost::unit_test::test_suite const& suite )
+  {
+    level -= 1;
+  }
+};
+
+
+using namespace uhal::tests;
+
+const std::string kOptionHelp = "help";
+const std::string kOptionList = "list";
+const std::string kOptionConnFile = "connection-file";
+const std::string kOptionVerbose = "verbose";
+const std::string kOptionVeryVerbose = "very-verbose";
 
 int BOOST_TEST_CALL_DECL
 main( int argc, char* argv[] )
 {
   namespace po = boost::program_options;
 
-  const std::map<std::string, DeviceInfo> lDeviceMap = getDeviceMap();
-  std::string lDeviceType;
+  size_t lListDepth = 0;
 
   po::options_description lDesc ( "Allowed options" );
   lDesc.add_options()
-  ( "help,h", "produce help message" )
-  ( "connection-file,c", po::value<std::string>(&MinimalFixture::sConnectionFile)->required(), "Connection file URI" )
-  ( "device-type,d", po::value<std::string>(&lDeviceType)->required(), ("Device type. Possible values: " + getAvailableDevices()).c_str() )
-  ( "verbose,v", "Verbose output" )
-  ( "very-verbose,V", "Very verbose output" )
+  ( (kOptionHelp + ",h").c_str(), "produce help message" )
+  ( (kOptionList + ",l").c_str(), po::value<size_t>(&lListDepth)->implicit_value(0), "List all test suites and test cases (max depth can be specified if wanted; if not, all depths are shown)" )
+  ( (kOptionConnFile + ",c").c_str(), po::value<std::string>(&AbstractFixture::sConnectionFile), "Connection file URI" )
+  ( (kOptionVerbose + ",v").c_str(), "Verbose output" )
+  ( (kOptionVeryVerbose + ",V").c_str(), "Very verbose output" )
   ;
   po::variables_map vm;
 
@@ -123,33 +130,36 @@ main( int argc, char* argv[] )
     exit ( 1 );
   }
 
-  if ( vm.count ( "help" ) )
+  if ( vm.count ( kOptionHelp ) )
   {
     std::cout << "Usage: " << argv[0] << " [OPTIONS]" << std::endl;
     std::cout << lDesc << std::endl;
     exit ( 0 );
   }
 
-  if (lDeviceMap.find(lDeviceType) == lDeviceMap.end()) {
-    std::cout << "ERROR : Specified device type, '" << lDeviceType << "', is invalid." << std::endl;
-    std::cout << "        Possible values are: " << getAvailableDevices() << std::endl;
-    exit (1);
+  if ( vm.count ( kOptionList ) )
+  {
+    ListWritingVisitor lVisitor(lListDepth);
+    boost::unit_test::traverse_test_tree( boost::unit_test::framework::master_test_suite(), lVisitor);
+    exit ( 0 );
   }
-  else
-    MinimalFixture::sDeviceInfo = lDeviceMap.find(lDeviceType)->second;
-
+  else if ( vm.count (kOptionConnFile) == 0)
+  {
+    std::cerr << " ERROR : Option '" << kOptionConnFile << "' must be specified under normal running mode." << std::endl << std::endl;
+    std::cout << "Usage: " << argv[0] << " [OPTIONS]" << std::endl;
+    std::cout << lDesc << std::endl;
+    exit ( 1 );
+  }
 
   std::cout << "Supplied arguments ..." << std::endl;
-  std::cout << "   connection file = " << MinimalFixture::sConnectionFile << std::endl;
-  std::cout << "   device type     = " << lDeviceType << std::endl;
-  MinimalFixture::sDeviceId = MinimalFixture::sDeviceInfo.connectionId;
+  std::cout << "   connection file = " << AbstractFixture::sConnectionFile << std::endl;
 
   std::cout << "Log level set to ";
-  if ( vm.count ( "very-verbose" ) ) {
+  if ( vm.count ( kOptionVeryVerbose ) ) {
     uhal::setLogLevelTo ( uhal::Debug() );
     std::cout << "DEBUG";
   }
-  else if ( vm.count ( "verbose" ) ) {
+  else if ( vm.count ( kOptionVerbose ) ) {
     uhal::setLogLevelTo ( uhal::Notice() );
     std::cout << "NOTICE";
   }
