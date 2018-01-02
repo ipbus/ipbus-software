@@ -137,7 +137,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
                 ]]
 
     cmds += [["TEST IPBUS 2.0 PCIe",
-              ["run_unit_tests.exe -c %s --run_test=ipbuspcie_2_0 --log_level=test_suite" % (conn_file)]
+              ["run_uhal_tests.exe -c %s --run_test=ipbuspcie_2_0 --log_level=test_suite" % (conn_file)]
             ]]
 
     cmds += [["TEST PYCOHAL",
