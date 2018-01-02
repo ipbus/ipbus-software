@@ -33,6 +33,8 @@
 */
 
 #include "uhal/uhal.hpp"
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 #include "uhal/log/log.hpp"
 
@@ -104,7 +106,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterface
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
       log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-      jobs.push_back ( new boost::thread ( job_multiple, sConnectionFile, deviceId ) );
+      jobs.push_back ( new boost::thread ( job_multiple, connectionFileURI, deviceId ) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )

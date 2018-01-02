@@ -51,6 +51,8 @@
 #include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 #include "uhal/log/log.hpp"
 
@@ -107,7 +109,7 @@ main( int argc, char* argv[] )
   lDesc.add_options()
   ( (kOptionHelp + ",h").c_str(), "produce help message" )
   ( (kOptionList + ",l").c_str(), po::value<size_t>(&lListDepth)->implicit_value(0), "List all test suites and test cases (max depth can be specified if wanted; if not, all depths are shown)" )
-  ( (kOptionConnFile + ",c").c_str(), po::value<std::string>(&AbstractFixture::sConnectionFile), "Connection file URI" )
+  ( (kOptionConnFile + ",c").c_str(), po::value<std::string>(&AbstractFixture::connectionFileURI), "Connection file URI" )
   ( (kOptionVerbose + ",v").c_str(), "Verbose output" )
   ( (kOptionVeryVerbose + ",V").c_str(), "Very verbose output" )
   ;
@@ -152,7 +154,7 @@ main( int argc, char* argv[] )
   }
 
   std::cout << "Supplied arguments ..." << std::endl;
-  std::cout << "   connection file = " << AbstractFixture::sConnectionFile << std::endl;
+  std::cout << "   connection file = " << AbstractFixture::connectionFileURI << std::endl;
 
   std::cout << "Log level set to ";
   if ( vm.count ( kOptionVeryVerbose ) ) {

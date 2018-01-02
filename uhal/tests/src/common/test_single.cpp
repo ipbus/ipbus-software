@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -79,7 +81,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, on_the_fly_connect
   //get location of address file. Assumption: it is located with the connection file
   std::string address_file;
   {
-    boost::filesystem::path conn_fn ( sConnectionFile );
+    boost::filesystem::path conn_fn ( connectionFileURI );
     boost::filesystem::path fn ( "dummy_address.xml" );
     address_file = ( conn_fn.parent_path() /fn ).string();
   }
@@ -100,7 +102,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, on_the_fly_connect
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, search_device_id, MinimalFixture,
 {
-  ConnectionManager manager (sConnectionFile);
+  ConnectionManager manager (connectionFileURI);
   std::vector<std::string> ids = manager.getDevices ( "^" + deviceId + "$" );
   BOOST_CHECK ( std::find ( ids.begin(),ids.end(), deviceId ) != ids.end() );
 }

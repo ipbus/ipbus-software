@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/shared_ptr.hpp>

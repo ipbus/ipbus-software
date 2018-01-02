@@ -61,10 +61,38 @@ namespace uhal
     //! Size of the receive and reply buffers
     static const uint32_t BUFFER_SIZE = 100000;
   
-  
+
+    //! Common abstract base class for IPbus 1.3 and 2.0 dummy hardware
+    class DummyHardwareInterface {
+    public:
+      DummyHardwareInterface(const boost::chrono::microseconds& aReplyDelay) :
+        mReplyDelay(aReplyDelay)
+      {
+      }
+
+      virtual ~DummyHardwareInterface() {}
+
+        //! Function which "starts" the dummy hardware; does not return until the 'stop' method is called
+        virtual void run() = 0;
+
+        //! Stops this dummy hardware instance - i.e. makes the 'run' method return
+        virtual void stop() = 0;
+
+        template <class DurationType>
+        void setReplyDelay(const DurationType& aDelay)
+        {
+          mReplyDelay = aDelay;
+        }
+
+      protected:
+        //! The delay in seconds between the request and reply of the first transaction
+        boost::chrono::microseconds mReplyDelay;
+    };
+
+
     //! Abstract base class to emulate IPbus hardware
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    class DummyHardware : public HostToTargetInspector< IPbus_major , IPbus_minor >
+    class DummyHardware : public DummyHardwareInterface, public HostToTargetInspector< IPbus_major , IPbus_minor >
     {
         typedef HostToTargetInspector< IPbus_major , IPbus_minor > base_type;
   
@@ -76,32 +104,9 @@ namespace uhal
         */
         DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack );
   
-        /**
-          Destructor
-        */
         virtual ~DummyHardware();
 
-        template <class DurationType>
-        void setReplyDelay(const DurationType& aDelay)
-        {
-          mReplyDelay = aDelay;
-        }
-  
-        /**
-          Function which "starts" the dummy hardware; does not return until the 'stop' method is called
-        */
-        virtual void run() = 0;
-
-        /**
-          Stops this dummy hardware instance - i.e. makes the 'run' method return
-        */
-        virtual void stop() = 0;
-
-        virtual void SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue );
-
-        virtual uint32_t GetEndpoint( const uint32_t& aAddress );
-
-  
+      protected:
         /**
           Function which analyses the received IPbus packet and creates the suitable response
           @param aByteCount the number of bytes received
@@ -109,6 +114,11 @@ namespace uhal
         void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount );
   
       private:
+
+        void SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue );
+
+        uint32_t GetEndpoint( const uint32_t& aAddress );
+
         /**
           Analyse request and create reply when a Byte-OrderTransaction is observed
         */    
@@ -186,8 +196,6 @@ namespace uhal
       private:
         //! The memory space of the virtual hardware
         std::vector< uint32_t > mMemory;
-        //! The delay in seconds between the request and reply of the first transaction
-        boost::chrono::microseconds mReplyDelay;
   
       protected:
         //! The buffer for the incoming IPbus packet
@@ -215,7 +223,6 @@ namespace uhal
   
     };
   }
-
 
 }
 

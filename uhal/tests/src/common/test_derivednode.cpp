@@ -36,6 +36,8 @@
 */
 
 #include "uhal/log/log.hpp"
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 #include "uhal/tests/DummyDerivedNode.hpp"
 #include "uhal/uhal.hpp"

@@ -51,9 +51,10 @@ namespace uhal
 
   
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    DummyHardware<IPbus_major, IPbus_minor>::DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) : HostToTargetInspector< IPbus_major , IPbus_minor >() ,
+    DummyHardware<IPbus_major, IPbus_minor>::DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
+      DummyHardwareInterface( boost::chrono::seconds(aReplyDelay) ),
+      HostToTargetInspector< IPbus_major , IPbus_minor >() ,
       mMemory (),
-      mReplyDelay ( boost::chrono::seconds(aReplyDelay) ),
       mReceive ( BUFFER_SIZE , 0x00000000 ),
       mReply ( BUFFER_SIZE , 0x00000000 ),
       mReplyHistory ( REPLY_HISTORY_DEPTH , std::make_pair ( 0 , mReply ) ),
@@ -69,22 +70,6 @@ namespace uhal
     DummyHardware<IPbus_major, IPbus_minor>::~DummyHardware()
     {
     }
-
-
-    template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    void DummyHardware<IPbus_major, IPbus_minor>::SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue )
-    {
-      if( ! mMemory.size() ) mMemory.resize( ADDRESSMASK + 1 );
-      mMemory.at ( aAddress & ADDRESSMASK ) = aValue;
-    }
-
-
-    template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    uint32_t DummyHardware<IPbus_major, IPbus_minor>::GetEndpoint( const uint32_t& aAddress )
-    {
-      if( ! mMemory.size() ) mMemory.resize( ADDRESSMASK + 1 );
-      return mMemory.at ( aAddress & ADDRESSMASK );
-    }        
 
 
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
@@ -168,6 +153,24 @@ namespace uhal
         }
       }
     }
+
+
+    template< uint8_t IPbus_major , uint8_t IPbus_minor >
+    void DummyHardware<IPbus_major, IPbus_minor>::SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue )
+    {
+      if( ! mMemory.size() )
+        mMemory.resize( ADDRESSMASK + 1 );
+      mMemory.at ( aAddress & ADDRESSMASK ) = aValue;
+    }
+
+
+    template< uint8_t IPbus_major , uint8_t IPbus_minor >
+    uint32_t DummyHardware<IPbus_major, IPbus_minor>::GetEndpoint( const uint32_t& aAddress )
+    {
+      if( ! mMemory.size() )
+        mMemory.resize( ADDRESSMASK + 1 );
+      return mMemory.at ( aAddress & ADDRESSMASK );
+    }        
 
 
     template< uint8_t IPbus_major , uint8_t IPbus_minor >

@@ -35,6 +35,8 @@
 #include "uhal/uhal.hpp"
 
 #include "uhal/tests/PerfTester.hxx"
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>

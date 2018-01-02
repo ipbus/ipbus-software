@@ -39,6 +39,8 @@
 #include "uhal/ProtocolPCIe.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -54,7 +56,7 @@ namespace tests {
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(TimeoutTestSuite, check_timeout, DummyHardwareFixture,
 {
-  hwRunner->setReplyDelay( boost::chrono::seconds(2) );
+  hwRunner.setReplyDelay( boost::chrono::seconds(2) );
   HwInterface hw = getHwInterface();
 
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)

@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -81,7 +83,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NonreachableTestSuite, check_nonreachable_co
 {
   if ( (deviceType == IPBUS_1_3_CONTROLHUB) || (deviceType == IPBUS_2_0_CONTROLHUB) ) {
     for (size_t i = 0; i < 10; i++) {
-      HwInterface hw = getHwWithModifiedControlHubPort(sConnectionFile, deviceId);
+      HwInterface hw = getHwWithModifiedControlHubPort(connectionFileURI, deviceId);
 
       BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
     }
