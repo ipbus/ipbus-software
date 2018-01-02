@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -49,8 +51,6 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(NodeNavigationTestSuite)
-
 
 void iteration ( const uhal::Node& parentNode )
 { 
@@ -63,10 +63,10 @@ void iteration ( const uhal::Node& parentNode )
   }
 }
 
-BOOST_AUTO_TEST_CASE(navigation_and_traversal)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeNavigationTestSuite, navigation_and_traversal, MinimalFixture,
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
+
   std::vector<std::string> ids = hw.getNodes();
   BOOST_CHECK ( std::find ( ids.begin(),ids.end(),"REG" ) != ids.end() );
   BOOST_CHECK ( std::find ( ids.begin(),ids.end(),"MEM" ) != ids.end() );
@@ -95,12 +95,13 @@ BOOST_AUTO_TEST_CASE(navigation_and_traversal)
   BOOST_CHECK_NO_THROW ( iteration ( hw.getNode() ) );
   BOOST_CHECK_NO_THROW ( iteration ( hw.getNode("SUBSYSTEM1") ) );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(write_read, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeNavigationTestSuite, write_read, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_EQUAL ( hw.getNode ( "SUBSYSTEM1.SUBMODULE.REG" ).getAddress(),
                       hw.getNode ( "SUBSYSTEM1" ).getNode ( "SUBMODULE" ).getNode ( "REG" ).getAddress() );
   BOOST_CHECK_EQUAL ( hw.getNode ( "SUBSYSTEM1.SUBMODULE.REG" ).getMask(),
@@ -119,18 +120,18 @@ BOOST_FIXTURE_TEST_CASE(write_read, TestFixture)
   hw.dispatch();
   BOOST_CHECK_EQUAL ( reg.value(), x );
 }
+)
 
 
-BOOST_AUTO_TEST_CASE(empty_node_id)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeNavigationTestSuite, empty_node_id, MinimalFixture,
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_EQUAL ( &hw.getNode ( "" ), &hw.getNode() );
   BOOST_CHECK_EQUAL ( &hw.getNode ( "SUBSYSTEM1" ).getNode ( "" ), &hw.getNode ( "SUBSYSTEM1" ) );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

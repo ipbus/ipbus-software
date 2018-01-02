@@ -36,6 +36,8 @@
 */
 
 #include "uhal/log/log.hpp"
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 #include "uhal/tests/DummyDerivedNode.hpp"
 #include "uhal/uhal.hpp"
@@ -48,13 +50,10 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(DerivedNodeTestSuite)
 
-
-BOOST_AUTO_TEST_CASE(derivednode_building)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(DerivedNodeTestSuite, derivednode_building, MinimalFixture,
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
 
   // Check node casting
   BOOST_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDNODE") )    == typeid(tests::DummyParentNode) );
@@ -64,9 +63,8 @@ BOOST_AUTO_TEST_CASE(derivednode_building)
   BOOST_CHECK( typeid( hw.getNode("SUBSYSTEM3.DERIVEDMODULE4") ) == typeid(tests::DummyChildNode) );
   BOOST_CHECK( typeid( hw.getNode("SUBSYSTEM3.BADNODE") ) == typeid(uhal::Node) );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

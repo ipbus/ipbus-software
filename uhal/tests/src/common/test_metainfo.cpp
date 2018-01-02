@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -46,18 +48,17 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(NodeMetainfoTestSuite)
+typedef boost::unordered_map<std::string, std::string> UnorderedStringMap_t;
 
 
-BOOST_AUTO_TEST_CASE(check_meta_info)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NodeMetainfoTestSuite, check_meta_info, MinimalFixture,
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
 
-  boost::unordered_map<std::string,std::string> lPars;
-  boost::unordered_map<std::string,std::string>::iterator iPar;
-  boost::unordered_map<std::string,std::string> lFwInfo;
-  boost::unordered_map<std::string,std::string>::iterator iFwInfo;
+  UnorderedStringMap_t lPars;
+  UnorderedStringMap_t::iterator iPar;
+  UnorderedStringMap_t lFwInfo;
+  UnorderedStringMap_t::iterator iFwInfo;
 
   //REG
   BOOST_CHECK_EQUAL ( hw.getNode ( "REG" ).getAddress(), 0x000001 );
@@ -233,9 +234,8 @@ BOOST_AUTO_TEST_CASE(check_meta_info)
   BOOST_CHECK( ( iFwInfo = lFwInfo.find( "width" ) ) != lFwInfo.end() && iFwInfo->second == "0x10" );
   
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

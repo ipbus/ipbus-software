@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -47,13 +49,11 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(MaskedNodeTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(write_read_masked, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MaskedNodeTestSuite, write_read_masked, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   uint32_t x = static_cast<uint32_t> ( rand() );
   hw.getNode ( "REG_LOWER_MASK" ).write ( x & 0xFFFF );
   hw.getNode ( "REG_UPPER_MASK" ).write ( x >> 16 );
@@ -73,9 +73,8 @@ BOOST_FIXTURE_TEST_CASE(write_read_masked, TestFixture)
   BOOST_CHECK_EQUAL ( reg_l.value(), ( x & 0xFFFF ) );
   BOOST_CHECK_EQUAL ( reg_u.value(), ( x >> 16 ) );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

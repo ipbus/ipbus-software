@@ -34,11 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
-#include "uhal/ProtocolUDP.hpp"
-#include "uhal/ProtocolTCP.hpp"
-#include "uhal/ProtocolPCIe.hpp"
-#include "uhal/ProtocolControlHub.hpp"
-
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -51,23 +48,16 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(NonreachableTestSuite)
 
-
-BOOST_AUTO_TEST_CASE(check_nonreachable_device)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NonreachableTestSuite, check_nonreachable_device, MinimalFixture,
 {
   for (size_t i = 0; i < 10; i++) {
-    ConnectionManager manager ( TestFixture::sConnectionFile );
-    HwInterface hw = manager.getDevice ( TestFixture::sDeviceId );
+    HwInterface hw = getHwInterface();
 
     // Check we get an exception corresponding to target being unreachable
-    if ( hw.uri().find ( "ipbustcp" ) != std::string::npos )
+    if ( (hw.uri().find ( "ipbustcp" ) != std::string::npos ) || (hw.uri().find ( "ipbuspcie" ) != std::string::npos) )
     {
       BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
-    }
-    else if ( hw.uri().find ( "ipbuspcie" ) != std::string::npos )
-    {
-      BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::PCIeInitialisationError );
     }
     else
     {
@@ -75,6 +65,7 @@ BOOST_AUTO_TEST_CASE(check_nonreachable_device)
     }
   }
 }
+)
 
 
 HwInterface getHwWithModifiedControlHubPort(const std::string& aConnectionFile, const std::string& aDeviceId)
@@ -88,11 +79,11 @@ HwInterface getHwWithModifiedControlHubPort(const std::string& aConnectionFile, 
   return ConnectionManager::getDevice(aDeviceId, lModifiedUri, lAddrFilePath);  
 }
 
-BOOST_AUTO_TEST_CASE(check_nonreachable_controlhub)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NonreachableTestSuite, check_nonreachable_controlhub, MinimalFixture,
 {
-  if ( (TestFixture::sDeviceInfo.type == IPBUS_1_3_CONTROLHUB) || (TestFixture::sDeviceInfo.type == IPBUS_2_0_CONTROLHUB) ) {
+  if ( (deviceType == IPBUS_1_3_CONTROLHUB) || (deviceType == IPBUS_2_0_CONTROLHUB) ) {
     for (size_t i = 0; i < 10; i++) {
-      HwInterface hw = getHwWithModifiedControlHubPort(TestFixture::sConnectionFile, TestFixture::sDeviceId);
+      HwInterface hw = getHwWithModifiedControlHubPort(connectionFileURI, deviceId);
 
       BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::TransportLayerError );
     }
@@ -100,9 +91,8 @@ BOOST_AUTO_TEST_CASE(check_nonreachable_controlhub)
   else
     BOOST_TEST_MESSAGE("  ***  Skipping check_nonreachable_controlhub test case, since client under test does not talk to ControlHub.  ***");
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

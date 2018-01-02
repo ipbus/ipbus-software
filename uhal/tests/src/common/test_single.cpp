@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -50,13 +52,11 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE( SingleReadWriteTestSuite )
 
-
-BOOST_FIXTURE_TEST_CASE(connect_write_read, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, connect_write_read, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   // hw.ping();
   uint32_t x1 = static_cast<uint32_t> ( rand() );
   uint32_t x2 = static_cast<uint32_t> ( rand() );
@@ -73,23 +73,20 @@ BOOST_FIXTURE_TEST_CASE(connect_write_read, TestFixture)
   BOOST_CHECK_EQUAL ( mem1.value(), x1 );
   BOOST_CHECK_EQUAL ( mem2.value(), x2 );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, on_the_fly_connect_write_read, DummyHardwareFixture,
 {
   //get location of address file. Assumption: it is located with the connection file
   std::string address_file;
   {
-    boost::filesystem::path conn_fn ( sConnectionFile );
+    boost::filesystem::path conn_fn ( connectionFileURI );
     boost::filesystem::path fn ( "dummy_address.xml" );
     address_file = ( conn_fn.parent_path() /fn ).string();
   }
   //get the parameters from the file
-  std::string uri;
-  {
-    ConnectionManager manager ( sConnectionFile );
-    uri = manager.getDevice ( sDeviceId ).uri();
-  }
+  std::string uri = getHwInterface().uri();
   HwInterface hw=ConnectionManager::getDevice ( "test_device_id", uri, address_file );
   uint32_t x = static_cast<uint32_t> ( rand() );
   hw.getNode ( "REG" ).write ( x );
@@ -100,17 +97,17 @@ BOOST_FIXTURE_TEST_CASE(on_the_fly_connect_write_read, TestFixture)
   BOOST_CHECK ( mem.valid() );
   BOOST_CHECK_EQUAL ( mem.value(), x );
 }
+)
 
 
-BOOST_AUTO_TEST_CASE(search_device_id)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, search_device_id, MinimalFixture,
 {
-  ConnectionManager manager (TestFixture::sConnectionFile);
-  std::vector<std::string> ids = manager.getDevices ( "^" + TestFixture::sDeviceId + "$" );
-  BOOST_CHECK ( std::find ( ids.begin(),ids.end(),TestFixture::sDeviceId ) != ids.end() );
+  ConnectionManager manager (connectionFileURI);
+  std::vector<std::string> ids = manager.getDevices ( "^" + deviceId + "$" );
+  BOOST_CHECK ( std::find ( ids.begin(),ids.end(), deviceId ) != ids.end() );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

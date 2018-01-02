@@ -39,6 +39,8 @@
 #include "uhal/ProtocolPCIe.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -51,15 +53,11 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(TimeoutTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(check_timeout, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(TimeoutTestSuite, check_timeout, DummyHardwareFixture,
 {
-  hwRunner->setReplyDelay( boost::chrono::seconds(2) );
-
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw = manager.getDevice ( sDeviceId );
+  hwRunner.setReplyDelay( boost::chrono::seconds(2) );
+  HwInterface hw = getHwInterface();
 
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
   BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ClientTimeout );
@@ -77,9 +75,8 @@ BOOST_FIXTURE_TEST_CASE(check_timeout, TestFixture)
   );
   BOOST_CHECK ( x == y );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

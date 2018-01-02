@@ -33,6 +33,8 @@
 */
 
 #include "uhal/uhal.hpp"
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -41,27 +43,25 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(EmptyDispatchTestSuite)
 
-
-BOOST_AUTO_TEST_CASE(empty_dispatch)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(EmptyDispatchTestSuite, empty_dispatch, MinimalFixture,
 {
-  ConnectionManager manager ( TestFixture::sConnectionFile );
-  HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+  HwInterface hw = getHwInterface();
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
 }
+)
 
-BOOST_FIXTURE_TEST_CASE(empty_dispatch_after_read, TestFixture)
+
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(EmptyDispatchTestSuite, empty_dispatch_after_read, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_NO_THROW ( ValWord< uint32_t > r = hw.getNode ( "REG" ).read() );
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
   BOOST_CHECK_NO_THROW ( hw.dispatch() );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

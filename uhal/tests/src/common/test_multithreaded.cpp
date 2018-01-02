@@ -33,6 +33,8 @@
 */
 
 #include "uhal/uhal.hpp"
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 #include "uhal/log/log.hpp"
 
@@ -59,8 +61,6 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(MultithreadedTestSuite)
-
 
 void job_multiple ( const std::string& connection, const std::string& id )
 {
@@ -70,8 +70,9 @@ void job_multiple ( const std::string& connection, const std::string& id )
   {
     log ( Info() , "Iteration " , Integer ( iter ) );
     ConnectionManager manager ( connection );
-    HwInterface hw=manager.getDevice ( id );
+    HwInterface hw = manager.getDevice ( id );
     hw.setTimeoutPeriod ( TIMEOUT_S*1000 );
+
     uint32_t x = static_cast<uint32_t> ( rand() );
     hw.getNode ( "REG" ).write ( x );
     ValWord< uint32_t > reg = hw.getNode ( "REG" ).read();
@@ -96,16 +97,16 @@ void job_multiple ( const std::string& connection, const std::string& id )
 }
 
 
-BOOST_FIXTURE_TEST_CASE(multiple_hwinterfaces, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterfaces, DummyHardwareFixture,
 {
-  if (sDeviceInfo.type != IPBUS_2_0_PCIE)
+  if (deviceType != IPBUS_2_0_PCIE)
   {
     std::vector<boost::thread*> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
       log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-      jobs.push_back ( new boost::thread ( job_multiple, sConnectionFile, sDeviceId ) );
+      jobs.push_back ( new boost::thread ( job_multiple, connectionFileURI, deviceId ) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )
@@ -122,6 +123,7 @@ BOOST_FIXTURE_TEST_CASE(multiple_hwinterfaces, TestFixture)
   else
     std::cout << "  **  Skipping multiple HwInterface test for PCIe  **" << std::endl;
 }
+)
 
 
 void job_single ( HwInterface& hw )
@@ -133,26 +135,26 @@ void job_single ( HwInterface& hw )
     std::vector<uint32_t> xx;
 
     for ( size_t i=0; i!= N_SIZE; ++i )
-{
-  xx.push_back ( static_cast<uint32_t> ( rand() ) );
-  }
-  hw.getNode ( "MEM" ).writeBlock ( xx );
-  ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
-  hw.dispatch();
-  BOOST_CHECK ( reg.valid() );
-  BOOST_CHECK ( mem.valid() );
-  BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
+    {
+      xx.push_back ( static_cast<uint32_t> ( rand() ) );
+    }
+
+    hw.getNode ( "MEM" ).writeBlock ( xx );
+    ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+    hw.dispatch();
+    BOOST_CHECK ( reg.valid() );
+    BOOST_CHECK ( mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
   );
   //can not check content in the mutlithreaded case
 }
 
 
-BOOST_FIXTURE_TEST_CASE(single_hwinterface, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_hwinterface, DummyHardwareFixture,
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
-    ConnectionManager manager ( TestFixture::sConnectionFile );
-    HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+    HwInterface hw = getHwInterface();
     std::vector<boost::thread*> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )
@@ -167,6 +169,7 @@ BOOST_FIXTURE_TEST_CASE(single_hwinterface, TestFixture)
     }
   }
 }
+)
 
 
 void job_single_copied ( HwInterface hw )
@@ -178,25 +181,25 @@ void job_single_copied ( HwInterface hw )
     std::vector<uint32_t> xx;
 
     for ( size_t i=0; i!= N_SIZE; ++i )
-{
-  xx.push_back ( static_cast<uint32_t> ( 0xDEADBEEF /*rand()*/ ) );
-  }
-  hw.getNode ( "MEM" ).writeBlock ( xx );
-  ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
-  hw.dispatch();
-  BOOST_CHECK ( reg.valid() );
-  BOOST_CHECK ( mem.valid() );
-  BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
+    {
+      xx.push_back ( static_cast<uint32_t> ( 0xDEADBEEF /*rand()*/ ) );
+    }
+
+    hw.getNode ( "MEM" ).writeBlock ( xx );
+    ValVector< uint32_t > mem = hw.getNode ( "MEM" ).readBlock ( N_SIZE );
+    hw.dispatch();
+    BOOST_CHECK ( reg.valid() );
+    BOOST_CHECK ( mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N_SIZE );
   );
 }
 
 
-BOOST_FIXTURE_TEST_CASE(single_copied_hwinterface, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_copied_hwinterface, DummyHardwareFixture,
 {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
-    ConnectionManager manager ( TestFixture::sConnectionFile );
-    HwInterface hw=manager.getDevice ( TestFixture::sDeviceId );
+    HwInterface hw = getHwInterface();
     std::vector<boost::thread*> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )
@@ -211,9 +214,8 @@ BOOST_FIXTURE_TEST_CASE(single_copied_hwinterface, TestFixture)
     }
   }
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

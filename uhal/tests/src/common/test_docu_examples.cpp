@@ -33,6 +33,8 @@
 */
 
 #include "uhal/uhal.hpp"
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -44,14 +46,12 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(AddrTableDocuExamplesTestSuite)
 
-
-BOOST_FIXTURE_TEST_CASE(test_docu_addr_table_examples, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(AddrTableDocuExamplesTestSuite, test_docu_addr_table_examples, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
+  ConnectionManager manager ( connectionFileURI );
   // This line is majority of the test (i.e. load the addr table without exception).
-  HwInterface hw=manager.getDevice ( "dummy.docu" + sDeviceId.substr(5) );
+  HwInterface hw=manager.getDevice ( "dummy.docu" + deviceId.substr(5) );
   // ***** "Single Register Address Table" example *****
   BOOST_CHECK_NO_THROW
   (
@@ -89,9 +89,8 @@ BOOST_FIXTURE_TEST_CASE(test_docu_addr_table_examples, TestFixture)
     hw.dispatch();
   );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns tests

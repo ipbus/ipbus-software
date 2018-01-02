@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/shared_ptr.hpp>
@@ -50,14 +52,11 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE(RawClientTestSuite)
 
-
-
-BOOST_FIXTURE_TEST_CASE(single_write_read, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, single_write_read, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   ClientInterface* c = &hw.getClient();
   uint32_t x = static_cast<uint32_t> ( rand() );
   uint32_t addr = hw.getNode ( "REG" ).getAddress();
@@ -85,13 +84,13 @@ BOOST_FIXTURE_TEST_CASE(single_write_read, TestFixture)
   BOOST_CHECK ( reg3.valid() );
   BOOST_CHECK_EQUAL ( reg3.value(), y );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(mem_write_read, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_write_read, DummyHardwareFixture,
 {
   const uint32_t N =1024*1024/4;
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
   ClientInterface* c = &hw.getClient();
   std::vector<uint32_t> xx;
 
@@ -120,12 +119,12 @@ BOOST_FIXTURE_TEST_CASE(mem_write_read, TestFixture)
 
   BOOST_CHECK ( correct_block_write_read );
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_rmw_bits, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
   ClientInterface* c = &hw.getClient();
   uint32_t addr = hw.getNode ( "REG_UPPER_MASK" ).getAddress();
   uint32_t x1 = static_cast<uint32_t> ( rand() );
@@ -149,13 +148,13 @@ BOOST_FIXTURE_TEST_CASE(mem_rmw_bits, TestFixture)
     BOOST_CHECK_EQUAL ( reg1.value(), x1 );
   }
 }
+)
 
 
-BOOST_FIXTURE_TEST_CASE(mem_rmw_sum, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_rmw_sum, DummyHardwareFixture,
 {
   const uint32_t N =1024;
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
   ClientInterface* c = &hw.getClient();
   uint32_t total = 0;
   std::vector<uint32_t> xx;
@@ -203,9 +202,8 @@ BOOST_FIXTURE_TEST_CASE(mem_rmw_sum, TestFixture)
 
   BOOST_CHECK_EQUAL ( reg.value(), total );
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal

@@ -34,6 +34,8 @@
 
 #include "uhal/uhal.hpp"
 
+#include "uhal/tests/definitions.hpp"
+#include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -46,13 +48,11 @@
 namespace uhal {
 namespace tests {
 
-BOOST_AUTO_TEST_SUITE( CheckPermissionsTestSuite )
 
-
-BOOST_FIXTURE_TEST_CASE(check_permissions, TestFixture)
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(CheckPermissionsTestSuite, check_permissions, DummyHardwareFixture,
 {
-  ConnectionManager manager ( sConnectionFile );
-  HwInterface hw=manager.getDevice ( sDeviceId );
+  HwInterface hw = getHwInterface();
+
   BOOST_CHECK_THROW ( hw.getNode ( "REG_READ_ONLY" ).write ( 1 ),uhal::exception::WriteAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_READ_ONLY" ).write ( 1 ),uhal::exception::WriteAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_WRITE_ONLY" ).read(),uhal::exception::ReadAccessDenied );
@@ -65,9 +65,8 @@ BOOST_FIXTURE_TEST_CASE(check_permissions, TestFixture)
   ValWord< uint32_t > mem2 = hw.getNode ( "REG_MASKED_READ_ONLY" ).read();
   hw.dispatch();
 }
+)
 
-
-BOOST_AUTO_TEST_SUITE_END()
 
 } // end ns tests
 } // end ns uhal
