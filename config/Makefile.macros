@@ -52,28 +52,3 @@ ifeq ($(BUILD_PUGIXML), 1)
     EXTERN_PUGIXML_INCLUDE_PREFIX = ${EXTERN_PUGIXML_PREFIX}/include
     EXTERN_PUGIXML_LIB_PREFIX = ${EXTERN_PUGIXML_PREFIX}/lib
 endif
-
-
-# uhal/grammars
-UHAL_GRAMMARS_PREFIX = $(BUILD_HOME)/uhal/grammars
-UHAL_GRAMMARS_INCLUDE_PREFIX = ${UHAL_GRAMMARS_PREFIX}/include
-UHAL_GRAMMARS_LIB_PREFIX = ${UHAL_GRAMMARS_PREFIX}/lib
-
-# uhal/log
-UHAL_LOG_PREFIX = $(BUILD_HOME)/uhal/log
-UHAL_LOG_INCLUDE_PREFIX = ${UHAL_LOG_PREFIX}/include
-UHAL_LOG_LIB_PREFIX = ${UHAL_LOG_PREFIX}/lib
-
-# uhal/uhal
-UHAL_UHAL_PREFIX = $(BUILD_HOME)/uhal/uhal
-UHAL_UHAL_INCLUDE_PREFIX = ${UHAL_UHAL_PREFIX}/include
-UHAL_UHAL_LIB_PREFIX = ${UHAL_UHAL_PREFIX}/lib
-
-# uhal/uhal
-UHAL_TESTS_PREFIX = $(BUILD_HOME)/uhal/tests
-UHAL_TESTS_INCLUDE_PREFIX = ${UHAL_TESTS_PREFIX}/include
-UHAL_TESTS_LIB_PREFIX = ${UHAL_TESTS_PREFIX}/lib
-
-# Python include path  
-PYTHON_INCLUDE_PREFIX ?= $(shell python -c "import distutils.sysconfig; print distutils.sysconfig.get_python_inc()")
-PYTHON_LIB_PREFIX ?= $(shell python -c "from distutils.sysconfig import get_python_lib; import os.path; print os.path.split(get_python_lib(standard_lib=True))[0]")

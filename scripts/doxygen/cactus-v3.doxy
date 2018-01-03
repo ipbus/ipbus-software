@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = $(DOXYGEN_PROJECT_NAME)
 # PROJECT_NUMBER         = "Nightly build"
-PROJECT_BRIEF          = "Part of the CACTUS repository" 
+PROJECT_BRIEF          = "Part of the IPbus software repository"
 PROJECT_LOGO           = $(DOXYGEN_PROJECT_LOGO)
 OUTPUT_DIRECTORY       = $(DOXYGEN_OUTPUT)
 CREATE_SUBDIRS         = YES

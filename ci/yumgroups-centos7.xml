@@ -4,7 +4,7 @@
     <id>ipbus-sw</id>
     <name>uhal</name>
     <default>true</default>
-    <description>uHAL packages of the CACTUS YUM repository</description>
+    <description>uHAL and ControlHub packages (IPbus software)</description>
     <uservisible>true</uservisible>
     <grouplist></grouplist>
     <packagelist>

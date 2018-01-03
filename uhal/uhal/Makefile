@@ -23,15 +23,15 @@ Library = cactus_uhal_uhal
 
 
 IncludePaths = include  \
-		${UHAL_GRAMMARS_INCLUDE_PREFIX} \
-		${UHAL_LOG_INCLUDE_PREFIX} \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
-		${EXTERN_PUGIXML_INCLUDE_PREFIX} 
+		${EXTERN_PUGIXML_INCLUDE_PREFIX} \
+		${BUILD_HOME}/uhal/log/include \
+		${BUILD_HOME}/uhal/grammars/include
 
 LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX} \
 		${EXTERN_PUGIXML_LIB_PREFIX} \
-		${UHAL_GRAMMARS_LIB_PREFIX} \
-		${UHAL_LOG_LIB_PREFIX}
+		${BUILD_HOME}/uhal/log/lib \
+		${BUILD_HOME}/uhal/grammars/lib
 
 Libraries = pthread \
 		\

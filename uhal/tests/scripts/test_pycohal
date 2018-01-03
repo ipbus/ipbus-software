@@ -2,7 +2,7 @@
 
 """
 Usage: test_pycohal -c <connections xml file> [-v] [other options for unittest module]
-Executes the CACTUS pycohal tests.
+Executes the tests of the Python bindings of uHAL (pycohal)
 
 Mandatory option:
    -c, --connections-file    Connections xml file used in tests
