@@ -157,8 +157,8 @@ install:
 	mkdir -p /var/log/controlhub
 	touch /var/log/controlhub/controlhub.log
 	chmod 644 /var/log/controlhub/controlhub.log
-ifeq (,$(shell command -v service))
-	$(warning 'service' command not detected! After the installation has finished, you should restart rsyslog to ensure that the ControlHub syslog config is loaded)
+ifeq (,$(shell /bin/bash -c "command -v service"))
+	@echo " WARNING : 'service' command not detected! After the installation has finished, you should restart rsyslog to ensure that the ControlHub syslog config is loaded"
 else
 	service rsyslog restart
 endif
