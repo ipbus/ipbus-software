@@ -6,9 +6,8 @@ Name: %{name}
 Summary: IPbus packet-router
 Version: %{version}
 Release: %{release}
-License: BSD License
-URL: http://www.erlang.org/
-Group: CACTUS
+License: GPLv3
+URL: https://ipbus.web.cern.ch/ipbus
 Source: %{tarball_file}
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: psmisc rsyslog logrotate

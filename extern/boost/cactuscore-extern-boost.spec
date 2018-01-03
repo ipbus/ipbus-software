@@ -7,7 +7,6 @@ Release: %{release}
 Packager: %{packager}
 Summary: Boost Library packaged for the CACTUS project
 License: Boost Software License
-Group: CACTUS
 Source: %{tarball_file}
 URL:  http://www.boost.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot 

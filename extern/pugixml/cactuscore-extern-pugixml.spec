@@ -7,7 +7,6 @@ Release: %{release}
 Packager: %{packager}
 Summary: PugiXML - Light-weight, simple and fast XML parser for C++ with XPath support 
 License: MIT License
-Group: CACTUS
 Source: %{zip_file}
 URL:  http://pugixml.org/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot 
