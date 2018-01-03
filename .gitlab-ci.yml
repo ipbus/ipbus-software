@@ -201,6 +201,19 @@ publish_build_job:
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
 
 
+.job_template: &fedora26_test_job
+  stage: test
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2017-11-04__erlang19.3.6.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  except:
+    - triggers
+  dependencies:
+    - build:fedora26
+  before_script:
+    - sudo make -k Set=all install
+    - ls -al /opt/cactus /opt/cactus/*
+    - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
+
+
 .job_template: &ubuntu16_test_job
   stage: test
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
@@ -317,6 +330,36 @@ test_tools:centos7:
 
 test_controlhub:centos7:
   <<: *centos7_test_job
+  tags:
+    - docker
+  script:
+    - /opt/cactus/bin/controlhub_stop || true
+    - env | grep -v PASSWORD | grep -v TOKEN
+    - 'for i in `seq 1 50`; do /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /opt/cactus/bin/controlhub_stop; done'
+
+
+
+test_core:fedora26:
+  <<: *fedora26_test_job
+  tags:
+    - docker
+    - docker-cap-net-admin
+  script: *test_core_script
+
+test_python:fedora26:
+  <<: *fedora26_test_job
+  tags:
+    - docker
+  script: *test_python_script
+
+test_tools:fedora26:
+  <<: *fedora26_test_job
+  tags:
+    - docker
+  script: *test_tools_script
+
+test_controlhub:fedora26:
+  <<: *fedora26_test_job
   tags:
     - docker
   script:
