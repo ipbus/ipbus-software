@@ -86,7 +86,7 @@ doxygen_job:
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - make -k Set=all
-    - make -k Set=all install
+    - sudo make -k Set=all install
   artifacts:
     paths:
       - /opt/cactus
