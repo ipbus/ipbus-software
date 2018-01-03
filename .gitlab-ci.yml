@@ -77,7 +77,7 @@ doxygen_job:
 
 
 
-.job_template: &simple_build_test_job
+.job_template: &build_install_job
   stage: build
   tags:
     - docker
@@ -86,10 +86,13 @@ doxygen_job:
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - make -k Set=all
-    - source uhal/tests/setup.sh
-    - python uhal/tests/scripts/uhal_test_suite.py -v -c uhal/tests/etc/uhal/tests/dummy_connections.xml -s "2.0 udp"
-    - python uhal/tests/scripts/uhal_test_suite.py -v -c uhal/tests/etc/uhal/tests/dummy_connections.xml -s "pycohal"
-    - python uhal/tests/scripts/uhal_test_suite.py -v -c uhal/tests/etc/uhal/tests/dummy_connections.xml -s "2.0 controlhub - normal"
+    - make -k Set=all install
+  artifacts:
+    paths:
+      - /opt/cactus
+    when: always
+    expire_in: 1 day
+
 
 
 .job_template: &build_rpm_yumrepo_job
@@ -134,14 +137,14 @@ build:centos7:
 
 
 build:fedora26:
-  <<: *simple_build_test_job
+  <<: *build_install_job
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2017-11-04__erlang19.3.6.3_gcc7.1.1_boost1.63.0_pugixml1.8
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "fedora26_x86_64"
 
 build:ubuntu16:
-  <<: *simple_build_test_job
+  <<: *build_install_job
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
 
 
@@ -198,6 +201,18 @@ publish_build_job:
     - sudo yum -y groupinstall uhal
     - rpm -qa | grep cactus | sort
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
+
+
+.job_template: &ubuntu16_test_job
+  stage: test
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  except:
+    - triggers
+  dependencies:
+    - build:ubuntu16
+  before_script:
+    - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
+
 
 
 .job_template:
@@ -304,7 +319,43 @@ test_controlhub:centos7:
   <<: *centos7_test_job
   tags:
     - docker
-  script: 
+  script:
+    - /opt/cactus/bin/controlhub_stop || true
+    - env | grep -v PASSWORD | grep -v TOKEN
+    - 'for i in `seq 1 50`; do /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /opt/cactus/bin/controlhub_stop; done'
+
+
+
+test_core:ubuntu16:
+  <<: *ubuntu16_test_job
+  tags:
+    - docker
+    - docker-cap-net-admin
+  script: *test_core_script
+
+test_python:ubuntu16:
+  <<: *ubuntu16_test_job
+  tags:
+    - docker
+  script: *test_python_script
+
+test_gui:ubuntu16:
+  <<: *ubuntu16_test_job
+  tags:
+    - docker
+  script: *test_gui_script
+
+test_tools:ubuntu16:
+  <<: *ubuntu16_test_job
+  tags:
+    - docker
+  script: *test_tools_script
+
+test_controlhub:ubuntu16:
+  <<: *ubuntu16_test_job
+  tags:
+    - docker
+  script:
     - /opt/cactus/bin/controlhub_stop || true
     - env | grep -v PASSWORD | grep -v TOKEN
     - 'for i in `seq 1 50`; do /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /opt/cactus/bin/controlhub_stop; done'
