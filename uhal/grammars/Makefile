@@ -40,3 +40,4 @@ endif
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
 include $(BUILD_HOME)/uhal/config/mfRPMRules.mk
+include $(BUILD_HOME)/uhal/config/mfInstallRules.mk
