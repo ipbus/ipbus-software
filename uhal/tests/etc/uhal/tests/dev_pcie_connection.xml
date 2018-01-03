@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<connections>
-
-  <!-- PCIe -->
-  <connection id="xbmd" uri="pcie-2.0://dummy:dummy/dev/xbmd"	address_table="file://dummy_address.xml" />
-  
-</connections>
-

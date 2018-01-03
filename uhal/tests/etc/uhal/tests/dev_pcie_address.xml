@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
-<node>
-  <node id="REG"       address="0x1" permission="rw"/>
-  <node id="LARGE_MEM" address="0x2"  permission="rw" mode="incremental" size="26214400"/>
-</node>
