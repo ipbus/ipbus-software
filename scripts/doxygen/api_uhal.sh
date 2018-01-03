@@ -56,7 +56,7 @@ rm -rf ${DOXYGEN_OUTPUT}/html
 
 
 # 3. Main command
-${DOXYGEN_BIN} ${REPO_BASE_DIR}/scripts/doxygen/cactus-v3.doxy
+${DOXYGEN_BIN} ${REPO_BASE_DIR}/scripts/doxygen/ipbus-sw.doxy
 
 
 # 4. Copy output to ${TARGET_DOXY_DIR} if specified
