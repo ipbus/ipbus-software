@@ -35,7 +35,7 @@ LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX} \
 
 Libraries = pthread \
 		\
-		${PUGIXML_LIB_NAME} \
+		pugixml \
 		\
 		boost_thread \
 		boost_filesystem \

@@ -43,7 +43,7 @@ Libraries = \
 		cactus_uhal_uhal \
 		cactus_uhal_log \
 		cactus_uhal_grammars \
-		${PUGIXML_LIB_NAME} \
+		pugixml \
 		\
 		boost_filesystem \
 		boost_python \
