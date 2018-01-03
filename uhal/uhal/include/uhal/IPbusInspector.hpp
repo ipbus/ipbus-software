@@ -122,6 +122,12 @@ namespace uhal
       virtual void read ( const uint32_t& aAddress );
 
       /**
+        Virtual callback function called when an incrementing "configuration space" read is observed
+        @param aAddress the base address of the read
+      */
+      virtual void readConfigurationSpace ( const uint32_t& aAddress );
+
+      /**
         Virtual callback function called when a non-incrementing write is observed
         @param aAddress the base address of the write
         @param aIt iterator to the start of the payload

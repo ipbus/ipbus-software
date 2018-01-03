@@ -109,9 +109,8 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_write_read, DummyHar
   BOOST_CHECK ( mem.valid() );
   BOOST_CHECK_EQUAL ( mem.size(), N );
   bool correct_block_write_read = true;
-  ValVector< uint32_t >::const_iterator i=mem.begin();
-  std::vector< uint32_t >::const_iterator j=xx.begin();
 
+  std::vector< uint32_t >::const_iterator j=xx.begin();
   for ( ValVector< uint32_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
   {
     correct_block_write_read = correct_block_write_read && ( *i == *j );
