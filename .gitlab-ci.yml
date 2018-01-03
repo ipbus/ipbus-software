@@ -86,10 +86,8 @@ doxygen_job:
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
     - make -k Set=all
-    - sudo make -k Set=all install
   artifacts:
-    paths:
-      - /opt/cactus
+    untracked: true
     when: always
     expire_in: 1 day
 
@@ -211,6 +209,8 @@ publish_build_job:
   dependencies:
     - build:ubuntu16
   before_script:
+    - sudo make -k Set=all install
+    - ls -al /opt/cactus /opt/cactus/*
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
 
 
