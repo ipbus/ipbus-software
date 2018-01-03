@@ -339,12 +339,6 @@ test_python:ubuntu16:
     - docker
   script: *test_python_script
 
-test_gui:ubuntu16:
-  <<: *ubuntu16_test_job
-  tags:
-    - docker
-  script: *test_gui_script
-
 test_tools:ubuntu16:
   <<: *ubuntu16_test_job
   tags:
