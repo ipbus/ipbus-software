@@ -20,7 +20,7 @@ PackagerEmail = tom.williams@cern.ch
 
 
 PythonModules = ["uhal"]
-LibraryTarget = pkg/uhal/_core.so
+LibraryFile = pkg/uhal/_core.so
 
 
 IncludePaths = include  \

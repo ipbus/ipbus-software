@@ -20,6 +20,7 @@ Packager = Andrew Rose, Tom Williams
 
 
 Library = cactus_uhal_log
+LIBRARY_VER_ABI = $(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR)
 
 
 USE_BACKTRACE ?= FALSE
@@ -79,7 +80,7 @@ GENERATED_HEADERS = ${PackagePath}/include/uhal/log/log.hpp ${PackagePath}/inclu
 GENERATED_FILES = ${GENERATED_HEADERS} ${PackagePath}/src/common/log.cpp
 
 ${LibraryObjectFiles} : ${GENERATED_HEADERS}
-${LibraryTarget} : ${PackagePath}/obj/log.o
+${LibraryFile} : ${PackagePath}/obj/log.o
 LibraryObjectFiles += ${PackagePath}/obj/log.o
 
 ${GENERATOR_EXE} : ${GENERATOR_OBJ}

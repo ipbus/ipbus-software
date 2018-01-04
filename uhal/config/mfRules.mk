@@ -37,9 +37,16 @@ ExecutableDependentLibraries += $(addprefix -l,${ExecutableLibraries})
 
 
 ifeq ("${Library}","")
-  LibraryTarget ?=
+  LibraryFile ?=
 else
-  LibraryTarget ?= lib/lib${Library}.so
+  ifeq ("${LIBRARY_VER_ABI}","")
+    LibraryFile ?= lib/lib${Library}.so
+  else
+    LDFLAGS_SONAME ?= -Wl,-soname,lib${Library}.so.${LIBRARY_VER_ABI}
+    LibraryFile ?= lib/lib${Library}.so.${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}
+    LibraryLinkSONAME ?= lib/lib${Library}.so.${LIBRARY_VER_ABI}
+    LibraryLinkPlain ?= lib/lib${Library}.so
+  endif
 endif
 
 .PHONY: default
@@ -50,13 +57,13 @@ clean: _cleanall
 _cleanall:
 	rm -rf obj
 	rm -rf bin
-	rm -rf lib ${LibraryTarget}
+	rm -rf lib ${LibraryFile} ${LibraryLink}
 
 .PHONY: all _all build buildall
 all: _all
 build: _all
 buildall: _all
-_all: ${LibraryTarget} ${Executables} ${ExtraTargets}
+_all: ${LibraryFile} ${Executables} ${ExtraTargets}
 
 .PHONY: objects
 objects: ${LibraryObjectFiles} ${ExecutableObjectFiles}
@@ -75,14 +82,20 @@ ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | $$(dir ${PackagePath
 	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 	
 # Main target: shared library
-${LibraryTarget}: ${LibraryObjectFiles}  | ${PackagePath}/lib
-	${LD} -shared ${LDFLAGS} ${LibraryObjectFiles} ${DependentLibraries} -o $@
+${LibraryFile}: ${LibraryObjectFiles}  | ${PackagePath}/lib
+	${LD} -shared ${LDFLAGS_SONAME} ${LDFLAGS} ${LibraryObjectFiles} ${DependentLibraries} -o $@
+ifneq ("${LibraryLinkSONAME}","")
+	ln -s ${PackagePath}/${LibraryFile} ${LibraryLinkSONAME}
+ifneq ("${LibraryLinkPlain}", "")
+	ln -s ${PackagePath}/${LibraryLinkSONAME} ${LibraryLinkPlain}
+endif
+endif
 
 # Include automatically generated dependencies
 -include $(LibraryObjectFiles:.o=.d)
 	
 # Static Pattern rule for binaries
-${Executables} : ${PackagePath}/bin/%.exe : ${PackagePath}/obj/%.o ${LibraryTarget}  | ${PackagePath}/bin
+${Executables} : ${PackagePath}/bin/%.exe : ${PackagePath}/obj/%.o ${LibraryFile}  | ${PackagePath}/bin
 	${LD} ${LDFLAGS} $< ${ExecutableDependentLibraries} -o $@
 
 # Include automatically generated dependencies
