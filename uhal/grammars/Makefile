@@ -24,9 +24,9 @@ Library = cactus_uhal_grammars
 
 IncludePaths = include  \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
-		${UHAL_LOG_INCLUDE_PREFIX}
+		${BUILD_HOME}/uhal/log/include
 
-LibraryPaths = ${UHAL_LOG_LIB_PREFIX}	
+LibraryPaths = ${BUILD_HOME}/uhal/log/lib
 
 Libraries = 
 
@@ -40,3 +40,4 @@ endif
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
 include $(BUILD_HOME)/uhal/config/mfRPMRules.mk
+include $(BUILD_HOME)/uhal/config/mfInstallRules.mk

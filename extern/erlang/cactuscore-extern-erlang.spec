@@ -8,7 +8,6 @@ Version: %{version}
 Release: %{release}
 License: Erlang Public License (EPL) 
 URL: http://www.erlang.org/
-Group: CACTUS 
 Source: %{tarball_file}
 Requires: gcc gcc-c++ ncurses-devel
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot 

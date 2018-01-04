@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 """
 Usage: uhal_test_suite.py [-v] [-l] [-c <path to xml connections file>] [-s <search string for sections to run>]
 
@@ -344,8 +344,8 @@ if __name__=="__main__":
     print '  ControlHub scripts dir: ', controlhub_scripts_dir
 
     # Get uhal tools template file name
-    which_gen_ipbus_addr_decode = run_command("which gen_ipbus_addr_decode", False)[0][0].rstrip('\n')
-    uhal_tools_dir = os.path.dirname ( which_gen_ipbus_addr_decode )
+    which_gen_ipbus_addr_decode = run_command("which gen_ipbus_addr_decode", False)
+    uhal_tools_dir = "/opt/cactus/bin/uhal/tools" if which_gen_ipbus_addr_decode[1] else os.path.dirname ( which_gen_ipbus_addr_decode[0][0].rstrip('\n') )
     if uhal_tools_dir.endswith("bin/uhal/tools"): # RPM-installed code
         uhal_tools_dir = uhal_tools_dir[:-14]
     else: # Checked-out code

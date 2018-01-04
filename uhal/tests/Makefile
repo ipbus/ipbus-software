@@ -24,17 +24,17 @@ Library = cactus_uhal_tests
 
 
 IncludePaths = include  \
-		${UHAL_LOG_INCLUDE_PREFIX} \
-		${UHAL_GRAMMARS_INCLUDE_PREFIX} \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
 		${EXTERN_PUGIXML_INCLUDE_PREFIX} \
-		${UHAL_UHAL_INCLUDE_PREFIX}
+		${BUILD_HOME}/uhal/log/include \
+		${BUILD_HOME}/uhal/grammars/include \
+		${BUILD_HOME}/uhal/uhal/include
 
 LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX} \
 		${EXTERN_PUGIXML_LIB_PREFIX} \
-		${UHAL_LOG_LIB_PREFIX} \
-		${UHAL_GRAMMARS_LIB_PREFIX} \
-		${UHAL_UHAL_LIB_PREFIX} \
+		${BUILD_HOME}/uhal/log/lib \
+		${BUILD_HOME}/uhal/grammars/lib \
+		${BUILD_HOME}/uhal/uhal/lib \
 		lib 
 
 Libraries = \
@@ -56,7 +56,7 @@ ExecutableLibraries = \
 		boost_chrono \
 		boost_regex \
 		boost_system \
-		${PUGIXML_LIB_NAME}
+		pugixml
 
 
 # Hide c++11-extensions warning when building on osx
@@ -68,3 +68,4 @@ endif
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
 include $(BUILD_HOME)/uhal/config/mfRPMRules.mk
+include $(BUILD_HOME)/uhal/config/mfInstallRules.mk

@@ -12,4 +12,4 @@ For development purposes, this documentation contains all classes that form part
 * `uhal::Node`
 * `uhal::ValHeader` , `uhal::ValWord` , `uhal::ValVector<uint32_t>`
 
-**Before looking at these doxygen pages**, please read the uHAL quick tutorial [here](https://svnweb.cern.ch/trac/cactus/wiki/uhalQuickTutorial) for an overall summary of how to use uHAL, and how to write address/connection files.
+**Before looking at these doxygen pages**, please read the uHAL quick tutorial [here](https://ipbus.web.cern.ch/ipbus/doc/user/html/software/uhalQuickTutorial.html) for an overall summary of how to use uHAL, and how to write address/connection files.

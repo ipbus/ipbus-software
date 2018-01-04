@@ -28,7 +28,6 @@ Release: %{_release}
 Packager: %{_author}
 Summary: %{_summary}
 License: GPLv3
-Group: CACTUS
 Source: %{_source}
 URL: %{_url} 
 BuildArch: 
@@ -49,7 +48,6 @@ __description__
 %if %{defined _build_debuginfo_package}
 %package -n %{_packagename}-debuginfo
 Summary:  Debuginfo package for %{_summary}
-Group:    Applications/XDAQ
 
 %description -n %{_packagename}-debuginfo
 __description__

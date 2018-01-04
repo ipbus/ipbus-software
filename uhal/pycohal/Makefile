@@ -13,7 +13,7 @@ PACKAGE_VER_MINOR = 5
 PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
-PackageDescription = Python bindings for the CACTUS uhal library
+PackageDescription = Python bindings for the uHAL library
 PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Tom Williams
 PackagerEmail = tom.williams@cern.ch
@@ -25,25 +25,25 @@ LibraryTarget = pkg/uhal/_core.so
 
 IncludePaths = include  \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
+		${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		${PYTHON_INCLUDE_PREFIX} \
-		${EXTERN_PUGIXML_INCLUDE_PREFIX}  \
-		${UHAL_UHAL_INCLUDE_PREFIX}  \
-		${UHAL_LOG_INCLUDE_PREFIX}  \
-		${UHAL_GRAMMARS_INCLUDE_PREFIX}
+		${BUILD_HOME}/uhal/log/include  \
+		${BUILD_HOME}/uhal/grammars/include \
+		${BUILD_HOME}/uhal/uhal/include
 
 LibraryPaths = \
 		${EXTERN_BOOST_LIB_PREFIX} \
 		${EXTERN_PUGIXML_LIB_PREFIX} \
-		${UHAL_UHAL_LIB_PREFIX} \
-		${UHAL_LOG_LIB_PREFIX} \
-		${UHAL_GRAMMARS_LIB_PREFIX} \
-		${PYTHON_LIB_PREFIX}
+		${PYTHON_LIB_PREFIX} \
+		${BUILD_HOME}/uhal/log/lib \
+		${BUILD_HOME}/uhal/grammars/lib \
+		${BUILD_HOME}/uhal/uhal/lib
 
 Libraries = \
 		cactus_uhal_uhal \
 		cactus_uhal_log \
 		cactus_uhal_grammars \
-		${PUGIXML_LIB_NAME} \
+		pugixml \
 		\
 		boost_filesystem \
 		boost_python \

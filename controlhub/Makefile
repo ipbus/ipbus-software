@@ -37,7 +37,7 @@ PACKAGE_VER_PATCH = 1
 # This is the version number for the RPM packaging.
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
-RPMBUILD_DIR = ${PackagePath}/RPMBUILD
+RPMBUILD_DIR = ${PackagePath}/rpm/RPMBUILD
 RPMBUILD_SOURCES_DIR = ${RPMBUILD_DIR}/SOURCES
 
 ####################  Define path to erlang runtime and compiler  ####################
@@ -53,7 +53,7 @@ ifeq ($(BUILD_ERLANG), 1)
 endif
 ######################################################################################
 
-.PHONY: all _all clean  _cleanall build _buildall rpm _rpmall _erlang
+.PHONY: all _all clean  _cleanall build _buildall cleanrpm rpm _rpmall uninstall install _erlang
 
 default: build
 
@@ -71,9 +71,9 @@ endif
 
 
 ifeq (${CACTUS_OS}, centos7)
-RPMSPEC_SNIPPET_OS_TAG=rhel7
+    RPMSPEC_SNIPPET_OS_TAG=rhel7
 else
-RPMSPEC_SNIPPET_OS_TAG=rhelLeq6
+    RPMSPEC_SNIPPET_OS_TAG=rhelLeq6
 endif
 
 rpm: _rpmall
@@ -102,7 +102,10 @@ endif
 		--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}" \
 		--define "packager ${Packager}" \
 		${PackageName}.spec
+	find  ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} $(PackagePath)/rpm \;
 
+cleanrpm:
+	-rm -r rpm
 
 
 clean: _cleanall
@@ -131,3 +134,36 @@ erlang/.build_done:
         rm -rf ${ERL_TARBALL_DIR};                \
         date > ${ERL_TARGET_DIR}/.build_done;
 
+
+
+# Installation directories for all types of files (following GNU naming convention)
+prefix = /opt/cactus
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+includedir = $(prefix)/include
+sysconfdir = $(prefix)/etc
+
+install:
+	cd scripts; find . -name "controlhub_*" -exec install -D -m 755 {} $(bindir)/{} \;
+	mkdir -p $(libdir) && cp -r rel/controlhub $(libdir)/
+	install -D -m 644 pkg/rsyslog.d.conf /etc/rsyslog.d/controlhub.conf
+	install -D -m 644 pkg/logrotate.d.conf /etc/logrotate.d/controlhub.conf
+
+	mv $(libdir)/controlhub/controlhub.config /etc/controlhub.config
+	sed -i "s|\"controlhub.config\"|\"/etc/controlhub.config\"|" $(libdir)/controlhub/releases/*/sys.config
+	sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=$(libdir)/controlhub/bin|" $(bindir)/controlhub_*
+
+	mkdir -p /var/log/controlhub
+	touch /var/log/controlhub/controlhub.log
+	chmod 644 /var/log/controlhub/controlhub.log
+ifeq (,$(shell /bin/bash -c "command -v service"))
+	@echo " WARNING : 'service' command not detected! After the installation has finished, you should restart rsyslog to ensure that the ControlHub syslog config is loaded"
+else
+	service rsyslog restart
+endif
+
+uninstall:
+	rm -rf $(bindir)/controlhub*
+	rm -rf $(libdir)/controlhub
+	rm -rf /etc/rsyslog.d/controlhub.conf /etc/logrotate.d/controlhub.conf /etc/controlhub.config
