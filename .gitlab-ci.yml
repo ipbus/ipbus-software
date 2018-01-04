@@ -211,6 +211,7 @@ publish_build_job:
   before_script:
     - sudo make -k Set=all install
     - ls -al /opt/cactus /opt/cactus/*
+    - sudo yum -y install iproute-tc
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
 
 
