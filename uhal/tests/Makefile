@@ -21,6 +21,7 @@ PackageRequires = which iproute
 
 
 Library = cactus_uhal_tests
+LIBRARY_VER_ABI = $(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR)
 
 
 IncludePaths = include  \

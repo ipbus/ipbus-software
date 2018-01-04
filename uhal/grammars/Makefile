@@ -20,6 +20,7 @@ Packager = Andrew Rose, Tom Williams
 
 
 Library = cactus_uhal_grammars
+LIBRARY_VER_ABI = $(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR)
 
 
 IncludePaths = include  \
