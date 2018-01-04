@@ -44,6 +44,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include <boost/thread/thread.hpp>
 
@@ -311,12 +312,17 @@ void PCIe::dmaRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNr
   /* select AXI MM address */
   char* buffer = allocated;
   off_t off = lseek(aFileDescriptor, 4*aAddr, SEEK_SET);
+  if ( off != (4 * aAddr)) {
+    exception::PCIeCommunicationError lExc;
+    log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(4*aAddr), " (in preparation for read of ", Integer(aNrWords), " words)");
+    throw lExc;
+  }
 
   /* read data from AXI MM into buffer using SGDMA */
   int rc = ::read(aFileDescriptor, buffer, 4*aNrWords);
   assert(rc >= 0);
   assert((rc % 4) == 0);
-  if ((rc > 0) && (rc < 4*aNrWords)) {
+  if ((rc > 0) && (size_t(rc) < 4*aNrWords)) {
     std::cout << "Short read of " << rc << " bytes into a " << 4*aNrWords << " bytes buffer, could be a packet read?\n";
   }
 
@@ -353,10 +359,18 @@ bool PCIe::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* co
 
   /* select AXI MM address */
   off_t off = lseek(aFileDescriptor, aAddr, SEEK_SET);
+  if ( off != aAddr) {
+    struct stat st;
+    if (fstat(aFileDescriptor, &st) or (not S_ISFIFO(st.st_mode))) {
+      exception::PCIeCommunicationError lExc;
+      log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(aAddr), " (in preparation for write of ", Integer(aNrBytes), " bytes)");
+      throw lExc;
+    }
+  }
 
   /* write buffer to AXI MM address using SGDMA */
   int rc = ::write(aFileDescriptor, buffer, aNrBytes);
-  assert(rc == aNrBytes);
+  assert((rc > 0) && (size_t(rc) == aNrBytes));
 
   free(allocated);
 
@@ -386,10 +400,18 @@ bool PCIe::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector
 
   /* select AXI MM address */
   off_t off = lseek(aFileDescriptor, aAddr, SEEK_SET);
+  if ( off != aAddr) {
+    struct stat st;
+    if (fstat(aFileDescriptor, &st) or (not S_ISFIFO(st.st_mode))) {
+      exception::PCIeCommunicationError lExc;
+      log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(aAddr), " (in preparation for write of ", Integer(lNrBytes), " bytes)");
+      throw lExc;
+    }
+  }
 
   /* write buffer to AXI MM address using SGDMA */
   int rc = ::write(aFileDescriptor, buffer, lNrBytes);
-  assert(rc == lNrBytes);
+  assert((rc > 0) && (size_t(rc) == lNrBytes));
 
   free(allocated);
 
