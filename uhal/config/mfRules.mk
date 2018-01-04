@@ -57,7 +57,7 @@ clean: _cleanall
 _cleanall:
 	rm -rf obj
 	rm -rf bin
-	rm -rf lib ${LibraryFile} ${LibraryLink}
+	rm -rf lib ${LibraryFile} ${LibraryLinkSONAME} ${LibraryLinkPlain}
 
 .PHONY: all _all build buildall
 all: _all
@@ -85,9 +85,9 @@ ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | $$(dir ${PackagePath
 ${LibraryFile}: ${LibraryObjectFiles}  | ${PackagePath}/lib
 	${LD} -shared ${LDFLAGS_SONAME} ${LDFLAGS} ${LibraryObjectFiles} ${DependentLibraries} -o $@
 ifneq ("${LibraryLinkSONAME}","")
-	ln -s ${PackagePath}/${LibraryFile} ${LibraryLinkSONAME}
+	ln -s -f ${PackagePath}/${LibraryFile} ${LibraryLinkSONAME}
 ifneq ("${LibraryLinkPlain}", "")
-	ln -s ${PackagePath}/${LibraryLinkSONAME} ${LibraryLinkPlain}
+	ln -s -f ${PackagePath}/${LibraryLinkSONAME} ${LibraryLinkPlain}
 endif
 endif
 
