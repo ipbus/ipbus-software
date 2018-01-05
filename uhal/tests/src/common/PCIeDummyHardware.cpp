@@ -44,6 +44,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "uhal/ProtocolPCIe.hpp"
+
 
 namespace uhal {
 namespace tests {
@@ -188,6 +190,11 @@ void PCIeDummyHardware::dmaRead(int aFileDescriptor, const uint32_t aAddr, const
   /* select AXI MM address */
   char* buffer = allocated;
   off_t off = lseek(aFileDescriptor, 4*aAddr, SEEK_SET);
+  if ( off != 4*aAddr) {
+    exception::PCIeCommunicationError lExc;
+    log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(4*aAddr), " (in preparation for read of ", Integer(aNrWords), " words)");
+    throw lExc;
+  }
 
   /* read data from AXI MM into buffer using SGDMA */
   int rc = ::read(aFileDescriptor, buffer, 4*aNrWords);
@@ -195,7 +202,7 @@ void PCIeDummyHardware::dmaRead(int aFileDescriptor, const uint32_t aAddr, const
   if ((rc % 4) != 0)
     log(Fatal(), "PCIeDummyHardware::dmaRead  -  rc = ", Integer(rc));
   assert((rc % 4) == 0);
-  if ((rc > 0) && (rc < 4*aNrWords)) {
+  if ((rc > 0) && (size_t(rc) < 4*aNrWords)) {
     std::cout << "Short read of " << rc << " bytes into a " << 4*aNrWords << " bytes buffer, could be a packet read?\n";
   }
 
@@ -221,11 +228,19 @@ void PCIeDummyHardware::dmaBlockingRead(int aFileDescriptor, const uint32_t aAdd
   /* select AXI MM address */
   char* buffer = allocated;
   off_t off = lseek(aFileDescriptor, 4*aAddr, SEEK_SET);
+  if ( off != 4*aAddr) {
+    struct stat st;
+    if (fstat(aFileDescriptor, &st) or (not S_ISFIFO(st.st_mode))) {
+      exception::PCIeCommunicationError lExc;
+      log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(4*aAddr), " (in preparation for blocking read of ", Integer(aNrWords), " words)");
+      throw lExc;
+    }
+  }
 
   memset(buffer, 0, 4 * aNrWords);
 
   /* read data from AXI MM into buffer using SGDMA */
-  int lNrBytesRead = 0;
+  size_t lNrBytesRead = 0;
   do {
     if (lNrBytesRead != 0)
       log (Fatal(), "dmaBlockingRead calling ::read multiple times to get all expected ", Integer(aNrWords * 4), " bytes (only ", Integer(lNrBytesRead), " so far)");
@@ -280,10 +295,15 @@ bool PCIeDummyHardware::dmaWrite(int aFileDescriptor, const uint32_t aAddr, cons
 
   /* select AXI MM address */
   off_t off = lseek(aFileDescriptor, 4*aAddr, SEEK_SET);
+  if ( off != 4*aAddr) {
+    exception::PCIeCommunicationError lExc;
+    log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(4*aAddr), " (in preparation for write of ", Integer(aNrBytes), " bytes)");
+    throw lExc;
+  }
 
   /* write buffer to AXI MM address using SGDMA */
   int rc = ::write(aFileDescriptor, buffer, aNrBytes);
-  assert(rc == aNrBytes);
+  assert((rc >= 0) && (size_t(rc) == aNrBytes));
 
   free(allocated);
 

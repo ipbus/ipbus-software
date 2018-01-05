@@ -63,6 +63,8 @@ namespace uhal
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeTimeout , ClientTimeout , "Exception class to handle the case in which the PCIe connection timed out." )
     //! Exception class to handle a failure to read from the specified device files during initialisation
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeInitialisationError , TransportLayerError , "Exception class to handle a failure to read from the specified device files during initialisation." )
+    //! Exception class to handle a low-level seek/read/write error after initialisation
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeCommunicationError , TransportLayerError , "Exception class to handle a low-level seek/read/write error after initialisation." )
   }
 
   //! Transport protocol to transfer an IPbus buffer via PCIe

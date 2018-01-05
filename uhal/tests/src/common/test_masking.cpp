@@ -59,8 +59,8 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MaskedNodeTestSuite, write_read_masked, Dumm
   hw.getNode ( "REG_UPPER_MASK" ).write ( x >> 16 );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_LOWER_MASK" ).write ( 0x1FFFF ),uhal::exception::exception );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_UPPER_MASK" ).write ( 0x1FFFF ),uhal::exception::exception );
-  BOOST_CHECK_EQUAL ( hw.getNode ( "REG_LOWER_MASK" ).getMask(), 0xFFFF );
-  BOOST_CHECK_EQUAL ( hw.getNode ( "REG_UPPER_MASK" ).getMask(), 0xFFFF0000 );
+  BOOST_CHECK_EQUAL ( hw.getNode ( "REG_LOWER_MASK" ).getMask(), 0xFFFFu );
+  BOOST_CHECK_EQUAL ( hw.getNode ( "REG_UPPER_MASK" ).getMask(), 0xFFFF0000u );
   ValWord<uint32_t> reg_l = hw.getNode ( "REG_LOWER_MASK" ).read();
   ValWord<uint32_t> reg_u = hw.getNode ( "REG_UPPER_MASK" ).read();
   BOOST_CHECK ( !reg_l.valid() && !reg_u.valid() );
