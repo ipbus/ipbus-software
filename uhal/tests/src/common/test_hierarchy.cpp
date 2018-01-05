@@ -45,7 +45,7 @@
 #include <typeinfo>
 
 
-#define N_1MB    1024*1024/4
+#define N_1MB    uint32_t(1024*1024/4)
 
 
 namespace uhal {

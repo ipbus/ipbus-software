@@ -54,7 +54,7 @@
 
 #define N_THREADS     5
 #define N_ITERATIONS  5
-#define N_SIZE        10*1024/4
+#define N_SIZE        uint32_t(10*1024/4)
 #define TIMEOUT_S     50
 
 
