@@ -86,7 +86,9 @@ LibraryObjectFiles += ${PackagePath}/obj/log.o
 ${GENERATOR_EXE} : ${GENERATOR_OBJ}
 	${LD} ${LDFLAGS} $< -o $@
 
-${GENERATED_FILES} : ${GENERATOR_EXE}
+.PHONY: _generate_log_source_code
+${GENERATED_FILES} : _generate_log_source_code
+_generate_log_source_code : ${GENERATOR_EXE}
 	./generator.exe
 
 .PHONY: _generator_clean

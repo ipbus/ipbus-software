@@ -1,3 +1,7 @@
+
+.NOTPARALLEL:
+
+
 PACKAGES = \
 	log \
 	grammars \
