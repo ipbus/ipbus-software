@@ -1,5 +1,5 @@
 .rebar/
-RPMBUILD/
+rpm/
 cactuscore-controlhub.spec
 deps/
 ebin/*.beam

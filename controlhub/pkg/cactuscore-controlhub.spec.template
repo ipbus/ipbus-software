@@ -27,7 +27,7 @@ IPbus packet-router
 
 # Make directories
 mkdir -p $RPM_BUILD_ROOT%{_prefix}/{bin,lib}
-mkdir -p $RPM_BUILD_ROOT/etc/{rsyslog.d,logrotate.d}
+mkdir -p $RPM_BUILD_ROOT/etc/{rsyslog.d,logrotate.d,controlhub/default}
 mkdir -p $RPM_BUILD_ROOT/var/log/controlhub
 
 # Copy over files
@@ -36,9 +36,11 @@ cp -rp %{sources_dir}/lib/* $RPM_BUILD_ROOT%{_prefix}/lib/.
 cp -rp %{sources_dir}/rsyslog.d.conf $RPM_BUILD_ROOT/etc/rsyslog.d/controlhub.conf
 cp -rp %{sources_dir}/logrotate.d.conf $RPM_BUILD_ROOT/etc/logrotate.d/controlhub.conf
 
-# Move user-editable configuration file under /etc
-mv $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/controlhub.config $RPM_BUILD_ROOT/etc/controlhub.config
-sed -i "s|\"controlhub.config\"|\"/etc/controlhub.config\"|" $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/releases/*/sys.config
+# Move default configuration file under /etc , and update paths to config files
+mv $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/sys.config $RPM_BUILD_ROOT/etc/controlhub/default/sys.config
+sed -i "s|\".*core.config\"|\"%{_prefix}/lib/controlhub/core.config\"|" $RPM_BUILD_ROOT/etc/controlhub/default/sys.config
+sed -i "s|CONTROLHUB_CONFIG_FILE_DEFAULT=.*|CONTROLHUB_CONFIG_FILE_DEFAULT=/etc/controlhub/default/sys.config|" $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/bin/controlhub
+sed -i "s|CONTROLHUB_CONFIG_FILE_OPTIONAL=.*|CONTROLHUB_CONFIG_FILE_OPTIONAL=/etc/controlhub/sys.config|" $RPM_BUILD_ROOT%{_prefix}/lib/controlhub/bin/controlhub
 
 # Update the CONTROLHUB_BIN_DIR variable in controlhub scripts
 sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=%{_prefix}/lib/controlhub/bin|" $RPM_BUILD_ROOT%{_prefix}/bin/controlhub_*
@@ -67,9 +69,9 @@ ___POST_PREUN_SCRIPTLETS___
 %defattr(-, root, root)
 %{_prefix}/bin/*
 %{_prefix}/lib/*
-/etc/rsyslog.d/controlhub.conf
 /var/log/controlhub
-%config(noreplace) /etc/controlhub.config
+/etc/controlhub/default
+%config(noreplace) /etc/controlhub/default/sys.config
 %config(noreplace) /etc/rsyslog.d/controlhub.conf
 %config(noreplace) /etc/logrotate.d/controlhub.conf
 ___FILELIST_FINALE___
