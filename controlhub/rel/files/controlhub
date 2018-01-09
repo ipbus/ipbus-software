@@ -224,14 +224,14 @@ case "$1" in
         export HEART_COMMAND
 
         # Check for Erlang syntax errors in the config file
+        echo "Using config file: $CONFIG_PATH"
         CHKCONFIG_RES=`$NODETOOL chkconfig $CONFIG_PATH 2>&1`
         CHKCONFIG_ES=$?
         if [ "$CHKCONFIG_ES" -ne "0" ]; then
-            echo "ERROR in ControlHub configuration file ${CONFIG_PATH} ..."
+            echo "ERROR in ControlHub configuration files! Details below."
             echo -e "${CHKCONFIG_RES}"
             exit 4
         fi
-        echo "Using config file: $CONFIG_PATH"
 
         # If "-redirect_stdio" option used then launch with run_erl (which redirects stdio); otherwise normal simpler launch 
         case "$1" in
