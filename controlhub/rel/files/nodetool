@@ -24,7 +24,7 @@ main(Args) ->
     %% any commands that don't need a running node
     case RestArgs of
         ["chkconfig", File] ->
-            {Result, Msg} = recursive_file_consult(File),
+            {Result, Msg} = check_config_file(File),
             io:format("~s~n", [Msg]),
             halt(case Result of ok -> 0; error -> 1 end);
         _ ->
@@ -223,18 +223,37 @@ append_node_suffix(Name, Suffix) ->
 %%   and runs same function on any other config files that are referenced
 %% Returns {ok, Msg} if file conforms to config file syntax, otherwise returns {error, Msg}
 %%
-recursive_file_consult(File) ->
+check_config_file(File) ->
     case file:consult(File) of
         {ok, Terms} ->
-            Msg = io_lib:format("~s ... ok.~n", [File]),
             case Terms of
-                [Term] when is_list(Term) ->
-                    ReferencedFiles = lists:filter(fun io_lib:char_list/1 , Term),
-                    ReferencedFileResults = lists:map(fun(X) -> recursive_file_consult(X) end, ReferencedFiles),
+                [ConfigFileItems] when is_list(ConfigFileItems) ->
+                    % 1) Check if defined any parameters that don't exist
+                    DefinedParams = lists:flatten(
+                                        lists:filtermap(
+                                            fun(X) -> case X of
+                                                {controlhub, L} when is_list(L) -> {true, proplists:get_keys(L)};
+                                                _ -> false end
+                                            end,
+                                            ConfigFileItems
+                                        )),
+                    ValidParamList = ch_config:get_parameter_names(),
+                    ValidParamSet  = sets:from_list(ValidParamList),
+                    InvalidParams = sets:to_list(sets:subtract(sets:from_list(DefinedParams), ValidParamSet)),
+                    io:format("Constructing msg~n"),
+                    Result = case length(InvalidParams) of
+                              0 ->
+                                  {ok, io_lib:format("~s ... ok.~n", [File])};
+                              _ ->
+                                  {error, io_lib:format("~s ... ERROR : The following ControlHub parameters are not used (maybe typo?): ~p~n   Valid parameters: ~p~n", [File, InvalidParams, ValidParamList])}
+                          end,
+                    % 2) Check referenced files
+                    ReferencedFiles = lists:filter(fun io_lib:char_list/1 , ConfigFileItems),
+                    ReferencedFileResults = lists:map(fun(X) -> check_config_file(X) end, ReferencedFiles),
                     lists:foldl(fun({Status, M}, {AccStatus, AccMsg}) ->
                                     {case {Status, AccStatus} of {ok, ok} -> ok; _ -> error end, AccMsg ++ M}
                                 end,
-                                {ok, Msg},
+                                Result,
                                 ReferencedFileResults);
                 _ ->
                     {error, io_lib:format("~s ... ERROR : Config file must contain a single Erlang term, that is a list.~n", [File])}
