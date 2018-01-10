@@ -1,4 +1,7 @@
 
+.NOTPARALLEL:
+
+
 Set?=all
 
 ifeq ($(Set), uhal)

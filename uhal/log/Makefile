@@ -86,8 +86,10 @@ LibraryObjectFiles += ${PackagePath}/obj/log.o
 ${GENERATOR_EXE} : ${GENERATOR_OBJ}
 	${LD} ${LDFLAGS} $< -o $@
 
-${GENERATED_FILES} : ${GENERATOR_EXE}
+${GENERATED_FILES} : .generated_files
+.generated_files : ${GENERATOR_EXE}
 	./generator.exe
+	touch .generated_files
 
 .PHONY: _generator_clean
 clean: _generator_clean
