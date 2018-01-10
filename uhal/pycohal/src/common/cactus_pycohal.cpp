@@ -12,6 +12,7 @@
 #include "boost/python/slice.hpp"
 
 // uhal includes
+#include "uhal/ClientFactory.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/ConnectionManager.hpp"
 #include "uhal/ProtocolControlHub.hpp"
@@ -19,6 +20,7 @@
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/Node.hpp"
+#include "uhal/tests/tools.hpp"
 
 // pycohal includes
 #include "uhal/pycohal/converters.hpp"
@@ -112,7 +114,10 @@ namespace pycohal
     packageScope.attr ( "tests" ) = testModule; //< Enables "from mypackage import tests"
     // Change to sub-module scope ...
     bpy::scope testScope = testModule;
+
     // Wrap the test functions ...
+    bpy::def ( "measureReadLatency", static_cast<double (*) ( uhal::ClientInterface&, uint32_t, uint32_t, size_t, bool, bool ) > ( &uhal::tests::measureReadLatency ) );
+    bpy::def ( "measureWriteLatency", static_cast<double (*) ( uhal::ClientInterface&, uint32_t, uint32_t, size_t, bool, bool ) > ( &uhal::tests::measureWriteLatency ) );
     bpy::def ( "check_uint32_argument", pycohal::test_check_uint32_argument );
     bpy::def ( "convert_str_to_uint32", pycohal::test_convert_str_to_uint32 );
     bpy::def ( "convert_str_to_vec_str", pycohal::convert_string_to_vector<std::string> );
@@ -129,6 +134,12 @@ namespace pycohal
   /// For member functions, it causes python garbage collector to keep 'self' (i.e. this) alive behind-the-scences as long as the returned object still exists.
   /// N.B: This return value policy is a safe option, but not necessarily the most optimal.
   typedef return_internal_reference<> norm_ref_return_policy ;
+
+  /// Constructs a ClientInterface using the ClientFactory
+  boost::shared_ptr<uhal::ClientInterface> buildClient(const std::string& aId, const std::string& aURI)
+  {
+    return uhal::ClientFactory::getInstance().getClient(aId, aURI);
+  }
 
   /// Returns hex string for ValWord<uint32_t> value
   std::string hex_string ( const uhal::ValWord<uint32_t>& valWord )
@@ -380,6 +391,7 @@ BOOST_PYTHON_MODULE ( _core )
          boost::shared_ptr< uhal::TCP<uhal::ControlHub<uhal::IPbus<2, 0> >, 3> > // /* all instances are held within boost::shared_ptr */
           >("_TCP_ControlHub_IPbus_2_0", no_init /* no CTORs */);
 
+  def ( "buildClient", pycohal::buildClient );
 
   // Wrap uhal::HwInterface
   class_<uhal::HwInterface> ( "HwInterface", init<const uhal::HwInterface&>() )
