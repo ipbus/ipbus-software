@@ -13,7 +13,7 @@
 
 %% Exported functions
 
--export([init/0, get/1, get_start_time/0]).
+-export([init/0, get/1, get_start_time/0, get_parameter_names/0]).
 
 -type config_param() :: config_file | app_start_timestamp
                        | tcp_listen_port | tcp_socket_opts
@@ -78,6 +78,9 @@ get_start_time() ->
    ?MODULE:get(app_start_timestamp).
 
 
+-spec get_parameter_names() -> [any()].
+get_parameter_names() ->
+    [tcp_listen_port, tcp_socket_opts, max_udp_in_flight, device_response_timeout, device_client_shutdown_after].
 
 
 %% Internal functions

@@ -24,19 +24,9 @@ main(Args) ->
     %% any commands that don't need a running node
     case RestArgs of
         ["chkconfig", File] ->
-            case file:consult(File) of
-                {ok, _} ->
-                    io:format("ok\n"),
-                    halt(0);
-                {error, {Line, Mod, Term}} ->
-                    io:format(standard_error, ["Error on line ",
-                              file:format_error({Line, Mod, Term}), "\n"], []),
-                    halt(1);
-                {error, R} ->
-                    io:format(standard_error, ["Error reading config file: ",
-                              file:format_error(R), "\n"], []),
-                    halt(1)
-            end;
+            {Result, Msg} = check_config_file(File),
+            io:format("~s~n", [Msg]),
+            halt(case Result of ok -> 0; error -> 1 end);
         _ ->
             ok
     end,
@@ -77,8 +67,8 @@ main(Args) ->
             UptimeString = io_lib:format("~w days, ~w hours, ~w minutes, ~w seconds", 
                                          [UptimeInSeconds div (24 * 3600), (UptimeInSeconds div 3600) rem 24, (UptimeInSeconds div 60) rem 60, UptimeInSeconds rem 60]),
             io:format("    started at ~s~n"
-                      "    uptime: ~s~n"
-                      "    version: ~s~n"
+                      "    uptime:    ~s~n"
+                      "    version:   ~s~n"
                       "    config file: ~s~n~n",
                       [StartTimeString, 
                        UptimeString, 
@@ -224,6 +214,56 @@ append_node_suffix(Name, Suffix) ->
             list_to_atom(lists:concat([Node, Suffix, os:getpid(), "@", Host]));
         [Node] ->
             list_to_atom(lists:concat([Node, Suffix, os:getpid()]))
+    end.
+
+
+
+%%
+%% Runs file:consult on specified file, performs basic checks on whether file obeys config file syntax,
+%%   and runs same function on any other config files that are referenced
+%% Returns {ok, Msg} if file conforms to config file syntax, otherwise returns {error, Msg}
+%%
+check_config_file(File) ->
+    case file:consult(File) of
+        {ok, Terms} ->
+            case Terms of
+                [ConfigFileItems] when is_list(ConfigFileItems) ->
+                    % 1) Check if defined any parameters that don't exist
+                    DefinedParams = lists:flatten(
+                                        lists:filtermap(
+                                            fun(X) -> case X of
+                                                {controlhub, L} when is_list(L) -> {true, proplists:get_keys(L)};
+                                                _ -> false end
+                                            end,
+                                            ConfigFileItems
+                                        )),
+                    ValidParamList = ch_config:get_parameter_names(),
+                    ValidParamSet  = sets:from_list(ValidParamList),
+                    InvalidParams = sets:to_list(sets:subtract(sets:from_list(DefinedParams), ValidParamSet)),
+                    io:format("Constructing msg~n"),
+                    Result = case length(InvalidParams) of
+                              0 ->
+                                  {ok, io_lib:format("~s ... ok.~n", [File])};
+                              _ ->
+                                  {error, io_lib:format("~s ... ERROR : The following ControlHub parameters are not used (maybe typo?): ~p~n   Valid parameters: ~p~n", [File, InvalidParams, ValidParamList])}
+                          end,
+                    % 2) Check referenced files
+                    ReferencedFiles = lists:filter(fun io_lib:char_list/1 , ConfigFileItems),
+                    ReferencedFileResults = lists:map(fun(X) -> check_config_file(X) end, ReferencedFiles),
+                    lists:foldl(fun({Status, M}, {AccStatus, AccMsg}) ->
+                                    {case {Status, AccStatus} of {ok, ok} -> ok; _ -> error end, AccMsg ++ M}
+                                end,
+                                Result,
+                                ReferencedFileResults);
+                _ ->
+                    {error, io_lib:format("~s ... ERROR : Config file must contain a single Erlang term, that is a list.~n", [File])}
+            end;
+        {error, {Line, Mod, Term}} ->
+            Msg = io_lib:format("~s ... ERROR on line ~s~n", [File, file:format_error({Line, Mod, Term})]),
+            {error, Msg};
+        {error, R} ->
+            Msg = io_lib:format("~s ... ERROR when reading / parsing : ~s~n", [File, file:format_error(R)]),
+            {error, Msg}
     end.
 
 

@@ -64,16 +64,17 @@ RUNNER_LOG_DIR=$USE_DIR/log
 # Make sure log directory exists
 mkdir -p $RUNNER_LOG_DIR
 
-# Use releases/VSN/sys.config if it exists otherwise use etc/app.config
-if [ -e "$USE_DIR/sys.config" ]; then
-    CONFIG_PATH="$USE_DIR/sys.config"
+# Use controlhub.config if it exists otherwise use controlhub.default.config
+CONTROLHUB_CONFIG_FILE_DEFAULT="$RUNNER_BASE_DIR/sys.config"
+CONTROLHUB_CONFIG_FILE_OPTIONAL="$(dirname $(dirname $RUNNER_BASE_DIR))/sys.config"
+if [ -f "$CONTROLHUB_CONFIG_FILE_OPTIONAL" ]; then
+    CONFIG_PATH="$CONTROLHUB_CONFIG_FILE_OPTIONAL"
+elif [ -h "$CONTROLHUB_CONFIG_FILE_OPTIONAL" -a -f "$(readlink CONTROLHUB_CONFIG_FILE_OPTIONAL)" ]; then
+    CONFIG_PATH="$CONTROLHUB_CONFIG_FILE_OPTIONAL"
 else
-    if [ -e "$RUNNER_BASE_DIR/releases/$APP_VSN/sys.config" ]; then
-        CONFIG_PATH="$RUNNER_BASE_DIR/releases/$APP_VSN/sys.config"
-    else
-        CONFIG_PATH="$RUNNER_ETC_DIR/app.config"
-    fi
+    CONFIG_PATH="$CONTROLHUB_CONFIG_FILE_DEFAULT"
 fi
+CONFIG_ARG="-config $CONFIG_PATH -controlhub config_file \"$CONFIG_PATH\""
 
 # Extract the target node name from node.args
 NAME_ARG=`egrep '^\-s?name' $VMARGS_PATH`
@@ -221,6 +222,16 @@ case "$1" in
 
         HEART_COMMAND="$RUNNER_BASE_DIR/bin/$SCRIPT $HEART_OPTION $RUN_PARAM"
         export HEART_COMMAND
+
+        # Check for Erlang syntax errors in the config file
+        echo "Using config file: $CONFIG_PATH"
+        CHKCONFIG_RES=`$NODETOOL chkconfig $CONFIG_PATH 2>&1`
+        CHKCONFIG_ES=$?
+        if [ "$CHKCONFIG_ES" -ne "0" ]; then
+            echo "ERROR in ControlHub configuration files! Details below."
+            echo -e "${CHKCONFIG_RES}"
+            exit 4
+        fi
 
         # If "-redirect_stdio" option used then launch with run_erl (which redirects stdio); otherwise normal simpler launch 
         case "$1" in
@@ -428,7 +439,7 @@ case "$1" in
             echo "ERROR in ControlHub configuration file ${CONFIG_PATH} ..."
             echo -e "${CHKCONFIG_RES}"
             exit 4
-        fi 
+        fi
 
         # .boot file typically just $SCRIPT (ie, the app name)
         # however, for debugging, sometimes start_clean.boot is useful.
@@ -446,7 +457,7 @@ case "$1" in
         BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
         EMU=beam
         PROGNAME=`echo $0 | sed 's/.*\\///'`
-        CMD="$BINDIR/erlexec $SLIM_ARGS -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -mode embedded -config $CONFIG_PATH -args_file $VMARGS_PATH"
+        CMD="$BINDIR/erlexec $SLIM_ARGS -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -mode embedded $CONFIG_ARG -args_file $VMARGS_PATH"
         export EMU
         export ROOTDIR
         export BINDIR
@@ -474,7 +485,7 @@ case "$1" in
         BINDIR=$ROOTDIR/erts-$ERTS_VSN/bin
         EMU=beam
         PROGNAME=`echo $0 | sed 's/.*\///'`
-        CMD="$BINDIR/erlexec $SLIM_ARGS $FOREGROUNDOPTIONS -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE -config $CONFIG_PATH -args_file $VMARGS_PATH"
+        CMD="$BINDIR/erlexec $SLIM_ARGS $FOREGROUNDOPTIONS -boot $RUNNER_BASE_DIR/releases/$APP_VSN/$BOOTFILE $CONFIG_ARG -args_file $VMARGS_PATH"
         export EMU
         export ROOTDIR
         export BINDIR

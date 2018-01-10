@@ -154,7 +154,7 @@ publish_build_job:
   before_script:
     - yum -y install openssh-clients
     - export EOS_PATH=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
-    - if [ -n "${CI_COMMIT_TAG}" ]; then export EOS_PATH=${OUTPUT_PIPELINE_URL/commits/tags} ; fi
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export EOS_PATH=${EOS_PATH/commits/tags} ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN | sort
     - echo "${EOS_ACCOUNT_PASSWORD}" | kinit ${EOS_ACCOUNT_USERNAME}@CERN.CH

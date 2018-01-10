@@ -105,7 +105,7 @@ endif
 	find  ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} $(PackagePath)/rpm \;
 
 cleanrpm:
-	-rm -r rpm
+	rm -rf ${PackageName}.spec rpm
 
 
 clean: _cleanall
@@ -150,8 +150,12 @@ install:
 	install -D -m 644 pkg/rsyslog.d.conf /etc/rsyslog.d/controlhub.conf
 	install -D -m 644 pkg/logrotate.d.conf /etc/logrotate.d/controlhub.conf
 
-	mv $(libdir)/controlhub/controlhub.config /etc/controlhub.config
-	sed -i "s|\"controlhub.config\"|\"/etc/controlhub.config\"|" $(libdir)/controlhub/releases/*/sys.config
+	mkdir -p /etc/controlhub/default
+	mv $(libdir)/controlhub/sys.config /etc/controlhub/default/sys.config
+	sed -i "s|\".*core.config\"|\"$(libdir)/controlhub/core.config\"|" /etc/controlhub/default/sys.config
+	sed -i "s|CONTROLHUB_CONFIG_FILE_DEFAULT=.*|CONTROLHUB_CONFIG_FILE_DEFAULT=/etc/controlhub/default/sys.config|" $(libdir)/controlhub/bin/controlhub
+	sed -i "s|CONTROLHUB_CONFIG_FILE_OPTIONAL=.*|CONTROLHUB_CONFIG_FILE_OPTIONAL=/etc/controlhub/sys.config|" $(libdir)/controlhub/bin/controlhub
+
 	sed -i "s|CONTROLHUB_BIN_DIR=.*|CONTROLHUB_BIN_DIR=$(libdir)/controlhub/bin|" $(bindir)/controlhub_*
 
 	mkdir -p /var/log/controlhub
@@ -166,4 +170,4 @@ endif
 uninstall:
 	rm -rf $(bindir)/controlhub*
 	rm -rf $(libdir)/controlhub
-	rm -rf /etc/rsyslog.d/controlhub.conf /etc/logrotate.d/controlhub.conf /etc/controlhub.config
+	rm -rf /etc/rsyslog.d/controlhub.conf /etc/logrotate.d/controlhub.conf /etc/controlhub/default
