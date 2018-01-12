@@ -121,13 +121,19 @@ void PCIe::dispatchExceptionHandler()
 
 uint32_t PCIe::getMaxSendSize()
 {
-  return (350 * 4);
+  if ( (mDeviceFileFPGAToHost < 0) && (mDeviceFileHostToFPGA < 0) )
+    connect();
+
+  return (mPageSize - 1) * 4;
 }
 
 
 uint32_t PCIe::getMaxReplySize()
 {
-  return (350 * 4);
+  if ( (mDeviceFileFPGAToHost < 0) && (mDeviceFileHostToFPGA < 0) )
+    connect();
+
+  return (mPageSize - 1) * 4;
 }
 
 

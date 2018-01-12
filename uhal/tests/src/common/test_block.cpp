@@ -234,7 +234,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_offset_write_
 )
 
 
-UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_access_type_violations, MinimalFixture,
+UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_access_type_violations, DummyHardwareFixture,
 {
   HwInterface hw = getHwInterface();
   std::vector<uint32_t> xx;
