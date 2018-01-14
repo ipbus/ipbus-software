@@ -48,7 +48,7 @@ github_commit_status:end:success:
 
 doxygen_job:
   stage: build
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2017-11-04__doxygen1.8.13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2018-01-14__doxygen1.8.13
   tags:
     - docker
   script:
@@ -89,14 +89,14 @@ doxygen_job:
 
 build:slc6:
   <<: *build_rpm_yumrepo_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-slc6:2017-11-04
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-slc6:2018-01-14
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-slc6.xml"
     OUTPUT_REPO_SUBDIR: "slc6_x86_64"
 
 build:centos7:
   <<: *build_rpm_yumrepo_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-cc7:2017-11-04__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-cc7:2018-01-14__boost1.53.0_pugixml1.8
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "centos7_x86_64"
@@ -117,11 +117,11 @@ build:centos7:
 
 build:fedora26:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
 
 build:ubuntu16:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2018-01-14__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
 
 
 
@@ -162,13 +162,13 @@ publish_build_job:
 
 .job_template: &slc6_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2017-11-04
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2018-01-14
   variables:
     REPO_URL_OS_SUBDIR: slc6_x86_64
 
 .job_template: &centos7_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:2017-11-04
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:2018-01-14
   variables:
     REPO_URL_OS_SUBDIR: centos7_x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
@@ -183,13 +183,13 @@ publish_build_job:
 
 .job_template: &fedora26_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
   dependencies:
     - build:fedora26
 
 .job_template: &ubuntu16_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2018-01-14__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
   dependencies:
     - build:ubuntu16
 
