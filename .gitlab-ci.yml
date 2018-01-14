@@ -117,7 +117,7 @@ build:centos7:
 
 build:fedora26:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:master__erlang19.3.6.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
 
 build:ubuntu16:
   <<: *simple_build_jobTemplate
@@ -183,7 +183,7 @@ publish_build_job:
 
 .job_template: &fedora26_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:master__erlang19.3.6.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
   dependencies:
     - build:fedora26
 
