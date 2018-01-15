@@ -11,7 +11,7 @@ PackageName = cactuscore-uhal-grammars
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 6
 PACKAGE_VER_PATCH = 0
-PACKAGE_RELEASE = 0.alpha.1${PACKAGE_RELEASE_SUFFIX}
+PACKAGE_RELEASE = 0.alpha.2${PACKAGE_RELEASE_SUFFIX}
 
 PackageSummary = uHAL Boost Spirit Grammars
 PackageDescription = uHAL Boost Spirit Grammars
