@@ -42,6 +42,7 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/placeholders.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/chrono/chrono_io.hpp>
 
 #include "uhal/Buffers.hpp"
 #include "uhal/grammars/URI.hpp"
@@ -230,6 +231,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
+    mLastSendQueued = SteadyClock_t::now();
     boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
     mPacketsInFlight += mDispatchBuffers.size();
   }
@@ -335,6 +337,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
+    mLastRecvQueued = SteadyClock_t::now();
     boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
   }
 
@@ -353,11 +356,14 @@ namespace uhal
         return;
       }
 
+      SteadyClock_t::time_point lNow = SteadyClock_t::now();
+
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         exception::TcpTimeout* lExc = new exception::TcpTimeout();
-        log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
-              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
+        log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " ms) occurred for receive (header) from ",
+              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI '", this->uri(), "'. Last send queued ",
+              boost::chrono::duration<float>(lNow - mLastSendQueued), " ago, receive queued ", boost::chrono::duration<float>(lNow - mLastRecvQueued), " ago");
 
         if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
         {
@@ -439,7 +445,7 @@ namespace uhal
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         mAsynchronousException = new exception::TcpTimeout();
-        log ( *mAsynchronousException , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
+        log ( *mAsynchronousException , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive (chunk) from ",
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
       }
       else
@@ -570,10 +576,10 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::dispatchExceptionHandler()
   {
-    log ( Warning() , "Closing Socket since exception detected." );
-
     if ( mSocket.is_open() )
     {
+      log ( Warning() , "Closing TCP socket for device with URI " , Quote ( this->uri() ) , " since exception detected." );
+
       try
       {
         mSocket.close();

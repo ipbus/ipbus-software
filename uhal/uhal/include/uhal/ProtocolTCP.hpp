@@ -50,6 +50,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
+#include <boost/chrono.hpp>
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -268,6 +269,11 @@ namespace uhal
       */
       uhal::exception::exception* mAsynchronousException;
 
+
+      typedef boost::chrono::steady_clock SteadyClock_t;
+
+      SteadyClock_t::time_point mLastSendQueued;
+      SteadyClock_t::time_point mLastRecvQueued;
   };
 
 

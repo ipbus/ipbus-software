@@ -210,8 +210,6 @@ namespace uhal
         A block of memory into which we write replies, before copying them to their final destination
         @note This should not be necessary and was, for a while, removed, with the buffer sequence created, instead, pointing to the final destinations
         @note Tom Williams, however believes that there is a problem with scatter-gather operations of size>64 with the UDP and so has reverted it -- see https://svnweb.cern.ch/trac/cactus/ticket/259#comment:17
-        @note Reverting the code, however, may have caused a seg-fault!
-        @todo THIS NEEDS TO BE UNDERSTOOD
       */
       std::vector<uint8_t> mReplyMemory;
 
