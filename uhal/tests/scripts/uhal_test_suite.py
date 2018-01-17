@@ -163,7 +163,7 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
 def cleanup_cmds():
     """Return list of cleanup commands to be used in case test script interupted - e.g. by ctrl-c"""
 
-    cmds = ["sudo controlhub_stop",
+    cmds = ["controlhub_stop",
             "sudo /sbin/tc qdisc del dev lo root"]
     return cmds
 
@@ -187,7 +187,7 @@ def get_sections():
 
 def get_controlhub_status( cmd ):
   if ("dummy.controlhub" in cmd) or ("chtcp" in cmd ):
-    StdOut, ExitCode , Time = run_command("sudo controlhub_status", False)
+    StdOut, ExitCode , Time = run_command("controlhub_status", False)
     if ExitCode:
       return "controlhub_status failed, "
     else:
