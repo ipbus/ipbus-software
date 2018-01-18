@@ -114,6 +114,7 @@ namespace uhal
       */
       virtual ~TCP();
 
+    private:
       /**
       	Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
       	@param aBuffers the buffer object wrapping the send and receive buffers that are to be transported
@@ -126,15 +127,10 @@ namespace uhal
        */
       virtual void Flush( );
 
-
-    protected:
       /**
         Function which tidies up this protocol layer in the event of an exception
        */
       virtual void dispatchExceptionHandler();
-
-
-    private:
 
       /**
         Return the maximum size to be sent based on the buffer size in the target
