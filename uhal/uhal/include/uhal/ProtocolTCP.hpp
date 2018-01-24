@@ -58,7 +58,7 @@
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
-
+#include "uhal/utilities/TimeIntervalStats.hpp"
 
 namespace uhal
 {
@@ -194,6 +194,8 @@ namespace uhal
 
 
     private:
+      typedef boost::chrono::steady_clock SteadyClock_t;
+
       //! The boost::asio::io_service used to create the connections
       boost::asio::io_service mIOservice;
 
@@ -218,7 +220,7 @@ namespace uhal
       //! The list of buffers still waiting to be sent
       std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
       //! The list of buffers still awaiting a reply
-      std::deque < std::vector< boost::shared_ptr< Buffers > > > mReplyQueue;
+      std::deque < std::pair<std::vector< boost::shared_ptr< Buffers > >, SteadyClock_t::time_point> > mReplyQueue;
 
       //! Counter of how many writes have been sent, for which no reply has yet been received
       uint32_t mPacketsInFlight;
@@ -249,15 +251,16 @@ namespace uhal
       uint32_t mReplyByteCounter;
 
       /**
-        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
-        @todo Tom Williams needs to check this and expand
+        The buffers containing the payload for the send operation that's currently in progress
+        @note When communicating with the ControlHub it is more efficient to send as much data as possible - i.e. multiple IPbus packets - to minimise the number of TCP chunks that are unpacked at each end of the TCP connection.
       */
       std::vector< boost::shared_ptr< Buffers > > mDispatchBuffers;
+
       /**
-        When communicating with the ControlHub it is more efficient to send as much data as possible. This has something to do with that...
-        @todo Tom Williams needs to check this and expand
+        The buffers containing the payloads for the receive operation that's currently in progress
+        @note When communicating with the ControlHub it is more efficient to send as much data as possible - i.e. multiple IPbus packets - to minimise the number of TCP chunks that are unpacked at each end of the TCP connection.
       */
-      std::vector< boost::shared_ptr< Buffers > > mReplyBuffers;
+      std::pair< std::vector< boost::shared_ptr< Buffers > >, SteadyClock_t::time_point > mReplyBuffers;
 
       /**
         A pointer to an exception object for passing exceptions from the worker thread to the main thread.
@@ -266,12 +269,14 @@ namespace uhal
       uhal::exception::exception* mAsynchronousException;
 
 
-      typedef boost::chrono::steady_clock SteadyClock_t;
-
       SteadyClock_t::time_point mLastSendQueued;
       SteadyClock_t::time_point mLastRecvQueued;
-  };
 
+      TimeIntervalStats mRTTStats;
+      TimeIntervalStats mLSTStats;
+      TimeIntervalStats mInterSendTimeStats;
+      TimeIntervalStats mInterRecvTimeStats;
+  };
 
 }
 

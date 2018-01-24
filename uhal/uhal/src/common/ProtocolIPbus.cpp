@@ -455,7 +455,7 @@ namespace uhal
         aStream << "bus timeout on read";
         break;
       case 7:
-        aStream << "bus timeout on wite";
+        aStream << "bus timeout on write";
         break;
       case 0xf:
         aStream << "outbound request";
