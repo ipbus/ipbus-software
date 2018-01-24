@@ -38,9 +38,9 @@
 %% ----------------------------------------------------------------------------
 -ifdef(log_debug).
 
--define( CH_LOG_DEBUG(MESSAGE), ch_utils:log(debug, ?MODULE, MESSAGE) ).
--define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA), ch_utils:log(debug, ?MODULE, MESSAGE, MESSAGE_DATA) ).
--define( CH_LOG_DEBUG(PREFIX, MESSAGE, MESSAGE_DATA), ch_utils:log({debug, PREFIX}, ?MODULE, MESSAGE, MESSAGE_DATA) ).
+-define( CH_LOG_DEBUG(MESSAGE), ch_utils:log(debug, MESSAGE, []) ).
+-define( CH_LOG_DEBUG(MESSAGE, MESSAGE_DATA), ch_utils:log(debug, MESSAGE, MESSAGE_DATA) ).
+-define( CH_LOG_DEBUG(PREFIX, MESSAGE, MESSAGE_DATA), ch_utils:log({debug, PREFIX}, MESSAGE, MESSAGE_DATA) ).
 
 -else.
 
