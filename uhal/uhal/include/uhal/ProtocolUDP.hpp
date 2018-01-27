@@ -111,6 +111,7 @@ namespace uhal
       */
       virtual ~UDP();
 
+    private:
       /**
       	Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
       	@param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
@@ -123,15 +124,10 @@ namespace uhal
        */
       virtual void Flush( );
 
-
-    protected:
       /**
               Function which tidies up this protocol layer in the event of an exception
              */
       virtual void dispatchExceptionHandler();
-
-
-    private:
 
       /**
         Return the maximum size to be sent based on the buffer size in the target
@@ -210,8 +206,6 @@ namespace uhal
         A block of memory into which we write replies, before copying them to their final destination
         @note This should not be necessary and was, for a while, removed, with the buffer sequence created, instead, pointing to the final destinations
         @note Tom Williams, however believes that there is a problem with scatter-gather operations of size>64 with the UDP and so has reverted it -- see https://svnweb.cern.ch/trac/cactus/ticket/259#comment:17
-        @note Reverting the code, however, may have caused a seg-fault!
-        @todo THIS NEEDS TO BE UNDERSTOOD
       */
       std::vector<uint8_t> mReplyMemory;
 

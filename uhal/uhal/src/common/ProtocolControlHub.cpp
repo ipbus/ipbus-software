@@ -264,7 +264,7 @@ namespace uhal
       {
         uhal::exception::ControlHubTargetTimeout* lExc = new uhal::exception::ControlHubTargetTimeout();
         log ( *lExc , "The ControlHub did not receive any response from the target with URI ", Quote(this->uri()) );
-        log ( *lExc , "ControlHub returned error code ", Integer ( lErrorCode ), " = ", TranslatedFmt<uint16_t>(lErrorCode, translateErrorCode));
+        log ( *lExc , "ControlHub returned error code ", Integer ( lErrorCode ), " = '", TranslatedFmt<uint16_t>(lErrorCode, translateErrorCode), "'");
         return lExc ;
       }
 

@@ -38,6 +38,7 @@ import platform
 
 SOFT_TIMEOUT_S = 570
 
+
 def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
     """Return full list of all sections/commands in this test suite."""
 
@@ -162,14 +163,18 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
 def cleanup_cmds():
     """Return list of cleanup commands to be used in case test script interupted - e.g. by ctrl-c"""
 
-    cmds = ["sudo controlhub_stop",
+    cmds = ["controlhub_stop",
             "sudo /sbin/tc qdisc del dev lo root"]
     return cmds
 
 
-def run_cleanup_commands():
+def run_cleanup_commands(background_processes):
     """Runs the cleanup commands"""
     print
+    for p in background_procs:
+        print "  Terminating PID", p.pid
+        os.killpg(p.pid, signal.SIGTERM)
+
     for cmd in cleanup_cmds():
        print "+ Running cleanup command: ", cmd
        run_command(cmd, False)
@@ -182,7 +187,7 @@ def get_sections():
 
 def get_controlhub_status( cmd ):
   if ("dummy.controlhub" in cmd) or ("chtcp" in cmd ):
-    StdOut, ExitCode , Time = run_command("sudo controlhub_status", False)
+    StdOut, ExitCode , Time = run_command("controlhub_status", False)
     if ExitCode:
       return "controlhub_status failed, "
     else:
@@ -428,29 +433,26 @@ if __name__=="__main__":
                     split_name_list = re.split('(\.exe)',cmd)
                     split_name = split_name_list[0]
                     if len( split_name_list ) > 1:
-                      split_name = split_name + split_name_list[1]
+                        split_name = split_name + split_name_list[1]
 
                     print "+ *** ERROR OCCURED (section = '%s', test = '%s', exit code = %s, time elapsed = %s seconds, %s%s ) ***" % (section_name, split_name , exit_code, cmd_duration , get_controlhub_status( cmd ) , get_dummyhardware_status( cmd ) )
 
                     if quit_on_error:
-                      print "+ Quitting as an error was observed and the '-x' flag was specified by the user"
-                      run_cleanup_commands()
-                      sys.exit(exit_code)
+                        print "+ Quitting as an error was observed and the '-x' flag was specified by the user"
+                        run_cleanup_commands(background_procs)
+                        sys.exit(exit_code)
                 else:
                     print "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
 
     except KeyboardInterrupt:
         print "\n+ Ctrl-C detected."
-        for p in background_procs:
-            print "  Terminating PID", p.pid
-            os.killpg(p.pid, signal.SIGTERM)
-        run_cleanup_commands()
+        run_cleanup_commands(background_procs)
         sys.exit()
 
     if run_cmds:
-       run_cleanup_commands()
+        run_cleanup_commands(background_procs)
 
-       print "\n   TEST SUITE COMPLETED! ", nr_cmds_run, "commands run," , nr_cmds_err, "errors (non-zero exit codes)"
-       if nr_cmds_err > 0:
-           sys.exit(1)
+        print "\n   TEST SUITE COMPLETED! ", nr_cmds_run, "commands run," , nr_cmds_err, "errors (non-zero exit codes)"
+        if nr_cmds_err > 0:
+            sys.exit(1)
 

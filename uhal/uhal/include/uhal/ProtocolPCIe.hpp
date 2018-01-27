@@ -70,35 +70,28 @@ namespace uhal
   //! Transport protocol to transfer an IPbus buffer via PCIe
   class PCIe : public IPbus< 2 , 0 >
   {
-    public:
-      /**
-      	Constructor
-      	@param aId the uinique identifier that the client will be given.
-      	@param aUri a struct containing the full URI of the target.
-      */
-      PCIe ( const std::string& aId, const URI& aUri );
-
     private:
       PCIe ( const PCIe& aPCIe );
 
-      /**
-       Assignment operator
-       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-       @param aUDP a UDP-protocol object to copy
-       @return reference to the current object to allow chaining of assignments
-            */
       PCIe& operator= ( const PCIe& aPCIe );
 
     public:
+      /**
+        Constructor
+        @param aId the uinique identifier that the client will be given.
+        @param aUri a struct containing the full URI of the target.
+      */
+      PCIe ( const std::string& aId, const URI& aUri );
+
       //!	Destructor
       virtual ~PCIe();
 
-    protected:
+    private:
 
       /**
-      	Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
-      	@param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
-      	If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
+        Send the IPbus buffer to the target, read back the response and call the packing-protocol's validate function
+        @param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
+        If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
       */
       void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
 
@@ -111,8 +104,6 @@ namespace uhal
       //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
 
-
-    private:
 
       typedef IPbus< 2 , 0 > InnerProtocol;
 

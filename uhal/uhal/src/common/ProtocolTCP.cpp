@@ -42,6 +42,7 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/placeholders.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/chrono/chrono_io.hpp>
 
 #include "uhal/Buffers.hpp"
 #include "uhal/grammars/URI.hpp"
@@ -95,9 +96,10 @@ namespace uhal
       mIOservice.stop();
       mDispatchThread.join();
       ClientInterface::returnBufferToPool ( mDispatchQueue );
-      ClientInterface::returnBufferToPool ( mReplyQueue );
+      for (size_t i = 0; i < mReplyQueue.size(); i++)
+        ClientInterface::returnBufferToPool ( mReplyQueue.at(i).first );
       ClientInterface::returnBufferToPool ( mDispatchBuffers );
-      ClientInterface::returnBufferToPool ( mReplyBuffers );
+      ClientInterface::returnBufferToPool ( mReplyBuffers.first );
     }
     catch ( const std::exception& aExc )
     {
@@ -232,6 +234,11 @@ namespace uhal
 
     boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
     mPacketsInFlight += mDispatchBuffers.size();
+
+    SteadyClock_t::time_point lNow = SteadyClock_t::now();
+    if (mLastSendQueued > SteadyClock_t::time_point())
+      mInterSendTimeStats.add(mLastSendQueued, lNow);
+    mLastSendQueued = lNow;
   }
 
 
@@ -292,13 +299,13 @@ namespace uhal
       return;
     }
 
-    if ( ! mReplyBuffers.empty() )
+    if ( ! mReplyBuffers.first.empty() )
     {
-      mReplyQueue.push_back ( mDispatchBuffers );
+      mReplyQueue.push_back ( std::make_pair(mDispatchBuffers, mLastSendQueued) );
     }
     else
     {
-      mReplyBuffers = mDispatchBuffers;
+      mReplyBuffers = std::make_pair(mDispatchBuffers, mLastSendQueued);
       read ( );
     }
 
@@ -336,6 +343,11 @@ namespace uhal
     }
 
     boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+
+    SteadyClock_t::time_point lNow = SteadyClock_t::now();
+    if (mLastRecvQueued > SteadyClock_t::time_point())
+      mInterRecvTimeStats.add(mLastRecvQueued, lNow);
+    mLastRecvQueued = lNow;
   }
 
 
@@ -345,6 +357,17 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
+    std::size_t lNrReplyBuffers = 1;
+    uint32_t lRequestBytes = 0;
+    uint32_t lExpectedReplyBytes = 0;
+
+    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    {
+      lNrReplyBuffers += ( *lBufIt )->getReplyBuffer().size();
+      lRequestBytes += ( *lBufIt )->sendCounter();
+      lExpectedReplyBytes += ( *lBufIt )->replyCounter();
+    }
+
     {
       boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
       if ( mAsynchronousException )
@@ -353,11 +376,22 @@ namespace uhal
         return;
       }
 
+      SteadyClock_t::time_point lNow = SteadyClock_t::now();
+
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         exception::TcpTimeout* lExc = new exception::TcpTimeout();
-        log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
-              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
+        log ( *lExc , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " ms) occurred for receive (header) from ",
+              ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI '", this->uri(), "'. ",
+              Integer(mPacketsInFlight), " packets in flight, ", Integer(mReplyBuffers.first.size()), " in this chunk (",
+              Integer(lRequestBytes), "/", Integer(lExpectedReplyBytes), " bytes sent/expected). Last send / receive queued ",
+              boost::chrono::duration<float, boost::milli>(lNow - mLastSendQueued).count(), " / ",
+              boost::chrono::duration<float, boost::milli>(lNow - mLastRecvQueued), " ago.");
+
+        log ( Error(), "Extra timeout-related info - round-trip times: ", mRTTStats);
+        log ( Error(), "Extra timeout-related info - send-recv  times: ", mLSTStats);
+        log ( Error(), "Extra timeout-related info - inter-send times: ", mInterSendTimeStats);
+        log ( Error(), "Extra timeout-related info - inter-recv times: ", mInterRecvTimeStats);
 
         if ( aErrorCode && aErrorCode != boost::asio::error::operation_aborted )
         {
@@ -403,22 +437,18 @@ namespace uhal
       return;
     }
 
+    SteadyClock_t::time_point lReadHeaderTimestamp = SteadyClock_t::now();
+    mRTTStats.add(mReplyBuffers.second, lReadHeaderTimestamp);
+    mLSTStats.add(mLastSendQueued, lReadHeaderTimestamp);
+
     mReplyByteCounter = ntohl ( mReplyByteCounter );
     log ( Debug() , "Byte Counter says " , Integer ( mReplyByteCounter ) , " bytes are coming" );
     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-    std::size_t lNrReplyBuffers = 1;
-    uint32_t lExpectedReplyBytes = 0;
-
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.begin(); lBufIt != mReplyBuffers.end(); lBufIt++ )
-    {
-      lNrReplyBuffers += ( *lBufIt )->getReplyBuffer().size();
-      lExpectedReplyBytes += ( *lBufIt )->replyCounter();
-    }
 
     lAsioReplyBuffer.reserve ( lNrReplyBuffers );
-    log ( Debug() , "Expecting " , Integer ( lExpectedReplyBytes ) , " bytes in reply, for ", Integer ( mReplyBuffers.size() ), " buffers" );
+    log ( Debug() , "Expecting " , Integer ( lExpectedReplyBytes ) , " bytes in reply, for ", Integer ( mReplyBuffers.first.size() ), " buffers" );
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.begin(); lBufIt != mReplyBuffers.end(); lBufIt++ )
+    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( ( *lBufIt )->getReplyBuffer() );
 
@@ -439,7 +469,7 @@ namespace uhal
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
       {
         mAsynchronousException = new exception::TcpTimeout();
-        log ( *mAsynchronousException , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive from ",
+        log ( *mAsynchronousException , "Timeout (" , Integer ( this->getBoostTimeoutPeriod().total_milliseconds() ) , " milliseconds) occurred for receive (chunk) from ",
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI: ", this->uri() );
       }
       else
@@ -461,7 +491,7 @@ namespace uhal
     }
 
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.begin(); lBufIt != mReplyBuffers.end(); lBufIt++ )
+    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       try
       {
@@ -486,7 +516,7 @@ namespace uhal
     }
 
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
-    mPacketsInFlight -= mReplyBuffers.size();
+    mPacketsInFlight -= mReplyBuffers.first.size();
 
     if ( mReplyQueue.size() )
     {
@@ -496,7 +526,7 @@ namespace uhal
     }
     else
     {
-      mReplyBuffers.clear();
+      mReplyBuffers.first.clear();
     }
 
     if ( mDispatchBuffers.empty() && ( mDispatchQueue.size() >= (mFlushStarted ? 1 : nr_buffers_per_send) ) && ( mPacketsInFlight < this->getMaxNumberOfBuffers() ) )
@@ -504,7 +534,7 @@ namespace uhal
       write();
     }
 
-    if ( mDispatchBuffers.empty() && mReplyBuffers.empty() )
+    if ( mDispatchBuffers.empty() && mReplyBuffers.first.empty() )
     {
       mDeadlineTimer.expires_from_now ( boost::posix_time::seconds(60) );
       NotifyConditionalVariable ( true );
@@ -522,7 +552,7 @@ namespace uhal
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
       // SETTING THE EXCEPTION HERE CAN APPEAR AS A TIMEOUT WHEN NONE ACTUALLY EXISTS
-      if (  mDispatchBuffers.size() || mReplyBuffers.size() )
+      if (  mDispatchBuffers.size() || mReplyBuffers.first.size() )
       {
         log ( Warning() , "Closing TCP socket for device with URI " , Quote ( this->uri() ) , " since deadline has passed" );
       }
@@ -570,10 +600,10 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::dispatchExceptionHandler()
   {
-    log ( Warning() , "Closing Socket since exception detected." );
-
     if ( mSocket.is_open() )
     {
+      log ( Warning() , "Closing TCP socket for device with URI " , Quote ( this->uri() ) , " since exception detected." );
+
       try
       {
         mSocket.close();
@@ -594,10 +624,11 @@ namespace uhal
     }
 
     ClientInterface::returnBufferToPool ( mDispatchQueue );
-    ClientInterface::returnBufferToPool ( mReplyQueue );
+      for (size_t i = 0; i < mReplyQueue.size(); i++)
+        ClientInterface::returnBufferToPool ( mReplyQueue.at(i).first );
     mPacketsInFlight = 0;
     ClientInterface::returnBufferToPool ( mDispatchBuffers );
-    ClientInterface::returnBufferToPool ( mReplyBuffers );
+    ClientInterface::returnBufferToPool ( mReplyBuffers.first );
 
     mSendByteCounter = 0;
     mReplyByteCounter = 0;
