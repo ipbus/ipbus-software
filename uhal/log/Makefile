@@ -84,7 +84,7 @@ ${LibraryFile} : ${PackagePath}/obj/log.o
 LibraryObjectFiles += ${PackagePath}/obj/log.o
 
 ${GENERATOR_EXE} : ${GENERATOR_OBJ}
-	${LD} ${LDFLAGS} $< -o $@
+	${LD} ${LDFLAGS} -lstdc++ $< -o $@
 
 ${GENERATED_FILES} : .generated_files
 .generated_files : ${GENERATOR_EXE}

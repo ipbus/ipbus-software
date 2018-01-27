@@ -57,7 +57,8 @@ ExecutableLibraries = \
 		boost_chrono \
 		boost_regex \
 		boost_system \
-		pugixml
+		pugixml \
+		stdc++
 
 
 # Hide c++11-extensions warning when building on osx
