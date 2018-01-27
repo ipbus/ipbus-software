@@ -75,7 +75,7 @@ private:
 
   bool mStop;
 
-  int mDeviceFileHostToFPGA, mDeviceFileHostToFPGA_slave, mDeviceFileFPGAToHost;
+  int mDeviceFileHostToFPGA, mDeviceFileFPGAToHost;
 };
 
 } // end ns tests
