@@ -44,6 +44,7 @@
 
 #include <algorithm>                                        // for min
 #include <assert.h>
+#include <cstdlib>
 #include <fcntl.h>
 #include <iomanip>                                          // for operator<<
 #include <iostream>                                         // for operator<<
@@ -63,6 +64,7 @@
 #include "uhal/log/log_inserters.quote.hpp"                 // for Quote
 #include "uhal/log/log.hpp"
 #include "uhal/Buffers.hpp"
+#include "uhal/ClientFactory.hpp"
 
 
 namespace uhal {
@@ -79,6 +81,13 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   mPublishedReplyPageCount(0),
   mAsynchronousException ( NULL )
 {
+  if ( getenv("UHAL_ENABLE_IPBUS_PCIE") == NULL ) {
+    exception::ProtocolDoesNotExist lExc;
+    log(lExc, "The IPbus 2.0 PCIe client is still an experimental feature, since the software-driver interface could change in the future.");
+    log(lExc, "In order to enable the IPbus 2.0 PCIe client, you need to define the environment variable 'UHAL_ENABLE_IPBUS_PCIE'");
+    throw lExc;
+  }
+
   if ( aUri.mHostname.find(",") == std::string::npos ) {
     exception::PCIeInitialisationError lExc;
     log(lExc, "No comma found in hostname of PCIe client URI '" + uri() + "'; cannot construct 2 paths for device files");
