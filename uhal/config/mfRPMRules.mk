@@ -49,5 +49,5 @@ _spec_update:
 .PHONY: cleanrpm _cleanrpm
 cleanrpm: _cleanrpm
 _cleanrpm:
-	-rm -r rpm
+	rm -rf rpm
 
