@@ -46,7 +46,11 @@
 #include <string>
 #include <utility>
 
+#include <boost/function.hpp>                    // for function
+#include <boost/thread/mutex.hpp>                // for mutex
+
 #include "uhal/log/exception.hpp"
+#include "uhal/ClientInterface.hpp"              // for PacketLevelError
 #include "uhal/ProtocolIPbusCore.hpp"
 
 

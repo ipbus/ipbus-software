@@ -3,11 +3,11 @@
 #define _uhal_TimeIntervalStats_hpp_
 
 
+#include <iosfwd>                          // for ostream
 #include <queue>
+#include <stddef.h>                        // for size_t
 
-#include <boost/chrono.hpp>
-
-#include "uhal/utilities/TimeIntervalStats.hpp"
+#include <boost/chrono/system_clocks.hpp>  // for steady_clock
 
 
 namespace uhal {

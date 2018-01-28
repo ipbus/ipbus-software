@@ -2,6 +2,10 @@
 #include "uhal/tests/TCPDummyHardware.hpp"
 
 
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log.hpp"
+
+
 template< uint8_t IPbus_major , uint8_t IPbus_minor >
 void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::run()
 {

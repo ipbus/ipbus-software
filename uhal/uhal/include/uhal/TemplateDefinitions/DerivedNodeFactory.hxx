@@ -31,6 +31,12 @@
 */
 
 
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log_inserters.type.hpp"
+#include "uhal/log/log.hpp"
+
+
 namespace uhal
 {
 

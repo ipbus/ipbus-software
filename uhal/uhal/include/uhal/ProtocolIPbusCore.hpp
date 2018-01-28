@@ -43,16 +43,23 @@
 #include <deque>
 #include <iosfwd>
 #include <stdint.h>
+#include <string>
 #include <utility>
 #include <vector>
 
-#include "boost/function.hpp"
+#include <boost/function.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/ValMem.hpp"
 
+
+namespace boost {
+  namespace posix_time {
+    class time_duration;
+  }
+}
 
 namespace uhal
 {

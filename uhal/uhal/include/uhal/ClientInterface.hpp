@@ -41,16 +41,20 @@
 #define _uhal_ClientInterface_hpp_
 
 
+#include <deque>
+#include <stdint.h>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+
 #include "uhal/grammars/URI.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
 #include "uhal/ValMem.hpp"
-
-#include <vector>
-#include <deque>
-
-#include <boost/thread/mutex.hpp>
-
 
 
 namespace uhal
@@ -94,7 +98,7 @@ namespace uhal
       	@param aUri a struct containing the full URI of the target.
         @param aTimeoutPeriod the default timeout period for the protocol
       */
-      ClientInterface ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod = boost::posix_time::pos_infin );
+      ClientInterface ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod );
 
     private:
       /**

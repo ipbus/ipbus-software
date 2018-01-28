@@ -42,14 +42,27 @@
 #include "uhal/ProtocolPCIe.hpp"
 
 
+#include <algorithm>                                        // for min
+#include <assert.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <iomanip>                                          // for operator<<
+#include <iostream>                                         // for operator<<
 #include <sys/stat.h>
+#include <stdlib.h>                                         // for size_t, free
+#include <string.h>                                         // for memcpy
+#include <unistd.h>
 
-#include <boost/thread/thread.hpp>
+#include <boost/chrono/duration.hpp>                        // for operator>
+#include <boost/chrono/time_point.hpp>                      // for operator-
+#include <boost/thread/thread.hpp>                          // for sleep_for
+#include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
 
-#include "uhal/Buffers.hpp"
+#include "uhal/grammars/URI.hpp"                            // for URI
+#include "uhal/log/LogLevels.hpp"                           // for BaseLogLevel
+#include "uhal/log/log_inserters.integer.hpp"               // for Integer
+#include "uhal/log/log_inserters.quote.hpp"                 // for Quote
 #include "uhal/log/log.hpp"
+#include "uhal/Buffers.hpp"
 
 
 namespace uhal {

@@ -38,6 +38,9 @@
 
 #include <boost/program_options.hpp>
 
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log.hpp"
+
 
 namespace uhal {
   namespace tests {

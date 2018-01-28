@@ -41,21 +41,23 @@
 #define _uhal_DerivedNodeFactory_hpp_
 
 
-#include "uhal/log/log.hpp"
-#include "uhal/definitions.hpp"
-#include "uhal/Node.hpp"
+#include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/unordered_map.hpp>
 
 
+namespace boost {
+  template <class Y> class shared_ptr;
+}
+
 namespace uhal
 {
+  class Node;
+  class NodeTreeBuilder;   // IWYU pragma: keep
 
-  class NodeTreeBuilder;
-
-  //! EXPERIMENTAL! Helper class to add Nodes derived from DerivedNode to the class factory
-  template< typename T > struct RegistrationHelper;
+  //! Helper class to add Nodes derived from DerivedNode to the class factory
+  template< typename T > struct RegistrationHelper;   // IWYU pragma: keep
 
 
   /**

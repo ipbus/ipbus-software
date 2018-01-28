@@ -45,9 +45,13 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "uhal/ClientInterface.hpp"
-#include "uhal/Node.hpp"
+#include "uhal/ClientInterface.hpp" // IWYU pragma: keep
+#include "uhal/Node.hpp"            // IWYU pragma: keep
 
+
+namespace boost {
+  template <class Y> class shared_ptr;
+}
 
 namespace uhal
 {

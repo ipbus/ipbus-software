@@ -33,7 +33,8 @@
 #include "uhal/ProtocolUDP.hpp"
 
 
-#include <sys/time.h>
+#include <exception>
+#include <utility>
 
 #include <boost/bind/bind.hpp>
 #include <boost/lambda/lambda.hpp>
@@ -43,8 +44,13 @@
 #include <boost/asio/placeholders.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log_inserters.location.hpp"
+#include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log.hpp"
+#include "uhal/grammars/URI.hpp"
 #include "uhal/Buffers.hpp"
-#include "uhal/IPbusInspector.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 
 

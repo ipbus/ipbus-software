@@ -3,7 +3,7 @@
 
     This file is part of uHAL.
 
-    uHAL is a hardware access library and programming framework
+    uHAL is a hardware access library aod programming framework
     originally developed for upgrades of the Level-1 trigger of the CMS
     experiment at CERN.
 
@@ -32,7 +32,16 @@
 
 #include "uhal/DerivedNodeFactory.hpp"
 
+
+#include <stddef.h>                          // for NULL
+
+#include <boost/shared_ptr.hpp>              // for shared_ptr
+#include <boost/unordered_map.hpp>            // for operator!=, operator==
+
+#include "uhal/log/LogLevels.hpp"            // for Warning
+#include "uhal/log/log_inserters.quote.hpp"  // for Quote, _Quote
 #include "uhal/log/log.hpp"
+#include "uhal/Node.hpp"
 
 
 namespace uhal

@@ -2,6 +2,14 @@
 #include "uhal/utilities/TimeIntervalStats.hpp"
 
 
+#include <boost/chrono/duration.hpp>    // for operator/, operator<, operator>
+#include <boost/chrono/time_point.hpp>  // for operator-
+#include <boost/ratio/ratio.hpp>        // for ratio
+#include <boost/ratio/ratio_fwd.hpp>    // for milli
+
+#include <ostream>                      // for operator<<, ostream, basic_os...
+
+
 namespace uhal {
 
 TimeIntervalStats::TimeIntervalStats() :
@@ -66,7 +74,6 @@ void TimeIntervalStats::clear()
 {
   for (size_t i = 0; i < nMeasurements; i++)
     mLatestMeasurements.pop();
-  assert (mLatestMeasurements.size() == 0);
   nMeasurements = 0;
 }
 

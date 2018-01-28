@@ -39,6 +39,10 @@
 #include "uhal/Node.hpp"
 
 
+namespace boost {
+  template <class Y> class shared_ptr;
+}
+
 namespace uhal
 {
 
