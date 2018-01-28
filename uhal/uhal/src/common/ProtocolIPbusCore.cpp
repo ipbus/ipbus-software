@@ -32,8 +32,21 @@
 
 #include "uhal/ProtocolIPbusCore.hpp"
 
-#include "uhal/Buffers.hpp"
+
+#include <algorithm>                            // for min
+#include <ostream>                              // for operator<<
+#include <stddef.h>                             // for NULL
+
+#include <boost/shared_ptr.hpp>                 // for shared_ptr
+#include <boost/thread/lock_guard.hpp>          // for lock_guard
+#include <boost/thread/mutex.hpp>               // for mutex
+
+#include "uhal/log/LogLevels.hpp"               // for BaseLogLevel, Debug
 #include "uhal/log/log.hpp"
+#include "uhal/log/log_inserters.integer.hpp"   // for Integer, _Integer
+#include "uhal/log/log_inserters.location.hpp"  // for ThisLocation
+#include "uhal/log/log_inserters.quote.hpp"     // for Quote, _Quote
+#include "uhal/Buffers.hpp"
 
 
 namespace uhal

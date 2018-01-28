@@ -35,6 +35,8 @@
 
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log.hpp"
 
 
 namespace uhal

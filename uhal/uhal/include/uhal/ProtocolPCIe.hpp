@@ -42,20 +42,30 @@
 #ifndef _uhal_ProtocolPCIe_hpp_
 #define _uhal_ProtocolPCIe_hpp_
 
+#include <deque>                           // for deque
+#include <stddef.h>                        // for size_t
+#include <stdint.h>                        // for uint32_t, uint8_t
+#include <string>                          // for string
+#include <utility>                         // for pair
+#include <vector>                          // for vector
 
-#include <iostream>
-#include <iomanip>
-#include <string>
-
-#include <boost/shared_ptr.hpp>
+#include <boost/chrono/system_clocks.hpp>  // for steady_clock
+#include <boost/function.hpp>              // for function
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 
 
+namespace boost
+{
+  template <class Y> class shared_ptr;
+}
+
 namespace uhal
 {
+  class Buffers;
+  struct URI;
 
   namespace exception
   {

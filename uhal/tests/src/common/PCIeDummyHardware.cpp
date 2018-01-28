@@ -44,6 +44,10 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log.hpp"
 #include "uhal/ProtocolPCIe.hpp"
 
 

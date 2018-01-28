@@ -35,9 +35,12 @@
 
 #include <sstream>
 
-#include "boost/thread/lock_guard.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 #include "uhal/Buffers.hpp"
+#include "uhal/log/LogLevels.hpp"                              // for BaseLo...
+#include "uhal/log/log_inserters.integer.hpp"                  // for Integer
 #include "uhal/log/log.hpp"
 #include "uhal/utilities/bits.hpp"
 

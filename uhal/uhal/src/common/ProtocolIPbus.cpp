@@ -36,6 +36,10 @@
 #include <stdint.h>
 #include <ostream>
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>  // for seconds
+#include <boost/shared_ptr.hpp>                             // for shared_ptr
+#include <boost/thread/lock_guard.hpp>                      // for lock_guard
+
 #include "uhal/Buffers.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/LogLevels.hpp"

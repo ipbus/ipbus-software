@@ -44,11 +44,8 @@
 #include <vector>
 
 #include "uhal/ProtocolIPbusCore.hpp"
-#include "uhal/log/log_inserters.integer.hpp"
-#include "uhal/log/log.hpp"
 
 
-// Using the uhal namespace
 namespace uhal
 {
 
