@@ -11,7 +11,7 @@ PackageName = cactuscore-uhal-gui
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 3
 PACKAGE_VER_PATCH = 0
-PACKAGE_RELEASE = 0${PACKAGE_RELEASE_SUFFIX}
+PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageDescription = Python GUI for uTCA HW access based on uHAL
 PackageURL = https://ipbus.web.cern.ch/ipbus
