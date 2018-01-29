@@ -165,12 +165,14 @@ publish_build_job:
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2018-01-14
   variables:
     REPO_URL_OS_SUBDIR: slc6_x86_64
+    UHAL_ENABLE_IPBUS_PCIE: ""
 
 .job_template: &centos7_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:2018-01-14
   variables:
     REPO_URL_OS_SUBDIR: centos7_x86_64
+    UHAL_ENABLE_IPBUS_PCIE: ""
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
 
 
@@ -186,12 +188,16 @@ publish_build_job:
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
   dependencies:
     - build:fedora26
+  variables:
+    UHAL_ENABLE_IPBUS_PCIE: ""
 
 .job_template: &ubuntu16_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2018-01-14__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
   dependencies:
     - build:ubuntu16
+  variables:
+    UHAL_ENABLE_IPBUS_PCIE: ""
 
 
 
