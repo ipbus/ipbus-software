@@ -11,7 +11,7 @@ PackageName = cactuscore-uhal-tools
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 6
 PACKAGE_VER_PATCH = 0
-PACKAGE_RELEASE = 0.alpha.2${PACKAGE_RELEASE_SUFFIX}
+PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageSummary = uTCA HW Development Tools that depend on uHAL
 PackageDescription = uTCA HW Development Tools that depend on uHAL
