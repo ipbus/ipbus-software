@@ -328,6 +328,11 @@ void PCIe::read()
     mAsynchronousException = new exception::ValidationError ();
     log ( *mAsynchronousException , "Exception caught during reply validation for PCIe device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
   }
+
+  if ( mAsynchronousException )
+  {
+    mAsynchronousException->ThrowAsDerivedType();
+  }
 }
 
 
