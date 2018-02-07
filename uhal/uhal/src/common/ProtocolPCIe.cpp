@@ -264,6 +264,40 @@ void PCIe::read()
   SteadyClock_t::time_point lStartTime = SteadyClock_t::now();
 
   uint32_t lHwPublishedPageCount = 0x0;
+  unsigned int rx_event[1] = {0};
+  int rc = 0;
+  
+  mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY|O_NONBLOCK);
+  assert(mDeviceFileFPGAEvent >= 0);
+
+  // wait for interrupt; read events file node to see if user interrupt has come
+  while (true){
+    rx_event[0] = 0;
+    rc = 0;
+
+    rc = ::read(mDeviceFileFPGAEvent, rx_event, 4);
+    if(rx_event[0] == 1) {
+        //std::cout <<" \n Interrupt recieved " << std::endl;
+     break;
+     }
+    
+    
+    if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
+      exception::PCIeTimeout lExc;
+      log(lExc, "Next page (index ", Integer(lPageIndexToRead), " count ", Integer(mPublishedReplyPageCount+1), ") of PCIe device '" + mDevicePathHostToFPGA + "' is not ready after timeout period");
+      throw lExc;
+     }
+    
+    log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Waiting for interrupt  ", "; sleeping for a while ...");
+    // boost::this_thread::sleep_for( boost::chrono::microseconds(50));
+ 
+   } // end of while (true)
+    
+   close(mDeviceFileFPGAEvent);
+   
+
+  // Polling 
+  /*
   while ( true ) {
     std::vector<uint32_t> lValues;
     // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
@@ -285,6 +319,8 @@ void PCIe::read()
     log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mPublishedReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for a while ...");
     boost::this_thread::sleep_for( boost::chrono::microseconds(50));
   }
+ */
+
 
   log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mPublishedReplyPageCount), ")");
 

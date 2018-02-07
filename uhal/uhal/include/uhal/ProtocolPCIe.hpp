@@ -56,6 +56,14 @@
 #include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <sys/poll.h>
+#include <sys/errno.h>
 
 namespace boost
 {
@@ -162,7 +170,8 @@ namespace uhal
       int mDeviceFileHostToFPGA;
       //! File descriptor for FPGA-to-host device file
       int mDeviceFileFPGAToHost;
-
+      //! File descriptor for FPGA-to-host interrupt (event)
+      int mDeviceFileFPGAEvent;
 
       uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount;
 
