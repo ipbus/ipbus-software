@@ -161,7 +161,10 @@ uint32_t PCIe::getMaxReplySize()
 
 void PCIe::connect()
 {
-  log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathHostToFPGA ) , " (client-to-device)" );
+ char *IntEnv = "UHAL_ENABLE_PCIE_INTERRUPT";
+ char *envRet;
+
+ log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathHostToFPGA ) , " (client-to-device)" );
 
   mDeviceFileHostToFPGA = open(mDevicePathHostToFPGA.c_str(), O_RDWR );
   if ( mDeviceFileHostToFPGA < 0 ) {
@@ -188,6 +191,15 @@ void PCIe::connect()
   mPublishedReplyPageCount = lValues.at(3);
 
   log ( Info() , "PCIe client connected to device at ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathHostToFPGA), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
+  
+  envRet = getenv(IntEnv);
+  if(envRet){
+    use_interrupt = true;
+    log (Info() , "Using PCIe interrupt for ipbus reply packet status update");
+    //std::cout << "Using interrupt" << std::endl;
+  }
+  else
+    use_interrupt = false;
 }
 
 
@@ -266,20 +278,23 @@ void PCIe::read()
   uint32_t lHwPublishedPageCount = 0x0;
   unsigned int rx_event[1] = {0};
   int rc = 0;
-  
-  mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY|O_NONBLOCK);
-  assert(mDeviceFileFPGAEvent >= 0);
+    
+  mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY);
+  //assert(mDeviceFileFPGAEvent >= 0);
 
   // wait for interrupt; read events file node to see if user interrupt has come
-  while (true){
+ if(use_interrupt)
+ { 
+ while (true){
     rx_event[0] = 0;
     rc = 0;
-
+    
+    //  mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY);
     rc = ::read(mDeviceFileFPGAEvent, rx_event, 4);
     if(rx_event[0] == 1) {
         //std::cout <<" \n Interrupt recieved " << std::endl;
      break;
-     }
+    }
     
     
     if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
@@ -289,15 +304,16 @@ void PCIe::read()
      }
     
     log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Waiting for interrupt  ", "; sleeping for a while ...");
-    // boost::this_thread::sleep_for( boost::chrono::microseconds(50));
+   // boost::this_thread::sleep_for( boost::chrono::microseconds(2));
  
    } // end of while (true)
     
    close(mDeviceFileFPGAEvent);
-   
-
+ } 
+ else 
+ {
   // Polling 
-  /*
+  
   while ( true ) {
     std::vector<uint32_t> lValues;
     // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
@@ -319,8 +335,8 @@ void PCIe::read()
     log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mPublishedReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for a while ...");
     boost::this_thread::sleep_for( boost::chrono::microseconds(50));
   }
- */
-
+ 
+ }
 
   log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mPublishedReplyPageCount), ")");
 

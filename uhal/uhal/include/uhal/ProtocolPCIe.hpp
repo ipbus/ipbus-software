@@ -173,6 +173,8 @@ namespace uhal
       //! File descriptor for FPGA-to-host interrupt (event)
       int mDeviceFileFPGAEvent;
 
+      bool use_interrupt;
+
       uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount;
 
       //! The list of buffers still awaiting a reply
