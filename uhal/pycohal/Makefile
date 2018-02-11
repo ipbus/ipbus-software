@@ -29,7 +29,8 @@ IncludePaths = include  \
 		${PYTHON_INCLUDE_PREFIX} \
 		${BUILD_HOME}/uhal/log/include  \
 		${BUILD_HOME}/uhal/grammars/include \
-		${BUILD_HOME}/uhal/uhal/include
+		${BUILD_HOME}/uhal/uhal/include \
+		${BUILD_HOME}/uhal/tests/include
 
 LibraryPaths = \
 		${EXTERN_BOOST_LIB_PREFIX} \
@@ -37,9 +38,11 @@ LibraryPaths = \
 		${PYTHON_LIB_PREFIX} \
 		${BUILD_HOME}/uhal/log/lib \
 		${BUILD_HOME}/uhal/grammars/lib \
-		${BUILD_HOME}/uhal/uhal/lib
+		${BUILD_HOME}/uhal/uhal/lib \
+		${BUILD_HOME}/uhal/tests/lib
 
 Libraries = \
+		cactus_uhal_tests \
 		cactus_uhal_uhal \
 		cactus_uhal_log \
 		cactus_uhal_grammars \

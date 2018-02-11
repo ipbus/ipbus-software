@@ -60,16 +60,22 @@ void DummyHardwareRunner::setReplyDelay(const boost::chrono::microseconds& aDela
 }
 
 
-double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream)
+double measureReadLatency(ClientInterface& aClient, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose)
+{
+  return measureReadLatency(std::vector<ClientInterface*>(1, &aClient), aBaseAddr, aDepth, aNrIterations, aDispatchEachIteration, aVerbose);
+}
+
+
+double measureReadLatency(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose)
 {
   typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
   Timer myTimer;
 
   for ( unsigned i = 0; i < aNrIterations ; ++i )
   {
-    if ( aOutStream )
+    if ( aVerbose )
     {
-      (*aOutStream) << "Iteration " << i << std::endl;
+      std::cout << "Iteration " << i << std::endl;
     }
 
     for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
@@ -98,7 +104,13 @@ double measureRxPerformance(const std::vector<ClientInterface*>& aClients, uint3
 }
 
 
-double measureTxPerformance(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, std::ostream* aOutStream)
+double measureWriteLatency(ClientInterface& aClient, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose)
+{
+  return measureWriteLatency(std::vector<ClientInterface*>(1, &aClient), aBaseAddr, aDepth, aNrIterations, aDispatchEachIteration, aVerbose);
+}
+
+
+double measureWriteLatency(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose)
 {
   typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
 
@@ -108,9 +120,9 @@ double measureTxPerformance(const std::vector<ClientInterface*>& aClients, uint3
 
   for ( unsigned i = 0; i < aNrIterations ; ++i )
   {
-    if ( aOutStream )
+    if ( aVerbose )
     {
-      (*aOutStream) << "Iteration " << i << std::endl;
+      std::cout << "Iteration " << i << std::endl;
     }
 
     // Create the packet

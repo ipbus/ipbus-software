@@ -310,7 +310,7 @@ void uhal::tests::PerfTester::bandwidthRxTest()
     lClients.push_back( &*iClient );
   }
 
-  double totalSeconds = measureRxPerformance(lClients, m_baseAddr, m_bandwidthTestDepth, m_iterations, m_perIterationDispatch, (m_verbose ? &std::cout : NULL));
+  double totalSeconds = measureReadLatency(lClients, m_baseAddr, m_bandwidthTestDepth, m_iterations, m_perIterationDispatch, m_verbose);
   double totalPayloadKB = m_deviceURIs.size() * m_iterations * m_bandwidthTestDepth * 4. / 1024.;
   double dataRateKB_s = totalPayloadKB/totalSeconds;
   outputStandardResults ( totalSeconds );
@@ -337,7 +337,7 @@ void uhal::tests::PerfTester::bandwidthTxTest()
     lClients.push_back( &*iClient );
   }
 
-  double totalSeconds = measureTxPerformance(lClients, m_baseAddr, m_bandwidthTestDepth, m_iterations, m_perIterationDispatch, (m_verbose ? &std::cout : NULL));
+  double totalSeconds = measureWriteLatency(lClients, m_baseAddr, m_bandwidthTestDepth, m_iterations, m_perIterationDispatch, m_verbose);
   double totalPayloadKB = m_deviceURIs.size() * m_iterations * m_bandwidthTestDepth * 4. / 1024.;
   double dataRateKB_s = totalPayloadKB/totalSeconds;
   outputStandardResults ( totalSeconds );

@@ -56,10 +56,7 @@ namespace tests {
 
 void report_rx_performance(ClientInterface& aClient, const uint32_t aBaseAddr, const uint32_t aDepth, const size_t aNrIterations, const bool aDispatchEachIteration)
 {
-  std::vector<ClientInterface*> lClients;
-  lClients.push_back(&aClient);
-
-  double totalSeconds = measureRxPerformance(lClients, aBaseAddr, aDepth, aNrIterations, aDispatchEachIteration, NULL);
+  double totalSeconds = measureReadLatency(aClient, aBaseAddr, aDepth, aNrIterations, aDispatchEachIteration, false);
   double totalPayloadKB = aNrIterations * aDepth * 4. / 1024.;
   double dataRateKB_s = totalPayloadKB/totalSeconds;
   std::cout << " --> " << aNrIterations << " reads, each " << aDepth << " x 32-bit words, took " << totalSeconds << " seconds" << std::endl
@@ -70,10 +67,7 @@ void report_rx_performance(ClientInterface& aClient, const uint32_t aBaseAddr, c
 
 void report_tx_performance(ClientInterface& aClient, const uint32_t aBaseAddr, const uint32_t aDepth, const size_t aNrIterations, const bool aDispatchEachIteration)
 {
-  std::vector<ClientInterface*> lClients;
-  lClients.push_back(&aClient);
-
-  double totalSeconds = measureTxPerformance(lClients, aBaseAddr, aDepth, aNrIterations, aDispatchEachIteration, NULL);
+  double totalSeconds = measureWriteLatency(aClient, aBaseAddr, aDepth, aNrIterations, aDispatchEachIteration, false);
   double totalPayloadKB = aNrIterations * aDepth * 4. / 1024.;
   double dataRateKB_s = totalPayloadKB/totalSeconds;
   std::cout << " --> " << aNrIterations << " writes, each " << aDepth << " x 32-bit words, took " << totalSeconds << " seconds" << std::endl
