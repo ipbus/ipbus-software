@@ -194,12 +194,12 @@ void PCIe::connect()
   
   envRet = getenv(IntEnv);
   if(envRet){
-    use_interrupt = true;
+    mUseInterrupt = true;
     log (Info() , "Using PCIe interrupt for ipbus reply packet status update");
     //std::cout << "Using interrupt" << std::endl;
   }
   else
-    use_interrupt = false;
+    mUseInterrupt = false;
 }
 
 
@@ -276,22 +276,22 @@ void PCIe::read()
   SteadyClock_t::time_point lStartTime = SteadyClock_t::now();
 
   uint32_t lHwPublishedPageCount = 0x0;
-  unsigned int rx_event[1] = {0};
-  int rc = 0;
+  unsigned int lRxEvent[1] = {0};
+  int lRC = 0;
     
   mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY);
   //assert(mDeviceFileFPGAEvent >= 0);
 
   // wait for interrupt; read events file node to see if user interrupt has come
- if(use_interrupt)
+ if(mUseInterrupt)
  { 
  while (true){
-    rx_event[0] = 0;
-    rc = 0;
+    lRxEvent[0] = 0;
+    lRC = 0;
     
     //  mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY);
-    rc = ::read(mDeviceFileFPGAEvent, rx_event, 4);
-    if(rx_event[0] == 1) {
+    lRC = ::read(mDeviceFileFPGAEvent, lRxEvent, 4);
+    if(lRxEvent[0] == 1) {
         //std::cout <<" \n Interrupt recieved " << std::endl;
      break;
     }
