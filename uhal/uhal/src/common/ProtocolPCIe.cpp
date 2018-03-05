@@ -187,7 +187,7 @@ uint32_t PCIe::getMaxReplySize()
 
 void PCIe::connect()
 {
- log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathHostToFPGA ) , " (client-to-device)" );
+  log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathHostToFPGA ) , " (client-to-device)" );
 
   mDeviceFileHostToFPGA = open(mDevicePathHostToFPGA.c_str(), O_RDWR );
   if ( mDeviceFileHostToFPGA < 0 ) {
