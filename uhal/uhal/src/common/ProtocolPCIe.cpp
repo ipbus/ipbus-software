@@ -75,6 +75,8 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   mDevicePathFPGAToHost(aUri.mHostname.substr(aUri.mHostname.find(",")+1)),
   mDeviceFileHostToFPGA(-1),
   mDeviceFileFPGAToHost(-1),
+  mDeviceFileFPGAEvent(-1),
+  mUseInterrupt(false),
   mNumberOfPages(0),
   mPageSize(0),
   mIndexNextPage(0),
@@ -97,6 +99,20 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
     exception::PCIeInitialisationError lExc;
     log(lExc, "Hostname of PCIe client URI '" + uri() + "' starts/ends with a comma; cannot construct 2 paths for device files");
     throw lExc;
+  }
+
+  for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
+    if (lIt->first == "events") {
+      if (mUseInterrupt) {
+        exception::PCIeInitialisationError lExc;
+        log(lExc, "PCIe client URI ", Quote(uri()), ": 'events' attribute is specified multiple times");
+        throw lExc;
+      }
+
+      mUseInterrupt = true;
+      mDevicePathFPGAEvent = lIt->second;
+      log (Info() , "PCIe client with URI", Quote (uri()), " is configured to use interrupts");
+    }
   }
 }
 
@@ -161,9 +177,6 @@ uint32_t PCIe::getMaxReplySize()
 
 void PCIe::connect()
 {
- char *IntEnv = "UHAL_ENABLE_PCIE_INTERRUPT";
- char *envRet;
-
  log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathHostToFPGA ) , " (client-to-device)" );
 
   mDeviceFileHostToFPGA = open(mDevicePathHostToFPGA.c_str(), O_RDWR );
@@ -174,7 +187,7 @@ void PCIe::connect()
   }
 
 
-  log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathHostToFPGA ) , " (device-to-client)" );
+  log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathFPGAToHost ) , " (device-to-client)" );
   mDeviceFileFPGAToHost = open(mDevicePathFPGAToHost.c_str(), O_RDWR | O_NONBLOCK  /* for read might need O_RDWR | O_NONBLOCK */ );
   if ( mDeviceFileFPGAToHost < 0 ) {
     exception::PCIeInitialisationError lExc;
@@ -190,16 +203,17 @@ void PCIe::connect()
   mIndexNextPage = lValues.at(2);
   mPublishedReplyPageCount = lValues.at(3);
 
-  log ( Info() , "PCIe client connected to device at ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathHostToFPGA), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
-  
-  envRet = getenv(IntEnv);
-  if(envRet){
-    mUseInterrupt = true;
-    log (Info() , "Using PCIe interrupt for ipbus reply packet status update");
-    //std::cout << "Using interrupt" << std::endl;
+
+  if (mUseInterrupt) {
+    mDeviceFileFPGAEvent = open(mDevicePathFPGAEvent.c_str(), O_RDONLY);
+    if ( mDeviceFileFPGAEvent < 0 ) {
+      exception::PCIeInitialisationError lExc;
+      log(lExc, "Cannot open 'interrupt event' device file '" + mDevicePathFPGAEvent + "'");
+      throw lExc;
+    }
   }
-  else
-    mUseInterrupt = false;
+
+  log ( Info() , "PCIe client connected to device at ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
 }
 
 
@@ -208,6 +222,7 @@ void PCIe::disconnect()
   // FIXME: Add proper implementation
   mDeviceFileHostToFPGA = -1;
   mDeviceFileFPGAToHost = -1;
+  mDeviceFileFPGAEvent = -1;
 }
 
 
@@ -279,9 +294,6 @@ void PCIe::read()
   unsigned int lRxEvent[1] = {0};
   int lRC = 0;
     
-  mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY);
-  //assert(mDeviceFileFPGAEvent >= 0);
-
   // wait for interrupt; read events file node to see if user interrupt has come
  if(mUseInterrupt)
  { 
@@ -289,7 +301,6 @@ void PCIe::read()
     lRxEvent[0] = 0;
     lRC = 0;
     
-    //  mDeviceFileFPGAEvent = open("/dev/xdma/card0/events0", O_RDONLY);
     lRC = ::read(mDeviceFileFPGAEvent, lRxEvent, 4);
     if(lRxEvent[0] == 1) {
         //std::cout <<" \n Interrupt recieved " << std::endl;
@@ -307,8 +318,6 @@ void PCIe::read()
    // boost::this_thread::sleep_for( boost::chrono::microseconds(2));
  
    } // end of while (true)
-    
-   close(mDeviceFileFPGAEvent);
  } 
  else 
  {
