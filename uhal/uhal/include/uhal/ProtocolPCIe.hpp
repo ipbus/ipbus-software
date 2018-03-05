@@ -169,6 +169,8 @@ namespace uhal
 
       bool mUseInterrupt;
 
+      boost::chrono::microseconds mSleepDuration;
+
       uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount;
 
       //! The list of buffers still awaiting a reply

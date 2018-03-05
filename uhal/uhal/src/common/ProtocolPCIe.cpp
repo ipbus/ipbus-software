@@ -55,6 +55,7 @@
 
 #include <boost/chrono/duration.hpp>                        // for operator>
 #include <boost/chrono/time_point.hpp>                      // for operator-
+#include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>                          // for sleep_for
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
 
@@ -111,7 +112,16 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
 
       mUseInterrupt = true;
       mDevicePathFPGAEvent = lIt->second;
-      log (Info() , "PCIe client with URI", Quote (uri()), " is configured to use interrupts");
+      log (Info() , "PCIe client with URI ", Quote (uri()), " is configured to use interrupts");
+    }
+  }
+
+  mSleepDuration = boost::chrono::microseconds(mUseInterrupt ? 0 : 50);
+
+  for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
+    if (lIt->first == "sleep") {
+      mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
     }
   }
 }
@@ -309,8 +319,9 @@ void PCIe::read()
         throw lExc;
       }
 
-      log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Waiting for interrupt; sleeping for a while ...");
-     // boost::this_thread::sleep_for( boost::chrono::microseconds(2));
+      log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Waiting for interrupt; sleeping for ", mSleepDuration.count(), "us");
+      if (mSleepDuration > boost::chrono::microseconds(0))
+        boost::this_thread::sleep_for( mSleepDuration );
 
     } // end of while (true)
 
@@ -338,8 +349,9 @@ void PCIe::read()
         throw lExc;
       }
 
-      log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mPublishedReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for a while ...");
-      boost::this_thread::sleep_for( boost::chrono::microseconds(50));
+      log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mPublishedReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
+      if (mSleepDuration > boost::chrono::microseconds(0))
+        boost::this_thread::sleep_for( mSleepDuration );
     }
 
     log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mPublishedReplyPageCount), ")");
