@@ -55,6 +55,7 @@
 
 #include <boost/chrono/duration.hpp>                        // for operator>
 #include <boost/chrono/time_point.hpp>                      // for operator-
+#include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>                          // for sleep_for
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
 
@@ -75,6 +76,8 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   mDevicePathFPGAToHost(aUri.mHostname.substr(aUri.mHostname.find(",")+1)),
   mDeviceFileHostToFPGA(-1),
   mDeviceFileFPGAToHost(-1),
+  mDeviceFileFPGAEvent(-1),
+  mUseInterrupt(false),
   mNumberOfPages(0),
   mPageSize(0),
   mIndexNextPage(0),
@@ -97,6 +100,29 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
     exception::PCIeInitialisationError lExc;
     log(lExc, "Hostname of PCIe client URI '" + uri() + "' starts/ends with a comma; cannot construct 2 paths for device files");
     throw lExc;
+  }
+
+  for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
+    if (lIt->first == "events") {
+      if (mUseInterrupt) {
+        exception::PCIeInitialisationError lExc;
+        log(lExc, "PCIe client URI ", Quote(uri()), ": 'events' attribute is specified multiple times");
+        throw lExc;
+      }
+
+      mUseInterrupt = true;
+      mDevicePathFPGAEvent = lIt->second;
+      log (Info() , "PCIe client with URI ", Quote (uri()), " is configured to use interrupts");
+    }
+  }
+
+  mSleepDuration = boost::chrono::microseconds(mUseInterrupt ? 0 : 50);
+
+  for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
+    if (lIt->first == "sleep") {
+      mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
+    }
   }
 }
 
@@ -171,7 +197,7 @@ void PCIe::connect()
   }
 
 
-  log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathHostToFPGA ) , " (device-to-client)" );
+  log ( Debug() , "PCIe client is opening device file " , Quote ( mDevicePathFPGAToHost ) , " (device-to-client)" );
   mDeviceFileFPGAToHost = open(mDevicePathFPGAToHost.c_str(), O_RDWR | O_NONBLOCK  /* for read might need O_RDWR | O_NONBLOCK */ );
   if ( mDeviceFileFPGAToHost < 0 ) {
     exception::PCIeInitialisationError lExc;
@@ -187,7 +213,17 @@ void PCIe::connect()
   mIndexNextPage = lValues.at(2);
   mPublishedReplyPageCount = lValues.at(3);
 
-  log ( Info() , "PCIe client connected to device at ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathHostToFPGA), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
+
+  if (mUseInterrupt) {
+    mDeviceFileFPGAEvent = open(mDevicePathFPGAEvent.c_str(), O_RDONLY);
+    if ( mDeviceFileFPGAEvent < 0 ) {
+      exception::PCIeInitialisationError lExc;
+      log(lExc, "Cannot open 'interrupt event' device file '" + mDevicePathFPGAEvent + "'");
+      throw lExc;
+    }
+  }
+
+  log ( Info() , "PCIe client connected to device at ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
 }
 
 
@@ -196,6 +232,7 @@ void PCIe::disconnect()
   // FIXME: Add proper implementation
   mDeviceFileHostToFPGA = -1;
   mDeviceFileFPGAToHost = -1;
+  mDeviceFileFPGAEvent = -1;
 }
 
 
@@ -263,30 +300,63 @@ void PCIe::read()
   const size_t lPageIndexToRead = (mIndexNextPage - mReplyQueue.size() + mNumberOfPages) % mNumberOfPages;
   SteadyClock_t::time_point lStartTime = SteadyClock_t::now();
 
-  uint32_t lHwPublishedPageCount = 0x0;
-  while ( true ) {
-    std::vector<uint32_t> lValues;
-    // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
-    dmaRead(mDeviceFileFPGAToHost, 3, 1, lValues);
-    lHwPublishedPageCount = lValues.at(0);
+    
+  if (mUseInterrupt)
+  {
+    uint32_t lRxEvent = 0;
+    // wait for interrupt; read events file node to see if user interrupt has come
+    while (true) {
+      lRxEvent = 0;
 
-    if (lHwPublishedPageCount != mPublishedReplyPageCount) {
-      mPublishedReplyPageCount++;
-      break;
+      ::read(mDeviceFileFPGAEvent, &lRxEvent, 4);
+      if (lRxEvent == 1) {
+        break;
+      }
+
+      if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
+        exception::PCIeTimeout lExc;
+        log(lExc, "Next page (index ", Integer(lPageIndexToRead), " count ", Integer(mPublishedReplyPageCount+1), ") of PCIe device '" + mDevicePathHostToFPGA + "' is not ready after timeout period");
+        throw lExc;
+      }
+
+      log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Waiting for interrupt; sleeping for ", mSleepDuration.count(), "us");
+      if (mSleepDuration > boost::chrono::microseconds(0))
+        boost::this_thread::sleep_for( mSleepDuration );
+
+    } // end of while (true)
+
+    log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (interrupt received)");
+  }
+  else
+  {
+    uint32_t lHwPublishedPageCount = 0x0;
+
+    while ( true ) {
+      std::vector<uint32_t> lValues;
+      // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
+      dmaRead(mDeviceFileFPGAToHost, 3, 1, lValues);
+      lHwPublishedPageCount = lValues.at(0);
+
+      if (lHwPublishedPageCount != mPublishedReplyPageCount) {
+        mPublishedReplyPageCount++;
+        break;
+      }
+      // FIXME: Throw if published page count is invalid number
+
+      if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
+        exception::PCIeTimeout lExc;
+        log(lExc, "Next page (index ", Integer(lPageIndexToRead), " count ", Integer(mPublishedReplyPageCount+1), ") of PCIe device '" + mDevicePathHostToFPGA + "' is not ready after timeout period");
+        throw lExc;
+      }
+
+      log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mPublishedReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
+      if (mSleepDuration > boost::chrono::microseconds(0))
+        boost::this_thread::sleep_for( mSleepDuration );
     }
-    // FIXME: Throw if published page count is invalid number
 
-    if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
-      exception::PCIeTimeout lExc;
-      log(lExc, "Next page (index ", Integer(lPageIndexToRead), " count ", Integer(mPublishedReplyPageCount+1), ") of PCIe device '" + mDevicePathHostToFPGA + "' is not ready after timeout period");
-      throw lExc;
-    }
-
-    log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mPublishedReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for a while ...");
-    boost::this_thread::sleep_for( boost::chrono::microseconds(50));
+    log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mPublishedReplyPageCount), ")");
   }
 
-  log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mPublishedReplyPageCount), ")");
 
   // PART 1 : Read the page
   boost::shared_ptr<Buffers> lBuffers = mReplyQueue.front();
@@ -314,6 +384,7 @@ void PCIe::read()
     memcpy ( lIt->first, &lPageContents.at(1 + (lNrBytesCopied / 4)), lNrBytesToCopy );
     lNrBytesCopied += lNrBytesToCopy;
   }
+
 
   // PART 3 : Validate the packet contents
   try

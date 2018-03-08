@@ -49,7 +49,7 @@ namespace grammars
     // PCIeURI     = protocol > empty_string > empty_string >  path      > empty_string   > - ( data_pairs_vector );
 
     protocol = + ( qi::char_ - qi::lit ( ":" ) ) > qi::lit ( "://" );
-    hostname = + ( qi::char_ - qi::lit ( ":" ) ) ;
+    hostname = + ( qi::char_ - qi::lit ( ":" ) - qi::lit ( "?" ) ) ;
     port 	 = qi::lit ( ":" ) > + ( qi::char_ - ascii::punct ) ;
     path 				= qi::lit ( "/" ) > + ( qi::char_ - qi::lit ( "." ) - qi::lit ( "?" ) );
     extension 			= qi::lit ( "." ) > + ( qi::char_ - qi::lit ( "?" ) ) ;

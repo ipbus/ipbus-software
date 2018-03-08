@@ -157,12 +157,19 @@ namespace uhal
       std::string mDevicePathHostToFPGA;
       //! FPGA-to-host device file path
       std::string mDevicePathFPGAToHost;
+      //! FPGA-to-host interrupt (event) file path
+      std::string mDevicePathFPGAEvent;
 
       //! File desriptor for host-to-FPGA device file
       int mDeviceFileHostToFPGA;
       //! File descriptor for FPGA-to-host device file
       int mDeviceFileFPGAToHost;
+      //! File descriptor for FPGA-to-host interrupt (event)
+      int mDeviceFileFPGAEvent;
 
+      bool mUseInterrupt;
+
+      boost::chrono::microseconds mSleepDuration;
 
       uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount;
 
