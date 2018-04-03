@@ -223,10 +223,6 @@ namespace uhal
     return theStream;
   }
 
-  std::ostream& operator<< ( std::ostream& theStream, const uhal::Node& node )
-  {
-    return ( theStream << node.getId() );
-  }
   std::ostream& operator<< ( std::ostream& theStream, const uhal::ClientInterface& client )
   {
     return ( theStream << client.id() );
@@ -331,7 +327,7 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "readBlockOffset", &uhal::Node::readBlockOffset )
   .def ( "getClient",       &uhal::Node::getClient,     pycohal::norm_ref_return_policy() )
   .def ( "__iter__"   ,     range< pycohal::norm_ref_return_policy >(&uhal::Node::begin, &uhal::Node::end) )
-  .def ( /*__str__*/ self_ns::str ( self ) )
+  .def ( "__str__", &uhal::Node::getId, pycohal::const_ref_return_policy() )
   ;
 
   class_< uhal::Node::const_iterator >( "NodeConstIterator" , no_init )
