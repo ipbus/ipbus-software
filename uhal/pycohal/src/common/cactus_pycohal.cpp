@@ -193,50 +193,33 @@ namespace pycohal
       return lSliced;
     }
   };
-}//namespace pycohal
 
-
-// ostream operators for uhal classes - needed for using with 'print' in python
-namespace uhal
-{
-  std::ostream& operator<< ( std::ostream& theStream, const uhal::ValWord<uint32_t>& valWord )
+  std::string convert_to_string( const uhal::ValWord<uint32_t>& valWord )
   {
-    theStream << valWord.value();
-    return theStream;
+    return boost::lexical_cast<std::string>(valWord.value());
   }
 
-  std::ostream& operator<< ( std::ostream& theStream, const uhal::ValVector<uint32_t>& valVec )
+  std::string convert_to_string ( const uhal::ValVector<uint32_t>& valVec )
   {
-    theStream << "[";
+    std::ostringstream lStream;
+
+    lStream << "[";
 
     for ( size_t  i=0; i<valVec.size(); i++ )
     {
-      theStream << valVec.at ( i );
+      lStream << valVec.at ( i );
 
       if ( i!= ( valVec.size()-1 ) )
       {
-        theStream << ", ";
+        lStream << ", ";
       }
     }
 
-    theStream << "]";
-    return theStream;
+    lStream << "]";
+    return lStream.str();
   }
 
-  std::ostream& operator<< ( std::ostream& theStream, const uhal::Node& node )
-  {
-    return ( theStream << node.getId() );
-  }
-  std::ostream& operator<< ( std::ostream& theStream, const uhal::ClientInterface& client )
-  {
-    return ( theStream << client.id() );
-  }
-  std::ostream& operator<< ( std::ostream& theStream, const uhal::HwInterface& hw )
-  {
-    return ( theStream << hw.id() );
-  }
-
-}//namespace uhal
+}//namespace pycohal
 
 
 
@@ -290,7 +273,7 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "valid", static_cast< bool ( uhal::ValWord<uint32_t>::* ) () > ( &uhal::ValWord<uint32_t>::valid ) )
   .def ( "value", static_cast< uint32_t ( uhal::ValWord<uint32_t>::* ) () const > ( &uhal::ValWord<uint32_t>::value ) )
   .def ( "mask",  static_cast< const uint32_t& ( uhal::ValWord<uint32_t>::* ) () const > ( &uhal::ValWord<uint32_t>::mask ) , pycohal::const_ref_return_policy() )
-  .def ( /*__str__*/ self_ns::str ( self_ns::self ) )
+  .def ( "__str__", static_cast< std::string (*) ( const uhal::ValWord<uint32_t>& ) > ( &pycohal::convert_to_string ) )
   .def ( "__int__", static_cast< uint32_t ( uhal::ValWord<uint32_t>::* ) () const> ( &uhal::ValWord<uint32_t>::value ) )
   .def ( "__hex__", pycohal::hex_string )
   ;
@@ -301,7 +284,7 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "value", static_cast< std::vector<uint32_t> ( uhal::ValVector<uint32_t>::* ) () const > ( &uhal::ValVector<uint32_t>::value ) )
   .def ( "size",  &uhal::ValVector<uint32_t>::size )
   .def ( "at", &uhal::ValVector<uint32_t>::at, pycohal::const_ref_return_policy() )
-  .def ( /*__str__*/ self_ns::str ( self ) )
+  .def ( "__str__", static_cast< std::string (*) ( const uhal::ValVector<uint32_t>& ) > ( &pycohal::convert_to_string ) )
   .def ( "__len__", &uhal::ValVector<uint32_t>::size )
   .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getItem , pycohal::const_ref_return_policy() )
   .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getSlice )
@@ -331,7 +314,7 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "readBlockOffset", &uhal::Node::readBlockOffset )
   .def ( "getClient",       &uhal::Node::getClient,     pycohal::norm_ref_return_policy() )
   .def ( "__iter__"   ,     range< pycohal::norm_ref_return_policy >(&uhal::Node::begin, &uhal::Node::end) )
-  .def ( /*__str__*/ self_ns::str ( self ) )
+  .def ( "__str__", &uhal::Node::getId, pycohal::const_ref_return_policy() )
   ;
 
   class_< uhal::Node::const_iterator >( "NodeConstIterator" , no_init )
@@ -353,7 +336,7 @@ BOOST_PYTHON_MODULE ( _core )
          .def ( "dispatch", &uhal::ClientInterface::dispatch )
          .def ( "setTimeoutPeriod", &uhal::ClientInterface::setTimeoutPeriod )
          .def ( "getTimeoutPeriod", &uhal::ClientInterface::getTimeoutPeriod )
-         .def ( /*__str__*/ self_ns::str ( self ) )
+         .def ( "__str__", &uhal::ClientInterface::id, pycohal::const_ref_return_policy() )
          ;
 
   class_<uhal::IPbusCore, bases<uhal::ClientInterface>, boost::noncopyable /* no to-python converter (would require a copy CTOR) */,
@@ -405,7 +388,7 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "getNode", static_cast< const uhal::Node& ( uhal::HwInterface::* ) ( const std::string& ) const > ( &uhal::HwInterface::getNode ), pycohal::norm_ref_return_policy() )
   .def ( "getNodes", static_cast< std::vector<std::string> ( uhal::HwInterface::* ) () const > ( &uhal::HwInterface::getNodes ) )
   .def ( "getNodes", static_cast< std::vector<std::string> ( uhal::HwInterface::* ) ( const std::string& ) const > ( &uhal::HwInterface::getNodes ) )
-  .def ( /*__str__*/ self_ns::str ( self ) )
+  .def ( "__str__", &uhal::HwInterface::id, pycohal::const_ref_return_policy() )
   ;
   // Wrap uhal::ConnectionManager
   class_< uhal::ConnectionManager, boost::noncopyable > ( "ConnectionManager", init<const std::string&>() )
