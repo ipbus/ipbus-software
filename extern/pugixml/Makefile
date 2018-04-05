@@ -1,6 +1,7 @@
 BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
+include $(BUILD_HOME)/extern/config/mfCommonDefs.mk
 
 Project =
 Package = extern/pugixml
@@ -52,7 +53,7 @@ _rpmall:
 			--define "sources_dir ${RPMBUILD_DIR}/SOURCES"			\
 			--define "name ${PackageName}"					\
 			--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}"	\
-			--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}"		\
+			--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}.${CPP_VERSION_TAG}"		\
 			--define "packager ${Packager}"					\
 			${PackageName}.spec
 
