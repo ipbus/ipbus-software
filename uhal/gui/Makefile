@@ -9,8 +9,8 @@ PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-gui
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 3
-PACKAGE_VER_PATCH = 0
+PACKAGE_VER_MINOR = 6
+PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageDescription = Python GUI for uTCA HW access based on uHAL
