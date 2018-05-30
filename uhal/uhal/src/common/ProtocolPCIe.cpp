@@ -209,7 +209,7 @@ void PCIe::connect()
   dmaRead(mDeviceFileFPGAToHost, 0x0, 4, lValues);
 
   mNumberOfPages = lValues.at(0);
-  mPageSize = lValues.at(1);
+  mPageSize = (lValues.at(1)/2);
   mIndexNextPage = lValues.at(2);
   mPublishedReplyPageCount = lValues.at(3);
 
@@ -334,7 +334,7 @@ void PCIe::read()
     while ( true ) {
       std::vector<uint32_t> lValues;
       // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
-      dmaRead(mDeviceFileFPGAToHost, 3, 1, lValues);
+      dmaRead(mDeviceFileFPGAToHost, 3, 8, lValues);
       lHwPublishedPageCount = lValues.at(0);
 
       if (lHwPublishedPageCount != mPublishedReplyPageCount) {
@@ -357,15 +357,23 @@ void PCIe::read()
     log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mPublishedReplyPageCount), ")");
   }
 
-
+  
   // PART 1 : Read the page
   boost::shared_ptr<Buffers> lBuffers = mReplyQueue.front();
   mReplyQueue.pop_front();
-
+  uint32_t nrWords;
   std::vector<uint32_t> lPageContents;
-  dmaRead(mDeviceFileFPGAToHost, 4 + lPageIndexToRead * 4 * mPageSize, 1 + (lBuffers->replyCounter() >> 2), lPageContents);
+  if((lBuffers->replyCounter() >> 2) % 32 == 0 || (lBuffers->replyCounter() >> 2) % 32 == 28 || (lBuffers->replyCounter() >> 2) < 4)
+    nrWords = (lBuffers->replyCounter() >> 2) + 4;
+  //else if((lBuffers->replyCounter() >> 2) == 1020)
+  //  nrWords = (lBuffers->replyCounter() >> 2) + 1;
+  else
+    nrWords = (lBuffers->replyCounter() >> 2);
+ 
+  //dmaRead(mDeviceFileFPGAToHost, 4 + lPageIndexToRead * 4 * mPageSize, 1 + (lBuffers->replyCounter() >> 2), lPageContents);
+  dmaRead(mDeviceFileFPGAToHost, 4 + lPageIndexToRead * 4 * mPageSize, 1 + nrWords , lPageContents);
   log (Debug(), "Read " , Integer(1 + (lBuffers->replyCounter() >> 2)), " 32-bit words from address " , Integer(4 + lPageIndexToRead * 4 * mPageSize), " ... ", PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
-
+  //std::cout << "dmaRead of : " << 1 + nrWords << " 32-bit words from address " << std::endl;   
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );
