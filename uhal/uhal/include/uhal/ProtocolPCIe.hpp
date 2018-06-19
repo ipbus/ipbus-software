@@ -167,6 +167,8 @@ namespace uhal
       //! File descriptor for FPGA-to-host interrupt (event)
       int mDeviceFileFPGAEvent;
 
+      bool mXdma7seriesWorkaround;
+
       bool mUseInterrupt;
 
       boost::chrono::microseconds mSleepDuration;

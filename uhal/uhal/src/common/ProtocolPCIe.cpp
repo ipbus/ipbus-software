@@ -77,6 +77,7 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   mDeviceFileHostToFPGA(-1),
   mDeviceFileFPGAToHost(-1),
   mDeviceFileFPGAEvent(-1),
+  mXdma7seriesWorkaround(false),
   mUseInterrupt(false),
   mNumberOfPages(0),
   mPageSize(0),
@@ -102,6 +103,8 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
     throw lExc;
   }
 
+  mSleepDuration = boost::chrono::microseconds(mUseInterrupt ? 0 : 50);
+
   for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
     if (lIt->first == "events") {
       if (mUseInterrupt) {
@@ -114,15 +117,16 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
       mDevicePathFPGAEvent = lIt->second;
       log (Info() , "PCIe client with URI ", Quote (uri()), " is configured to use interrupts");
     }
-  }
-
-  mSleepDuration = boost::chrono::microseconds(mUseInterrupt ? 0 : 50);
-
-  for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
-    if (lIt->first == "sleep") {
+    else if (lIt->first == "sleep") {
       mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
       log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
     }
+    else if (lIt->first == "xdma_7series_workaround") {
+      mXdma7seriesWorkaround = true;
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : Adjusting size of PCIe reads to a few fixed sizes as workaround for 7-series xdma firmware bug");
+    }
+    else
+      log (Warning() , "Unknown attribute ", Quote (lIt->first), " used in URI ", Quote(uri()));
   }
 }
 
@@ -209,7 +213,7 @@ void PCIe::connect()
   dmaRead(mDeviceFileFPGAToHost, 0x0, 4, lValues);
 
   mNumberOfPages = lValues.at(0);
-  mPageSize = lValues.at(1);
+  mPageSize = std::min(uint32_t(4096), lValues.at(1));
   mIndexNextPage = lValues.at(2);
   mPublishedReplyPageCount = lValues.at(3);
 
@@ -334,7 +338,7 @@ void PCIe::read()
     while ( true ) {
       std::vector<uint32_t> lValues;
       // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
-      dmaRead(mDeviceFileFPGAToHost, 3, 1, lValues);
+      dmaRead(mDeviceFileFPGAToHost, 3, (mXdma7seriesWorkaround ? 8 : 1), lValues);
       lHwPublishedPageCount = lValues.at(0);
 
       if (lHwPublishedPageCount != mPublishedReplyPageCount) {
@@ -357,15 +361,19 @@ void PCIe::read()
     log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mPublishedReplyPageCount), ")");
   }
 
-
+  
   // PART 1 : Read the page
   boost::shared_ptr<Buffers> lBuffers = mReplyQueue.front();
   mReplyQueue.pop_front();
 
+  uint32_t lNrWordsToRead(lBuffers->replyCounter() >> 2);
+  if(mXdma7seriesWorkaround and (lNrWordsToRead % 32 == 0 || lNrWordsToRead % 32 == 28 || lNrWordsToRead < 4))
+    lNrWordsToRead += 4;
+  lNrWordsToRead += 1;
+ 
   std::vector<uint32_t> lPageContents;
-  dmaRead(mDeviceFileFPGAToHost, 4 + lPageIndexToRead * 4 * mPageSize, 1 + (lBuffers->replyCounter() >> 2), lPageContents);
-  log (Debug(), "Read " , Integer(1 + (lBuffers->replyCounter() >> 2)), " 32-bit words from address " , Integer(4 + lPageIndexToRead * 4 * mPageSize), " ... ", PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
-
+  dmaRead(mDeviceFileFPGAToHost, 4 + lPageIndexToRead * 4 * mPageSize, lNrWordsToRead , lPageContents);
+  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(4 + lPageIndexToRead * 4 * mPageSize), " ... ", PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );
