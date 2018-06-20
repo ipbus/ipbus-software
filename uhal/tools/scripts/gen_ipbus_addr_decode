@@ -256,7 +256,7 @@ def main():
 
     if not nflag:
 
-        # generate vhdl snipped with symbolic constants
+        # generate vhdl snippet with symbolic constants
         snippet1 = "-- START automatically  generated VHDL the %s \n" % time.asctime()
         slaveIds={}
         maxN=0
@@ -288,12 +288,16 @@ def main():
             
             snippet2 += "      sel := ipbus_sel_t(to_unsigned(" + slaveIds[n] + ", IPBUS_SEL_WIDTH)); -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + mask.hex() + "\n"
         snippet2 += "-- END automatically generated VHDL\n"
-    
+
+        # calculate required selector bit width
+        ipbus_sel_width = math.floor(math.log(maxN+1,2))+1
+
         # print vhdl code
         vhdlfilename = "ipbus_decode_"+moduleName+".vhd"
         vhdlfile=open(vhdlfilename,"w")
         vhdlfile.write(open(template_fn).read().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
                        .replace("-- INSERT_SELECTION_HERE",snippet2)\
+                       .replace("INSERT_SEL_WIDTH_HERE","%s"%ipbus_sel_width)\
                        .replace("PACKAGENAME",moduleName))
         vhdlfile.close()
         print "VHDL decode file saved: ", vhdlfilename
