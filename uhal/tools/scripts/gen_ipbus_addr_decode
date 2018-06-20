@@ -290,7 +290,7 @@ def main():
         snippet2 += "-- END automatically generated VHDL\n"
 
         # calculate required selector bit width
-        ipbus_sel_width = math.floor(math.log(maxN+1,2))+1
+        ipbus_sel_width = int(math.floor(math.log(maxN+1,2))+1)
 
         # print vhdl code
         vhdlfilename = "ipbus_decode_"+moduleName+".vhd"
