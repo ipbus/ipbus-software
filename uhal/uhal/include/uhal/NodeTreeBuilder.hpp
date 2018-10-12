@@ -45,6 +45,7 @@
 #include "uhal/Node.hpp"
 
 #include <boost/filesystem/path.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 #include "uhal/grammars/NodeTreeClassAttributeGrammar.hpp"
@@ -109,13 +110,13 @@ namespace uhal
       */
       NodeTreeBuilder ();
 
+
+    public:
       /**
       	Destructor
       */
       virtual ~NodeTreeBuilder ();
 
-
-    public:
       /**
       	Static method to retrieve the single instance of the class
       	@return the single instance of the class
@@ -197,7 +198,7 @@ namespace uhal
 
     private:
       //! The single instance of the class
-      static NodeTreeBuilder* mInstance;
+      static boost::shared_ptr<NodeTreeBuilder> mInstance;
 
       //! Hash map associating a Node tree with a file name so that we do not need to repeatedly parse the xml documents if someone asks for a second copy of a particular node tree
       boost::unordered_map< std::string , const Node* > mNodes;

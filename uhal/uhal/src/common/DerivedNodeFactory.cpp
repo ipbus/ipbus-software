@@ -47,7 +47,7 @@
 namespace uhal
 {
 
-  DerivedNodeFactory* DerivedNodeFactory::mInstance = NULL;
+  boost::shared_ptr<DerivedNodeFactory> DerivedNodeFactory::mInstance;
 
 
   DerivedNodeFactory::DerivedNodeFactory ()
@@ -62,9 +62,9 @@ namespace uhal
 
   DerivedNodeFactory& DerivedNodeFactory::getInstance()
   {
-    if ( mInstance == NULL )
+    if ( ! mInstance )
     {
-      mInstance = new DerivedNodeFactory();
+      mInstance.reset(new DerivedNodeFactory());
     }
 
     return *mInstance;
