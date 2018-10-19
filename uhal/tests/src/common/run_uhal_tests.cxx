@@ -99,6 +99,8 @@ using namespace uhal::tests;
 const std::string kOptionHelp = "help";
 const std::string kOptionList = "list";
 const std::string kOptionConnFile = "connection-file";
+const std::string kOptionHwTimeout = "timeout";
+const std::string kOptionQuickTest = "quick";
 const std::string kOptionVerbose = "verbose";
 const std::string kOptionVeryVerbose = "very-verbose";
 
@@ -114,6 +116,8 @@ main( int argc, char* argv[] )
   ( (kOptionHelp + ",h").c_str(), "produce help message" )
   ( (kOptionList + ",l").c_str(), po::value<size_t>(&lListDepth)->implicit_value(0), "List all test suites and test cases (max depth can be specified if wanted; if not, all depths are shown)" )
   ( (kOptionConnFile + ",c").c_str(), po::value<std::string>(&AbstractFixture::connectionFileURI), "Connection file URI" )
+  ( (kOptionHwTimeout + ",t").c_str(), po::value<size_t>(&AbstractFixture::timeout)->default_value(1000), "Timeout for Client/HwInterface (unit: ms)" )
+  ( kOptionQuickTest.c_str(), "Run brief tests (fewer iterations)" )
   ( (kOptionVerbose + ",v").c_str(), "Verbose output" )
   ( (kOptionVeryVerbose + ",V").c_str(), "Very verbose output" )
   ;
@@ -157,8 +161,12 @@ main( int argc, char* argv[] )
     exit ( 1 );
   }
 
+  AbstractFixture::quickTest = ( vm.count(kOptionQuickTest) > 0);
+
   std::cout << "Supplied arguments ..." << std::endl;
   std::cout << "   connection file = " << AbstractFixture::connectionFileURI << std::endl;
+  std::cout << "   timeout = " << AbstractFixture::timeout << " ms" << std::endl;
+  std::cout << "   " << (AbstractFixture::quickTest ? "quick" : "full") << " test will be run" << std::endl;
 
   std::cout << "Log level set to ";
   if ( vm.count ( kOptionVeryVerbose ) ) {

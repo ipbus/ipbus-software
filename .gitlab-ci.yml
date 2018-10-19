@@ -166,7 +166,7 @@ publish_build_job:
 
 .job_template: &slc6_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2018-01-14
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:master
   variables:
     REPO_URL_OS_SUBDIR: slc6_x86_64
     UHAL_ENABLE_IPBUS_PCIE: ""
@@ -174,7 +174,7 @@ publish_build_job:
 
 .job_template: &centos7_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:2018-01-14
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:master
   variables:
     REPO_URL_OS_SUBDIR: centos7_x86_64
     UHAL_ENABLE_IPBUS_PCIE: ""
@@ -191,7 +191,7 @@ publish_build_job:
 
 .job_template: &fedora26_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
   dependencies:
     - build:fedora26
   variables:
@@ -209,7 +209,7 @@ publish_build_job:
 
 .job_template: &ubuntu16_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2018-01-14__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:master__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
   dependencies:
     - build:ubuntu16
   variables:
@@ -234,6 +234,7 @@ publish_build_job:
     - uhal_test_suite.py -v -s "2.0 pcie"
     - uhal_test_suite.py -v -s "2.0 controlhub - normal" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbus* --log_level=test_suite
 
 .job_template: &test_python_jobTemplate
   tags:

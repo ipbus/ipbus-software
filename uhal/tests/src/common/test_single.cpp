@@ -88,6 +88,8 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, on_the_fly_connect
   //get the parameters from the file
   std::string uri = getHwInterface().uri();
   HwInterface hw=ConnectionManager::getDevice ( "test_device_id", uri, address_file );
+  hw.setTimeoutPeriod(timeout);
+
   uint32_t x = static_cast<uint32_t> ( rand() );
   hw.getNode ( "REG" ).write ( x );
   ValWord< uint32_t > mem = hw.getNode ( "REG" ).read();

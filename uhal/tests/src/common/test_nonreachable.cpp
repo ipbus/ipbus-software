@@ -51,7 +51,8 @@ namespace tests {
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(NonreachableTestSuite, check_nonreachable_device, MinimalFixture,
 {
-  for (size_t i = 0; i < 10; i++) {
+  const size_t numTests(quickTest ? 1 : 10);
+  for (size_t i = 0; i < numTests; i++) {
     HwInterface hw = getHwInterface();
 
     // Check we get an exception corresponding to target being unreachable

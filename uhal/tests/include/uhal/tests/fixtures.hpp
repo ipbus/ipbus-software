@@ -53,6 +53,9 @@ protected:
 
 public:
   static std::string connectionFileURI;
+  // HW client timeout in milliseconds
+  static size_t timeout;
+  static bool quickTest;
 };
 
 
@@ -119,7 +122,9 @@ template <DeviceType type>
 HwInterface MinimalFixture<type>::getHwInterface() const
 {
   ConnectionManager manager(connectionFileURI);
-  return manager.getDevice(deviceId);
+  HwInterface hw(manager.getDevice(deviceId));
+  hw.setTimeoutPeriod(timeout);
+  return hw;
 }
 
 

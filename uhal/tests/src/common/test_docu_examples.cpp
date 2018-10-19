@@ -52,6 +52,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(AddrTableDocuExamplesTestSuite, test_docu_ad
   ConnectionManager manager ( connectionFileURI );
   // This line is majority of the test (i.e. load the addr table without exception).
   HwInterface hw=manager.getDevice ( "dummy.docu" + deviceId.substr(5) );
+  hw.setTimeoutPeriod(timeout);
   // ***** "Single Register Address Table" example *****
   BOOST_CHECK_NO_THROW
   (

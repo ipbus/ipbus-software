@@ -58,21 +58,31 @@ using namespace uhal;
 namespace uhal {
 namespace tests {
 
-std::vector<size_t> getBlockUnitTestDepths()
+std::vector<size_t> getBlockUnitTestDepths(const size_t aMaxSize)
 {
   std::vector<size_t> lDepths;
   lDepths.push_back(0);
   lDepths.push_back(N_4B);
   lDepths.push_back(N_1kB);
+  lDepths.push_back(10 * N_1kB);
+  lDepths.push_back(100 * N_1kB);
   lDepths.push_back(N_1MB);
   lDepths.push_back(N_10MB);
+  lDepths.push_back(N_200MB);
+
+  for (std::vector<size_t>::iterator lIt=lDepths.begin(); lIt != lDepths.end(); ) {
+    if ((*lIt) > aMaxSize)
+      lIt = lDepths.erase(lIt);
+    else
+      ++lIt;
+  }
   return lDepths;
 }
 
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_write_read, DummyHardwareFixture,
 {
-  std::vector<size_t> lDepths = getBlockUnitTestDepths();
+  std::vector<size_t> lDepths = getBlockUnitTestDepths(quickTest ? N_1MB : N_10MB);
 
   for(size_t i=0; i<lDepths.size(); i++) {
     const size_t N = lDepths.at(i);
@@ -120,8 +130,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_write_read, D
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, fifo_write_read, DummyHardwareFixture,
 {
-  std::vector<size_t> lDepths = getBlockUnitTestDepths();
-  lDepths.push_back(N_200MB);
+  std::vector<size_t> lDepths = getBlockUnitTestDepths(quickTest ? N_1MB : N_200MB);
 
   for(size_t i=0; i<lDepths.size(); i++) {
     const size_t N = lDepths.at(i);
@@ -157,7 +166,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, fifo_write_read, Du
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_offset_write_read, DummyHardwareFixture,
 {
-  std::vector<size_t> lDepths = getBlockUnitTestDepths();
+  std::vector<size_t> lDepths = getBlockUnitTestDepths(quickTest ? N_1MB : N_10MB);
 
   for(size_t i=0; i<lDepths.size(); i++) {
     const size_t N = lDepths.at(i);
