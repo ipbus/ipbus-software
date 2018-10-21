@@ -162,6 +162,7 @@ publish_build_job:
     - cat /etc/yum.repos.d/ipbus-sw-ci.repo
     - sudo rpm --rebuilddb && sudo yum clean all 
     - sudo yum -y groupinstall ipbus-sw
+    - sudo yum -y install 'cactuscore-uhal-*-debuginfo'
     - rpm -qa | grep cactus | sort
 
 .job_template: &slc6_test_jobTemplate
