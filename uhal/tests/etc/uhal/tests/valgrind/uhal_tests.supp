@@ -25,7 +25,9 @@
    Memcheck:Leak
    match-leak-kinds: possible
    fun:calloc
+   ...
    fun:_dl_allocate_tls
+   ...
    fun:pthread_create@@GLIBC_2.2.5
    fun:_ZN5boost6thread21start_thread_noexceptEv
    ...
@@ -34,11 +36,11 @@
    ...
    fun:_ZN4uhal5tests12ipbusudp_1_323BlockReadWriteTestSuiteL24block_write_read_invokerEv
    ...
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
 }
 
 
@@ -66,7 +68,9 @@
    Memcheck:Leak
    match-leak-kinds: possible
    fun:calloc
+   ...
    fun:_dl_allocate_tls
+   ...
    fun:pthread_create@@GLIBC_2.2.5
    fun:_ZN5boost6thread21start_thread_noexceptEv
    fun:start_thread
@@ -74,11 +78,11 @@
    fun:_ZN4uhal5tests12ipbustcp_2_022MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
    fun:_ZN4uhal5tests12ipbustcp_2_022MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
    ...
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
 }
 
 
@@ -106,7 +110,9 @@
    Memcheck:Leak
    match-leak-kinds: possible
    fun:calloc
+   ...
    fun:_dl_allocate_tls
+   ...
    fun:pthread_create@@GLIBC_2.2.5
    fun:_ZN5boost6thread21start_thread_noexceptEv
    fun:start_thread
@@ -114,9 +120,9 @@
    fun:_ZN4uhal5tests13ipbuspcie_2_022MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
    fun:_ZN4uhal5tests13ipbuspcie_2_022MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
    ...
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
-   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
 }
