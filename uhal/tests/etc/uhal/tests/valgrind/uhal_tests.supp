@@ -34,11 +34,11 @@
    ...
    fun:_ZN4uhal5tests12ipbusudp_1_323BlockReadWriteTestSuiteL24block_write_read_invokerEv
    ...
-   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tINS1_6unusedEPFvvEE6invokeEv
    obj:/usr/lib64/libboost_unit_test_framework.so.*
-   fun:_ZN5boost17execution_monitor13catch_signalsERKNS_9unit_test9callback0IiEE
-   fun:_ZN5boost17execution_monitor7executeERKNS_9unit_test9callback0IiEE
-   fun:_ZN5boost9unit_test19unit_test_monitor_t21execute_and_translateERKNS0_9test_caseE
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
 }
 
 
@@ -70,15 +70,15 @@
    fun:pthread_create@@GLIBC_2.2.5
    fun:_ZN5boost6thread21start_thread_noexceptEv
    fun:start_thread
-   fun:_ZN5boost6threadC2IPFvN4uhal11HwInterfaceEES3_EET_T0_NS_10disable_ifINS_13thread_detail14is_convertibleIRS6_NS_17thread_attributesEEEPNS0_5dummyEE4typeE.constprop.296
+   fun:_ZN5boost6threadC2IPFvN4uhal11HwInterfaceEES3_EET_T0_NS_10disable_ifINS_13thread_detail14is_convertibleIRS6_NS_17thread_attributesEEEPNS0_5dummyEE4typeE.constprop.*
    fun:_ZN4uhal5tests12ipbustcp_2_022MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
    fun:_ZN4uhal5tests12ipbustcp_2_022MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
-   fun:invoke<void (*)()>
-   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tINS1_6unusedEPFvvEE6invokeEv
-   obj:/usr/lib64/libboost_unit_test_framework.so.1.53.0
-   fun:_ZN5boost17execution_monitor13catch_signalsERKNS_9unit_test9callback0IiEE
-   fun:_ZN5boost17execution_monitor7executeERKNS_9unit_test9callback0IiEE
-   fun:_ZN5boost9unit_test19unit_test_monitor_t21execute_and_translateERKNS0_9test_caseE
+   ...
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
 }
 
 
@@ -110,13 +110,13 @@
    fun:pthread_create@@GLIBC_2.2.5
    fun:_ZN5boost6thread21start_thread_noexceptEv
    fun:start_thread
-   fun:_ZN5boost6threadC2IPFvN4uhal11HwInterfaceEES3_EET_T0_NS_10disable_ifINS_13thread_detail14is_convertibleIRS6_NS_17thread_attributesEEEPNS0_5dummyEE4typeE.constprop.296
+   fun:_ZN5boost6threadC2IPFvN4uhal11HwInterfaceEES3_EET_T0_NS_10disable_ifINS_13thread_detail14is_convertibleIRS6_NS_17thread_attributesEEEPNS0_5dummyEE4typeE.constprop.*
    fun:_ZN4uhal5tests13ipbuspcie_2_022MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
    fun:_ZN4uhal5tests13ipbuspcie_2_022MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
-   fun:invoke<void (*)()>
-   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tINS1_6unusedEPFvvEE6invokeEv
-   obj:/usr/lib64/libboost_unit_test_framework.so.1.53.0
-   fun:_ZN5boost17execution_monitor13catch_signalsERKNS_9unit_test9callback0IiEE
-   fun:_ZN5boost17execution_monitor7executeERKNS_9unit_test9callback0IiEE
-   fun:_ZN5boost9unit_test19unit_test_monitor_t21execute_and_translateERKNS0_9test_caseE
+   ...
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
+   obj:/usr/lib64/libboost_unit_test_framework.so.*
 }
