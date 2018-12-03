@@ -30,6 +30,11 @@ ${VIRTUAL_PACKAGES}:
 #     because removing installed files from one of the individual packages without removing any from other uhal packages
 #     would be much harder to implement (especially when coping with changes to filenames between different releases)
 
+ifndef prefix
+  PYTHON_DIRECTORIES = $(shell python -c "import site,sys; print ' '.join([x+'/*uhal*' for x in site.getsitepackages()])")
+else
+  PYTHON_DIRECTORIES = ${prefix}/lib/python*/*-packages/*uhal* ${exec_prefix}/lib/python*/*-packages/*uhal*
+endif
 include $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/config/mfInstallVariables.mk
 
 .PHONY: uninstall
@@ -38,4 +43,4 @@ uninstall:
 	rm -rf $(libdir)/libcactus_uhal*
 	rm -rf $(includedir)/uhal
 	rm -rf $(sysconfdir)/uhal
-	rm -rf $(shell python -c "import site,sys; print ' '.join([x+'/*uhal*' for x in site.getsitepackages()])")
+	rm -rf $(PYTHON_DIRECTORIES)
