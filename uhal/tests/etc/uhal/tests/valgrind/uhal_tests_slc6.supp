@@ -1,0 +1,185 @@
+
+# Supress false positive in valgrind v3.8.1 ; correctly categorised as 'still reachable' using heuristics in more recent versions (e.g. 3.13.0)
+#
+# ==718== 26 bytes in 1 blocks are possibly lost in loss record 12 of 40
+# ==718==    at 0x4C295FC: operator new(unsigned long) (vg_replace_malloc.c:298)
+# ==718==    by 0x70743C8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib64/libstdc++.so.6.0.13)
+# ==718==    by 0x7075DA9: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib64/libstdc++.so.6.0.13)
+# ==718==    by 0x70761B9: std::string::_M_replace_aux(unsigned long, unsigned long, unsigned long, char) (in /usr/lib64/libstdc++.so.6.0.13)
+# ==718==    by 0x4EDDD85: boost::chrono::duration_punct<char>::init_C() (basic_string.h:989)
+# ==718==    by 0x50C8C81: std::basic_ostream<char, std::char_traits<char> >& boost::chrono::operator<< <char, std::char_traits<char>, long, boost::ratio<1l, 1000l> >(std::basic_ostream<char, std::char_traits<char> >&, boost::chrono::duration<long, boost::ratio<1l, 1000l> > const&) (chrono_io.hpp:74)
+# ==718==    by 0x50C8342: boost::unit_test::lazy_ostream_impl<char const (&) [48]>::operator()(std::ostream&) const (lazy_ostream.hpp:74)
+# ==718==    by 0x6247574: boost::unit_test::unit_test_log_t::operator<<(boost::unit_test::lazy_ostream const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x624758F: boost::unit_test::ut_detail::entry_value_collector::operator<<(boost::unit_test::lazy_ostream const&) const (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x50C1AF2: uhal::tests::ipbusudp_1_3::TimeoutTestSuite::check_timeout::test_method() (test_timeout.cpp:58)
+# ==718==    by 0x50C25D9: uhal::tests::ipbusudp_1_3::TimeoutTestSuite::check_timeout_invoker() (test_timeout.cpp:58)
+# ==718==    by 0x4F4D386: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:56)
+# ==718== 
+{
+   uhal_tests__stdstring__message_ipbusudp_1_3_TimeoutTestSuite1
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNSs4_Rep9_S_createEmmRKSaIcE
+   fun:_ZNSs9_M_mutateEmmm
+   fun:_ZNSs14_M_replace_auxEmmmc
+   fun:_ZN5boost6chrono14duration_punctIcE6init_CEv
+   fun:_ZN5boost6chronolsIcSt11char_traitsIcElNS_5ratioILl1ELl1000EEEEERSt13basic_ostreamIT_T0_ESA_RKNS0_8durationIT1_T2_EE
+   fun:_ZNK5boost9unit_test17lazy_ostream_implIRA48_KcEclERSo
+   fun:_ZN5boost9unit_test15unit_test_log_tlsERKNS0_12lazy_ostreamE
+   fun:_ZNK5boost9unit_test9ut_detail21entry_value_collectorlsERKNS0_12lazy_ostreamE
+   fun:_ZN4uhal5tests12ipbusudp_1_316TimeoutTestSuite13check_timeout11test_methodEv
+   fun:_ZN4uhal5tests12ipbusudp_1_316TimeoutTestSuiteL21check_timeout_invokerEv
+   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tINS1_6unusedEPFvvEE6invokeEv
+}
+
+
+# Supress false positive in valgrind v3.8.1 ; correctly categorised as 'still reachable' using heuristics in more recent versions (e.g. 3.13.0)
+#
+# ==718== 30 bytes in 1 blocks are possibly lost in loss record 15 of 40
+# ==718==    at 0x4C295FC: operator new(unsigned long) (vg_replace_malloc.c:298)
+# ==718==    by 0x70743C8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib64/libstdc++.so.6.0.13)
+# ==718==    by 0x7075DA9: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib64/libstdc++.so.6.0.13)
+# ==718==    by 0x7075F6B: std::string::_M_replace_safe(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib64/libstdc++.so.6.0.13)
+# ==718==    by 0x7076947: std::string::replace(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib64/libstdc++.so.6.0.13)
+# ==718==    by 0x4EDDE77: boost::chrono::duration_punct<char>::init_C() (basic_string.h:1472)
+# ==718==    by 0x50C8C81: std::basic_ostream<char, std::char_traits<char> >& boost::chrono::operator<< <char, std::char_traits<char>, long, boost::ratio<1l, 1000l> >(std::basic_ostream<char, std::char_traits<char> >&, boost::chrono::duration<long, boost::ratio<1l, 1000l> > const&) (chrono_io.hpp:74)
+# ==718==    by 0x50C8342: boost::unit_test::lazy_ostream_impl<char const (&) [48]>::operator()(std::ostream&) const (lazy_ostream.hpp:74)
+# ==718==    by 0x6247574: boost::unit_test::unit_test_log_t::operator<<(boost::unit_test::lazy_ostream const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x624758F: boost::unit_test::ut_detail::entry_value_collector::operator<<(boost::unit_test::lazy_ostream const&) const (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x50C1AF2: uhal::tests::ipbusudp_1_3::TimeoutTestSuite::check_timeout::test_method() (test_timeout.cpp:58)
+# ==718==    by 0x50C25D9: uhal::tests::ipbusudp_1_3::TimeoutTestSuite::check_timeout_invoker() (test_timeout.cpp:58)
+# ==718== 
+{
+   uhal_tests__stdstring__message_ipbusudp_1_3_TimeoutTestSuite2
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNSs4_Rep9_S_createEmmRKSaIcE
+   fun:_ZNSs9_M_mutateEmmm
+   fun:_ZNSs15_M_replace_safeEmmPKcm
+   fun:_ZNSs7replaceEmmPKcm
+   fun:_ZN5boost6chrono14duration_punctIcE6init_CEv
+   fun:_ZN5boost6chronolsIcSt11char_traitsIcElNS_5ratioILl1ELl1000EEEEERSt13basic_ostreamIT_T0_ESA_RKNS0_8durationIT1_T2_EE
+   fun:_ZNK5boost9unit_test17lazy_ostream_implIRA48_KcEclERSo
+   fun:_ZN5boost9unit_test15unit_test_log_tlsERKNS0_12lazy_ostreamE
+   fun:_ZNK5boost9unit_test9ut_detail21entry_value_collectorlsERKNS0_12lazy_ostreamE
+   fun:_ZN4uhal5tests12ipbusudp_1_316TimeoutTestSuite13check_timeout11test_methodEv
+   fun:_ZN4uhal5tests12ipbusudp_1_316TimeoutTestSuiteL21check_timeout_invokerEv
+}
+
+
+# Suppress false positive encountered when running with '--run-libc-freeres=no' (which is required to prevent segfault with certain versions of glibc) 
+# Refs: http://valgrind.org/docs/manual/faq.html#faq.exit_errors  &  https://bugzilla.redhat.com/show_bug.cgi?id=1596537
+#
+# ==718== 608 bytes in 1 blocks are possibly lost in loss record 33 of 40
+# ==718==    at 0x4C277BB: calloc (vg_replace_malloc.c:593)
+# ==718==    by 0x4011D02: _dl_allocate_tls (in /lib64/ld-2.12.so)
+# ==718==    by 0x64982CC: pthread_create@@GLIBC_2.2.5 (in /lib64/libpthread-2.12.so)
+# ==718==    by 0x5B45090: boost::thread::start_thread_noexcept() (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_thread.so.1.53.0)
+# ==718==    by 0x50C9CD3: uhal::tests::DummyHardwareRunner::DummyHardwareRunner(uhal::tests::DummyHardwareInterface*) (thread.hpp:180)
+# ==718==    by 0x4EE78C4: uhal::tests::DummyHardwareFixture<(uhal::tests::DeviceType)0>::DummyHardwareFixture() (fixtures.cpp:89)
+# ==718==    by 0x50C25C1: uhal::tests::ipbusudp_1_3::TimeoutTestSuite::check_timeout_invoker() (test_timeout.cpp:58)
+# ==718==    by 0x4F4D386: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:56)
+# ==718==    by 0x624B0C0: boost::unit_test::ut_detail::callback0_impl_t<int, boost::unit_test::(anonymous namespace)::zero_return_wrapper_t<boost::unit_test::callback0<boost::unit_test::ut_detail::unused> > >::invoke() (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x622F5FD: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x622F67A: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x624B2E6: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718== 
+{
+   uhal_tests__pthread_create_GLIBC2.2.5__ipbus_1_3_runner_TimeoutTestSuite
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:_ZN5boost6thread21start_thread_noexceptEv
+   fun:_ZN4uhal5tests19DummyHardwareRunnerC1EPNS0_22DummyHardwareInterfaceE
+   fun:_ZN4uhal5tests20DummyHardwareFixtureILNS0_10DeviceTypeE0EEC1Ev
+   fun:_ZN4uhal5tests12ipbusudp_1_316TimeoutTestSuiteL21check_timeout_invokerEv
+   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tINS1_6unusedEPFvvEE6invokeEv
+   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tIiNS0_12_GLOBAL__N_121zero_return_wrapper_tINS0_9callback0INS1_6unusedEEEEEE6invokeEv
+   fun:_ZN5boost17execution_monitor13catch_signalsERKNS_9unit_test9callback0IiEE
+   fun:_ZN5boost17execution_monitor7executeERKNS_9unit_test9callback0IiEE
+   fun:_ZN5boost9unit_test19unit_test_monitor_t21execute_and_translateERKNS0_9test_caseE
+}
+
+
+# Suppress false positive encountered when running with '--run-libc-freeres=no' (which is required to prevent segfault with certain versions of glibc) 
+# Refs: http://valgrind.org/docs/manual/faq.html#faq.exit_errors  &  https://bugzilla.redhat.com/show_bug.cgi?id=1596537
+#
+# ==718== 608 bytes in 1 blocks are possibly lost in loss record 34 of 40
+# ==718==    at 0x4C277BB: calloc (vg_replace_malloc.c:593)
+# ==718==    by 0x4011D02: _dl_allocate_tls (in /lib64/ld-2.12.so)
+# ==718==    by 0x64982CC: pthread_create@@GLIBC_2.2.5 (in /lib64/libpthread-2.12.so)
+# ==718==    by 0x5B45090: boost::thread::start_thread_noexcept() (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_thread.so.1.53.0)
+# ==718==    by 0x5047903: boost::thread::thread<void (*)(uhal::HwInterface), uhal::HwInterface>(void (*)(uhal::HwInterface), uhal::HwInterface, boost::disable_if<boost::thread_detail::is_convertible<void (*&)(uhal::HwInterface), boost::thread_attributes>, boost::thread::dummy*>::type) (thread.hpp:180)
+# ==718==    by 0x503AD19: uhal::tests::ipbustcp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method() (test_multithreaded.cpp:198)
+# ==718==    by 0x503AFB9: uhal::tests::ipbustcp_2_0::MultithreadedTestSuite::single_copied_hwinterface_invoker() (test_multithreaded.cpp:198)
+# ==718==    by 0x4F4D386: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:56)
+# ==718==    by 0x624B0C0: boost::unit_test::ut_detail::callback0_impl_t<int, boost::unit_test::(anonymous namespace)::zero_return_wrapper_t<boost::unit_test::callback0<boost::unit_test::ut_detail::unused> > >::invoke() (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x622F5FD: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x622F67A: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x624B2E6: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718== 
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:_ZN5boost6thread21start_thread_noexceptEv
+   fun:_ZN5boost6threadC1IPFvN4uhal11HwInterfaceEES3_EET_T0_NS_10disable_ifINS_13thread_detail14is_convertibleIRS6_NS_17thread_attributesEEEPNS0_5dummyEE4typeE
+   fun:_ZN4uhal5tests12ipbustcp_2_022MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
+   fun:_ZN4uhal5tests12ipbustcp_2_022MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
+   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tINS1_6unusedEPFvvEE6invokeEv
+   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tIiNS0_12_GLOBAL__N_121zero_return_wrapper_tINS0_9callback0INS1_6unusedEEEEEE6invokeEv
+   fun:_ZN5boost17execution_monitor13catch_signalsERKNS_9unit_test9callback0IiEE
+   fun:_ZN5boost17execution_monitor7executeERKNS_9unit_test9callback0IiEE
+   fun:_ZN5boost9unit_test19unit_test_monitor_t21execute_and_translateERKNS0_9test_caseE
+}
+
+
+# Suppress false positive encountered when running with '--run-libc-freeres=no' (which is required to prevent segfault with certain versions of glibc) 
+# Refs: http://valgrind.org/docs/manual/faq.html#faq.exit_errors  &  https://bugzilla.redhat.com/show_bug.cgi?id=1596537
+#
+# ==718== 608 bytes in 1 blocks are possibly lost in loss record 36 of 40
+# ==718==    at 0x4C277BB: calloc (vg_replace_malloc.c:593)
+# ==718==    by 0x4011D02: _dl_allocate_tls (in /lib64/ld-2.12.so)
+# ==718==    by 0x64982CC: pthread_create@@GLIBC_2.2.5 (in /lib64/libpthread-2.12.so)
+# ==718==    by 0x5B45090: boost::thread::start_thread_noexcept() (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_thread.so.1.53.0)
+# ==718==    by 0x5047903: boost::thread::thread<void (*)(uhal::HwInterface), uhal::HwInterface>(void (*)(uhal::HwInterface), uhal::HwInterface, boost::disable_if<boost::thread_detail::is_convertible<void (*&)(uhal::HwInterface), boost::thread_attributes>, boost::thread::dummy*>::type) (thread.hpp:180)
+# ==718==    by 0x503A3E8: uhal::tests::ipbuspcie_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method() (test_multithreaded.cpp:198)
+# ==718==    by 0x503A62C: uhal::tests::ipbuspcie_2_0::MultithreadedTestSuite::single_copied_hwinterface_invoker() (test_multithreaded.cpp:198)
+# ==718==    by 0x4F4D386: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:56)
+# ==718==    by 0x624B0C0: boost::unit_test::ut_detail::callback0_impl_t<int, boost::unit_test::(anonymous namespace)::zero_return_wrapper_t<boost::unit_test::callback0<boost::unit_test::ut_detail::unused> > >::invoke() (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x622F5FD: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x622F67A: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718==    by 0x624B2E6: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /build/ipbus-software/extern/boost/RPMBUILD/SOURCES/lib/libboost_unit_test_framework.so.1.53.0)
+# ==718== 
+{
+   uhal_tests__pthread_create_GLIBC2.2.5__ipbuspcie_2_0_MultithreadedTestSuite_single_copied_hwinterface
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:_ZN5boost6thread21start_thread_noexceptEv
+   fun:_ZN5boost6threadC1IPFvN4uhal11HwInterfaceEES3_EET_T0_NS_10disable_ifINS_13thread_detail14is_convertibleIRS6_NS_17thread_attributesEEEPNS0_5dummyEE4typeE
+   fun:_ZN4uhal5tests13ipbuspcie_2_022MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
+   fun:_ZN4uhal5tests13ipbuspcie_2_022MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
+   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tINS1_6unusedEPFvvEE6invokeEv
+   fun:_ZN5boost9unit_test9ut_detail16callback0_impl_tIiNS0_12_GLOBAL__N_121zero_return_wrapper_tINS0_9callback0INS1_6unusedEEEEEE6invokeEv
+   fun:_ZN5boost17execution_monitor13catch_signalsERKNS_9unit_test9callback0IiEE
+   fun:_ZN5boost17execution_monitor7executeERKNS_9unit_test9callback0IiEE
+   fun:_ZN5boost9unit_test19unit_test_monitor_t21execute_and_translateERKNS0_9test_caseE
+}
+
+
+# ==718== LEAK SUMMARY:
+# ==718==    definitely lost: 0 bytes in 0 blocks
+# ==718==    indirectly lost: 0 bytes in 0 blocks
+# ==718==      possibly lost: 2,604 bytes in 10 blocks
+# ==718==    still reachable: 9,048 bytes in 76 blocks
+# ==718==         suppressed: 0 bytes in 0 blocks
+# ==718== Reachable blocks (those to which a pointer was found) are not shown.
+# ==718== To see them, rerun with: --leak-check=full --show-reachable=yes
+# ==718== 
+# ==718== For counts of detected and suppressed errors, rerun with: -v
+# ==718== ERROR SUMMARY: 10 errors from 10 contexts (suppressed: 8 from 6)

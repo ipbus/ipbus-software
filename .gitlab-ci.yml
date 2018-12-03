@@ -172,6 +172,7 @@ publish_build_job:
     REPO_URL_OS_SUBDIR: slc6_x86_64
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests_slc6.supp"
 
 .job_template: &centos7_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
@@ -181,6 +182,7 @@ publish_build_job:
     UHAL_ENABLE_IPBUS_PCIE: ""
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 
 .job_template: &simpleInstall_test_jobTemplate
@@ -198,6 +200,7 @@ publish_build_job:
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 .job_template: &fedora26_python3_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
@@ -207,6 +210,7 @@ publish_build_job:
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: python3-wxpython4
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 .job_template: &ubuntu16_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
@@ -215,6 +219,7 @@ publish_build_job:
     - build:ubuntu16
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 
 
@@ -235,7 +240,7 @@ publish_build_job:
     - uhal_test_suite.py -v -s "2.0 pcie"
     - uhal_test_suite.py -v -s "2.0 controlhub - normal" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
-    - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no --suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbus* --log_level=test_suite
+    - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbus* --log_level=test_suite
 
 .job_template: &test_python_jobTemplate
   tags:
