@@ -232,7 +232,7 @@ publish_build_job:
   tags:
     - docker
   script:
-    - sudo yum -y install wxPython numpy
+    - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install wxPython numpy; else sudo apt-get install python-wx* ; fi'
     - export PATH=/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - env | grep -v PASSWORD | grep -v TOKEN
@@ -314,6 +314,10 @@ test_python:fedora26:
   <<: *fedora26_test_jobTemplate
   <<: *test_python_jobTemplate
 
+test_gui:fedora26:
+  <<: *fedora26_test_jobTemplate
+  <<: *test_gui_jobTemplate
+
 test_tools:fedora26:
   <<: *fedora26_test_jobTemplate
   <<: *test_tools_jobTemplate
@@ -330,6 +334,10 @@ test_core:ubuntu16:
 test_python:ubuntu16:
   <<: *ubuntu16_test_jobTemplate
   <<: *test_python_jobTemplate
+
+test_gui:ubuntu16:
+  <<: *ubuntu16_test_jobTemplate
+  <<: *test_gui_jobTemplate
 
 test_tools:ubuntu16:
   <<: *ubuntu16_test_jobTemplate
