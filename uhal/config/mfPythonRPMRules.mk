@@ -5,6 +5,13 @@ endif
 PackageScripts ?= []
 PackageDescription ?= None
 
+# By default, install Python bindings using same prefix & exec_prefix as main Python installation
+ifdef prefix
+    CUSTOM_INSTALL_PREFIX = true
+endif
+ifdef exec_prefix
+	CUSTOM_INSTALL_EXEC_PREFIX = true
+endif
 include $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/mfInstallVariables.mk
 
 RPMBUILD_DIR=${PackagePath}/rpm/RPMBUILD
@@ -64,4 +71,4 @@ install: _setup_update
 	echo "include */*.so" > ${RPMBUILD_DIR}/MANIFEST.in
 	# Change into rpm/pkg to finally run the customized setup.py
 	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
-	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py install
+	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py install $(if ${CUSTOM_INSTALL_PREFIX},--prefix=${prefix},) $(if ${CUSTOM_INSTALL_PREFIX}${CUSTOM_INSTALL_EXEC_PREFIX},--exec-prefix=${exec_prefix},)
