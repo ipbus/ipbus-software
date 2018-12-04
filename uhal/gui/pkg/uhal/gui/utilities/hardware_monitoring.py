@@ -1,5 +1,8 @@
 import sys, threading, time, logging, wx
-from wx.lib.pubsub import Publisher
+try:
+    from wx.lib.pubsub import Publisher
+except ImportError:
+    from wx.lib.pubsub import pub as Publisher
 
 import uhal
 

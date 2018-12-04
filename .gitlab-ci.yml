@@ -232,7 +232,7 @@ publish_build_job:
   tags:
     - docker
   script:
-    - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install wxPython numpy; else sudo apt-get install python-wx* ; fi'
+    - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install wxPython numpy; else sudo apt-get update && sudo apt-get -y install python-wx* ; fi'
     - export PATH=/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - env | grep -v PASSWORD | grep -v TOKEN

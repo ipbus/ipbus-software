@@ -24,6 +24,7 @@ PackageScripts = ["uhal_gui.exe"]
 
 
 .PHONY: _all build clean
+default: build
 clean: ;
 _all: ;
 build: ;

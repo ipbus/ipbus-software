@@ -1,7 +1,10 @@
 import os, webbrowser, logging
 
 import wx
-from wx.lib.pubsub import Publisher
+try:
+    from wx.lib.pubsub import Publisher
+except ImportError:
+    from wx.lib.pubsub import pub as Publisher
 
 from uhal.gui.utilities.hardware_monitoring import HardwareMonitoring
 from uhal.gui.guis.hardware_tree import HardwareTree
