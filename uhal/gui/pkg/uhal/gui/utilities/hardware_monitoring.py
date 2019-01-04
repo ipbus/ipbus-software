@@ -40,7 +40,7 @@ class HardwareMonitoring(threading.Thread):
             self.__init_hw(file_name)      
             self.__build_hw_tree()
             
-        except Exception, e:            
+        except Exception as e:
             raise                                 
 
 
@@ -61,7 +61,7 @@ class HardwareMonitoring(threading.Thread):
             
             map_devs_to_map_nodes_to_values = {}
            
-            for name, dev in self.__devices.iteritems():
+            for name, dev in self.__devices.items():
                 '''
                 if dev.get_status() is not "OK":
                     continue
@@ -83,14 +83,14 @@ class HardwareMonitoring(threading.Thread):
                                                
                         nodes_vs_values[node] = node_object.read()                       
                                                         
-                    except Exception, e:
+                    except Exception as e:
                         self.__logger.warning('Exception while reading node %s from device %s: %s', node , name, str(e))                        
                 
                 # Temporarily add try/except block to cope with the fact that IP End point check status (PING) is not offered right now
                 try:              
                     dev.dispatch()                    
                     map_devs_to_map_nodes_to_values[name] = nodes_vs_values
-                except Exception, e:
+                except Exception as e:
                     self.__logger.warning('Dispatch operation for device %s failed: %s', dev.id(), str(e))
                                                                                     
             

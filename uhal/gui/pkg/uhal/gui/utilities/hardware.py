@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import uhal
 
 ########## NODE RELATED CLASSES ##########
@@ -8,7 +10,7 @@ class Node:
     def __init__(self, node, parent_id=""):
 
         if not node: 
-            print "ERROR: tried to initialize Node object with invalid uhal Node argument"
+            print("ERROR: tried to initialize Node object with invalid uhal Node argument")
             return
                
         self.__id = node.getId()
@@ -23,7 +25,7 @@ class Node:
         self.__size = node.getSize()
         self.__tags = node.getTags()
 
-        print "DEBUG: Creating node %s %s" % (self.__id, self.__permission)
+        print("DEBUG: Creating node %s %s" % (self.__id, self.__permission))
         self.__parent = parent_id
         self.__children = []
 
@@ -34,7 +36,7 @@ class Node:
 
             
     def __add_kid(self, node):
-        print "DEBUG: Adding kid %s to node %s" % (node.get_id(), self.get_id())
+        print("DEBUG: Adding kid %s to node %s" % (node.get_id(), self.get_id()))
         self.__children.append(node)
 
     
@@ -83,9 +85,9 @@ class Node:
 
 
     def print_node(self):
-        print "DEBUG: Node: %s %s %s" % (self.__id, self.__mode, self.__permission)
+        print("DEBUG: Node: %s %s %s" % (self.__id, self.__mode, self.__permission))
         for c in self.__children:
-            print "\t",c.print_node()
+            print("\t",c.print_node())
      
 
 
@@ -98,19 +100,19 @@ class IPEndPoint:
     def __init__(self, ip_ep, status="Undefined"):
 
          if not ip_ep:
-             print "ERROR: tried to initialize IPEndPoint object with invalid uhal IP End Point argument"
+             print("ERROR: tried to initialize IPEndPoint object with invalid uhal IP End Point argument")
              return
          
          self.__id = ip_ep.id()
          self.__uri = ip_ep.uri()        
          self.__status = status        
          self.__nodes_list = []
-         print "DEBUG: IP End Point instantiated: %s %s %s" %(self.__id, self.__uri, self.__status)
+         print("DEBUG: IP End Point instantiated: %s %s %s" %(self.__id, self.__uri, self.__status))
          
 
 
     def add_node(self, node):
-        print "DEBUG: Adding node %s to the IP End Point %s" % (node.get_id(), self.__id)
+        print("DEBUG: Adding node %s to the IP End Point %s" % (node.get_id(), self.__id))
         self.__nodes_list.append(node)
         
     def get_nodes(self):
@@ -142,7 +144,7 @@ class IPEndPoint:
 
           
     def print_ip_end_point(self):
-        print "DEBUG: IP End Point: %s %s %s" % (self.__id, self.__uri, self.__status)
+        print("DEBUG: IP End Point: %s %s %s" % (self.__id, self.__uri, self.__status))
         
         for n in self.__nodes_list:
             n.print_node()
@@ -169,22 +171,22 @@ class HardwareStruct:
             self.__connection_file = connection_file
             self.__hw_manager = uhal.ConnectionManager(str("file://" + self.__connection_file))
             
-            print "DEBUG: HardwareStruct instantiated with file name %s" % self.__connection_file
+            print("DEBUG: HardwareStruct instantiated with file name %s" % self.__connection_file)
         elif id and uri and address_table:            
             self.__id = id
             self.__uri = uri
             self.__address_table = address_table
             self.__hw_manager = uhal.ConnectionManager(self.__id, self.__uri, self.__address_table)
             
-            print "DEBUG: HardwareStruct instantiated with id: %s, uri: %s, address_table: %s" % (self.__id, self.__uri, self.__address_table)
+            print("DEBUG: HardwareStruct instantiated with id: %s, uri: %s, address_table: %s" % (self.__id, self.__uri, self.__address_table))
         else:
-            print "ERROR: HardwareStruct object not properly instantiated"
+            print("ERROR: HardwareStruct object not properly instantiated")
         
         
         if self.__hw_manager:
             self.__load_hardware()
         else:
-            print "ERROR: could not start uhal.ConnectionManager object. Cannot start the default gui"
+            print("ERROR: could not start uhal.ConnectionManager object. Cannot start the default gui")
         
         
 
@@ -235,7 +237,7 @@ class HardwareStruct:
 
     
     def add_ip_end_point(self, ip_ep):
-        print "DEBUG: Adding IP End Point %s to the IP End Point list" % ip_ep.get_id()
+        print("DEBUG: Adding IP End Point %s to the IP End Point list" % ip_ep.get_id())
         self.__ip_end_points.append(ip_ep)
 
 

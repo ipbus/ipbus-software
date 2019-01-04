@@ -111,7 +111,7 @@ class StaticFields(wx.Panel):
             
     def __init__(self, parent):
         
-        print "DEBUG: Init StaticFields"
+        print("DEBUG: Init StaticFields")
         wx.Panel.__init__(self, parent)     
         
         # Attributes
@@ -329,7 +329,7 @@ class HardwareTablePanel(scroll.ScrolledPanel):
                 try:
                     # Item is a Node object 
                     id = k.getId()
-                except AttributeError, e:
+                except AttributeError as e:
                     # The item is an IP End point object (HardwareInterface)
                     id = k.id()
                 

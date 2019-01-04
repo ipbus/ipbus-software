@@ -59,7 +59,7 @@ class HardwareTree(wx.Frame):
             try:
                 # Case node is an IP End point
                 id = k.id()
-            except AttributeError, e:
+            except AttributeError as e:
                 # Case node is a Node
                 id = k.getId()
                         

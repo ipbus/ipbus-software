@@ -4,7 +4,7 @@ from uhal.gui.guis import defaultgui
 class CustomWindow1(defaultgui.DefaultGui):
 
     def __init__(self, parent, id, title):
-	wx.Frame.__init__(self, parent, id, title)
+        wx.Frame.__init__(self, parent, id, title)
 
 
 def start():

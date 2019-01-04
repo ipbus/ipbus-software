@@ -64,7 +64,7 @@ def loader(default=True, guilist=[]):
             guilist.append(def_gui_mod_obj)
             logger.info('GUI modules successfully imported')
             
-        except ImportError, e:
+        except ImportError as e:
             logger.critical('Failed to import defaultgui module: %s', str(e))
             
         

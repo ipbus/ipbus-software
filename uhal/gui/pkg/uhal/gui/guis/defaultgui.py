@@ -245,7 +245,7 @@ class DefaultGui(wx.Frame):
             self.__hw_tree_struct = self.__hw_mon.get_hw_tree()           
             self.__logger.info('Starting HW monitoring thread...')
               
-        except Exception, e:
+        except Exception as e:
             
             self.__logger.critical('Exception while instantiating HW monitoring thread! %s Exiting...', str(e))            
             import sys
@@ -256,7 +256,7 @@ class DefaultGui(wx.Frame):
             
             self.__hw_mon.start()
             
-        except RuntimeError, e:
+        except RuntimeError as e:
             
             self.__logger.critical('Tried to initiate twice the HW monitoring thread! Message %s Exiting...', str(e))
             self.__hw_mon.set_thread_running(False)

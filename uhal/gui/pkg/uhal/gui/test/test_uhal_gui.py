@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 
 from uhal.gui.guiloader import test
@@ -21,39 +22,39 @@ class TestGuiImports(unittest.TestCase):
 
 
     def test_default_on(self):
-        print '\n********** Simple configuration **********'
+        print('\n********** Simple configuration **********')
         self.assertEqual(test(guilist=[self.default_gui_mod]), 'OK')
-        print
+        print()
 
     
     def test_default_off(self):    
-        print '\n********** Configuration: default=No, guilist=[] **********'
+        print('\n********** Configuration: default=No, guilist=[] **********')
         self.assertEqual(test(guilist=[]), 'OK')
-        print
+        print()
 
     
     def test_default_on_custom_one(self):
-        print '\n********** Configuration: default=Yes, guilist=[\'CustomWindow1\'] **********'
+        print('\n********** Configuration: default=Yes, guilist=[\'CustomWindow1\'] **********')
         self.assertEqual(test(guilist=[self.default_gui_mod, self.custom_gui1]), 'OK')
-        print
+        print()
 
     
     def test_default_off_custom_one(self):
-        print '\n********** Configuration: default=No, guilist=[\'CustomWindow1\'] **********'
+        print('\n********** Configuration: default=No, guilist=[\'CustomWindow1\'] **********')
         self.assertEqual(test(guilist=[self.custom_gui1]), 'OK')
-        print
+        print()
 
     
     def test_default_on_custom_one_two(self):
-        print '\n********** Configuration: default=Yes, guilist=[\'CustomWindow1\',\'CustomWindow2\']**********'
+        print('\n********** Configuration: default=Yes, guilist=[\'CustomWindow1\',\'CustomWindow2\']**********')
         self.assertEqual(test(guilist=[self.default_gui_mod, self.custom_gui1, self.custom_gui2]), 'OK')
-        print
+        print()
 
     
     def test_default_off_custom_one_two(self):
-        print '\n********** Configuration: default=No, guilist=[\'CustomWindow1\',\'CustomWindow2\'] **********'
+        print('\n********** Configuration: default=No, guilist=[\'CustomWindow1\',\'CustomWindow2\'] **********')
         self.assertEqual(test(guilist=[self.custom_gui1, self.custom_gui2]), 'OK')
-        print
+        print()
 
    
 def main():
