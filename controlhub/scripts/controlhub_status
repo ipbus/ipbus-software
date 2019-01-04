@@ -11,7 +11,7 @@
 #######################################################################################
 
 
-CONTROLHUB_BIN_DIR=$(python -c "import os.path; print os.path.dirname(os.path.abspath('$BASH_SOURCE'))")/../rel/controlhub/bin
+CONTROLHUB_BIN_DIR=$(python -c "import os.path; print(os.path.dirname(os.path.abspath('$BASH_SOURCE')))")/../rel/controlhub/bin
 
 CONTROLHUB_CMD=${CONTROLHUB_BIN_DIR}/controlhub
 

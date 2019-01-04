@@ -22,6 +22,8 @@ E.g:
 
 """
 
+from __future__ import print_function
+
 from os.path import join
 import fcntl
 import sys
@@ -170,13 +172,13 @@ def cleanup_cmds():
 
 def run_cleanup_commands(background_processes):
     """Runs the cleanup commands"""
-    print
+    print()
     for p in background_procs:
-        print "  Terminating PID", p.pid
+        print("  Terminating PID", p.pid)
         os.killpg(p.pid, signal.SIGTERM)
 
     for cmd in cleanup_cmds():
-       print "+ Running cleanup command: ", cmd
+       print("+ Running cleanup command: ", cmd)
        run_command(cmd, False)
 
 
@@ -221,17 +223,17 @@ def background_run_command(cmd , proc_list):
       exit_code = p.poll()
       cmd_duration = time.time()-t0
       if exit_code == -15:
-        print "+ Background command was terminated '%s' (time elapsed = %s seconds)" % (cmd , cmd_duration)
+        print("+ Background command was terminated '%s' (time elapsed = %s seconds)" % (cmd , cmd_duration))
       elif exit_code:
         msg = "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) IN BACKGROUND COMMAND '%s' ***\n" % (exit_code, cmd_duration, cmd)
         msg += "  ----- START OF STDOUT -----\n"
         msg += p.stdout.read()
         msg += "\n  ----- END OF STDOUT -----"
-        print msg
+        print(msg)
       else:
-        print "+ Background command '%s' completed successfully, time elapsed: %s seconds" % (cmd, cmd_duration)
+        print("+ Background command '%s' completed successfully, time elapsed: %s seconds" % (cmd, cmd_duration))
 
-    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Background running ", cmd
+    print("+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Background running ", cmd)
     thread = threading.Thread( target=runInThread , args=( cmd , proc_list ) )
     thread.start()
 
@@ -257,32 +259,45 @@ def run_command(cmd, verbose=True):
       stdout = []
       last = time.time()
 
+      def convert_to_utf(byte_string):
+          if sys.version_info[0] > 2:
+              return str(byte_string, 'utf-8')
+          else:
+              return byte_string
+
       while True:
           current = time.time()
 
           try:
               nextline = p.stdout.readline()
-              if not nextline:
-                  break
-
               last = time.time()
-              stdout += [nextline]
-              if verbose:
-                  sys.stdout.write(nextline)
-                  sys.stdout.flush()
+
+              if nextline:
+                  stdout += [convert_to_utf(nextline)]
+                  if verbose:
+                      sys.stdout.write(convert_to_utf(nextline))
+                      sys.stdout.flush()
+              elif (p.poll() is not None):
+                  nextlines = [convert_to_utf(s) for s in p.stdout.readlines()]
+                  if verbose:
+                      for l in nextlines:
+                          sys.stdout.write(l)
+                          sys.stdout.flush()
+                  stdout += nextlines
+                  break
 
           except IOError:
               time.sleep(0.1)
 
               if (current-last) > SOFT_TIMEOUT_S:
-                  print "+ ERROR : unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S)
+                  print("+ ERROR : unresponsive command, missing output for %d sec" % (SOFT_TIMEOUT_S))
                   os.killpg(p.pid, signal.SIGTERM)
                   return stdout, -1, time.time()-t0
 
     except KeyboardInterrupt:
-        print "+ Ctrl-C detected."
+        print("+ Ctrl-C detected.")
         os.killpg(p.pid, signal.SIGTERM)
-        print "  Press Ctrl-C again in next 5 seconds to stop script."
+        print("  Press Ctrl-C again in next 5 seconds to stop script.")
         time.sleep(5)
         return stdout, -2, time.time()-t0
 
@@ -293,8 +308,8 @@ if __name__=="__main__":
     # Parse options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "xhvlp:s:c:", ["help"])
-    except getopt.GetoptError, err:
-        print __doc__
+    except getopt.GetoptError as err:
+        print(__doc__)
         sys.exit(2)
 
     run_cmds = True
@@ -311,10 +326,10 @@ if __name__=="__main__":
 
     for opt, value in opts:
         if opt in ("-h", "--help"):
-            print __doc__
-            print "The sections in this suite are:"
+            print(__doc__)
+            print("The sections in this suite are:")
             for s in get_sections():
-                print "  ", s
+                print("  ", s)
             sys.exit(0)
         elif opt == "-l":
             run_cmds = False
@@ -330,23 +345,24 @@ if __name__=="__main__":
             controlhub_scripts_dir = value
 
     if len(args) != 0:
-        print "Incorrect usage!"
-        print __doc__
+        print("Incorrect usage!")
+        print(__doc__)
         sys.exit(1)
 
-    print "Configuration ... "
-    print "  connections file:       ",  conn_file
+    print("Configuration ... ")
+    print("  connections file:       ",  conn_file)
 
     # Find directory for controlhub commands
     if controlhub_scripts_dir is None:
         which_controlhub_status = run_command("which controlhub_status", False)
+        print('which_controlhub_status =', which_controlhub_status)
         if which_controlhub_status[1]:
             controlhub_scripts_dir = "/opt/cactus/bin"
         else:
             controlhub_scripts_dir = os.path.dirname( which_controlhub_status[0][0].rstrip("\n") )
         if controlhub_scripts_dir.startswith("/opt/cactus/bin"):
             controlhub_scripts_dir = None
-    print '  ControlHub scripts dir: ', controlhub_scripts_dir
+    print('  ControlHub scripts dir: ', controlhub_scripts_dir)
 
     # Get uhal tools template file name
     which_gen_ipbus_addr_decode = run_command("which gen_ipbus_addr_decode", False)
@@ -370,19 +386,19 @@ if __name__=="__main__":
     if run_cmds:
         for env_var in ["PATH", "LD_LIBRARY_PATH"]:
             value = run_command("echo $" + env_var, verbose=False)[0][0]
-            print " $", env_var, "is: ", value.strip("\n")
+            print(" $", env_var, "is: ", value.strip("\n"))
 
         if section_search_str is None:
-            print "\nAll sections will be run."
+            print("\nAll sections will be run.")
         elif len(sections_cmds_to_run) != 0:
-            print "\nThe following sections will be skipped:"
+            print("\nThe following sections will be skipped:")
             for name in sections_skipped:
-                print "   ", name
+                print("   ", name)
         else:
-            print "No sections matched the search string \"" + section_search_str + "\""
+            print("No sections matched the search string \"" + section_search_str + "\"")
 
     else:
-        print "\nN.B: Commands will only be listed, not run"
+        print("\nN.B: Commands will only be listed, not run")
 
     background_procs = []
 
@@ -391,27 +407,27 @@ if __name__=="__main__":
     nr_cmds_err = 0
     try:
         for section_name, cmds in sections_cmds_to_run:
-            print "\n\n" + ("=" * 120)
-            print "-" * 120
-            print "  --> Section:", section_name
+            print ("\n\n" + ("=" * 120))
+            print ("-" * 120)
+            print ("  --> Section:", section_name)
 
             for cmd in cmds:
                 if run_cmds == False:
-                    print cmd
+                    print(cmd)
                     continue
 
 
-                print
+                print()
                 if verbose:
-                    print "-" * 120
+                    print("-" * 120)
 
                 nr_cmds_run += 1
 
                 if cmd == "KILL_BACKGROUND_PROCS":
-                    print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Killing background processes"
+                    print("+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Killing background processes")
                     while len(background_procs) > 0:
                         p = background_procs.pop()
-                        print "  Terminating PID", p.pid
+                        print("  Terminating PID", p.pid)
                         os.killpg(p.pid, signal.SIGTERM)
                         p.wait()
                     time.sleep(2)
@@ -419,15 +435,15 @@ if __name__=="__main__":
 
                 if cmd.startswith( "DummyHardware" ):
                     background_run_command( cmd , background_procs )
-                    print "     (Brief sleep after dummy H/W command)"
+                    print("     (Brief sleep after dummy H/W command)")
                     time.sleep(0.5)
                     continue
 
-                print "+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd
+                print("+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Running ", cmd)
                 stdout, exit_code, cmd_duration = run_command(cmd, verbose)
 
                 if len(stdout) and not verbose:
-                    print stdout[-1].rstrip("\n")
+                    print(stdout[-1].rstrip("\n"))
                 if exit_code:
                     nr_cmds_err += 1
                     split_name_list = re.split('(\.exe)',cmd)
@@ -435,24 +451,24 @@ if __name__=="__main__":
                     if len( split_name_list ) > 1:
                         split_name = split_name + split_name_list[1]
 
-                    print "+ *** ERROR OCCURED (section = '%s', test = '%s', exit code = %s, time elapsed = %s seconds, %s%s ) ***" % (section_name, split_name , exit_code, cmd_duration , get_controlhub_status( cmd ) , get_dummyhardware_status( cmd ) )
+                    print("+ *** ERROR OCCURED (section = '%s', test = '%s', exit code = %s, time elapsed = %s seconds, %s%s ) ***" % (section_name, split_name , exit_code, cmd_duration , get_controlhub_status( cmd ) , get_dummyhardware_status( cmd ) ))
 
                     if quit_on_error:
-                        print "+ Quitting as an error was observed and the '-x' flag was specified by the user"
+                        print("+ Quitting as an error was observed and the '-x' flag was specified by the user")
                         run_cleanup_commands(background_procs)
                         sys.exit(exit_code)
                 else:
-                    print "+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration)
+                    print("+ Command completed successfully, time elapsed: %s seconds" % (cmd_duration))
 
     except KeyboardInterrupt:
-        print "\n+ Ctrl-C detected."
+        print("\n+ Ctrl-C detected.")
         run_cleanup_commands(background_procs)
         sys.exit()
 
     if run_cmds:
         run_cleanup_commands(background_procs)
 
-        print "\n   TEST SUITE COMPLETED! ", nr_cmds_run, "commands run," , nr_cmds_err, "errors (non-zero exit codes)"
+        print("\n   TEST SUITE COMPLETED! ", nr_cmds_run, "commands run," , nr_cmds_err, "errors (non-zero exit codes)")
         if nr_cmds_err > 0:
             sys.exit(1)
 
