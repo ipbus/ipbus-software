@@ -119,6 +119,10 @@ build:fedora26:
   <<: *simple_build_jobTemplate
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
 
+build:fedora26-python3:
+  <<: *simple_build_jobTemplate
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+
 build:ubuntu16:
   <<: *simple_build_jobTemplate
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2018-01-14__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
@@ -166,6 +170,7 @@ publish_build_job:
   variables:
     REPO_URL_OS_SUBDIR: slc6_x86_64
     UHAL_ENABLE_IPBUS_PCIE: ""
+    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
 
 .job_template: &centos7_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
@@ -174,6 +179,7 @@ publish_build_job:
     REPO_URL_OS_SUBDIR: centos7_x86_64
     UHAL_ENABLE_IPBUS_PCIE: ""
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
+    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
 
 
 .job_template: &simpleInstall_test_jobTemplate
@@ -190,6 +196,16 @@ publish_build_job:
     - build:fedora26
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
+    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+
+.job_template: &fedora26_python3_test_jobTemplate
+  <<: *simpleInstall_test_jobTemplate
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  dependencies:
+    - build:fedora26-python3
+  variables:
+    UHAL_ENABLE_IPBUS_PCIE: ""
+    UHAL_GUI_DEPENDENCIES: python3-wxpython4
 
 .job_template: &ubuntu16_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
@@ -232,7 +248,7 @@ publish_build_job:
   tags:
     - docker
   script:
-    - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install wxPython numpy; else sudo apt-get update && sudo apt-get -y install python-wx* ; fi'
+    - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install ${UHAL_GUI_DEPENDENCIES} ; else sudo apt-get update && sudo apt-get -y install python-wx* ; fi'
     - export PATH=/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - env | grep -v PASSWORD | grep -v TOKEN
@@ -324,6 +340,27 @@ test_tools:fedora26:
 
 test_controlhub:fedora26:
   <<: *fedora26_test_jobTemplate
+  <<: *test_controlhub_plainScripts_jobTemplate
+
+
+test_core:fedora26-python3:
+  <<: *fedora26_python3_test_jobTemplate
+  <<: *test_core_jobTemplate
+
+test_python:fedora26-python3:
+  <<: *fedora26_python3_test_jobTemplate
+  <<: *test_python_jobTemplate
+
+test_gui:fedora26-python3:
+  <<: *fedora26_python3_test_jobTemplate
+  <<: *test_gui_jobTemplate
+
+test_tools:fedora26-python3:
+  <<: *fedora26_python3_test_jobTemplate
+  <<: *test_tools_jobTemplate
+
+test_controlhub:fedora26-python3:
+  <<: *fedora26_python3_test_jobTemplate
   <<: *test_controlhub_plainScripts_jobTemplate
 
 
