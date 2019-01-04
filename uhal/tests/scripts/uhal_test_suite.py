@@ -209,6 +209,14 @@ def get_dummyhardware_status( cmd ):
   else:
     return StdOut+" DummyHardwares running"
 
+
+def convert_to_utf(byte_string):
+    if sys.version_info[0] > 2:
+        return str(byte_string, 'utf-8')
+    else:
+        return byte_string
+
+
 def background_run_command(cmd , proc_list):
     """
     Run command in separate thread, ignoring stdout and stderr
@@ -227,7 +235,7 @@ def background_run_command(cmd , proc_list):
       elif exit_code:
         msg = "+ *** ERROR OCCURED (exit code = %s, time elapsed = %s seconds) IN BACKGROUND COMMAND '%s' ***\n" % (exit_code, cmd_duration, cmd)
         msg += "  ----- START OF STDOUT -----\n"
-        msg += p.stdout.read()
+        msg += convert_to_utf(p.stdout.read())
         msg += "\n  ----- END OF STDOUT -----"
         print(msg)
       else:
@@ -236,7 +244,6 @@ def background_run_command(cmd , proc_list):
     print("+ At", datetime.strftime(datetime.now(),"%H:%M:%S"), ": Background running ", cmd)
     thread = threading.Thread( target=runInThread , args=( cmd , proc_list ) )
     thread.start()
-
 
 
 def run_command(cmd, verbose=True):
@@ -259,11 +266,6 @@ def run_command(cmd, verbose=True):
       stdout = []
       last = time.time()
 
-      def convert_to_utf(byte_string):
-          if sys.version_info[0] > 2:
-              return str(byte_string, 'utf-8')
-          else:
-              return byte_string
 
       while True:
           current = time.time()

@@ -2,14 +2,16 @@
 import sys
 
 try:
-   from _core import *
+   from ._core import *
 except ImportError as e:
     from os import environ
     if ('LD_LIBRARY_PATH' not in environ) or '/opt/cactus/lib' not in environ['LD_LIBRARY_PATH'].split():
-        new_msg = (e.message +
-                  "\nN.B. ImportError raised when uHAL's __init__.py tries to load python bindings library" +
-                  '\n     Maybe you need to add "/opt/cactus/lib", or some other path, to the "LD_LIBRARY_PATH" environment variable?')
-        raise type(e), type(e)(new_msg), sys.exc_info()[2]
+        msg_suffix = '\nN.B. ImportError (or derived exception) raised when uHAL\'s __init__.py tries to load python bindings library\n     Maybe you need to add "/opt/cactus/lib", or some other path, to the "LD_LIBRARY_PATH" environment variable?'
+        if sys.version_info[0] > 2:
+            # raise type(e)(type(e)(new_msg)).with_traceback()
+            exec('raise type(e)(e.msg + msg_suffix) from e')
+        else:
+            exec('raise type(e), type(e)(e.message + msg_suffix), sys.exc_info()[2]')
     else:
         raise
 
@@ -26,10 +28,12 @@ exception.__str__ = _exception_to_string
 ##################################################
 # Pythonic additions to the ValWord_uint32 API
 
-def _ValWord_to_long(self):
-    return long(int(self))
+if sys.version_info[0] <= 2:
+    def _ValWord_to_long(self):
+        return long(int(self))
+    ValWord_uint32.__long__ = _ValWord_to_long
 
-ValWord_uint32.__long__ = _ValWord_to_long
+ValWord_uint32.__index__ = ValWord_uint32.__int__
 
 
 def _add_int_method_to_ValWord(method_name, unary=False):
@@ -40,7 +44,7 @@ def _add_int_method_to_ValWord(method_name, unary=False):
     else:
         def valWord_method(self, other):
             int_type = int
-            if isinstance(int(self), long) or ( not isinstance(other, str) and isinstance(int(other), long) ):
+            if (sys.version_info[0] <= 2) and (isinstance(int(self), long) or ( not isinstance(other, str) and isinstance(int(other), long) )):
                 int_type = long
             int_method = getattr(int_type, method_name)
             if isinstance(other, int_type) or isinstance(other, str):
@@ -77,8 +81,8 @@ if sys.hexversion >= 0x020600F0:
     _add_int_method_to_ValWord('__format__')
 
 # Unary comparison operator (used in "if valWord")
-_add_int_method_to_ValWord('__nonzero__', unary=True)
+_add_int_method_to_ValWord('__bool__' if (sys.version_info[0] > 2) else '__nonzero__', unary=True)
 
-# Binary comparison operator
-_add_int_method_to_ValWord('__cmp__')
+# Binary comparison operators
+_add_int_methods_to_ValWord(['__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__'] if (sys.version_info[0] > 2) else ['__cmp__'])
 
