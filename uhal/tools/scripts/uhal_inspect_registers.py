@@ -4,6 +4,8 @@
 This script prints the values in a remote device, of registers below a specified uHAL node.
 """
 
+from __future__ import print_function
+
 import argparse
 import uhal
 
@@ -43,8 +45,8 @@ if __name__=="__main__":
         cm = uhal.ConnectionManager(args.conn_file)
         device = cm.getDevice(args.device_id)
 
-    print 'Values of registers below node "'+args.reg_name+'" in device "'+args.device_id+'"'
+    print('Values of registers below node "'+args.reg_name+'" in device "'+args.device_id+'"')
 
     for name, value in snapshot(device.getNode(args.reg_name), args.regex):
-        print " +", name, ":", hex(value)
+        print(" +", name, ":", hex(value))
 

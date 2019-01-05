@@ -18,6 +18,9 @@ options:
                                             (default
                                             /opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd)
 """
+
+from __future__ import print_function
+
 import getopt
 import sys
 import os.path
@@ -27,6 +30,10 @@ import math
 import uhal
 
 #===========================================================================================
+# In Python 3 "xrange" doesn't exist, since Python 3's "range" is just as efficient as Python 2's "xrange"
+if (sys.version_info[0] > 2):
+    xrange = range
+
         
 class BitArray:
     
@@ -189,7 +196,7 @@ def main():
     template_fn = "/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd"
     try:
         opts, args = getopt.getopt(sys.argv[1:], "vdnht:", ["verbose","debug","dry-run","help","template="])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         log.critical(__doc__)
         sys.exit(EXIT_CODE_ARG_PARSING_ERROR)
     for o, a in opts:
@@ -200,7 +207,7 @@ def main():
             log.setLevel(logging.DEBUG)
             uhal.setLogLevelTo(uhal.LogLevel.DEBUG)
         elif o in ("-h", "--help"):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
         elif o in ("-t", "--template"):
             template_fn = a
@@ -300,7 +307,7 @@ def main():
                        .replace("INSERT_SEL_WIDTH_HERE","%s"%ipbus_sel_width)\
                        .replace("PACKAGENAME",moduleName))
         vhdlfile.close()
-        print "VHDL decode file saved: ", vhdlfilename
+        print("VHDL decode file saved: ", vhdlfilename)
     
 if __name__ == '__main__':
     main()

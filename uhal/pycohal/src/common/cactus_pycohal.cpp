@@ -275,7 +275,11 @@ BOOST_PYTHON_MODULE ( _core )
   .def ( "mask",  static_cast< const uint32_t& ( uhal::ValWord<uint32_t>::* ) () const > ( &uhal::ValWord<uint32_t>::mask ) , pycohal::const_ref_return_policy() )
   .def ( "__str__", static_cast< std::string (*) ( const uhal::ValWord<uint32_t>& ) > ( &pycohal::convert_to_string ) )
   .def ( "__int__", static_cast< uint32_t ( uhal::ValWord<uint32_t>::* ) () const> ( &uhal::ValWord<uint32_t>::value ) )
+#if PY_VERSION_HEX >= 0x03000000
+  .def ( "__index__", static_cast< uint32_t ( uhal::ValWord<uint32_t>::* ) () const> ( &uhal::ValWord<uint32_t>::value ) )
+#else
   .def ( "__hex__", pycohal::hex_string )
+#endif
   ;
   // Wrap uhal::ValVector<uint32_t>
   class_<uhal::ValVector<uint32_t> > ( "ValVector_uint32", init< const uhal::ValVector<uint32_t>& >() )

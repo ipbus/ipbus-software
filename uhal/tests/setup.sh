@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #HERE=$(readlink -f $(dirname $BASH_SOURCE))
-HERE=$(python -c "import os.path; print os.path.dirname(os.path.abspath('$BASH_SOURCE'))")
+HERE=$(python -c "import os.path; print(os.path.dirname(os.path.abspath('$BASH_SOURCE')))")
 
 REPO_BASE_DIR=$HERE/../..
 UHAL_BASE_DIR=$HERE/..

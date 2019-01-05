@@ -31,7 +31,7 @@ ${VIRTUAL_PACKAGES}:
 #     would be much harder to implement (especially when coping with changes to filenames between different releases)
 
 ifndef prefix
-  PYTHON_DIRECTORIES = $(shell python -c "import site,sys; print ' '.join([x+'/*uhal*' for x in site.getsitepackages()])")
+  PYTHON_DIRECTORIES = $(shell python -c "import site,sys; print(' '.join([x+'/*uhal*' for x in site.getsitepackages()]))")
 else
   PYTHON_DIRECTORIES = ${prefix}/lib/python*/*-packages/*uhal* ${exec_prefix}/lib/python*/*-packages/*uhal*
 endif

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import wx
 
 
@@ -26,6 +27,6 @@ def dynamic_loader(module_object):
         if inspect.isclass(obj):
             return (obj, "OK")
 
-    print "FAILED to return class from module %s" % module_object.__name__
+    print("FAILED to return class from module %s" % module_object.__name__)
 
 

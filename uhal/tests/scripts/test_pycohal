@@ -296,9 +296,13 @@ class TestValWordIntMethods(unittest.TestCase):
         if valid:
             x0 = 0
             reg0 = uhal.tests.get_dummy_ValWord(x0, True)
-            self.assertEqual ( x0.__nonzero__() , reg0.__nonzero__() )
+            if (sys.version_info[0] > 2):
+                self.assertEqual ( x0.__bool__() , reg0.__bool__() )
+                self.assertEqual ( x1.__bool__() , reg1.__bool__() )
+            else:
+                self.assertEqual ( x0.__nonzero__() , reg0.__nonzero__() )
+                self.assertEqual ( x1.__nonzero__() , reg1.__nonzero__() )
             self.assertEqual ( bool(x0) , bool(reg0) )
-            self.assertEqual ( x1.__nonzero__() , reg1.__nonzero__() )
             self.assertEqual ( bool(x1) , bool(reg1) )
         else:
             self.assertRaises( uhal.NonValidatedMemory, bool , (reg1) )
@@ -314,8 +318,22 @@ class TestValWordIntMethods(unittest.TestCase):
             reg1b = uhal.tests.get_dummy_ValWord(x1, True)
             self.assertAllEqual ( x1 == x1 , reg1 == x1 , x1 == reg1 , reg1 == reg1b )
         else:
-            self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (x1) )
-            self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (reg2) )
+            if (sys.version_info[0] > 2):
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__lt__, (x1) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__le__, (x1) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__eq__, (x1) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__ne__, (x1) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__gt__, (x1) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__ge__, (x1) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__lt__, (reg2) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__le__, (reg2) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__eq__, (reg2) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__ne__, (reg2) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__gt__, (reg2) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__ge__, (reg2) )
+            else:
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (x1) )
+                self.assertRaises( uhal.NonValidatedMemory, reg1.__cmp__, (reg2) )
 
         # __format__
         if sys.hexversion >= 0x020600F0:
@@ -436,7 +454,7 @@ class TestBlock(unittest.TestCase):
 
 
     def test_block_write_read(self):
-        for N in [1, 1024/4, 1024, 1024*1024/4]:
+        for N in [1, 1024//4, 1024, 1024*1024//4]:
             self.exe_test_block_write_read(N)
 
     def exe_test_block_offset_write_read(self, N, offset):
@@ -470,7 +488,7 @@ class TestBlock(unittest.TestCase):
         self.assertEqual( xx, [x for x in memVals] )
 
     def test_block_offset_write_read(self):
-        for N in [1, 1024/4, 1024, 1024*1024/4]:
+        for N in [1, 1024//4, 1024, 1024*1024//4]:
             for offset in [0, min(N,self.hw.getNode("MEM").getSize()-N), randint(0,self.hw.getNode("MEM").getSize()-N)]:
                 self.exe_test_block_offset_write_read(N, offset)
 
@@ -523,7 +541,7 @@ class TestRawClient(unittest.TestCase):
         self.assertEqual( int(reg)   , x )
 
     def test_mem_write_read_rawclient(self):
-        N = 1024*1024/4
+        N = 1024*1024//4
         client = self.hw.getClient()
         # Queue IPBus transactions
         xx = list_randuint32s(N)
@@ -563,7 +581,7 @@ class TestRawClient(unittest.TestCase):
         total = 0
         xx = []
         for i in range(N):
-            xx.append( randint(0,0xffffffff/1024) )
+            xx.append( randint(0,0xffffffff//1024) )
             total += xx[i]
         addr = self.hw.getNode( "SUBSYSTEM1.REG" ).getAddress()
         client.write( addr, xx[0] )
@@ -807,7 +825,7 @@ class TestPrintValMem( unittest.TestCase ):
 
     def test_ValVector(self):
         self.exe_ValVector_test( [0, 42, 56, 75] )
-        self.exe_ValVector_test( list_randuint32s(1024*1024/4) )
+        self.exe_ValVector_test( list_randuint32s(1024*1024//4) )
 
 
 # Run the tests
@@ -816,14 +834,14 @@ if __name__ == '__main__':
     # Grabbing connections xml file from args, and leaving rest of args for unittest
     if len(sys.argv)<3:
         sys.stderr.write("ERROR: Connections file not specified\n")
-        print __doc__
+        print(__doc__)
         sys.exit(2)
 
     try:
         opts, args = getopt.getopt([sys.argv.pop(1),sys.argv.pop(1)], "c:", ["connections-file="])
-    except getopt.GetoptError, err:
-        print err
-        print __doc__
+    except getopt.GetoptError as err:
+        print(err)
+        print(__doc__)
         sys.exit(2)
 
     CONNECTIONS_FILE = opts[0][1]
@@ -832,14 +850,14 @@ if __name__ == '__main__':
 
     # Check that '-v' is first remaining option if present - otherwise unittest module fails, with incomprehensible stack trace
     if ( sys.argv.count('-v')==1 and sys.argv[1]!='-v' ) or sys.argv.count('-v')>1 :
-       print "Invalid usage of '-v' option - if used it should only come directly after connection file"
-       print "E.g: To run only the unit tests under TestPrintValMem try ..."
-       print "     python test_pycohal -c file::///dir/to/connections_file.xml  -v  TestPrintValMem"
-       print __doc__
+       print("Invalid usage of '-v' option - if used it should only come directly after connection file")
+       print("E.g: To run only the unit tests under TestPrintValMem try ...")
+       print("     python test_pycohal -c file::///dir/to/connections_file.xml  -v  TestPrintValMem")
+       print(__doc__)
        sys.exit(2)
 
     # Now run tests ...
-    print 'Running tests using connections file "'+CONNECTIONS_FILE+'"\n'
+    print('Running tests using connections file "'+CONNECTIONS_FILE+'"\n')
     uhal.setLogLevelTo( uhal.LogLevel.FATAL )
     unittest.main()
 

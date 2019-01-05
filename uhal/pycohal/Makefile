@@ -22,6 +22,11 @@ PackagerEmail = tom.williams@cern.ch
 PythonModules = ["uhal"]
 LibraryFile = pkg/uhal/_core.so
 
+ifeq ($(shell python -c "import sys; print(sys.version_info[0])"),3)
+  EXTERN_BOOST_PYTHON_LIB = boost_python3
+else
+  EXTERN_BOOST_PYTHON_LIB = boost_python
+endif
 
 IncludePaths = include  \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
@@ -49,7 +54,7 @@ Libraries = \
 		pugixml \
 		\
 		boost_filesystem \
-		boost_python \
+		${EXTERN_BOOST_PYTHON_LIB} \
 		boost_regex \
 		boost_system \
 		boost_thread \

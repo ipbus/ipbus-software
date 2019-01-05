@@ -61,14 +61,14 @@ class Plot(wx.Frame):
         
         if self.__data:
             previous_y = self.__data[-1][1]
-            print "previous y is %s" % previous_y            
+            print("previous y is %s" % previous_y)
             self.__data.append((time_elapsed, previous_y))         
         
         self.__data.append((time_elapsed, y))
               
         
     def plot(self):
-        print "DEBUG: plotting with data", str(self.__data)
+        print("DEBUG: plotting with data", str(self.__data))
         self.__canvas.Draw(self.__draw_reg_plot())
     
     
