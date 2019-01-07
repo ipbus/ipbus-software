@@ -309,7 +309,7 @@ namespace uhal
         if ( !lStr.is_open() )
         {
           uhal::exception::CannotOpenFile lExc;
-          log ( lExc , "Failed to open " , lIt2->c_str() , ". Continuing with next document for now but be aware!" );
+          log ( lExc , "Failed to open file " , Quote ( lIt2->c_str() ) );
           throw lExc ;
         }
         else
@@ -339,7 +339,7 @@ namespace uhal
       if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
       {
         uhal::exception::CannotOpenFile lExc;
-        log ( lExc , "Failed to download file " , aURL , ". Continuing for now but be aware!" );
+        log ( lExc , "Failed to download file " , Quote ( aURL ) );
         throw lExc;
       }
 

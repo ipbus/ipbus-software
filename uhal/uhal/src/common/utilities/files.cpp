@@ -97,7 +97,7 @@ namespace uhal
       catch ( const std::exception& aExc )
       {
         uhal::exception::ExpandingShellExpressionFailed lExc;
-        log ( lExc , "Caught exception: " , Quote ( aExc.what() ) );
+        log ( lExc , "Caught exception during shell expansion: " , Quote ( aExc.what() ) );
         throw lExc;
       }
 
