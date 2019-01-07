@@ -231,14 +231,9 @@ publish_build_job:
     - export PATH=/opt/cactus/bin:/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - env | grep -v PASSWORD | grep -v TOKEN
-    - uhal_test_suite.py -v -s "1.3 udp"
-    - uhal_test_suite.py -v -s "1.3 tcp"
-    - service controlhub stop || /opt/cactus/bin/controlhub_stop || true
-    - uhal_test_suite.py -v -s "1.3 controlhub" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
-    - uhal_test_suite.py -v -s "2.0 udp"
-    - uhal_test_suite.py -v -s "2.0 tcp"
-    - uhal_test_suite.py -v -s "2.0 pcie"
-    - uhal_test_suite.py -v -s "2.0 controlhub - normal" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
+    - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
+    - service controlhub stop || /opt/cactus/bin/controlhub_stop
     - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbus* --log_level=test_suite
 
