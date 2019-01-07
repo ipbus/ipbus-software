@@ -235,7 +235,7 @@ publish_build_job:
     - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
     - service controlhub stop || /opt/cactus/bin/controlhub_stop
     - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
-    - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbus* --log_level=test_suite
+    - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbusudp* --log_level=test_suite
 
 .job_template: &test_python_jobTemplate
   tags:
