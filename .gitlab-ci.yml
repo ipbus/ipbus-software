@@ -74,7 +74,7 @@ doxygen_job:
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - cd .. && sudo rm -rf ipbus-software____ && mv ipbus-software ipbus-software____ && mkdir ipbus-software && cd ipbus-software____
+    - cd .. && sudo rm -rf ipbus-software___ && mv ipbus-software ipbus-software___ && mkdir ipbus-software && cd ipbus-software___
     - make -k Set=all
     - make -k Set=all PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - mkdir -p ${REPO_DIR} 
