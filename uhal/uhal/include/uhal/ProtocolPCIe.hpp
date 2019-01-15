@@ -173,7 +173,7 @@ namespace uhal
 
       boost::chrono::microseconds mSleepDuration;
 
-      uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount;
+      uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
 
       //! The list of buffers still awaiting a reply
       std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
