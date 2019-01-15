@@ -338,8 +338,9 @@ void PCIe::read()
     while ( true ) {
       std::vector<uint32_t> lValues;
       // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
-      dmaRead(mDeviceFileFPGAToHost, 3, (mXdma7seriesWorkaround ? 8 : 1), lValues);
-      lHwPublishedPageCount = lValues.at(0);
+      dmaRead(mDeviceFileFPGAToHost, 0, (mXdma7seriesWorkaround ? 8 : 4), lValues);
+      lHwPublishedPageCount = lValues.at(3);
+      log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
       if (lHwPublishedPageCount != mPublishedReplyPageCount) {
         mPublishedReplyPageCount++;
@@ -372,7 +373,7 @@ void PCIe::read()
   lNrWordsToRead += 1;
  
   std::vector<uint32_t> lPageContents;
-  dmaRead(mDeviceFileFPGAToHost, 4 + lPageIndexToRead * 4 * mPageSize, lNrWordsToRead , lPageContents);
+  dmaRead(mDeviceFileFPGAToHost, 4 + lPageIndexToRead * mPageSize, lNrWordsToRead , lPageContents);
   log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(4 + lPageIndexToRead * 4 * mPageSize), " ... ", PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
 
   // PART 2 : Transfer to reply buffer
