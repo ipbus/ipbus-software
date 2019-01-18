@@ -45,7 +45,6 @@ Libraries = \
 		\
 		boost_thread \
 		boost_filesystem \
-		boost_thread \
 		boost_program_options \
 		boost_unit_test_framework \
 		\
