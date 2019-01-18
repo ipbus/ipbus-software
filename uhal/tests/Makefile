@@ -43,7 +43,6 @@ Libraries = \
 		cactus_uhal_grammars \
 		cactus_uhal_log \
 		\
-		boost_thread \
 		boost_filesystem \
 		boost_thread \
 		boost_program_options \

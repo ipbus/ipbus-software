@@ -38,7 +38,6 @@ Libraries = pthread \
 		\
 		pugixml \
 		\
-		boost_thread \
 		boost_filesystem \
 		boost_regex \
 		boost_thread \
