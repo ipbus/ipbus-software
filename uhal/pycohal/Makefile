@@ -24,6 +24,9 @@ LibraryFile = pkg/uhal/_core.so
 
 ifeq ($(shell python -c "import sys; print(sys.version_info[0])"),3)
   EXTERN_BOOST_PYTHON_LIB = boost_python3
+	ifeq ($(CACTUS_OS),osx)
+		EXTERN_BOOST_PYTHON_LIB = boost_python$(shell python -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
+	endif
 else
   EXTERN_BOOST_PYTHON_LIB = boost_python
 endif
@@ -57,7 +60,7 @@ Libraries = \
 		${EXTERN_BOOST_PYTHON_LIB} \
 		boost_regex \
 		boost_system \
-		boost_thread \
+		boost_thread$(BOOST_LIB_SUFFIX) \
 		\
 		pthread \
 		dl \
@@ -68,6 +71,8 @@ CXXFLAGS += -ftemplate-depth-128 -O0 -rdynamic -finline-functions -Wno-inline -D
 
 ifeq (${CACTUS_OS},osx)
   CXXFLAGS += -Wno-c++11-extensions
+	CXXFLAGS += $(shell python-config --cflags)
+	LDFLAGS += $(shell python-config --ldflags)
 else
   LDFLAGS += -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic
 endif

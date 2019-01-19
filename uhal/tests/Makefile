@@ -36,17 +36,19 @@ LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX} \
 		${BUILD_HOME}/uhal/log/lib \
 		${BUILD_HOME}/uhal/grammars/lib \
 		${BUILD_HOME}/uhal/uhal/lib \
-		lib 
+		lib
 
 Libraries = \
 		cactus_uhal_uhal \
 		cactus_uhal_grammars \
 		cactus_uhal_log \
 		\
-		boost_thread \
+		boost_thread$(BOOST_LIB_SUFFIX) \
 		boost_filesystem \
 		boost_program_options \
 		boost_unit_test_framework \
+		boost_chrono \
+		boost_system \
 		\
 		pthread \
 

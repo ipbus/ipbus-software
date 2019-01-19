@@ -1,7 +1,7 @@
 # Sanitize package path
 PackagePath := $(shell cd ${PackagePath}; pwd)
 
-# Library sources 
+# Library sources
 LibrarySources = $(wildcard src/common/*.cpp) $(wildcard src/common/**/*.cpp)
 # Filter undesired files
 LibrarySourcesFiltered = $(filter-out ${IgnoreSources}, ${LibrarySources})
@@ -29,7 +29,7 @@ IncludePaths := $(addprefix -I,${IncludePaths})
 
 # Library dependencies
 DependentLibraries += $(addprefix -L,${LibraryPaths})
-DependentLibraries += $(addprefix -l,${Libraries})  
+DependentLibraries += $(addprefix -l,${Libraries})
 
 # Executable dependencies
 ExecutableDependentLibraries += $(addprefix -L,${LibraryPaths})
@@ -42,7 +42,11 @@ else
   ifeq ("${LIBRARY_VER_ABI}","")
     LibraryFile ?= lib/lib${Library}.so
   else
-    LDFLAGS_SONAME ?= -Wl,-soname,lib${Library}.so.${LIBRARY_VER_ABI}
+		ifeq ($(CACTUS_OS), osx)
+    	LDFLAGS_SONAME ?= -Wl,-install_name,lib${Library}.so.${LIBRARY_VER_ABI}
+		else
+			LDFLAGS_SONAME ?= -Wl,-soname,lib${Library}.so.${LIBRARY_VER_ABI}
+		endif
     LibraryFile ?= lib/lib${Library}.so.${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}
     LibraryLinkSONAME ?= lib/lib${Library}.so.${LIBRARY_VER_ABI}
     LibraryLinkPlain ?= lib/lib${Library}.so
@@ -71,16 +75,16 @@ objects: ${LibraryObjectFiles} ${ExecutableObjectFiles}
 ${PackagePath}/obj ${PackagePath}/lib ${PackagePath}/bin ${ObjectSubDirPaths}:
 	${MakeDir} $@
 
-# Implicit rule for .cpp -> .o 
+# Implicit rule for .cpp -> .o
 .SECONDEXPANSION:
 ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cpp  | $$(dir ${PackagePath}/obj/%.o)
 	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 
-# Implicit rule for .cxx -> .o 
+# Implicit rule for .cxx -> .o
 .SECONDEXPANSION:
 ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | $$(dir ${PackagePath}/obj/%.o)
 	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
-	
+
 # Main target: shared library
 ${LibraryFile}: ${LibraryObjectFiles}  | ${PackagePath}/lib
 	${LD} -shared ${LDFLAGS_SONAME} ${LDFLAGS} ${LibraryObjectFiles} ${DependentLibraries} -o $@
@@ -93,7 +97,7 @@ endif
 
 # Include automatically generated dependencies
 -include $(LibraryObjectFiles:.o=.d)
-	
+
 # Static Pattern rule for binaries
 ${Executables} : ${PackagePath}/bin/%.exe : ${PackagePath}/obj/%.o ${LibraryFile}  | ${PackagePath}/bin
 	${LD} ${LDFLAGS} $< ${ExecutableDependentLibraries} -o $@

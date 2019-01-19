@@ -38,29 +38,28 @@ Libraries = pthread \
 		\
 		pugixml \
 		\
-		boost_thread \
+		boost_thread$(BOOST_LIB_SUFFIX) \
+		boost_system \
 		boost_filesystem \
 		boost_regex \
 		boost_chrono \
 		\
 		cactus_uhal_grammars \
-		cactus_uhal_log	
-
-
+		cactus_uhal_log
 
 CXXFLAGS += -DDISABLE_PACKET_COUNTER_HACK
-#					 -DNO_PREEMPTIVE_DISPATCH 
+#					 -DNO_PREEMPTIVE_DISPATCH
 
-#CPP_FLAGS += -fdelayed-template-parsing 
+#CPP_FLAGS += -fdelayed-template-parsing
 
-#-D THROW_ON_ADDRESS_SPACE_OVERLAP 
+#-D THROW_ON_ADDRESS_SPACE_OVERLAP
 
-# NOTE: Adding this flag is a dirty hack to make uhal/uhal compile on 
-# OS X. The fact that this is necessary really means the code is 
-# fishy. 
-ifeq ($(CACTUS_OS),osx) 
+# NOTE: Adding this flag is a dirty hack to make uhal/uhal compile on
+# OS X. The fact that this is necessary really means the code is
+# fishy.
+ifeq ($(CACTUS_OS),osx)
 CPP_FLAGS += -Wno-c++11-extensions -fdelayed-template-parsing
-endif 
+endif
 
 
 

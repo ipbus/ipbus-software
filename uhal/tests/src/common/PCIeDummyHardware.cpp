@@ -37,7 +37,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <pty.h>
+#include <util.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -259,7 +259,7 @@ void PCIeDummyHardware::dmaBlockingRead(int aFileDescriptor, const uint32_t aAdd
   // int rc = ::read(aFileDescriptor, buffer, 4*aNrWords);
   // assert(rc >= 0);
   // if ((rc % 4) != 0)
-  //   log(Fatal(), "PCIeDummyHardware::dmaRead  -  rc = ", rc); 
+  //   log(Fatal(), "PCIeDummyHardware::dmaRead  -  rc = ", rc);
   // assert((rc % 4) == 0);
   // if ((rc > 0) && (rc < 4*aNrWords)) {
   //   std::cout << "Short read of " << rc << " bytes into a " << 4*aNrWords << " bytes buffer, could be a packet read?\n";
@@ -279,13 +279,13 @@ void PCIeDummyHardware::dmaBlockingRead(int aFileDescriptor, const uint32_t aAdd
 
 
 
-bool PCIeDummyHardware::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues) 
+bool PCIeDummyHardware::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues)
 {
   return dmaWrite(aFileDescriptor, aAddr, reinterpret_cast<const uint8_t*>(aValues.data()), 4 * aValues.size());
 }
 
 
-bool PCIeDummyHardware::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes) 
+bool PCIeDummyHardware::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes)
 {
   assert((aNrBytes % 4) == 0);
 
