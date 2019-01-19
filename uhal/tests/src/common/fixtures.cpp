@@ -12,6 +12,8 @@ namespace tests {
 
 
 std::string AbstractFixture::connectionFileURI = "";
+size_t AbstractFixture::timeout = 1;
+bool AbstractFixture::quickTest = false;
 
 template <>
 MinimalFixture<IPBUS_1_3_UDP>::MinimalFixture() : 
@@ -71,7 +73,9 @@ MinimalFixture<IPBUS_2_0_PCIE>::~MinimalFixture()
 HwInterface MinimalFixture<IPBUS_2_0_PCIE>::getHwInterface() const
 {
   ConnectionManager manager(connectionFileURI);
-  return manager.getDevice(deviceId);
+  HwInterface hw(manager.getDevice(deviceId));
+  hw.setTimeoutPeriod(timeout);
+  return hw;
 }
 
 

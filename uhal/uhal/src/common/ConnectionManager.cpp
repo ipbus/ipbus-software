@@ -137,7 +137,7 @@ namespace uhal
   */
   HwInterface ConnectionManager::getDevice ( const std::string& aId )
   {
-    //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
+    //We need a mutex lock here to protect access to the NodeTreeBuilder and the ClientFactory
     boost::lock_guard<boost::mutex> lLock ( mMutex );
 
     if ( mConnectionDescriptors.size() == 0 )

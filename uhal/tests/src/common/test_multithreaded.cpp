@@ -55,14 +55,14 @@
 #define N_THREADS     5
 #define N_ITERATIONS  5
 #define N_SIZE        uint32_t(10*1024/4)
-#define TIMEOUT_S     50
+#define TIMEOUT_MULTIPLIER 50
 
 
 namespace uhal {
 namespace tests {
 
 
-void job_multiple ( const std::string& connection, const std::string& id )
+void job_multiple ( const std::string& connection, const std::string& id, const size_t timeout )
 {
   BOOST_CHECK_NO_THROW (
 
@@ -71,7 +71,7 @@ void job_multiple ( const std::string& connection, const std::string& id )
     log ( Info() , "Iteration " , Integer ( iter ) );
     ConnectionManager manager ( connection );
     HwInterface hw = manager.getDevice ( id );
-    hw.setTimeoutPeriod ( TIMEOUT_S*1000 );
+    hw.setTimeoutPeriod ( TIMEOUT_MULTIPLIER * timeout );
 
     uint32_t x = static_cast<uint32_t> ( rand() );
     hw.getNode ( "REG" ).write ( x );
@@ -106,7 +106,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterface
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
       log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-      jobs.push_back ( new boost::thread ( job_multiple, connectionFileURI, deviceId ) );
+      jobs.push_back ( new boost::thread ( job_multiple, connectionFileURI, deviceId, timeout) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )

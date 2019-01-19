@@ -73,7 +73,7 @@ namespace uhal
 
 
 
-  NodeTreeBuilder* NodeTreeBuilder::mInstance = NULL;
+  boost::shared_ptr<NodeTreeBuilder> NodeTreeBuilder::mInstance;
 
 
   NodeTreeBuilder::NodeTreeBuilder ()
@@ -133,17 +133,20 @@ namespace uhal
     mNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , true , _1 ) );
     //------------------------------------------------------------------------------------------------------------------------
   }
+
+
   NodeTreeBuilder::~NodeTreeBuilder ()
   {
+    clearAddressFileCache();
   }
 
 
 
   NodeTreeBuilder& NodeTreeBuilder::getInstance()
   {
-    if ( mInstance == NULL )
+    if ( ! mInstance )
     {
-      mInstance = new NodeTreeBuilder();
+      mInstance.reset(new NodeTreeBuilder());
     }
 
     return *mInstance;

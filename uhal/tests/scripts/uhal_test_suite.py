@@ -357,7 +357,6 @@ if __name__=="__main__":
     # Find directory for controlhub commands
     if controlhub_scripts_dir is None:
         which_controlhub_status = run_command("which controlhub_status", False)
-        print('which_controlhub_status =', which_controlhub_status)
         if which_controlhub_status[1]:
             controlhub_scripts_dir = "/opt/cactus/bin"
         else:
