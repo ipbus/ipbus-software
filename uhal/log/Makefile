@@ -72,8 +72,10 @@ GENERATED_HEADERS = ${PackagePath}/include/uhal/log/log.hpp ${PackagePath}/inclu
 GENERATED_FILES = ${GENERATED_HEADERS} ${PackagePath}/src/common/log.cpp
 
 ${LibraryObjectFiles} : ${GENERATED_HEADERS}
-${LibraryFile} : ${PackagePath}/obj/log.o
-LibraryObjectFiles += ${PackagePath}/obj/log.o
+ifeq (,$(findstring ${PackagePath}/obj/log.o,${LibraryObjectFiles}))
+    ${LibraryFile} : ${PackagePath}/obj/log.o
+    LibraryObjectFiles += ${PackagePath}/obj/log.o
+endif
 
 ${GENERATOR_EXE} : ${GENERATOR_OBJ}
 	${LD} ${LDFLAGS} -lstdc++ $< -o $@

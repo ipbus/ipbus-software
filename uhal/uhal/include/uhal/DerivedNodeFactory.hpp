@@ -44,6 +44,7 @@
 #include <string>
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
 
@@ -80,13 +81,12 @@ namespace uhal
       */
       DerivedNodeFactory ();
 
+    public:
       /**
       	Destructor
       */
       virtual ~DerivedNodeFactory ();
 
-
-    public:
       /**
       	Static method to retrieve the single instance of the class
       	@return the single instance of the class
@@ -160,7 +160,7 @@ namespace uhal
 
     private:
       //! The single instance of the class
-      static DerivedNodeFactory* mInstance;
+      static boost::shared_ptr<DerivedNodeFactory> mInstance;
 
       //! Hash map associating a creator for a particular node type with a string identifier for that node type
       boost::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;

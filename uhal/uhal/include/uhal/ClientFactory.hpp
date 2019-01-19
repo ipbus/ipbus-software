@@ -78,12 +78,12 @@ namespace uhal
       */
       ClientFactory();
 
+    public:
       /**
       	Destructor
       */
       virtual ~ClientFactory();
 
-    public:
       /**
       	Static method to retrieve the single instance of the class
       	@return the single instance of the class
@@ -162,7 +162,7 @@ namespace uhal
 
     private:
       //! The single instance of the class
-      static ClientFactory* mInstance;
+      static boost::shared_ptr<ClientFactory> mInstance;
       //! Hash map associating a creator for a particular protocol with a file name
       boost::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators; //map string name of each protocol to a creator for that protocol
       //! Store the description of the factory product

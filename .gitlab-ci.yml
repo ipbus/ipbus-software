@@ -48,7 +48,7 @@ github_commit_status:end:success:
 
 doxygen_job:
   stage: build
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2018-01-14__doxygen1.8.13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2019-01-08__doxygen1.8.14
   tags:
     - docker
   script:
@@ -74,7 +74,7 @@ doxygen_job:
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
   script:
     - env | grep -v PASSWORD | grep -v TOKEN
-    - cd .. && sudo rm -rf ipbus-software____ && mv ipbus-software ipbus-software____ && mkdir ipbus-software && cd ipbus-software____
+    - cd .. && sudo rm -rf ipbus-software___ && mv ipbus-software ipbus-software___ && mkdir ipbus-software && cd ipbus-software___
     - make -k Set=all
     - make -k Set=all PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - mkdir -p ${REPO_DIR} 
@@ -89,14 +89,14 @@ doxygen_job:
 
 build:slc6:
   <<: *build_rpm_yumrepo_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-slc6:2018-01-14
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-slc6:2019-01-08
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-slc6.xml"
     OUTPUT_REPO_SUBDIR: "slc6_x86_64"
 
 build:centos7:
   <<: *build_rpm_yumrepo_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-cc7:2018-01-14__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-cc7:2019-01-08__boost1.53.0_pugixml1.8
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "centos7_x86_64"
@@ -117,15 +117,15 @@ build:centos7:
 
 build:fedora26:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2019-01-08__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
 
 build:fedora26-python3:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:2019-01-08__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
 
 build:ubuntu16:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2018-01-14__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2019-01-08__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
 
 
 
@@ -162,24 +162,27 @@ publish_build_job:
     - cat /etc/yum.repos.d/ipbus-sw-ci.repo
     - sudo rpm --rebuilddb && sudo yum clean all 
     - sudo yum -y groupinstall ipbus-sw
+    - sudo yum -y install 'cactuscore-uhal-*-debuginfo'
     - rpm -qa | grep cactus | sort
 
 .job_template: &slc6_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2018-01-14
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2019-01-08
   variables:
     REPO_URL_OS_SUBDIR: slc6_x86_64
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests_slc6.supp"
 
 .job_template: &centos7_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:2018-01-14
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:2019-01-08
   variables:
     REPO_URL_OS_SUBDIR: centos7_x86_64
     UHAL_ENABLE_IPBUS_PCIE: ""
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 
 .job_template: &simpleInstall_test_jobTemplate
@@ -191,29 +194,32 @@ publish_build_job:
 
 .job_template: &fedora26_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2019-01-08__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
   dependencies:
     - build:fedora26
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 .job_template: &fedora26_python3_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:2019-01-08__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
   dependencies:
     - build:fedora26-python3
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: python3-wxpython4
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 .job_template: &ubuntu16_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2018-01-14__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2019-01-08__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
   dependencies:
     - build:ubuntu16
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 
 
@@ -225,15 +231,11 @@ publish_build_job:
     - export PATH=/opt/cactus/bin:/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - env | grep -v PASSWORD | grep -v TOKEN
-    - uhal_test_suite.py -v -s "1.3 udp"
-    - uhal_test_suite.py -v -s "1.3 tcp"
-    - service controlhub stop || /opt/cactus/bin/controlhub_stop || true
-    - uhal_test_suite.py -v -s "1.3 controlhub" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
-    - uhal_test_suite.py -v -s "2.0 udp"
-    - uhal_test_suite.py -v -s "2.0 tcp"
-    - uhal_test_suite.py -v -s "2.0 pcie"
-    - uhal_test_suite.py -v -s "2.0 controlhub - normal" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
+    - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
+    - service controlhub stop || /opt/cactus/bin/controlhub_stop
     - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbusudp* --log_level=test_suite
 
 .job_template: &test_python_jobTemplate
   tags:

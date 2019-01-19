@@ -47,11 +47,24 @@
 namespace uhal
 {
 
+  boost::shared_ptr<ClientFactory> ClientFactory::mInstance;
+
+
+  ClientFactory::ClientFactory()
+  {
+  }
+
+
+  ClientFactory::~ClientFactory()
+  {
+  }
+
+
   ClientFactory& ClientFactory::getInstance()
   {
-    if ( mInstance == NULL )
+    if ( ! mInstance )
     {
-      mInstance = new ClientFactory();
+      mInstance.reset(new ClientFactory());
       // ---------------------------------------------------------------------
       mInstance->add< UDP< IPbus< 1 , 3 > > > ( "ipbusudp-1.3" , "Direct access to hardware via UDP, using IPbus version 1.3" );
       mInstance->add< UDP< IPbus< 2 , 0 > > > ( "ipbusudp-2.0" , "Direct access to hardware via UDP, using IPbus version 2.0" );
@@ -68,19 +81,6 @@ namespace uhal
     }
 
     return *mInstance;
-  }
-
-
-  ClientFactory* ClientFactory::mInstance = NULL;
-
-
-  ClientFactory::ClientFactory()
-  {
-  }
-
-
-  ClientFactory::~ClientFactory()
-  {
   }
 
 
