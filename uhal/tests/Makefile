@@ -43,12 +43,12 @@ Libraries = \
 		cactus_uhal_grammars \
 		cactus_uhal_log \
 		\
-		boost_thread$(BOOST_LIB_SUFFIX) \
+		boost_chrono \
 		boost_filesystem \
+		boost_system \
+		${BOOST_THREAD_LIB} \
 		boost_program_options \
 		boost_unit_test_framework \
-		boost_chrono \
-		boost_system \
 		\
 		pthread \
 

@@ -26,3 +26,14 @@ CPP_VERSION_TAG = $(word 1, $(shell ${CPP} --version))
 CPP_VERSION_TAG := $(subst g++,gcc,${CPP_VERSION_TAG})
 CPP_VERSION_TAG := ${CPP_VERSION_TAG}$(shell ${CPP} -dumpfullversion -dumpversion)
 CPP_VERSION_TAG := $(subst .,_,${CPP_VERSION_TAG})
+
+
+ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.dylib))
+  BOOST_THREAD_LIB = boost_thread-mt
+else ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.dylib))
+  BOOST_THREAD_LIB = boost_thread
+else ifeq (,$(shell ${CPP} -lboost_thread-mt 2>&1 | grep -E 'ld: (cannot find|library not found)'))
+  BOOST_THREAD_LIB = boost_thread-mt
+else
+  BOOST_THREAD_LIB = boost_thread
+endif

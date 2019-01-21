@@ -38,10 +38,10 @@ Libraries = pthread \
 		\
 		pugixml \
 		\
-		boost_thread$(BOOST_LIB_SUFFIX) \
-		boost_system \
 		boost_filesystem \
 		boost_regex \
+		boost_system \
+		${BOOST_THREAD_LIB} \
 		boost_chrono \
 		\
 		cactus_uhal_grammars \

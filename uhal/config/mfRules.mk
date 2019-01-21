@@ -42,11 +42,11 @@ else
   ifeq ("${LIBRARY_VER_ABI}","")
     LibraryFile ?= lib/lib${Library}.so
   else
-		ifeq ($(CACTUS_OS), osx)
-    	LDFLAGS_SONAME ?= -Wl,-install_name,lib${Library}.so.${LIBRARY_VER_ABI}
-		else
-			LDFLAGS_SONAME ?= -Wl,-soname,lib${Library}.so.${LIBRARY_VER_ABI}
-		endif
+    ifeq ($(CACTUS_OS), osx)
+      LDFLAGS_SONAME ?= -Wl,-install_name,lib${Library}.so.${LIBRARY_VER_ABI}
+    else
+      LDFLAGS_SONAME ?= -Wl,-soname,lib${Library}.so.${LIBRARY_VER_ABI}
+    endif
     LibraryFile ?= lib/lib${Library}.so.${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}
     LibraryLinkSONAME ?= lib/lib${Library}.so.${LIBRARY_VER_ABI}
     LibraryLinkPlain ?= lib/lib${Library}.so

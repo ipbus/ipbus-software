@@ -4,6 +4,7 @@ BUILD_HOME := $(shell cd ${BUILD_HOME}; pwd)
 CACTUS_ROOT ?= /opt/cactus
 CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
+
 CACTUS_PLATFORM=$(shell /usr/bin/python -c "import platform; print(platform.platform())")
 CACTUS_OS=unknown.os
 
@@ -29,12 +30,6 @@ ifeq ($(CACTUS_OS), slc6)
     BUILD_ERLANG?=1
     BUILD_BOOST?=1
     BUILD_PUGIXML?=1
-endif
-
-ifeq ($(CACTUS_OS), osx)
-  BOOST_LIB_SUFFIX?=-mt
-else
-  BOOST_LIB_SUFFIX?=
 endif
 
 
