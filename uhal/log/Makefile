@@ -25,38 +25,30 @@ LIBRARY_VER_ABI = $(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR)
 
 USE_BACKTRACE ?= FALSE
 
+IncludePaths = include  \
+	${EXTERN_BOOST_INCLUDE_PREFIX}
+
+LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX}
+
+Libraries = pthread \
+	$(BOOST_THREAD_LIB) \
+	boost_system
+
+CXXFLAGS += -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS
+
 ifeq ($(USE_BACKTRACE),TRUE)
 
-  LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX}\
-		$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd\
-		$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty 
-	
-  Libraries = pthread \
-		boost_thread
-	
-  IncludePaths = include  \
-		${EXTERN_BOOST_INCLUDE_PREFIX} \
-		$(BUILD_HOME)/extern/binutils/binutils-2.23/include/\
-		$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/\
+	IncludePaths += $(BUILD_HOME)/extern/binutils/binutils-2.23/include/ \
+		$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/ \
 		$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd/
 
-  CXXFLAGS += -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS -DUSE_BACKTRACE \
+  LibraryPaths += $(BUILD_HOME)/extern/binutils/binutils-2.23/bfd \
+		$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty
 
-  LDFLAGS += -Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive\
+  CXXFLAGS += -DUSE_BACKTRACE
 
-else
-
-  IncludePaths = include  \
-		${EXTERN_BOOST_INCLUDE_PREFIX}
-
-  LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX}
-	
-  Libraries = pthread \
-		boost_thread
-
-  CXXFLAGS += -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS \
-
-endif		
+  LDFLAGS += -Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive
+endif
 
 
 # Hide c++11-extensions warning when building on osx
