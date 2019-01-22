@@ -111,11 +111,6 @@ namespace uhal
     {
       ( **lIt ).mParent = this;
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
-
-      for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
-      {
-        mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-      }
     }
   }
 
@@ -159,11 +154,6 @@ namespace uhal
     {
       ( **lIt ).mParent = this;
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
-
-      for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
-      {
-        mChildrenMap.insert ( std::make_pair ( ( ( **lIt ).mUid ) +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-      }
     }
 
     return *this;
@@ -246,6 +236,29 @@ namespace uhal
     return lRet;
   }
 
+
+  std::string Node::getRelativePath(const Node& aAncestor) const
+  {
+    std::deque< const Node* > lPath;
+    getAncestors ( lPath );
+    std::string lRet;
+
+    for (std::deque< const Node* >::iterator lIt ( std::find(lPath.begin(), lPath.end(), &aAncestor) + 1 ) ; lIt != lPath.end() ; ++lIt )
+    {
+      if ( ( **lIt ).mUid.size() )
+      {
+        lRet += ( **lIt ).mUid;
+        lRet += ".";
+      }
+    }
+
+    if ( lRet.size() )
+    {
+      lRet.resize ( lRet.size() - 1 );
+    }
+
+    return lRet;
+  }
 
   void Node::getAncestors ( std::deque< const Node* >& aPath ) const
   {
@@ -412,58 +425,44 @@ namespace uhal
       return *this;
     }
 
-    boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId );
+    size_t lStartIdx = 0;
+    size_t lDotIdx = 0;
 
-    if ( lIt==mChildrenMap.end() )
-    {
-      exception::NoBranchFoundWithGivenUID lExc;
-      log ( lExc , "No branch found with ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) );
-      std::size_t lPos ( std::string::npos );
-      bool lPartialMatch ( false );
+    const Node* lDescendant = this;
 
-      while ( true )
-      {
-        lPos = aId.rfind ( '.' , lPos );
+    do {
+      lDotIdx = aId.find('.', lStartIdx);
+      boost::unordered_map< std::string , Node* >::const_iterator lIt = lDescendant->mChildrenMap.find ( aId.substr(lStartIdx, lDotIdx - lStartIdx) );
 
-        if ( lPos == std::string::npos )
-        {
-          break;
-        }
-
-        boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.find ( aId.substr ( 0 , lPos ) );
-
-        if ( lIt!=mChildrenMap.end() )
-        {
-          log ( lExc , "Partial match " ,  Quote ( aId.substr ( 0 , lPos ) ) , " found for ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) );
-          log ( Error() , "Tree structure of partial match is:" , * ( lIt->second ) );
-          lPartialMatch = true;
-          break;
-        }
-
-        lPos--;
+      if (lIt != lDescendant->mChildrenMap.end()) {
+        lDescendant = lIt->second;
+      }
+      else if (lDescendant == this) {
+        exception::NoBranchFoundWithGivenUID lExc;
+        log ( lExc , "No branch found with ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) , " (no partial match)" );
+        throw lExc;
+      }
+      else {
+        exception::NoBranchFoundWithGivenUID lExc;
+        log ( lExc , "No branch found with ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) , " (partial match for node ", Quote ( lDescendant->getRelativePath(*this) ), ")" );
+        throw lExc;
       }
 
-      if ( !lPartialMatch )
-      {
-        log ( lExc , "Not even a partial match found for ID-path " ,  Quote ( aId ) , " from node " , Quote ( this->getPath() ) , ". If this address looks correct, please check for leading, trailing and stray whitespace." );
-        log ( Error(), "Tree structure is:" , *this );
-      }
+      lStartIdx = lDotIdx + 1;
+    } while (lDotIdx != std::string::npos);
 
-      throw lExc;
-    }
-
-    return * ( lIt->second );
+    return *lDescendant;
   }
 
 
   std::vector<std::string> Node::getNodes() const
   {
     std::vector<std::string> lNodes;
-    lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
 
-    for ( boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+    // The 'begin' method returns an iterator to this instance, so skip to the next node straight away
+    for (Node::const_iterator lIt = ++begin(); lIt != end(); lIt++)
     {
-      lNodes.push_back ( lIt->first );
+      lNodes.push_back(lIt->getRelativePath(*this));
     }
 
     return lNodes;
@@ -472,17 +471,18 @@ namespace uhal
   std::vector<std::string> Node::getNodes ( const std::string& aRegex ) const
   {
     std::vector<std::string> lNodes;
-    lNodes.reserve ( mChildrenMap.size() ); //prevent reallocations
     log ( Info() , "Regular Expression : " , aRegex );
 
-    for ( boost::unordered_map< std::string , Node* >::const_iterator lIt = mChildrenMap.begin(); lIt != mChildrenMap.end(); ++lIt )
+    // The 'begin' method returns an iterator to this instance, so skip to the next node straight away
+    for (Node::const_iterator lIt = ++begin(); lIt != end(); lIt++)
     {
+      const std::string lRelativePath(lIt->getRelativePath(*this));
       boost::cmatch lMatch;
 
-      if ( boost::regex_match ( lIt->first.c_str() , lMatch , boost::regex ( aRegex ) ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
+      if ( boost::regex_match ( lRelativePath.c_str() , lMatch , boost::regex ( aRegex ) ) ) //to allow partial match, add  boost::match_default|boost::match_partial  as fourth argument
       {
-        log ( Info() , lIt->first , " matches" );
-        lNodes.push_back ( lIt->first );
+        log ( Info() , lRelativePath , " matches" );
+        lNodes.push_back ( lRelativePath );
       }
     }
 

@@ -367,7 +367,7 @@ void checkDescendants (const uhal::Node& aNode, const NodeFixture::Properties& a
   BOOST_CHECK_EQUAL(&aNode.getNode(""), &aNode);
 
   // 2) 'getNode' should throw given an invalid ID
-//FIXME - uncomment later    BOOST_CHECK_THROW(aNode.getNode("."), exception::NoBranchFoundWithGivenUID);
+  BOOST_CHECK_THROW(aNode.getNode("."), exception::NoBranchFoundWithGivenUID);
   BOOST_CHECK_THROW(aNode.getNode("some_invalid_id"), exception::NoBranchFoundWithGivenUID);
 
   // 3) 'getNodes' should return relative IDs of all descendants (order is not defined)
@@ -386,6 +386,9 @@ void checkDescendants (const uhal::Node& aNode, const NodeFixture::Properties& a
     BOOST_CHECK_NO_THROW(aNode.getNode(*lIt));
     BOOST_CHECK(typeid(aNode.getNode(*lIt)) == lType);
     BOOST_CHECK_EQUAL(&aNode.getNode(*lIt), &aNode.getNode(*lIt).getNode(""));
+
+    BOOST_CHECK_THROW(aNode.getNode("." + *lIt), exception::NoBranchFoundWithGivenUID);
+    BOOST_CHECK_THROW(aNode.getNode(*lIt + "."), exception::NoBranchFoundWithGivenUID);
 
     // 5) Templated 'getNode' method should return pointer to same object instance as non-templated method, but throw for invalid casts
     BOOST_CHECK_EQUAL(&aNode.getNode<Node>(*lIt), &aNode.getNode(*lIt));

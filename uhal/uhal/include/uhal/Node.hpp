@@ -326,6 +326,9 @@ namespace uhal
 
 
     private:
+
+      std::string getRelativePath(const Node& aAncestor) const;
+
       /**
         Get the full path to the current node
       */
