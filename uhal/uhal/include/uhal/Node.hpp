@@ -91,7 +91,7 @@ namespace uhal
       class const_iterator : public std::iterator< std::forward_iterator_tag , Node , ptrdiff_t, const Node* , const Node& >
       {
           friend class Node;
-          typedef std::deque< std::deque< Node* >::const_iterator > stack;
+          typedef std::deque< std::vector< Node* >::const_iterator > stack;
 
         public:
           const_iterator();
@@ -378,7 +378,7 @@ namespace uhal
       Node* mParent;
 
       //! The direct children of the node
-      std::deque< Node* > mChildren;
+      std::vector< Node* > mChildren;
 
       //! Helper to assist look-up of a particular child node, given a name
       boost::unordered_map< std::string , Node* > mChildrenMap;

@@ -70,7 +70,7 @@ namespace uhal
   {
     aNode.mHw = this;
 
-    for ( std::deque< Node* >::iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
       claimNode ( **lIt );
     }

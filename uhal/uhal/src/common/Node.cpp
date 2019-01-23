@@ -102,12 +102,13 @@ namespace uhal
     mChildren ( ),
     mChildrenMap ( )
   {
-    for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
+    mChildren.reserve(aNode.mChildren.size());
+    for ( std::vector< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
       mChildren.push_back ( ( **lIt ).clone() );
     }
 
-    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       ( **lIt ).mParent = this;
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
@@ -133,7 +134,7 @@ namespace uhal
     mClassName = aNode.mClassName;
     mParameters = aNode.mParameters;
 
-    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       if ( *lIt )
       {
@@ -145,12 +146,13 @@ namespace uhal
     mChildren.clear();
     mChildrenMap.clear();
 
-    for ( std::deque< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
+    mChildren.reserve(aNode.mChildren.size());
+    for ( std::vector< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
     {
       mChildren.push_back ( ( **lIt ).clone() );
     }
 
-    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       ( **lIt ).mParent = this;
       mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
@@ -170,7 +172,7 @@ namespace uhal
 
   Node::~Node()
   {
-    for ( std::deque< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       if ( *lIt )
       {
@@ -412,7 +414,7 @@ namespace uhal
     aStr.flags(original_flags);
 
     // Recursively print children 
-    for ( std::deque< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::const_iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
     {
       ( **lIt ).stream ( aStr , aIndent+2 );
     }

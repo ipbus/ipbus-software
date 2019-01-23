@@ -542,7 +542,7 @@ namespace uhal
         aNode->mChildren.push_back ( mNodeParser ( lXmlNode ) );
       }
 
-      for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+      for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
       {
         aNode->mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
       }
@@ -562,7 +562,7 @@ namespace uhal
         // bool lAnyMasked( false );
         bool lAllMasked ( true );
 
-        for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+        for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
         {
           if ( ( **lIt ).mMask == defs::NOMASK )
           {
@@ -620,7 +620,7 @@ namespace uhal
 
     aNode->mAddr = aNode->mPartialAddr + aAddr;
 
-    for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
     {
       ( **lIt ).mParent = aNode;
       calculateHierarchicalAddresses ( *lIt , aNode->mAddr );
@@ -729,7 +729,7 @@ namespace uhal
                 if ( lNode1->mMask == 0xFFFFFFFF )
                 {
                   // Node 1 is a full register, Node 2 is a masked region. Check if Node 2 is a child of Node 1 and, if not, then throw
-                  for ( std::deque< Node* >::const_iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
+                  for ( std::vector< Node* >::const_iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
                   {
                     if ( *lIt == lNode2 )
                     {
@@ -742,7 +742,7 @@ namespace uhal
                 if ( lShouldThrow && ( lNode2->mMask == 0xFFFFFFFF ) )
                 {
                   // Node 2 is a full register, Node 1 is a masked region. Check if Node 1 is a child of Node 2 and, if not, then throw
-                  for ( std::deque< Node* >::const_iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
+                  for ( std::vector< Node* >::const_iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
                   {
                     if ( *lIt == lNode1 )
                     {
