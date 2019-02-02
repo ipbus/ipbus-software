@@ -542,14 +542,9 @@ namespace uhal
         aNode->mChildren.push_back ( mNodeParser ( lXmlNode ) );
       }
 
-      for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+      for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
       {
         aNode->mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
-
-        for ( boost::unordered_map< std::string , Node* >::iterator lSubMapIt = ( **lIt ).mChildrenMap.begin() ; lSubMapIt != ( **lIt ).mChildrenMap.end() ; ++lSubMapIt )
-        {
-          aNode->mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid +'.'+ ( lSubMapIt->first ) , lSubMapIt->second ) );
-        }
       }
     }
   }
@@ -567,7 +562,7 @@ namespace uhal
         // bool lAnyMasked( false );
         bool lAllMasked ( true );
 
-        for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+        for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
         {
           if ( ( **lIt ).mMask == defs::NOMASK )
           {
@@ -625,7 +620,7 @@ namespace uhal
 
     aNode->mAddr = aNode->mPartialAddr + aAddr;
 
-    for ( std::deque< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+    for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
     {
       ( **lIt ).mParent = aNode;
       calculateHierarchicalAddresses ( *lIt , aNode->mAddr );
@@ -640,13 +635,12 @@ namespace uhal
   {
     std::stringstream lReport;
     lReport << std::hex << std::setfill ( '0' );
-    boost::unordered_map< std::string , Node* >::iterator lIt, lIt2;
-    Node* lNode1, *lNode2;
+    const Node* lNode1, *lNode2;
 
-    for ( lIt = aNode->mChildrenMap.begin() ; lIt != aNode->mChildrenMap.end() ; ++lIt )
+    for (Node::const_iterator lIt = ++aNode->begin() ; lIt != aNode->end() ; ++lIt )
     {
-      lNode1 = lIt->second;
-      lIt2 = lIt;
+      lNode1 = &*lIt;
+      Node::const_iterator lIt2 = lIt;
       lIt2++;
 
       if ( lNode1->mMode == defs::INCREMENTAL )
@@ -654,9 +648,9 @@ namespace uhal
         uint32_t lBottom1 ( lNode1->mAddr );
         uint32_t lTop1 ( lNode1->mAddr + ( lNode1->mSize - 1 ) );
 
-        for ( ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
+        for ( ; lIt2 != aNode->end() ; ++lIt2 )
         {
-          lNode2 = lIt2->second;
+          lNode2 = &*lIt2;
 
           if ( lNode2->mMode == defs::INCREMENTAL )
           {
@@ -666,9 +660,9 @@ namespace uhal
 
             if ( ( ( lTop2 >= lBottom1 ) && ( lTop2 <= lTop1 ) ) || ( ( lTop1 >= lBottom2 ) && ( lTop1 <= lTop2 ) ) )
             {
-              lReport << "Branch '" << lIt->first
+              lReport << "Branch '" << lNode1->getPath()
                       << "' has address range [0x" << std::setw ( 8 ) << lBottom1 << " - 0x" << std::setw ( 8 ) <<  lTop1
-                      << "] which overlaps with branch '" << lIt2->first
+                      << "] which overlaps with branch '" << lNode2->getPath()
                       << "' which has address range [0x"  << std::setw ( 8 )  <<  lBottom2  << " - 0x" << std::setw ( 8 ) <<  lTop2
                       << "]." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
@@ -683,9 +677,9 @@ namespace uhal
 
             if ( ( lAddr2 >= lBottom1 ) && ( lAddr2 <= lTop1 ) )
             {
-              lReport << "Branch '" << lIt->first
+              lReport << "Branch '" << lNode1->getPath()
                       << "' has address range [0x"  << std::setw ( 8 ) << lBottom1 << " - 0x"  << std::setw ( 8 ) << lTop1
-                      << "] which overlaps with branch '" << lIt2->first
+                      << "] which overlaps with branch '" << lNode2->getPath()
                       << "' which has address 0x"  << std::setw ( 8 ) << lAddr2
                       << "." << std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
@@ -699,9 +693,9 @@ namespace uhal
       {
         uint32_t lAddr1 ( lNode1->mAddr );
 
-        for ( ; lIt2 != aNode->mChildrenMap.end() ; ++lIt2 )
+        for ( ; lIt2 != aNode->end() ; ++lIt2 )
         {
-          lNode2 = lIt2->second;
+          lNode2 = &*lIt2;
 
           if ( lNode2->mMode == defs::INCREMENTAL )
           {
@@ -711,9 +705,9 @@ namespace uhal
 
             if ( ( lAddr1 >= lBottom2 ) && ( lAddr1 <= lTop2 ) )
             {
-              lReport <<  "Branch '" << lIt->first
+              lReport <<  "Branch '" << lNode1->getPath()
                       <<"' has address 0x"  << std::setw ( 8 ) << lAddr1
-                      <<" which overlaps with branch '" << lIt2->first
+                      <<" which overlaps with branch '" << lNode2->getPath()
                       <<"' which has address range [0x"   << std::setw ( 8 ) << lBottom2 << " - 0x"   << std::setw ( 8 ) << lTop2
                       << "]."<< std::endl;
 #ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
@@ -735,7 +729,7 @@ namespace uhal
                 if ( lNode1->mMask == 0xFFFFFFFF )
                 {
                   // Node 1 is a full register, Node 2 is a masked region. Check if Node 2 is a child of Node 1 and, if not, then throw
-                  for ( std::deque< Node* >::iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
+                  for ( std::vector< Node* >::const_iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
                   {
                     if ( *lIt == lNode2 )
                     {
@@ -748,7 +742,7 @@ namespace uhal
                 if ( lShouldThrow && ( lNode2->mMask == 0xFFFFFFFF ) )
                 {
                   // Node 2 is a full register, Node 1 is a masked region. Check if Node 1 is a child of Node 2 and, if not, then throw
-                  for ( std::deque< Node* >::iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
+                  for ( std::vector< Node* >::const_iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
                   {
                     if ( *lIt == lNode1 )
                     {
@@ -760,10 +754,10 @@ namespace uhal
 
                 if ( lShouldThrow )
                 {
-                  lReport <<  "Branch '" << lIt->first
+                  lReport <<  "Branch '" << lNode1->getPath()
                           << "' has address 0x" << std::setw ( 8 ) << lAddr1
                           << " and mask 0x" << std::setw ( 8 ) << lNode1->mMask
-                          << " which overlaps with branch '" << lIt2->first
+                          << " which overlaps with branch '" << lNode2->getPath()
                           << "' which has address 0x" << std::setw ( 8 ) << lAddr2
                           << " and mask 0x" << std::setw ( 8 ) << lNode2->mMask
                           << "." << std::endl;
