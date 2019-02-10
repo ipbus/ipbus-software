@@ -80,7 +80,42 @@ namespace uhal
   //! Transport protocol to transfer an IPbus buffer via PCIe
   class PCIe : public IPbus< 2 , 0 >
   {
+    public:
+      class PacketFmt {
+      public:
+        PacketFmt(const uint8_t* const, const size_t);
+        PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData);
+        ~PacketFmt();
+
+        const std::vector< std::pair<const uint8_t*, size_t> > mData;
+      };
+
     private:
+      class File {
+      public:
+        File(const std::string& aPath, int aFlags);
+        ~File();
+
+        const std::string& getPath() const;
+        void setPath(const std::string& aPath);
+
+        void open();
+        void close();
+
+        void read(const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
+
+        void write(const uint32_t aAddr, const std::vector<uint32_t>& aValues);
+
+        void write(const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);
+
+        void write(const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData);
+
+      private:
+        std::string mPath;
+        int mFd;
+        int mFlags;
+      };
+
       PCIe ( const PCIe& aPCIe );
 
       PCIe& operator= ( const PCIe& aPCIe );
@@ -140,32 +175,17 @@ namespace uhal
       //! Write request packet to next page in host-to-FPGA device file 
       void write(const boost::shared_ptr<Buffers>& aBuffers);
 
-      //! Read next pending reply packet appropriate page of FPGA-to-host device file, and validate contents
+      //! Read next pending reply packet from appropriate page of FPGA-to-host device file, and validate contents
       void read();
 
+      bool mConnected;
 
-      static void dmaRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
-
-
-      static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues);
-
-      static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);
-
-      static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData);
-
-      //! Host-to-FPGA device file path
-      std::string mDevicePathHostToFPGA;
-      //! FPGA-to-host device file path
-      std::string mDevicePathFPGAToHost;
-      //! FPGA-to-host interrupt (event) file path
-      std::string mDevicePathFPGAEvent;
-
-      //! File desriptor for host-to-FPGA device file
-      int mDeviceFileHostToFPGA;
-      //! File descriptor for FPGA-to-host device file
-      int mDeviceFileFPGAToHost;
-      //! File descriptor for FPGA-to-host interrupt (event)
-      int mDeviceFileFPGAEvent;
+      //! Host-to-FPGA device file
+      File mDeviceFileHostToFPGA;
+      //! FPGA-to-host device file
+      File mDeviceFileFPGAToHost;
+      //! FPGA-to-host interrupt (event) file
+      File mDeviceFileFPGAEvent;
 
       bool mXdma7seriesWorkaround;
 
@@ -185,6 +205,7 @@ namespace uhal
       uhal::exception::exception* mAsynchronousException;
   };
 
+  std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket);
 
 }
 
