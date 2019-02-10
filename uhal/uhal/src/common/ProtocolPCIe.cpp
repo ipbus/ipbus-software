@@ -392,7 +392,6 @@ void PCIe::Flush( )
 
 void PCIe::dispatchExceptionHandler()
 {
-  // FIXME: Adapt to PCIe implementation
   log(Notice(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );

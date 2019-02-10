@@ -40,6 +40,7 @@
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolControlHub.hpp"
+#include "uhal/ProtocolMmap.hpp"
 #include "uhal/ProtocolPCIe.hpp"
 
 
@@ -76,6 +77,7 @@ namespace uhal
       mInstance->add< TCP< ControlHub < IPbus< 2 , 0 > > , 3 > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
       mInstance->add< PCIe > ( "ipbuspcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0" );
+      mInstance->add< Mmap > ( "ipbusmmap-2.0" , "Direct access to hardware via mmap, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
 
     }
