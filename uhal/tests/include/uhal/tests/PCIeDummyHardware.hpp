@@ -33,7 +33,7 @@
 */
 
 #ifndef _uhal_tests_PCIeDummyHardware_hpp_
-#define  _uhal_tests_PCIeDummyHardware_hpp_
+#define _uhal_tests_PCIeDummyHardware_hpp_
 
 
 #include "uhal/tests/DummyHardware.hpp"
@@ -56,14 +56,12 @@ public:
   void stop();
 
 private:
-  static void dmaRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
-
-  static void dmaBlockingRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
+  static void fifoRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
 
 
-  static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues);
+  static bool fileWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues);
 
-  static bool dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);
+  static bool fileWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);
 
 
   std::string mDevicePathHostToFPGA, mDevicePathFPGAToHost;
