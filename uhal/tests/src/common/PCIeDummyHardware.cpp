@@ -39,9 +39,12 @@
 #include <fcntl.h>
 #include <pty.h>
 #include <unistd.h>
-#include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
+#include <boost/chrono/duration.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "uhal/log/LogLevels.hpp"
@@ -58,7 +61,7 @@ PCIeDummyHardware::PCIeDummyHardware(const std::string& aDevicePathHostToFPGA, c
   DummyHardware<2, 0>(aReplyDelay, aBigEndianHack),
   mDevicePathHostToFPGA(aDevicePathHostToFPGA),
   mDevicePathFPGAToHost(aDevicePathFPGAToHost),
-  mNumberOfPages(1),
+  mNumberOfPages(3),
   mWordsPerPage(360),
   mNextPageIndex(0),
   mPublishedPageCount(0),
@@ -93,10 +96,10 @@ PCIeDummyHardware::PCIeDummyHardware(const std::string& aDevicePathHostToFPGA, c
   std::vector<uint32_t> lFPGAToHostData(4 + mNumberOfPages * mWordsPerPage, 0);
   lFPGAToHostData.at(0) = mNumberOfPages;
   lFPGAToHostData.at(1) = mWordsPerPage;
-  lFPGAToHostData.at(2) = mNumberOfPages;
-  lFPGAToHostData.at(2) = mNumberOfPages;
+  lFPGAToHostData.at(2) = mNextPageIndex;
+  lFPGAToHostData.at(3) = mPublishedPageCount;
 
-  dmaWrite(mDeviceFileFPGAToHost, 0, lFPGAToHostData);
+  fileWrite(mDeviceFileFPGAToHost, 0, lFPGAToHostData);
 
   log(Notice(), "Starting IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), "; ", Integer(mNumberOfPages), " pages, ", Integer(mWordsPerPage), " words per page");
 }
@@ -123,23 +126,20 @@ void PCIeDummyHardware::run()
   log(Info(), "Entering run method for IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost));
 
   while ( !mStop ) {
-    fd_set lInputFileSet;
-    FD_ZERO(&lInputFileSet);
-    FD_SET(mDeviceFileHostToFPGA, &lInputFileSet);
+    int lNrBytes;
+    int lRC = ioctl(mDeviceFileHostToFPGA, FIONREAD, &lNrBytes);
+    log (Debug(), "PCIeDummyHardware::run  -  ioctl returns ", Integer(lRC), ", ", lNrBytes, " bytes available");
+    assert (lRC == 0);
 
-    timeval lTimeout;
-    lTimeout.tv_sec = 0;
-    lTimeout.tv_usec = 50000;
-    int rc = select(FD_SETSIZE, &lInputFileSet, NULL, NULL, &lTimeout);
-    log (Debug(), "PCIeDummyHardware::run  -  select returns ", Integer(rc), " Input file set ", (FD_ISSET(mDeviceFileHostToFPGA, &lInputFileSet) ? "contains" : "does not contain"),  " pty");
-
-    if (rc == 0)
+    if (lNrBytes == 0) {
+      boost::this_thread::sleep_for(boost::chrono::microseconds(50));
       continue;
+    }
 
     log(Debug(), "IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), " : data ready; reading 'packet length' header");
     // FIXME: Define template method that reads sizeof(T) bytes and returns T
     std::vector<uint32_t> lPageHeader;
-    dmaBlockingRead(mDeviceFileHostToFPGA, 0x0, 1, lPageHeader);
+    fifoRead(mDeviceFileHostToFPGA, 0x0, 1, lPageHeader);
 
     const uint32_t lNrWordsInRequestPacket = (lPageHeader.at(0) >> 16) + (lPageHeader.at(0) & 0xFFFF);
 
@@ -148,9 +148,9 @@ void PCIeDummyHardware::run()
       return;
     }
 
-    log(Info(), "IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), " : reading ", Integer(lPageHeader.at(0)), "-word packet");
+    log(Info(), "IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost), " : reading ", Integer(lNrWordsInRequestPacket), "-word packet");
     mReceive.clear();
-    dmaBlockingRead(mDeviceFileHostToFPGA, 0x0, lNrWordsInRequestPacket, mReceive);
+    fifoRead(mDeviceFileHostToFPGA, 0x0, lNrWordsInRequestPacket, mReceive);
 
     // std::cout << "Received:" << std::endl;
     // for(size_t i=0; i<mReceive.size(); i++)
@@ -163,15 +163,22 @@ void PCIeDummyHardware::run()
     lPageHeader.clear();
     lPageHeader.push_back(0x10000 | ((mReply.size() - 1) & 0xFFFF));
 
-    dmaWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage, lPageHeader); // FIXME: Define template dmaWrite method that takes const T& as final argument, so that don't have to define vector
-    dmaWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage + 1, mReply);
+    fileWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage, lPageHeader); // FIXME: Define template fileWrite method that takes const T& as final argument, so that don't have to define vector
+    fileWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage + 1, mReply);
 
     std::vector<uint32_t> lData;
-    lData.push_back(mPublishedPageCount+1); // FIXME: Define template dmaWrite method that takes const T& as final argument, so that don't have to define vector
-    dmaWrite(mDeviceFileFPGAToHost, 3, lData);
+    lData.push_back(mPublishedPageCount+1); // FIXME: Define template fileWrite method that takes const T& as final argument, so that don't have to define vector
+    fileWrite(mDeviceFileFPGAToHost, 3, lData);
 
     mNextPageIndex = (mNextPageIndex + 1) % mNumberOfPages;
     mPublishedPageCount++;
+
+    std::vector<uint32_t> lStatusBlock(4, 0);
+    lStatusBlock.at(0) = mNumberOfPages;
+    lStatusBlock.at(1) = mWordsPerPage;
+    lStatusBlock.at(2) = mNextPageIndex;
+    lStatusBlock.at(3) = mPublishedPageCount;
+    fileWrite(mDeviceFileFPGAToHost, 0, lStatusBlock);
   }
 
   log(Info(), "Exiting run method for IPbus 2.0 PCIe dummy hardware ", Quote(mDevicePathHostToFPGA), ", ", Quote(mDevicePathFPGAToHost));
@@ -185,7 +192,7 @@ void PCIeDummyHardware::stop()
 }
 
 
-void PCIeDummyHardware::dmaRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
+void PCIeDummyHardware::fifoRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
 {
   char *allocated = NULL;
   posix_memalign((void **)&allocated, 4096/*alignment*/, 4*aNrWords + 4096);
@@ -193,69 +200,21 @@ void PCIeDummyHardware::dmaRead(int aFileDescriptor, const uint32_t aAddr, const
 
   /* select AXI MM address */
   char* buffer = allocated;
-  off_t off = lseek(aFileDescriptor, 4*aAddr, SEEK_SET);
-  if ( off != 4*aAddr) {
-    exception::PCIeCommunicationError lExc;
-    log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(4*aAddr), " (in preparation for read of ", Integer(aNrWords), " words)");
-    throw lExc;
-  }
-
-  /* read data from AXI MM into buffer using SGDMA */
-  int rc = ::read(aFileDescriptor, buffer, 4*aNrWords);
-  assert(rc >= 0);
-  if ((rc % 4) != 0)
-    log(Fatal(), "PCIeDummyHardware::dmaRead  -  rc = ", Integer(rc));
-  assert((rc % 4) == 0);
-  if ((rc > 0) && (size_t(rc) < 4*aNrWords)) {
-    std::cout << "Short read of " << rc << " bytes into a " << 4*aNrWords << " bytes buffer, could be a packet read?\n";
-  }
-
-  aValues.insert(aValues.end(), reinterpret_cast<uint32_t*>(buffer), reinterpret_cast<uint32_t*>(buffer)+ aNrWords);
-//    for (unsigned i=0; i<aNrWords; i++) {
-//      //uint32_t val = (buffer[4*i]&0xff)+((buffer[4*i+1]&0xff)<<8)+((buffer[4*i+2]&0xff)<<16)
-//      //  +((buffer[4*i+3]&0xff)<<24);
-//      uint32_t val = *reinterpret_cast<uint32_t*>(buffer);
-//      printf("ipbus address : 0x%08x\n", aAddr);
-//      printf("readback value: 0x%08x\n\n",val);
-//    }
-
-  free(allocated);
-}
-
-
-void PCIeDummyHardware::dmaBlockingRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
-{
-  char *allocated = NULL;
-  posix_memalign((void **)&allocated, 4096/*alignment*/, 4*aNrWords + 4096);
-  assert(allocated);
-
-  /* select AXI MM address */
-  char* buffer = allocated;
-  off_t off = lseek(aFileDescriptor, 4*aAddr, SEEK_SET);
-  if ( off != 4*aAddr) {
-    struct stat st;
-    if (fstat(aFileDescriptor, &st) or (not S_ISFIFO(st.st_mode))) {
-      exception::PCIeCommunicationError lExc;
-      log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(4*aAddr), " (in preparation for blocking read of ", Integer(aNrWords), " words)");
-      throw lExc;
-    }
-  }
-
   memset(buffer, 0, 4 * aNrWords);
 
   /* read data from AXI MM into buffer using SGDMA */
   size_t lNrBytesRead = 0;
   do {
     if (lNrBytesRead != 0)
-      log (Fatal(), "dmaBlockingRead calling ::read multiple times to get all expected ", Integer(aNrWords * 4), " bytes (only ", Integer(lNrBytesRead), " so far)");
+      log (Fatal(), "fifo calling ::read multiple times to get all expected ", Integer(aNrWords * 4), " bytes (only ", Integer(lNrBytesRead), " so far)");
     int rc = ::read(aFileDescriptor, buffer + lNrBytesRead, 4*aNrWords - lNrBytesRead);
     if (rc <= 0)
-      log (Fatal(), "dmaBlockingRead   -   read returned ", Integer(rc), ", bugger! errno = ", Integer(errno));
+      log (Fatal(), "fifo   -   read returned ", Integer(rc), ", bugger! errno = ", Integer(errno), ", meaning ", Quote (strerror(errno)));
     assert (rc > 0);
     lNrBytesRead += rc;
   } while (lNrBytesRead < (4 * aNrWords) );
   if (lNrBytesRead > (4 * aNrWords))
-    log (Fatal(), "dmaBlockingRead   -   read ", Integer(lNrBytesRead), " but only wanted to read  ", Integer(aNrWords * 4), " bytes");
+    log (Fatal(), "fifo   -   read ", Integer(lNrBytesRead), " but only wanted to read  ", Integer(aNrWords * 4), " bytes");
   // int rc = ::read(aFileDescriptor, buffer, 4*aNrWords);
   // assert(rc >= 0);
   // if ((rc % 4) != 0)
@@ -279,13 +238,13 @@ void PCIeDummyHardware::dmaBlockingRead(int aFileDescriptor, const uint32_t aAdd
 
 
 
-bool PCIeDummyHardware::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues) 
+bool PCIeDummyHardware::fileWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues)
 {
-  return dmaWrite(aFileDescriptor, aAddr, reinterpret_cast<const uint8_t*>(aValues.data()), 4 * aValues.size());
+  return fileWrite(aFileDescriptor, aAddr, reinterpret_cast<const uint8_t*>(aValues.data()), 4 * aValues.size());
 }
 
 
-bool PCIeDummyHardware::dmaWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes) 
+bool PCIeDummyHardware::fileWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes)
 {
   assert((aNrBytes % 4) == 0);
 

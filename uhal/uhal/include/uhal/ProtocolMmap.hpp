@@ -39,8 +39,8 @@
 	@date September 2017
 */
 
-#ifndef _uhal_ProtocolPCIe_hpp_
-#define _uhal_ProtocolPCIe_hpp_
+#ifndef _uhal_ProtocolMmap_hpp_
+#define _uhal_ProtocolMmap_hpp_
 
 #include <deque>                           // for deque
 #include <stddef.h>                        // for size_t
@@ -70,15 +70,15 @@ namespace uhal
   namespace exception
   {
     //! Exception class to handle the case in which the PCIe connection timed out.
-    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeTimeout , ClientTimeout , "Exception class to handle the case in which the PCIe connection timed out." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( MmapTimeout , ClientTimeout , "Exception class to handle the case in which the PCIe connection timed out." )
     //! Exception class to handle a failure to read from the specified device files during initialisation
-    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeInitialisationError , TransportLayerError , "Exception class to handle a failure to read from the specified device files during initialisation." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( MmapInitialisationError , TransportLayerError , "Exception class to handle a failure to read from the specified device files during initialisation." )
     //! Exception class to handle a low-level seek/read/write error after initialisation
-    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeCommunicationError , TransportLayerError , "Exception class to handle a low-level seek/read/write error after initialisation." )
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( MmapCommunicationError , TransportLayerError , "Exception class to handle a low-level seek/read/write error after initialisation." )
   }
 
-  //! Transport protocol to transfer an IPbus buffer via PCIe
-  class PCIe : public IPbus< 2 , 0 >
+  //! Transport protocol to transfer an IPbus buffer via device file, using mmap
+  class Mmap : public IPbus< 2 , 0 >
   {
     public:
       class PacketFmt {
@@ -104,21 +104,18 @@ namespace uhal
 
         void read(const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
 
-        void write(const uint32_t aAddr, const std::vector<uint32_t>& aValues);
-
-        void write(const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);
-
         void write(const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData);
 
       private:
         std::string mPath;
         int mFd;
         int mFlags;
+        void* mMmapBaseAddress;
       };
 
-      PCIe ( const PCIe& aPCIe );
+      Mmap ( const Mmap& aMmap );
 
-      PCIe& operator= ( const PCIe& aPCIe );
+      Mmap& operator= ( const Mmap& aMmap );
 
     public:
       /**
@@ -126,10 +123,10 @@ namespace uhal
         @param aId the uinique identifier that the client will be given.
         @param aUri a struct containing the full URI of the target.
       */
-      PCIe ( const std::string& aId, const URI& aUri );
+      Mmap ( const std::string& aId, const URI& aUri );
 
       //!	Destructor
-      virtual ~PCIe();
+      virtual ~Mmap();
 
     private:
 
@@ -180,16 +177,7 @@ namespace uhal
 
       bool mConnected;
 
-      //! Host-to-FPGA device file
-      File mDeviceFileHostToFPGA;
-      //! FPGA-to-host device file
-      File mDeviceFileFPGAToHost;
-      //! FPGA-to-host interrupt (event) file
-      File mDeviceFileFPGAEvent;
-
-      bool mXdma7seriesWorkaround;
-
-      bool mUseInterrupt;
+      File mDeviceFile;
 
       boost::chrono::microseconds mSleepDuration;
 
@@ -205,7 +193,6 @@ namespace uhal
       uhal::exception::exception* mAsynchronousException;
   };
 
-  std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket);
 
 }
 
