@@ -503,5 +503,6 @@ namespace uhal
 
   template class UDP< IPbus< 1 , 3 > >;
   template class UDP< IPbus< 2 , 0 > >;
+  template class UDP< IPbus< 3 , 0 > >;
 }
 

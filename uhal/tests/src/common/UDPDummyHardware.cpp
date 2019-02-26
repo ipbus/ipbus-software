@@ -45,4 +45,5 @@ void uhal::tests::UDPDummyHardware<IPbus_major,IPbus_minor>::handle_receive(cons
 
 template class uhal::tests::UDPDummyHardware<1,3>;
 template class uhal::tests::UDPDummyHardware<2,0>;
+template class uhal::tests::UDPDummyHardware<3,0>;
 

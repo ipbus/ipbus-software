@@ -481,6 +481,7 @@ namespace uhal
 
     template class DummyHardware<1, 3>;
     template class DummyHardware<2, 0>;
+    template class DummyHardware<3, 0>;
   }
 }
 

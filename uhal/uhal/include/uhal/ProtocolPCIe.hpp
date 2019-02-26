@@ -79,7 +79,8 @@ namespace uhal
   }
 
   //! Transport protocol to transfer an IPbus buffer via PCIe
-  class PCIe : public IPbus< 2 , 0 >
+  template< uint8_t IPbus_major , uint8_t IPbus_minor >
+  class PCIe : public IPbus<IPbus_major , IPbus_minor>
   {
     public:
       class PacketFmt {
@@ -147,7 +148,7 @@ namespace uhal
       //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
 
-      typedef IPbus< 2 , 0 > InnerProtocol;
+      typedef IPbus<IPbus_major , IPbus_minor> InnerProtocol;
 
       typedef boost::chrono::steady_clock SteadyClock_t;
 
@@ -202,7 +203,8 @@ namespace uhal
       uhal::exception::exception* mAsynchronousException;
   };
 
-  std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket);
+  std::ostream& operator<<(std::ostream& aStream, const PCIe<2, 0>::PacketFmt& aPacket);
+  std::ostream& operator<<(std::ostream& aStream, const PCIe<3, 0>::PacketFmt& aPacket);
 
 }
 

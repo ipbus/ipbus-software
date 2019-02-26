@@ -111,6 +111,9 @@ MinimalFixture<IPBUS_2_0_TCP>::MinimalFixture();
 template <>
 MinimalFixture<IPBUS_2_0_CONTROLHUB>::MinimalFixture();
 
+template <>
+MinimalFixture<IPBUS_3_0_UDP>::MinimalFixture();
+
 
 template <DeviceType type>
 MinimalFixture<type>::~MinimalFixture()
@@ -158,6 +161,9 @@ DummyHardwareFixture<IPBUS_2_0_CONTROLHUB>::DummyHardwareFixture();
 
 template <>
 DummyHardwareFixture<IPBUS_2_0_PCIE>::DummyHardwareFixture();
+
+template <>
+DummyHardwareFixture<IPBUS_3_0_UDP>::DummyHardwareFixture();
 
 
 } // end ns tests

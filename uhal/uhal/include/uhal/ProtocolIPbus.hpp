@@ -312,6 +312,142 @@ namespace uhal
   };
 
 
+  //! A class which provides the version-specific functionality for IPbus
+  template< uint8_t IPbus_minor >
+  class IPbus < 3 , IPbus_minor > : public IPbusCore
+  {
+
+    public:
+      /**
+        Default constructor
+        @param aId the uinique identifier that the client will be given.
+        @param aUri a struct containing the full URI of the target.
+      */
+      IPbus ( const std::string& aId, const URI& aUri );
+
+      /**
+        Destructor
+      */
+      virtual ~IPbus();
+
+    protected:
+      /**
+        Add a preamble to an IPbus buffer
+      */
+      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
+
+      /**
+          Return the size of the preamble
+      */
+      virtual uint32_t getPreambleSize();
+
+      /**
+        Finalize the buffer before it is transmitted
+      */
+      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
+
+    public:
+      /**
+      Abstract interface of function to calculate the IPbus header for a particular protocol version
+      @param aType the type of the IPbus transaction
+      @param aWordCount the word count field of the IPbus header
+      @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction
+      @return an IPbus header
+      */
+      static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+
+      /**
+      Abstract interface of function to calculate the IPbus header for a particular protocol version
+      @param aType the type of the IPbus transaction
+      @param aWordCount the word count field of the IPbus header
+      @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction
+      @return an IPbus header
+      */
+      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+
+      /**
+      Abstract interface of function to parse an IPbus header for a particular protocol version
+      @param aHeader an IPbus header to be parsed
+      @param aType return the type of the IPbus transaction
+      @param aWordCount return the word count field of the IPbus header
+      @param aTransactionId return the TransactionId of the IPbus header
+      @param aInfoCode return the response status of the IPbus header
+      @return whether extraction succeeded
+      */
+      static bool ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+
+
+
+    protected:
+
+      /**
+        Function which the transport protocol calls when the IPbus reply is received to check that the headers are as expected
+        @param aSendBufferStart a pointer to the start of the first word of IPbus data which was sent (i.e. with no preamble)
+        @param aSendBufferEnd a pointer to the end of the last word of IPbus data which was sent
+        @param aReplyStartIt an iterator to the start of the list of memory locations in to which the reply was written
+        @param aReplyEndIt an iterator to the end (one past last valid entry) of the list of memory locations in to which the reply was written
+        @return whether the returned IPbus packet is valid
+      */
+      virtual  exception::exception* validate ( uint8_t* aSendBufferStart ,
+          uint8_t* aSendBufferEnd ,
+          std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
+          std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
+
+      /**
+      Abstract interface of function to calculate the IPbus header for a particular protocol version
+      @param aType the type of the IPbus transaction
+      @param aWordCount the word count field of the IPbus header
+      @param aTransactionId the TransactionId of the IPbus header
+      @param aInfoCode the response status of the transaction
+      @return an IPbus header
+      */
+      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
+
+      /**
+      Abstract interface of function to parse an IPbus header for a particular protocol version
+      @param aHeader an IPbus header to be parsed
+      @param aType return the type of the IPbus transaction
+      @param aWordCount return the word count field of the IPbus header
+      @param aTransactionId return the TransactionId of the IPbus header
+      @param aInfoCode return the response status of the IPbus header
+      @return whether extraction succeeded
+      */
+      bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+
+      //! Returns the InfoCode for request transactions in this IPbus version.
+      uint8_t requestTransactionInfoCode () const
+      {
+        return 0xF;
+      }
+
+      //! Returns the maximum value of the word count in the transaction header, for each IPbus version
+      uint32_t getMaxTransactionWordCount() const
+      {
+        return 0xff;
+      }
+
+      virtual uint32_t getMaxNumberOfBuffers()
+      {
+        return 16;
+      }
+
+      virtual void dispatchExceptionHandler();
+
+    private:
+      boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
+
+      static void translateInfoCode(std::ostream& aStream, const uint8_t& aErrorCode);
+
+      //! The transaction counter which will be incremented in the sent IPbus headers
+      uint16_t mPacketCounter;
+
+      boost::mutex mReceivePacketMutex;
+      std::deque< uint32_t > mReceivePacketHeader;
+
+  };
+
 }
 
 

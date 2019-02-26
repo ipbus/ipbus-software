@@ -464,8 +464,244 @@ namespace uhal
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
+
+  // --------------------------------------------------------------------------------------------------------------------------------------------------------------
+  template< uint8_t IPbus_minor >
+  IPbus< 3 , IPbus_minor >::IPbus ( const std::string& aId, const URI& aUri ) :
+    IPbusCore ( aId , aUri , boost::posix_time::seconds ( 1 ) ),
+    mPacketCounter (
+#ifndef DISABLE_PACKET_COUNTER_HACK
+      1
+#else
+      0
+#endif
+    )
+  {
+  }
+
+
+  template< uint8_t IPbus_minor >
+  IPbus< 3 , IPbus_minor >::~IPbus()
+  {
+  }
+
+  template< uint8_t IPbus_minor >
+  void IPbus< 3 , IPbus_minor >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
+  {
+    aBuffers->send ( 0x300000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
+#ifndef DISABLE_PACKET_COUNTER_HACK
+    mPacketCounter++;
+#endif
+    {
+      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      mReceivePacketHeader.push_back ( 0x00000000 );
+      aBuffers->receive ( mReceivePacketHeader.back() );
+    }
+  }
+
+
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 3 , IPbus_minor >::getPreambleSize()
+  {
+    return 1;
+  }
+
+
+  template< uint8_t IPbus_minor >
+  void IPbus< 3 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  {
+  }
+
+
+
+  template< uint8_t IPbus_minor >
+  exception::exception* IPbus< 3 , IPbus_minor >::validate ( uint8_t* aSendBufferStart ,
+      uint8_t* aSendBufferEnd ,
+      std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
+      std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
+  {
+    //log ( Debug() , ThisLocation() );
+    //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
+    if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
+    {
+      uhal::exception::IPbus2PacketHeaderMismatch* lExc = new uhal::exception::IPbus2PacketHeaderMismatch();
+      log ( *lExc , "Returned Packet Header from URI " , Quote ( this->uri() ) , ", " , Integer ( * ( uint32_t* ) ( aReplyStartIt ->first ) , IntFmt<hex,fixed>() ) ,
+            " does not match that sent " , Integer ( * ( uint32_t* ) ( aSendBufferStart ) , IntFmt<hex,fixed>() ) );
+      return lExc;
+    }
+
+    {
+      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      mReceivePacketHeader.pop_front();
+    }
+
+    // log ( Info() , "IPbus 2.0 has validated the packet header" );
+    return IPbusCore::validate ( ( aSendBufferStart+=4 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
+  }
+
+
+
+
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 3 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  {
+    uint8_t lType ( 0x00 );
+
+    switch ( aType )
+    {
+      case B_O_T :
+      {
+        exception::ValidationError lExc;
+        log ( lExc , "Byte-Order-Transaction undefined in IPbus version 2" );
+        throw lExc;
+      }
+      case READ :
+        lType = 0x00;
+        break;
+      case WRITE :
+        lType = 0x10;
+        break;
+      case NI_READ :
+        lType = 0x20;
+        break;
+      case NI_WRITE :
+        lType = 0x30;
+        break;
+      case RMW_BITS :
+        lType = 0x40;
+        break;
+      case RMW_SUM :
+        lType = 0x50;
+        break;
+      case CONFIG_SPACE_READ :
+        lType = 0x60;
+        break;
+      case R_A_I :
+      {
+        exception::ValidationError lExc;
+        log ( lExc , "Reserved address information transaction is undefined in IPbus version 2" );
+        throw lExc;
+      }
+    }
+
+    return ( 0x00000000 | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType | ( aInfoCode&0xF ) );
+  }
+
+
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 3 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  {
+    return ( IPbus< 3 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
+  }
+
+
+  template< uint8_t IPbus_minor >
+  bool IPbus< 3 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  {
+    uint32_t lReserved ( ( aHeader >> 29 ) & 0xF );
+
+    if ( lReserved != 0 )
+    {
+      log ( Error() , "Unexpected value (" , Integer ( lReserved ) , ") in reserved section of transaction header!" );
+      return false;
+    }
+
+    switch ( aHeader & 0xF0 )
+    {
+      case 0x00 :
+        aType = READ;
+        break;
+      case 0x10 :
+        aType = WRITE;
+        break;
+      case 0x20 :
+        aType = NI_READ;
+        break;
+      case 0x30 :
+        aType = NI_WRITE;
+        break;
+      case 0x40 :
+        aType = RMW_BITS;
+        break;
+      case 0x50 :
+        aType = RMW_SUM;
+        break;
+      case 0x60 :
+        aType = CONFIG_SPACE_READ;
+        break;
+      default:
+        log ( Error() , "Unknown IPbus-header " , Integer ( uint8_t ( ( aHeader & 0xF0 ) >>4 ) , IntFmt<hex,fixed>() ) );
+        return false;
+    }
+
+    aWordCount = ( aHeader >> 8 ) & 0xff;
+    aTransactionId = ( aHeader >> 16 ) & 0xfff;
+    aInfoCode = aHeader & 0xf;
+    return true;
+  }
+
+  template< uint8_t IPbus_minor >
+  uint32_t IPbus< 3 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  {
+    return IPbus< 3 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+  }
+
+  template< uint8_t IPbus_minor >
+  bool IPbus< 3 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  {
+    return IPbus< 3 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+  }
+
+  template< uint8_t IPbus_minor >
+  void IPbus< 3 , IPbus_minor >::dispatchExceptionHandler()
+  {
+    log ( Info() , ThisLocation() );
+#ifndef DISABLE_PACKET_COUNTER_HACK
+    mPacketCounter = 1;
+#else
+    mPacketCounter = 0;
+#endif
+    mReceivePacketHeader.clear();
+    IPbusCore::dispatchExceptionHandler();
+  }
+
+  template< uint8_t IPbus_minor >
+  void IPbus< 3 , IPbus_minor >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode)
+  {
+    switch (aInfoCode) {
+      case 0:
+        aStream << "success";
+        break;
+      case 1:
+        aStream << "bad header";
+        break;
+      case 4:
+        aStream << "bus error on read";
+        break;
+      case 5:
+        aStream << "bus error on write";
+        break;
+      case 6:
+        aStream << "bus timeout on read";
+        break;
+      case 7:
+        aStream << "bus timeout on write";
+        break;
+      case 0xf:
+        aStream << "outbound request";
+        break;
+      default:
+        aStream << "UNKNOWN";
+    }
+  }
+
+  // --------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
   template class IPbus<1, 3>;
   template class IPbus<2, 0>;
+  template class IPbus<3, 0>;
 }
 
 

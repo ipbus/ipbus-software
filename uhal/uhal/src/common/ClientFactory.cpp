@@ -69,6 +69,7 @@ namespace uhal
       // ---------------------------------------------------------------------
       mInstance->add< UDP< IPbus< 1 , 3 > > > ( "ipbusudp-1.3" , "Direct access to hardware via UDP, using IPbus version 1.3" );
       mInstance->add< UDP< IPbus< 2 , 0 > > > ( "ipbusudp-2.0" , "Direct access to hardware via UDP, using IPbus version 2.0" );
+      mInstance->add< UDP< IPbus< 3 , 0 > > > ( "ipbusudp-3.0" , "Direct access to hardware via UDP, using IPbus version 3.0" );
       // ---------------------------------------------------------------------
       mInstance->add< TCP< IPbus< 1 , 3 > , 1 > > ( "ipbustcp-1.3" , "Direct access to hardware via TCP, using IPbus version 1.3" );
       mInstance->add< TCP< IPbus< 2 , 0 > , 1 > > ( "ipbustcp-2.0" , "Direct access to hardware via TCP, using IPbus version 2.0" );
@@ -76,10 +77,11 @@ namespace uhal
       mInstance->add< TCP< ControlHub < IPbus< 1 , 3 > > , 3 > > ( "chtcp-1.3", "Hardware access via the Control Hub, using IPbus version 1.3" );
       mInstance->add< TCP< ControlHub < IPbus< 2 , 0 > > , 3 > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
-      mInstance->add< PCIe > ( "ipbuspcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0" );
+      mInstance->add< PCIe< 2 , 0 > > ( "ipbuspcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0" );
+      mInstance->add< PCIe< 3 , 0 > > ( "ipbuspcie-3.0" , "Direct access to hardware via PCIe, using IPbus version 3.0" );
+      // ---------------------------------------------------------------------
       mInstance->add< Mmap > ( "ipbusmmap-2.0" , "Direct access to hardware via mmap, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
-
     }
 
     return *mInstance;

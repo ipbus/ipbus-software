@@ -64,6 +64,12 @@ MinimalFixture<IPBUS_2_0_PCIE>::MinimalFixture() :
 {
 }
 
+template <>
+MinimalFixture<IPBUS_3_0_UDP>::MinimalFixture() :
+  devicePort(70001),
+  deviceId("dummy.udp3")
+{
+}
 
 MinimalFixture<IPBUS_2_0_PCIE>::~MinimalFixture()
 {
@@ -133,6 +139,12 @@ DummyHardwareFixture<IPBUS_2_0_TCP>::DummyHardwareFixture() :
 template <>
 DummyHardwareFixture<IPBUS_2_0_PCIE>::DummyHardwareFixture() :
   hwRunner(new PCIeDummyHardware(clientToHardwareFile, hardwareToClientFile, 0, false))
+{
+}
+
+template <>
+DummyHardwareFixture<IPBUS_3_0_UDP>::DummyHardwareFixture() :
+  hwRunner(new UDPDummyHardware<3,0>(devicePort, 0, false))
 {
 }
 

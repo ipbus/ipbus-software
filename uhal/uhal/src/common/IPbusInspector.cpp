@@ -529,6 +529,8 @@ namespace uhal
 
   template class HostToTargetInspector<1, 3>;
   template class HostToTargetInspector<2, 0>;
+  template class HostToTargetInspector<3, 0>;
   template class TargetToHostInspector<1, 3>;
   template class TargetToHostInspector<2, 0>;
+  template class TargetToHostInspector<3, 0>;
 }

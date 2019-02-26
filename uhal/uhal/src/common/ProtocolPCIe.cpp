@@ -72,21 +72,42 @@
 namespace uhal {
 
 
-PCIe::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+PCIe<IPbus_major, IPbus_minor>::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
   mData(1, std::pair<const uint8_t*, size_t>(aPtr, aNrBytes))
 {}
 
 
-PCIe::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+PCIe<IPbus_major, IPbus_minor>::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
   mData(aData)
 {}
 
 
-PCIe::PacketFmt::~PacketFmt()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+PCIe<IPbus_major, IPbus_minor>::PacketFmt::~PacketFmt()
 {}
 
 
-std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket)
+std::ostream& operator<<(std::ostream& aStream, const PCIe<2, 0>::PacketFmt& aPacket)
+{
+  std::ios::fmtflags lOrigFlags( aStream.flags() );
+
+  size_t lNrBytesWritten = 0;
+  for (size_t i = 0; i < aPacket.mData.size(); i++) {
+    for (const uint8_t* lPtr = aPacket.mData.at(i).first; lPtr != (aPacket.mData.at(i).first + aPacket.mData.at(i).second); lPtr++, lNrBytesWritten++) {
+      if ((lNrBytesWritten & 3) == 0)
+        aStream << std::endl << "   @ " << std::setw(3) << std::dec << (lNrBytesWritten >> 2) << " :  x";
+      aStream << std::setw(2) << std::hex << uint16_t(*lPtr) << " ";
+    }
+  }
+
+  aStream.flags( lOrigFlags );
+  return aStream;
+}
+
+
+std::ostream& operator<<(std::ostream& aStream, const PCIe<3, 0>::PacketFmt& aPacket)
 {
   std::ios::fmtflags lOrigFlags( aStream.flags() );
 
@@ -106,7 +127,8 @@ std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket)
 
 
 
-PCIe::File::File(const std::string& aPath, int aFlags) :
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+PCIe<IPbus_major, IPbus_minor>::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
   mFd(-1),
   mFlags(aFlags)
@@ -114,25 +136,29 @@ PCIe::File::File(const std::string& aPath, int aFlags) :
 }
 
 
-PCIe::File::~File()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+PCIe<IPbus_major, IPbus_minor>::File::~File()
 {
   close();
 }
 
 
-const std::string& PCIe::File::getPath() const
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+const std::string& PCIe<IPbus_major, IPbus_minor>::File::getPath() const
 {
   return mPath;
 }
 
 
-void PCIe::File::setPath(const std::string& aPath)
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::File::setPath(const std::string& aPath)
 {
   mPath = aPath;
 }
 
 
-void PCIe::File::open()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::File::open()
 {
   if (mFd != -1)
     return;
@@ -146,7 +172,8 @@ void PCIe::File::open()
 }
 
 
-void PCIe::File::close()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::File::close()
 {
   if (mFd != -1) {
     int rc = ::close(mFd);
@@ -157,7 +184,8 @@ void PCIe::File::close()
 }
 
 
-void PCIe::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
 {
   if (mFd == -1)
     open();
@@ -198,13 +226,15 @@ void PCIe::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
 }
 
 
-void PCIe::File::write(const uint32_t aAddr, const std::vector<uint32_t>& aValues)
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::File::write(const uint32_t aAddr, const std::vector<uint32_t>& aValues)
 {
   write(4 * aAddr, reinterpret_cast<const uint8_t* const>(aValues.data()), 4 * aValues.size());
 }
 
 
-void PCIe::File::write(const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes)
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::File::write(const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes)
 {
   if (mFd == -1)
     open();
@@ -251,7 +281,8 @@ void PCIe::File::write(const uint32_t aAddr, const uint8_t* const aPtr, const si
 }
 
 
-void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData)
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::File::write(const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData)
 {
   if (mFd == -1)
     open();
@@ -308,8 +339,9 @@ void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
 
 
 
-PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
-  IPbus< 2 , 0 > ( aId , aUri ),
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+PCIe<IPbus_major, IPbus_minor>::PCIe ( const std::string& aId, const URI& aUri ) :
+  IPbus<IPbus_major, IPbus_minor> ( aId , aUri ),
   mConnected(false),
   mDeviceFileHostToFPGA(aUri.mHostname.substr(0, aUri.mHostname.find(",")), O_RDWR ),
   mDeviceFileFPGAToHost(aUri.mHostname.substr(aUri.mHostname.find(",")+1), O_RDWR | O_NONBLOCK  /* for read might need O_RDWR | O_NONBLOCK */),
@@ -332,12 +364,12 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
 
   if ( aUri.mHostname.find(",") == std::string::npos ) {
     exception::PCIeInitialisationError lExc;
-    log(lExc, "No comma found in hostname of PCIe client URI '" + uri() + "'; cannot construct 2 paths for device files");
+    log(lExc, "No comma found in hostname of PCIe client URI '" + this->uri() + "'; cannot construct 2 paths for device files");
     throw lExc;
   }
   else if ( aUri.mHostname.find(",") == 0 || aUri.mHostname.find(",") == aUri.mHostname.size()-1) {
     exception::PCIeInitialisationError lExc;
-    log(lExc, "Hostname of PCIe client URI '" + uri() + "' starts/ends with a comma; cannot construct 2 paths for device files");
+    log(lExc, "Hostname of PCIe client URI '" + this->uri() + "' starts/ends with a comma; cannot construct 2 paths for device files");
     throw lExc;
   }
 
@@ -347,37 +379,39 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
     if (lIt->first == "events") {
       if (mUseInterrupt) {
         exception::PCIeInitialisationError lExc;
-        log(lExc, "PCIe client URI ", Quote(uri()), ": 'events' attribute is specified multiple times");
+        log(lExc, "PCIe client URI ", Quote(this->uri()), ": 'events' attribute is specified multiple times");
         throw lExc;
       }
 
       mUseInterrupt = true;
       mDeviceFileFPGAEvent.setPath(lIt->second);
-      log (Info() , "PCIe client with URI ", Quote (uri()), " is configured to use interrupts");
+      log (Info() , "PCIe client with URI ", Quote (this->uri()), " is configured to use interrupts");
     }
     else if (lIt->first == "sleep") {
       mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
-      log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
+      log (Notice() , "PCIe client with URI ", Quote (this->uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
     }
     else if (lIt->first == "xdma_7series_workaround") {
       mXdma7seriesWorkaround = true;
-      log (Notice() , "PCIe client with URI ", Quote (uri()), " : Adjusting size of PCIe reads to a few fixed sizes as workaround for 7-series xdma firmware bug");
+      log (Notice() , "PCIe client with URI ", Quote (this->uri()), " : Adjusting size of PCIe reads to a few fixed sizes as workaround for 7-series xdma firmware bug");
     }
     else
-      log (Warning() , "Unknown attribute ", Quote (lIt->first), " used in URI ", Quote(uri()));
+      log (Warning() , "Unknown attribute ", Quote (lIt->first), " used in URI ", Quote(this->uri()));
   }
 }
 
 
-PCIe::~PCIe()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+PCIe<IPbus_major, IPbus_minor>::~PCIe()
 {
   disconnect();
 }
 
 
-void PCIe::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
 {
-  log(Debug(), "PCIe client (URI: ", Quote(uri()), ") : implementDispatch method called");
+  log(Debug(), "PCIe client (URI: ", Quote(this->uri()), ") : implementDispatch method called");
 
   if ( ! mConnected )
     connect();
@@ -388,18 +422,20 @@ void PCIe::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
 }
 
 
-void PCIe::Flush( )
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::Flush( )
 {
-  log(Debug(), "PCIe client (URI: ", Quote(uri()), ") : Flush method called");
+  log(Debug(), "PCIe client (URI: ", Quote(this->uri()), ") : Flush method called");
   while ( !mReplyQueue.empty() )
     read();
 
 }
 
 
-void PCIe::dispatchExceptionHandler()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::dispatchExceptionHandler()
 {
-  log(Notice(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
+  log(Notice(), "PCIe client ", Quote(this->id()), " (URI: ", Quote(this->uri()), ") : closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
   disconnect();
@@ -408,7 +444,8 @@ void PCIe::dispatchExceptionHandler()
 }
 
 
-uint32_t PCIe::getMaxSendSize()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+uint32_t PCIe<IPbus_major, IPbus_minor>::getMaxSendSize()
 {
   if ( ! mConnected )
     connect();
@@ -417,7 +454,8 @@ uint32_t PCIe::getMaxSendSize()
 }
 
 
-uint32_t PCIe::getMaxReplySize()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+uint32_t PCIe<IPbus_major, IPbus_minor>::getMaxReplySize()
 {
   if ( ! mConnected )
     connect();
@@ -426,7 +464,8 @@ uint32_t PCIe::getMaxReplySize()
 }
 
 
-void PCIe::connect()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::connect()
 {
   log ( Debug() , "PCIe client is opening device file " , Quote ( mDeviceFileHostToFPGA.getPath() ) , " (client-to-device)" );
   mDeviceFileHostToFPGA.open();
@@ -462,7 +501,8 @@ void PCIe::connect()
 }
 
 
-void PCIe::disconnect()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::disconnect()
 {
   mDeviceFileHostToFPGA.close();
   mDeviceFileFPGAToHost.close();
@@ -471,9 +511,10 @@ void PCIe::disconnect()
 }
 
 
-void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::write(const boost::shared_ptr<Buffers>& aBuffers)
 {
-  log (Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFileHostToFPGA.getPath()));
+  log (Info(), "PCIe client ", Quote(this->id()), " (URI: ", Quote(this->uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFileHostToFPGA.getPath()));
 
   const uint32_t lHeaderWord = (0x10000 | (((aBuffers->sendCounter() / 4) - 1) & 0xFFFF));
   std::vector<std::pair<const uint8_t*, size_t> > lDataToWrite;
@@ -488,7 +529,8 @@ void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
 }
 
 
-void PCIe::read()
+template< uint8_t IPbus_major , uint8_t IPbus_minor >
+void PCIe<IPbus_major, IPbus_minor>::read()
 {
   const size_t lPageIndexToRead = (mIndexNextPage - mReplyQueue.size() + mNumberOfPages) % mNumberOfPages;
   SteadyClock_t::time_point lStartTime = SteadyClock_t::now();
@@ -506,19 +548,19 @@ void PCIe::read()
         }
         lRxEvent.clear();
 
-        if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
+        if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(this->getBoostTimeoutPeriod().total_microseconds())) {
           exception::PCIeTimeout lExc;
           log(lExc, "Next page (index ", Integer(lPageIndexToRead), " count ", Integer(mPublishedReplyPageCount+1), ") of PCIe device '" + mDeviceFileHostToFPGA.getPath() + "' is not ready after timeout period");
           throw lExc;
         }
 
-        log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Waiting for interrupt; sleeping for ", mSleepDuration.count(), "us");
+        log(Debug(), "PCIe client ", Quote(this->id()), " (URI: ", Quote(this->uri()), ") : Waiting for interrupt; sleeping for ", mSleepDuration.count(), "us");
         if (mSleepDuration > boost::chrono::microseconds(0))
           boost::this_thread::sleep_for( mSleepDuration );
 
       } // end of while (true)
 
-      log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (interrupt received)");
+      log(Info(), "PCIe client ", Quote(this->id()), " (URI: ", Quote(this->uri()), ") : Reading page ", Integer(lPageIndexToRead), " (interrupt received)");
     }
     else
     {
@@ -537,18 +579,18 @@ void PCIe::read()
         }
         // FIXME: Throw if published page count is invalid number
 
-        if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
+        if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(this->getBoostTimeoutPeriod().total_microseconds())) {
           exception::PCIeTimeout lExc;
           log(lExc, "Next page (index ", Integer(lPageIndexToRead), " count ", Integer(mPublishedReplyPageCount+1), ") of PCIe device '" + mDeviceFileHostToFPGA.getPath() + "' is not ready after timeout period");
           throw lExc;
         }
 
-        log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
+        log(Debug(), "PCIe client ", Quote(this->id()), " (URI: ", Quote(this->uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
         if (mSleepDuration > boost::chrono::microseconds(0))
           boost::this_thread::sleep_for( mSleepDuration );
       }
 
-      log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");
+      log(Info(), "PCIe client ", Quote(this->id()), " (URI: ", Quote(this->uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");
     }
   }
   mReadReplyPageCount++;
@@ -605,5 +647,7 @@ void PCIe::read()
   }
 }
 
+template class PCIe<2, 0>;
+template class PCIe<3, 0>;
 
 } // end ns uhal
