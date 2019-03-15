@@ -46,6 +46,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <map>
 
