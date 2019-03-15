@@ -45,6 +45,7 @@
 #include "uhal/Node.hpp"
 
 #include <boost/filesystem/path.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/spirit/include/qi.hpp>
 
