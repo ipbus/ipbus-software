@@ -312,6 +312,72 @@ namespace uhal
 
 
     template < bool DebugInfo >
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint64_t& aTarget )
+    {
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+
+      if ( ! lAttr.empty() )
+      {
+        std::string lAttrStr ( lAttr.value() );
+        std::stringstream ss;
+
+        //if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
+        if ( lAttrStr.size() > 2 )
+        {
+          if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
+          {
+            ss << std::hex << lAttrStr.substr ( 2 );
+          }
+          else
+          {
+            ss << lAttrStr;
+          }
+        }
+        else if ( lAttrStr.size() > 1 )
+        {
+          if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
+          {
+            ss << std::hex << lAttrStr.substr ( 1 );
+          }
+          else
+          {
+            ss << lAttrStr;
+          }
+        }
+        else
+        {
+          ss << lAttrStr;
+        }
+
+        if ( ss.str().size() > 18 )
+        {
+          exception::StringNumberWillNotFitInto32BitNumber lExc;
+          log ( lExc , "XML attribute " , Quote ( aAttrName ) , " has value " , Quote ( ss.str() ) , " which is too big to fit into 64-bit number" );
+          throw lExc;
+        }
+
+        uint64_t lTarget;
+        ss >> lTarget;
+
+        aTarget = ( uint64_t ) ( lTarget );
+        return true;
+      }
+      else
+      {
+        if ( DebugInfo )
+        {
+          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
+        }
+
+        return false;
+      }
+    }
+
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName , uint64_t& aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName , uint64_t& aTarget );
+
+
+    template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget )
     {
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );

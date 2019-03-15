@@ -115,9 +115,9 @@ namespace uhal
   
       private:
 
-        void SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue );
+        void SetEndpoint( const uint32_t& aAddress , const uint64_t&  aValue );
 
-        uint32_t GetEndpoint( const uint32_t& aAddress );
+        uint64_t GetEndpoint( const uint32_t& aAddress );
 
         //! Analyse request and create reply when a Byte-OrderTransaction is observed
         void bot();
@@ -161,7 +161,7 @@ namespace uhal
           @param aAddress the base address of the write
           @param aAddend the value to be added
         */
-        void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend );
+        void rmw_sum ( const uint32_t& aAddress , const uint64_t& aAddend );
   
         /**
           Analyse request and create reply when a read-modify-write bits is observed
@@ -169,7 +169,7 @@ namespace uhal
           @param aAndTerm the value to be and'ed
           @param aOrTerm the value to be or'ed
         */
-        void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm );
+        void rmw_bits ( const uint32_t& aAddress , const uint64_t& aAndTerm , const uint64_t& aOrTerm );
   
         //! Analyse request and create reply when the header is unknown
         void unknown_type();
@@ -189,7 +189,7 @@ namespace uhal
   
       private:
         //! The memory space of the virtual hardware
-        std::vector< uint32_t > mMemory;
+        std::vector< uint64_t > mMemory;
 
         //! The configuration space within the virtual hardware
         std::vector< uint32_t > mConfigurationSpace;

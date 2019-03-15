@@ -65,6 +65,8 @@ namespace uhal
       uint32_t mHeader;
       //! The current transaction type
       eIPbusTransactionType mType;
+      //! The current data width
+      IPbusDataWidth mDataWidth;
       //! The current word count
       uint32_t mWordCounter;
       //! The current transaction id
@@ -132,7 +134,7 @@ namespace uhal
         @param aAddress the base address of the write
         @param aAddend the value to be added
       */
-      virtual void rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend );
+      virtual void rmw_sum ( const uint32_t& aAddress , const uint64_t& aAddend );
 
       /**
         Virtual callback function called when a read-modify-write bits is observed
@@ -140,7 +142,7 @@ namespace uhal
         @param aAndTerm the value to be and'ed
         @param aOrTerm the value to be or'ed
       */
-      virtual void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm );
+      virtual void rmw_bits ( const uint32_t& aAddress , const uint64_t& aAndTerm , const uint64_t& aOrTerm );
 
       //! Virtual callback function for the case where the header is unknown
       virtual void unknown_type();
@@ -175,6 +177,8 @@ namespace uhal
       uint32_t mHeader;
       //! The current transaction type
       eIPbusTransactionType mType;
+      //! The current data width
+      IPbusDataWidth mDataWidth;
       //! The current word count
       uint32_t mWordCounter;
       //! The current transaction id
@@ -228,13 +232,13 @@ namespace uhal
         Virtual callback function called when a read-modify-write sum is observed
         @param aNewValue the value before/after the change (depending on IPbus version)
       */
-      virtual void rmw_sum ( const uint32_t& aNewValue );
+      virtual void rmw_sum ( const uint64_t& aNewValue );
  
       /**
         Virtual callback function called when a read-modify-write bits is observed
         @param aNewValue the value before/after the change (depending on IPbus version)
       */
-      virtual void rmw_bits ( const uint32_t& aNewValue );
+      virtual void rmw_bits ( const uint64_t& aNewValue );
 
       //! Virtual callback function for the case where the header is unknown
       virtual void unknown_type();

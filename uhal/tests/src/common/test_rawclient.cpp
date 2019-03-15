@@ -204,6 +204,163 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(RawClientTestSuite, mem_rmw_sum, DummyHardwa
 )
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(RawClientTestSuite, single_write64_read64, DummyHardwareFixture,
+{
+  HwInterface hw = getHwInterface();
+
+  ClientInterface* c = &hw.getClient();
+  uint64_t x = static_cast<uint64_t> ( rand64() );
+  uint32_t addr = hw.getNode ( "REG" ).getAddress();
+  c->write64 ( addr,x );
+  ValWord< uint64_t > reg = c->read64 ( addr );
+  BOOST_CHECK ( !reg.valid() );
+  BOOST_CHECK_THROW ( reg.value(),uhal::exception::NonValidatedMemory );
+  c->dispatch();
+  BOOST_CHECK ( reg.valid() );
+  BOOST_CHECK_EQUAL ( reg.value(), x );
+  BOOST_CHECK_THROW ( c->write64 ( addr,0xF0000000, 0xF0 ) ,uhal::exception::BitsSetWhichAreForbiddenByBitMask );
+  BOOST_CHECK_THROW ( c->write64 ( addr,0xFF, 0x0F ) ,uhal::exception::BitsSetWhichAreForbiddenByBitMask );
+
+  uint64_t y = static_cast<uint64_t> ( rand64() ) & 0xF;
+  c->write64 ( addr,y, 0xF );
+  ValWord< uint64_t > reg2 = c->read64 ( addr );
+  BOOST_CHECK ( !reg2.valid() );
+  BOOST_CHECK_THROW ( reg2.value(),uhal::exception::NonValidatedMemory );
+  c->dispatch();
+  BOOST_CHECK ( reg2.valid() );
+  BOOST_CHECK_EQUAL ( reg2.value(), ( ( x&~0xF ) |y ) );
+  ValWord< uint64_t > reg3 = c->read64 ( addr , 0xF );
+  BOOST_CHECK ( !reg3.valid() );
+  BOOST_CHECK_THROW ( reg3.value(),uhal::exception::NonValidatedMemory );
+  c->dispatch();
+  BOOST_CHECK ( reg3.valid() );
+  BOOST_CHECK_EQUAL ( reg3.value(), y );
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(RawClientTestSuite, mem_write64_read64, DummyHardwareFixture,
+{
+  const uint32_t N =1024*1024/4;
+  HwInterface hw = getHwInterface();
+  ClientInterface* c = &hw.getClient();
+  std::vector<uint64_t> xx;
+
+  for ( size_t i=0; i!= N; ++i )
+  {
+    xx.push_back ( static_cast<uint64_t> ( rand64() ) );
+  }
+
+  uint32_t addr = hw.getNode ( "MEM" ).getAddress();
+  c->writeBlock64 ( addr, xx );
+  ValVector< uint64_t > mem = c->readBlock64 ( addr, N );
+  BOOST_CHECK ( !mem.valid() );
+  BOOST_CHECK_EQUAL ( mem.size(), N );
+  BOOST_CHECK_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
+  c->dispatch();
+  BOOST_CHECK ( mem.valid() );
+  BOOST_CHECK_EQUAL ( mem.size(), N );
+  bool correct_block_write_read = true;
+
+  std::vector< uint64_t >::const_iterator j=xx.begin();
+  for ( ValVector< uint64_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
+  {
+    correct_block_write_read = correct_block_write_read && ( *i == *j );
+  }
+
+  BOOST_CHECK ( correct_block_write_read );
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(RawClientTestSuite, mem_rmw_bits64, DummyHardwareFixture,
+{
+  HwInterface hw = getHwInterface();
+  ClientInterface* c = &hw.getClient();
+  uint32_t addr = hw.getNode ( "REG_UPPER_MASK" ).getAddress();
+  uint64_t x1 = static_cast<uint64_t> ( rand64() );
+  uint64_t x2 = static_cast<uint64_t> ( rand64() );
+  uint64_t x3 = static_cast<uint64_t> ( rand64() );
+  c->write64 ( addr,x1 );
+  ValWord< uint64_t > reg1 = c->rmw_bits64 ( addr,x2,x3 );
+  ValWord< uint64_t > reg2 = c->read64 ( addr );
+  c->dispatch();
+  BOOST_CHECK_EQUAL ( ( ( x1 & x2 ) | x3 ), reg2.value() );
+
+  //IPBus 1.3 bug on RMW: https://svnweb.cern.ch/trac/cactus/ticket/179
+  if ( hw.uri().find ( "ipbusudp-1.3://" ) != std::string::npos ||
+       hw.uri().find ( "ipbustcp-1.3://" ) != std::string::npos ||
+       hw.uri().find ( "chtcp-1.3://" ) != std::string::npos )
+  {
+    BOOST_CHECK_EQUAL ( reg1.value(), ( ( x1 & x2 ) | x3 ) );
+  }
+  else
+  {
+    BOOST_CHECK_EQUAL ( reg1.value(), x1 );
+  }
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(RawClientTestSuite, mem_rmw_sum64, DummyHardwareFixture,
+{
+  const uint32_t N =1024;
+  HwInterface hw = getHwInterface();
+  ClientInterface* c = &hw.getClient();
+  uint64_t total = 0;
+  std::vector<uint64_t> xx;
+  bool IPbus1_3;
+
+  //IPBus 1.3 bug on RMW: https://svnweb.cern.ch/trac/cactus/ticket/179
+  if ( hw.uri().find ( "ipbusudp-1.3://" ) != std::string::npos ||
+       hw.uri().find ( "ipbustcp-1.3://" ) != std::string::npos ||
+       hw.uri().find ( "chtcp-1.3://" ) != std::string::npos )
+  {
+    IPbus1_3=true;
+  }
+  else
+  {
+    IPbus1_3=false;
+  }
+
+  uint64_t x ( 0x00000000 );
+
+  for ( size_t i=0; i!= N; ++i )
+  {
+    if ( !IPbus1_3 )
+    {
+      total += x;
+      x = static_cast<uint64_t> ( rand64() );
+    }
+    else
+    {
+      x = static_cast<uint64_t> ( rand64() );
+      total += x;
+    }
+
+    xx.push_back ( x );
+  }
+
+  uint32_t addr = hw.getNode ( "SUBSYSTEM1.REG" ).getAddress();
+  c->write64 ( addr,xx[0] );
+  ValWord<uint64_t> reg;
+
+  for ( size_t i=1; i!= N; ++i )
+  {
+    reg = c->rmw_sum64 ( addr,xx[i] );
+    c->dispatch();
+  }
+
+  BOOST_CHECK_EQUAL ( reg.value(), total );
+}
+)
+
+
 } // end ns tests
 } // end ns uhal
 

@@ -116,7 +116,7 @@ namespace uhal
       if ( ! base_type::analyze ( lBegin , lEnd ) ) // Cope with receiving bad headers
       {
         log ( Error() , "Found a bad header" );
-        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId , ( IPbus_major==1 ? 2 : 1 ) ) );
+        mReply.push_back ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , base_type::mWordCounter , base_type::mTransactionId , ( IPbus_major==1 ? 2 : 1 ) ) );
       }
 
       if ( ( base_type::mPacketType == 0 ) && ( mReply.size() != 0 ) )
@@ -161,7 +161,7 @@ namespace uhal
 
 
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    void DummyHardware<IPbus_major, IPbus_minor>::SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue )
+    void DummyHardware<IPbus_major, IPbus_minor>::SetEndpoint( const uint32_t& aAddress , const uint64_t&  aValue )
     {
       if( ! mMemory.size() )
         mMemory.resize( ADDRESSMASK + 1 );
@@ -170,7 +170,7 @@ namespace uhal
 
 
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    uint32_t DummyHardware<IPbus_major, IPbus_minor>::GetEndpoint( const uint32_t& aAddress )
+    uint64_t DummyHardware<IPbus_major, IPbus_minor>::GetEndpoint( const uint32_t& aAddress )
     {
       if( ! mMemory.size() )
         mMemory.resize( ADDRESSMASK + 1 );
@@ -183,7 +183,7 @@ namespace uhal
     {
       mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
       mReceivedControlPacketHeaderHistory.pop_front();
-      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId ) );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , 0 , base_type::mTransactionId, 0 ) );
       mReply.push_back ( lExpected );
       mSentControlPacketHeaderHistory.push_back ( lExpected );
       mSentControlPacketHeaderHistory.pop_front();
@@ -196,14 +196,19 @@ namespace uhal
       mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
       mReceivedControlPacketHeaderHistory.pop_front();
       uint32_t lAddress ( aAddress );
-      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , base_type::mWordCounter , base_type::mTransactionId, 0 ) );
       mReply.push_back ( lExpected );
       mSentControlPacketHeaderHistory.push_back ( lExpected );
       mSentControlPacketHeaderHistory.pop_front();
 
       for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
       {
-        mReply.push_back ( GetEndpoint( lAddress  ) );
+        uint64_t lValue = GetEndpoint( lAddress );
+        mReply.push_back ( uint32_t(lValue) );
+        if (base_type::mDataWidth == DATA64)
+        {
+          mReply.push_back( uint32_t(lValue >> 32) );
+        }
       }
     }
 
@@ -214,14 +219,19 @@ namespace uhal
       mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
       mReceivedControlPacketHeaderHistory.pop_front();
       uint32_t lAddress ( aAddress );
-      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , base_type::mWordCounter , base_type::mTransactionId, 0 ) );
       mReply.push_back ( lExpected );
       mSentControlPacketHeaderHistory.push_back ( lExpected );
       mSentControlPacketHeaderHistory.pop_front();
 
       for ( ; base_type::mWordCounter!=0 ; --base_type::mWordCounter )
       {
-        mReply.push_back ( GetEndpoint( lAddress++ ) );
+        uint64_t lValue = GetEndpoint( lAddress++ );
+        mReply.push_back( uint32_t(lValue) );
+        if (base_type::mDataWidth == DATA64)
+        {
+          mReply.push_back( uint32_t(lValue >> 32) );
+        }
       }
     }
 
@@ -232,7 +242,7 @@ namespace uhal
       mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
       mReceivedControlPacketHeaderHistory.pop_front();
       uint32_t lAddress ( aAddress );
-      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId ) );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , base_type::mWordCounter , base_type::mTransactionId, 0 ) );
       mReply.push_back ( lExpected );
       mSentControlPacketHeaderHistory.push_back ( lExpected );
       mSentControlPacketHeaderHistory.pop_front();
@@ -253,18 +263,23 @@ namespace uhal
 
       while ( aIt != aEnd )
       {
-        SetEndpoint ( lAddress , *aIt++ );
+        uint64_t lValue(*aIt++);
+        if (base_type::mDataWidth == DATA64)
+        {
+          lValue = ( uint64_t(*aIt++) << 32 ) | lValue;
+        }
+        SetEndpoint ( lAddress , lValue );
       }
 
       uint32_t lExpected;
 
       if ( IPbus_major == 1 )
       {
-        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId );
+        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , 0 , base_type::mTransactionId, 0 );
       }
       else
       {
-        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId );
+        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , base_type::mWordCounter , base_type::mTransactionId, 0 );
       }
 
       mReply.push_back ( lExpected );
@@ -282,18 +297,23 @@ namespace uhal
 
       while ( aIt != aEnd )
       {
-        SetEndpoint ( lAddress++ , *aIt++ );
+        uint64_t lValue(*aIt++);
+        if (base_type::mDataWidth == DATA64)
+        {
+          lValue = ( uint64_t(*aIt++) << 32 ) | lValue;
+        }
+        SetEndpoint ( lAddress++ , lValue );
       }
 
       uint32_t lExpected;
 
       if ( IPbus_major == 1 )
       {
-        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId );
+        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , 0 , base_type::mTransactionId, 0 );
       }
       else
       {
-        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mWordCounter , base_type::mTransactionId );
+        lExpected = IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , base_type::mWordCounter , base_type::mTransactionId, 0 );
       }
 
       mReply.push_back ( lExpected );
@@ -303,12 +323,12 @@ namespace uhal
 
 
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    void DummyHardware<IPbus_major, IPbus_minor>::rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
+    void DummyHardware<IPbus_major, IPbus_minor>::rmw_sum ( const uint32_t& aAddress , const uint64_t& aAddend )
     {
       mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
       mReceivedControlPacketHeaderHistory.pop_front();
       uint32_t lAddress ( aAddress );
-      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 1 , base_type::mTransactionId ) );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , 1 , base_type::mTransactionId, 0 ) );
       mReply.push_back ( lExpected );
       mSentControlPacketHeaderHistory.push_back ( lExpected );
       mSentControlPacketHeaderHistory.pop_front();
@@ -324,21 +344,32 @@ namespace uhal
       else
       {
         //IPbus 2.x returns pre-modified value
-        uint32_t lValue( GetEndpoint( lAddress  ) );
-        mReply.push_back ( lValue );
-        lValue += aAddend;
-        SetEndpoint( lAddress  ,  lValue );
+        if (base_type::mDataWidth == DATA32)
+        {
+          uint32_t lValue( GetEndpoint( lAddress  ) );
+          mReply.push_back ( uint32_t(lValue) );
+          lValue += uint32_t(aAddend);
+          SetEndpoint( lAddress , lValue );
+        }
+        else
+        {
+          uint64_t lValue( GetEndpoint( lAddress  ) );
+          mReply.push_back ( uint32_t(lValue) );
+          mReply.push_back ( uint32_t(lValue >> 32) );
+          lValue += aAddend;
+          SetEndpoint( lAddress , lValue );
+        }
       }
     }
 
 
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
-    void DummyHardware<IPbus_major, IPbus_minor>::rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
+    void DummyHardware<IPbus_major, IPbus_minor>::rmw_bits ( const uint32_t& aAddress , const uint64_t& aAndTerm , const uint64_t& aOrTerm )
     {
       mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
       mReceivedControlPacketHeaderHistory.pop_front();
       uint32_t lAddress ( aAddress );
-      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 1 , base_type::mTransactionId ) );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , 1 , base_type::mTransactionId, 0 ) );
       mReply.push_back ( lExpected );
       mSentControlPacketHeaderHistory.push_back ( lExpected );
       mSentControlPacketHeaderHistory.pop_front();
@@ -349,17 +380,21 @@ namespace uhal
         uint32_t lValue( GetEndpoint( lAddress  ) );
         lValue &= aAndTerm;
         lValue |= aOrTerm;
-        SetEndpoint( lAddress  ,  lValue );
+        SetEndpoint( lAddress , lValue );
         mReply.push_back ( lValue );
       }
       else
       {
         //IPbus 2.x returns pre-modified value
-        uint32_t lValue( GetEndpoint( lAddress  ) );
-        mReply.push_back ( lValue );
+        uint64_t lValue( GetEndpoint( lAddress  ) );
+        mReply.push_back ( uint32_t(lValue) );
+        if (base_type::mDataWidth == DATA64)
+        {
+          mReply.push_back( uint32_t(lValue >> 32) );
+        }
         lValue &= aAndTerm;
         lValue |= aOrTerm;
-        SetEndpoint( lAddress  ,  lValue );
+        SetEndpoint( lAddress , lValue );
       }
     }
 
@@ -370,7 +405,7 @@ namespace uhal
       log ( Error() , Integer ( base_type::mHeader, IntFmt<hex,fixed>() ) , " is an unknown IPbus transaction header. Returning error code." );
       mReceivedControlPacketHeaderHistory.push_back ( base_type::mPacketHeader );
       mReceivedControlPacketHeaderHistory.pop_front();
-      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , 0 , base_type::mTransactionId , 1 ) );
+      uint32_t lExpected ( IPbus< IPbus_major , IPbus_minor >::ExpectedHeader ( base_type::mType , base_type::mDataWidth , 0 , base_type::mTransactionId , 1 ) );
       mReply.push_back ( lExpected );
       mSentControlPacketHeaderHistory.push_back ( lExpected );
       mSentControlPacketHeaderHistory.pop_front();

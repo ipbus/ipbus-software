@@ -214,7 +214,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwbits_read ( ClientInterfa
 
   oss_values << "Wrote value 0x" << std::hex << x0 << ", then did RMW-bits with AND-term 0x" << a << ", OR-term 0x" << b;
 
-  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbuspcie-2.0" ) != string::npos ) || ( c.uri().find ( "ipbusmmap-2.0" ) != string::npos ) );
+  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbuspcie-2.0" ) != string::npos ) || ( c.uri().find ( "ipbusmmap-2.0" ) != string::npos ) || ( c.uri().find ( "ipbusudp-3.0" ) != string::npos ) || ( c.uri().find ( "ipbuspcie-3.0" ) != string::npos ) );
 
   try
   {
@@ -273,7 +273,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read ( ClientInterfac
 
   oss_values << "Wrote value 0x" << std::hex << x0 << ", then did RMW-sum with ADDEND 0x" << a;
 
-  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos )  || ( c.uri().find ( "ipbuspcie-2.0" ) != string::npos ) || ( c.uri().find ( "ipbusmmap-2.0" ) != string::npos ) );
+  const bool ipbus2 = ( ( c.uri().find ( "ipbusudp-2.0" ) != string::npos ) || ( c.uri().find ( "ipbustcp-2.0" ) != string::npos ) || ( c.uri().find ( "chtcp-2.0" ) != string::npos )  || ( c.uri().find ( "ipbuspcie-2.0" ) != string::npos ) || ( c.uri().find ( "ipbusmmap-2.0" ) != string::npos ) || ( c.uri().find ( "ipbusudp-3.0" ) != string::npos ) || ( c.uri().find ( "ipbuspcie-3.0" ) != string::npos ) );
 
   try
   {
@@ -440,19 +440,20 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
     cout << "\nSOAK TEST to device '" << client->uri() << "'\n   Random sequence of " << aNrIterations << " transactions will be sent to hardware" << endl << endl;
     // Setup
     uint32_t ipbus_vsn;
-    size_t found = client->uri().find ( "-1.3" );
 
-    if ( found!=std::string::npos )
+    if ( client->uri().find ( "-1.3" ) != std::string::npos )
     {
       ipbus_vsn = 1;
     }
     else
     {
-      found = client->uri().find ( "-2.0" );
-
-      if ( found!=std::string::npos )
+      if ( client->uri().find ( "-2.0" ) != std::string::npos )
       {
         ipbus_vsn = 2;
+      }
+      else if ( client->uri().find ( "-3.0" ) != std::string::npos )
+      {
+        ipbus_vsn = 3;
       }
       else
       {
@@ -517,7 +518,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
           queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwBits ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
           nrQueuedWords += 1;
 
-          if ( ipbus_vsn == 2 )
+          if ( ipbus_vsn != 1 )
           {
             *regIt &= tempUInt1;
             *regIt |= tempUInt2;
@@ -540,7 +541,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
           queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwSum ( addr, tempUInt1, result, *regIt ) ) );
           nrQueuedWords += 1;
 
-          if ( ipbus_vsn == 2 )
+          if ( ipbus_vsn != 1 )
           {
             *regIt += tempUInt1;
           }

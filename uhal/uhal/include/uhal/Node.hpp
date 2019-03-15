@@ -208,7 +208,7 @@ namespace uhal
       	Return the mask to be applied if this node is a sub-field, rather than an entire register
       	@return the mask to be applied if this node is a sub-field, rather than an entire register
       */
-      const uint32_t& getMask() const;
+      const uint64_t& getMask() const;
 
       /**
       	Return whether the node represents a single register, a block of registers or a block-read/write port
@@ -271,13 +271,17 @@ namespace uhal
         @return a Validated Header which will contain the returned IPbus header
       */
       ValHeader write ( const uint32_t& aValue ) const;
+      ValHeader write32 ( const uint32_t& aValue ) const;
+      ValHeader write64 ( const uint64_t& aValue ) const;
 
       /**
       	Write a block of data to a block of registers or a block-write port
       	@param aValues the values to write to the registers or a block-write port
         @return a Validated Header which will contain the returned IPbus header
       */
-      ValHeader writeBlock ( const std::vector< uint32_t >& aValues ) const;
+      ValHeader writeBlock ( const std::vector<uint32_t>& ) const;
+      ValHeader writeBlock32 ( const std::vector<uint32_t>& aValues ) const;
+      ValHeader writeBlock64 ( const std::vector<uint64_t>& aValues ) const;
 
       /**
         Write a block of data to a block of registers or a block-write port
@@ -285,20 +289,26 @@ namespace uhal
         @param aOffset an offset into the block at which to start the block-write
         @return a Validated Header which will contain the returned IPbus header
       */
-      ValHeader writeBlockOffset ( const std::vector< uint32_t >& aValues , const uint32_t& aOffset ) const;
+      ValHeader writeBlockOffset ( const std::vector<uint32_t>& aValues , const uint32_t& aOffset ) const;
+      ValHeader writeBlockOffset32 ( const std::vector<uint32_t>& aValues , const uint32_t& aOffset ) const;
+      ValHeader writeBlockOffset64 ( const std::vector<uint64_t>& aValues , const uint32_t& aOffset ) const;
 
       /**
       	Read a single, unmasked, unsigned word
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      ValWord< uint32_t > read ( ) const;
+      ValWord<uint32_t> read ( ) const;
+      ValWord< uint32_t > read32 ( ) const;
+      ValWord< uint64_t > read64 ( ) const;
 
       /**
       	Read a block of unsigned data from a block of registers or a block-read port
       	@param aSize the number of words to read
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      ValVector< uint32_t > readBlock ( const uint32_t& aSize ) const;
+      ValVector<uint32_t> readBlock ( const uint32_t& aSize ) const;
+      ValVector<uint32_t> readBlock32 ( const uint32_t& aSize ) const;
+      ValVector<uint64_t> readBlock64 ( const uint32_t& aSize ) const;
 
       /**
         Read a block of unsigned data from a block of registers or a block-read port
@@ -306,7 +316,9 @@ namespace uhal
         @param aOffset an offset into the block at which to start the block-read
         @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      ValVector< uint32_t > readBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const;
+      ValVector<uint32_t> readBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const;
+      ValVector<uint32_t> readBlockOffset32 ( const uint32_t& aSize , const uint32_t& aOffset ) const;
+      ValVector<uint64_t> readBlockOffset64 ( const uint32_t& aSize , const uint32_t& aOffset ) const;
 
       /**
       	Get the underlying IPbus client
@@ -315,6 +327,43 @@ namespace uhal
       ClientInterface& getClient() const;
 
     private:
+
+      template <typename T>
+      struct ClientMethods {
+        typedef ValHeader (ClientInterface::*Write_t)(const uint32_t&, const T&);
+        typedef ValHeader (ClientInterface::*MaskedWrite_t)(const uint32_t&, const T&, const T&);
+        typedef ValHeader (ClientInterface::*WriteBlock_t)(const uint32_t&, const std::vector<T>&, const defs::BlockReadWriteMode&);
+
+        typedef ValWord<T> (ClientInterface::*Read_t)(const uint32_t&);
+        typedef ValWord<T> (ClientInterface::*MaskedRead_t)(const uint32_t&, const T&);
+        typedef ValVector<T> (ClientInterface::*ReadBlock_t)(const uint32_t&, const uint32_t&, const defs::BlockReadWriteMode&);
+
+        static const Write_t write;
+        static const MaskedWrite_t maskedWrite;
+        static const WriteBlock_t writeBlock;
+
+        static const Read_t read;
+        static const MaskedRead_t maskedRead;
+        static const ReadBlock_t readBlock;
+      };
+
+      template <typename T>
+      ValHeader implWrite ( const T& aValue ) const;
+
+      template <typename T>
+      ValHeader implWriteBlock ( const std::vector<T>& ) const;
+
+      template <typename T>
+      ValHeader implWriteBlockOffset ( const std::vector<T>& aValues , const uint32_t& aOffset ) const;
+
+      template <typename T>
+      ValWord< T > implRead ( ) const;
+
+      template <typename T>
+      ValVector<T> implReadBlock ( const uint32_t& aSize ) const;
+
+      template <typename T>
+      ValVector<T> implReadBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const;
 
       std::string getRelativePath(const Node& aAncestor) const;
 
@@ -335,7 +384,7 @@ namespace uhal
       uint32_t mAddr;
 
       //! The mask to be applied if this node is a sub-field, rather than an entire register
-      uint32_t mMask;
+      uint64_t mMask;
       //! The read/write access permissions of this node
       defs::NodePermission mPermission;
       //! Whether the node represents a single register, a block of registers or a block-read/write port

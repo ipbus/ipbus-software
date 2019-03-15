@@ -434,10 +434,22 @@ namespace uhal
     return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
   }
 
+  std::pair < ValWord<uint64_t> , _ValWord_<uint64_t>* > ClientInterface::CreateValWord64 ( const uint64_t& aValue , const uint64_t& aMask )
+  {
+    ValWord<uint64_t> lReply ( aValue , aMask );
+    return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
+  }
+
 
   std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > ClientInterface::CreateValVector ( const uint32_t& aSize )
   {
     ValVector<uint32_t> lReply ( aSize );
+    return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
+  }
+
+  std::pair < ValVector<uint64_t> , _ValVector_<uint64_t>* > ClientInterface::CreateValVector64 ( const uint32_t& aSize )
+  {
+    ValVector<uint64_t> lReply ( aSize );
     return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
   }
 
@@ -446,11 +458,28 @@ namespace uhal
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    return implementWrite ( aAddr , aSource );
+    return implementWrite32 ( aAddr , aSource );
+  }
+
+  ValHeader ClientInterface::write32 ( const uint32_t& aAddr, const uint32_t& aSource )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementWrite32 ( aAddr , aSource );
+  }
+
+  ValHeader ClientInterface::write64 ( const uint32_t& aAddr, const uint64_t& aSource )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementWrite64 ( aAddr , aSource );
   }
 
 
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
+  {
+    return write32(aAddr, aSource, aMask);
+  }
+
+  ValHeader ClientInterface::write32 ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
@@ -475,37 +504,112 @@ namespace uhal
       throw lExc;
     }
 
-    return ( ValHeader ) ( implementRMWbits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
+    return ( ValHeader ) ( implementRMWbits32 ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
+  }
+
+  ValHeader ClientInterface::write64 ( const uint32_t& aAddr, const uint64_t& aSource, const uint64_t& aMask )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
+    uint32_t lBitShiftedSource ( aSource << lShiftSize );
+
+    if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
+    {
+      exception::BitsSetWhichAreForbiddenByBitMask lExc;
+      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
+      throw lExc;
+    }
+
+    uint32_t lOverlap ( lBitShiftedSource & ~aMask );
+
+    if ( lOverlap )
+    {
+      exception::BitsSetWhichAreForbiddenByBitMask lExc;
+      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ")"
+            " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
+            Integer ( lOverlap , IntFmt<hex,fixed>() )
+          );
+      throw lExc;
+    }
+
+    return ( ValHeader ) ( implementRMWbits64 ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
   }
 
 
   ValHeader ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    return implementWriteBlock ( aAddr, aSource, aMode );
+    return implementWriteBlock32(aAddr, aSource, aMode);
+  }
+
+  ValHeader ClientInterface::writeBlock32 ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementWriteBlock32 ( aAddr, aSource, aMode );
+  }
+
+  ValHeader ClientInterface::writeBlock64 ( const uint32_t& aAddr, const std::vector< uint64_t >& aSource, const defs::BlockReadWriteMode& aMode )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementWriteBlock64 ( aAddr, aSource, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    return implementRead ( aAddr );
+    return implementRead32 (aAddr);
+  }
+
+  ValWord< uint32_t > ClientInterface::read32 ( const uint32_t& aAddr )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRead32 ( aAddr );
+  }
+
+  ValWord< uint64_t > ClientInterface::read64 ( const uint32_t& aAddr )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRead64 ( aAddr );
   }
 
 
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr, const uint32_t& aMask )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    return implementRead ( aAddr, aMask );
+    return implementRead32 ( aAddr, aMask );
+  }
+
+  ValWord< uint32_t > ClientInterface::read32 ( const uint32_t& aAddr, const uint32_t& aMask )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRead32 ( aAddr, aMask );
+  }
+
+  ValWord< uint64_t > ClientInterface::read64 ( const uint32_t& aAddr, const uint64_t& aMask )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRead64 ( aAddr, aMask );
   }
 
 
   ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    return implementReadBlock ( aAddr, aSize, aMode );
+    return implementReadBlock32 ( aAddr, aSize, aMode );
+  }
+
+  ValVector< uint32_t > ClientInterface::readBlock32 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementReadBlock32 ( aAddr, aSize, aMode );
+  }
+
+  ValVector< uint64_t > ClientInterface::readBlock64 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementReadBlock64 ( aAddr, aSize, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -514,7 +618,19 @@ namespace uhal
   ValWord< uint32_t > ClientInterface::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    return implementRMWbits ( aAddr , aANDterm , aORterm );
+    return implementRMWbits32 ( aAddr , aANDterm , aORterm );
+  }
+
+  ValWord< uint32_t > ClientInterface::rmw_bits32 ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRMWbits32 ( aAddr , aANDterm , aORterm );
+  }
+
+  ValWord< uint64_t > ClientInterface::rmw_bits64 ( const uint32_t& aAddr , const uint64_t& aANDterm , const uint64_t& aORterm )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRMWbits64 ( aAddr , aANDterm , aORterm );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -523,7 +639,19 @@ namespace uhal
   ValWord< uint32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
-    return implementRMWsum ( aAddr , aAddend );
+    return implementRMWsum32 ( aAddr , aAddend );
+  }
+
+  ValWord< uint32_t > ClientInterface::rmw_sum32 ( const uint32_t& aAddr , const uint32_t& aAddend )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRMWsum32 ( aAddr , aAddend );
+  }
+
+  ValWord< uint64_t > ClientInterface::rmw_sum64 ( const uint32_t& aAddr , const uint64_t& aAddend )
+  {
+    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    return implementRMWsum64 ( aAddr , aAddend );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

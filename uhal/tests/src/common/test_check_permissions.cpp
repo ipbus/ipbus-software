@@ -54,10 +54,20 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(CheckPermissionsTestSuite, check_permissions
   HwInterface hw = getHwInterface();
 
   BOOST_CHECK_THROW ( hw.getNode ( "REG_READ_ONLY" ).write ( 1 ),uhal::exception::WriteAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_READ_ONLY" ).write32 ( 1 ),uhal::exception::WriteAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_READ_ONLY" ).write64 ( 1 ),uhal::exception::WriteAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_READ_ONLY" ).write ( 1 ),uhal::exception::WriteAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_READ_ONLY" ).write32 ( 1 ),uhal::exception::WriteAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_READ_ONLY" ).write64 ( 1 ),uhal::exception::WriteAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_WRITE_ONLY" ).read(),uhal::exception::ReadAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_WRITE_ONLY" ).read32(),uhal::exception::ReadAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_WRITE_ONLY" ).read64(),uhal::exception::ReadAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).read(),uhal::exception::ReadAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).read32(),uhal::exception::ReadAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).read64(),uhal::exception::ReadAccessDenied );
   BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).write ( 1 ),uhal::exception::WriteAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).write32 ( 1 ),uhal::exception::WriteAccessDenied );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG_MASKED_WRITE_ONLY" ).write64 ( 1 ),uhal::exception::WriteAccessDenied );
 
   uint32_t x = static_cast<uint32_t> ( rand() );
   hw.getNode ( "REG_WRITE_ONLY" ).write ( x );

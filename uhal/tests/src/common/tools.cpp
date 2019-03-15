@@ -60,6 +60,12 @@ void DummyHardwareRunner::setReplyDelay(const boost::chrono::microseconds& aDela
 }
 
 
+uint64_t rand64()
+{
+  return (uint64_t(rand()) << 32) | uint64_t(rand());
+}
+
+
 double measureReadLatency(ClientInterface& aClient, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose)
 {
   return measureReadLatency(std::vector<ClientInterface*>(1, &aClient), aBaseAddr, aDepth, aNrIterations, aDispatchEachIteration, aVerbose);

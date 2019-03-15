@@ -83,6 +83,12 @@ namespace uhal
     CONFIG_SPACE_READ
   };
 
+  enum IPbusDataWidth
+  {
+    DATA32,
+    DATA64
+  };
+
   /**
     Streaming operator for formatting objects of the uhal::eIPbusTransactionType
     @param aStr a stream to which to append the formatted data
@@ -148,7 +154,8 @@ namespace uhal
         @param aAddr the address of the register to write
         @param aValue the value to write to the register
       */
-      virtual ValHeader implementWrite ( const uint32_t& aAddr, const uint32_t& aValue );
+      virtual ValHeader implementWrite32 ( const uint32_t& aAddr, const uint32_t& aValue );
+      virtual ValHeader implementWrite64 ( const uint32_t& aAddr, const uint64_t& aValue );
 
       /**
         Write a block of data to a block of registers or a block-write port
@@ -156,7 +163,8 @@ namespace uhal
         @param aValues the values to write to the registers or a block-write port
         @param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
       */
-      virtual ValHeader implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      virtual ValHeader implementWriteBlock32 ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      virtual ValHeader implementWriteBlock64 ( const uint32_t& aAddr, const std::vector< uint64_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
       /**
         Read a single, masked, unsigned word
@@ -164,7 +172,8 @@ namespace uhal
         @param aMask the mask to apply to the value after reading
         @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValWord< uint32_t > implementRead ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
+      virtual ValWord< uint32_t > implementRead32 ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
+      virtual ValWord< uint64_t > implementRead64 ( const uint32_t& aAddr, const uint64_t& aMask = defs::NOMASK64 );
 
       /**
         Read a block of unsigned data from a block of registers or a block-read port
@@ -173,7 +182,8 @@ namespace uhal
         @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
         @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValVector< uint32_t > implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      virtual ValVector< uint32_t > implementReadBlock32 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      virtual ValVector< uint64_t > implementReadBlock64 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
       /**
         Read a single, masked, unsigned word from the configuration address space
@@ -190,7 +200,8 @@ namespace uhal
         @param aORterm the OR-term to apply to existing value in the target register
         @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValWord< uint32_t > implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
+      virtual ValWord< uint32_t > implementRMWbits32 ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
+      virtual ValWord< uint64_t > implementRMWbits64 ( const uint32_t& aAddr , const uint64_t& aANDterm , const uint64_t& aORterm );
 
       /**
         Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
@@ -198,7 +209,8 @@ namespace uhal
         @param aAddend the addend to add to the existing value in the target register
         @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend );
+      virtual ValWord< uint32_t > implementRMWsum32 ( const uint32_t& aAddr , const int32_t& aAddend );
+      virtual ValWord< uint64_t > implementRMWsum64 ( const uint32_t& aAddr , const int64_t& aAddend );
 
 
     protected:
@@ -223,7 +235,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode ) = 0;
+      virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode ) = 0;
 
       /**
         Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -234,7 +246,7 @@ namespace uhal
         @param aInfoCode return the response status of the IPbus header
         @return whether extraction succeeded
       */
-      virtual bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode ) = 0;
+      virtual bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , IPbusDataWidth& aWidth , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode ) = 0;
 
       //! Returns the InfoCode for request transactions in this IPbus version.
       virtual uint8_t requestTransactionInfoCode() const = 0;

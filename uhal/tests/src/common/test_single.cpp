@@ -102,6 +102,55 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, on_the_fly_connect
 )
 
 
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(SingleReadWriteTestSuite, connect_write64_read64, DummyHardwareFixture,
+{
+  HwInterface hw = getHwInterface();
+
+  // hw.ping();
+  uint64_t x1 = static_cast<uint64_t> ( rand64() );
+  uint64_t x2 = static_cast<uint64_t> ( rand64() );
+  hw.getNode ( "SUBSYSTEM1.REG" ).write64 ( x1 );
+  hw.getNode ( "SUBSYSTEM2.REG" ).write64 ( x2 );
+  ValWord< uint64_t > mem1 = hw.getNode ( "SUBSYSTEM1.REG" ).read64();
+  ValWord< uint64_t > mem2 = hw.getNode ( "SUBSYSTEM2.REG" ).read64();
+  BOOST_CHECK ( !mem1.valid() );
+  BOOST_CHECK ( !mem2.valid() );
+  BOOST_CHECK_THROW ( mem1.value(), uhal::exception::NonValidatedMemory );
+  BOOST_CHECK_THROW ( mem2.value(), uhal::exception::NonValidatedMemory );
+  BOOST_CHECK_NO_THROW ( hw.dispatch() );
+  BOOST_CHECK ( mem1.valid() );
+  BOOST_CHECK_EQUAL ( mem1.value(), x1 );
+  BOOST_CHECK_EQUAL ( mem2.value(), x2 );
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(SingleReadWriteTestSuite, on_the_fly_connect_write64_read64, DummyHardwareFixture,
+{
+  //get location of address file. Assumption: it is located with the connection file
+  std::string address_file;
+  {
+    boost::filesystem::path conn_fn ( connectionFileURI );
+    boost::filesystem::path fn ( "dummy_address.xml" );
+    address_file = ( conn_fn.parent_path() /fn ).string();
+  }
+  //get the parameters from the file
+  std::string uri = getHwInterface().uri();
+  HwInterface hw=ConnectionManager::getDevice ( "test_device_id", uri, address_file );
+  hw.setTimeoutPeriod(timeout);
+
+  uint64_t x = static_cast<uint64_t> ( rand64() );
+  hw.getNode ( "REG" ).write64 ( x );
+  ValWord< uint64_t > mem = hw.getNode ( "REG" ).read64();
+  BOOST_CHECK ( !mem.valid() );
+  BOOST_CHECK_THROW ( mem.value(), uhal::exception::NonValidatedMemory );
+  BOOST_CHECK_NO_THROW ( hw.dispatch() );
+  BOOST_CHECK ( mem.valid() );
+  BOOST_CHECK_EQUAL ( mem.value(), x );
+}
+)
+
+
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(SingleReadWriteTestSuite, search_device_id, MinimalFixture,
 {
   ConnectionManager manager (connectionFileURI);

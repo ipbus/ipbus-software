@@ -47,13 +47,29 @@
 
 namespace uhal
 {
+  template<> const Node::ClientMethods<uint32_t>::Write_t Node::ClientMethods<uint32_t>::write = &ClientInterface::write32;
+  template<> const Node::ClientMethods<uint32_t>::MaskedWrite_t Node::ClientMethods<uint32_t>::maskedWrite = &ClientInterface::write32;
+  template<> const Node::ClientMethods<uint32_t>::WriteBlock_t Node::ClientMethods<uint32_t>::writeBlock = &ClientInterface::writeBlock32;
+
+  template<> const Node::ClientMethods<uint32_t>::Read_t Node::ClientMethods<uint32_t>::read = &ClientInterface::read32;
+  template<> const Node::ClientMethods<uint32_t>::MaskedRead_t Node::ClientMethods<uint32_t>::maskedRead = &ClientInterface::read32;
+  template<> const Node::ClientMethods<uint32_t>::ReadBlock_t Node::ClientMethods<uint32_t>::readBlock = &ClientInterface::readBlock32;
+
+  template<> const Node::ClientMethods<uint64_t>::Write_t Node::ClientMethods<uint64_t>::write = &ClientInterface::write64;
+  template<> const Node::ClientMethods<uint64_t>::MaskedWrite_t Node::ClientMethods<uint64_t>::maskedWrite = &ClientInterface::write64;
+  template<> const Node::ClientMethods<uint64_t>::WriteBlock_t Node::ClientMethods<uint64_t>::writeBlock = &ClientInterface::writeBlock64;
+
+  template<> const Node::ClientMethods<uint64_t>::Read_t Node::ClientMethods<uint64_t>::read = &ClientInterface::read64;
+  template<> const Node::ClientMethods<uint64_t>::MaskedRead_t Node::ClientMethods<uint64_t>::maskedRead = &ClientInterface::read64;
+  template<> const Node::ClientMethods<uint64_t>::ReadBlock_t Node::ClientMethods<uint64_t>::readBlock = &ClientInterface::readBlock64;
+
 
   Node::Node ( )  :
     mHw ( NULL ),
     mUid ( "" ),
     mPartialAddr ( 0x00000000 ),
     mAddr ( 0x00000000 ),
-    mMask ( defs::NOMASK ),
+    mMask ( defs::NOMASK64 ),
     mPermission ( defs::READWRITE ),
     mMode ( defs::HIERARCHICAL ),
     mSize ( 0x00000001 ),
@@ -265,7 +281,7 @@ namespace uhal
   }
 
 
-  const uint32_t& Node::getMask() const
+  const uint64_t& Node::getMask() const
   {
     return mMask;
   }
@@ -347,7 +363,7 @@ namespace uhal
       case defs::SINGLE:
         aStr << "SINGLE register, "
              << std::hex << "Address 0x" << std::setw ( 8 ) << mAddr << ", "
-             << std::hex << "Mask 0x" << std::setw ( 8 ) << mMask << ", "
+             << std::hex << "Mask 0x" << std::setw ( 16 ) << mMask << ", "
              << "Permissions " << ( mPermission&defs::READ?'r':'-' ) << ( mPermission&defs::WRITE?'w':'-' ) ;
         break;
       case defs::INCREMENTAL:
@@ -491,15 +507,31 @@ namespace uhal
 
   ValHeader  Node::write ( const uint32_t& aValue ) const
   {
+    return implWrite<uint32_t>(aValue);
+  }
+
+  ValHeader  Node::write32 ( const uint32_t& aValue ) const
+  {
+    return implWrite<uint32_t>(aValue);
+  }
+
+  ValHeader  Node::write64 ( const uint64_t& aValue ) const
+  {
+    return implWrite<uint64_t>(aValue);
+  }
+
+  template <typename T>
+  ValHeader  Node::implWrite ( const T& aValue ) const
+  {
     if ( mPermission & defs::WRITE )
     {
-      if ( mMask == defs::NOMASK )
+      if ( T(mMask) == T(defs::NOMASK64) )
       {
-        return mHw->getClient().write ( mAddr , aValue );
+        return (mHw->getClient().*ClientMethods<T>::write) ( mAddr , aValue );
       }
       else if ( mPermission & defs::READ )
       {
-        return mHw->getClient().write ( mAddr , aValue , mMask );
+        return (mHw->getClient().*ClientMethods<T>::maskedWrite) ( mAddr , aValue , mMask );
       }
       else // Masked write-only register
       {
@@ -515,7 +547,23 @@ namespace uhal
   }
 
 
-  ValHeader  Node::writeBlock ( const std::vector< uint32_t >& aValues ) const // , const defs::BlockReadWriteMode& aMode )
+  ValHeader  Node::writeBlock( const std::vector<uint32_t>& aValues ) const
+  {
+    return implWriteBlock<uint32_t>(aValues);
+  }
+
+  ValHeader  Node::writeBlock32( const std::vector<uint32_t>& aValues ) const
+  {
+    return implWriteBlock<uint32_t>(aValues);
+  }
+
+  ValHeader  Node::writeBlock64( const std::vector<uint64_t>& aValues ) const
+  {
+    return implWriteBlock<uint64_t>(aValues);
+  }
+
+  template <typename T>
+  ValHeader  Node::implWriteBlock ( const std::vector< T >& aValues ) const // , const defs::BlockReadWriteMode& aMode )
   {
     if ( ( mMode == defs::SINGLE ) && ( aValues.size() != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
@@ -534,7 +582,7 @@ namespace uhal
 
     if ( mPermission & defs::WRITE )
     {
-      return mHw->getClient().writeBlock ( mAddr , aValues , mMode ); //aMode );
+      return (mHw->getClient().*ClientMethods<T>::writeBlock) ( mAddr , aValues , mMode ); //aMode );
     }
     else
     {
@@ -542,11 +590,26 @@ namespace uhal
       log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied write access" );
       throw lExc;
     }
-    
   }
 
 
-  ValHeader  Node::writeBlockOffset ( const std::vector< uint32_t >& aValues , const uint32_t& aOffset ) const // , const defs::BlockReadWriteMode& aMode )
+  ValHeader  Node::writeBlockOffset ( const std::vector< uint32_t >& aValues , const uint32_t& aOffset ) const
+  {
+    return implWriteBlockOffset<uint32_t>(aValues, aOffset);
+  }
+
+  ValHeader  Node::writeBlockOffset32 ( const std::vector< uint32_t >& aValues , const uint32_t& aOffset ) const
+  {
+    return implWriteBlockOffset<uint32_t>(aValues, aOffset);
+  }
+
+  ValHeader  Node::writeBlockOffset64 ( const std::vector< uint64_t >& aValues , const uint32_t& aOffset ) const
+  {
+    return implWriteBlockOffset<uint64_t>(aValues, aOffset);
+  }
+
+  template <typename T>
+  ValHeader  Node::implWriteBlockOffset( const std::vector< T >& aValues , const uint32_t& aOffset ) const // , const defs::BlockReadWriteMode& aMode )
   {
     if ( mMode == defs::NON_INCREMENTAL )
     {
@@ -572,7 +635,7 @@ namespace uhal
 
     if ( mPermission & defs::WRITE )
     {
-      return mHw->getClient().writeBlock ( mAddr+aOffset , aValues , mMode ); //aMode );
+      return (mHw->getClient().*ClientMethods<T>::writeBlock) ( mAddr+aOffset , aValues , mMode ); //aMode );
     }
     else
     {
@@ -586,26 +649,57 @@ namespace uhal
 
   ValWord< uint32_t > Node::read() const
   {
+    return implRead<uint32_t>();
+  }
+
+  ValWord< uint32_t > Node::read32() const
+  {
+    return implRead<uint32_t>();
+  }
+
+  ValWord< uint64_t > Node::read64() const
+  {
+    return implRead<uint64_t>();
+  }
+
+  template <typename T>
+  ValWord< T > Node::implRead() const
+  {
     if ( mPermission & defs::READ )
     {
-      if ( mMask == defs::NOMASK )
+      if ( T(mMask) == T(defs::NOMASK64) )
       {
-        return mHw->getClient().read ( mAddr );
+        return (mHw->getClient().*ClientMethods<T>::read) ( mAddr );
       }
       else
       {
-        return mHw->getClient().read ( mAddr , mMask );
+        return (mHw->getClient().*ClientMethods<T>::maskedRead) ( mAddr , mMask );
       }
     }
 
     exception::ReadAccessDenied lExc;
     log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied read access" );
     throw lExc;
-    
   }
 
 
-  ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize ) const //, const defs::BlockReadWriteMode& aMode )
+  ValVector< uint32_t > Node::readBlock ( const uint32_t& aSize ) const
+  {
+    return implReadBlock<uint32_t>(aSize);
+  }
+
+  ValVector< uint32_t > Node::readBlock32 ( const uint32_t& aSize ) const
+  {
+    return implReadBlock<uint32_t>(aSize);
+  }
+
+  ValVector< uint64_t > Node::readBlock64 ( const uint32_t& aSize ) const
+  {
+    return implReadBlock<uint64_t>(aSize);
+  }
+
+  template <typename T>
+  ValVector< T > Node::implReadBlock ( const uint32_t& aSize ) const //, const defs::BlockReadWriteMode& aMode )
   {
     if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
     {
@@ -624,7 +718,7 @@ namespace uhal
 
     if ( mPermission & defs::READ )
     {
-      return mHw->getClient().readBlock ( mAddr , aSize , mMode ); //aMode );
+      return (mHw->getClient().*ClientMethods<T>::readBlock) ( mAddr , aSize , mMode ); //aMode );
     }
     else
     {
@@ -632,11 +726,26 @@ namespace uhal
       log ( lExc , "Node " , Quote ( this->getPath() ) , ": permissions denied read access" );
       throw lExc;
     }
-    
   }
 
 
-  ValVector< uint32_t > Node::readBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const //, const defs::BlockReadWriteMode& aMode )
+  ValVector< uint32_t > Node::readBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const
+  {
+    return implReadBlockOffset<uint32_t>(aSize, aOffset);
+  }
+
+  ValVector< uint32_t > Node::readBlockOffset32 ( const uint32_t& aSize , const uint32_t& aOffset ) const
+  {
+    return implReadBlockOffset<uint32_t>(aSize, aOffset);
+  }
+
+  ValVector< uint64_t > Node::readBlockOffset64 ( const uint32_t& aSize , const uint32_t& aOffset ) const
+  {
+    return implReadBlockOffset<uint64_t>(aSize, aOffset);
+  }
+
+  template <typename T>
+  ValVector< T > Node::implReadBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const //, const defs::BlockReadWriteMode& aMode )
   {
     if ( mMode == defs::NON_INCREMENTAL )
     {
@@ -662,7 +771,7 @@ namespace uhal
 
     if ( mPermission & defs::READ )
     {
-      return mHw->getClient().readBlock ( mAddr+aOffset , aSize , mMode ); //aMode );
+      return (mHw->getClient().*ClientMethods<T>::readBlock) ( mAddr+aOffset , aSize , mMode ); //aMode );
     }
     else
     {

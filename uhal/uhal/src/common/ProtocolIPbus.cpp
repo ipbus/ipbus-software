@@ -94,7 +94,7 @@ namespace uhal
       {
         log ( Debug() , "Adding padding word." );
         // We do not need to check for space here as this condition is only met when the current filling buffer is severely underfull
-        aBuffers->send ( CalculateHeader ( B_O_T , 0 , 0 ) );
+        aBuffers->send ( CalculateHeader ( B_O_T , DATA32 , 0 , 0, requestTransactionInfoCode() ) );
         std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
         lReply.second->IPbusHeaders.push_back ( 0 );
         aBuffers->add ( lReply.first );
@@ -105,7 +105,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 1 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  uint32_t IPbus< 1 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -148,14 +148,14 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 1 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 1 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
+    return ( IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWidth , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 1 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 1 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , IPbusDataWidth& aWidth , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -196,6 +196,7 @@ namespace uhal
         return false;
     }
 
+    aWidth = DATA32;
     aWordCount = ( aHeader >> 8 ) & 0x1ff;
     aTransactionId = ( aHeader >> 17 ) & 0x7ff;
     aInfoCode = aHeader & 0x3;
@@ -204,16 +205,16 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 1 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  uint32_t IPbus< 1 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWidth , aWordCount , aTransactionId , aInfoCode );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 1 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 1 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , IPbusDataWidth& aWidth , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    return IPbus< 1 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 1 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWidth , aWordCount , aTransactionId , aInfoCode );
   }
 
 
@@ -310,7 +311,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 2 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 2 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -356,14 +357,14 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 2 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 2 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
+    return ( IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWidth , aWordCount , aTransactionId , aInfoCode ) );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 2 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 2 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , IPbusDataWidth& aWidth , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -401,6 +402,7 @@ namespace uhal
         return false;
     }
 
+    aWidth = DATA32;
     aWordCount = ( aHeader >> 8 ) & 0xff;
     aTransactionId = ( aHeader >> 16 ) & 0xfff;
     aInfoCode = aHeader & 0xf;
@@ -409,16 +411,16 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 2 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  uint32_t IPbus< 2 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWidth , aWordCount , aTransactionId , aInfoCode );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 2 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 2 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , IPbusDataWidth& aWidth , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    return IPbus< 2 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 2 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWidth , aWordCount , aTransactionId , aInfoCode );
   }
 
 
@@ -520,8 +522,6 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    //log ( Debug() , ThisLocation() );
-    //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
     {
       uhal::exception::IPbus2PacketHeaderMismatch* lExc = new uhal::exception::IPbus2PacketHeaderMismatch();
@@ -535,7 +535,6 @@ namespace uhal
       mReceivePacketHeader.pop_front();
     }
 
-    // log ( Info() , "IPbus 2.0 has validated the packet header" );
     return IPbusCore::validate ( ( aSendBufferStart+=4 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
   }
 
@@ -543,7 +542,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 3 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 3 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -584,19 +583,19 @@ namespace uhal
       }
     }
 
-    return ( 0x00000000 | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType | ( aInfoCode&0xF ) );
+    return ( (aWidth == DATA32 ? 0x0 : (0x1 << 28)) | ( ( aTransactionId&0xfff ) <<16 ) | ( ( aWordCount&0xff ) <<8 ) | lType | ( aInfoCode&0xF ) );
   }
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 3 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 3 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
-    return ( IPbus< 3 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
+    return ( IPbus< 3 , IPbus_minor >::CalculateHeader ( aType , aWidth , aWordCount , aTransactionId , aInfoCode ) );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 3 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 3 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , IPbusDataWidth& aWidth , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lReserved ( ( aHeader >> 29 ) & 0xF );
 
@@ -634,6 +633,16 @@ namespace uhal
         return false;
     }
 
+    switch ( (aHeader >> 28) & 0x1 )
+    {
+      case 0x0 : 
+        aWidth = DATA32;
+        break;
+      case 0x1 :
+        aWidth = DATA64;
+        break;
+    }
+
     aWordCount = ( aHeader >> 8 ) & 0xff;
     aTransactionId = ( aHeader >> 16 ) & 0xfff;
     aInfoCode = aHeader & 0xf;
@@ -641,21 +650,20 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 3 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  uint32_t IPbus< 3 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const IPbusDataWidth aWidth , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
-    return IPbus< 3 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 3 , IPbus_minor >::CalculateHeader ( aType , aWidth , aWordCount , aTransactionId , aInfoCode );
   }
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 3 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 3 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , IPbusDataWidth& aWidth , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
-    return IPbus< 3 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
+    return IPbus< 3 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWidth , aWordCount , aTransactionId , aInfoCode );
   }
 
   template< uint8_t IPbus_minor >
   void IPbus< 3 , IPbus_minor >::dispatchExceptionHandler()
   {
-    log ( Info() , ThisLocation() );
 #ifndef DISABLE_PACKET_COUNTER_HACK
     mPacketCounter = 1;
 #else

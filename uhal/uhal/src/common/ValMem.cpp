@@ -48,7 +48,7 @@ namespace uhal
 
   template< typename T >
 
-  _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask ) :
+  _ValWord_<T>::_ValWord_ ( const T& aValue , const bool& aValid , const T aMask ) :
     _ValHeader_ ( aValid ) ,
     value ( aValue ) ,
     mask ( aMask )
@@ -88,7 +88,7 @@ namespace uhal
 
 
   template< typename T >
-  ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) :
+  ValWord< T >::ValWord ( const T& aValue , const T& aMask ) :
     mMembers ( new _ValWord_<T> ( aValue , false , aMask ) )
   {
   }
@@ -103,7 +103,7 @@ namespace uhal
 
   template< typename T >
   ValWord< T >::ValWord() :
-    mMembers ( new _ValWord_<T> ( T() , false , 0xFFFFFFFF ) )
+    mMembers ( new _ValWord_<T> ( T() , false , T(0xFFFFFFFFFFFFFFFF) ) )
   {
   }
 
@@ -152,6 +152,23 @@ namespace uhal
     }
   }
 
+  template<>
+  uint64_t ValWord<uint64_t>::value() const
+  {
+    if ( mMembers->valid )
+    {
+      uint8_t lTrailingRightBits = utilities::TrailingRightBits ( mMembers->mask );
+      if (lTrailingRightBits == 32)
+        lTrailingRightBits += utilities::TrailingRightBits ( mMembers->mask >> 32 );
+      return ( mMembers->value & mMembers->mask ) >> lTrailingRightBits ;
+    }
+    else
+    {
+      exception::NonValidatedMemory lExc;
+      log ( lExc , "Access attempted on non-validated memory" );
+      throw lExc;
+    }
+  }
 
   template< typename T >
   void ValWord< T >::value ( const T& aValue )
@@ -170,14 +187,14 @@ namespace uhal
 
 
   template< typename T >
-  const uint32_t& ValWord< T >::mask() const
+  const T& ValWord< T >::mask() const
   {
     return mMembers->mask;
   }
 
 
   template< typename T >
-  void ValWord< T >::mask ( const uint32_t& aMask )
+  void ValWord< T >::mask ( const T& aMask )
   {
     mMembers->mask = aMask ;
   }
@@ -388,9 +405,10 @@ namespace uhal
 
   template class ValWord< uint8_t >;
   template class ValWord< uint32_t >;
+  template class ValWord< uint64_t >;
 
   template class ValVector< uint8_t >;
   template class ValVector< uint32_t >;
-
+  template class ValVector< uint64_t >;
 
 }

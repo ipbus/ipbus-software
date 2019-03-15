@@ -122,13 +122,19 @@ namespace uhal
     uint32_t lNrSendBytesProcessed = 0;
     uint32_t lNrReplyBytesValidated = 0;
     eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
+    IPbusDataWidth lSendDataWidth, lReplyDataWidth;
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
-    uint8_t lSendResponseGood , lReplyResponseGood;
+    uint8_t lSendInfoCode , lReplyInfoCode;
 
     do
     {
-      if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendWordCount , lSendTransactionId , lSendResponseGood ) )
+      log ( Debug() , "Validating IPbus transaction; send/received headers ",
+        Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ), "/",
+        Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ),
+        " (", Integer ( lNrSendBytesProcessed ) , "/", Integer ( lNrReplyBytesValidated ) , " send/reply bytes already validated)" );
+
+      if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , lSendIPbusTransactionType , lSendDataWidth , lSendWordCount , lSendTransactionId , lSendInfoCode ) )
       {
         uhal::exception::IPbusCoreUnparsableTransactionHeader* lExc = new uhal::exception::IPbusCoreUnparsableTransactionHeader();
         log ( *lExc , "Unable to parse send header ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) ,
@@ -138,7 +144,7 @@ namespace uhal
         return lExc;
       }
 
-      if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyWordCount , lReplyTransactionId , lReplyResponseGood ) )
+      if ( ! implementExtractHeader ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) , lReplyIPbusTransactionType , lReplyDataWidth , lReplyWordCount , lReplyTransactionId , lReplyInfoCode ) )
       {
         uhal::exception::IPbusCoreUnparsableTransactionHeader* lExc = new uhal::exception::IPbusCoreUnparsableTransactionHeader();
         log ( *lExc , "Unable to parse reply header ", Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ),
@@ -152,17 +158,26 @@ namespace uhal
 
       const bool lTransactionIdMismatch = (lSendTransactionId != lReplyTransactionId);
       const bool lTransactionTypeMismatch = (lSendIPbusTransactionType != lReplyIPbusTransactionType);
-      if ( lTransactionIdMismatch or lTransactionTypeMismatch )
+      const bool lTransactionDataWidthMismatch = (lSendDataWidth != lReplyDataWidth);
+      if ( lTransactionIdMismatch or lTransactionTypeMismatch or lTransactionDataWidthMismatch )
       {
         uhal::exception::IPbusTransactionFieldsIncorrect* lExc = new uhal::exception::IPbusTransactionFieldsIncorrect();
 
         std::string lFields;
+        if (lTransactionIdMismatch and lTransactionTypeMismatch and lTransactionDataWidthMismatch)
+          lFields = "ID, type and data width";
         if (lTransactionIdMismatch and lTransactionTypeMismatch)
           lFields = "ID and type";
+        if (lTransactionIdMismatch and lTransactionDataWidthMismatch)
+          lFields = "ID and data width";
+        if (lTransactionTypeMismatch and lTransactionDataWidthMismatch)
+          lFields = "type and data width";
         else if (lTransactionIdMismatch)
           lFields = "ID";
-        else
+        else if (lTransactionTypeMismatch)
           lFields = "type";
+        else
+          lFields = "data width";
 
         log ( *lExc , "Incorrect transaction ", lFields, " returned from URI ", Quote ( this->uri() ), ". Sent header was " ,
                       Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ) , IntFmt< hex , fixed >() ),
@@ -173,7 +188,7 @@ namespace uhal
         return lExc;
       }
 
-      if ( lReplyResponseGood )
+      if ( lReplyInfoCode )
       {
         uhal::exception::IPbusCoreResponseCodeSet* lExc = new uhal::exception::IPbusCoreResponseCodeSet();
         log ( *lExc , "Transaction header returned from URI " , Quote ( this->uri() ) , ", " ,
@@ -181,8 +196,8 @@ namespace uhal
               " (ID = " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
               ", type = " , lReplyIPbusTransactionType ,
               ", word count = " , Integer ( lReplyWordCount ) ,
-              ") has response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) ,
-              " = '", TranslatedFmt<uint8_t>(lReplyResponseGood, getInfoCodeTranslator()) , "' indicating an error (" ,
+              ") has response field = " , Integer ( lReplyInfoCode, IntFmt< hex , fixed >() ) ,
+              " = '", TranslatedFmt<uint8_t>(lReplyInfoCode, getInfoCodeTranslator()) , "' indicating an error (" ,
               Integer ( lNrReplyBytesValidated+1 ) , " bytes into IPbus reply payload)" );
         log ( *lExc , "Original sent header was ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) ,
                       ", for base address ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart+4 ) ), IntFmt< hex , fixed >() ), 
@@ -205,12 +220,14 @@ namespace uhal
         case NI_WRITE:
         case WRITE:
           aSendBufferStart += ( ( 2+lSendWordCount ) <<2 );
+          if ( lSendDataWidth == DATA64 )
+            aSendBufferStart += lSendWordCount << 2;
           break;
         case RMW_SUM:
-          aSendBufferStart += ( 3<<2 );
+          aSendBufferStart += ( ( lSendDataWidth == DATA32 ) ? 3<<2 : 4<<2 );
           break;
         case RMW_BITS:
-          aSendBufferStart += ( 4<<2 );
+          aSendBufferStart += ( ( lSendDataWidth == DATA32 ) ? 4<<2 : 6<<2 );
           break;
       }
 
@@ -256,7 +273,7 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    lBuffers->send ( implementCalculateHeader ( B_O_T , 0 , mTransactionCounter++ , requestTransactionInfoCode() ) );
+    lBuffers->send ( implementCalculateHeader ( B_O_T , DATA32 , 0 , mTransactionCounter++ , requestTransactionInfoCode() ) );
     std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
     lReply.second->IPbusHeaders.push_back ( 0 );
     lBuffers->add ( lReply.first );
@@ -267,7 +284,7 @@ namespace uhal
 
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  ValHeader IPbusCore::implementWrite ( const uint32_t& aAddr, const uint32_t& aSource )
+  ValHeader IPbusCore::implementWrite32 ( const uint32_t& aAddr, const uint32_t& aSource )
   {
     log ( Debug() , "Write " , Integer ( aSource , IntFmt<hex,fixed>() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
@@ -281,7 +298,7 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    lBuffers->send ( implementCalculateHeader ( WRITE , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+    lBuffers->send ( implementCalculateHeader ( WRITE , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
     lBuffers->send ( aSource );
@@ -292,8 +309,34 @@ namespace uhal
     return lReply.first;
   }
 
+  ValHeader IPbusCore::implementWrite64 ( const uint32_t& aAddr, const uint64_t& aSource )
+  {
+    log ( Debug() , "Write (64-bit) " , Integer ( aSource , IntFmt<hex,fixed>() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    // IPbus packet format is:
+    // HEADER
+    // BASE ADDRESS
+    // WORD(31:0)
+    // WORD(63:32)
+    uint32_t lSendByteCount ( 4 << 2 );
+    // IPbus reply packet format is:
+    // HEADER
+    uint32_t lReplyByteCount ( 1 << 2 );
+    uint32_t lSendBytesAvailable;
+    uint32_t  lReplyBytesAvailable;
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( WRITE , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    lBuffers->send <uint64_t> ( aSource );
+    std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
+    lReply.second->IPbusHeaders.push_back ( 0 );
+    lBuffers->add ( lReply.first );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    return lReply.first;
+  }
 
-  ValHeader IPbusCore::implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
+
+  ValHeader IPbusCore::implementWriteBlock32 ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
     log ( Debug() , "Write block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
@@ -320,7 +363,7 @@ namespace uhal
       lBuffers = checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lSendBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
 
-      lBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode() ) );
+      lBuffers->send ( implementCalculateHeader ( lType , DATA32 , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode() ) );
       lBuffers->send ( lAddr );
       if ( aSource.size() > 0 )
       {
@@ -342,11 +385,63 @@ namespace uhal
     lBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
     return lReply.first;
   }
+
+  ValHeader IPbusCore::implementWriteBlock64 ( const uint32_t& aAddr, const std::vector< uint64_t >& aSource, const defs::BlockReadWriteMode& aMode )
+  {
+    log ( Debug() , "Write (64-bit) block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    // IPbus packet format is:
+    // HEADER
+    // BASE ADDRESS
+    // WORD 1 (31:0)
+    // WORD 1 (63:32)
+    // WORD 2 (31:0)
+    // WORD 2 (63:32)
+    // ....
+    uint32_t lSendHeaderByteCount ( 2 << 2 );
+    // IPbus reply packet format is:
+    // HEADER
+    uint32_t lReplyByteCount ( 1 << 2 );
+    uint32_t lSendBytesAvailable;
+    uint32_t  lReplyBytesAvailable;
+    eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? WRITE : NI_WRITE );
+    int32_t lPayloadByteCount ( aSource.size() << 3 );
+    uint8_t* lSourcePtr ( ( uint8_t* ) ( aSource.empty() ? NULL : & ( aSource.at ( 0 ) ) ) );
+    uint32_t lAddr ( aAddr );
+    std::pair < ValHeader , _ValHeader_* > lReply ( CreateValHeader() );
+    boost::shared_ptr< Buffers > lBuffers;
+
+    do
+    {
+      lBuffers = checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+      uint32_t lSendBytesAvailableForPayload ( std::min ( 8*getMaxTransactionWordCount(), lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFF8 );
+
+      lBuffers->send ( implementCalculateHeader ( lType , DATA64 , lSendBytesAvailableForPayload>>3 , mTransactionCounter++ , requestTransactionInfoCode() ) );
+      lBuffers->send ( lAddr );
+      if ( aSource.size() > 0 )
+      {
+        lBuffers->send ( lSourcePtr , lSendBytesAvailableForPayload );
+        lSourcePtr += lSendBytesAvailableForPayload;
+        lPayloadByteCount -= lSendBytesAvailableForPayload;
+      }
+
+      if ( aMode == defs::INCREMENTAL )
+      {
+        lAddr += ( lSendBytesAvailableForPayload>>3 );
+      }
+
+      lReply.second->IPbusHeaders.push_back ( 0 );
+      lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    }
+    while ( lPayloadByteCount > 0 );
+
+    lBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
+    return lReply.first;
+  }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  ValWord< uint32_t > IPbusCore::implementRead ( const uint32_t& aAddr, const uint32_t& aMask )
+  ValWord< uint32_t > IPbusCore::implementRead32 ( const uint32_t& aAddr, const uint32_t& aMask )
   {
     log ( Debug() , "Read one unsigned word from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
@@ -360,7 +455,7 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    lBuffers->send ( implementCalculateHeader ( READ , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+    lBuffers->send ( implementCalculateHeader ( READ , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 , aMask ) );
@@ -371,8 +466,33 @@ namespace uhal
     return lReply.first;
   }
 
+  ValWord< uint64_t > IPbusCore::implementRead64 ( const uint32_t& aAddr, const uint64_t& aMask )
+  {
+    log ( Debug() , "Read (64-bit) one unsigned word from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    // IPbus packet format is:
+    // HEADER
+    // BASE ADDRESS
+    uint32_t lSendByteCount ( 2 << 2 );
+    // IPbus reply packet format is:
+    // HEADER
+    // WORD
+    uint32_t lReplyByteCount ( 3 << 2 );
+    uint32_t lSendBytesAvailable;
+    uint32_t  lReplyBytesAvailable;
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( READ , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    std::pair < ValWord<uint64_t> , _ValWord_<uint64_t>* > lReply ( CreateValWord64 ( 0 , aMask ) );
+    lBuffers->add ( lReply.first );
+    lReply.second->IPbusHeaders.push_back ( 0 );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->receive <uint64_t> ( lReply.second->value );
+    return lReply.first;
+  }
 
-  ValVector< uint32_t > IPbusCore::implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+
+  ValVector< uint32_t > IPbusCore::implementReadBlock32 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
     log ( Debug() , "Read unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
@@ -398,7 +518,7 @@ namespace uhal
     {
       lBuffers = checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lReplyBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFFC );
-      lBuffers->send ( implementCalculateHeader ( lType , lReplyBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode()
+      lBuffers->send ( implementCalculateHeader ( lType , DATA32 , lReplyBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode()
                                                 ) );
       lBuffers->send ( lAddr );
       lReply.second->IPbusHeaders.push_back ( 0 );
@@ -410,6 +530,52 @@ namespace uhal
       if ( aMode == defs::INCREMENTAL )
       {
         lAddr += ( lReplyBytesAvailableForPayload>>2 );
+      }
+    }
+    while ( lPayloadByteCount > 0 );
+
+    lBuffers->add ( lReply.first ); //we store the valmem in the last chunk so that, if the reply is split over many chunks, the valmem is guaranteed to still exist when the other chunks come back...
+    return lReply.first;
+  }
+
+  ValVector< uint64_t > IPbusCore::implementReadBlock64 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+  {
+    log ( Debug() , "Read (64-bit) unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    // IPbus packet format is:
+    // HEADER
+    // BASE ADDRESS
+    uint32_t lSendByteCount ( 2 << 2 );
+    // IPbus reply packet format is:
+    // HEADER
+    // WORD
+    // WORD
+    // ....
+    uint32_t lReplyHeaderByteCount ( 1 << 2 );
+    uint32_t lSendBytesAvailable;
+    uint32_t  lReplyBytesAvailable;
+    std::pair < ValVector<uint64_t> , _ValVector_<uint64_t>* > lReply ( CreateValVector64 ( aSize ) );
+    uint8_t* lReplyPtr = ( uint8_t* ) ( aSize == 0 ? NULL : & ( lReply.second->value.at(0) ) );
+    eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
+    int32_t lPayloadByteCount ( aSize << 3 );
+    uint32_t lAddr ( aAddr );
+    boost::shared_ptr< Buffers > lBuffers;
+
+    do
+    {
+      lBuffers = checkBufferSpace ( lSendByteCount , lReplyHeaderByteCount+lPayloadByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+      uint32_t lReplyBytesAvailableForPayload ( std::min ( 8*getMaxTransactionWordCount(), lReplyBytesAvailable - lReplyHeaderByteCount ) & 0xFFFFFFF8 );
+      lBuffers->send ( implementCalculateHeader ( lType , DATA64 , lReplyBytesAvailableForPayload>>3 , mTransactionCounter++ , requestTransactionInfoCode()
+                                                ) );
+      lBuffers->send ( lAddr );
+      lReply.second->IPbusHeaders.push_back ( 0 );
+      lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+      lBuffers->receive ( lReplyPtr , lReplyBytesAvailableForPayload );
+      lReplyPtr += lReplyBytesAvailableForPayload;
+      lPayloadByteCount -= lReplyBytesAvailableForPayload;
+
+      if ( aMode == defs::INCREMENTAL )
+      {
+        lAddr += ( lReplyBytesAvailableForPayload>>3 );
       }
     }
     while ( lPayloadByteCount > 0 );
@@ -434,7 +600,7 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    lBuffers->send ( implementCalculateHeader ( CONFIG_SPACE_READ , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+    lBuffers->send ( implementCalculateHeader ( CONFIG_SPACE_READ , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 , aMask ) );
@@ -448,7 +614,7 @@ namespace uhal
 
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  ValWord< uint32_t > IPbusCore::implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
+  ValWord< uint32_t > IPbusCore::implementRMWbits32 ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
     log ( Debug() , "Read/Modify/Write bits (and=" , Integer ( aANDterm , IntFmt<hex,fixed>() ) , ", or=" , Integer ( aORterm , IntFmt<hex,fixed>() ) , ") from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
     // IPbus packet format is:
@@ -464,7 +630,7 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    lBuffers->send ( implementCalculateHeader ( RMW_BITS , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+    lBuffers->send ( implementCalculateHeader ( RMW_BITS , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
     lBuffers->send ( aANDterm );
@@ -476,11 +642,40 @@ namespace uhal
     lBuffers->receive ( lReply.second->value );
     return lReply.first;
   }
+
+  ValWord< uint64_t > IPbusCore::implementRMWbits64 ( const uint32_t& aAddr , const uint64_t& aANDterm , const uint64_t& aORterm )
+  {
+    log ( Debug() , "Read/Modify/Write bits (64-bit, and=" , Integer ( aANDterm , IntFmt<hex,fixed>() ) , ", or=" , Integer ( aORterm , IntFmt<hex,fixed>() ) , ") from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    // IPbus packet format is:
+    // HEADER
+    // BASE ADDRESS
+    // AND TERM
+    // OR TERM
+    uint32_t lSendByteCount ( 6 << 2 );
+    // IPbus reply packet format is:
+    // HEADER
+    // WORD
+    uint32_t lReplyByteCount ( 3 << 2 );
+    uint32_t lSendBytesAvailable;
+    uint32_t  lReplyBytesAvailable;
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( RMW_BITS , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    lBuffers->send <uint64_t> ( aANDterm );
+    lBuffers->send <uint64_t> ( aORterm );
+    std::pair < ValWord<uint64_t> , _ValWord_<uint64_t>* > lReply ( CreateValWord64 ( 0 ) );
+    lBuffers->add ( lReply.first );
+    lReply.second->IPbusHeaders.push_back ( 0 );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->receive ( lReply.second->value );
+    return lReply.first;
+  }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  ValWord< uint32_t > IPbusCore::implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend )
+  ValWord< uint32_t > IPbusCore::implementRMWsum32 ( const uint32_t& aAddr , const int32_t& aAddend )
   {
     log ( Debug() , "Read/Modify/Write sum (addend=" , Integer ( aAddend , IntFmt<hex,fixed>() ) , ") from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );			// IPbus packet format is:
     // HEADER
@@ -494,11 +689,37 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
-    lBuffers->send ( implementCalculateHeader ( RMW_SUM , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+    lBuffers->send ( implementCalculateHeader ( RMW_SUM , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
     lBuffers->send ( static_cast< uint32_t > ( aAddend ) );
     std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > lReply ( CreateValWord ( 0 ) );
+    lBuffers->add ( lReply.first );
+    lReply.second->IPbusHeaders.push_back ( 0 );
+    lBuffers->receive ( lReply.second->IPbusHeaders.back() );
+    lBuffers->receive ( lReply.second->value );
+    return lReply.first;
+  }
+
+  ValWord< uint64_t > IPbusCore::implementRMWsum64 ( const uint32_t& aAddr , const int64_t& aAddend )
+  {
+    log ( Debug() , "Read/Modify/Write sum (64-bit, addend=" , Integer ( aAddend , IntFmt<hex,fixed>() ) , ") from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );     // IPbus packet format is:
+    // HEADER
+    // BASE ADDRESS
+    // ADDEND
+    uint32_t lSendByteCount ( 4 << 2 );
+    // IPbus reply packet format is:
+    // HEADER
+    // WORD
+    uint32_t lReplyByteCount ( 3 << 2 );
+    uint32_t lSendBytesAvailable;
+    uint32_t  lReplyBytesAvailable;
+    boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    lBuffers->send ( implementCalculateHeader ( RMW_SUM , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
+                                              ) );
+    lBuffers->send ( aAddr );
+    lBuffers->send <uint64_t> ( static_cast< uint64_t > ( aAddend ) );
+    std::pair < ValWord<uint64_t> , _ValWord_<uint64_t>* > lReply ( CreateValWord64 ( 0 ) );
     lBuffers->add ( lReply.first );
     lReply.second->IPbusHeaders.push_back ( 0 );
     lBuffers->receive ( lReply.second->IPbusHeaders.back() );

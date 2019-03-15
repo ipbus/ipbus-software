@@ -54,6 +54,7 @@ namespace uhal
 
     //! define what it means to have no mask
     const uint32_t NOMASK = 0xFFFFFFFF;
+    const uint64_t NOMASK64 = 0xFFFFFFFFFFFFFFFF;
   }
 }
 

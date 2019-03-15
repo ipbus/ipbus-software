@@ -67,7 +67,8 @@ namespace uhal
     }
 
     // log ( Notice() , Pointer(&(*aIt)) , " : " , Pointer(&(*aEnd)) , "(", Integer((&(*aEnd)-&(*aIt))*4)  ,")" );
-    uint32_t lAddress , lAddend , lAndTerm , lOrTerm ;
+    uint32_t lAddress ;
+    uint64_t lAddend , lAndTerm , lOrTerm;
     std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
     if ( IPbus_major != 1 )
@@ -96,6 +97,7 @@ namespace uhal
           if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
                  mHeader ,
                  mType ,
+                 mDataWidth ,
                  mWordCounter ,
                  mTransactionId ,
                  mResponseGood )
@@ -147,26 +149,32 @@ namespace uhal
             case NI_WRITE:
               lAddress = *aIt++;
               lPayloadBegin = aIt;
-              lPayloadEnd = aIt + mWordCounter;
+              lPayloadEnd = aIt + (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               ni_write ( lAddress , lPayloadBegin , lPayloadEnd );
-              aIt += mWordCounter;
+              aIt += (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               break;
             case WRITE:
               lAddress = *aIt++;
               lPayloadBegin = aIt;
-              lPayloadEnd = aIt + mWordCounter;
+              lPayloadEnd = aIt + (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               write ( lAddress , lPayloadBegin , lPayloadEnd );
-              aIt += mWordCounter;
+              aIt += (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               break;
             case RMW_SUM:
               lAddress = *aIt++;
-              lAddend = *aIt++;
+              lAddend = uint64_t(*aIt++);
+              if (mDataWidth == DATA64)
+                lAddend = ( uint64_t(*aIt++) << 32 ) | lAddend;
               rmw_sum ( lAddress , lAddend );
               break;
             case RMW_BITS:
               lAddress = *aIt++;
               lAndTerm = *aIt++;
+              if (mDataWidth == DATA64)
+                lAndTerm = ( uint64_t(*aIt++) << 32 ) | lAndTerm;
               lOrTerm = *aIt++;
+              if (mDataWidth == DATA64)
+                lOrTerm = ( uint64_t(*aIt++) << 32 ) | lOrTerm;
               rmw_bits ( lAddress , lAndTerm , lOrTerm );
               break;
             default:
@@ -234,7 +242,12 @@ namespace uhal
 
     while ( aIt != aEnd )
     {
-      log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
+      if (mDataWidth == DATA32)
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter++ ) );
+      else {
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter ) , " [31:0]" );
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter++ ) , " [63:32]" );
+      }
     }
   }
 
@@ -248,27 +261,49 @@ namespace uhal
 
     while ( aIt != aEnd )
     {
-      log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
+      if (mDataWidth == DATA32)
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
+      else
+      {
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter ) , " [31:0]" );
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter++ ) , " [63:32]" );
+      }
     }
   }
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
-  void  HostToTargetInspector<IPbus_major , IPbus_minor>::rmw_sum ( const uint32_t& aAddress , const uint32_t& aAddend )
+  void  HostToTargetInspector<IPbus_major , IPbus_minor>::rmw_sum ( const uint32_t& aAddress , const uint64_t& aAddend )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write sum, transaction ID " , Integer ( mTransactionId ) );
     log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
-    log ( Notice() , Integer ( aAddend, IntFmt<hex,fixed>() ) , " |  > Addend" );
+    if (mDataWidth == DATA32)
+      log ( Notice() , Integer ( uint32_t(aAddend), IntFmt<hex,fixed>() ) , " |  > Addend" );
+    else
+    {
+      log ( Notice() , Integer ( uint32_t(aAddend), IntFmt<hex,fixed>() ) , " |  > Addend [31:0]" );
+      log ( Notice() , Integer ( uint32_t(aAddend>>32), IntFmt<hex,fixed>() ) , " |  > Addend [63:32]" );
+    }
   }
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
-  void HostToTargetInspector<IPbus_major , IPbus_minor>::rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm )
+  void HostToTargetInspector<IPbus_major , IPbus_minor>::rmw_bits ( const uint32_t& aAddress , const uint64_t& aAndTerm , const uint64_t& aOrTerm )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write bits, transaction ID " , Integer ( mTransactionId ) );
     log ( Notice() , Integer ( aAddress, IntFmt<hex,fixed>() ) , " |  > Address" );
-    log ( Notice() , Integer ( aAndTerm, IntFmt<hex,fixed>() ) , " |  > And-term" );
-    log ( Notice() , Integer ( aOrTerm, IntFmt<hex,fixed>() ) , " |  > Or-term" );
+    if (mDataWidth == DATA32)
+    {
+      log ( Notice() , Integer ( uint32_t(aAndTerm), IntFmt<hex,fixed>() ) , " |  > And-term" );
+      log ( Notice() , Integer ( uint32_t(aOrTerm), IntFmt<hex,fixed>() ) , " |  > Or-term" );
+    }
+    else
+    {
+      log ( Notice() , Integer ( uint32_t(aAndTerm), IntFmt<hex,fixed>() ) , " |  > And-term [31:0]" );
+      log ( Notice() , Integer ( uint32_t(aAndTerm>>32), IntFmt<hex,fixed>() ) , " |  > And-term [63:32]" );
+      log ( Notice() , Integer ( uint32_t(aOrTerm), IntFmt<hex,fixed>() ) , " |  > Or-term [31:0]" );
+      log ( Notice() , Integer ( uint32_t(aOrTerm>>32), IntFmt<hex,fixed>() ) , " |  > Or-term [63:32]" );
+    }
   }
 
 
@@ -329,7 +364,7 @@ namespace uhal
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   bool TargetToHostInspector<IPbus_major , IPbus_minor>::analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError )
   {
-    uint32_t lNewValue;
+    uint64_t lNewValue;
     std::vector<uint32_t>::const_iterator lPayloadBegin, lPayloadEnd;
 
     if ( IPbus_major != 1 )
@@ -358,6 +393,7 @@ namespace uhal
           if ( ! IPbus< IPbus_major , IPbus_minor >::ExtractHeader (
                  mHeader ,
                  mType ,
+                 mDataWidth ,
                  mWordCounter ,
                  mTransactionId ,
                  mResponseGood )
@@ -390,15 +426,15 @@ namespace uhal
               break;
             case NI_READ:
               lPayloadBegin = aIt;
-              lPayloadEnd = aIt + mWordCounter;
+              lPayloadEnd = aIt + (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               ni_read ( lPayloadBegin , lPayloadEnd );
-              aIt += mWordCounter;
+              aIt += (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               break;
             case READ:
               lPayloadBegin = aIt;
-              lPayloadEnd = aIt + mWordCounter;
+              lPayloadEnd = aIt + (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               read ( lPayloadBegin , lPayloadEnd );
-              aIt += mWordCounter;
+              aIt += (mDataWidth == DATA32 ? mWordCounter : 2 * mWordCounter);
               break;
             case NI_WRITE:
               ni_write ();
@@ -407,11 +443,15 @@ namespace uhal
               write ();
               break;
             case RMW_SUM:
-              lNewValue = *aIt++;
+              lNewValue = uint64_t(*aIt++);
+              if (mDataWidth == DATA64)
+                lNewValue = (uint64_t(*aIt++) << 32) | lNewValue;
               rmw_sum ( lNewValue );
               break;
             case RMW_BITS:
-              lNewValue = *aIt++;
+              lNewValue = uint64_t(*aIt++);
+              if (mDataWidth == DATA64)
+                lNewValue = (uint64_t(*aIt++) << 32) | lNewValue;
               rmw_bits ( lNewValue );
               break;
             default:
@@ -450,7 +490,13 @@ namespace uhal
 
     while ( aIt != aEnd )
     {
-      log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
+      if (mDataWidth == DATA32)
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter++ ) );
+      else
+      {
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter ) , " [31:0]" );
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter++ ) , " [63:32]" );
+      }
     }
   }
 
@@ -463,7 +509,13 @@ namespace uhal
 
     while ( aIt != aEnd )
     {
-      log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data [" , Integer ( lCounter++ ) , "]" );
+      if (mDataWidth == DATA32)
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter++ ) );
+      else
+      {
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter ) , " [31:0]" );
+        log ( Notice() , Integer ( *aIt++, IntFmt<hex,fixed>() ) , " |  > Data " , Integer ( lCounter++ ) , " [63:32]" );
+      }
     }
   }
 
@@ -483,18 +535,30 @@ namespace uhal
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
-  void TargetToHostInspector<IPbus_major , IPbus_minor>::rmw_sum ( const uint32_t& aNewValue )
+  void TargetToHostInspector<IPbus_major , IPbus_minor>::rmw_sum ( const uint64_t& aNewValue )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write sum, transaction ID " , Integer ( mTransactionId ) );
-    log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
+    if (mDataWidth == DATA32)
+      log ( Notice() , Integer ( uint32_t(aNewValue), IntFmt<hex,fixed>() ) , " |  > Data" );
+    else
+    {
+      log ( Notice() , Integer ( uint32_t(aNewValue), IntFmt<hex,fixed>() ) , " |  > Data [31:0]" );
+      log ( Notice() , Integer ( uint32_t(aNewValue >> 32), IntFmt<hex,fixed>() ) , " |  > Data [63:32]" );
+    }
   }
 
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
-  void TargetToHostInspector<IPbus_major , IPbus_minor>::rmw_bits ( const uint32_t& aNewValue )
+  void TargetToHostInspector<IPbus_major , IPbus_minor>::rmw_bits ( const uint64_t& aNewValue )
   {
     log ( Notice() , Integer ( mHeader, IntFmt<hex,fixed>() ) , " | Read-modify-write bits, transaction ID " , Integer ( mTransactionId ) );
-    log ( Notice() , Integer ( aNewValue, IntFmt<hex,fixed>() ) , " |  > Data" );
+    if (mDataWidth == DATA32)
+      log ( Notice() , Integer ( uint32_t(aNewValue), IntFmt<hex,fixed>() ) , " |  > Data" );
+    else
+    {
+      log ( Notice() , Integer ( uint32_t(aNewValue), IntFmt<hex,fixed>() ) , " |  > Data [31:0]" );
+      log ( Notice() , Integer ( uint32_t(aNewValue >> 32), IntFmt<hex,fixed>() ) , " |  > Data [63:32]" );
+    }
   }
 
 

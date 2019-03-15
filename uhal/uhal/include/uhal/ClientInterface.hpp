@@ -169,6 +169,8 @@ namespace uhal
       	@param aValue the value to write to the register
       */
       ValHeader write ( const uint32_t& aAddr, const uint32_t& aValue );
+      ValHeader write32 ( const uint32_t& aAddr, const uint32_t& aValue );
+      ValHeader write64 ( const uint32_t& aAddr, const uint64_t& aValue );
 
       /**
       	Write a single, masked word to a register
@@ -177,6 +179,8 @@ namespace uhal
       	@param aMask the mask to apply to the value
       */
       ValHeader write ( const uint32_t& aAddr, const uint32_t& aValue, const uint32_t& aMask );
+      ValHeader write32 ( const uint32_t& aAddr, const uint32_t& aValue, const uint32_t& aMask );
+      ValHeader write64 ( const uint32_t& aAddr, const uint64_t& aValue, const uint64_t& aMask );
 
       /**
       	Write a block of data to a block of registers or a block-write port
@@ -185,6 +189,8 @@ namespace uhal
       	@param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
       */
       ValHeader writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      ValHeader writeBlock32 ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      ValHeader writeBlock64 ( const uint32_t& aAddr, const std::vector< uint64_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
       /**
       	Read a single, unmasked, unsigned word
@@ -192,6 +198,8 @@ namespace uhal
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
       ValWord< uint32_t > read ( const uint32_t& aAddr );
+      ValWord< uint32_t > read32 ( const uint32_t& aAddr );
+      ValWord< uint64_t > read64 ( const uint32_t& aAddr );
 
       /**
       	Read a single, masked, unsigned word
@@ -200,6 +208,8 @@ namespace uhal
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
       ValWord< uint32_t > read ( const uint32_t& aAddr, const uint32_t& aMask );
+      ValWord< uint32_t > read32 ( const uint32_t& aAddr, const uint32_t& aMask );
+      ValWord< uint64_t > read64 ( const uint32_t& aAddr, const uint64_t& aMask );
 
       /**
       	Read a block of unsigned data from a block of registers or a block-read port
@@ -209,6 +219,8 @@ namespace uhal
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
       ValVector< uint32_t > readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      ValVector< uint32_t > readBlock32 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
+      ValVector< uint64_t > readBlock64 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
       /**
       	Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the original value to the user
@@ -218,6 +230,8 @@ namespace uhal
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
       ValWord< uint32_t > rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
+      ValWord< uint32_t > rmw_bits32 ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
+      ValWord< uint64_t > rmw_bits64 ( const uint32_t& aAddr , const uint64_t& aANDterm , const uint64_t& aORterm );
 
       /**
       	Read the value of a register, add the addend, set the register to this new value and return a copy of the original value to the user
@@ -226,6 +240,8 @@ namespace uhal
       	@return a Validated Memory which wraps the location to which the reply data is to be written
       */
       ValWord< uint32_t > rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend );
+      ValWord< uint32_t > rmw_sum32 ( const uint32_t& aAddr , const uint32_t& aAddend );
+      ValWord< uint64_t > rmw_sum64 ( const uint32_t& aAddr , const uint64_t& aAddend );
 
     protected:
       /**
@@ -246,7 +262,8 @@ namespace uhal
       @param aAddr the address of the register to write
       @param aValue the value to write to the register
       */
-      virtual ValHeader implementWrite ( const uint32_t& aAddr, const uint32_t& aValue ) = 0;
+      virtual ValHeader implementWrite32 ( const uint32_t& aAddr, const uint32_t& aValue ) = 0;
+      virtual ValHeader implementWrite64 ( const uint32_t& aAddr, const uint64_t& aValue ) = 0;
 
       /**
       Write a block of data to a block of registers or a block-write port
@@ -254,7 +271,8 @@ namespace uhal
       @param aValues the values to write to the registers or a block-write port
       @param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
       */
-      virtual ValHeader implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL ) = 0;
+      virtual ValHeader implementWriteBlock32 ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL ) = 0;
+      virtual ValHeader implementWriteBlock64 ( const uint32_t& aAddr, const std::vector< uint64_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL ) = 0;
 
       /**
       Read a single, masked, unsigned word
@@ -262,7 +280,8 @@ namespace uhal
       @param aMask the mask to apply to the value after reading
       @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValWord< uint32_t > implementRead ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK ) = 0;
+      virtual ValWord< uint32_t > implementRead32 ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK ) = 0;
+      virtual ValWord< uint64_t > implementRead64 ( const uint32_t& aAddr, const uint64_t& aMask = defs::NOMASK64 ) = 0;
 
       /**
       Read a block of unsigned data from a block of registers or a block-read port
@@ -271,7 +290,8 @@ namespace uhal
       @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
       @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValVector< uint32_t > implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL ) = 0;
+      virtual ValVector< uint32_t > implementReadBlock32 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL ) = 0;
+      virtual ValVector< uint64_t > implementReadBlock64 ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL ) = 0;
 
 
       /**
@@ -281,7 +301,8 @@ namespace uhal
       @param aORterm the OR-term to apply to existing value in the target register
       @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValWord< uint32_t > implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm ) = 0;
+      virtual ValWord< uint32_t > implementRMWbits32 ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm ) = 0;
+      virtual ValWord< uint64_t > implementRMWbits64 ( const uint32_t& aAddr , const uint64_t& aANDterm , const uint64_t& aORterm ) = 0;
 
       /**
       Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
@@ -289,7 +310,8 @@ namespace uhal
       @param aAddend the addend to add to the existing value in the target register
       @return a Validated Memory which wraps the location to which the reply data is to be written
       */
-      virtual ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend ) = 0;
+      virtual ValWord< uint32_t > implementRMWsum32 ( const uint32_t& aAddr , const int32_t& aAddend ) = 0;
+      virtual ValWord< uint64_t > implementRMWsum64 ( const uint32_t& aAddr , const int64_t& aAddend ) = 0;
 
       //! Add a preamble to an IPbus buffer
       virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
@@ -316,6 +338,7 @@ namespace uhal
         @return a std::pair containing the ValWord object and a pointer to the underlying memory object
       */      
       std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > CreateValWord ( const uint32_t& aValue , const uint32_t& aMask = defs::NOMASK );
+      std::pair < ValWord<uint64_t> , _ValWord_<uint64_t>* > CreateValWord64 ( const uint64_t& aValue , const uint64_t& aMask = defs::NOMASK64 );
       
       /**
         Helper function to create a ValVector object
@@ -323,6 +346,7 @@ namespace uhal
         @return a std::pair containing the ValVector object and a pointer to the underlying memory object
       */          
       std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > CreateValVector ( const uint32_t& aSize );
+      std::pair < ValVector<uint64_t> , _ValVector_<uint64_t>* > CreateValVector64 ( const uint32_t& aSize );
 
       /**
         	Function which dispatch calls when the reply is received to check that the headers are as expected
@@ -435,7 +459,6 @@ namespace uhal
       */
       virtual uint32_t getMaxReplySize() = 0;
   };
-
 }
 
 #endif

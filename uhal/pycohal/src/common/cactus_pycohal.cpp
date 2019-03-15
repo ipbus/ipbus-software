@@ -26,6 +26,7 @@
 #include "uhal/pycohal/converters.hpp"
 #include "uhal/pycohal/enums_logging.hpp"
 #include "uhal/pycohal/exceptions.hpp"
+#include "uhal/pycohal/val_mem.hpp"
 
 
 using namespace boost::python;
@@ -35,6 +36,11 @@ namespace pycohal
   uint32_t defs_NOMASK()
   {
     return uhal::defs::NOMASK;
+  }
+
+  uint64_t defs_NOMASK64()
+  {
+    return uhal::defs::NOMASK64;
   }
 
   /// Trivial function that returns copy of vector argument in order to test vector to/from list converters. [Function solely used in unit-tests]
@@ -141,84 +147,6 @@ namespace pycohal
     return uhal::ClientFactory::getInstance().getClient(aId, aURI);
   }
 
-  /// Returns hex string for ValWord<uint32_t> value
-  std::string hex_string ( const uhal::ValWord<uint32_t>& valWord )
-  {
-    std::ostringstream osstream;
-    osstream << "0x" << std::hex << valWord.value();
-    return osstream.str();
-  }
-
-  /// Struct containing wrapper functions for list-like indexing of ValVector<uint32_t> in python
-  template <class T>
-  struct ValVectorIndexingSuite
-  {
-    static void raiseIndexError()
-    {
-      PyErr_SetString ( PyExc_IndexError, "Index out of range" );
-      boost::python::throw_error_already_set();
-    }
-
-    static const T& getItem ( const uhal::ValVector<T>& valVec, int i )
-    {
-      if ( i<0 )
-      {
-        i += valVec.size();
-      }
-
-      if ( i<0 || i>=int ( valVec.size() ) )
-      {
-        raiseIndexError();
-      }
-
-      return valVec.at ( i );
-    }
-    
-    static std::vector<T> getSlice( const uhal::ValVector<T>& valVec, const slice aSlice ) 
-    {
-      slice::range<typename std::vector<T>::const_iterator> bounds;
-      try {
-        bounds = aSlice.get_indicies<>(valVec.begin(), valVec.end());
-      }
-      catch (std::invalid_argument) {
-        return std::vector<T>();
-      }
-
-      std::vector<T> lSliced;
-      while (bounds.start != bounds.stop) {
-        lSliced.push_back(*bounds.start);
-        std::advance( bounds.start, bounds.step);
-      }
-      lSliced.push_back(*bounds.start);
-      return lSliced;
-    }
-  };
-
-  std::string convert_to_string( const uhal::ValWord<uint32_t>& valWord )
-  {
-    return boost::lexical_cast<std::string>(valWord.value());
-  }
-
-  std::string convert_to_string ( const uhal::ValVector<uint32_t>& valVec )
-  {
-    std::ostringstream lStream;
-
-    lStream << "[";
-
-    for ( size_t  i=0; i<valVec.size(); i++ )
-    {
-      lStream << valVec.at ( i );
-
-      if ( i!= ( valVec.size()-1 ) )
-      {
-        lStream << ", ";
-      }
-    }
-
-    lStream << "]";
-    return lStream.str();
-  }
-
 }//namespace pycohal
 
 
@@ -238,10 +166,18 @@ const uhal::Node& NextNodeConstIterator( uhal::Node::const_iterator& aIt )
 
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_Node_getNodes_overloads, getNodes, 0, 1 )
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_write_overloads,      write,      2, 3 )
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_writeBlock_overloads, writeBlock, 2, 3 )
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_read_overloads,       read,       1, 2 )
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_readBlock_overloads,  readBlock,  2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_write_overloads,        write,        2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_write32_overloads,      write32,      2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_write64_overloads,      write64,      2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_writeBlock_overloads,   writeBlock,   2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_writeBlock32_overloads, writeBlock32, 2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_writeBlock64_overloads, writeBlock64, 2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_read_overloads,         read,         1, 2 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_read32_overloads,       read32,       1, 2 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_read64_overloads,       read64,       1, 2 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_readBlock_overloads,    readBlock,    2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_readBlock32_overloads,  readBlock32,  2, 3 )
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_ClientInterface_readBlock64_overloads,  readBlock64,  2, 3 )
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_IPbusCore_readConfigurationSpace_overloads, readConfigurationSpace, 1, 2 )
 
 
@@ -253,6 +189,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS ( uhal_IPbusCore_readConfigurationSpace_o
 BOOST_PYTHON_MODULE ( _core )
 {
   def ( "NOMASK", pycohal::defs_NOMASK );
+  def ( "NOMASK64", pycohal::defs_NOMASK64 );
   // ENUMS
   pycohal::wrap_enums();
   // LOGGING FUNCTIONS
@@ -263,61 +200,45 @@ BOOST_PYTHON_MODULE ( _core )
   pycohal::wrap_exceptions();
   // TEST FUNCTIONS
   pycohal::wrap_test_functions();
-  // Wrap uhal::ValHeader
-  class_< uhal::ValHeader > ( "ValHeader", init< const uhal::ValHeader& >() )
-  .def ( "valid", static_cast< bool ( uhal::ValHeader::* ) () > ( &uhal::ValHeader::valid ) )
-  ;
-  // Wrap uhal::ValWord<uint32_t>
-  class_< uhal::ValWord<uint32_t> > ( "ValWord_uint32", init< const uhal::ValWord<uint32_t>& >() )
-  .def ( init<>() )
-  .def ( "valid", static_cast< bool ( uhal::ValWord<uint32_t>::* ) () > ( &uhal::ValWord<uint32_t>::valid ) )
-  .def ( "value", static_cast< uint32_t ( uhal::ValWord<uint32_t>::* ) () const > ( &uhal::ValWord<uint32_t>::value ) )
-  .def ( "mask",  static_cast< const uint32_t& ( uhal::ValWord<uint32_t>::* ) () const > ( &uhal::ValWord<uint32_t>::mask ) , pycohal::const_ref_return_policy() )
-  .def ( "__str__", static_cast< std::string (*) ( const uhal::ValWord<uint32_t>& ) > ( &pycohal::convert_to_string ) )
-  .def ( "__int__", static_cast< uint32_t ( uhal::ValWord<uint32_t>::* ) () const> ( &uhal::ValWord<uint32_t>::value ) )
-#if PY_VERSION_HEX >= 0x03000000
-  .def ( "__index__", static_cast< uint32_t ( uhal::ValWord<uint32_t>::* ) () const> ( &uhal::ValWord<uint32_t>::value ) )
-#else
-  .def ( "__hex__", pycohal::hex_string )
-#endif
-  ;
-  // Wrap uhal::ValVector<uint32_t>
-  class_<uhal::ValVector<uint32_t> > ( "ValVector_uint32", init< const uhal::ValVector<uint32_t>& >() )
-  .def ( init<>() )
-  .def ( "valid", static_cast< bool ( uhal::ValVector<uint32_t>::* ) () > ( &uhal::ValVector<uint32_t>::valid ) )
-  .def ( "value", static_cast< std::vector<uint32_t> ( uhal::ValVector<uint32_t>::* ) () const > ( &uhal::ValVector<uint32_t>::value ) )
-  .def ( "size",  &uhal::ValVector<uint32_t>::size )
-  .def ( "at", &uhal::ValVector<uint32_t>::at, pycohal::const_ref_return_policy() )
-  .def ( "__str__", static_cast< std::string (*) ( const uhal::ValVector<uint32_t>& ) > ( &pycohal::convert_to_string ) )
-  .def ( "__len__", &uhal::ValVector<uint32_t>::size )
-  .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getItem , pycohal::const_ref_return_policy() )
-  .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getSlice )
-  .def ( "__iter__", boost::python::range ( &uhal::ValVector<uint32_t>::begin , &uhal::ValVector<uint32_t>::end ) )
-  ;
+
+  pycohal::wrapValMem();
+
   // Wrap uhal::Node
   class_<uhal::Node, boost::noncopyable /*since no copy CTOR*/ > ( "Node", no_init )
-  .def ( "getNode",         static_cast< const uhal::Node& ( uhal::Node::* ) ( const std::string& ) const > ( &uhal::Node::getNode ), pycohal::norm_ref_return_policy() )
-  .def ( "getNodes",        ( std::vector<std::string> ( uhal::Node::* ) ( const std::string& ) ) 0, uhal_Node_getNodes_overloads() )
-  .def ( "getId",           &uhal::Node::getId,         pycohal::const_ref_return_policy() )
-  .def ( "getPath",         &uhal::Node::getPath )
-  .def ( "getParameters",   &uhal::Node::getParameters, pycohal::const_ref_return_policy() )
-  .def ( "getFirmwareInfo", &uhal::Node::getFirmwareInfo, pycohal::const_ref_return_policy() ) 
-  .def ( "getAddress",      &uhal::Node::getAddress,    pycohal::const_ref_return_policy() )
-  .def ( "getMask",         &uhal::Node::getMask,       pycohal::const_ref_return_policy() )
-  .def ( "getMode",         &uhal::Node::getMode,       pycohal::const_ref_return_policy() )
-  .def ( "getSize",         &uhal::Node::getSize,       pycohal::const_ref_return_policy() )
-  .def ( "getPermission",   &uhal::Node::getPermission, pycohal::const_ref_return_policy() )
-  .def ( "getTags",         &uhal::Node::getTags,       pycohal::const_ref_return_policy() )
-  .def ( "getDescription",  &uhal::Node::getDescription, pycohal::const_ref_return_policy() )
-  .def ( "getModule",       &uhal::Node::getModule,     pycohal::const_ref_return_policy() )
-  .def ( "write",           &uhal::Node::write )
-  .def ( "writeBlock",      &uhal::Node::writeBlock )
-  .def ( "writeBlockOffset",&uhal::Node::writeBlockOffset )
-  .def ( "read",            &uhal::Node::read )
-  .def ( "readBlock",       &uhal::Node::readBlock )
-  .def ( "readBlockOffset", &uhal::Node::readBlockOffset )
-  .def ( "getClient",       &uhal::Node::getClient,     pycohal::norm_ref_return_policy() )
-  .def ( "__iter__"   ,     range< pycohal::norm_ref_return_policy >(&uhal::Node::begin, &uhal::Node::end) )
+  .def ( "getNode",           static_cast< const uhal::Node& ( uhal::Node::* ) ( const std::string& ) const > ( &uhal::Node::getNode ), pycohal::norm_ref_return_policy() )
+  .def ( "getNodes",          ( std::vector<std::string> ( uhal::Node::* ) ( const std::string& ) ) 0, uhal_Node_getNodes_overloads() )
+  .def ( "getId",             &uhal::Node::getId,         pycohal::const_ref_return_policy() )
+  .def ( "getPath",           &uhal::Node::getPath )
+  .def ( "getParameters",     &uhal::Node::getParameters, pycohal::const_ref_return_policy() )
+  .def ( "getFirmwareInfo",   &uhal::Node::getFirmwareInfo, pycohal::const_ref_return_policy() ) 
+  .def ( "getAddress",        &uhal::Node::getAddress,    pycohal::const_ref_return_policy() )
+  .def ( "getMask",           &uhal::Node::getMask,       pycohal::const_ref_return_policy() )
+  .def ( "getMode",           &uhal::Node::getMode,       pycohal::const_ref_return_policy() )
+  .def ( "getSize",           &uhal::Node::getSize,       pycohal::const_ref_return_policy() )
+  .def ( "getPermission",     &uhal::Node::getPermission, pycohal::const_ref_return_policy() )
+  .def ( "getTags",           &uhal::Node::getTags,       pycohal::const_ref_return_policy() )
+  .def ( "getDescription",    &uhal::Node::getDescription, pycohal::const_ref_return_policy() )
+  .def ( "getModule",         &uhal::Node::getModule,     pycohal::const_ref_return_policy() )
+  .def ( "write",             &uhal::Node::write )
+  .def ( "write32",           &uhal::Node::write32 )
+  .def ( "write64",           &uhal::Node::write64 )
+  .def ( "writeBlock",        &uhal::Node::writeBlock )
+  .def ( "writeBlock32",      &uhal::Node::writeBlock32 )
+  .def ( "writeBlock64",      &uhal::Node::writeBlock64 )
+  .def ( "writeBlockOffset",  &uhal::Node::writeBlockOffset )
+  .def ( "writeBlockOffset32",&uhal::Node::writeBlockOffset32 )
+  .def ( "writeBlockOffset64",&uhal::Node::writeBlockOffset64 )
+  .def ( "read",              &uhal::Node::read )
+  .def ( "read32",            &uhal::Node::read32 )
+  .def ( "read64",            &uhal::Node::read64 )
+  .def ( "readBlock",         &uhal::Node::readBlock )
+  .def ( "readBlock32",       &uhal::Node::readBlock32 )
+  .def ( "readBlock64",       &uhal::Node::readBlock64 )
+  .def ( "readBlockOffset",   &uhal::Node::readBlockOffset )
+  .def ( "readBlockOffset32", &uhal::Node::readBlockOffset32 )
+  .def ( "readBlockOffset64", &uhal::Node::readBlockOffset64 )
+  .def ( "getClient",         &uhal::Node::getClient,     pycohal::norm_ref_return_policy() )
+  .def ( "__iter__"   ,       range< pycohal::norm_ref_return_policy >(&uhal::Node::begin, &uhal::Node::end) )
   .def ( "__str__", &uhal::Node::getId, pycohal::const_ref_return_policy() )
   ;
 
@@ -331,12 +252,24 @@ BOOST_PYTHON_MODULE ( _core )
          boost::shared_ptr<uhal::ClientInterface> /* all instances are held within boost::shared_ptr */> ( "ClientInterface", no_init /* no CTORs */ )
          .def ( "id",     &uhal::ClientInterface::id,   pycohal::const_ref_return_policy() )
          .def ( "uri",    &uhal::ClientInterface::uri )
-         .def ( "write", ( uhal::ValHeader ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t&, const uint32_t& ) ) 0, uhal_ClientInterface_write_overloads() )
-         .def ( "read", ( uhal::ValWord<uint32_t> ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t& ) ) 0,                  uhal_ClientInterface_read_overloads() )
-         .def ( "writeBlock", &uhal::ClientInterface::writeBlock, uhal_ClientInterface_writeBlock_overloads() )
-         .def ( "readBlock",  &uhal::ClientInterface::readBlock,  uhal_ClientInterface_readBlock_overloads() )
-         .def ( "rmw_bits", &uhal::ClientInterface::rmw_bits )
-         .def ( "rmw_sum", &uhal::ClientInterface::rmw_sum )
+         .def ( "write",   ( uhal::ValHeader ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t&, const uint32_t& ) ) 0, uhal_ClientInterface_write_overloads() )
+         .def ( "write32", ( uhal::ValHeader ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t&, const uint32_t& ) ) 0, uhal_ClientInterface_write32_overloads() )
+         .def ( "write64", ( uhal::ValHeader ( uhal::ClientInterface::* ) ( const uint32_t&, const uint64_t&, const uint64_t& ) ) 0, uhal_ClientInterface_write64_overloads() )
+         .def ( "read",   ( uhal::ValWord<uint32_t> ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t& ) ) 0,           uhal_ClientInterface_read_overloads() )
+         .def ( "read32", ( uhal::ValWord<uint32_t> ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t& ) ) 0,           uhal_ClientInterface_read32_overloads() )
+         .def ( "read64", ( uhal::ValWord<uint64_t> ( uhal::ClientInterface::* ) ( const uint32_t&, const uint64_t& ) ) 0,           uhal_ClientInterface_read64_overloads() )
+         .def ( "writeBlock",   &uhal::ClientInterface::writeBlock,   uhal_ClientInterface_writeBlock_overloads() )
+         .def ( "writeBlock32", &uhal::ClientInterface::writeBlock32, uhal_ClientInterface_writeBlock32_overloads() )
+         .def ( "writeBlock64", &uhal::ClientInterface::writeBlock64, uhal_ClientInterface_writeBlock64_overloads() )
+         .def ( "readBlock",    &uhal::ClientInterface::readBlock,    uhal_ClientInterface_readBlock_overloads() )
+         .def ( "readBlock32",  &uhal::ClientInterface::readBlock32,  uhal_ClientInterface_readBlock32_overloads() )
+         .def ( "readBlock64",  &uhal::ClientInterface::readBlock64,  uhal_ClientInterface_readBlock64_overloads() )
+         .def ( "rmw_bits",   &uhal::ClientInterface::rmw_bits )
+         .def ( "rmw_bits32", &uhal::ClientInterface::rmw_bits32 )
+         .def ( "rmw_bits64", &uhal::ClientInterface::rmw_bits64 )
+         .def ( "rmw_sum",   &uhal::ClientInterface::rmw_sum )
+         .def ( "rmw_sum32", &uhal::ClientInterface::rmw_sum32 )
+         .def ( "rmw_sum64", &uhal::ClientInterface::rmw_sum64 )
          .def ( "dispatch", &uhal::ClientInterface::dispatch )
          .def ( "setTimeoutPeriod", &uhal::ClientInterface::setTimeoutPeriod )
          .def ( "getTimeoutPeriod", &uhal::ClientInterface::getTimeoutPeriod )
@@ -357,6 +290,11 @@ BOOST_PYTHON_MODULE ( _core )
          boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
          boost::shared_ptr< uhal::UDP<uhal::IPbus<2, 0> > > // /* all instances are held within boost::shared_ptr */
           >("_UDP_IPbus_2_0", no_init /* no CTORs */);
+
+  class_<uhal::UDP<uhal::IPbus<3, 0> >, bases<uhal::IPbusCore>,
+         boost::noncopyable, /* no to-python converter (would require a copy CTOR) */
+         boost::shared_ptr< uhal::UDP<uhal::IPbus<3, 0> > > // /* all instances are held within boost::shared_ptr */
+          >("_UDP_IPbus_3_0", no_init /* no CTORs */);
 
   class_<uhal::TCP<uhal::IPbus<1, 3>, 1>, bases<uhal::IPbusCore>,
          boost::noncopyable, /* no to-python converter (would require a copy CTOR) */

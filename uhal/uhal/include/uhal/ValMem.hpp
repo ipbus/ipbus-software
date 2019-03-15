@@ -105,7 +105,7 @@ namespace uhal
       //! A register for storing data
       T value;
       //! A mask for modifying returned values
-      uint32_t mask;
+      T mask;
 
     protected:
       //! Make ValWord a friend since it is the only class that should be able to create an instance this struct
@@ -117,7 +117,7 @@ namespace uhal
         @param aValid an initial validity
         @param aMask a mask value
       */
-      _ValWord_ ( const T& aValue , const bool& aValid , const uint32_t aMask );
+      _ValWord_ ( const T& aValue , const bool& aValid , const T aMask );
   };
 
 
@@ -201,7 +201,7 @@ namespace uhal
         @param aValue a value to which the validated memory will be initialized
         @param aMask a mask for modifying returned values
       */
-      ValWord ( const T& aValue , const uint32_t& aMask = defs::NOMASK );
+      ValWord ( const T& aValue , const T& aMask = defs::NOMASK64 );
 
       /**
         Copy constructor
@@ -253,13 +253,13 @@ namespace uhal
         Return the mask used by this validated memory
         @return the mask used by this validated memory
       */
-      const uint32_t& mask() const;
+      const T& mask() const;
 
       /**
         Set the mask used by this validated memory
         @param aMask the mask to be used by this validated memory
       */
-      void mask ( const uint32_t& aMask );
+      void mask ( const T& aMask );
 
     private:
       //! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory

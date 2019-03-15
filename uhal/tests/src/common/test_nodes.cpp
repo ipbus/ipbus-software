@@ -57,7 +57,7 @@ public:
     defs::BlockReadWriteMode mode;
     defs::NodePermission permission;
     size_t size;
-    uint32_t mask;
+    uint64_t mask;
     std::string description;
     std::string module;
     std::vector<std::string> descendantIds;
@@ -239,7 +239,7 @@ NodeFixture::Properties::Properties(const std::string& aIdPath, const uint32_t a
   mode(aMode),
   permission(aPermission),
   size(aSize),
-  mask(defs::NOMASK),
+  mask(defs::NOMASK64),
   module(aModule),
   descendantIds(aNrDescendants),
   type(&typeid(Node))
@@ -294,7 +294,7 @@ void checkExceptionsThrownByReadWrite(const uhal::Node& aNode, const NodeFixture
     BOOST_CHECK_THROW(aNode.write(1), uhal::exception::WriteAccessDenied);
   if (aProperties.permission == defs::WRITE) {
     BOOST_CHECK_THROW(aNode.read(), uhal::exception::ReadAccessDenied);
-    if (aProperties.mask != 0xFFFFFFFF)
+    if (aProperties.mask != 0xFFFFFFFFFFFFFFFF)
       BOOST_CHECK_THROW(aNode.write(1), uhal::exception::WriteAccessDenied);
   }
 

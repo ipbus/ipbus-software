@@ -126,6 +126,17 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint64_t& aTarget );
+
+
+    /**
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
+    */
+    template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget );
 
 

@@ -562,7 +562,7 @@ namespace uhal
 
         for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
         {
-          if ( ( **lIt ).mMask == defs::NOMASK )
+          if ( ( **lIt ).mMask == defs::NOMASK64 )
           {
             lAllMasked = false;
           }

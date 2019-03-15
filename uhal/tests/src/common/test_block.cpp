@@ -295,6 +295,226 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(BlockReadWriteTestSuite, block_offset_bigger
 )
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(BlockReadWriteTestSuite, block_write64_read64, DummyHardwareFixture,
+{
+  std::vector<size_t> lDepths = getBlockUnitTestDepths(quickTest ? N_1MB : N_10MB);
+
+  for(size_t i=0; i<lDepths.size(); i++) {
+    const size_t N = lDepths.at(i);
+    BOOST_TEST_MESSAGE("  N = " << N);
+
+    HwInterface hw = getHwInterface();
+
+    std::vector<uint64_t> xx;
+    xx.reserve ( N );
+    for ( size_t i=0; i!= N; ++i )
+    {
+      xx.push_back ( static_cast<uint64_t> ( rand64() ) );
+    }
+
+    hw.getNode ( "LARGE_MEM" ).writeBlock64 ( xx );
+    ValVector< uint64_t > mem = hw.getNode ( "LARGE_MEM" ).readBlock64 ( N );
+    BOOST_CHECK ( !mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N );
+    if ( N > 0 )
+    {
+      BOOST_CHECK_THROW ( mem.at ( 0 ), uhal::exception::NonValidatedMemory );
+    }
+    BOOST_CHECK_THROW ( mem.value(), uhal::exception::NonValidatedMemory );
+    BOOST_CHECK_NO_THROW ( hw.dispatch() );
+    BOOST_CHECK ( mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N );
+
+    //This check will fail when DummyHardware::ADDRESS_MASK < N
+    if ( N < N_10MB )
+    {
+      bool correct_block_write_read = true;
+      std::vector< uint64_t >::const_iterator j=xx.begin();
+
+      for ( ValVector< uint64_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
+      {
+        correct_block_write_read = correct_block_write_read && ( *i == *j );
+      }
+
+      BOOST_CHECK ( correct_block_write_read );
+    }
+  }
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(BlockReadWriteTestSuite, fifo_write64_read64, DummyHardwareFixture,
+{
+  std::vector<size_t> lDepths = getBlockUnitTestDepths(quickTest ? N_1MB : N_200MB);
+
+  for(size_t i=0; i<lDepths.size(); i++) {
+    const size_t N = lDepths.at(i);
+    BOOST_TEST_MESSAGE("  N = " << N);
+
+    HwInterface hw = getHwInterface();
+    // Scope the large source vector so that the memory is freed up after the call to write. The data is safe, since it is copied into the send buffers.
+    std::vector<uint64_t> xx;
+    xx.reserve ( N );
+
+    for ( size_t i=0; i!= N; ++i )
+    {
+      xx.push_back ( static_cast<uint64_t> ( rand64() ) );
+    }
+
+    hw.getNode ( "FIFO" ).writeBlock64 ( xx );
+    ValVector< uint64_t > mem = hw.getNode ( "FIFO" ).readBlock64 ( N );
+    BOOST_CHECK ( !mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N );
+    if ( N > 0 )
+    {
+      BOOST_CHECK_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
+    }
+    BOOST_CHECK_THROW ( mem.value(), uhal::exception::NonValidatedMemory );
+    BOOST_CHECK_NO_THROW ( hw.dispatch() );
+    BOOST_CHECK ( mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N );
+    //The FIFO implementation on the dummy HW is a single memory location so there is not much to check
+  }
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(BlockReadWriteTestSuite, block_offset_write64_read64, DummyHardwareFixture,
+{
+  std::vector<size_t> lDepths = getBlockUnitTestDepths(quickTest ? N_1MB : N_10MB);
+
+  for(size_t i=0; i<lDepths.size(); i++) {
+    const size_t N = lDepths.at(i);
+    BOOST_TEST_MESSAGE("  N = " << N);
+
+    HwInterface hw = getHwInterface();
+
+    std::vector<uint64_t> xx;
+    xx.reserve ( N );
+    std::vector<uint64_t> yy;
+    yy.reserve ( N );
+    for ( size_t i=0; i!= N; ++i )
+    {
+      xx.push_back ( static_cast<uint64_t> ( rand64() ) );
+      yy.push_back ( static_cast<uint64_t> ( rand64() ) );
+    }
+
+    hw.getNode ( "LARGE_MEM" ).writeBlockOffset64 ( xx , 0 );
+    ValVector< uint64_t > mem = hw.getNode ( "LARGE_MEM" ).readBlockOffset64 ( N , 0 );
+
+    BOOST_CHECK ( !mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N );
+
+    if ( N > 0 )
+    {
+      BOOST_CHECK_THROW ( mem.at ( 0 ),uhal::exception::NonValidatedMemory );
+    }
+    BOOST_CHECK_THROW ( mem.value(), uhal::exception::NonValidatedMemory );
+
+
+    hw.getNode ( "LARGE_MEM" ).writeBlockOffset64 ( yy , N );
+    ValVector< uint64_t > mem2 = hw.getNode ( "LARGE_MEM" ).readBlockOffset64 ( N , N );
+
+    BOOST_CHECK ( !mem2.valid() );
+    BOOST_CHECK_EQUAL ( mem2.size(), N );
+
+    if ( N > 0 )
+    {
+      BOOST_CHECK_THROW ( mem2.at ( 0 ),uhal::exception::NonValidatedMemory );
+    }
+    BOOST_CHECK_THROW ( mem2.value(), uhal::exception::NonValidatedMemory );
+
+    BOOST_CHECK_NO_THROW ( hw.dispatch() );
+
+    BOOST_CHECK ( mem.valid() );
+    BOOST_CHECK_EQUAL ( mem.size(), N );
+
+    BOOST_CHECK ( mem2.valid() );
+    BOOST_CHECK_EQUAL ( mem2.size(), N );
+
+
+    //This check will fail when DummyHardware::ADDRESS_MASK < N
+    if ( N < N_10MB )
+    {
+      bool correct_block_write_read = true;
+      std::vector< uint64_t >::const_iterator j=xx.begin();
+
+      for ( ValVector< uint64_t >::const_iterator i ( mem.begin() ); i!=mem.end(); ++i , ++j )
+      {
+        correct_block_write_read = correct_block_write_read && ( *i == *j );
+      }
+
+      j=yy.begin();
+
+      for ( ValVector< uint64_t >::const_iterator i ( mem2.begin() ); i!=mem2.end(); ++i , ++j )
+      {
+        correct_block_write_read = correct_block_write_read && ( *i == *j );
+      }
+
+      BOOST_CHECK ( correct_block_write_read );
+    }
+  }
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(BlockReadWriteTestSuite, block64_access_type_violations, DummyHardwareFixture,
+{
+  HwInterface hw = getHwInterface();
+  std::vector<uint64_t> xx;
+
+  //We allow the user to call a bulk access of size=1 to a single register
+  xx.resize ( N_4B );
+  BOOST_CHECK_NO_THROW ( hw.getNode ( "REG" ).writeBlock64 ( xx ) );
+  BOOST_CHECK_NO_THROW ( ValVector< uint64_t > mem = hw.getNode ( "REG" ).readBlock64( N_4B ) );
+
+  //These should all throw
+  BOOST_CHECK_THROW ( hw.getNode ( "REG" ).writeBlockOffset64 ( xx , 0 ) , uhal::exception::BulkTransferOffsetRequestedForSingleRegister );
+  BOOST_CHECK_THROW ( ValVector< uint64_t > mem = hw.getNode ( "REG" ).readBlockOffset64 ( N_1kB , 0 ) , uhal::exception::BulkTransferOffsetRequestedForSingleRegister );
+
+  xx.resize ( N_1kB );
+  BOOST_CHECK_THROW ( hw.getNode ( "REG" ).writeBlock64 ( xx ) , uhal::exception::BulkTransferOnSingleRegister );
+  BOOST_CHECK_THROW ( ValVector< uint64_t > mem = hw.getNode ( "REG" ).readBlock64( N_1kB ) , uhal::exception::BulkTransferOnSingleRegister );
+
+  BOOST_CHECK_THROW ( hw.getNode ( "FIFO" ).writeBlockOffset64 ( xx , 1 ) , uhal::exception::BulkTransferOffsetRequestedForFifo );
+  BOOST_CHECK_THROW ( ValVector< uint64_t > mem = hw.getNode ( "FIFO" ).readBlockOffset64 ( N_1kB , 1 ) , uhal::exception::BulkTransferOffsetRequestedForFifo );
+
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(BlockReadWriteTestSuite, block64_bigger_than_size_attribute, MinimalFixture,
+{
+  HwInterface hw = getHwInterface();
+  std::vector<uint64_t> xx;
+  xx.resize ( N_1MB );
+  BOOST_CHECK_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlock64 ( xx ) , uhal::exception::BulkTransferRequestedTooLarge );
+  BOOST_CHECK_THROW ( ValVector< uint64_t > mem = hw.getNode ( "SMALL_MEM" ).readBlock64 ( N_1MB ) , uhal::exception::BulkTransferRequestedTooLarge );
+}
+)
+
+
+UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES(BlockReadWriteTestSuite, block64_offset_bigger_than_size_attribute, MinimalFixture,
+{
+  HwInterface hw = getHwInterface();
+  std::vector<uint64_t> xx;
+  // Size OK but offset too large
+  xx.resize ( N_4B );
+  BOOST_CHECK_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlockOffset64 ( xx , 256 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  BOOST_CHECK_THROW ( ValVector< uint64_t > mem = hw.getNode ( "SMALL_MEM" ).readBlockOffset64 ( N_4B , 256 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  // Size OK, offset OK, combination too large
+  xx.resize ( N_1kB );
+  BOOST_CHECK_THROW ( hw.getNode ( "SMALL_MEM" ).writeBlockOffset64 ( xx , 1 ) , uhal::exception::BulkTransferRequestedTooLarge );
+  BOOST_CHECK_THROW ( ValVector< uint64_t > mem = hw.getNode ( "SMALL_MEM" ).readBlockOffset64 ( N_1kB , 1 ) , uhal::exception::BulkTransferRequestedTooLarge );
+}
+)
+
+
 } // end ns tests
 } // end ns uhal
 

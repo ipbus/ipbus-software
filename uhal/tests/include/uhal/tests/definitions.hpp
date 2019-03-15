@@ -165,4 +165,20 @@ enum DeviceType {
   BOOST_AUTO_TEST_SUITE_END()
 
 
+#define UHAL_TESTS_DEFINE_CLIENT_DATA64_TEST_CASES( test_suite_name , test_case_name , test_fixture, test_case_contents ) \
+  \
+  BOOST_AUTO_TEST_SUITE( ipbusudp_3_0 ) \
+  \
+  BOOST_AUTO_TEST_SUITE( test_suite_name ) \
+  \
+  BOOST_FIXTURE_TEST_CASE( test_case_name , test_fixture<IPBUS_3_0_UDP> ) \
+  {\
+    test_case_contents \
+  }\
+  \
+  BOOST_AUTO_TEST_SUITE_END() \
+  \
+  BOOST_AUTO_TEST_SUITE_END()
+
+
 #endif
