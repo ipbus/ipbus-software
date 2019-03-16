@@ -31,17 +31,19 @@
 */
 
 
-#ifndef _log_inserters_location_hpp_
-#define _log_inserters_location_hpp_
+#ifndef _uhal_log_inserters_location_hpp_
+#define _uhal_log_inserters_location_hpp_
+
 
 #define ThisLocation() uhal::Location( __PRETTY_FUNCTION__ , __FILE__ , __LINE__ )
 
-#include <stdint.h>
+
 #include <iostream>
+#include <stdint.h>
+
 
 namespace uhal
 {
-
   //! A class to wrap the function name, filename and line-number location of its construction for the purpose of debugging and tracking unwinding exceptions
   class Location
   {

@@ -43,7 +43,6 @@ struct tm;
 namespace uhal
 {
 
-
   template< time_element T0, char D0 ,
           time_element T1 , char D1 ,
           time_element T2 , char D2 ,
@@ -112,9 +111,6 @@ namespace uhal
   {
     return _Time< TimeFmt<T0,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> > ( aTime );
   }
-
-
-
 
 
 
@@ -246,7 +242,6 @@ namespace uhal
   {
     return _Time< FORMAT > ( aTime );
   }
-
 
 }
 

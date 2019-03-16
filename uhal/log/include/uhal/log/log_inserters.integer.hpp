@@ -30,21 +30,20 @@
 ---------------------------------------------------------------------------
 */
 
+#ifndef _uhal_log_inserters_integer_hpp_
+#define _uhal_log_inserters_integer_hpp_
 
-#ifndef _log_inserters_integer_hpp_
-#define _log_inserters_integer_hpp_
-
-#include <uhal/log/log_inserter_helper.hpp>
 
 #include <stdint.h>
 #include <iostream>
 
+#include <uhal/log/log_inserter_helper.hpp>
+
+
 namespace uhal
 {
 
-  /**
-  	Enumerated type specifying the formatting option
-  */
+  //! Enumerated type specifying the formatting option
   enum integer_base
   {
     bin, ///< Binary
@@ -52,77 +51,54 @@ namespace uhal
     hex  ///< Hexadecimal
   };
 
-  /**
-  	Enumerated type specifying the formatting option
-  */
+  //! Enumerated type specifying the formatting option
   enum integer_format
   {
     fixed,   ///< Fixed width
     variable ///< Variable width
   };
 
-  /**
-  	Constant which is the default formatting option
-  */
+  //! Constant which is the default formatting option
   static const integer_base DefaultIntegerBase ( dec );
 
-  /**
-  	Constant which is the default formatting option
-  */
+  //! Constant which is the default formatting option
   static const integer_format DefaultIntegerFormat ( variable );
 
-  /**
-  	Empty struct which acts as a dummy variable for passing the formatting information around
-  */
+  //! Empty struct which acts as a dummy variable for passing the formatting information around
   template< integer_base BASE = DefaultIntegerBase , integer_format FORMAT = DefaultIntegerFormat , uint32_t WIDTH = 0 > struct IntFmt {};
 
-  /**
-  	Forward declare an ultra-lightweight wrapper which does formatting of numbers only on demand
-  */
+  //! Forward declare an ultra-lightweight wrapper which does formatting of numbers only on demand
   template< typename T , typename FORMAT >
   class _Integer;
 
-  /**
-  	Forward declare a function which creates an instance of the ultra-lightweight wrapper from an integer
-  */
+  //! Forward declare a function which creates an instance of the ultra-lightweight wrapper from an integer
   template< typename T > _Integer< T , IntFmt<> > Integer ( const T& aT );
 
-  /**
-  	Forward declare a function which creates an instance of the ultra-lightweight wrapper from an integer
-  */
+  //! Forward declare a function which creates an instance of the ultra-lightweight wrapper from an integer
   template< typename T , integer_base BASE , integer_format FORMAT , uint32_t WIDTH > _Integer< T , IntFmt<BASE , FORMAT , WIDTH> > Integer ( const T& aT , const IntFmt<BASE , FORMAT , WIDTH>& aFmt );
 
-  /**
-  	Helper function for adding the '+'/'-' sign
-  */
+  //! Helper function for adding the '+'/'-' sign
   template< typename T >
   void sign_helper ( std::ostream& aStr, const T& aInt );
 
-  /**
-  	Helper function for adding the '+'/'-' sign to int8_ts
-  */
+  //! Helper function for adding the '+'/'-' sign to int8_ts
   template<>
   void sign_helper ( std::ostream& aStr, const int8_t& aInt );
-  /**
-  	Helper function for adding the '+'/'-' sign to int16_ts
-  */
+
+  //! Helper function for adding the '+'/'-' sign to int16_ts
   template<>
   void sign_helper ( std::ostream& aStr, const int16_t& aInt );
-  /**
-  	Helper function for adding the '+'/'-' sign to int32_ts
-  */
+
+  //! Helper function for adding the '+'/'-' sign to int32_ts
   template<>
   void sign_helper ( std::ostream& aStr, const int32_t& aInt );
-  /**
-  	Helper function for adding the '+'/'-' sign to int64_ts
-  */
+
+  //! Helper function for adding the '+'/'-' sign to int64_ts
   template<>
   void sign_helper ( std::ostream& aStr, const int64_t& aInt );
 
 
-  /**
-  	Declare an ultra-lightweight wrapper which does formatting of numbers only on demand
-  */
+  //! Declare an ultra-lightweight wrapper which does formatting of numbers only on demand
   template< typename T , typename FORMAT >
   class _Integer : public RefWrapper< T >
   {

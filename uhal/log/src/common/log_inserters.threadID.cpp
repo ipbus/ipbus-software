@@ -39,15 +39,10 @@
 namespace uhal
 {
 
-  std::ostream& operator<< ( std::ostream& aStr , const _ThisThreadID& aThisThreadID )
+  std::ostream& operator<< ( std::ostream& aStr , const ThisThreadID& aThisThreadID )
   {
     aStr << boost::this_thread::get_id();
     return aStr;
-  }
-
-  _ThisThreadID ThisThreadID ()
-  {
-    return _ThisThreadID();
   }
 
 }

@@ -39,6 +39,7 @@
 #ifndef _uhal_log_exception_hpp_
 #define _uhal_log_exception_hpp_
 
+
 #include <exception>
 #include <string>
 #include <sys/time.h>
@@ -120,8 +121,8 @@ namespace uhal
         virtual const char* what() const throw();
 
         /**
-        			Function which casts a pointer from the base type of this object to a derived type of this object and rethrows as the derived type
-        		*/
+        	Function which casts a pointer from the base type of this object to a derived type of this object and rethrows as the derived type
+        */
         virtual void ThrowAsDerivedType_() = 0;
 
         /**

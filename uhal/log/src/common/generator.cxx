@@ -37,8 +37,8 @@
 #include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -64,16 +64,13 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
   aHppFile	<< "\n"
             << "#ifndef _uhal_log_log_hpp_\n"
             << "#define _uhal_log_log_hpp_\n"
-            << "\n"
+            << "\n\n"
             << "#include <iosfwd>  // for ostream\n"
-            << "#include <boost/thread/mutex.hpp>\n"
-            << "#include <boost/thread/lock_guard.hpp>\n"
+            << "\n"
             << "#include <uhal/log/log_inserters.hpp>\n"
             << "#include <uhal/log/LogLevels.hpp>\n"
             << "#include <uhal/log/exception.hpp>\n"
             << "\n"
-            //            << "#define logging() logger log( ThisLocation() );\n"
-            << "#define logging()\n"
             << "\n"
             << "namespace boost { class mutex; }\n"
             << "\n"
@@ -98,18 +95,20 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "#include \"uhal/log/exception.hpp\"          // for exception\n"
             << "#include \"uhal/log/LogLevels.hpp\"          // for insert, ErrorLevel, DebugL...\n"
             << "#include \"uhal/log/log_inserters.quote.hpp\"  // for operator<<\n"
-            << "\n"
+            << "\n\n"
             << "namespace uhal{\n"
             << "\n"
             << gDivider
             << "\n";
   aCppFile	<< "\n"
             << "#include <stdlib.h>                          // for getenv\n"
+            << "\n"
             << "#include <boost/thread/mutex.hpp>            // for mutex\n"
+            << "\n"
             << "#include \"uhal/log/LogLevels.hpp\"            // for BaseLogLevel, Info, Info...\n"
             << "#include \"uhal/log/log.hpp\"                  // for log\n"
             << "#include \"uhal/log/log_inserters.quote.hpp\"  // for operator<<, Quote\n"
-            << "\n"
+            << "\n\n"
             << "namespace uhal{\n"
             << "\n"
             << gDivider

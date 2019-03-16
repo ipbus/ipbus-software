@@ -31,14 +31,13 @@
 */
 
 
-#ifndef _log_inserters_time_hpp_
-#define _log_inserters_time_hpp_
+#ifndef _uhal_log_inserters_time_hpp_
+#define _uhal_log_inserters_time_hpp_
 
 
 #include <iostream>
 #include <stdint.h>
 #include <sys/time.h>
-
 
 #include "uhal/log/log_inserter_helper.hpp"
 
@@ -144,7 +143,6 @@ namespace uhal
 
 
 
-
   /**
   	A private class whose template parameters fully encapsulate the formatting and which is used to wrap a reference to an underlying type. A log_inserter function must be available to handle this type.
   	The first parameter (the type) was templated so that we could overload for multiple time types but, so far, only timeval has been implemented
@@ -198,14 +196,11 @@ namespace uhal
       friend _Time< TimeFmt<T0,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> > Time ( const timeval& aTime );
 
 
-
       /**
       	Constructor
       	@param aT an object for which we will are wrapping a reference
       */
       _Time ( const timeval& aTime ) : RefWrapper< timeval > ( aTime ) {}
-
-
   };
 
 
@@ -267,7 +262,6 @@ namespace uhal
 
   template< time_element T0 >
   std::ostream& operator<< ( std::ostream& aStr ,   const _Time< TimeFmt<T0,' ',null,' ',null,' ',null,' ',null,' ',null,' ',null> >& aTime );
-
 
 }
 
