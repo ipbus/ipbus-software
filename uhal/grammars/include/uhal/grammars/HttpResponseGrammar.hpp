@@ -30,8 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _uhal_HttpResponseGrammar_hpp_
-#define _uhal_HttpResponseGrammar_hpp_
+#ifndef _uhal_grammars_HttpResponseGrammar_hpp_
+#define _uhal_grammars_HttpResponseGrammar_hpp_
 
 
 #include <iosfwd>
@@ -47,7 +47,6 @@
 
 namespace uhal
 {
-
   //! Struct to store an http response received from a server when parsed by boost spirit
   struct HttpResponseType
   {
@@ -69,7 +68,6 @@ namespace uhal
 }
 
 
-
 // Call to BOOST_FUSION_ADAPT_STRUCT must be at global scope
 //! A boost::fusion adaptive struct used by the boost::qi parser
 BOOST_FUSION_ADAPT_STRUCT (
@@ -83,6 +81,8 @@ BOOST_FUSION_ADAPT_STRUCT (
 )
 
 
+namespace uhal
+{
 namespace grammars
 {
   //! A struct wrapping a set of rules as a grammar that can parse an HTTP response packet
@@ -100,12 +100,8 @@ namespace grammars
     boost::spirit::qi::rule< std::vector<uint8_t>::iterator,	std::string(),											boost::spirit::ascii::space_type > noblankline_sequence;
   };
 
-
 }
-
-
-
-
+}
 
 
 #endif

@@ -36,6 +36,8 @@
 #include <boost/spirit/include/qi.hpp>
 
 
+namespace uhal
+{
 namespace grammars
 {
   SemicolonDelimitedUriListGrammar::SemicolonDelimitedUriListGrammar() :
@@ -49,4 +51,4 @@ namespace grammars
   }
 
 }
-
+}

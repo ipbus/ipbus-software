@@ -36,13 +36,13 @@
 #include <boost/spirit/include/qi.hpp>
 
 
+namespace uhal
+{
 namespace grammars
 {
-
   NodeTreeParametersGrammar::NodeTreeParametersGrammar() :
     NodeTreeParametersGrammar::base_type(query)
   {
-
     namespace qi = boost::spirit::qi;
     
     query =  pair >> *((qi::lit(';') | '&') >> pair);
@@ -50,5 +50,6 @@ namespace grammars
     key   =  qi::char_("a-zA-Z_") >> *qi::char_("a-zA-Z_0-9");
     value = +qi::char_("a-zA-Z_0-9");
   }
-}
 
+}
+}

@@ -30,8 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _uhal_SemicolonDelimitedUriListGrammar_hpp_
-#define _uhal_SemicolonDelimitedUriListGrammar_hpp_
+#ifndef _uhal_grammars_SemicolonDelimitedUriListGrammar_hpp_
+#define _uhal_grammars_SemicolonDelimitedUriListGrammar_hpp_
 
 
 #include <string>
@@ -43,9 +43,10 @@
 #include <boost/spirit/include/qi_grammar.hpp>
 
 
+namespace uhal
+{
 namespace grammars
 {
-
   //! The BOOST::SPIRIT grammar for parsing the Semicolon delimited URI list into a vector of protocol-URI pairs
   struct SemicolonDelimitedUriListGrammar : boost::spirit::qi::grammar< std::string::const_iterator , std::vector< std::pair<std::string, std::string> >() , boost::spirit::ascii::space_type >
   {
@@ -59,13 +60,8 @@ namespace grammars
     //! Boost spirit parsing rule for parsing the "URI" part of each entry in a Semicolon delimited URI list
     boost::spirit::qi::rule< std::string::const_iterator , std::string() ,											boost::spirit::ascii::space_type > data_pairs_2;
   };
-
-
 }
-
-
-
-
+}
 
 
 #endif

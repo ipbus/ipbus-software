@@ -36,6 +36,8 @@
 #include <boost/spirit/include/qi.hpp>
 
 
+namespace uhal
+{
 namespace grammars
 {
   NodeTreeClassAttributeGrammar::NodeTreeClassAttributeGrammar() :
@@ -51,4 +53,4 @@ namespace grammars
   }
 
 }
-
+}
