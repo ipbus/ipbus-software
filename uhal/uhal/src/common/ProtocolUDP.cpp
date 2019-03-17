@@ -46,8 +46,8 @@
 
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
-#include "uhal/log/log_inserters.location.hpp"
 #include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log_inserters.type.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/grammars/URI.hpp"
 #include "uhal/Buffers.hpp"
@@ -94,7 +94,7 @@ namespace uhal
     }
     catch ( const std::exception& aExc )
     {
-      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught in " , Type<UDP< InnerProtocol > >(), " destructor" );
     }
   }
 
@@ -107,7 +107,7 @@ namespace uhal
 
     if ( mAsynchronousException )
     {
-      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from 'implementDispatch' method of " , Type<UDP< InnerProtocol > >() );
       mAsynchronousException->ThrowAsDerivedType();
     }
 

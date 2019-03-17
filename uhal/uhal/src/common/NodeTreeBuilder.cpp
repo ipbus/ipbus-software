@@ -235,7 +235,6 @@ namespace uhal
     {
       log ( Info() , "TXT file" );
       log ( Error() , "Parser problems mean that this method has been disabled." );
-      log ( Error() , "At " , ThisLocation() );
       return;
     }
     else

@@ -50,8 +50,8 @@
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
-#include "uhal/log/log_inserters.location.hpp"
 #include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log_inserters.type.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 
@@ -99,7 +99,7 @@ namespace uhal
     }
     catch ( const std::exception& aExc )
     {
-      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught in " , Type<TCP< InnerProtocol , nr_buffers_per_send > >(), " destructor" );
     }
   }
 
@@ -111,7 +111,7 @@ namespace uhal
 
     if ( mAsynchronousException )
     {
-      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from 'implementDispatch' method of " , Type<TCP< InnerProtocol , nr_buffers_per_send > >() );
       mAsynchronousException->ThrowAsDerivedType();
     }
 
