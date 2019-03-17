@@ -36,17 +36,16 @@
 #ifndef _uhal_utilities_files_hpp_
 #define _uhal_utilities_files_hpp_
 
-#include <vector>
-#include <string>
-#include <iostream>
+
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 #include <wordexp.h>
 
-//#include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-//#include <boost/asio.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -54,10 +53,8 @@
 #include <boost/asio/streambuf.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
-//#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/home/qi/parse.hpp>
 #include <boost/spirit/include/qi_char_.hpp>
-//#include <boost/thread/mutex.hpp>
 #include <boost/bind/bind.hpp>
 
 #include "uhal/grammars/SemicolonDelimitedUriListGrammar.hpp"
@@ -106,8 +103,6 @@ namespace uhal
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 namespace uhal
 {
-  // boost::mutex gUtilityMutex;
-
   namespace utilities
   {
     /**
@@ -192,7 +187,6 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
         return false;
       }
 
@@ -216,7 +210,6 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
         return false;
       }
 
@@ -250,7 +243,6 @@ namespace uhal
       }
       catch ( const std::exception& aExc )
       {
-        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
         return false;
       }
 
@@ -325,6 +317,7 @@ namespace uhal
       }
     }
 
+
     /**
     	Given a URL, retrieve the file and call the callback function on each of them
     	@param aURL a URL to retrieve
@@ -346,6 +339,7 @@ namespace uhal
       boost::filesystem::path lFilePath = boost::filesystem::path ( aURL );
       aBinder ( std::string ( "http" ) , lFilePath , boost::ref ( lHttpResponse.content ) );
     }
+
 
     /**
     	Given a protocol and either a URL or a linux shell expression, open the file and call the callback function on each of them
@@ -374,8 +368,6 @@ namespace uhal
         throw lExc;
       }
     }
-
-
 
   }
 }

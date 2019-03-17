@@ -35,16 +35,16 @@
 
 #include <fstream>
 
-#include "uhal/DerivedNodeFactory.hpp"
-#include "uhal/utilities/files.hpp"
-#include "uhal/utilities/xml.hpp"
-#include "uhal/log/log.hpp"
-
 #include <boost/bind.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
+
+#include "uhal/DerivedNodeFactory.hpp"
+#include "uhal/log/log.hpp"
+#include "uhal/utilities/files.hpp"
+#include "uhal/utilities/xml.hpp"
 
 
 #if BOOST_VERSION >= 106000
@@ -70,7 +70,6 @@ namespace uhal
   const char* NodeTreeBuilder::mClassAttribute = "class";
   const char* NodeTreeBuilder::mModuleAttribute = "module";
   const char* NodeTreeBuilder::mFirmwareInfo = "fwinfo";
-
 
 
   boost::shared_ptr<NodeTreeBuilder> NodeTreeBuilder::mInstance;
@@ -141,7 +140,6 @@ namespace uhal
   }
 
 
-
   NodeTreeBuilder& NodeTreeBuilder::getInstance()
   {
     if ( ! mInstance )
@@ -151,6 +149,7 @@ namespace uhal
 
     return *mInstance;
   }
+
 
   Node* NodeTreeBuilder::getNodeTree ( const std::string& aFilenameExpr , const boost::filesystem::path& aPath )
   {
@@ -516,7 +515,7 @@ namespace uhal
     }
   }
 
-  bool NodeTreeBuilder::NodePtrCompare ( Node* aNodeL, Node* aNodeR )
+  bool NodeTreeBuilder::compareNodePtr ( Node* aNodeL, Node* aNodeR )
   {
     return ( aNodeL->mAddr < aNodeR->mAddr );
   }
@@ -626,7 +625,7 @@ namespace uhal
       calculateHierarchicalAddresses ( *lIt , aNode->mAddr );
     }
 
-    std::sort ( aNode->mChildren.begin() , aNode->mChildren.end() , NodeTreeBuilder::NodePtrCompare );
+    std::sort ( aNode->mChildren.begin() , aNode->mChildren.end() , NodeTreeBuilder::compareNodePtr );
   }
 
 
@@ -821,10 +820,6 @@ namespace uhal
       }
     }
   }
-
-
-
-
 
 
   NodeTreeBuilder::permissions_lut::permissions_lut()

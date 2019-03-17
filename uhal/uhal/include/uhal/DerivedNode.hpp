@@ -39,9 +39,10 @@
 #ifndef _uhal_DerivedNode_hpp_
 #define _uhal_DerivedNode_hpp_
 
-#include "uhal/Node.hpp"
 
 #include <boost/static_assert.hpp>
+
+#include "uhal/Node.hpp"
 
 
 /**

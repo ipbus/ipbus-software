@@ -40,21 +40,20 @@
 #ifndef _uhal_NodeTreeBuilder_hpp_
 #define _uhal_NodeTreeBuilder_hpp_
 
-#include "uhal/log/exception.hpp"
-#include "uhal/definitions.hpp"
-#include "uhal/Node.hpp"
 
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/spirit/include/qi.hpp>
 
+#include "pugixml.hpp"
+
+#include "uhal/definitions.hpp"
 #include "uhal/grammars/NodeTreeClassAttributeGrammar.hpp"
 #include "uhal/grammars/NodeTreeParametersGrammar.hpp"
 #include "uhal/grammars/NodeTreeFirmwareInfoAttributeGrammar.hpp"
-
-#include "pugixml.hpp"
-
+#include "uhal/log/exception.hpp"
+#include "uhal/Node.hpp"
 #include "uhal/XmlParser.hpp"
 
 
@@ -83,17 +82,6 @@ namespace uhal
 
     //! Exception class to handle the case when someone tries to give a bit-masked node a child.
     UHAL_DEFINE_EXCEPTION_CLASS ( MaskedNodeCannotHaveChild , "Exception class to handle the case when someone tries to give a bit-masked node a child." )
-
-    // //! Exception class to handle the case when a node has both masked and unmasked children. Uses the base uhal::exception implementation of what()
-    // class BothMaskedAndUnmaskedChildren : public exception {};
-
-
-    // //! Exception class to handle the case where a child node has an address which overlaps with the parent. Uses the base uhal::exception implementation of what()
-    // class ChildHasAddressOverlap : public exception {};
-    // //! Exception class to handle the case where a child node has an address mask which overlaps with the parent. Uses the base uhal::exception implementation of what()
-    // class ChildHasAddressMaskOverlap : public exception {};
-    //    //! Exception class to handle the case where a class is requested which does not exist in the class factory.
-    //    UHAL_DEFINE_EXCEPTION_CLASS ( LabelUnknownToClassFactory , "Exception class to handle the case where a class is requested which does not exist in the class factory." )
   }
 
 
@@ -103,7 +91,6 @@ namespace uhal
   */
   class NodeTreeBuilder: private boost::noncopyable
   {
-
     private:
       /**
       	Default constructor
@@ -111,11 +98,8 @@ namespace uhal
       */
       NodeTreeBuilder ();
 
-
     public:
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~NodeTreeBuilder ();
 
       /**
@@ -135,7 +119,6 @@ namespace uhal
       //! Clears address filename -> Node tree cache. NOT thread safe; for tread-safety, use ConnectionManager method
       void clearAddressFileCache();
 
-
     private:
       /**
       	Method called once the file specified in the call to getNodeTree( aFilenameExpr ) has been opened
@@ -154,12 +137,9 @@ namespace uhal
       */
       void calculateHierarchicalAddresses ( Node* aNode , const uint32_t& aAddr );
 
-
       void checkForAddressCollisions ( Node* aNode , const boost::filesystem::path& aPath );
 
-
-      static bool NodePtrCompare ( Node* aNodeL, Node* aNodeR );
-
+      static bool compareNodePtr ( Node* aNodeL, Node* aNodeR );
 
       Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
       //       Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
@@ -218,7 +198,6 @@ namespace uhal
         //! The actual function that the boost qi parser uses for associating strings with enumerated permissions types
         mode_lut();
       } mModeLut; //!< An instance of a look-up table that the boost qi parser uses for associating strings with enumerated permissions types
-
 
       grammars::NodeTreeClassAttributeGrammar mNodeTreeClassAttributeGrammar;
       grammars::NodeTreeParametersGrammar mNodeTreeParametersGrammar;

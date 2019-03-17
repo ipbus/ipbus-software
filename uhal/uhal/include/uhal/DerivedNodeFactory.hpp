@@ -82,9 +82,7 @@ namespace uhal
       DerivedNodeFactory ();
 
     public:
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~DerivedNodeFactory ();
 
       /**
@@ -98,9 +96,9 @@ namespace uhal
 
       Node* convertToClassType( Node* aNode );
 
-      /*
-      Method to create an associate between a node type identifier and a Creator of that particular node type
-      @param aNodeClassName the node type identifier
+      /**
+        Method to create an associate between a node type identifier and a Creator of that particular node type
+        @param aNodeClassName the node type identifier
       */
       template <class T>
       void add ( const std::string& aNodeClassName );
@@ -110,18 +108,16 @@ namespace uhal
       class CreatorInterface
       {
         public:
-          /**
-          Default constructor
-          */
+          //! Default constructor
           CreatorInterface()
           {
           }
-          /**
-          Destructor
-          */
+
+          //! Destructor
           virtual ~CreatorInterface()
           {
           }
+
           /**
           Interface to a function which create a new derived node class based on the class name
           @param aAttributes a vector containing a set of name value pairs which were passed as arguments
@@ -137,18 +133,16 @@ namespace uhal
       {
         public:
 
-          /**
-          Default constructor
-          */
+          //! Default constructor
           Creator()
           {
           }
-          /**
-          Destructor
-          */
+
+          //! Destructor
           virtual ~Creator()
           {
           }
+
           /**
           Concrete function which creates a new IPbus client based on the protocol identifier specified
           @param aAttributes a vector containing a set of name value pairs which were passed as arguments
@@ -164,7 +158,6 @@ namespace uhal
 
       //! Hash map associating a creator for a particular node type with a string identifier for that node type
       boost::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;
-
   };
 }
 

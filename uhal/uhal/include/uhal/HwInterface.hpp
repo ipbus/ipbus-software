@@ -39,6 +39,7 @@
 #ifndef _uhal_HwInterface_hpp_
 #define _uhal_HwInterface_hpp_
 
+
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -74,9 +75,7 @@ namespace uhal
       */
       HwInterface ( const HwInterface& hwInterface );
 
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~HwInterface();
 
       /**
@@ -98,9 +97,7 @@ namespace uhal
       const std::string& id() const;
 
 
-      /**
-      	Make the IPbus client issue a dispatch
-      */
+      //! Make the IPbus client issue a dispatch
       void dispatch ();
 
       /**
@@ -141,7 +138,6 @@ namespace uhal
       template< typename T>
       const T& getNode ( const std::string& aId ) const;
 
-
       /**
       	Return all node IDs known to this HwInterface
       	@return all node IDs known to this HwInterface
@@ -155,12 +151,6 @@ namespace uhal
       */
       std::vector<std::string> getNodes ( const std::string& aRegex ) const;
 
-      // /**
-      // Get the target device's reserved address information
-      // @return a Validated Memory which wraps the location to which the reserved address information will be written
-      // */
-      // ValVector< uint32_t > readReservedAddressInfo ();
-
     private:
       /**
       	A function which sets the HwInterface pointer in the Node to point to this HwInterface
@@ -173,7 +163,6 @@ namespace uhal
 
       //! A node tree
       boost::shared_ptr<Node> mNode;
-
   };
 
 }

@@ -62,5 +62,4 @@ namespace uhal
     return new T ( aNode );
   }
 
-
 }

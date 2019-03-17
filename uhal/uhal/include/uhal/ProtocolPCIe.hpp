@@ -42,6 +42,7 @@
 #ifndef _uhal_ProtocolPCIe_hpp_
 #define _uhal_ProtocolPCIe_hpp_
 
+
 #include <deque>                           // for deque
 #include <stddef.h>                        // for size_t
 #include <stdint.h>                        // for uint32_t, uint8_t
@@ -140,15 +141,11 @@ namespace uhal
       */
       void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
 
-      /**
-      Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
-       */
+      //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       virtual void Flush( );
-
 
       //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
-
 
       typedef IPbus< 2 , 0 > InnerProtocol;
 

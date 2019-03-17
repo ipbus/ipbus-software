@@ -276,9 +276,6 @@ namespace uhal
           ss << lAttrStr;
         }
 
-        // ss >> aTarget;
-        // aTarget = lAttr.as_uint();
-
         if ( ss.str().size() > 10 )
         {
           exception::StringNumberWillNotFitInto32BitNumber lExc;

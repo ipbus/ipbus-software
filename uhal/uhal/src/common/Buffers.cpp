@@ -47,7 +47,6 @@ namespace uhal
   }
 
 
-
   Buffers::~Buffers()
   {
   }
@@ -62,7 +61,6 @@ namespace uhal
   {
     return mReplyCounter;
   }
-
 
 
   uint8_t* Buffers::send ( const uint8_t* aPtr , const uint32_t& aSize )
@@ -90,22 +88,10 @@ namespace uhal
     mUnsignedValWords.push_back ( aValMem );
   }
 
-  // void Buffers::add ( const ValWord< int32_t >& aValMem )
-  // {
-  //
-  // mSignedValWords.push_back ( aValMem );
-  // }
-
   void Buffers::add ( const ValVector< uint32_t >& aValMem )
   {
     mUnsignedValVectors.push_back ( aValMem );
   }
-
-  // void Buffers::add ( const ValVector< int32_t >& aValMem )
-  // {
-  //
-  // mSignedValVectors.push_back ( aValMem );
-  // }
 
   uint8_t* Buffers::getSendBuffer()
   {
@@ -130,21 +116,12 @@ namespace uhal
       lIt->valid ( true );
     }
 
-    // for ( std::deque< ValWord< int32_t > >::iterator lIt = mSignedValWords.begin() ; lIt != mSignedValWords.end() ; ++lIt )
-    // {
-    // lIt->valid ( true );
-    // }
-
     for ( std::deque< ValVector< uint32_t > >::iterator lIt = mUnsignedValVectors.begin() ; lIt != mUnsignedValVectors.end() ; ++lIt )
     {
       lIt->valid ( true );
     }
-
-    // for ( std::deque< ValVector< int32_t > >::iterator lIt = mSignedValVectors.begin() ; lIt != mSignedValVectors.end() ; ++lIt )
-    // {
-    // lIt->valid ( true );
-    // }
   }
+
 
   void Buffers::clear()
   {
@@ -153,9 +130,7 @@ namespace uhal
     mReplyBuffer.clear();
     mValHeaders.clear();
     mUnsignedValWords.clear();
-    // mSignedValWords.clear();
     mUnsignedValVectors.clear();
-    // mSignedValVectors.clear();
   }
 
 }

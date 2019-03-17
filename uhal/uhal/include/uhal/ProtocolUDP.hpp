@@ -93,16 +93,14 @@ namespace uhal
       UDP ( const UDP& aUDP ); // non-copyable
 
       /**
-       Assignment operator
-       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-       @param aUDP a UDP-protocol object to copy
-       @return reference to the current object to allow chaining of assignments
-            */
+        Assignment operator
+        This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
+        @param aUDP a UDP-protocol object to copy
+        @return reference to the current object to allow chaining of assignments
+      */
       UDP& operator= ( const UDP& aUDP ); // non-assignable
 
     public:
-      //! Functor class to perform the actual transport, Like this to allow multithreading if desirable.
-
       /**
       	Constructor
       	@param aId the uinique identifier that the client will be given.
@@ -110,9 +108,7 @@ namespace uhal
       */
       UDP ( const std::string& aId, const URI& aUri );
 
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~UDP();
 
     private:
@@ -123,14 +119,10 @@ namespace uhal
       */
       void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
 
-      /**
-      Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
-       */
+      //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       virtual void Flush( );
 
-      /**
-              Function which tidies up this protocol layer in the event of an exception
-             */
+      //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
 
       /**
@@ -145,16 +137,16 @@ namespace uhal
       */
       uint32_t getMaxReplySize();
 
-      /**
-        Set up the UDP socket
-      */
+      //! Set up the UDP socket
       void connect();
+
       /**
         Initialize performing the next UDP write operation
         In multi-threaded mode, this runs the ASIO async send and exits
         In single-threaded mode, this runs the ASIO async send and blocks
       */
       void write ( );
+
       /**
         Callback function which is called upon completion of the ASIO async send
         This, then, makes a call to read to read back the reply to what has just been sent
@@ -176,22 +168,17 @@ namespace uhal
       */
       void read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred );
 
-      /**
-        Function called by the ASIO deadline timer
-      */
+      //! Function called by the ASIO deadline timer
       void CheckDeadline();
 
       /**
-       Function to set the value of a variable associated with a BOOST conditional-variable and then notify that conditional variable
-       @param aValue a value to which to update the variable associated with a BOOST conditional-variable
-            */
+        Function to set the value of a variable associated with a BOOST conditional-variable and then notify that conditional variable
+        @param aValue a value to which to update the variable associated with a BOOST conditional-variable
+      */
       void NotifyConditionalVariable ( const bool& aValue );
 
-      /**
-        Function to block a thread pending a BOOST conditional-variable and its associated regular variable
-      */
+      //! Function to block a thread pending a BOOST conditional-variable and its associated regular variable
       void WaitOnConditionalVariable();
-
 
     private:
       //! The boost::asio::io_service used to create the connections
@@ -213,7 +200,7 @@ namespace uhal
       */
       std::vector<uint8_t> mReplyMemory;
 
-      /// Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
+      //! Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
       boost::asio::io_service::work mIOserviceWork;
 
       //! The Worker thread in Multi-threaded mode

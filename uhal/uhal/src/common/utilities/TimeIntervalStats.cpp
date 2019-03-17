@@ -17,6 +17,7 @@ TimeIntervalStats::TimeIntervalStats() :
 {
 }
 
+
 TimeIntervalStats::~TimeIntervalStats()
 {
 }

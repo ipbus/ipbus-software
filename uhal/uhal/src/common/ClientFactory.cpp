@@ -124,6 +124,5 @@ namespace uhal
     return lIt->second->create ( aId , lUri );
   }
 
-
 }
 

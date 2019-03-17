@@ -77,12 +77,15 @@ Mmap::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
 {
 }
 
+
 Mmap::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
   mData(aData)
 {}
 
+
 Mmap::PacketFmt::~PacketFmt()
 {}
+
 
 std::ostream& operator<<(std::ostream& aStream, const Mmap::PacketFmt& aPacket)
 {
@@ -112,23 +115,28 @@ Mmap::File::File(const std::string& aPath, int aFlags) :
 {
 }
 
+
 Mmap::File::~File()
 {
   close();
 }
+
 
 const std::string& Mmap::File::getPath() const
 {
   return mPath;
 }
 
+
 void Mmap::File::setPath(const std::string& aPath)
 {
   mPath = aPath;
 }
 
+
 #define MAP_SIZE (32*1024UL)
 #define MAP_MASK (MAP_SIZE - 1)
+
 
 void Mmap::File::open()
 {
@@ -149,6 +157,7 @@ void Mmap::File::open()
     throw lExc;
   }
 }
+
 
 void Mmap::File::close()
 {
@@ -176,8 +185,6 @@ void Mmap::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
   for (size_t i=0; i<aNrWords; i++) {
     aValues.push_back(*((uint32_t*) (lVirtAddr + 4 * i)));
   }
-
-  // aValues.insert(aValues.end(), reinterpret_cast<uint32_t*>(buffer), reinterpret_cast<uint32_t*>(buffer)+ aNrWords);
 }
 
 
@@ -371,8 +378,6 @@ void Mmap::write(const boost::shared_ptr<Buffers>& aBuffers)
   mReplyQueue.push_back(aBuffers);
 }
 
-
-// -------------------------------------------------------------------------------
 
 void Mmap::read()
 {

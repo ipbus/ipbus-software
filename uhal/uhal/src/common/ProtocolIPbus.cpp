@@ -33,8 +33,8 @@
 #include "uhal/ProtocolIPbus.hpp"
 
 
-#include <stdint.h>
 #include <ostream>
+#include <stdint.h>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for seconds
 #include <boost/shared_ptr.hpp>                             // for shared_ptr
@@ -44,7 +44,6 @@
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
-#include "uhal/log/log_inserters.location.hpp" 
 #include "uhal/log/log.hpp"
 #include "uhal/ValMem.hpp"
 
@@ -56,8 +55,6 @@ namespace uhal
   template< uint8_t IPbus_minor >
   IPbus< 1 , IPbus_minor >::IPbus ( const std::string& aId, const URI& aUri ) :
     IPbusCore ( aId , aUri , boost::posix_time::seconds ( 1 ) )
-    // , mSendPadding ( 8 , implementCalculateHeader ( B_O_T , 0 , 0 ) ),
-    // mReplyPadding ( 8 , 0x00000000 )
   {
   }
 
@@ -67,17 +64,20 @@ namespace uhal
   {
   }
 
+
   template< uint8_t IPbus_minor >
   void IPbus< 1 , IPbus_minor >::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
 
+
   template< uint8_t IPbus_minor >
   uint32_t IPbus< 1 , IPbus_minor >::getPreambleSize()
   {
     return 1;
   }
+
 
   template< uint8_t IPbus_minor >
   void IPbus< 1 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
@@ -102,6 +102,7 @@ namespace uhal
       }
     }
   }
+
 
   template< uint8_t IPbus_minor >
   uint32_t IPbus< 1 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
@@ -152,6 +153,7 @@ namespace uhal
     return ( IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
   }
 
+
   template< uint8_t IPbus_minor >
   bool IPbus< 1 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
@@ -200,11 +202,13 @@ namespace uhal
     return true;
   }
 
+
   template< uint8_t IPbus_minor >
   uint32_t IPbus< 1 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     return IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
+
 
   template< uint8_t IPbus_minor >
   bool IPbus< 1 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
@@ -212,12 +216,13 @@ namespace uhal
     return IPbus< 1 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
 
+
   template< uint8_t IPbus_minor >
   void IPbus< 1 , IPbus_minor >::dispatchExceptionHandler()
   {
-    log ( Info() , ThisLocation() );
     IPbusCore::dispatchExceptionHandler();
   }
+
 
   template< uint8_t IPbus_minor >
   void IPbus< 1 , IPbus_minor >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode) {
@@ -294,8 +299,6 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    //log ( Debug() , ThisLocation() );
-    //log ( Notice() , "Memory location = " , Integer ( ( std::size_t ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " Memory value = " , Integer ( * ( std::size_t* ) ( aReplyStartIt->first ) , IntFmt<hex,fixed>() ), " & size = " , Integer ( aReplyStartIt->second ) );
     if ( * ( uint32_t* ) ( aSendBufferStart ) != * ( uint32_t* ) ( aReplyStartIt ->first ) )
     {
       uhal::exception::IPbus2PacketHeaderMismatch* lExc = new uhal::exception::IPbus2PacketHeaderMismatch();
@@ -309,7 +312,6 @@ namespace uhal
       mReceivePacketHeader.pop_front();
     }
 
-    // log ( Info() , "IPbus 2.0 has validated the packet header" );
     return IPbusCore::validate ( ( aSendBufferStart+=4 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
   }
 
@@ -414,11 +416,13 @@ namespace uhal
     return true;
   }
 
+
   template< uint8_t IPbus_minor >
   uint32_t IPbus< 2 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     return IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
+
 
   template< uint8_t IPbus_minor >
   bool IPbus< 2 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
@@ -426,10 +430,10 @@ namespace uhal
     return IPbus< 2 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
 
+
   template< uint8_t IPbus_minor >
   void IPbus< 2 , IPbus_minor >::dispatchExceptionHandler()
   {
-    log ( Info() , ThisLocation() );
 #ifndef DISABLE_PACKET_COUNTER_HACK
     mPacketCounter = 1;
 #else
@@ -438,6 +442,7 @@ namespace uhal
     mReceivePacketHeader.clear();
     IPbusCore::dispatchExceptionHandler();
   }
+
 
   template< uint8_t IPbus_minor >
   void IPbus< 2 , IPbus_minor >::translateInfoCode(std::ostream& aStream, const uint8_t& aInfoCode)

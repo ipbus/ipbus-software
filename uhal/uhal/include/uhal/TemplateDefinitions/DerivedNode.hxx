@@ -34,7 +34,6 @@
 
 namespace uhal
 {
-  
   template< typename T >
   RegistrationHelper< T >::RegistrationHelper ( const std::string& aDerivedClassName )
   {

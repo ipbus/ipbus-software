@@ -56,7 +56,6 @@ using boost::placeholders::_3;
 namespace uhal
 {
 
-
   ConnectionManager::ConnectionDescriptor::ConnectionDescriptor ( const pugi::xml_node& aNode , const boost::filesystem::path& aConnectionFile , bool& aSuccess ) :
     connection_file ( aConnectionFile )
   {
@@ -97,12 +96,6 @@ namespace uhal
       return false;
     }
 
-    /*
-        if ( connection_file != aConnectionDescriptor.connection_file )
-        {
-          return false;
-        }
-    */
     return true;
   }
 
@@ -111,7 +104,6 @@ namespace uhal
 
 
   // Given a glob expression, parse all the files matching it (e.g. $BUILD/config/*.xml). If one parsing fails throw an exception and return filename and line number
-
   ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr )
   {
     //Mutex lock here to be on the safe side
@@ -162,6 +154,7 @@ namespace uhal
     boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );
     return HwInterface ( lClientInterface , lNode );
   }
+
 
   //Static method for building device on the fly
   HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr )
@@ -216,7 +209,6 @@ namespace uhal
     log( Info(), "ConnectionManager is clearing the address filename -> Node tree cache");
     NodeTreeBuilder::getInstance().clearAddressFileCache();
   }
-
 
 
   void ConnectionManager::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile )
@@ -280,6 +272,4 @@ namespace uhal
   boost::mutex ConnectionManager::mMutex;
 
 }
-
-
 

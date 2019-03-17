@@ -46,10 +46,13 @@ namespace uhal
   {
   }
 
+
   template < typename R >
   BaseFunctionObject<R>::~BaseFunctionObject()
   {
   }
+
+
 
 
   template < typename R , typename T >
@@ -58,11 +61,13 @@ namespace uhal
   {
   }
 
+
   template < typename R , typename T >
   R FunctionObject<R,T>::operator() ( const pugi::xml_node& aNode )
   {
     return ( mT ) ( aNode );
   }
+
 
   template < typename R , typename T >
   FunctionObject<R,T*>::FunctionObject ( T* aT ) :
@@ -70,11 +75,14 @@ namespace uhal
   {
   }
 
+
   template < typename R , typename T >
   R FunctionObject<R,T*>::operator() ( const pugi::xml_node& aNode )
   {
     return ( *mT ) ( aNode );
   }
+
+
 
 
   template < typename R >
@@ -86,6 +94,7 @@ namespace uhal
   {
   }
 
+
   template < typename R >
   Rule<R>::~Rule()
   {
@@ -95,6 +104,7 @@ namespace uhal
       mFuncPtr = NULL;
     }
   }
+
 
   template < typename R >
   Rule<R>& Rule<R>::require ( const std::string& aStr )
@@ -110,6 +120,7 @@ namespace uhal
     return *this;
   }
 
+
   template < typename R >
   Rule<R>& Rule<R>::forbid ( const std::string& aStr )
   {
@@ -124,12 +135,14 @@ namespace uhal
     return *this;
   }
 
+
   template < typename R >
   Rule<R>& Rule<R>::optional ( const std::string& aStr )
   {
     mOptional.insert ( aStr );
     return *this;
   }
+
 
   template < typename R >
   std::string Rule<R>::description() const
@@ -203,6 +216,7 @@ namespace uhal
     return lStr.str();
   }
 
+
   template < typename R >
   R Rule<R>::operator() ( const pugi::xml_node& aNode )
   {
@@ -219,6 +233,8 @@ namespace uhal
   }
 
 
+
+
   template < typename R >
   Parser<R>::Parser() :
     mNextHash ( 0x0000000000000001 ),
@@ -227,11 +243,11 @@ namespace uhal
     mHashes.clear();
   }
 
+
   template < typename R >
   Parser<R>::~Parser()
   {
   }
-
 
 
   template < typename R >

@@ -66,6 +66,7 @@ namespace uhal
   {
   }
 
+
   void HwInterface::claimNode ( Node& aNode )
   {
     aNode.mHw = this;
@@ -76,10 +77,12 @@ namespace uhal
     }
   }
 
+
   ClientInterface& HwInterface::getClient()
   {
     return *mClientInterface;
   }
+
 
   // void HwInterface::ping()
   // {
@@ -96,6 +99,7 @@ namespace uhal
   // throw // StdException ( aExc );
   // }
   // }
+
 
   void HwInterface::dispatch ()
   {
@@ -137,32 +141,17 @@ namespace uhal
     return mNode->getNode ( aId );
   }
 
+
   std::vector<std::string> HwInterface::getNodes() const
   {
     return mNode->getNodes();
   }
 
+
   std::vector<std::string> HwInterface::getNodes ( const std::string& aRegex ) const
   {
     return mNode->getNodes ( aRegex );
   }
-
-  // ValVector< uint32_t > HwInterface::readReservedAddressInfo ()
-  // {
-  // try
-  // {
-  // return mClientInterface->readReservedAddressInfo();
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.rethrowFrom( ThisLocation() );
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );	// uhal::StdException lExc( aExc );
-  // lExc.throwFrom( ThisLocation() );
-  // }
-  // }
 
 }
 

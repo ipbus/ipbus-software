@@ -53,14 +53,11 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
     mNoPreemptiveDispatchBuffers(),
 #endif
-    //    mCurrentBuffers ( NULL ),
     mId ( aId ),
     mTimeoutPeriod ( aTimeoutPeriod ),
     mUri ( aUri )
   {
-    //     log ( Warning() , ThisLocation()  );
   }
-
 
 
   ClientInterface::ClientInterface ( ) :
@@ -68,14 +65,11 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
     mNoPreemptiveDispatchBuffers(),
 #endif
-    //    mCurrentBuffers ( NULL ),
     mId ( ),
     mTimeoutPeriod ( boost::posix_time::pos_infin ),
     mUri ( )
   {
-    //     log ( Warning() , ThisLocation()  );
   }
-
 
 
   ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) :
@@ -83,12 +77,10 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
     mNoPreemptiveDispatchBuffers(),
 #endif
-    //    mCurrentBuffers ( NULL ),
     mId ( aClientInterface.mId ),
     mTimeoutPeriod ( aClientInterface.mTimeoutPeriod ),
     mUri ( aClientInterface.mUri )
   {
-    //     log ( Warning() , ThisLocation()  );
   }
 
 
@@ -182,7 +174,6 @@ namespace uhal
   }
 
 
-
   void ClientInterface::dispatch ()
   {
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
@@ -223,18 +214,12 @@ namespace uhal
   }
 
 
-
   void ClientInterface::Flush ()
   {}
 
 
   exception::exception* ClientInterface::validate ( boost::shared_ptr< Buffers > aBuffers )
   {
-    // std::cout << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
-    // log ( Debug() , ThisLocation() );
-    //check that the results are valid
-    // log ( Warning() , "mDispatchSideMutex SET AT " , ThisLocation() );
-    //std::cout << mDispatchedBuffers.size() << std::endl;
     exception::exception* lRet = this->validate ( aBuffers->getSendBuffer() ,
                                  aBuffers->getSendBuffer() + aBuffers->sendCounter() ,
                                  aBuffers->getReplyBuffer().begin() ,
@@ -260,6 +245,7 @@ namespace uhal
   void ClientInterface::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {}
 
+
   void ClientInterface::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {}
 
@@ -267,7 +253,6 @@ namespace uhal
 
   void ClientInterface::returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers )
   {
-    // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 
     if ( aBuffers )
@@ -275,8 +260,6 @@ namespace uhal
       mBuffers.push_back ( aBuffers );
       aBuffers.reset();
     }
-
-    // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
   }
 
 
@@ -339,19 +322,6 @@ namespace uhal
     updateCurrentBuffers();
     uint32_t lSendBufferFreeSpace ( this->getMaxSendSize() - mCurrentBuffers->sendCounter() );
     uint32_t lReplyBufferFreeSpace ( this->getMaxReplySize() - mCurrentBuffers->replyCounter() );
-    // log ( Debug() , "Current buffer:\n" ,
-    // " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
-    // " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
-    // "\n" ,
-    // " mMaxSendSize " , Integer( mMaxSendSize ) ,
-    // " | mMaxReplySize " , Integer( mMaxReplySize ) ,
-    // "\n" ,
-    // " lBuffers->sendCounter() " , Integer( lBuffers->sendCounter() ) ,
-    // " | lBuffers->replyCounter() " , Integer( lBuffers->replyCounter() ) ,
-    // "\n" ,
-    // " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
-    // " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
-    // );
 
     if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
     {
@@ -368,10 +338,6 @@ namespace uhal
     }
 
 #ifdef NO_PREEMPTIVE_DISPATCH
-    //     if ( !mCurrentBuffers )
-    //     {
-    //       std::cout << "Buffer is NULL" << std::endl;
-    //     }
     mNoPreemptiveDispatchBuffers.push_back ( mCurrentBuffers );
     mCurrentBuffers.reset();
 #else
@@ -393,19 +359,6 @@ namespace uhal
     updateCurrentBuffers();
     lSendBufferFreeSpace = this->getMaxSendSize() - mCurrentBuffers->sendCounter();
     lReplyBufferFreeSpace = this->getMaxReplySize() - mCurrentBuffers->replyCounter();
-    // log ( Debug() , "Newly created buffer:\n" ,
-    // " aRequestedSendSize " , Integer( aRequestedSendSize ) ,
-    // " | aRequestedReplySize " , Integer( aRequestedReplySize ) ,
-    // "\n" ,
-    // " mMaxSendSize " , Integer( mMaxSendSize ) ,
-    // " | mMaxReplySize " , Integer( mMaxReplySize ) ,
-    // "\n" ,
-    // " lBuffers->sendCounter() " , Integer( lBuffers->sendCounter() ) ,
-    // " | lBuffers->replyCounter() " , Integer( lBuffers->replyCounter() ) ,
-    // "\n" ,
-    // " lSendBufferFreeSpace " , Integer(lSendBufferFreeSpace) ,
-    // " | lReplyBufferFreeSpace " , Integer(lReplyBufferFreeSpace)
-    // );
 
     if ( ( aRequestedSendSize <= lSendBufferFreeSpace ) && ( aRequestedReplySize <= lReplyBufferFreeSpace ) )
     {
@@ -420,12 +373,12 @@ namespace uhal
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
   void ClientInterface::updateCurrentBuffers()
   {
     if ( ! mCurrentBuffers )
     {
       {
-        // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
         boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 
         if ( mBuffers.size() == 0 )
@@ -439,52 +392,27 @@ namespace uhal
         mCurrentBuffers = mBuffers.front();
         mBuffers.pop_front();
         mCurrentBuffers->clear();
-        // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
       }
       this->preamble ( mCurrentBuffers );
     }
   }
 
 
-
-
   void ClientInterface::deleteBuffers()
   {
-    // std::cout << "LOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
-    /*    for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = mBuffers.begin(); lIt != mBuffers.end(); ++lIt )
-        {
-          if ( *lIt )
-          {
-            delete *lIt;
-            *lIt = NULL;
-          }
-        }*/
     mBuffers.clear();
-    //
+
 #ifdef NO_PREEMPTIVE_DISPATCH
-    /*    for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
-        {
-          if ( *lIt )
-          {
-            delete *lIt;
-            *lIt = NULL;
-          }
-        }*/
     mNoPreemptiveDispatchBuffers.clear();
 #endif
 
     if ( mCurrentBuffers )
     {
-      //      delete mCurrentBuffers;
       mCurrentBuffers.reset();
     }
 
-    // std::cout << "UNLOCKED @ " << __FILE__ << ":" << __FUNCTION__ << ":" << __LINE__ << std::endl;
   }
-
-
-
 
 
   void ClientInterface::dispatchExceptionHandler()
@@ -493,12 +421,12 @@ namespace uhal
   }
 
 
-
   std::pair < ValHeader , _ValHeader_* > ClientInterface::CreateValHeader()
   {
     ValHeader lReply;
     return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
   }
+
 
   std::pair < ValWord<uint32_t> , _ValWord_<uint32_t>* > ClientInterface::CreateValWord ( const uint32_t& aValue , const uint32_t& aMask )
   {
@@ -506,23 +434,24 @@ namespace uhal
     return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
   }
 
+
   std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > ClientInterface::CreateValVector ( const uint32_t& aSize )
   {
     ValVector<uint32_t> lReply ( aSize );
     return std::make_pair ( lReply , & ( * ( lReply.mMembers ) ) );
   }
 
+
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementWrite ( aAddr , aSource );
   }
 
+
   ValHeader ClientInterface::write ( const uint32_t& aAddr, const uint32_t& aSource, const uint32_t& aMask )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     uint32_t lShiftSize ( utilities::TrailingRightBits ( aMask ) );
     uint32_t lBitShiftedSource ( aSource << lShiftSize );
@@ -549,43 +478,41 @@ namespace uhal
     return ( ValHeader ) ( implementRMWbits ( aAddr , ~aMask , lBitShiftedSource & aMask ) );
   }
 
+
   ValHeader ClientInterface::writeBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementWriteBlock ( aAddr, aSource, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRead ( aAddr );
   }
 
+
   ValWord< uint32_t > ClientInterface::read ( const uint32_t& aAddr, const uint32_t& aMask )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRead ( aAddr, aMask );
   }
 
+
   ValVector< uint32_t > ClientInterface::readBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementReadBlock ( aAddr, aSize, aMode );
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_bits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRMWbits ( aAddr , aANDterm , aORterm );
   }
@@ -595,7 +522,6 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > ClientInterface::rmw_sum ( const uint32_t& aAddr , const int32_t& aAddend )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementRMWsum ( aAddr , aAddend );
   }
@@ -615,6 +541,7 @@ namespace uhal
       mTimeoutPeriod = boost::posix_time::milliseconds ( aTimeoutPeriod );
     }
   }
+
 
   uint64_t ClientInterface::getTimeoutPeriod()
   {

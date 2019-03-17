@@ -63,9 +63,7 @@ namespace uhal
       */
       Buffers ( const uint32_t& aMaxSendSize = 65536 );
 
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~Buffers();
 
       /**
@@ -137,23 +135,11 @@ namespace uhal
       */
       void add ( const ValWord< uint32_t >& aValMem );
 
-      // /*
-      // Helper function to associate a validated memory with this buffer so that it is guaranteed to exist when the transaction is performed
-      // @param aValMem a validated memory to be associated with this buffer
-      // */
-      // void add ( const ValWord< int32_t >& aValMem );
-
       /**
       	Helper function to associate a validated memory with this buffer so that it is guaranteed to exist when the transaction is performed
       	@param aValMem a validated memory to be associated with this buffer
       */
       void add ( const ValVector< uint32_t >& aValMem );
-
-      // /*
-      // Helper function to associate a validated memory with this buffer so that it is guaranteed to exist when the transaction is performed
-      // @param aValMem a validated memory to be associated with this buffer
-      // */
-      // void add ( const ValVector< int32_t >& aValMem );
 
       /**
       	Get a pointer to the start of the send buffer
@@ -167,14 +153,10 @@ namespace uhal
       */
       std::deque< std::pair< uint8_t* , uint32_t > >& getReplyBuffer();
 
-      /**
-      	Helper function to mark all validated memories associated with this buffer as valid
-      */
+      //! Helper function to mark all validated memories associated with this buffer as valid
       void validate ();
 
-      /**
-        Clear the counters and the reply buffers
-      */
+      //! Clear the counters and the reply buffers
       void clear();
 
     private:
@@ -192,17 +174,9 @@ namespace uhal
       std::deque< ValHeader > mValHeaders;
       //! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
       std::deque< ValWord< uint32_t > > mUnsignedValWords;
-      // Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
-      // std::deque< ValWord< int32_t > > mSignedValWords;
       //! Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
       std::deque< ValVector< uint32_t > > mUnsignedValVectors;
-      // Deque holding validated memories so that they are guaranteed to exist when the transaction is performed
-      // std::deque< ValVector< int32_t > > mSignedValVectors;
   };
-
-
-
-
 
 }
 
