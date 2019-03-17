@@ -32,8 +32,11 @@
 #ifndef _uhal_tests_TCPDummyHardware_hpp_
 #define _uhal_tests_TCPDummyHardware_hpp_
 
+
 #include <boost/asio.hpp>
+
 #include "uhal/tests/DummyHardware.hpp"
+
 
 namespace uhal {
   namespace tests {
@@ -61,9 +64,7 @@ namespace uhal {
           mAcceptor.listen();
         }
   
-        /**
-          Destructor
-        */
+        //! Destructor
         ~TCPDummyHardware()
         {
         }
@@ -94,7 +95,6 @@ namespace uhal {
         boost::asio::ip::tcp::endpoint mSenderEndpoint;
         //! Value of 'byte count' header at start of latest TCP chunk
         uint32_t mByteCountHeader;
-
     };
   }
 }

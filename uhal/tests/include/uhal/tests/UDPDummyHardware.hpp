@@ -60,9 +60,7 @@ namespace uhal {
       {
       }
   
-      /**
-        Destructor
-      */
+      //! Destructor
       ~UDPDummyHardware()
       {
       }

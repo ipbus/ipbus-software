@@ -119,9 +119,7 @@ namespace uhal
 
         uint32_t GetEndpoint( const uint32_t& aAddress );
 
-        /**
-          Analyse request and create reply when a Byte-OrderTransaction is observed
-        */    
+        //! Analyse request and create reply when a Byte-OrderTransaction is observed
         void bot();
 
         /**
@@ -173,29 +171,19 @@ namespace uhal
         */
         void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm );
   
-        /**
-          Analyse request and create reply when the header is unknown
-        */
+        //! Analyse request and create reply when the header is unknown
         void unknown_type();
   
-        /**
-          Analyse request and create reply when an IPbus 2.0 control packet header is observed
-        */
+        //! Analyse request and create reply when an IPbus 2.0 control packet header is observed
         bool control_packet_header();
   
-        /**
-          Analyse request and create reply when an IPbus 2.0 status packet header is observed
-        */
+        //! Analyse request and create reply when an IPbus 2.0 status packet header is observed
         void status_packet_header();
   
-        /**
-          Analyse request and create reply when an IPbus 2.0 resend packet header is observed
-        */
+        //! Analyse request and create reply when an IPbus 2.0 resend packet header is observed
         void resend_packet_header();
   
-        /**
-          Analyse request and create reply when an unknown IPbus 2.0 packet header is observed
-        */
+        //! Analyse request and create reply when an unknown IPbus 2.0 packet header is observed
         void unknown_packet_header();
   
   
@@ -229,7 +217,6 @@ namespace uhal
       private:
         //! Whether we are talking to an IPbus client which includes the big-endian hack
         bool mBigEndianHack;
-  
     };
   }
 

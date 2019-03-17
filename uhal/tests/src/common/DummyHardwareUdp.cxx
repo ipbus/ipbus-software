@@ -33,8 +33,8 @@
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
 #include "uhal/log/log.hpp"
-#include "uhal/tests/UDPDummyHardware.hpp"
 #include "uhal/tests/DummyHardwareOptions.hpp"
+#include "uhal/tests/UDPDummyHardware.hpp"
 
 
 using namespace uhal;
