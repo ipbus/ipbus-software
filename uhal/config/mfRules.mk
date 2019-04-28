@@ -2,13 +2,13 @@
 PackagePath := $(shell cd ${PackagePath}; pwd)
 
 # Library sources
-LibrarySources = $(wildcard src/common/*.cpp) $(wildcard src/common/**/*.cpp)
+LibrarySources = $(sort $(wildcard src/common/*.cpp) $(wildcard src/common/**/*.cpp))
 # Filter undesired files
 LibrarySourcesFiltered = $(filter-out ${IgnoreSources}, ${LibrarySources})
 # Turn them into objects
 LibraryObjectFiles = $(patsubst src/common/%.cpp,${PackagePath}/obj/%.o,${LibrarySourcesFiltered})
 
-ExecutableSources = $(wildcard src/common/*.cxx)
+ExecutableSources =$(sort $(wildcard src/common/*.cxx))
 # Filter undesired files
 ExecutableSourcesFiltered = $(filter-out ${IgnoreSources}, ${ExecutableSources})
 # Turn them into objects
