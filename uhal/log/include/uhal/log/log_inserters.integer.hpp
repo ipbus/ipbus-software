@@ -198,6 +198,11 @@ namespace uhal
   template< typename FORMAT >
   std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< int64_t , FORMAT >& aInt );
 
+#if __SIZEOF_LONG__ == 4
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< long int , FORMAT >& aInt );
+#endif
+
 #ifdef __APPLE__ 
   template< typename FORMAT > 
   std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< size_t , FORMAT >& aInt ); 

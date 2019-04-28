@@ -309,6 +309,15 @@ namespace uhal
     return aStr;
   }
 
+#if __SIZEOF_LONG__ == 4
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< long int , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
+#endif
+
 #ifdef __APPLE__ 
   template< typename FORMAT > 
   std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< size_t , FORMAT >& aInt ) 
