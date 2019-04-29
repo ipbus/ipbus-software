@@ -54,6 +54,11 @@ int main ( int argc, char* argv[] )
     UDPDummyHardware<2,0> lDummyHardware ( lOptions.port , lOptions.delay, lOptions.bigendian );
     lDummyHardware.run();
   }
+  else if ( lOptions.version == 3 )
+  {
+    UDPDummyHardware<3,0> lDummyHardware ( lOptions.port , lOptions.delay, lOptions.bigendian );
+    lDummyHardware.run();
+  }
   else
   {
     log ( Error() , "Unknown IPbus version, " , Integer ( lOptions.version ) );

@@ -76,14 +76,11 @@ namespace uhal
 
         // PRIVATE TYPEDEFS
 
-        /// An unsigned 32-bit word.
-        typedef uint32_t U32;
-
         /// A vector of unsigned 32-bit words.
-        typedef std::vector< U32 > U32Vec;
+        typedef std::vector< uint32_t > U32Vec;
 
-        /// A Validated Vector of U32
-        typedef uhal::ValVector< U32 > U32ValVec;
+        /// A Validated Vector of uint32_t
+        typedef uhal::ValVector< uint32_t > U32ValVec;
 
         /// A vector of strings
         typedef std::vector< std::string > StringVec;
@@ -144,10 +141,8 @@ namespace uhal
         static uint32_t getRandomBlockSize ( const uint32_t maxSize );
 
         /// Returns a buffer of random numbers
-        static U32Vec getRandomBuffer ( unsigned size );
-
-        /// Compares a write buffer with one or more ValVec read responses
-        bool buffersEqual ( const U32Vec& writeBuffer, const U32ValVec& readBuffer ) const;
+        template <typename T>
+        static std::vector<T> getRandomBuffer ( unsigned size );
 
         /// Validation test -- single-register write/read-back
         static bool validation_test_single_write_read ( uhal::ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose );
@@ -167,13 +162,13 @@ namespace uhal
         void bandwidthTxTest();  ///< Write bandwidth test
         void validationTest();   ///< Historic basic firmware/software validation test
 
+        static uint8_t getIPbusMajorVsn(const std::string& aURI);
+
     public:
 
         static bool runValidationTest(const std::vector<ClientInterface*>& aClients, const uint32_t aBaseAddr, const uint32_t aDepth, const size_t aNrIterations, const bool aDispatchEachIteration, const bool aVerbose);
 
     private:
-        void sandbox();          ///< An area for a user-definable test
-
         // PRIVATE CLASSES
 
         class QueuedTransaction
@@ -182,66 +177,73 @@ namespace uhal
             QueuedTransaction() {  }
             virtual ~QueuedTransaction() {  }
 
-            virtual bool check_values() = 0;
+            virtual bool checkValues() = 0;
         };
 
 
+        template <typename T>
         class QueuedBlockRead : public QueuedTransaction
         {
           public:
-            QueuedBlockRead ( const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt );
+            QueuedBlockRead ( const uint32_t aAddr, const ValVector<T>& aValVector, std::vector<uint64_t>::const_iterator aExpectedBeginIt );
             ~QueuedBlockRead();
 
-            virtual bool check_values();
+            virtual bool checkValues();
 
           private:
             // PRIVATE MEMBER DATA
-            uint32_t m_depth, m_addr;
-            ValVector<uint32_t> m_valVector;
-            std::vector<uint32_t> m_expected;
+            uint32_t mAddr;
+            ValVector<T> mValVector;
+            std::vector<T> mExpected;
         };
 
 
+        template <typename T>
         class QueuedBlockWrite : public QueuedTransaction
         {
           public:
-            QueuedBlockWrite ( const uint32_t addr, const uint32_t depth, const ValHeader& valHeader );
+            QueuedBlockWrite ( const uint32_t aAddr, const size_t aDepth, const ValHeader& aValHeader );
             ~QueuedBlockWrite();
 
-            virtual bool check_values();
+            virtual bool checkValues();
 
           private:
             // PRIVATE MEMBER DATA
-            uint32_t m_depth, m_addr;
-            ValHeader m_valHeader;
+            size_t mDepth;
+            uint32_t mAddr;
+            ValHeader mValHeader;
         };
 
 
+        template <typename T>
         class QueuedRmwBits : public QueuedTransaction
         {
           public:
-            QueuedRmwBits ( const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected );
+            QueuedRmwBits ( const uint32_t aAddr, const T a, const T b, const ValWord<T>& aValWord, const T aExpected );
             ~QueuedRmwBits();
-            virtual bool check_values();
+            virtual bool checkValues();
 
           private:
-            const uint32_t m_addr, m_and, m_or;
-            ValWord<uint32_t> m_valWord;
-            const uint32_t m_expected;
+            const uint32_t mAddr;
+            const T mAnd, mOr;
+            ValWord<T> mValWord;
+            const T mExpected;
         };
 
 
+        template <typename T>
         class QueuedRmwSum : public QueuedTransaction
         {
           public:
-            QueuedRmwSum ( const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected );
+            QueuedRmwSum ( const uint32_t aAddr, const T aAddend, const ValWord<T>& aValWord, const T aExpected);
             ~QueuedRmwSum();
-            virtual bool check_values();
+            virtual bool checkValues();
 
           private:
-            const uint32_t m_addr, m_addend;
-            ValWord<uint32_t> m_valWord;
-            const uint32_t m_expected;
+            const uint32_t mAddr;
+            const T mAddend;
+            ValWord<T> mValWord;
+            const T mExpected;
         };
 
     }; /* End of class PerfTester */

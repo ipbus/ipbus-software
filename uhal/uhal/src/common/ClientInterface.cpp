@@ -330,7 +330,7 @@ namespace uhal
       return mCurrentBuffers;
     }
 
-    if ( ( lSendBufferFreeSpace > 16 ) && ( lReplyBufferFreeSpace > 16 ) )
+    if ( ( lSendBufferFreeSpace > 24 ) && ( lReplyBufferFreeSpace > 16 ) )
     {
       aAvailableSendSize = lSendBufferFreeSpace;
       aAvailableReplySize = lReplyBufferFreeSpace;

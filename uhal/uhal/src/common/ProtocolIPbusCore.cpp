@@ -298,6 +298,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( WRITE , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -324,6 +326,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( WRITE , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -455,6 +459,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( READ , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -480,6 +486,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( READ , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -630,6 +638,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( RMW_BITS , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -659,6 +669,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( RMW_BITS , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -689,6 +701,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( RMW_SUM , DATA32 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );
@@ -715,6 +729,8 @@ namespace uhal
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
     boost::shared_ptr< Buffers > lBuffers = checkBufferSpace ( lSendByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
+    assert (lSendBytesAvailable >= lSendByteCount);
+    assert (lReplyBytesAvailable >= lReplyByteCount);
     lBuffers->send ( implementCalculateHeader ( RMW_SUM , DATA64 , 1 , mTransactionCounter++ , requestTransactionInfoCode()
                                               ) );
     lBuffers->send ( aAddr );

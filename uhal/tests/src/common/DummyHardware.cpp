@@ -165,7 +165,11 @@ namespace uhal
     {
       if( ! mMemory.size() )
         mMemory.resize( ADDRESSMASK + 1 );
-      mMemory.at ( aAddress & ADDRESSMASK ) = aValue;
+      if (base_type::mDataWidth == DATA64)
+        mMemory.at ( aAddress & ADDRESSMASK ) = aValue;
+      else {
+        mMemory.at ( aAddress & ADDRESSMASK ) = ( mMemory.at ( aAddress & ADDRESSMASK ) & 0xFFFFFFFF00000000 ) | uint32_t(aValue);
+      }
     }
 
 

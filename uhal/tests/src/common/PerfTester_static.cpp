@@ -55,9 +55,11 @@
 using namespace std;
 
 
+namespace uhal {
+namespace tests {
 
 
-uint32_t uhal::tests::PerfTester::getRandomBlockSize ( const uint32_t maxSize )
+uint32_t PerfTester::getRandomBlockSize ( const uint32_t maxSize )
 {
   // Generate uniformly-distributed random float in range: 0 <= x < 1
   const double uniformRandom = static_cast<double> ( rand() ) / RAND_MAX; //TODO -- replace with boost::random random-double-generating function
@@ -79,9 +81,10 @@ uint32_t uhal::tests::PerfTester::getRandomBlockSize ( const uint32_t maxSize )
 }
 
 
-uhal::tests::PerfTester::U32Vec uhal::tests::PerfTester::getRandomBuffer ( unsigned size )
+template <>
+std::vector<uint32_t> PerfTester::getRandomBuffer<uint32_t>( unsigned size )
 {
-  U32Vec buffer;
+  std::vector<uint32_t> buffer;
   buffer.reserve ( size );
 
   // Never said anything about it being a flat random distribution... ;-)
@@ -94,8 +97,24 @@ uhal::tests::PerfTester::U32Vec uhal::tests::PerfTester::getRandomBuffer ( unsig
 }
 
 
+template<>
+std::vector<uint64_t> PerfTester::getRandomBuffer<uint64_t>( unsigned size )
+{
+  std::vector<uint64_t> buffer;
+  buffer.reserve ( size );
+
+  // Never said anything about it being a flat random distribution... ;-)
+  for ( unsigned i = 0 ; i < size ; ++i )
+  {
+    buffer.push_back ( ( uint64_t(rand() + rand()) << 32 ) | uint64_t(rand() + rand()) );
+  }
+
+  return buffer;
+}
+
+
 // Validation test -- single-register write/read-back
-bool uhal::tests::PerfTester::validation_test_single_write_read ( ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose )
+bool PerfTester::validation_test_single_write_read ( ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose )
 {
   std::ostringstream oss_details;
   oss_details << "Single-register write-read @ 0x" << std::hex << addr << ( perTransactionDispatch ? " (multiple dispatches)" : " (single dispatch)" );
@@ -136,7 +155,7 @@ bool uhal::tests::PerfTester::validation_test_single_write_read ( ClientInterfac
 
 
 // Validation test -- block write/read-back
-bool uhal::tests::PerfTester::validation_test_block_write_read ( ClientInterface& c, const uint32_t addr, const uint32_t depth, const bool perTransactionDispatch, const bool aVerbose )
+bool PerfTester::validation_test_block_write_read ( ClientInterface& c, const uint32_t addr, const uint32_t depth, const bool perTransactionDispatch, const bool aVerbose )
 {
   std::ostringstream oss_details;
   oss_details << depth << "-word write-read @ 0x" << std::hex << addr;
@@ -153,7 +172,7 @@ bool uhal::tests::PerfTester::validation_test_block_write_read ( ClientInterface
     cout << "Running test: " << oss_details.str() << endl;
   }
 
-  const U32Vec xx = getRandomBuffer ( depth );
+  const std::vector<uint32_t> xx = getRandomBuffer<uint32_t>( depth );
 
   try
   {
@@ -164,7 +183,7 @@ bool uhal::tests::PerfTester::validation_test_block_write_read ( ClientInterface
       c.dispatch();
     }
 
-    U32ValVec ram = c.readBlock ( addr, depth );
+    uhal::ValVector<uint32_t> ram = c.readBlock ( addr, depth );
     c.dispatch();
     std::vector<uint32_t>::const_iterator valVecIt = ram.begin();
     std::vector<uint32_t>::const_iterator xxIt = xx.begin();
@@ -192,7 +211,7 @@ bool uhal::tests::PerfTester::validation_test_block_write_read ( ClientInterface
 
 
 // Validation test -- write, RMW bits, read
-bool uhal::tests::PerfTester::validation_test_write_rmwbits_read ( ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose )
+bool PerfTester::validation_test_write_rmwbits_read ( ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose )
 {
   std::ostringstream oss_details;
   oss_details << "RMW-bits @ 0x" << std::hex << addr << ( perTransactionDispatch ? " (multiple dispatches)" : " (single dispatch)" );
@@ -253,7 +272,7 @@ bool uhal::tests::PerfTester::validation_test_write_rmwbits_read ( ClientInterfa
 }
 
 // Validation test -- write, RMW sum, read
-bool uhal::tests::PerfTester::validation_test_write_rmwsum_read ( ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose )
+bool PerfTester::validation_test_write_rmwsum_read ( ClientInterface& c, const uint32_t addr, const bool perTransactionDispatch, const bool aVerbose )
 {
   std::ostringstream oss_details;
   oss_details << "RMW-sum @ 0x" << std::hex << addr << ( perTransactionDispatch ? " (multiple dispatches)" : " (single dispatch)" );
@@ -311,8 +330,28 @@ bool uhal::tests::PerfTester::validation_test_write_rmwsum_read ( ClientInterfac
   return true;
 }
 
+uint8_t PerfTester::getIPbusMajorVsn(const std::string& aURI)
+{
+  if ( aURI.find ( "-1.3" ) != std::string::npos )
+  {
+    return 1;
+  }
+  else if ( aURI.find ( "-2.0" ) != std::string::npos )
+  {
+    return 2;
+  }
+  else if ( aURI.find ( "-3.0" ) != std::string::npos )
+  {
+    return 3;
+  }
+  else
+  {
+    throw std::runtime_error("Cannot deduce protocol from URI \"" + aURI + "\"" );
+  }
+}
 
-bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterface*>& aClients, const uint32_t aBaseAddr, const uint32_t aDepth, const size_t aNrIterations, const bool aDispatchEachIteration, const bool aVerbose)
+
+bool PerfTester::runValidationTest(const std::vector<ClientInterface*>& aClients, const uint32_t aBaseAddr, const uint32_t aDepth, const size_t aNrIterations, const bool aDispatchEachIteration, const bool aVerbose)
 {
   unsigned nrTestsFailed = 0;
   unsigned nrTestsTotal  = 0;
@@ -439,86 +478,90 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
     ClientInterface* client = *clientIt;
     cout << "\nSOAK TEST to device '" << client->uri() << "'\n   Random sequence of " << aNrIterations << " transactions will be sent to hardware" << endl << endl;
     // Setup
-    uint32_t ipbus_vsn;
+    uint8_t lIPbusMajorVsn = getIPbusMajorVsn(client->uri());
 
-    if ( client->uri().find ( "-1.3" ) != std::string::npos )
-    {
-      ipbus_vsn = 1;
-    }
-    else
-    {
-      if ( client->uri().find ( "-2.0" ) != std::string::npos )
-      {
-        ipbus_vsn = 2;
-      }
-      else if ( client->uri().find ( "-3.0" ) != std::string::npos )
-      {
-        ipbus_vsn = 3;
-      }
-      else
-      {
-        log ( Error() , "Cannot deduce protocol from URI " , Quote ( client->uri() ), "  Exiting before performing soak test." );
-        return false;
-      }
-    }
 
     // Initialise registers to 0x0
-    std::vector< uint32_t > registers ( aDepth , 0x00000000 );
-    client->writeBlock ( aBaseAddr, registers );
+    std::vector< uint64_t > registers ( aDepth , 0x00000000 );
+    client->writeBlock64 ( aBaseAddr, registers );
     client->dispatch();
     // ACTUAL MEAT OF SOAK TEST
     uint32_t type, addr, blockSize;
-    uint32_t tempUInt1, tempUInt2;
+    uint64_t tempUInt1, tempUInt2;
     vector< boost::shared_ptr<QueuedTransaction> > queuedTransactions;
     uint32_t nrQueuedWords = 0;
 
     for ( unsigned i = 1; i <= aNrIterations; i++ )
     {
-      type = ( rand() % 4 );
+      type = ( rand() % 8 );
       addr = aBaseAddr + ( rand() % aDepth );
 
       switch ( type )
       {
-        case 0: // read
+        case 0: // read (32 bit data)
         {
           blockSize = getRandomBlockSize ( aBaseAddr + aDepth - addr );
           log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
 
           ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead ( addr, result, registers.begin() + ( addr - aBaseAddr ) ) ) );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead<uint32_t>( addr, result, registers.begin() + ( addr - aBaseAddr ) ) ) );
           nrQueuedWords += blockSize;
           break;
         }
-        case 1: // write
+        case 1: // read (64 bit data)
+        {
+          blockSize = getRandomBlockSize ( aBaseAddr + aDepth - addr );
+          log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word 64-bit read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+
+          ValVector<uint64_t> result = client->readBlock64 ( addr, blockSize, defs::INCREMENTAL );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead<uint64_t>( addr, result, registers.begin() + ( addr - aBaseAddr ) ) ) );
+          nrQueuedWords += blockSize;
+          break;
+        }
+        case 2: // write (32 bit data)
         {
           blockSize = getRandomBlockSize ( aBaseAddr + aDepth - addr );
           log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
 
-          vector<uint32_t> randomData = getRandomBuffer ( blockSize );
+          vector<uint32_t> randomData = getRandomBuffer<uint32_t>( blockSize );
           ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
-          std::copy ( randomData.begin(), randomData.end(), registers.begin() + ( addr - aBaseAddr ) );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockWrite ( addr, blockSize, result ) ) );
+          for (size_t i=0; i < blockSize; i++)
+            registers.at(addr + i - aBaseAddr) = (registers.at(addr + i - aBaseAddr) & uint64_t(0xFFFFFFFF00000000)) | uint64_t(randomData.at(i));
+          // std::copy ( randomData.begin(), randomData.end(), registers.begin() + ( addr - aBaseAddr ) );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockWrite<uint32_t>( addr, blockSize, result ) ) );
           nrQueuedWords += blockSize;
           break;
         }
-        case 2: // RMW-bits
+        case 3: // write (64 bit data)
+        {
+          blockSize = getRandomBlockSize ( aBaseAddr + aDepth - addr );
+          log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word 64-bit write at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+
+          vector<uint64_t> randomData = getRandomBuffer<uint64_t>( blockSize );
+          ValHeader result = client->writeBlock64 ( addr, randomData, defs::INCREMENTAL );
+          std::copy ( randomData.begin(), randomData.end(), registers.begin() + ( addr - aBaseAddr ) );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockWrite<uint64_t>( addr, blockSize, result ) ) );
+          nrQueuedWords += blockSize;
+          break;
+        }
+        case 4: // RMW-bits (32 bit data)
         {
           log ( Notice(), "Soak test - queueing: RMW-bits at ", Integer ( addr, IntFmt<hex,fixed>() ) );
-          tempUInt1 = rand();
+          tempUInt1 = (uint64_t(0xFFFFFFFF) << 32) | uint64_t(rand());
           tempUInt2 = rand();
-          vector<uint32_t>::iterator regIt = registers.begin() + ( addr - aBaseAddr );
+          vector<uint64_t>::iterator regIt = registers.begin() + ( addr - aBaseAddr );
 
-          if ( ipbus_vsn == 1 )
+          if ( lIPbusMajorVsn == 1 )
           {
             *regIt &= tempUInt1;
             *regIt |= tempUInt2;
           }
 
           ValWord<uint32_t> result = client->rmw_bits ( addr, tempUInt1, tempUInt2 );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwBits ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwBits<uint32_t> ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
           nrQueuedWords += 1;
 
-          if ( ipbus_vsn != 1 )
+          if ( lIPbusMajorVsn != 1 )
           {
             *regIt &= tempUInt1;
             *regIt |= tempUInt2;
@@ -526,22 +569,69 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
 
           break;
         }
-        case 3: // RMW-sum
+        case 5: // RMW-bits (64 bit data)
+        {
+          log ( Notice(), "Soak test - queueing: 64-bit RMW-bits at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+          tempUInt1 = (uint64_t(rand()) << 32) | rand();
+          tempUInt2 = (uint64_t(rand()) << 32) | rand();
+          vector<uint64_t>::iterator regIt = registers.begin() + ( addr - aBaseAddr );
+
+          if ( lIPbusMajorVsn == 1 )
+          {
+            *regIt &= tempUInt1;
+            *regIt |= tempUInt2;
+          }
+
+          ValWord<uint64_t> result = client->rmw_bits64 ( addr, tempUInt1, tempUInt2 );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwBits<uint64_t> ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
+          nrQueuedWords += 1;
+
+          if ( lIPbusMajorVsn != 1 )
+          {
+            *regIt &= tempUInt1;
+            *regIt |= tempUInt2;
+          }
+
+          break;
+        }
+        case 6: // RMW-sum (32 bit data)
         {
           log ( Notice(), "Soak test - queueing: RMW-sum at ", Integer ( addr, IntFmt<hex,fixed>() ) );
           tempUInt1 = rand();
-          vector<uint32_t>::iterator regIt = registers.begin() + ( addr - aBaseAddr );
+          vector<uint64_t>::iterator regIt = registers.begin() + ( addr - aBaseAddr );
 
-          if ( ipbus_vsn == 1 )
+          if ( lIPbusMajorVsn == 1 )
+          {
+            *regIt = (*regIt & uint64_t(0xFFFFFFFF00000000)) | uint32_t(uint32_t(*regIt) + uint32_t(tempUInt1));
+          }
+
+          ValWord<uint32_t> result = client->rmw_sum ( addr, tempUInt1 );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwSum<uint32_t> ( addr, tempUInt1, result, uint32_t(*regIt) ) ) );
+          nrQueuedWords += 1;
+
+          if ( lIPbusMajorVsn != 1 )
+          {
+            *regIt = (*regIt & uint64_t(0xFFFFFFFF00000000)) | uint32_t(uint32_t(*regIt) + uint32_t(tempUInt1));
+          }
+
+          break;
+        }
+        case 7: // RMW-sum (64 bit data)
+        {
+          log ( Notice(), "Soak test - queueing: 64-bit RMW-sum at ", Integer ( addr, IntFmt<hex,fixed>() ) );
+          tempUInt1 = (uint64_t(rand()) << 32) | rand();
+          vector<uint64_t>::iterator regIt = registers.begin() + ( addr - aBaseAddr );
+
+          if ( lIPbusMajorVsn == 1 )
           {
             *regIt += tempUInt1;
           }
 
-          ValWord<uint32_t> result = client->rmw_sum ( addr, tempUInt1 );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwSum ( addr, tempUInt1, result, *regIt ) ) );
+          ValWord<uint64_t> result = client->rmw_sum64 ( addr, tempUInt1 );
+          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwSum<uint64_t> ( addr, tempUInt1, result, *regIt ) ) );
           nrQueuedWords += 1;
 
-          if ( ipbus_vsn != 1 )
+          if ( lIPbusMajorVsn != 1 )
           {
             *regIt += tempUInt1;
           }
@@ -559,7 +649,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
 
         for ( vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++ )
         {
-          if ( ! ( *it )->check_values() )
+          if ( ! ( *it )->checkValues() )
           {
             cout << "ERROR OCCURED IN SOAK TEST to '" << client->uri() << "' - after " << i << " successful transactions" << endl;
             return false;
@@ -585,107 +675,123 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
 
 // PerfTester::QueuedBlockRead MEMBER FUNCTIONS
 
-uhal::tests::PerfTester::QueuedBlockRead::QueuedBlockRead ( const uint32_t addr, const ValVector<uint32_t>& valVector, std::vector<uint32_t>::const_iterator expectedValuesIt ) :
-  m_depth ( valVector.size() ),
-  m_addr ( addr ),
-  m_valVector ( valVector )
+template <typename T>
+PerfTester::QueuedBlockRead<T>::QueuedBlockRead ( const uint32_t aAddr, const ValVector<T>& aValVector, std::vector<uint64_t>::const_iterator aExpectedBeginIt ) :
+  mAddr ( aAddr ),
+  mValVector ( aValVector )
 {
-  m_expected.assign ( expectedValuesIt, expectedValuesIt + m_depth );
+  mExpected.assign ( aExpectedBeginIt, aExpectedBeginIt + aValVector.size() );
 }
 
-uhal::tests::PerfTester::QueuedBlockRead::~QueuedBlockRead()
-{ }
-
-bool uhal::tests::PerfTester::QueuedBlockRead::check_values()
+template <typename T>
+PerfTester::QueuedBlockRead<T>::~QueuedBlockRead()
 {
-  std::vector<uint32_t>::const_iterator valVecIt = m_valVector.begin();
-  std::vector<uint32_t>::const_iterator expdIt = m_expected.begin();
+}
 
-  for ( ; valVecIt != m_valVector.end(); valVecIt++, expdIt++ )
+template <typename T>
+bool PerfTester::QueuedBlockRead<T>::checkValues()
+{
+  typename std::vector<T>::const_iterator lValVecIt = mValVector.begin();
+  typename std::vector<T>::const_iterator lExpdIt = mExpected.begin();
+
+  for ( ; lValVecIt != mValVector.end(); lValVecIt++, lExpdIt++ )
   {
-    if ( ( *valVecIt ) != ( *expdIt ) )
+    if ( ( *lValVecIt ) != ( *lExpdIt ) )
     {
-      uint32_t addr = m_addr + ( valVecIt - m_valVector.begin() );
-      log ( Error(), "TEST FAILED: In ", Integer ( m_depth ), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), ", register ", Integer ( addr, IntFmt<hex,fixed>() ), " has value ", Integer ( *valVecIt, IntFmt<hex,fixed>() ), ", but expected value ", Integer ( *expdIt, IntFmt<hex,fixed>() ) );
+      uint32_t lAddr = mAddr + ( lValVecIt - mValVector.begin() );
+      log ( Error(), "TEST FAILED: In ", Integer ( mValVector.size() ), "-word read @ ", Integer ( mAddr, IntFmt<hex,fixed>() ), ", register ", Integer ( mAddr, IntFmt<hex,fixed>() ), " has value ", Integer ( *lValVecIt, IntFmt<hex,fixed>() ), ", but expected value ", Integer ( *lExpdIt, IntFmt<hex,fixed>() ) );
       return false;
     }
   }
 
-  log ( Notice(), "TEST PASSED: Incrementing ", Integer ( m_depth ), "-word read @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " --> ", Integer ( m_addr + m_depth - 1, IntFmt<hex,fixed>() ) );
+  log ( Notice(), "TEST PASSED: Incrementing ", Integer ( mValVector.size() ), "-word read @ ", Integer ( mAddr, IntFmt<hex,fixed>() ), " --> ", Integer ( uint32_t(mAddr + mValVector.size() - 1), IntFmt<hex,fixed>() ) );
   return true;
 }
 
 
 // PerfTester::QueuedBlockWrite MEMBER FUNCTIONS
 
-uhal::tests::PerfTester::QueuedBlockWrite::QueuedBlockWrite ( const uint32_t addr, const uint32_t depth, const ValHeader& valHeader ) :
-  m_depth ( depth ),
-  m_addr ( addr ),
-  m_valHeader ( valHeader )
+template <typename T>
+PerfTester::QueuedBlockWrite<T>::QueuedBlockWrite ( const uint32_t aAddr, const size_t aDepth, const ValHeader& aValHeader ) :
+  mDepth ( aDepth ),
+  mAddr ( aAddr ),
+  mValHeader ( aValHeader )
 { }
 
-uhal::tests::PerfTester::QueuedBlockWrite::~QueuedBlockWrite()
+template <typename T>
+PerfTester::QueuedBlockWrite<T>::~QueuedBlockWrite()
 { }
 
-bool uhal::tests::PerfTester::QueuedBlockWrite::check_values()
+template <typename T>
+bool PerfTester::QueuedBlockWrite<T>::checkValues()
 {
-  if ( ! m_valHeader.valid() )
+  if ( ! mValHeader.valid() )
   {
-    log ( Error(), "TEST FAILED: Incrementing ", Integer ( m_depth ), "-word write @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " unsuccessful." );
+    log ( Error(), "TEST FAILED: Incrementing ", Integer ( mDepth ), "-word write @ ", Integer ( mAddr, IntFmt<hex,fixed>() ), " unsuccessful." );
     return false;
   }
 
-  log ( Notice(), "TEST PASSED: Incrementing ", Integer ( m_depth ), "-word write @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " --> ", Integer ( m_addr + m_depth - 1, IntFmt<hex,fixed>() ) );
+  log ( Notice(), "TEST PASSED: Incrementing ", Integer ( mDepth ), "-word write @ ", Integer ( mAddr, IntFmt<hex,fixed>() ), " --> ", Integer ( uint32_t(mAddr + mDepth - 1), IntFmt<hex,fixed>() ) );
   return true;
 }
 
 
 // PerfTester::QueuedRmwBits MEMBER FUNCTIONS
 
-uhal::tests::PerfTester::QueuedRmwBits::QueuedRmwBits ( const uint32_t addr, const uint32_t a, const uint32_t b, const ValWord<uint32_t>& valWord, const uint32_t expected ) :
-  m_addr ( addr ),
-  m_and ( a ),
-  m_or ( b ),
-  m_valWord ( valWord ),
-  m_expected ( expected )
+template <typename T>
+PerfTester::QueuedRmwBits<T>::QueuedRmwBits ( const uint32_t aAddr, const T a, const T b, const ValWord<T>& aValWord, const T aExpected ) :
+  mAddr ( aAddr ),
+  mAnd ( a ),
+  mOr ( b ),
+  mValWord ( aValWord ),
+  mExpected ( aExpected )
 { }
 
-uhal::tests::PerfTester::QueuedRmwBits::~QueuedRmwBits()
+template <typename T>
+PerfTester::QueuedRmwBits<T>::~QueuedRmwBits()
 { }
 
-bool uhal::tests::PerfTester::QueuedRmwBits::check_values()
+template <typename T>
+bool PerfTester::QueuedRmwBits<T>::checkValues()
 {
-  if ( m_valWord.value() != m_expected )
+  if ( mValWord.value() != mExpected )
   {
-    log ( Error(), "TEST FAILED: RMW-bits @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), " (AND=", Integer ( m_and, IntFmt<hex,fixed>() ), ", OR=", Integer ( m_or, IntFmt<hex,fixed>() ), "). Transaction returned ", Integer ( m_valWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( m_expected, IntFmt<hex,fixed>() ) );
+    log ( Error(), "TEST FAILED: RMW-bits @ ", Integer ( mAddr, IntFmt<hex,fixed>() ), " (AND=", Integer ( mAnd, IntFmt<hex,fixed>() ), ", OR=", Integer ( mOr, IntFmt<hex,fixed>() ), "). Transaction returned ", Integer ( mValWord.value(), IntFmt<hex,fixed>() ), ", but expected ", Integer ( mExpected, IntFmt<hex,fixed>() ) );
     return false;
   }
 
-  log ( Notice(), "TEST PASSED: RMW-bits @ ", Integer ( m_addr, IntFmt<hex,fixed>() ) );
+  log ( Notice(), "TEST PASSED: RMW-bits @ ", Integer ( mAddr, IntFmt<hex,fixed>() ) );
   return true;
 }
 
 
 // PerfTester::QueuedRmwSum MEMBER FUNCTIONS
 
-uhal::tests::PerfTester::QueuedRmwSum::QueuedRmwSum ( const uint32_t addr, const uint32_t a, const ValWord<uint32_t>& valWord, const uint32_t expected ) :
-  m_addr ( addr ),
-  m_addend ( a ),
-  m_valWord ( valWord ),
-  m_expected ( expected )
+template <typename T>
+PerfTester::QueuedRmwSum<T>::QueuedRmwSum ( const uint32_t aAddr, const T aAddend, const ValWord<T>& aValWord, const T aExpected ) :
+  mAddr ( aAddr ),
+  mAddend ( aAddend ),
+  mValWord ( aValWord ),
+  mExpected ( aExpected )
 { }
 
-uhal::tests::PerfTester::QueuedRmwSum::~QueuedRmwSum()
+template <typename T>
+PerfTester::QueuedRmwSum<T>::~QueuedRmwSum()
 { }
 
-bool uhal::tests::PerfTester::QueuedRmwSum::check_values()
+template <typename T>
+bool PerfTester::QueuedRmwSum<T>::checkValues()
 {
-  if ( m_valWord.value() != m_expected )
+  if ( mValWord.value() != mExpected )
   {
-    log ( Error(), "TEST FAILED: RMW-sum @ ", Integer ( m_addr, IntFmt<hex,fixed>() ), ", ADDEND=", Integer ( m_addend, IntFmt<hex,fixed>() ), ". Transaction returned ", Integer ( m_valWord.value(), IntFmt<hex,fixed>() ), ", but I expected ", Integer ( m_expected, IntFmt<>() ) );
+    log ( Error(), "TEST FAILED: RMW-sum @ ", Integer ( mAddr, IntFmt<hex,fixed>() ), ", ADDEND=", Integer ( mAddend, IntFmt<hex,fixed>() ), ". Transaction returned ", Integer ( mValWord.value(), IntFmt<hex,fixed>() ), ", but I expected ", Integer ( mExpected, IntFmt<hex,fixed>() ) );
     return false;
   }
 
-  log ( Notice(), "TEST PASSED: RMW-sum @ ", Integer ( m_addr, IntFmt<hex,fixed>() ) );
+  log ( Notice(), "TEST PASSED: RMW-sum @ ", Integer ( mAddr, IntFmt<hex,fixed>() ) );
   return true;
 }
+
+
+} // end ns tests
+} // end ns uhal

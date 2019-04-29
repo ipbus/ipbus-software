@@ -82,9 +82,6 @@ uhal::tests::PerfTester::PerfTester() :
   // Validation test
   m_testFuncMap["Validation"] = &PerfTester::validationTest;
   m_testDescMap["Validation"] = "For validating downstream subsystems, such as the Control Hub or the IPbus firmware.";
-  // Sandbox test
-  m_testFuncMap["Sandbox"] = &PerfTester::sandbox;
-  m_testDescMap["Sandbox"] = "A user-definable test - modify the sandbox() function to whatever you wish.";
   // ***** END DECLARATION OF TESTS *****
   // Initialise random number generator
   srand ( time ( NULL ) );
@@ -285,12 +282,6 @@ void uhal::tests::PerfTester::outputStandardResults ( double totalSeconds ) cons
 }
 
 
-bool uhal::tests::PerfTester::buffersEqual ( const U32Vec& writeBuffer, const U32ValVec& readBuffer ) const
-{
-  return std::equal ( readBuffer.begin(), readBuffer.end(), writeBuffer.begin() );
-}
-
-
 // PRIVATE MEMBER FUNCTIONS - IPbus test functions that users can run
 
 void uhal::tests::PerfTester::bandwidthRxTest()
@@ -357,25 +348,6 @@ void uhal::tests::PerfTester::validationTest()
     std::exit( 1 );
 }
 
-
-void uhal::tests::PerfTester::sandbox()
-{
-  try
-  {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
-    {
-      // *** Your code here ***
-      // For example:
-      ValWord<uint32_t> result = iClient->read ( m_baseAddr );
-      iClient->dispatch();
-      cout << "Read: " << std::hex << result.value() << " from address: " << m_baseAddr << std::dec << endl;
-    }
-  }
-  catch ( const std::exception& e )
-  {
-    cout << e.what() << endl;
-  }
-}
 
 // END OF PerfTester MEMBER FUNCTIONS
 
