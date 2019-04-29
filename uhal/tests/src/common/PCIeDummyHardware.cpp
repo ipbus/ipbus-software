@@ -127,7 +127,7 @@ void PCIeDummyHardware::run()
   while ( !mStop ) {
     int lNrBytes;
     int lRC = ioctl(mDeviceFileHostToFPGA, FIONREAD, &lNrBytes);
-    log (Debug(), "PCIeDummyHardware::run  -  ioctl returns ", Integer(lRC), ", ", lNrBytes, " bytes available");
+    log (Debug(), "PCIeDummyHardware::run  -  ioctl returns ", Integer(lRC), ", ", Integer(lNrBytes), " bytes available");
     assert (lRC == 0);
 
     if (lNrBytes == 0) {
