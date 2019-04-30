@@ -44,6 +44,7 @@
 
 
 #include <deque>                           // for deque
+#include <istream>                         // for istream
 #include <stddef.h>                        // for size_t
 #include <stdint.h>                        // for uint32_t, uint8_t
 #include <string>                          // for string
@@ -100,6 +101,8 @@ namespace uhal
         const std::string& getPath() const;
         void setPath(const std::string& aPath);
 
+        void setOffset(size_t aOffset);
+
         void open();
         void close();
 
@@ -111,7 +114,20 @@ namespace uhal
         std::string mPath;
         int mFd;
         int mFlags;
-        void* mMmapBaseAddress;
+        off_t mOffset;
+        void* mMmapPtr;
+        void* mMmapIOPtr;
+      };
+
+      template <typename T>
+      struct HexTo {
+        T value;
+        operator T() const {return value;}
+        friend std::istream& operator>>(std::istream& in, HexTo& out)
+        {
+          in >> std::hex >> out.value;
+          return in;
+        }
       };
 
       Mmap ( const Mmap& aMmap );
