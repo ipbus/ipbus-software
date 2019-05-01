@@ -143,7 +143,7 @@ int main ( int argc,char* argv[] )
     //     log ( Notice() , "Pointer : " , Pointer ( argv ) );
     //     log ( Notice() , "Pointer : " , Pointer ( *argv ) );
     log ( Notice() , "Quote : " , Quote ( Type< TestStruct<uint32_t> >() ) );
-    log ( std::cout , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
+    log ( Notice() , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
     exception::FileNotFound lExc;
     log ( lExc , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
     log ( lExc , "Specified fixed width hex uint8_t : " , Integer ( uint8_t ( 13 ) , IntFmt<hex , fixed , 10>() ) );
