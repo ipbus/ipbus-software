@@ -8,10 +8,6 @@ gui/MANIFEST
 gui/build/
 gui/dist/
 
-log/include/uhal/log/log.hpp
-log/include/uhal/log/log.hxx
-log/src/common/log.cpp
-log/.generated_files
 log/generator.exe
 
 pycohal/MANIFEST

@@ -64,13 +64,11 @@ endif
 ${GENERATOR_EXE} : ${GENERATOR_OBJ}
 	${LD} ${LDFLAGS} -lstdc++ $< -o $@
 
-${GENERATED_FILES} : .generated_files
-.generated_files : ${GENERATOR_EXE}
+.PHONY: generate_files
+generate_files : ${GENERATOR_EXE}
 	./generator.exe
-	touch .generated_files
 
-.PHONY: _generator_clean
-clean: _generator_clean
-_generator_clean:
+.PHONY: clean_generated_files
+clean_generated_files:
 	rm -rf src/common/log.cpp
 	rm -rf include/uhal/log/log.hpp include/uhal/log/log.hxx
