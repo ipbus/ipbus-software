@@ -342,6 +342,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_single_write_read ( *client, addr_vec.at ( i ), true, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
 
       nrTestsTotal++;
@@ -349,6 +350,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_single_write_read ( *client, addr_vec.at ( i ), false || aDispatchEachIteration, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
     }
 
@@ -365,6 +367,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_block_write_read ( *client, addr, depth, true, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
 
       nrTestsTotal++;
@@ -372,6 +375,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_block_write_read ( *client, addr, depth, false || aDispatchEachIteration, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
     }
 
@@ -384,6 +388,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_write_rmwbits_read ( *client, *it, true, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
 
       nrTestsTotal++;
@@ -391,6 +396,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_write_rmwbits_read ( *client, *it, false || aDispatchEachIteration, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
     }
 
@@ -403,6 +409,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_write_rmwsum_read ( *client, *it, true, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
 
       nrTestsTotal++;
@@ -410,6 +417,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
       if ( ! validation_test_write_rmwsum_read ( *client, *it, false || aDispatchEachIteration, aVerbose ) )
       {
         nrTestsFailed++;
+        std::exit(1);
       }
     }
   }//end: for, m_clients
