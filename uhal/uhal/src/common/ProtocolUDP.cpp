@@ -46,8 +46,8 @@
 
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
-#include "uhal/log/log_inserters.location.hpp"
 #include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log_inserters.type.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/grammars/URI.hpp"
 #include "uhal/Buffers.hpp"
@@ -56,10 +56,6 @@
 
 namespace uhal
 {
-
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
   template < typename InnerProtocol >
   UDP< InnerProtocol >::UDP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
@@ -74,8 +70,6 @@ namespace uhal
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
     mFlushDone ( true ),
-    //    mDispatchBuffers ( NULL ),
-    //    mReplyBuffers ( NULL ),
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
@@ -100,7 +94,7 @@ namespace uhal
     }
     catch ( const std::exception& aExc )
     {
-      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught in " , Type<UDP< InnerProtocol > >(), " destructor" );
     }
   }
 
@@ -113,7 +107,7 @@ namespace uhal
 
     if ( mAsynchronousException )
     {
-      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from 'implementDispatch' method of " , Type<UDP< InnerProtocol > >() );
       mAsynchronousException->ThrowAsDerivedType();
     }
 
@@ -126,7 +120,6 @@ namespace uhal
     if ( mDispatchBuffers || mPacketsInFlight == this->getMaxNumberOfBuffers() )
     {
       mDispatchQueue.push_back ( aBuffers );
-      //   std::cout << "extended mDispatchQueue" << std::endl;
     }
     else
     {
@@ -173,15 +166,6 @@ namespace uhal
       return;
     }
 
-    /*    std::vector<uint32_t>::const_iterator lBegin ( reinterpret_cast<uint32_t*> ( aBuffers->getSendBuffer() ) );
-        std::vector<uint32_t>::const_iterator lEnd = lBegin + ( aBuffers->sendCounter() >>2 );
-        std::vector<uint32_t> lData;
-
-        for ( ; lBegin!=lEnd ; ++lBegin )
-        {
-          std::cout << std::setfill ( '0' ) << std::hex << std::setw ( 8 ) <<  *lBegin << std::endl;
-        }*/
-    //     mAsioSendBuffer.clear();
     std::vector< boost::asio::const_buffer > lAsioSendBuffer;
     lAsioSendBuffer.push_back ( boost::asio::const_buffer ( mDispatchBuffers->getSendBuffer() , mDispatchBuffers->sendCounter() ) );
     log ( Debug() , "Sending " , Integer ( mDispatchBuffers->sendCounter() ) , " bytes" );
@@ -202,11 +186,6 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
-    //     if( !mDispatchBuffers)
-    //     {
-    //       log( Error() , __PRETTY_FUNCTION__ , " called when 'mDispatchBuffers' was NULL" );
-    //       return;
-    //     }
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
@@ -250,7 +229,6 @@ namespace uhal
     if ( mReplyBuffers )
     {
       mReplyQueue.push_back ( mDispatchBuffers );
-      //   std::cout << "extended mReplyQueue" << std::endl;
     }
     else
     {
@@ -262,7 +240,6 @@ namespace uhal
     {
       mDispatchBuffers = mDispatchQueue.front();
       mDispatchQueue.pop_front();
-      //std::cout << "reduced mDispatchQueue" << std::endl;
       write();
     }
     else
@@ -346,22 +323,7 @@ namespace uhal
       return;
     }
 
-    //     uint32_t lCounter(0);
-    //     for ( std::vector< boost::asio::mutable_buffer >::iterator lIt = lAsioReplyBuffer.begin() ; lIt != lAsioReplyBuffer.end() ; ++lIt )
-    //     {
-    //     uint32_t s1 = boost::asio::buffer_size(*lIt)>>2;
-    //     uint32_t* p1 = boost::asio::buffer_cast<uint32_t*>(*lIt);
-    //
-    //     for( uint32_t i(0) ; i!= s1 ; ++i , ++p1 )
-    //     {
-    //     log ( Debug() , Integer ( lCounter++ ) , " : " , Integer ( *p1 , IntFmt<hex,fixed>() ) );
-    //     }
-    //     }
-    //         TargetToHostInspector< 2 , 0 > lT2HInspector;
-    //         std::vector<uint32_t>::const_iterator lBegin2 ( ( uint32_t* ) ( & mReplyMemory[0] ) );
-    //         std::vector<uint32_t>::const_iterator lEnd2 ( ( uint32_t* ) ( & mReplyMemory[aBuffers->replyCounter() ] ) );
-    //         lT2HInspector.analyze ( lBegin2 , lEnd2 );
-    //  std::cout << "Filling reply buffer : " << mReplyBuffers << std::endl;
+
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
@@ -405,7 +367,6 @@ namespace uhal
     {
       mReplyBuffers = mReplyQueue.front();
       mReplyQueue.pop_front();
-      // std::cout << "reduced mReplyQueue" << std::endl;
       read();
     }
     else
@@ -419,7 +380,6 @@ namespace uhal
     {
       mDispatchBuffers = mDispatchQueue.front();
       mDispatchQueue.pop_front();
-      //std::cout << "reduced mDispatchQueue" << std::endl;
       write();
     }
 
@@ -458,7 +418,6 @@ namespace uhal
       // There is no longer an active deadline. The expiry is set to positive
       // infinity so that the actor takes no action until a new deadline is set.
       mDeadlineTimer.expires_at ( boost::posix_time::pos_infin );
-      // log ( Error() , "ASIO deadline timer timed out" );
     }
 
     // Put the actor back to sleep.
@@ -517,9 +476,6 @@ namespace uhal
 
     InnerProtocol::dispatchExceptionHandler();
   }
-
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
   template < typename InnerProtocol  >

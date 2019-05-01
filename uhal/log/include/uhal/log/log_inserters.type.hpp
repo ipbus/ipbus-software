@@ -31,13 +31,14 @@
 */
 
 
-#ifndef _log_inserters_type_hpp_
-#define _log_inserters_type_hpp_
+#ifndef _uhal_log_inserters_type_hpp_
+#define _uhal_log_inserters_type_hpp_
+
+
+#include <iostream>
+#include <stdint.h>
 
 #include <uhal/log/log_inserter_helper.hpp>
-
-#include <stdint.h>
-#include <iostream>
 
 
 namespace uhal
@@ -58,9 +59,6 @@ namespace uhal
       friend _Type< T > Type<> ( const T& aT );
       _Type ( ) {}
   };
-
-
-
 
 }
 

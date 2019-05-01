@@ -30,25 +30,24 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _log_inserters_threadID_hpp_
-#define _log_inserters_threadID_hpp_
+#ifndef _uhal_log_inserters_threadID_hpp_
+#define _uhal_log_inserters_threadID_hpp_
+
 
 #include <iostream>
+
 
 namespace uhal
 {
 
-  class _ThisThreadID;
-
-  _ThisThreadID ThisThreadID ();
-
-  class _ThisThreadID
+  class ThisThreadID
   {
-      friend _ThisThreadID ThisThreadID ();
-      _ThisThreadID () {}
+  public:
+    ThisThreadID () {}
+    ~ThisThreadID () {}
   };
 
-  std::ostream& operator<< ( std::ostream& aStr , const _ThisThreadID& aThisThreadID );
+  std::ostream& operator<< ( std::ostream& aStr , const ThisThreadID& aThisThreadID );
 
 }
 

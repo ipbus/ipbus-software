@@ -40,16 +40,17 @@
 #ifndef _uhal_Node_hpp_
 #define _uhal_Node_hpp_
 
-#include "uhal/log/exception.hpp"
-#include "uhal/definitions.hpp"
-#include "uhal/ValMem.hpp"
-#include "uhal/ClientInterface.hpp"
-
-#include "boost/unordered_map.hpp"
 
 #include <vector>
 #include <string>
 #include <iterator>
+
+#include "boost/unordered_map.hpp"
+
+#include "uhal/ClientInterface.hpp"
+#include "uhal/definitions.hpp"
+#include "uhal/log/exception.hpp"
+#include "uhal/ValMem.hpp"
 
 
 namespace uhal
@@ -120,9 +121,7 @@ namespace uhal
       friend class const_iterator;
 
     protected:
-      /**
-      	Empty node
-      */
+      //! Empty node
       Node ( );
 
       /**
@@ -145,14 +144,12 @@ namespace uhal
       virtual Node* clone() const;
 
     public:
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~Node();
 
       const_iterator begin() const;
-      const_iterator end() const;
 
+      const_iterator end() const;
 
       /**
       	A function to determine whether two Nodes are identical
@@ -161,14 +158,12 @@ namespace uhal
       */
       bool operator == ( const Node& aNode ) const;
 
-
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the current node
       	@param aId a full-stop delimeted name path to a node, relative to the current node
       	@return the Node given by the identifier
       */
       const Node& getNode ( const std::string& aId ) const;
-
 
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the current node and cast it to a particular node type
@@ -178,13 +173,11 @@ namespace uhal
       template< typename T>
       const T& getNode ( const std::string& aId ) const;
 
-
       /**
       	Return all node IDs known to this HwInterface
       	@return all node IDs known to this HwInterface
       */
       std::vector<std::string> getNodes() const;
-
 
       /**
       	Return all node IDs known to this connection manager which match a (boost) regular expression
@@ -192,7 +185,6 @@ namespace uhal
       	@return all node IDs known to this connection manager
       */
       std::vector<std::string> getNodes ( const std::string& aRegex ) const;
-
 
       /**
       	Return the unique ID of the current node
@@ -273,7 +265,6 @@ namespace uhal
       */
       void stream ( std::ostream& aStr , std::size_t aIndent = 0 ) const;
 
-
       /**
       	Write a single, unmasked word to a register
       	@param aValue the value to write to the register
@@ -317,21 +308,17 @@ namespace uhal
       */
       ValVector< uint32_t > readBlockOffset ( const uint32_t& aSize , const uint32_t& aOffset ) const;
 
-
       /**
       	Get the underlying IPbus client
       	@return the IPbus client that will be used to issue a dispatch
       */
       ClientInterface& getClient() const;
 
-
     private:
 
       std::string getRelativePath(const Node& aAncestor) const;
 
-      /**
-        Get the full path to the current node
-      */
+      //! Get the full path to the current node
       void getAncestors ( std::deque< const Node* >& aPath ) const;
 
     private:

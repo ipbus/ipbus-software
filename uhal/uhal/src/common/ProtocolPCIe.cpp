@@ -74,15 +74,17 @@ namespace uhal {
 
 PCIe::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
   mData(1, std::pair<const uint8_t*, size_t>(aPtr, aNrBytes))
-{
-}
+{}
+
 
 PCIe::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
   mData(aData)
 {}
 
+
 PCIe::PacketFmt::~PacketFmt()
 {}
+
 
 std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket)
 {
@@ -111,20 +113,24 @@ PCIe::File::File(const std::string& aPath, int aFlags) :
 {
 }
 
+
 PCIe::File::~File()
 {
   close();
 }
+
 
 const std::string& PCIe::File::getPath() const
 {
   return mPath;
 }
 
+
 void PCIe::File::setPath(const std::string& aPath)
 {
   mPath = aPath;
 }
+
 
 void PCIe::File::open()
 {
@@ -138,6 +144,7 @@ void PCIe::File::open()
     throw lExc;
   }
 }
+
 
 void PCIe::File::close()
 {
@@ -464,7 +471,6 @@ void PCIe::disconnect()
 }
 
 
-
 void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
 {
   log (Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFileHostToFPGA.getPath()));
@@ -481,8 +487,6 @@ void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
   mReplyQueue.push_back(aBuffers);
 }
 
-
-// -------------------------------------------------------------------------------
 
 void PCIe::read()
 {

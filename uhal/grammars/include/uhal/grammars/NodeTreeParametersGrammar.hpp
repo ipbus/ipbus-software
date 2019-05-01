@@ -30,8 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _uhal_NodeTreeParametersGrammar_hpp_
-#define _uhal_NodeTreeParametersGrammar_hpp_
+#ifndef _uhal_grammars_NodeTreeParametersGrammar_hpp_
+#define _uhal_grammars_NodeTreeParametersGrammar_hpp_
 
 
 #include <string>
@@ -43,6 +43,8 @@
 #include <boost/unordered_map.hpp>
 
 
+namespace uhal
+{
 namespace grammars
 {
   //! A struct wrapping a set of rules as a grammar that can parse a NodeTreeParametersGrammar of the form "name1=val1;name2=val2;name3=val3"
@@ -59,6 +61,7 @@ namespace grammars
     //! Boost spirit parsing rule for parsing the "value" part of the "name-value pairs" of a NodeTreeParameters attribute
     boost::spirit::qi::rule<std::string::const_iterator, std::string()> value;
   };
+}
 }
 
 #endif

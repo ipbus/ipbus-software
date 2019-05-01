@@ -39,9 +39,11 @@
 #ifndef _uhal_log_GccOutputCleaner_hpp_
 #define _uhal_log_GccOutputCleaner_hpp_
 
+
+#include <stdint.h>
 #include <string>
 #include <vector>
-#include <stdint.h>
+
 
 /**
 	Parameterized Functor which parses and formats GCC call stack so that they are human readable.

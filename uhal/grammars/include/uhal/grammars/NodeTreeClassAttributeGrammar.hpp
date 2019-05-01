@@ -30,8 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _uhal_NodeTreeClassAttributeGrammar_hpp_
-#define _uhal_NodeTreeClassAttributeGrammar_hpp_
+#ifndef _uhal_grammars_NodeTreeClassAttributeGrammar_hpp_
+#define _uhal_grammars_NodeTreeClassAttributeGrammar_hpp_
 
 
 #include <string>
@@ -73,6 +73,8 @@ BOOST_FUSION_ADAPT_STRUCT (
 )
 
 
+namespace uhal
+{
 namespace grammars
 {
   //! A struct wrapping a set of rules as a grammar that can parse a NodeTreeClassAttribute of the form "class;name1=val1;name2=val2;name3=val3"
@@ -93,6 +95,7 @@ namespace grammars
     //! Boost spirit parsing rule for parsing the "value" part of the "name-value pairs" of a NodeTreeClassAttribute
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_2;
   };
+}
 }
 
 #endif

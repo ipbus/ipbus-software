@@ -30,8 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _log_inserters_quote_hpp_
-#define _log_inserters_quote_hpp_
+#ifndef _uhal_log_inserters_quote_hpp_
+#define _uhal_log_inserters_quote_hpp_
 
 
 #include <iostream>

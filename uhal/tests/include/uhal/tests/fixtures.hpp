@@ -36,7 +36,6 @@
 #include <stdint.h>
 #include <string>
 
-
 #include "uhal/ConnectionManager.hpp"
 #include "uhal/HwInterface.hpp"
 #include "uhal/tests/definitions.hpp"

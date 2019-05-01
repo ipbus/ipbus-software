@@ -127,7 +127,7 @@ void PCIeDummyHardware::run()
   while ( !mStop ) {
     int lNrBytes;
     int lRC = ioctl(mDeviceFileHostToFPGA, FIONREAD, &lNrBytes);
-    log (Debug(), "PCIeDummyHardware::run  -  ioctl returns ", Integer(lRC), ", ", lNrBytes, " bytes available");
+    log (Debug(), "PCIeDummyHardware::run  -  ioctl returns ", Integer(lRC), ", ", Integer(lNrBytes), " bytes available");
     assert (lRC == 0);
 
     if (lNrBytes == 0) {
@@ -214,23 +214,8 @@ void PCIeDummyHardware::fifoRead(int aFileDescriptor, const uint32_t aAddr, cons
   } while (lNrBytesRead < (4 * aNrWords) );
   if (lNrBytesRead > (4 * aNrWords))
     log (Fatal(), "fifo   -   read ", Integer(lNrBytesRead), " but only wanted to read  ", Integer(aNrWords * 4), " bytes");
-  // int rc = ::read(aFileDescriptor, buffer, 4*aNrWords);
-  // assert(rc >= 0);
-  // if ((rc % 4) != 0)
-  //   log(Fatal(), "PCIeDummyHardware::dmaRead  -  rc = ", rc);
-  // assert((rc % 4) == 0);
-  // if ((rc > 0) && (rc < 4*aNrWords)) {
-  //   std::cout << "Short read of " << rc << " bytes into a " << 4*aNrWords << " bytes buffer, could be a packet read?\n";
-  // }
 
   aValues.insert(aValues.end(), reinterpret_cast<uint32_t*>(buffer), reinterpret_cast<uint32_t*>(buffer)+ aNrWords);
-//    for (unsigned i=0; i<aNrWords; i++) {
-//      //uint32_t val = (buffer[4*i]&0xff)+((buffer[4*i+1]&0xff)<<8)+((buffer[4*i+2]&0xff)<<16)
-//      //  +((buffer[4*i+3]&0xff)<<24);
-//      uint32_t val = *reinterpret_cast<uint32_t*>(buffer);
-//      printf("ipbus address : 0x%08x\n", aAddr);
-//      printf("readback value: 0x%08x\n\n",val);
-//    }
 
   free(allocated);
 }

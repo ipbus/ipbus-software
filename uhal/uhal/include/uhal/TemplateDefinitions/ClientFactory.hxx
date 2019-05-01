@@ -41,8 +41,6 @@ namespace uhal
 
     if ( lIt != mCreators.end() )
     {
-      //
-      //ProtocolAlreadyExist().throwFrom( ThisLocation() );
       log ( Warning() , "Protocol \"" , aProtocol , "\" already exists in map of creators. Continuing for now, but be warned." );
       return;
     }

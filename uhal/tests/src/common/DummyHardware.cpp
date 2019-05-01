@@ -51,7 +51,6 @@ namespace uhal
 {
   namespace tests 
   {
-
   
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
     DummyHardware<IPbus_major, IPbus_minor>::DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
@@ -381,10 +380,6 @@ namespace uhal
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
     bool DummyHardware<IPbus_major, IPbus_minor>::control_packet_header ()
     {
-      //         if ( LoggingIncludes ( Debug() ) )
-      //         {
-      //           base_type::control_packet_header();
-      //         }
       if ( base_type::mPacketCounter != 0 )
       {
         uint16_t lTemp ( ( ( mLastPacketHeader>>8 ) &0x0000FFFF ) + 1 );
@@ -415,10 +410,6 @@ namespace uhal
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
     void DummyHardware<IPbus_major, IPbus_minor>::status_packet_header ( )
     {
-      //         if ( LoggingIncludes ( Debug() ) )
-      //         {
-      //           base_type::status_packet_header();
-      //         }
       mReply.push_back ( base_type::mPacketHeader );
       mReply.push_back ( BUFFER_SIZE * sizeof ( uint32_t ) );
       mReply.push_back ( REPLY_HISTORY_DEPTH );
@@ -464,10 +455,6 @@ namespace uhal
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
     void DummyHardware<IPbus_major, IPbus_minor>::resend_packet_header ()
     {
-      //         if ( LoggingIncludes ( Debug() ) )
-      //         {
-      //           base_type::resend_packet_header();
-      //         }
       std::deque< std::pair< uint32_t , std::vector< uint32_t > > >::reverse_iterator lIt = mReplyHistory.rbegin();
 
       for ( ; lIt!=mReplyHistory.rend() ; ++lIt )

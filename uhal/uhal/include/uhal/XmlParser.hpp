@@ -139,23 +139,17 @@ namespace uhal
 
 
 
-  /**
-    Rule for matching XML attributes
-  */
+  //! Rule for matching XML attributes
   template < typename R >
   class Rule
   {
       //! Make the Parser a friend of the Rule
       friend class Parser< R >;
     public:
-      /**
-        Default constructor
-      */
+      //! Default constructor
       Rule( );
 
-      /**
-        Destructor
-      */
+      //! Destructor
       virtual ~Rule();
 
       /**
@@ -214,9 +208,7 @@ namespace uhal
       BaseFunctionObject<R>* mFuncPtr;
   };
 
-  /**
-    Parser class which converts an XML node to an object of type R
-  */
+  //! Parser class which converts an XML node to an object of type R
   template < typename R >
   class Parser
   {

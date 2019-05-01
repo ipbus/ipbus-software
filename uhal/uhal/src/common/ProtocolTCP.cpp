@@ -41,7 +41,7 @@
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/placeholders.hpp>
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/chrono/chrono_io.hpp>
 
 #include "uhal/Buffers.hpp"
@@ -50,17 +50,14 @@
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
-#include "uhal/log/log_inserters.location.hpp"
 #include "uhal/log/log_inserters.quote.hpp"
+#include "uhal/log/log_inserters.type.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolControlHub.hpp"
 
 
 namespace uhal
 {
-
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol, nr_buffers_per_send >::TCP ( const std::string& aId, const URI& aUri ) :
@@ -69,7 +66,6 @@ namespace uhal
     mSocket ( mIOservice ),
     mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
-    //     mReplyMemory ( 65536 , 0x00000000 ),
     mIOserviceWork ( mIOservice ),
     mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
     mDispatchQueue(),
@@ -103,7 +99,7 @@ namespace uhal
     }
     catch ( const std::exception& aExc )
     {
-      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+      log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught in " , Type<TCP< InnerProtocol , nr_buffers_per_send > >(), " destructor" );
     }
   }
 
@@ -115,7 +111,7 @@ namespace uhal
 
     if ( mAsynchronousException )
     {
-      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from " , ThisLocation() );
+      log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from 'implementDispatch' method of " , Type<TCP< InnerProtocol , nr_buffers_per_send > >() );
       mAsynchronousException->ThrowAsDerivedType();
     }
 
@@ -322,13 +318,6 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::read ( )
   {
-    //     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
-    //     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
-    //     lAsioReplyBuffer.reserve ( lReplyBuffers.size() +1 );
-    //     for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
-    //     {
-    //       lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( lIt->first , lIt->second ) );
-    //     }
     std::vector< boost::asio::mutable_buffer > lAsioReplyBuffer;
     lAsioReplyBuffer.push_back ( boost::asio::mutable_buffer ( &mReplyByteCounter , 4 ) );
     log ( Debug() , "Getting reply byte counter" );
@@ -596,7 +585,6 @@ namespace uhal
   }
 
 
-
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::dispatchExceptionHandler()
   {
@@ -635,10 +623,6 @@ namespace uhal
 
     InnerProtocol::dispatchExceptionHandler();
   }
-
-
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >

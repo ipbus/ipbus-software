@@ -43,9 +43,8 @@
 #include "uhal/log/exception.hpp"
 #include "uhal/log/log.hpp"
 
-#include <iostream>
 #include <iomanip>
-
+#include <iostream>
 #include <string>
 
 
@@ -74,9 +73,9 @@ namespace uhal
   }
 
   /**
-         Extract an IP-address and port number from a URI object
-         @param aUri a URI object to be parsed
-         @return a pair containing an IP-address (first) and port number (second)
+    Extract an IP-address and port number from a URI object
+    @param aUri a URI object to be parsed
+    @return a pair containing an IP-address (first) and port number (second)
   */
   std::pair< uint32_t , uint16_t > ExtractTargetID ( const URI& aUri );
 
@@ -88,15 +87,13 @@ namespace uhal
 
     public:
       /**
-      Constructor
-      @param aId the uinique identifier that the client will be given.
-      @param aUri a struct containing the full URI of the target.
-            */
+        Constructor
+        @param aId the uinique identifier that the client will be given.
+        @param aUri a struct containing the full URI of the target.
+      */
       ControlHub ( const std::string& aId, const URI& aUri );
 
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~ControlHub();
 
     protected:
@@ -119,7 +116,6 @@ namespace uhal
       */
       virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
 
-
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected
       	@param aSendBufferStart a pointer to the start of the first word of IPbus data which was sent (i.e. with no preamble)
@@ -140,16 +136,10 @@ namespace uhal
         @note Since TCP allows the ControlHub to throttle incoming traffic, in the long term this "number in-flight" limit may not been needed. 
         @note But this limit is kept for the moment for safety (i.e. to prevent uHAL ever flooding ControlHub with data).
       */
-      virtual uint32_t getMaxNumberOfBuffers()
-      {
-        return 60;
-      }
+      virtual uint32_t getMaxNumberOfBuffers();
 
-      /**
-        Function which tidies up this protocol layer in the event of an exception
-       */
+      //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
-
 
     private:
       static void translateErrorCode(std::ostream& aStream, const uint16_t& aErrorCode);
@@ -163,13 +153,9 @@ namespace uhal
       //! A struct representing the preamble which will be prepended to an IPbus buffer for the benefit of the Control Hub
       struct tpreamble
       {
-        // The total number of bytes that follow (outgoing) forming a logical packet (IDs + IPbus packet)
-        //         uint32_t* mSendByteCountPtr;
         //! The number of 32-bit words in the IPbus packet (legacy and could be removed)
         uint16_t* mSendWordCountPtr;
 
-        // The total number of bytes that follow (incoming) forming a logical packet (IDs + IPbus packet)
-        //         uint32_t mReplyTotalByteCounter;
         //! A legacy counter
         uint32_t mReplyChunkByteCounter;
         //! The returned target device ID (IP address)

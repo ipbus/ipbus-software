@@ -77,12 +77,15 @@ Mmap::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
 {
 }
 
+
 Mmap::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
   mData(aData)
 {}
 
+
 Mmap::PacketFmt::~PacketFmt()
 {}
+
 
 std::ostream& operator<<(std::ostream& aStream, const Mmap::PacketFmt& aPacket)
 {
@@ -108,27 +111,40 @@ Mmap::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
   mFd(-1),
   mFlags(aFlags),
-  mMmapBaseAddress(NULL)
+  mOffset(0),
+  mMmapPtr(NULL),
+  mMmapIOPtr(NULL)
 {
 }
+
 
 Mmap::File::~File()
 {
   close();
 }
 
+
 const std::string& Mmap::File::getPath() const
 {
   return mPath;
 }
+
 
 void Mmap::File::setPath(const std::string& aPath)
 {
   mPath = aPath;
 }
 
+
+void Mmap::File::setOffset(size_t aOffset)
+{
+  mOffset = aOffset;
+}
+
+
 #define MAP_SIZE (32*1024UL)
 #define MAP_MASK (MAP_SIZE - 1)
+
 
 void Mmap::File::open()
 {
@@ -142,19 +158,29 @@ void Mmap::File::open()
     throw lExc;
   }
 
-  mMmapBaseAddress = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, mFd, 0);
-  if (mMmapBaseAddress == (void *)-1) {
+  const off_t lPageSize = sysconf(_SC_PAGESIZE);
+  const off_t lPageBaseAddr = (mOffset & ~(lPageSize-1));
+
+  mMmapPtr = mmap(0, MAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, mFd, lPageBaseAddr);
+  mMmapIOPtr = static_cast<uint8_t*>(mMmapPtr) + (mOffset - lPageBaseAddr);
+
+  if (mMmapPtr == (void *)-1) {
     exception::MmapInitialisationError lExc;
     log(lExc, "Error occurred when mapping device file '" + mPath + "' to memory; errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
     throw lExc;
   }
 }
 
+
 void Mmap::File::close()
 {
-  if (mMmapBaseAddress != NULL) {
-    if (munmap(mMmapBaseAddress, MAP_SIZE) == -1)
+  if (mMmapPtr != NULL) {
+    if (munmap(mMmapPtr, MAP_SIZE) == -1)
       log ( Error() , "mmap client for ", Quote(mPath), " encountered error when unmapping memory" );
+    else {
+      mMmapPtr = NULL;
+      mMmapIOPtr = NULL;
+    }
   }
 
   if (mFd != -1) {
@@ -171,13 +197,11 @@ void Mmap::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
   if (mFd == -1)
     open();
 
-  uint8_t* lVirtAddr = static_cast<uint8_t*>(mMmapBaseAddress) + off_t(4*aAddr);
+  uint8_t* lVirtAddr = static_cast<uint8_t*>(mMmapIOPtr) + off_t(4*aAddr);
 
   for (size_t i=0; i<aNrWords; i++) {
     aValues.push_back(*((uint32_t*) (lVirtAddr + 4 * i)));
   }
-
-  // aValues.insert(aValues.end(), reinterpret_cast<uint32_t*>(buffer), reinterpret_cast<uint32_t*>(buffer)+ aNrWords);
 }
 
 
@@ -212,7 +236,7 @@ void Mmap::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
   lNrBytesCopied = 0;
   while (lNrBytesCopied < lNrBytes) {
     char* lSrcPtr = buffer + lNrBytesCopied;
-    char* lVirtAddr = static_cast<char*>(mMmapBaseAddress) + aAddr + lNrBytesCopied;
+    char* lVirtAddr = static_cast<char*>(mMmapIOPtr) + aAddr + lNrBytesCopied;
     if ((lNrBytes - lNrBytesCopied) >= 8) {
       *((uint64_t*) lVirtAddr) = *(uint64_t*) lSrcPtr;
       lNrBytesCopied += 8;
@@ -254,8 +278,15 @@ Mmap::Mmap ( const std::string& aId, const URI& aUri ) :
       mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
       log (Notice() , "mmap client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
     }
-    else
+    else if (lIt->first == "offset") {
+      const bool lIsHex = (lIt->second.find("0x") == 0) or (lIt->second.find("0X") == 0);
+      const size_t lOffset = (lIsHex ? boost::lexical_cast<HexTo<size_t> >(lIt->second) : boost::lexical_cast<size_t>(lIt->second));
+      mDeviceFile.setOffset(lOffset);
+      log (Notice(), "mmap client with URI ", Quote (uri()), " : Address offset set to ", Integer(lOffset, IntFmt<hex>()));
+    }
+    else {
       log (Warning() , "Unknown attribute ", Quote (lIt->first), " used in URI ", Quote(uri()));
+    }
   }
 }
 
@@ -371,8 +402,6 @@ void Mmap::write(const boost::shared_ptr<Buffers>& aBuffers)
   mReplyQueue.push_back(aBuffers);
 }
 
-
-// -------------------------------------------------------------------------------
 
 void Mmap::read()
 {

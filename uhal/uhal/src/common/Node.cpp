@@ -32,34 +32,21 @@
 
 #include "uhal/Node.hpp"
 
+#include <iomanip>
+#ifdef __GNUG__
+#include <cxxabi.h>
+#endif
+
+#include <boost/regex.hpp>
+
 #include "uhal/log/log.hpp"
 #include "uhal/HwInterface.hpp"
 #include "uhal/ValMem.hpp"
 #include "uhal/NodeTreeBuilder.hpp"
 
-#include <boost/regex.hpp>
-
-#include <iomanip>
-
-#ifdef __GNUG__
-#include <cxxabi.h>
-#endif
-
 
 namespace uhal
 {
-  /**
-    The log_inserter function to add the node object to a log entry
-    @param aNode a node to format and print to log
-    @param aStr a stream to which to append the formatted node
-    @return a reference to the stream object for chaining stream calls
-  */
-  std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode )
-  {
-    aNode.stream ( aStr );
-    return aStr;
-  }
-
 
   Node::Node ( )  :
     mHw ( NULL ),
@@ -116,8 +103,6 @@ namespace uhal
   }
 
 
-
-
   Node& Node::operator= ( const Node& aNode )
   {
     mHw = aNode.mHw;
@@ -168,8 +153,6 @@ namespace uhal
   }
 
 
-
-
   Node::~Node()
   {
     for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
@@ -201,6 +184,7 @@ namespace uhal
     return lIt;
   }
 
+
   bool Node::operator == ( const Node& aNode ) const
   {
     return this->getAddress() == aNode.getAddress() &&
@@ -214,6 +198,7 @@ namespace uhal
   {
     return mUid;
   }
+
 
   std::string Node::getPath() const
   {
@@ -262,6 +247,7 @@ namespace uhal
     return lRet;
   }
 
+
   void Node::getAncestors ( std::deque< const Node* >& aPath ) const
   {
     aPath.push_front ( this );
@@ -278,20 +264,24 @@ namespace uhal
     return mAddr;
   }
 
+
   const uint32_t& Node::getMask() const
   {
     return mMask;
   }
+
 
   const defs::BlockReadWriteMode& Node::getMode() const
   {
     return mMode;
   }
 
+
   const uint32_t& Node::getSize() const
   {
     return mSize;
   }
+
 
   const defs::NodePermission& Node::getPermission() const
   {
@@ -316,15 +306,18 @@ namespace uhal
     return mModule;
   }
 
+
   const boost::unordered_map< std::string, std::string >& Node::getParameters() const
   {
     return mParameters;
   }
 
+
   const boost::unordered_map< std::string, std::string >& Node::getFirmwareInfo() const
   {
     return mFirmwareInfo;
   }
+
 
   void Node::stream ( std::ostream& aStr , std::size_t aIndent ) const
   {
@@ -420,6 +413,7 @@ namespace uhal
     }
   }
 
+
   const Node& Node::getNode ( const std::string& aId ) const
   {
     if ( aId.size() == 0 )
@@ -470,6 +464,7 @@ namespace uhal
     return lNodes;
   }
 
+
   std::vector<std::string> Node::getNodes ( const std::string& aRegex ) const
   {
     std::vector<std::string> lNodes;
@@ -492,6 +487,7 @@ namespace uhal
     std::sort ( lNodes.begin(), lNodes.end() );
     return lNodes;
   }
+
 
   ValHeader  Node::write ( const uint32_t& aValue ) const
   {
@@ -676,129 +672,7 @@ namespace uhal
     }
     
   }
-  // ValWord< int32_t > Node::readSigned()
-  // {
-  // try
-  // {
-  // if ( mPermission & defs::READ )
-  // {
-  // if ( mMask == defs::NOMASK )
-  // {
-  // return mHw->getClient().readSigned ( mAddr );
-  // }
-  // else
-  // {
-  // return mHw->getClient().readSigned ( mAddr , mMask );
-  // }
-  // }
-  // else
-  // {
-  // log ( Error() , "Node permissions denied read access" );
-  // throw exception::// ReadAccessDenied();
-  // }
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
 
-
-  // ValVector< int32_t > Node::readBlockSigned ( const uint32_t& aSize ) //, const defs::BlockReadWriteMode& aMode )
-  // {
-  // try
-  // {
-  // if ( ( mMode == defs::SINGLE ) && ( aSize != 1 ) ) //We allow the user to call a bulk access of size=1 to a single register
-  // {
-  // log ( Error() , "Bulk Transfer requested on single register node" );
-  // log ( Error() , "If you were expecting an incremental read, please modify your address file to add the 'mode=",  Quote ( "incremental" ) , "' flags there" );
-  // throw exception::// BulkTransferOnSingleRegister();
-  // }
-  // else
-  // {
-  // if ( ( mSize != 1 ) && ( aSize>mSize ) )
-  // {
-  // log ( Error() , "Requested bulk read of greater size than the specified endpoint size" );
-  // throw exception::// BulkTransferRequestedTooLarge();
-  // }
-
-  // if ( mPermission & defs::READ )
-  // {
-  // return mHw->getClient().readBlockSigned ( mAddr , aSize , mMode ); //aMode );
-  // }
-  // else
-  // {
-  // log ( Error() , "Node permissions denied read access" );
-  // throw exception::// ReadAccessDenied();
-  // }
-  // }
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
-
-
-
-
-  // ValWord< uint32_t > Node::rmw_bits ( const uint32_t& aANDterm , const uint32_t& aORterm )
-  // {
-  // try
-  // {
-  // if ( mPermission == defs::READWRITE )
-  // {
-  // return mHw->getClient().rmw_bits ( mAddr , aANDterm , aORterm );
-  // }
-  // else
-  // {
-  // log ( Error() , "Node permissions denied read/write access" );
-  // throw exception::// ReadAccessDenied();
-  // }
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
-
-
-
-  // ValWord< uint32_t > Node::rmw_sum ( const int32_t& aAddend )
-  // {
-  // try
-  // {
-  // if ( mPermission == defs::READWRITE )
-  // {
-  // return mHw->getClient().rmw_sum ( mAddr , aAddend );
-  // }
-  // else
-  // {
-  // log ( Error() , "Node permissions denied read/write access" );
-  // throw exception::// ReadAccessDenied();
-  // }
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
 
   ClientInterface& Node::getClient() const
   {
@@ -806,12 +680,13 @@ namespace uhal
   }
 
 
-
   Node::const_iterator::const_iterator() : mBegin ( NULL )
   {}
 
+
   Node::const_iterator::const_iterator ( const Node* aBegin ) : mBegin ( aBegin )
   {}
+
 
   Node::const_iterator::const_iterator ( const const_iterator& aOrig ) : mBegin ( aOrig.mBegin ) , mItStack ( aOrig.mItStack )
   {}
@@ -820,20 +695,24 @@ namespace uhal
   Node::const_iterator::~const_iterator()
   {}
 
+
   const Node& Node::const_iterator::operator*() const
   {
     return value();
   }
+
 
   const Node* Node::const_iterator::operator->() const
   {
     return & ( value() );
   }
 
+
   const Node& Node::const_iterator::value() const
   {
     return ( mItStack.size() ) ? ( **mItStack[0] ) : ( *mBegin );
   }
+
 
   Node::const_iterator& Node::const_iterator::operator++()
   {
@@ -905,9 +784,17 @@ namespace uhal
     return ! ( *this == aIt ) ;
   }
 
+
   bool Node::const_iterator::operator== ( const Node::const_iterator& aIt ) const
   {
     return ( aIt.mBegin == mBegin ) && ( aIt.mItStack == mItStack ) ;
+  }
+
+
+  std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode )
+  {
+    aNode.stream ( aStr );
+    return aStr;
   }
 
 }

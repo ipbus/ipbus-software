@@ -40,15 +40,16 @@
 #ifndef _uhal_ClientFactory_hpp_
 #define _uhal_ClientFactory_hpp_
 
+
+#include <map>
+
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
+
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/log.hpp"
-
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
-#include <boost/noncopyable.hpp>
-
-#include <map>
 
 
 namespace uhal
@@ -80,9 +81,7 @@ namespace uhal
       ClientFactory();
 
     public:
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~ClientFactory();
 
       /**
@@ -112,18 +111,16 @@ namespace uhal
       class CreatorInterface
       {
         public:
-          /**
-          	Default constructor
-          */
+          //! Default constructor
           CreatorInterface()
           {
           }
-          /**
-          	Destructor
-          */
+
+          //! Destructor
           virtual ~CreatorInterface()
           {
           }
+
           /**
           	Interface to a function which create a new IPbus client based on the protocol identifier specified
           	@param aId the uinique identifier that the client will be given.
@@ -139,18 +136,16 @@ namespace uhal
       {
         public:
 
-          /**
-          	Default constructor
-          */
+          //! Default constructor
           Creator()
           {
           }
-          /**
-          	Destructor
-          */
+
+          //! Destructor
           virtual ~Creator()
           {
           }
+
           /**
           	Concrete function which creates a new IPbus client based on the protocol identifier specified
           	@param aId the uinique identifier that the client will be given.

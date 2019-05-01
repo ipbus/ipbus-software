@@ -60,6 +60,8 @@ BOOST_FUSION_ADAPT_STRUCT (
 )
 
 
+namespace uhal
+{
 namespace grammars
 {
   //! A struct wrapping a set of rules as a grammar that can parse a URI of the form "protocol://host:port/patha/pathb/blah.ext?key1=val1&key2=val2&key3=val3"
@@ -97,6 +99,7 @@ namespace grammars
 
     boost::spirit::qi::rule< std::string::const_iterator, std::string(),                      boost::spirit::ascii::space_type > empty_string;    
   };
+}
 }
 
 #endif

@@ -70,7 +70,6 @@ namespace uhal
     {
       try
       {
-        //	boost::lock_guard<boost::mutex> lLock ( gUtilityMutex );
         //struct which will store the shell expansions of the expression
         wordexp_t lShellExpansion;
         wordexp ( aFilenameExpr.c_str() , &lShellExpansion , 0 );

@@ -55,9 +55,9 @@ namespace uhal
   template <class InputIterator>
   void ValVector<T>::assign ( InputIterator aBegin , InputIterator aEnd )
   {
-    if ( !/* *mValid */ mMembers->valid )
+    if ( ! mMembers->valid )
     {
-      /* mValues-> */ mMembers->value.assign ( aBegin , aEnd );
+      mMembers->value.assign ( aBegin , aEnd );
     }
     else
     {

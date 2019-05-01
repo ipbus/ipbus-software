@@ -37,6 +37,8 @@
 #include <boost/spirit/include/qi.hpp>
 
 
+namespace uhal
+{
 namespace grammars
 {
   URIGrammar::URIGrammar() :
@@ -62,4 +64,4 @@ namespace grammars
   }
 
 }
-
+}

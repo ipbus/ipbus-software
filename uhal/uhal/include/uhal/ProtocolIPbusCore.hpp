@@ -66,7 +66,6 @@ namespace uhal
   // Forward declaration
   struct URI;
 
-
   /**
   	Enumerated type to define the IPbus transaction type.
   	Note that they are stored here as (raw_type << 3) so that the LSL operation does not need to be performed every time a new transaction is created
@@ -105,7 +104,6 @@ namespace uhal
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
     //! Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned.
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , TransactionLevelError, "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
-
   }
 
 
@@ -122,23 +120,8 @@ namespace uhal
       */
       IPbusCore ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod );
 
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~IPbusCore();
-
-      //       /*
-      //       	A method to modify the timeout period for any pending or future transactions
-      //       	@param aTimeoutPeriod the desired timeout period in milliseconds
-      //       */
-      //       virtual void setTimeoutPeriod ( const uint32_t& aTimeoutPeriod  = 0 ) ;
-      //
-      //       /*
-      //       	A method to retrieve the timeout period currently being used
-      //       	@return the timeout period currently being used in milliseconds
-      //       */
-      //       virtual uint64_t getTimeoutPeriod();
-
 
       /**
         Read a single, unmasked, unsigned word from the configuration address space
@@ -157,65 +140,63 @@ namespace uhal
 
     protected:
 
-      /**
-      Send a byte order transaction
-      */
+      //! Send a byte order transaction
       virtual ValHeader implementBOT( );
 
       /**
-      Write a single, unmasked word to a register
-      @param aAddr the address of the register to write
-      @param aValue the value to write to the register
+        Write a single, unmasked word to a register
+        @param aAddr the address of the register to write
+        @param aValue the value to write to the register
       */
       virtual ValHeader implementWrite ( const uint32_t& aAddr, const uint32_t& aValue );
 
       /**
-      Write a block of data to a block of registers or a block-write port
-      @param aAddr the address of the register to write
-      @param aValues the values to write to the registers or a block-write port
-      @param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
+        Write a block of data to a block of registers or a block-write port
+        @param aAddr the address of the register to write
+        @param aValues the values to write to the registers or a block-write port
+        @param aMode whether we are writing to a block of registers (INCREMENTAL) or a block-write port (NON_INCREMENTAL)
       */
       virtual ValHeader implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
       /**
-      Read a single, masked, unsigned word
-      @param aAddr the address of the register to read
-      @param aMask the mask to apply to the value after reading
-      @return a Validated Memory which wraps the location to which the reply data is to be written
+        Read a single, masked, unsigned word
+        @param aAddr the address of the register to read
+        @param aMask the mask to apply to the value after reading
+        @return a Validated Memory which wraps the location to which the reply data is to be written
       */
       virtual ValWord< uint32_t > implementRead ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
 
       /**
-      Read a block of unsigned data from a block of registers or a block-read port
-      @param aAddr the lowest address in the block of registers or the address of the block-read port
-      @param aSize the number of words to read
-      @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
-      @return a Validated Memory which wraps the location to which the reply data is to be written
+        Read a block of unsigned data from a block of registers or a block-read port
+        @param aAddr the lowest address in the block of registers or the address of the block-read port
+        @param aSize the number of words to read
+        @param aMode whether we are reading from a block of registers (INCREMENTAL) or a block-read port (NON_INCREMENTAL)
+        @return a Validated Memory which wraps the location to which the reply data is to be written
       */
       virtual ValVector< uint32_t > implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL );
 
       /**
-      Read a single, masked, unsigned word from the configuration address space
-      @param aAddr the address of the register to read
-      @param aMask the mask to apply to the value after reading
-      @return a Validated Memory which wraps the location to which the reply data is to be written
+        Read a single, masked, unsigned word from the configuration address space
+        @param aAddr the address of the register to read
+        @param aMask the mask to apply to the value after reading
+        @return a Validated Memory which wraps the location to which the reply data is to be written
       */
       virtual ValWord< uint32_t > implementReadConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask = defs::NOMASK );
 
       /**
-      Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
-      @param aAddr the address of the register to read, modify, write
-      @param aANDterm the AND-term to apply to existing value in the target register
-      @param aORterm the OR-term to apply to existing value in the target register
-      @return a Validated Memory which wraps the location to which the reply data is to be written
+        Read the value of a register, apply the AND-term, apply the OR-term, set the register to this new value and return a copy of the new value to the user
+        @param aAddr the address of the register to read, modify, write
+        @param aANDterm the AND-term to apply to existing value in the target register
+        @param aORterm the OR-term to apply to existing value in the target register
+        @return a Validated Memory which wraps the location to which the reply data is to be written
       */
       virtual ValWord< uint32_t > implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
 
       /**
-      Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
-      @param aAddr the address of the register to read, modify, write
-      @param aAddend the addend to add to the existing value in the target register
-      @return a Validated Memory which wraps the location to which the reply data is to be written
+        Read the value of a register, add the addend, set the register to this new value and return a copy of the new value to the user
+        @param aAddr the address of the register to read, modify, write
+        @param aAddend the addend to add to the existing value in the target register
+        @return a Validated Memory which wraps the location to which the reply data is to be written
       */
       virtual ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend );
 
@@ -235,23 +216,23 @@ namespace uhal
           std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt );
 
       /**
-      Abstract interface of function to calculate the IPbus header for a particular protocol version
-      @param aType the type of the IPbus transaction
-      @param aWordCount the word count field of the IPbus header
-      @param aTransactionId the TransactionId of the IPbus header
-      @param aInfoCode the response status of the transaction      
-      @return an IPbus header
+        Abstract interface of function to calculate the IPbus header for a particular protocol version
+        @param aType the type of the IPbus transaction
+        @param aWordCount the word count field of the IPbus header
+        @param aTransactionId the TransactionId of the IPbus header
+        @param aInfoCode the response status of the transaction
+        @return an IPbus header
       */
       virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode ) = 0;
 
       /**
-      Abstract interface of function to parse an IPbus header for a particular protocol version
-      @param aHeader an IPbus header to be parsed
-      @param aType return the type of the IPbus transaction
-      @param aWordCount return the word count field of the IPbus header
-      @param aTransactionId return the TransactionId of the IPbus header
-      @param aInfoCode return the response status of the IPbus header
-      @return whether extraction succeeded
+        Abstract interface of function to parse an IPbus header for a particular protocol version
+        @param aHeader an IPbus header to be parsed
+        @param aType return the type of the IPbus transaction
+        @param aWordCount return the word count field of the IPbus header
+        @param aTransactionId return the TransactionId of the IPbus header
+        @param aInfoCode return the response status of the IPbus header
+        @return whether extraction succeeded
       */
       virtual bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode ) = 0;
 
@@ -302,8 +283,6 @@ namespace uhal
     return aStream;
   }
 }
-
-
 
 
 #endif

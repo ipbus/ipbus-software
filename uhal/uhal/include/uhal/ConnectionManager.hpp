@@ -106,9 +106,6 @@ namespace uhal
         boost::filesystem::path connection_file;
       };
 
-
-
-
     public:
       /**
       	Default constructor
@@ -117,9 +114,7 @@ namespace uhal
       */
       ConnectionManager ( const std::string& aFilenameExpr );
 
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~ConnectionManager ();
 
       /**
@@ -137,14 +132,12 @@ namespace uhal
       */
       std::vector<std::string> getDevices ( ) const;
 
-
       /**
       	Return all device IDs known to this connection manager which match a (boost) regular expression
       	@param aRegex a string expression which is converted to a (boost) regular expression against which the device IDs are tested
       	@return all device IDs known to this connection manager
       */
       std::vector<std::string> getDevices ( const std::string& aRegex ) const;
-
 
       /**
       	Use the specified protocol, host, and port to create an IPbus Client
@@ -177,9 +170,7 @@ namespace uhal
 
       //! A set of previously opened filenames, so that the same file is not parsed multiple times
       std::set< std::string > mPreviouslyOpenedFiles;
-
   };
-
 
 }
 

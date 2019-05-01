@@ -68,8 +68,6 @@ namespace uhal
 
 
 
-
-
   ValHeader::ValHeader() :
     mMembers ( new _ValHeader_ ( false ) )
   {
@@ -87,35 +85,9 @@ namespace uhal
   }
 
 
-  // const std::deque<uint32_t>& ValHeader::returnedHeaders()
-  // {
-  // try
-  // {
-  // if ( mMembers->valid )
-  // {
-  // return mMembers->IPbusHeaders ;
-  // }
-  // else
-  // {
-  // log ( Error() , "Access attempted on non-validated memory" );
-  // throw exception::// NonValidatedMemory();
-  // }
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
-
-
 
 
   template< typename T >
-
   ValWord< T >::ValWord ( const T& aValue , const uint32_t& aMask ) :
     mMembers ( new _ValWord_<T> ( aValue , false , aMask ) )
   {
@@ -123,18 +95,18 @@ namespace uhal
 
 
   template< typename T >
-
   ValWord< T >::ValWord ( const ValWord<T>& aVal ) :
     mMembers ( aVal.mMembers )
   {
   }
 
-  template< typename T >
 
+  template< typename T >
   ValWord< T >::ValWord() :
     mMembers ( new _ValWord_<T> ( T() , false , 0xFFFFFFFF ) )
   {
   }
+
 
   template< typename T >
   bool ValWord< T >::valid()
@@ -142,11 +114,13 @@ namespace uhal
     return mMembers->valid;
   }
 
+
   template< typename T >
   void ValWord< T >::valid ( bool aValid )
   {
     mMembers->valid = aValid;
   }
+
 
   template< typename T >
   ValWord< T >& ValWord< T >::operator = ( const T& aValue )
@@ -155,31 +129,13 @@ namespace uhal
     return *this;
   }
 
-  // template< typename T >
-  // ValWord< T >::operator const T&()
-  // {
-  // return value();
-  // }
-
-  // template< typename T >
-  // const T& ValWord< T >::value() const
-  // {
-  // if ( mMembers->valid )
-  // {
-  // return mMembers->value;
-  // }
-  // else
-  // {
-  //
-  // NonValidatedMemory().throwFrom( ThisLocation() );
-  // }
-  // }
 
   template< typename T >
   ValWord< T >::operator T()
   {
     return value();
   }
+
 
   template< typename T >
   T ValWord< T >::value() const
@@ -196,6 +152,7 @@ namespace uhal
     }
   }
 
+
   template< typename T >
   void ValWord< T >::value ( const T& aValue )
   {
@@ -211,11 +168,13 @@ namespace uhal
     }
   }
 
+
   template< typename T >
   const uint32_t& ValWord< T >::mask() const
   {
     return mMembers->mask;
   }
+
 
   template< typename T >
   void ValWord< T >::mask ( const uint32_t& aMask )
@@ -224,38 +183,9 @@ namespace uhal
   }
 
 
-  // template< typename T >
-  // const std::deque<uint32_t>& ValWord< T >::returnedHeaders()
-  // {
-  // try
-  // {
-  // if ( mMembers->valid )
-  // {
-  // return mMembers->IPbusHeaders ;
-  // }
-  // else
-  // {
-  // log ( Error() , "Access attempted on non-validated memory" );
-  // throw exception::// NonValidatedMemory();
-  // }
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
-
-
-
-
 
 
   template< typename T >
-
   ValVector< T >::ValVector ( const std::vector<T>& aValues ) :
     mMembers ( new _ValVector_<T> ( aValues , false ) )
   {
@@ -263,7 +193,6 @@ namespace uhal
 
 
   template< typename T >
-
   ValVector< T >::ValVector ( const ValVector& aValues ) :
     mMembers ( aValues.mMembers )
   {
@@ -271,7 +200,6 @@ namespace uhal
 
 
   template< typename T >
-
   ValVector< T >::ValVector ( const uint32_t& aSize )  :
     mMembers ( new _ValVector_<T> ( std::vector<T> ( aSize , T() ) , false ) )
   {
@@ -279,7 +207,6 @@ namespace uhal
 
 
   template< typename T >
-
   ValVector< T >::ValVector() :
     mMembers ( new _ValVector_<T> ( std::vector<T>() , false ) )
   {
@@ -291,6 +218,7 @@ namespace uhal
   {
     return mMembers->valid;
   }
+
 
   template< typename T >
   void ValVector< T >::valid ( bool aValid )
@@ -315,6 +243,7 @@ namespace uhal
     }
   }
 
+
   template< typename T >
   const T& ValVector< T >::operator[] ( std::size_t aIndex ) const
   {
@@ -329,6 +258,7 @@ namespace uhal
       throw lExc;
     }
   }
+
 
   template< typename T >
   const T& ValVector< T >::at ( std::size_t aIndex ) const
@@ -345,23 +275,13 @@ namespace uhal
     }
   }
 
+
   template< typename T >
   std::size_t ValVector< T >::size() const
   {
     return mMembers->value.size();
-    /*
-    if ( mMembers->valid )
-    {
-    	return  mMembers->value.size();
-    }
-    else
-    {
-    	log ( Error() , "Access attempted on non-validated memory" );
-
-    	NonValidatedMemory().throwFrom( ThisLocation() );
-    }
-    */
   }
+
 
   template< typename T >
   void ValVector< T >::clear()
@@ -369,6 +289,7 @@ namespace uhal
     mMembers->valid = false;
     mMembers->value.clear();
   }
+
 
   template< typename T >
   typename ValVector< T >::const_iterator ValVector< T >::begin() const
@@ -385,6 +306,7 @@ namespace uhal
     }
   }
 
+
   template< typename T >
   typename ValVector< T >::const_iterator ValVector< T >::end() const
   {
@@ -400,6 +322,7 @@ namespace uhal
     }
   }
 
+
   template< typename T >
   typename ValVector< T >::const_reverse_iterator ValVector< T >::rbegin() const
   {
@@ -414,6 +337,7 @@ namespace uhal
       throw lExc;
     }
   }
+
 
   template< typename T >
   typename ValVector< T >::const_reverse_iterator ValVector< T >::rend() const
@@ -460,142 +384,6 @@ namespace uhal
       throw lExc;
     }
   }
-
-  /*
-  	template< typename T >
-  	typename ValVector< T >::iterator ValVector< T >::begin()
-  	{
-  		try
-  		{
-  			if ( !mMembers->valid )
-  			{
-  				return  mMembers->value.begin();
-  			}
-  			else
-  			{
-  				log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-
-  				ValMemImutabilityViolation().throwFrom( ThisLocation() );
-  			}
-  		}
-  		catch ( uhal::exception& aExc )
-  {
-  aExc.rethrowFrom( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  		{
-  			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-  StdException ( aExc ).throwFrom( ThisLocation() );
-  		}
-  	}
-
-  	template< typename T >
-  	typename ValVector< T >::iterator ValVector< T >::end()
-  	{
-  		try
-  		{
-  			if ( !mMembers->valid )
-  			{
-  				return  mMembers->value.end();
-  			}
-  			else
-  			{
-  				log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-
-  				ValMemImutabilityViolation().throwFrom( ThisLocation() );
-  			}
-  		}
-  		catch ( uhal::exception& aExc )
-  {
-  aExc.rethrowFrom( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  		{
-  			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-  StdException ( aExc ).throwFrom( ThisLocation() );
-  		}
-  	}
-
-  	template< typename T >
-  	typename ValVector< T >::reverse_iterator ValVector< T >::rbegin()
-  	{
-  		try
-  		{
-  			if ( !mMembers->valid )
-  			{
-  				return  mMembers->value.rbegin();
-  			}
-  			else
-  			{
-  				log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_reverse_iterator." );
-
-  				ValMemImutabilityViolation().throwFrom( ThisLocation() );
-  			}
-  		}
-  		catch ( uhal::exception& aExc )
-  {
-  aExc.rethrowFrom( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  		{
-  			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-  StdException ( aExc ).throwFrom( ThisLocation() );
-  		}
-  	}
-
-  	template< typename T >
-  	typename ValVector< T >::reverse_iterator ValVector< T >::rend()
-  	{
-  		try
-  		{
-  			if ( !mMembers->valid )
-  			{
-  				return  mMembers->value.rend();
-  			}
-  			else
-  			{
-  				log ( Error() , "Attempted  to modify validated memory. If you do not intend to modify the memory, please use a const_iterator." );
-
-  				ValMemImutabilityViolation().throwFrom( ThisLocation() );
-  			}
-  		}
-  		catch ( uhal::exception& aExc )
-  {
-  aExc.rethrowFrom( ThisLocation() );
-  }
-  catch ( const std::exception& aExc )
-  		{
-  			log ( Error() , "Exception " , Quote( aExc.what() ) , " caught at " , ThisLocation() );
-  StdException ( aExc ).throwFrom( ThisLocation() );
-  		}
-  	}
-  */
-
-
-  // template< typename T >
-  // const std::deque<uint32_t>& ValVector< T >::returnedHeaders()
-  // {
-  // try
-  // {
-  // if ( mMembers->valid )
-  // {
-  // return mMembers->IPbusHeaders ;
-  // }
-  // else
-  // {
-  // log ( Error() , "Access attempted on non-validated memory" );
-  // throw exception::// NonValidatedMemory();
-  // }
-  // }
-  // catch ( uhal::exception& aExc )
-  // {
-  // aExc.throw r;
-  // }
-  // catch ( const std::exception& aExc )
-  // {
-  // throw // StdException ( aExc );
-  // }
-  // }
 
 
   template class ValWord< uint8_t >;

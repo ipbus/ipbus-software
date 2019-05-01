@@ -65,8 +65,6 @@ namespace uhal
 
   namespace exception
   {
-    // //! Exception class to handle the case where an Atomic Transaction was requested but could not be performed. Uses the base uhal::exception implementation of what()
-    // class AtomicTransactionSize : public exception {};
     //! Exception class to handle the case where pinging of a client failed.
     UHAL_DEFINE_EXCEPTION_CLASS ( PingFailed , "Exception class to handle the case where pinging of a client failed." )
 
@@ -101,9 +99,7 @@ namespace uhal
       ClientInterface ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod );
 
     private:
-      /**
-      	Default Constructor
-      */
+      //! Default Constructor
       ClientInterface ();
 
       /**
@@ -120,9 +116,7 @@ namespace uhal
       virtual ClientInterface& operator= ( const ClientInterface& aClientInterface );
 
     public:
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~ClientInterface();
 
       /**
@@ -142,9 +136,7 @@ namespace uhal
       */
       std::string uri() const;
 
-      /**
-      	Method to dispatch all IPbus packets which are in the queue of IPbusPacketInfo's and wait until all queued packets are flushed
-      */
+      //! Method to dispatch all queued transactions, and wait until all corresponding responses have been received
       void dispatch ();
 
       /**
@@ -246,9 +238,7 @@ namespace uhal
       virtual void Flush( );
 
 
-      /**
-      Send a byte order transaction
-      */
+      //! Send a byte order transaction
       virtual ValHeader implementBOT( ) = 0;
 
       /**
@@ -301,14 +291,10 @@ namespace uhal
       */
       virtual ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend ) = 0;
 
-      /**
-      	Add a preamble to an IPbus buffer
-      */
+      //! Add a preamble to an IPbus buffer
       virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
 
-      /**
-        	Return the size of the preamble
-        */
+      //! Return the size of the preamble
       virtual uint32_t getPreambleSize();
 
       /**
@@ -322,6 +308,7 @@ namespace uhal
         @return a std::pair containing the ValHeader object and a pointer to the underlying memory object
       */
       std::pair < ValHeader , _ValHeader_* > CreateValHeader();
+
       /**
         Helper function to create a ValWord object
         @param aValue an initial value
@@ -343,7 +330,6 @@ namespace uhal
         	@return whether the returned packet is valid
         */
       virtual  exception::exception* validate ( boost::shared_ptr< Buffers > aBuffers );
-
 
 
     protected:
@@ -408,7 +394,6 @@ namespace uhal
       std::deque < boost::shared_ptr< Buffers > > mNoPreemptiveDispatchBuffers;
 #endif
 
-
       //! A pointer to a buffer-wrapper object
       boost::shared_ptr< Buffers > mCurrentBuffers;
 
@@ -434,7 +419,6 @@ namespace uhal
       */
       virtual boost::shared_ptr< Buffers > checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 
-
       /**
         Return the maximum number of packets in flight
         @return the maximum number of packets in flight
@@ -451,8 +435,6 @@ namespace uhal
       */
       virtual uint32_t getMaxReplySize() = 0;
   };
-
-
 
 }
 

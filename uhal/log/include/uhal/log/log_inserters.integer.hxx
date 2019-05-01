@@ -31,15 +31,14 @@
 */
 
 
-#include <stdint.h>                          // for uint32_t, uint8_t, uint16_t, int32_t, ...
 #include <ostream>                           // for ostream, basic_ostream::put
+#include <stdint.h>                          // for uint32_t, uint8_t, uint16_t, int32_t, ...
+
 #include "uhal/log/log_inserter_helper.hpp"  // for RefWrapper
 
 
 namespace uhal
 {
-
-
   template< typename T >
   _Integer< T , IntFmt<> > Integer ( const T& aT )
   {
@@ -54,8 +53,6 @@ namespace uhal
 
   template< typename T >
   void sign_helper ( std::ostream& aStr, const T& aInt ) {}
-
-
 
 
 
@@ -311,6 +308,15 @@ namespace uhal
     aInt.print ( aStr );
     return aStr;
   }
+
+#if __SIZEOF_LONG__ == 4
+  template< typename FORMAT >
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::_Integer< long int , FORMAT >& aInt )
+  {
+    aInt.print ( aStr );
+    return aStr;
+  }
+#endif
 
 #ifdef __APPLE__ 
   template< typename FORMAT > 

@@ -29,8 +29,10 @@
 ---------------------------------------------------------------------------
 */
 
-#include "uhal/tests/TCPDummyHardware.hpp"
+
 #include "uhal/tests/DummyHardwareOptions.hpp"
+#include "uhal/tests/TCPDummyHardware.hpp"
+
 
 using namespace uhal;
 using namespace uhal::tests;

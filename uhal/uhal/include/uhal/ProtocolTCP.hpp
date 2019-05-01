@@ -51,7 +51,6 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/chrono/system_clocks.hpp>
-
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
@@ -94,11 +93,11 @@ namespace uhal
       TCP ( const TCP& aTCP ); // non-copyable
 
       /**
-       Assignment operator
-       This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
-       @param aTCP a TCP-protocol object to copy
-       @return reference to the current object to allow chaining of assignments
-            */
+        Assignment operator
+        This reassigns the endpoint, closes the existing socket and cleans up the buffers, etc. On the next call which requires the socket, it will be reopened with the new endpoint.
+        @param aTCP a TCP-protocol object to copy
+        @return reference to the current object to allow chaining of assignments
+      */
       TCP& operator= ( const TCP& aTCP ); // non-assignable
 
     public:
@@ -109,9 +108,7 @@ namespace uhal
       */
       TCP ( const std::string& aId, const URI& aUri );
 
-      /**
-      	Destructor
-      */
+      //! Destructor
       virtual ~TCP();
 
     private:
@@ -122,14 +119,10 @@ namespace uhal
       */
       void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
 
-      /**
-        Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
-       */
+      //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       virtual void Flush( );
 
-      /**
-        Function which tidies up this protocol layer in the event of an exception
-       */
+      //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
 
       /**
@@ -144,9 +137,7 @@ namespace uhal
       */
       uint32_t getMaxReplySize();
 
-      /**
-        Make the TCP connection
-      */
+      //! Make the TCP connection
       void connect();
 
       /**
@@ -177,9 +168,7 @@ namespace uhal
       */
       void read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred );
 
-      /**
-        Function called by the ASIO deadline timer
-      */
+      //! Function called by the ASIO deadline timer
       void CheckDeadline();
 
       /**
@@ -187,9 +176,8 @@ namespace uhal
         @param aValue a value to which to update the variable associated with a BOOST conditional-variable
       */
       void NotifyConditionalVariable ( const bool& aValue );
-      /**
-        Function to block a thread pending a BOOST conditional-variable and its associated regular variable
-      */
+
+      //! Function to block a thread pending a BOOST conditional-variable and its associated regular variable
       void WaitOnConditionalVariable();
 
 

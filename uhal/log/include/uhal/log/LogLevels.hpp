@@ -1,10 +1,10 @@
 
-#ifndef _loglevels_hpp_
-#define _loglevels_hpp_
+#ifndef _uhal_log_LogLevels_hpp_
+#define _uhal_log_LogLevels_hpp_
+
 
 #include <iostream>
 #include <stdint.h>
-
 
 
 template< typename U>
@@ -42,7 +42,10 @@ namespace uhal
     protected:
       typedef void ( *fPtr ) ( std::ostream& aStr );
 
-      BaseLogLevel ( std::ostream& aStr , fPtr aHeadFunction , fPtr aTailFunction ) : mStr ( aStr ) , mHeadFunction ( aHeadFunction ) , mTailFunction ( aTailFunction )
+      BaseLogLevel ( std::ostream& aStr , fPtr aHeadFunction , fPtr aTailFunction ) :
+        mStr ( aStr ),
+        mHeadFunction ( aHeadFunction ),
+        mTailFunction ( aTailFunction )
       {}
 
     public:
@@ -74,8 +77,6 @@ namespace uhal
       fPtr mTailFunction;
 
   };
-
-
 
 
   //! Helper struct representing the Fatal log level to allow us to specialize functions according to their log level

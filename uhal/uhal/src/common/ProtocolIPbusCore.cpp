@@ -44,7 +44,6 @@
 #include "uhal/log/LogLevels.hpp"               // for BaseLogLevel, Debug
 #include "uhal/log/log.hpp"
 #include "uhal/log/log_inserters.integer.hpp"   // for Integer, _Integer
-#include "uhal/log/log_inserters.location.hpp"  // for ThisLocation
 #include "uhal/log/log_inserters.quote.hpp"     // for Quote, _Quote
 #include "uhal/Buffers.hpp"
 
@@ -103,46 +102,16 @@ namespace uhal
 
   ValWord< uint32_t > IPbusCore::readConfigurationSpace ( const uint32_t& aAddr )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementReadConfigurationSpace ( aAddr );
   }
 
   ValWord< uint32_t > IPbusCore::readConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask )
   {
-    // log ( Warning() , "mUserSideMutex SET AT " , ThisLocation() );
     boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
     return implementReadConfigurationSpace ( aAddr, aMask );
   }
 
-
-
-  // void IPbusCore::preamble ( boost::shared_ptr< Buffers > lBuffers )
-  // {
-  //
-  // log ( Debug() , "preamble" );
-  // ByteOrderTransaction();
-  // }
-
-
-
-
-  // void IPbusCore::Dispatch( )
-  // {
-  //
-  // log ( Debug() , "Dispatch" );
-
-  // if ( lBuffers )
-  // {
-  // if ( lBuffers->sendCounter() )
-  // {
-  // predispatch ( boost::shared_ptr< Buffers > lBuffers );
-  // mTransportProtocol->Dispatch ( lBuffers );
-  // lBuffers = NULL; //Not deleting the underlying buffer, just flagging that we need a new buffer next time
-  // mTransportProtocol->Flush();
-  // }
-  // }
-  // }
 
   exception::exception* IPbusCore::validate ( uint8_t* aSendBufferStart ,
       uint8_t* aSendBufferEnd ,
@@ -268,37 +237,11 @@ namespace uhal
     }
     while ( ( aSendBufferEnd - aSendBufferStart != 0 ) && ( aReplyEndIt - aReplyStartIt != 0 ) );
 
-    // log ( Info() , "IPbus has validated the packet paylod" );
     log ( Debug() , "Validation Complete!" );
     return NULL;
   }
   // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-  // // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-  // // NOTE! THIS FUNCTION MUST BE THREAD SAFE: THAT IS:
-  // // IT MUST ONLY USE LOCAL VARIABLES
-  // //            --- OR ---
-  // // IT MUST MUTEX PROTECT ACCESS TO MEMBER VARIABLES!
-  // // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-  // bool IPbusCore::Validate ( boost::shared_ptr< Buffers > lBuffers )
-  // {
-  //
-  // bool lRet = Validate ( lBuffers->getSendBuffer() ,
-  // lBuffers->getSendBuffer() +lBuffers->sendCounter() ,
-  // lBuffers->getReplyBuffer().begin() ,
-  // lBuffers->getReplyBuffer().end() );
-
-  // if ( lRet )
-  // {
-  // lBuffers->validate ( boost::shared_ptr< Buffers > lBuffers );
-  // delete lBuffers; //We have now checked the returned data and marked as valid the underlying memory. We can, therefore, delete the local storage and from this point onward, the validated memory will only exist if the user kept their own copy
-  // }
-
-  // return lRet;
-  // }
 
   // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValHeader IPbusCore::implementBOT()
@@ -321,7 +264,6 @@ namespace uhal
     return lReply.first;
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -350,6 +292,7 @@ namespace uhal
     return lReply.first;
   }
 
+
   ValHeader IPbusCore::implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aSource, const defs::BlockReadWriteMode& aMode )
   {
     log ( Debug() , "Write block of size " , Integer ( aSource.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
@@ -376,12 +319,7 @@ namespace uhal
     {
       lBuffers = checkBufferSpace ( lSendHeaderByteCount+lPayloadByteCount , lReplyByteCount , lSendBytesAvailable , lReplyBytesAvailable );
       uint32_t lSendBytesAvailableForPayload ( std::min ( 4*getMaxTransactionWordCount(), lSendBytesAvailable - lSendHeaderByteCount ) & 0xFFFFFFFC );
-      //      log ( Info() , std::string ( 100,'-' ) );
-      //      log ( Info() , ThisLocation(), ", Buffer: " , Pointer ( & ( *lBuffers ) ) );
-      //      log ( Info() , "lSendBytesAvailable: " , Integer ( lSendBytesAvailable )  ,
-      //            " | lSendBytesAvailableForPayload (bytes): " , Integer ( lSendBytesAvailableForPayload )  ,
-      //            " | lSendBytesAvailableForPayload (words): " , Integer ( lSendBytesAvailableForPayload>>2 ) ,
-      //            " | lPayloadByteCount = " , Integer ( lPayloadByteCount ) );
+
       lBuffers->send ( implementCalculateHeader ( lType , lSendBytesAvailableForPayload>>2 , mTransactionCounter++ , requestTransactionInfoCode() ) );
       lBuffers->send ( lAddr );
       if ( aSource.size() > 0 )
@@ -407,9 +345,7 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
   ValWord< uint32_t > IPbusCore::implementRead ( const uint32_t& aAddr, const uint32_t& aMask )
   {
     log ( Debug() , "Read one unsigned word from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
@@ -434,6 +370,7 @@ namespace uhal
     lBuffers->receive ( lReply.second->value );
     return lReply.first;
   }
+
 
   ValVector< uint32_t > IPbusCore::implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
   {
@@ -509,6 +446,7 @@ namespace uhal
   }
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   ValWord< uint32_t > IPbusCore::implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
   {
@@ -570,11 +508,8 @@ namespace uhal
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
-
   void IPbusCore::dispatchExceptionHandler()
   {
-    log ( Info() , ThisLocation() );
     mTransactionCounter = 0;
     ClientInterface::dispatchExceptionHandler();
   }

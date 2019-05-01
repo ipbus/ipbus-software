@@ -58,7 +58,6 @@ public:
 private:
   static void fifoRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
 
-
   static bool fileWrite(int aFileDescriptor, const uint32_t aAddr, const std::vector<uint32_t>& aValues);
 
   static bool fileWrite(int aFileDescriptor, const uint32_t aAddr, const uint8_t* const aPtr, const size_t aNrBytes);

@@ -30,8 +30,8 @@
 ---------------------------------------------------------------------------
 */
 
-#ifndef _uhal_NodeTreeFirmwareInfoAttributeGrammar_hpp_
-#define _uhal_NodeTreeFirmwareInfoAttributeGrammar_hpp_
+#ifndef _uhal_grammars_NodeTreeFirmwareInfoAttributeGrammar_hpp_
+#define _uhal_grammars_NodeTreeFirmwareInfoAttributeGrammar_hpp_
 
 
 #include <string>
@@ -73,6 +73,8 @@ BOOST_FUSION_ADAPT_STRUCT (
 )
 
 
+namespace uhal
+{
 namespace grammars
 {
   //! A struct wrapping a set of rules as a grammar that can parse a NodeTreeFirmwareInfoAttribute of the form "endpoint;name1=val1;name2=val2;name3=val3"
@@ -94,5 +96,7 @@ namespace grammars
     boost::spirit::qi::rule< std::string::const_iterator,	std::string(),											boost::spirit::ascii::space_type > data_pairs_2;
   };
 }
+}
+
 
 #endif

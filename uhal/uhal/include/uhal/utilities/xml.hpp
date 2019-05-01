@@ -65,89 +65,87 @@ namespace uhal
 
   namespace utilities
   {
-
-
     /**
-    	Helper function to make debugging failures when parsing XML files easier
-    	@param aLoadResult the result of the parsing
-    	@param aPath the full filename of file whose parsing failed
-    	@param aFile a byte vector containing the contents of the file (stored like this because the file could be either local or retrieved by HTTP)
+      Helper function to make debugging failures when parsing XML files easier
+      @param aLoadResult the result of the parsing
+      @param aPath the full filename of file whose parsing failed
+      @param aFile a byte vector containing the contents of the file (stored like this because the file could be either local or retrieved by HTTP)
     */
     void PugiXMLParseResultPrettifier ( const pugi::xml_parse_result& aLoadResult , const boost::filesystem::path& aPath , const std::vector<uint8_t>& aFile );
 
 
     /**
-    	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
-    	@param aNode a node from which the attribute is to be extracted
-    	@param aAttrName the name of the attribute to be extracted
-    	@param aTarget a variable into which the attribute's value id to be written
-    	@return success/failure status
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
     */
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget );
 
 
     /**
-    	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
-    	@param aNode a node from which the attribute is to be extracted
-    	@param aAttrName the name of the attribute to be extracted
-    	@param aTarget a variable into which the attribute's value id to be written
-    	@return success/failure status
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
     */
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget );
 
 
     /**
-    	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
-    	@param aNode a node from which the attribute is to be extracted
-    	@param aAttrName the name of the attribute to be extracted
-    	@param aTarget a variable into which the attribute's value id to be written
-    	@return success/failure status
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
     */
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget );
 
 
     /**
-    	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
-    	@param aNode a node from which the attribute is to be extracted
-    	@param aAttrName the name of the attribute to be extracted
-    	@param aTarget a variable into which the attribute's value id to be written
-    	@return success/failure status
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
     */
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget );
 
 
     /**
-    	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
-    	@param aNode a node from which the attribute is to be extracted
-    	@param aAttrName the name of the attribute to be extracted
-    	@param aTarget a variable into which the attribute's value id to be written
-    	@return success/failure status
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
     */
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget );
 
 
     /**
-    	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
-    	@param aNode a node from which the attribute is to be extracted
-    	@param aAttrName the name of the attribute to be extracted
-    	@param aTarget a variable into which the attribute's value id to be written
-    	@return success/failure status
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
     */
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget );
 
 
     /**
-    	Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
-    	@param aNode a node from which the attribute is to be extracted
-    	@param aAttrName the name of the attribute to be extracted
-    	@param aTarget a variable into which the attribute's value id to be written
-    	@return success/failure status
+      Helper function to retrieve a named attribute from a PugiXML node and cast it to the correct type
+      @param aNode a node from which the attribute is to be extracted
+      @param aAttrName the name of the attribute to be extracted
+      @param aTarget a variable into which the attribute's value id to be written
+      @return success/failure status
     */
     template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , bool& aTarget );

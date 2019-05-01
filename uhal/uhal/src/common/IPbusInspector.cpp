@@ -53,8 +53,10 @@ namespace uhal
     mPacketType ( 0 )
   {}
 
+
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   HostToTargetInspector<IPbus_major , IPbus_minor>::~HostToTargetInspector( ) {}
+
 
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   bool HostToTargetInspector<IPbus_major , IPbus_minor>::analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError )
@@ -304,8 +306,6 @@ namespace uhal
   {
     log ( Error() , Integer ( mPacketHeader, IntFmt<hex,fixed>() ) , " | Unknown Packet Header" );
   }
-
-
 
 
 

@@ -49,28 +49,15 @@
 namespace uhal
 {
 
-  /*  namespace exception
-  {
-    // Exception class to handle the case where we are unable to parse a badly formed IPbus header.
-    ExceptionClass ( UnableToParseHeader , "Exception class to handle the case where we are unable to parse a badly formed IPbus header." )
-    ExceptionClass ( IllegalPacketHeader , "Exception class to handle the case where an illegal packet header is received." )
-  }
-  */
-
-  /**
-    Helper class to decode IPbus packets as passed from the Client to the Target
-  */
+  //! Helper class to decode IPbus packets as passed from the Client to the Target
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class HostToTargetInspector
   {
     public:
-      /**
-        Default constructor
-      */
+      //! Default constructor
       HostToTargetInspector( );
-      /**
-        Destructor
-      */
+
+      //! Destructor
       virtual ~HostToTargetInspector( );
 
     protected:
@@ -101,11 +88,11 @@ namespace uhal
         @return success or failure
       */
       bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError = true );
+
     protected:
-      /**
-        Virtual callback function called when a Byte-OrderTransaction is observed
-      */
+      //! Virtual callback function called when a Byte-OrderTransaction is observed
       virtual void bot();
+
       /**
         Virtual callback function called when a non-incrementing read is observed
         @param aAddress the base address of the read
@@ -155,51 +142,32 @@ namespace uhal
       */
       virtual void rmw_bits ( const uint32_t& aAddress , const uint32_t& aAndTerm , const uint32_t& aOrTerm );
 
-      /**
-        Virtual callback function for the case where the header is unknown
-      */
+      //! Virtual callback function for the case where the header is unknown
       virtual void unknown_type();
 
-      /**
-        Virtual callback function called when an IPbus 2.0 control packet header is observed
-      */
+      //! Virtual callback function called when an IPbus 2.0 control packet header is observed
       virtual bool control_packet_header ();
 
-      /**
-        Virtual callback function called when an IPbus 2.0 status packet header is observed
-      */
+      //! Virtual callback function called when an IPbus 2.0 status packet header is observed
       virtual void status_packet_header();
 
-      /**
-        Virtual callback function called when an IPbus 2.0 resend packet header is observed
-      */
+      //! Virtual callback function called when an IPbus 2.0 resend packet header is observed
       virtual void resend_packet_header();
 
-      /**
-        Virtual callback function called when an unknown IPbus 2.0 packet header is observed
-      */
+      //! Virtual callback function called when an unknown IPbus 2.0 packet header is observed
       virtual void unknown_packet_header();
-
   };
 
 
 
-
-
-  /**
-    Helper class to decode IPbus packets as passed from the Target to the Client
-  */
+  //! Helper class to decode IPbus packets as passed from the Target to the Client
   template< uint8_t IPbus_major , uint8_t IPbus_minor >
   class TargetToHostInspector
   {
     public:
-      /**
-        Default constructor
-      */
+      //! Default constructor
       TargetToHostInspector( );
-      /**
-        Destructor
-      */
+      //! Destructor
       virtual ~TargetToHostInspector( );
 
     protected:
@@ -233,9 +201,7 @@ namespace uhal
       bool analyze ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd , const bool& aContinueOnError = true );
 
     protected:
-      /**
-        Virtual callback function called when a Byte-OrderTransaction is observed
-      */
+      //! Virtual callback function called when a Byte-OrderTransaction is observed
       virtual void bot();
 
       /**
@@ -251,13 +217,11 @@ namespace uhal
         @param aEnd iterator to the end of the payload        
       */
       virtual void read ( std::vector<uint32_t>::const_iterator& aIt , const std::vector<uint32_t>::const_iterator& aEnd );
-      /**
-        Virtual callback function called when a non-incrementing write is observed
-      */
+
+      //! Virtual callback function called when a non-incrementing write is observed
       virtual void ni_write ( );
-      /**
-        Virtual callback function called when an incrementing write is observed
-      */
+
+      //! Virtual callback function called when an incrementing write is observed
       virtual void write ( );
 
       /**
@@ -272,27 +236,19 @@ namespace uhal
       */
       virtual void rmw_bits ( const uint32_t& aNewValue );
 
-      /**
-        Virtual callback function for the case where the header is unknown
-      */
+      //! Virtual callback function for the case where the header is unknown
       virtual void unknown_type();
 
-      /**
-        Virtual callback function called when an IPbus 2.0 control packet header is observed
-      */
+      //! Virtual callback function called when an IPbus 2.0 control packet header is observed
       virtual bool control_packet_header ();
 
-      /**
-        Virtual callback function called when an IPbus 2.0 status packet header is observed
-      */
+      //! Virtual callback function called when an IPbus 2.0 status packet header is observed
       virtual void status_packet_header();
 
-      /**
-        Virtual callback function called when an unknown IPbus 2.0 packet header is observed
-      */
+      //! Virtual callback function called when an unknown IPbus 2.0 packet header is observed
       virtual void unknown_packet_header();
-
   };
+
 }
 
 

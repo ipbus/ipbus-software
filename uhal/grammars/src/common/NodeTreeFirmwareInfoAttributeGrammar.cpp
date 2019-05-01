@@ -36,6 +36,8 @@
 #include <boost/spirit/include/qi.hpp>
 
 
+namespace uhal
+{
 namespace grammars
 {
   NodeTreeFirmwareinfoAttributeGrammar::NodeTreeFirmwareinfoAttributeGrammar() :
@@ -50,5 +52,6 @@ namespace grammars
     data_pairs_2 = * ( qi::char_ - qi::lit ( ";" ) ) >> - ( qi::lit ( ";" ) );
   }
 
+}
 }
 

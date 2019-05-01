@@ -151,21 +151,18 @@ namespace uhal
     std::pair< uint32_t , uint16_t > lPair ( ExtractTargetID ( aUri ) );
     mDeviceIPaddress = htonl ( lPair.first );
     mDevicePort = htons ( lPair.second );
-    //log ( Debug() , ThisLocation() );
   }
 
 
   template < typename InnerProtocol >
   ControlHub< InnerProtocol >::~ControlHub()
   {
-    //log ( Debug() , ThisLocation() );
   }
 
 
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
-    //log ( Debug() , ThisLocation() );
     // -------------------------------------------------------------------------------------------------------------
     // 8 bytes form the preamble:
     // Device IP address (4 bytes)
@@ -200,7 +197,7 @@ namespace uhal
   template < typename InnerProtocol >
   uint32_t ControlHub< InnerProtocol >::getPreambleSize()
   {
-    return InnerProtocol::getPreambleSize() +2;
+    return InnerProtocol::getPreambleSize() + 2;
   }
 
 
@@ -208,11 +205,9 @@ namespace uhal
   void ControlHub< InnerProtocol >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
   {
     InnerProtocol::predispatch ( aBuffers );
-    //log ( Debug() , ThisLocation() );
     boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
     tpreamble& lPreambles = mPreambles.back();
     uint32_t lByteCount ( aBuffers->sendCounter() );
-    //     * ( lPreambles.mSendByteCountPtr ) = htonl ( lByteCount-4 );
     * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-8 ) >>2 );
   }
 
@@ -223,7 +218,6 @@ namespace uhal
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
       std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
   {
-    //     aReplyStartIt++;
     aReplyStartIt++;
     uint32_t lReplyIPaddress ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) );
 
@@ -275,8 +269,6 @@ namespace uhal
       return lExc;
     }
 
-    //aReplyStartIt++;
-    // log ( Info() , "Control Hub has validated the packet headers" );
     {
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
@@ -285,11 +277,16 @@ namespace uhal
   }
 
 
+  template < typename InnerProtocol >
+  uint32_t ControlHub< InnerProtocol >::getMaxNumberOfBuffers()
+  {
+    return 60;
+  }
+
 
   template < typename InnerProtocol >
   void ControlHub< InnerProtocol >::dispatchExceptionHandler()
   {
-    log ( Info ,  ThisLocation() );
     {
       boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.clear();

@@ -21,15 +21,9 @@ namespace uhal {
 
       /// 
       void printParameters() const; 
-      
-      ///
-//      std::string className() const;
-
     };
-    /**
-     * Class further derived from Level1
-     */
 
+    //! Class further derived from Level1
     class DummyChildNode : public DummyParentNode {
       UHAL_DERIVEDNODE(DummyChildNode)
       public:

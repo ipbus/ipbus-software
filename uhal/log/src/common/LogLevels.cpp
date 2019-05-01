@@ -57,7 +57,6 @@ namespace uhal
     aStr << "\033[0m" << std::endl;
   }
 
-
   ErrorLevel Error;
 
 
@@ -77,6 +76,7 @@ namespace uhal
   }
 
   WarningLevel Warning;
+
 
   NoticeLevel::NoticeLevel ( std::ostream& aStr, Base::fPtr aHeadFunction, Base::fPtr aTailFunction )  : Base ( aStr , aHeadFunction , aTailFunction ) {}
 
@@ -129,10 +129,7 @@ namespace uhal
     aStr << "\033[0m" << std::endl;
   }
 
-
   DebugLevel Debug;
-
-
 
 }
 
