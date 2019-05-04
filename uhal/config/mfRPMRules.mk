@@ -8,7 +8,7 @@ PackageDescription := $(if ${PackageDescription}, ${PackageDescription}, None)
 BUILD_REQUIRES_TAG = $(if ${PackageBuildRequires} ,BuildRequires: ${PackageBuildRequires} ,\# No BuildRequires tag )
 REQUIRES_TAG = $(if ${PackageRequires} ,Requires: ${PackageRequires} ,\# No Requires tag )
 
-RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CPP_VERSION_TAG},.${CPP_VERSION_TAG},)
+RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
 
 export BUILD_HOME
 
