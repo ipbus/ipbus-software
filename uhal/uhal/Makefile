@@ -47,11 +47,7 @@ Libraries = pthread \
 		cactus_uhal_grammars \
 		cactus_uhal_log
 
-CXXFLAGS += -DDISABLE_PACKET_COUNTER_HACK
-#					 -DNO_PREEMPTIVE_DISPATCH
-
-#CXXFLAGS += -fdelayed-template-parsing
-
+#-DNO_PREEMPTIVE_DISPATCH
 #-D THROW_ON_ADDRESS_SPACE_OVERLAP
 
 # NOTE: Adding this flag is a dirty hack to make uhal/uhal compile on
