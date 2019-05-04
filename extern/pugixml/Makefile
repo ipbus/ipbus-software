@@ -21,6 +21,11 @@ ZIP_FILE = ${ZIP_NAME}.zip
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
+
+CXX = g++
+CXXFLAGS = -fPIC -O3
+
+
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
 
 default: build
@@ -37,7 +42,7 @@ _all:
 	if [ ! -f  ${ZIP_NAME}/.build_done ]; then \
 	unzip -q -u ${ZIP_FILE} -d ${ZIP_NAME};												\
 	cd ${ZIP_NAME};													\
-	g++ -fPIC -O3 -shared -o ${LIBRARY} src/pugixml.cpp;								\
+	${CXX} ${CXXFLAGS} -shared -o ${LIBRARY} src/pugixml.cpp;								\
 	date > .build_done;											\
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};	\
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include};								\

@@ -78,12 +78,12 @@ ${PackagePath}/obj ${PackagePath}/lib ${PackagePath}/bin ${ObjectSubDirPaths}:
 # Implicit rule for .cpp -> .o
 .SECONDEXPANSION:
 ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cpp  | $$(dir ${PackagePath}/obj/%.o)
-	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
+	${CXX} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 
 # Implicit rule for .cxx -> .o
 .SECONDEXPANSION:
 ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | $$(dir ${PackagePath}/obj/%.o)
-	${CPP} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
+	${CXX} -c ${CXXFLAGS} ${IncludePaths} $< -o $@
 
 # Main target: shared library
 ${LibraryFile}: ${LibraryObjectFiles}  | ${PackagePath}/lib

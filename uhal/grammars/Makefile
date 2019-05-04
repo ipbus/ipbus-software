@@ -34,7 +34,7 @@ Libraries =
 
 # Hide c++11-extensions warning when building on osx
 ifeq ($(CACTUS_OS),osx)
-CPP_FLAGS += -Wno-c++11-extensions
+CXXFLAGS += -Wno-c++11-extensions
 endif
 
 

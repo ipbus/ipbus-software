@@ -50,7 +50,7 @@ Libraries = pthread \
 CXXFLAGS += -DDISABLE_PACKET_COUNTER_HACK
 #					 -DNO_PREEMPTIVE_DISPATCH
 
-#CPP_FLAGS += -fdelayed-template-parsing
+#CXXFLAGS += -fdelayed-template-parsing
 
 #-D THROW_ON_ADDRESS_SPACE_OVERLAP
 
@@ -58,7 +58,7 @@ CXXFLAGS += -DDISABLE_PACKET_COUNTER_HACK
 # OS X. The fact that this is necessary really means the code is
 # fishy.
 ifeq ($(CACTUS_OS),osx)
-CPP_FLAGS += -Wno-c++11-extensions -fdelayed-template-parsing
+CXXFLAGS += -Wno-c++11-extensions -fdelayed-template-parsing
 endif
 
 

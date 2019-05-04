@@ -24,9 +24,9 @@ LibraryFile = pkg/uhal/_core.so
 
 PYTHON_VERSION_MAJOR_MINOR=$(shell python -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
 PYTHON_VERSION_MAJOR=$(shell python -c "import sys; print(sys.version_info.major)")
-ifeq (,$(shell ${CPP} -lboost_python${PYTHON_VERSION_MAJOR_MINOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
+ifeq (,$(shell ${CXX} -lboost_python${PYTHON_VERSION_MAJOR_MINOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
   EXTERN_BOOST_PYTHON_LIB = boost_python${PYTHON_VERSION_MAJOR_MINOR}
-else ifeq (,$(shell ${CPP} -lboost_python${PYTHON_VERSION_MAJOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
+else ifeq (,$(shell ${CXX} -lboost_python${PYTHON_VERSION_MAJOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
   EXTERN_BOOST_PYTHON_LIB = boost_python${PYTHON_VERSION_MAJOR}
 else
   EXTERN_BOOST_PYTHON_LIB = boost_python
