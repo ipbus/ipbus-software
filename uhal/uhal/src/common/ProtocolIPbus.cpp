@@ -248,13 +248,7 @@ namespace uhal
   template< uint8_t IPbus_minor >
   IPbus< 2 , IPbus_minor >::IPbus ( const std::string& aId, const URI& aUri ) :
     IPbusCore ( aId , aUri , boost::posix_time::seconds ( 1 ) ),
-    mPacketCounter (
-#ifndef DISABLE_PACKET_COUNTER_HACK
-      1
-#else
-      0
-#endif
-    )
+    mPacketCounter (0)
   {
   }
 
@@ -268,9 +262,6 @@ namespace uhal
   void IPbus< 2 , IPbus_minor >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
   {
     aBuffers->send ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
-#ifndef DISABLE_PACKET_COUNTER_HACK
-    mPacketCounter++;
-#endif
     {
       boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
       mReceivePacketHeader.push_back ( 0x00000000 );
@@ -434,11 +425,7 @@ namespace uhal
   template< uint8_t IPbus_minor >
   void IPbus< 2 , IPbus_minor >::dispatchExceptionHandler()
   {
-#ifndef DISABLE_PACKET_COUNTER_HACK
-    mPacketCounter = 1;
-#else
     mPacketCounter = 0;
-#endif
     mReceivePacketHeader.clear();
     IPbusCore::dispatchExceptionHandler();
   }
