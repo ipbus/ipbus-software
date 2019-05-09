@@ -7,34 +7,35 @@
 #include <stdint.h>
 
 
-template< typename U>
-void insert ( std::ostream& aStr , const U& aU )
-{
-  aStr << aU;
-}
-
-// NOTE: the log_insert_warning is defined to bridge between the compilers used on Linux and OSX.
+// NOTE: the UHAL_LOG_INSERT_WARNING is defined to bridge between the compilers used on Linux and OSX.
 // While on linux the 'warning' attribute is defined, it is not in OSX 10.9 clang.
 // On the other hand clang's 'deprecated' is messageless in g++, while it supports messages in clang.
-// To make the story short, log_insert_warning uses the most appropriated attribute for the system in use.
+// To make the story short, UHAL_LOG_INSERT_WARNING uses the most appropriated attribute for the system in use.
 #ifndef __clang__
-#define log_insert_warning warning
+#define UHAL_LOG_INSERT_WARNING warning
 #else
-#define log_insert_warning deprecated
+#define UHAL_LOG_INSERT_WARNING deprecated
 #endif
-
-__attribute__ ( ( log_insert_warning ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
-void insert ( std::ostream& aStr , const uint32_t& aUint ) ;
-
-__attribute__ ( ( log_insert_warning ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
-void insert ( std::ostream& aStr , const int32_t& aInt );
-
-__attribute__ ( ( log_insert_warning ( "Insertion of boolean types can result in implicit casts. Consider using the Boolean() formatter instead" ) ) )
-void insert ( std::ostream& aStr , const bool& aBool );
 
 
 namespace uhal
 {
+
+  template< typename U>
+  void insert ( std::ostream& aStr , const U& aU )
+  {
+    aStr << aU;
+  }
+
+  __attribute__ ( ( UHAL_LOG_INSERT_WARNING ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
+  void insert ( std::ostream& aStr , const uint32_t& aUint ) ;
+
+  __attribute__ ( ( UHAL_LOG_INSERT_WARNING ( "Insertion of integer types can result in implicit casts. Consider using the Integer() formatter instead" ) ) )
+  void insert ( std::ostream& aStr , const int32_t& aInt );
+
+  __attribute__ ( ( UHAL_LOG_INSERT_WARNING ( "Insertion of boolean types can result in implicit casts. Consider using the Boolean() formatter instead" ) ) )
+  void insert ( std::ostream& aStr , const bool& aBool );
+
 
   template< typename T >
   class BaseLogLevel
@@ -166,12 +167,7 @@ namespace uhal
   };
 
   extern DebugLevel Debug;
-
-
-
 }
 
 
-
 #endif
-

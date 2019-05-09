@@ -6,23 +6,24 @@
 #include "uhal/log/log_inserters.threadID.hpp"
 
 
-void insert ( std::ostream& aStr , const uint32_t& aUint )
-{
-  aStr << aUint;
-}
-
-void insert ( std::ostream& aStr , const int32_t& aInt )
-{
-  aStr << aInt;
-}
-
-void insert ( std::ostream& aStr , const bool& aBool )
-{
-  aStr << aBool;
-}
-
 namespace uhal
 {
+
+  void insert ( std::ostream& aStr , const uint32_t& aUint )
+  {
+    aStr << aUint;
+  }
+
+  void insert ( std::ostream& aStr , const int32_t& aInt )
+  {
+    aStr << aInt;
+  }
+
+  void insert ( std::ostream& aStr , const bool& aBool )
+  {
+    aStr << aBool;
+  }
+
 
   FatalLevel::FatalLevel ( std::ostream& aStr , Base::fPtr aHeadFunction, Base::fPtr aTailFunction ) : Base ( aStr , aHeadFunction , aTailFunction ) {}
 
