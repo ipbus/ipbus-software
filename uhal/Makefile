@@ -11,6 +11,29 @@ PACKAGES = \
 	gui \
 	tools
 
+
+BUILD_UHAL_TESTS?=1
+ifneq ($(BUILD_UHAL_TESTS), 1)
+	PACKAGES := $(filter-out tests, $(PACKAGES))
+endif
+
+BUILD_UHAL_PYCOHAL?=1
+ifneq ($(BUILD_UHAL_PYCOHAL), 1)
+	PACKAGES := $(filter-out pycohal, $(PACKAGES))
+endif
+
+BUILD_UHAL_GUI?=1
+ifneq ($(BUILD_UHAL_GUI), 1)
+	PACKAGES := $(filter-out gui, $(PACKAGES))
+endif
+
+BUILD_UHAL_TOOLS?=1
+ifneq ($(BUILD_UHAL_TOOLS), 1)
+	PACKAGES := $(filter-out tools, $(PACKAGES))
+endif
+
+
+
 VIRTUAL_PACKAGES = $(addsuffix /.virtual.Makefile,${PACKAGES})
 
 FLAGS = $(ifeq $(MAKEFLAGS) "","",-$(MAKEFLAGS))
@@ -24,6 +47,7 @@ $(TARGETS): ${VIRTUAL_PACKAGES}
 
 ${VIRTUAL_PACKAGES}:
 	${MAKE} ${FLAGS} -C $(@D) $(MAKECMDGOALS)
+
 
 
 # Uninstall target: Defined here, rather than in Makefiles for each individual uhal package (e.g. log, grammars, etc),
