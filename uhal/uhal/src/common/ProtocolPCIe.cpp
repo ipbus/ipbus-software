@@ -173,7 +173,7 @@ void PCIe::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
   /* select AXI MM address */
   char* buffer = allocated;
   off_t off = lseek(mFd, 4*aAddr, SEEK_SET);
-  if ( off != (4 * aAddr)) {
+  if ( off != off_t(4 * aAddr)) {
     exception::PCIeCommunicationError lExc;
     log(lExc, "Offset returned by lseek, ", Integer(off), ", does not match that requested, ", Integer(4*aAddr), " (in preparation for read of ", Integer(aNrWords), " words)");
     throw lExc;
@@ -225,7 +225,7 @@ void PCIe::File::write(const uint32_t aAddr, const uint8_t* const aPtr, const si
 
   /* select AXI MM address */
   off_t off = lseek(mFd, aAddr, SEEK_SET);
-  if ( off != aAddr) {
+  if ( off != off_t(aAddr)) {
     struct stat st;
     if (fstat(mFd, &st) or (not S_ISFIFO(st.st_mode))) {
       exception::PCIeCommunicationError lExc;
@@ -280,7 +280,7 @@ void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
 
   /* select AXI MM address */
   off_t off = lseek(mFd, aAddr, SEEK_SET);
-  if ( off != aAddr) {
+  if ( off != off_t(aAddr)) {
     struct stat st;
     if (fstat(mFd, &st) or (not S_ISFIFO(st.st_mode))) {
       exception::PCIeCommunicationError lExc;
