@@ -44,12 +44,6 @@
 #include <sstream>
 #include <stdlib.h>
 
-#ifdef USE_BACKTRACE
-#include "uhal/log/BacktraceSymbols.hpp"
-#include "uhal/log/GccOutputCleaner.hpp"
-#endif
-
-
 
 namespace uhal
 {
@@ -58,27 +52,16 @@ namespace uhal
 
     exception::exception ( ) :
       std::exception (),
-#ifdef USE_BACKTRACE
-      mBacktrace ( MaxExceptionHistoryLength , static_cast<void*> ( NULL ) ),
-      mThreadId ( boost::this_thread::get_id() ),
-#endif
       mString ( ( char* ) malloc ( 65536 ) ),
       mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
     {
       gettimeofday ( &mTime, NULL );
-#ifdef USE_BACKTRACE
-      Backtrace::Backtrace ( mBacktrace );
-#endif
       mAdditionalInfo[0] = '\0'; //malloc is not required to initialize to null, so do it manually, just in case
     }
 
 
     exception::exception ( const exception& aExc ) :
       std::exception (),
-#ifdef USE_BACKTRACE
-      mBacktrace ( aExc.mBacktrace ),
-      mThreadId ( aExc.mThreadId ),
-#endif
       mTime ( aExc.mTime ),
       mString ( ( char* ) malloc ( 65536 ) ),
       mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
@@ -89,10 +72,6 @@ namespace uhal
     exception& exception::operator= ( const exception& aExc )
     {
       strcpy ( mAdditionalInfo , aExc.mAdditionalInfo );
-#ifdef USE_BACKTRACE
-      mBacktrace = aExc.mBacktrace;
-      mThreadId = aExc.mThreadId;
-#endif
       mTime = aExc.mTime;
       return *this;
     }
@@ -123,65 +102,6 @@ namespace uhal
 
       std::stringstream lStr;
 
-#ifdef USE_BACKTRACE
-
-      timeval lTime;
-      gettimeofday ( &lTime, NULL );
-      lStr << "\n";
-#ifdef COURTEOUS_EXCEPTIONS
-      lStr << "I'm terribly sorry to have to tell you this, but it appears that there was an exception:\n";
-#endif
-      lStr << " * Exception type: ";
-#ifdef __GNUG__
-      // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
-      int lStatus ( 0 );
-      std::size_t lSize ( 1024 );
-      char lDemangled[lSize];
-      lStr << abi::__cxa_demangle ( typeid ( *this ).name() , lDemangled , &lSize , &lStatus );
-#else
-      lStr << typeid ( *this ).name();
-#endif
-      lStr << "\n";
-      lStr << " * Description: " << description() << "\n";
-
-      if ( strlen ( mAdditionalInfo ) )
-      {
-        lStr << " * Additional Information:\n";
-        lStr << mAdditionalInfo;
-      }
-
-      boost::thread::id lThreadId ( boost::this_thread::get_id() );
-
-      if ( mThreadId == lThreadId )
-      {
-        lStr << " * Exception occured in the same thread as that in which it was caught (" << lThreadId << ")\n";
-      }
-      else
-      {
-        lStr << " * Exception occured in thread with ID: " << mThreadId << "\n";
-        lStr << " * Current thread has ID: " << lThreadId << "\n";
-      }
-
-      lStr << std::setfill ( '0' );
-      char tmbuf[64];
-      strftime ( tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", localtime ( &mTime.tv_sec ) );
-      lStr << " * Exception constructed at time:              " << tmbuf << '.' << std::setw ( 6 ) << mTime.tv_usec << "\n";
-      strftime ( tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", localtime ( &lTime.tv_sec ) );
-      lStr << " * Exception's what() function called at time: " << tmbuf << '.' << std::setw ( 6 ) << lTime.tv_usec << "\n";
-
-      lStr << " * Call stack:\n";
-      std::vector< Backtrace::TracePoint > lBacktrace = Backtrace::BacktraceSymbols ( mBacktrace );
-      uint32_t lCounter ( 0 );
-      GccOutputCleaner lOutputCleaner ( 12 , &GccOutputCleaner::TStyle );
-
-      for ( std::vector< Backtrace::TracePoint >::iterator lIt = lBacktrace.begin() +3 ; lIt != lBacktrace.end(); ++lIt , ++lCounter )
-      {
-        lStr << "   [ " << std::setw ( 2 ) << lCounter << " ] " << lOutputCleaner ( lIt->function ) << "\n";
-        lStr << "          at " << lIt->file << ":" << lIt->line << "\n";
-      }
-
-#else
-
       if ( strlen ( mAdditionalInfo ) )
       {
         lStr << mAdditionalInfo;
@@ -190,8 +110,6 @@ namespace uhal
       {
         lStr << description() << " (no additional info)";
       }
-
-#endif
 
       std::string lString ( lStr.str() );
       strncpy ( mString , lString.c_str() , 65536 );

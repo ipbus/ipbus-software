@@ -408,49 +408,6 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
     aHxxFile  << gDivider
               << "\n";
   }
-
-  {
-    std::stringstream lTemplates;
-    std::stringstream lArgs;
-    std::stringstream lInstructions;
-    std::stringstream lDoxygen;
-
-    for ( uint32_t i = 0 ; i!=MAX_NUM_ARGS ; ++i )
-    {
-      lTemplates << " typename T" << i << " ,";
-      std::string lTemplatesStr ( lTemplates.str() );
-      lTemplatesStr.resize ( lTemplatesStr.size()-1 );
-      lArgs << " const T" << i << "& aArg" << i << " ,";
-      std::string lArgsStr ( lArgs.str() );
-      lArgsStr.resize ( lArgsStr.size()-1 );
-      lInstructions << "\t\t\tinsert( aStr , aArg" << i << " );\n";
-      lDoxygen << "\t\t@param aArg" << i << " a templated argument to be added to the log " << ( i+1 ) << suffix ( i+1 ) <<"\n";
-      aHppFile << "\t/**\n"
-               << lDoxygen.str()
-               << "\t*/\n"
-               << "\ttemplate<" << lTemplatesStr << ">\n"
-               //               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
-               << "\tvoid log ( std::ostream& aStr ," << lArgsStr << ");\n"
-               << "\n";
-      aHxxFile << "template<" << lTemplatesStr << ">\n"
-               //               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
-               << "void log (  std::ostream& aStr ," << lArgsStr << " )\n"
-               << "{\n"
-               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
-               << lInstructions.str()
-               << "\t\t\taStr << std::endl;\n"
-               << "}\n"
-               << "\n";
-    }
-
-    aHppFile  << gDivider
-              << "\n";
-    aHxxFile  << gDivider
-              << "\n";
-  }
-
-  //aHppFile << "};\n"
-  //         << "\n";
 }
 
 

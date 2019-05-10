@@ -78,6 +78,8 @@ doxygen_job:
     - make -k Set=all
     - make -k Set=all PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - mkdir -p ${REPO_DIR} 
+    - make -C uhal/log generate_files
+    - git diff --exit-code
     - cp `find . -iname "*.rpm"` ${REPO_DIR} && cp ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
     - ls ${REPO_DIR}
     - createrepo -vg yumgroups.xml ${REPO_DIR}

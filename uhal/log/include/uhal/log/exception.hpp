@@ -44,14 +44,8 @@
 #include <string>
 #include <sys/time.h>
 
-#ifdef USE_BACKTRACE
-#include "boost/thread.hpp"
-#endif
 
-
-/**
-	Macro for simplifying the declaration and definition of derived exception types
-*/
+//!	Macro for simplifying the declaration and definition of derived exception types
 #define UHAL_DEFINE_DERIVED_EXCEPTION_CLASS( ClassName , BaseClassName, ClassDescription )\
  class ClassName : public BaseClassName {\
  public:\
@@ -67,17 +61,9 @@
 #define ExceptionClass UHAL_DEFINE_EXCEPTION_CLASS
 
 
-
-
-/**
-	Macro version of the member function to wrap the ThrowAsDerivedType but also tell the compiler that this function always throws
-*/
+//!	Macro version of the member function to wrap the ThrowAsDerivedType but also tell the compiler that this function always throws
 #define ThrowAsDerivedType() ThrowAsDerivedType_(); throw 0;
 
-
-#ifdef USE_BACKTRACE
-#define MaxExceptionHistoryLength 100
-#endif
 
 namespace uhal
 {
@@ -146,15 +132,6 @@ namespace uhal
         virtual std::string description() const throw() = 0;
 
       private:
-#ifdef USE_BACKTRACE
-        /**
-        	List of pointers to the backtrace symbols
-        */
-        std::vector< void* > mBacktrace;
-
-        /// The thread ID of the thread in which the exception was originally thrown
-        boost::thread::id mThreadId;
-#endif
         /// The time at which the exception was thrown
         timeval mTime;
 

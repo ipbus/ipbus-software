@@ -23,8 +23,6 @@ Library = cactus_uhal_log
 LIBRARY_VER_ABI = $(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR)
 
 
-USE_BACKTRACE ?= FALSE
-
 IncludePaths = include  \
 	${EXTERN_BOOST_INCLUDE_PREFIX}
 
@@ -34,21 +32,7 @@ Libraries = pthread \
 	$(BOOST_THREAD_LIB) \
 	boost_system
 
-CXXFLAGS += -D MAX_NUM_ARGS=32 -DCOURTEOUS_EXCEPTIONS
-
-ifeq ($(USE_BACKTRACE),TRUE)
-
-	IncludePaths += $(BUILD_HOME)/extern/binutils/binutils-2.23/include/ \
-		$(BUILD_HOME)/extern/binutils/binutils-2.23/binutils/ \
-		$(BUILD_HOME)/extern/binutils/binutils-2.23/bfd/
-
-  LibraryPaths += $(BUILD_HOME)/extern/binutils/binutils-2.23/bfd \
-		$(BUILD_HOME)/extern/binutils/binutils-2.23/libiberty
-
-  CXXFLAGS += -DUSE_BACKTRACE
-
-  LDFLAGS += -Wl,--whole-archive -liberty -lbfd -lz -Wl,--no-whole-archive
-endif
+CXXFLAGS += -D MAX_NUM_ARGS=32
 
 
 # Hide c++11-extensions warning when building on osx
@@ -80,13 +64,11 @@ endif
 ${GENERATOR_EXE} : ${GENERATOR_OBJ}
 	${LD} ${LDFLAGS} -lstdc++ $< -o $@
 
-${GENERATED_FILES} : .generated_files
-.generated_files : ${GENERATOR_EXE}
+.PHONY: generate_files
+generate_files : ${GENERATOR_EXE}
 	./generator.exe
-	touch .generated_files
 
-.PHONY: _generator_clean
-clean: _generator_clean
-_generator_clean:
+.PHONY: clean_generated_files
+clean_generated_files:
 	rm -rf src/common/log.cpp
 	rm -rf include/uhal/log/log.hpp include/uhal/log/log.hxx
