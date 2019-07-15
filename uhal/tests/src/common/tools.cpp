@@ -35,6 +35,10 @@
 #include "uhal/tests/tools.hpp"
 
 
+#include <fcntl.h>
+#include <vector>
+
+#include "uhal/ProtocolPCIe.hpp"
 #include "uhal/tests/DummyHardware.hpp"
 
 
@@ -146,6 +150,52 @@ double measureWriteLatency(const std::vector<ClientInterface*>& aClients, uint32
     {
       (*lIt)->dispatch();
     }
+  }
+
+  return myTimer.elapsedSeconds();
+}
+
+
+double measureFileReadLatency(const std::string& aFilePath, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aVerbose)
+{
+  PCIe::File lFile(aFilePath, O_RDWR | O_NONBLOCK);
+  lFile.open();
+
+  std::vector<uint32_t> lRecvBuffer;
+  lFile.read(aBaseAddr, aDepth, lRecvBuffer);
+  lRecvBuffer.clear();
+  
+  Timer myTimer;
+  for ( unsigned i = 0; i < aNrIterations ; ++i )
+  {
+    if ( aVerbose )
+    {
+      std::cout << "Iteration " << i << std::endl;
+    }
+
+    lFile.read(aBaseAddr, aDepth, lRecvBuffer);
+    lRecvBuffer.clear();
+  }
+
+  return myTimer.elapsedSeconds();
+}
+
+
+double measureFileWriteLatency(const std::string& aFilePath, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aVerbose)
+{
+  PCIe::File lFile(aFilePath, O_RDWR);
+  std::vector<uint32_t> lSendBuffer(aDepth, 0x0);
+  lFile.write(aBaseAddr, lSendBuffer);
+
+  Timer myTimer;
+  for ( unsigned i = 0; i < aNrIterations ; ++i )
+  {
+    if ( aVerbose )
+    {
+      std::cout << "Iteration " << i << std::endl;
+    }
+
+    lFile.write(aBaseAddr, lSendBuffer);
   }
 
   return myTimer.elapsedSeconds();

@@ -91,7 +91,7 @@ namespace uhal
         const std::vector< std::pair<const uint8_t*, size_t> > mData;
       };
 
-    private:
+    // private:
       class File {
       public:
         File(const std::string& aPath, int aFlags);
