@@ -310,7 +310,9 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   mXdma7seriesWorkaround(false),
   mUseInterrupt(false),
   mNumberOfPages(0),
+  mMaxInFlight(0),
   mPageSize(0),
+  mMaxPacketSize(0),
   mIndexNextPage(0),
   mPublishedReplyPageCount(0),
   mReadReplyPageCount(0),
@@ -352,6 +354,14 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
       mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
       log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
     }
+    else if (lIt->first == "max_in_flight") {
+      mMaxInFlight = boost::lexical_cast<size_t>(lIt->second);
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum number of packets in flight' set to ", boost::lexical_cast<size_t>(lIt->second), " by URI 'max_in_flight' attribute");
+    }
+    else if (lIt->first == "max_packet_size") {
+      mMaxPacketSize = boost::lexical_cast<size_t>(lIt->second);
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum packet size (in 32-bit words) set to ", boost::lexical_cast<size_t>(lIt->second), " by URI 'max_packet_size' attribute");
+    }
     else if (lIt->first == "xdma_7series_workaround") {
       mXdma7seriesWorkaround = true;
       log (Notice() , "PCIe client with URI ", Quote (uri()), " : Adjusting size of PCIe reads to a few fixed sizes as workaround for 7-series xdma firmware bug");
@@ -375,7 +385,7 @@ void PCIe::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   if ( ! mConnected )
     connect();
 
-  if ( mReplyQueue.size() == mNumberOfPages )
+  if ( mReplyQueue.size() == mMaxInFlight )
     read();
   write(aBuffers);
 }
@@ -406,7 +416,7 @@ uint32_t PCIe::getMaxSendSize()
   if ( ! mConnected )
     connect();
 
-  return (mPageSize - 1) * 4;
+  return mMaxPacketSize * 4;
 }
 
 
@@ -415,7 +425,7 @@ uint32_t PCIe::getMaxReplySize()
   if ( ! mConnected )
     connect();
 
-  return (mPageSize - 1) * 4;
+  return mMaxPacketSize * 4;
 }
 
 
@@ -430,7 +440,11 @@ void PCIe::connect()
   log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
+  if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
+    mMaxInFlight = mNumberOfPages;
   mPageSize = std::min(uint32_t(4096), lValues.at(1));
+  if ( (mMaxPacketSize == 0) or (mMaxPacketSize >= mPageSize) )
+    mMaxPacketSize = mPageSize - 1;
   mIndexNextPage = lValues.at(2);
   mPublishedReplyPageCount = lValues.at(3);
   mReadReplyPageCount = mPublishedReplyPageCount;
