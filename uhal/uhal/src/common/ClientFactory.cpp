@@ -42,6 +42,7 @@
 #include "uhal/ProtocolControlHub.hpp"
 #include "uhal/ProtocolMmap.hpp"
 #include "uhal/ProtocolPCIe.hpp"
+#include "uhal/ProtocolUIO.hpp"
 
 
 
@@ -79,6 +80,7 @@ namespace uhal
       mInstance->add< PCIe > ( "ipbuspcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0" );
       mInstance->add< Mmap > ( "ipbusmmap-2.0" , "Direct access to hardware via mmap, using IPbus version 2.0" );
       // ---------------------------------------------------------------------
+      mInstance->add< UIO > ( "uioaxi-1.0" , "Direct access to hardware on AXI bus without IPbus" );
 
     }
 
