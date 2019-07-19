@@ -22,8 +22,8 @@ ZIP_FILE = ${ZIP_NAME}.zip
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
 
-CXX = g++
-CXXFLAGS = -fPIC -O3
+CXX = arm-linux-gnueabihf-g++ 
+CXXFLAGS = -fPIC -O3 ${COMPILETIME_ROOT}
 
 
 .PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall
