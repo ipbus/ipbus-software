@@ -54,7 +54,6 @@ ${VIRTUAL_PACKAGES}:
 #     because removing installed files from one of the individual packages without removing any from other uhal packages
 #     would be much harder to implement (especially when coping with changes to filenames between different releases)
 
-prefix=/mnt/
 
 ifndef prefix
   PYTHON_DIRECTORIES = $(shell python -c "import site,sys; print(' '.join([x+'/*uhal*' for x in site.getsitepackages()]))")
