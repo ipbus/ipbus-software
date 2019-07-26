@@ -449,7 +449,7 @@ void PCIe::connect()
   mNumberOfPages = lValues.at(0);
   if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
     mMaxInFlight = mNumberOfPages;
-  mPageSize = std::min(uint32_t(4096), lValues.at(1));
+  mPageSize = lValues.at(1);
   if ( (mMaxPacketSize == 0) or (mMaxPacketSize >= mPageSize) )
     mMaxPacketSize = mPageSize - 1;
   mIndexNextPage = lValues.at(2);
