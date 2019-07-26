@@ -103,6 +103,8 @@ namespace uhal
         void open();
         void close();
 
+        void createBuffer(const size_t aNrBytes);
+
         void read(const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
 
         void write(const uint32_t aAddr, const std::vector<uint32_t>& aValues);
@@ -115,6 +117,8 @@ namespace uhal
         std::string mPath;
         int mFd;
         int mFlags;
+        size_t mBufferSize;
+        char* mBuffer;
       };
 
       PCIe ( const PCIe& aPCIe );
