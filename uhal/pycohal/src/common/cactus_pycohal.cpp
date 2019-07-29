@@ -118,6 +118,8 @@ namespace pycohal
     // Wrap the test functions ...
     bpy::def ( "measureReadLatency", static_cast<double (*) ( uhal::ClientInterface&, uint32_t, uint32_t, size_t, bool, bool ) > ( &uhal::tests::measureReadLatency ) );
     bpy::def ( "measureWriteLatency", static_cast<double (*) ( uhal::ClientInterface&, uint32_t, uint32_t, size_t, bool, bool ) > ( &uhal::tests::measureWriteLatency ) );
+    bpy::def ( "measureFileReadLatency", uhal::tests::measureFileReadLatency );
+    bpy::def ( "measureFileWriteLatency", uhal::tests::measureFileWriteLatency );
     bpy::def ( "check_uint32_argument", pycohal::test_check_uint32_argument );
     bpy::def ( "convert_str_to_uint32", pycohal::test_convert_str_to_uint32 );
     bpy::def ( "convert_str_to_vec_str", pycohal::convert_string_to_vector<std::string> );
