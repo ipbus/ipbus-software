@@ -90,7 +90,7 @@ namespace uhal
         const std::vector< std::pair<const uint8_t*, size_t> > mData;
       };
 
-    private:
+    // private:
       class File {
       public:
         File(const std::string& aPath, int aFlags);
@@ -101,6 +101,8 @@ namespace uhal
 
         void open();
         void close();
+
+        void createBuffer(const size_t aNrBytes);
 
         void read(const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues);
 
@@ -114,6 +116,8 @@ namespace uhal
         std::string mPath;
         int mFd;
         int mFlags;
+        size_t mBufferSize;
+        char* mBuffer;
       };
 
       PCIe ( const PCIe& aPCIe );
@@ -193,7 +197,7 @@ namespace uhal
 
       boost::chrono::microseconds mSleepDuration;
 
-      uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
+      uint32_t mNumberOfPages, mMaxInFlight, mPageSize, mMaxPacketSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
 
       //! The list of buffers still awaiting a reply
       std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
