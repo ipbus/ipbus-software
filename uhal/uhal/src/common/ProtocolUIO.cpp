@@ -9,6 +9,9 @@
 #include <uhal/Node.hpp>
 #include <uhal/NodeTreeBuilder.hpp>
 #include <pugixml.hpp>
+#include "uhal/log/LogLevels.hpp"
+#include "uhal/log/log_inserters.integer.hpp"
+#include "uhal/log/log.hpp"
 
 #include <uhal/ProtocolUIO.hpp>
 
@@ -62,6 +65,7 @@ UIO::UIO (
         //get address1 from the file name
         int namesize=x->path().filename().native().size();
         if(namesize<10) {
+          log ( Debug() , "directory name ", x->path().filename().native().c_str() ," has incorrect format." );
           fprintf(stderr, "directory name %s has incorrect format\n", x->path().filename().native().c_str());
           continue; //expect the name to be in x@xxxxxxxx format for example myReg@0x41200000
         }
@@ -177,8 +181,7 @@ UIO::implementRead (const uint32_t& aAddr, const uint32_t& aMask) {
   if (checkDevice(da.device)) return ValWord<uint32_t>();
   uint32_t readval = hw[da.device][da.word];
   fprintf(stderr, "UIO:    read value %08x\n", readval);
-  ValWord<uint32_t> vw;
-  vw=readval;
+  ValWord<uint32_t> vw(readval, aMask);
   valwords.push_back(vw);
   primeDispatch();
   return vw;
