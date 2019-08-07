@@ -66,7 +66,6 @@ UIO::UIO (
         int namesize=x->path().filename().native().size();
         if(namesize<10) {
           log ( Debug() , "directory name ", x->path().filename().native().c_str() ," has incorrect format." );
-          fprintf(stderr, "directory name %s has incorrect format\n", x->path().filename().native().c_str());
           continue; //expect the name to be in x@xxxxxxxx format for example myReg@0x41200000
         }
         address1 = std::strtoul( x->path().filename().native().substr(namesize-8,8).c_str() , 0, 16);
@@ -132,8 +131,8 @@ UIO::openDevice(int i, uint32_t size, const char *name) {
     hw[i]=NULL;
     goto end;
   }
-  fprintf(stderr, "Mapped %s as device number 0x%.*x size 0x%x\n", devpath,
-      DEVNUMPRLEN,i, size);
+  log ( Debug(), "Mapped ", devpath, " as device number ", Integer( DEVNUMPRLEN, IntFmt<hex,fixed>()),
+		  " size ", Integer( size, IntFmt<hex, fixed>()));
   end:
   free(devpath);
 }
@@ -168,7 +167,7 @@ UIO::implementWrite (const uint32_t& aAddr, const uint32_t& aValue) {
   if (checkDevice(da.device)) return ValWord<uint32_t>();
   uint32_t writeval = aValue;
   hw[da.device][da.word] = writeval;
-  fprintf(stderr, "UIO:    wrote value %08x\n", writeval);
+  log (Debug(), "UIO:    wrote value ", Integer( writeval, IntFmt<hex, fixed>()));
   return ValHeader();
 }
 
@@ -184,7 +183,7 @@ UIO::implementRead (const uint32_t& aAddr, const uint32_t& aMask) {
 	"), mask ", Integer( aMask, IntFmt<hex,fixed>()));
   if (checkDevice(da.device)) return ValWord<uint32_t>();
   uint32_t readval = hw[da.device][da.word];
-  fprintf(stderr, "UIO:    read value %08x\n", readval);
+  log ( Debug(), "UIO:    read value ", Integer( readval, IntFmt<hex,fixed>()));
   ValWord<uint32_t> vw(readval, aMask);
   valwords.push_back(vw);
   primeDispatch();
@@ -202,7 +201,7 @@ UIO::primeDispatch () {
 
 void
 UIO::implementDispatch (boost::shared_ptr<Buffers> aBuffers) {
-  fprintf(stderr, "UIO: Dispatch\n");
+  log ( Debug(), "UIO: Dispatch");
   for (unsigned int i=0; i<valwords.size(); i++)
     valwords[i].valid(true);
   valwords.clear();
