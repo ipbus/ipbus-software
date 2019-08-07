@@ -109,7 +109,7 @@ UIO::UIO (
 }
 
 UIO::~UIO () {
-  fprintf(stderr, "UIO: destructor\n");
+  log ( Debug() , "UIO: destructor" );
 }
 
 void
@@ -160,10 +160,11 @@ UIO::decodeAddress (uint32_t uaddr) {
 ValHeader
 UIO::implementWrite (const uint32_t& aAddr, const uint32_t& aValue) {
   DevAddr da = decodeAddress(aAddr);
-  fprintf(stderr, "UIO: write at uhal addr %08x -> "
-    "device 0x%.*x hw addr %08x (byte %08lx), "
-    "\n",
-    aAddr,DEVNUMPRLEN,da.device,da.word,da.word*sizeof(*hw));
+  log ( Debug() , "UIO: write at uhal addr ", Integer(aAddr, IntFmt<hex,fixed>()) ,
+	" -> ",Integer(da.word, IntFmt<hex,fixed>()) ,
+	" device ",Integer( DEVNUMPRLEN, IntFmt<hex,fixed>()),
+	" hw addr ",Integer( da.device, IntFmt<hex,fixed>()),
+	" (byte ",Integer( da.word*sizeof(*hw), IntFmt<hex,fixed>()),"), ");
   if (checkDevice(da.device)) return ValWord<uint32_t>();
   uint32_t writeval = aValue;
   hw[da.device][da.word] = writeval;
@@ -174,10 +175,13 @@ UIO::implementWrite (const uint32_t& aAddr, const uint32_t& aValue) {
 ValWord<uint32_t>
 UIO::implementRead (const uint32_t& aAddr, const uint32_t& aMask) {
   DevAddr da = decodeAddress(aAddr);
-  fprintf(stderr, "UIO: read at uhal addr %08x -> "
-    "device 0x%.*x hw addr %08x (byte %08lx), "
-    "mask %08x\n",
-    aAddr,DEVNUMPRLEN,da.device,da.word,da.word*sizeof(*hw),aMask);
+  log ( Debug() , "UIO: read ", Integer( aAddr, IntFmt<hex,fixed>()),
+	"at uhal addr ",Integer( DEVNUMPRLEN, IntFmt<hex,fixed>()),
+	" -> ", Integer( da.word, IntFmt<hex,fixed>()) ,
+    "device ", Integer( da.device, IntFmt<hex,fixed>()),
+    "hw addr", Integer( da.word, IntFmt<hex,fixed>()),
+	" (byte ", Integer( da.word*sizeof(*hw), IntFmt<hex,fixed>()), 
+	"), mask ", Integer( aMask, IntFmt<hex,fixed>()));
   if (checkDevice(da.device)) return ValWord<uint32_t>();
   uint32_t readval = hw[da.device][da.word];
   fprintf(stderr, "UIO:    read value %08x\n", readval);
