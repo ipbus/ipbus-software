@@ -171,6 +171,29 @@ UIO::implementWrite (const uint32_t& aAddr, const uint32_t& aValue) {
   return ValHeader();
 }
 
+ValHeader 
+UIO::implementBOT(){
+	log ( Debug() , "Byte Order Transaction");
+	fprintf(stderr, "Error: implementBOT function not implemented yet\n");
+	return ValHeader();
+}
+
+ValHeader 
+UIO::implementWriteBlock (const uint32_t& aAddr, const std::vector<uint32_t>& aValues, const defs::BlockReadWriteMode& aMode) {
+    log ( Debug() , "UIO: Write block of size " , Integer ( aValues.size() ) , " to address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    DevAddr da = decodeAddress(aAddr);
+    if (checkDevice(da.device)) return ValWord<uint32_t>();
+    uint32_t lAddr ( da.word );
+	std::vector<uint32_t>::const_iterator ptr;
+	for (ptr = aValues.begin(); ptr < aValues.end(); ptr++){
+		uint32_t writeval = *ptr;
+		hw[da.device][lAddr] = writeval;
+        if ( aMode == defs::INCREMENTAL )
+            lAddr ++;
+	}
+    return ValHeader();
+}
+
 ValWord<uint32_t>
 UIO::implementRead (const uint32_t& aAddr, const uint32_t& aMask) {
   DevAddr da = decodeAddress(aAddr);
@@ -188,6 +211,23 @@ UIO::implementRead (const uint32_t& aAddr, const uint32_t& aMask) {
   valwords.push_back(vw);
   primeDispatch();
   return vw;
+}
+    
+ValVector< uint32_t > 
+UIO::implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode ) {
+    log ( Debug() , "Read unsigned block of size " , Integer ( aSize ) , " from address " , Integer ( aAddr , IntFmt<hex,fixed>() ) );
+    DevAddr da = decodeAddress(aAddr);
+    uint32_t lAddr ( da.word );
+    if (checkDevice(da.device)) return ValVector<uint32_t>();
+	std::vector<uint32_t> read_vector(aSize);
+	std::vector<uint32_t>::iterator ptr;
+	for (ptr = read_vector.begin(); ptr < read_vector.end(); ptr++){
+  		uint32_t readval = hw[da.device][lAddr];
+		*ptr = readval;
+        if ( aMode == defs::INCREMENTAL )
+            lAddr ++;
+	}
+	return ValVector< uint32_t> (read_vector);
 }
 
 void
