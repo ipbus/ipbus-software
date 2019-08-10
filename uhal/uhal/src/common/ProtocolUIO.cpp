@@ -207,5 +207,31 @@ UIO::implementDispatch (boost::shared_ptr<Buffers> aBuffers) {
   valwords.clear();
 }
 
-}
+  ValWord<uint32_t> UIO::implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm ){
+    DevAddr da = decodeAddress(aAddr);
+    if (checkDevice(da.device)) return ValWord<uint32_t>();
 
+    //read the current value
+    uint32_t readval = hw[da.device][da.word];
+    //apply and and or operations
+    readval &= aANDterm;
+    readval |= aORterm;
+    hw[da.device][da.word] = readval;
+    readval = hw[da.device][da.word];
+    return ValWord<uint32_t>(readval);
+  }
+
+
+ValWord< uint32_t > UIO::implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend ) {
+    DevAddr da = decodeAddress(aAddr);
+    if (checkDevice(da.device)) return ValWord<uint32_t>();
+
+    //read the current value
+    uint32_t readval = hw[da.device][da.word];
+    //apply and and or operations
+    readval += aAddend;
+    hw[da.device][da.word] = readval;
+    readval = hw[da.device][da.word];
+    return ValWord<uint32_t>(readval);
+  }
+}
