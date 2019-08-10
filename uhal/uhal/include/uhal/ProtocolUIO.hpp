@@ -69,8 +69,8 @@ class UIO : public ClientInterface {
     ValHeader implementBOT() {}
     ValHeader implementWriteBlock (const uint32_t& aAddr, const std::vector<uint32_t>& aValues, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL) {}
     ValVector< uint32_t > implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode=defs::INCREMENTAL ) {}
-    ValWord< uint32_t > implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm ) {}
-    ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend ) {}
+    ValWord< uint32_t > implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm );
+    ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend );
     uint32_t getMaxNumberOfBuffers() {return 0;}
     uint32_t getMaxSendSize() {return 0;}
     uint32_t getMaxReplySize() {return 0;}
