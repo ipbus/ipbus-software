@@ -72,7 +72,7 @@ UIO::UIO (
         break;
       }
     }
-    if(address1==0) fprintf(stderr, "Error: cannot find a device that matches label %s, device not opened!\n", (*nodeId).c_str());
+    if(address1==0) log (Debug(), "Cannot find a device that matches label ", (*nodeId).c_str(), " device not opened!" );
 
     // Traverse through the /sys/class/uio directory
     for (directory_iterator x(uiopath); x!=directory_iterator(); ++x){
@@ -98,7 +98,7 @@ UIO::UIO (
       }
     }
     if (size==0) {
-      fprintf(stderr, "Error: Trouble loading device %s, cannot find device or size zero\n", (*nodeId).c_str());
+      log ( Debug() , "Error: Trouble loading device ",(*nodeId).c_str(), " cannot find device or size zero." );
     }
     //save the mapping
     addrs[devnum]=address1;
@@ -120,18 +120,18 @@ UIO::openDevice(int i, uint32_t size, const char *name) {
   snprintf(devpath,devpath_cap, "%s/%s", prefix, name);
   fd[i] = open(devpath, O_RDWR|O_SYNC);
   if (-1==fd[i]) {
-    fprintf(stderr, "Failed to open %s: %s\n", devpath, strerror(errno));
+    log( Debug() , "Failed to open ", devpath, ": ", strerror(errno));
     goto end;
   }
   hw[i] = (uint32_t*)mmap( NULL, size*sizeof(uint32_t),
                            PROT_READ|PROT_WRITE, MAP_SHARED,
                            fd[i], 0x0);
   if (hw[i]==MAP_FAILED) {
-    fprintf(stderr, "Failed to map %s: %s\n", devpath, strerror(errno));
+    log ( Debug() , "Failed to map ", devpath, ": ",  strerror(errno));
     hw[i]=NULL;
     goto end;
   }
-  log ( Debug(), "Mapped ", devpath, " as device number ", Integer( DEVNUMPRLEN, IntFmt<hex,fixed>()),
+  log ( Debug(), "Mapped ", devpath, " as device number ", Integer( i, IntFmt<hex,fixed>()),
 		  " size ", Integer( size, IntFmt<hex, fixed>()));
   end:
   free(devpath);
@@ -141,9 +141,9 @@ int
 UIO::checkDevice (int i) {
   if (!hw[i]) {
     // Todo: replace with an exception
-    fprintf(stderr, "No device with number 0x%.*x\n",
-      DEVNUMPRLEN,i);
-    return 1;
+	  uhal::exception::BadUIODevice* lExc = new::exception::BadUIODevice();
+	  log (*lExc , "No device with number ", Integer(i, IntFmt< hex, fixed>() ));
+      return 1;
   }
   return 0;
 }
@@ -161,8 +161,8 @@ UIO::implementWrite (const uint32_t& aAddr, const uint32_t& aValue) {
   DevAddr da = decodeAddress(aAddr);
   log ( Debug() , "UIO: write at uhal addr ", Integer(aAddr, IntFmt<hex,fixed>()) ,
 	" -> ",Integer(da.word, IntFmt<hex,fixed>()) ,
-	" device ",Integer( DEVNUMPRLEN, IntFmt<hex,fixed>()),
-	" hw addr ",Integer( da.device, IntFmt<hex,fixed>()),
+	" device ",Integer( da.device, IntFmt<hex,fixed>()),
+    "hw addr", Integer( da.word, IntFmt<hex,fixed>()),
 	" (byte ",Integer( da.word*sizeof(*hw), IntFmt<hex,fixed>()),"), ");
   if (checkDevice(da.device)) return ValWord<uint32_t>();
   uint32_t writeval = aValue;
@@ -174,7 +174,8 @@ UIO::implementWrite (const uint32_t& aAddr, const uint32_t& aValue) {
 ValHeader 
 UIO::implementBOT(){
 	log ( Debug() , "Byte Order Transaction");
-	fprintf(stderr, "Error: implementBOT function not implemented yet\n");
+	uhal::exception::UnimplementedFunction* lExc = new uhal::exception::UnimplementedFunction();
+	log (*lExc, "Function implementBOT() is not yet implemented.");
 	return ValHeader();
 }
 
@@ -197,8 +198,7 @@ UIO::implementWriteBlock (const uint32_t& aAddr, const std::vector<uint32_t>& aV
 ValWord<uint32_t>
 UIO::implementRead (const uint32_t& aAddr, const uint32_t& aMask) {
   DevAddr da = decodeAddress(aAddr);
-  log ( Debug() , "UIO: read ", Integer( aAddr, IntFmt<hex,fixed>()),
-	"at uhal addr ",Integer( DEVNUMPRLEN, IntFmt<hex,fixed>()),
+  log ( Debug() , "UIO: read at uhal addr ",Integer( aAddr, IntFmt<hex,fixed>()),
 	" -> ", Integer( da.word, IntFmt<hex,fixed>()) ,
     "device ", Integer( da.device, IntFmt<hex,fixed>()),
     "hw addr", Integer( da.word, IntFmt<hex,fixed>()),

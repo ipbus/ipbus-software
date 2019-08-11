@@ -29,27 +29,9 @@ namespace uhal {
 
   namespace exception
   {
-    // //! Exception class to handle the case where an Atomic Transaction was requested but could not be performed. Uses the base uhal::exception implementation of what()
-    // class AtomicTransactionSize : public exception {};
-    //! Exception class to handle the case where pinging of a client failed.
-    //UHAL_DEFINE_EXCEPTION_CLASS ( PingFailed , "Exception class to handle the case where pinging of a client failed." )
-
-    //! Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds.
-    //UHAL_DEFINE_EXCEPTION_CLASS ( BitsSetWhichAreForbiddenByBitMask , "Exception class to handle the case where a masked write was attempted with a data source which has non-zero bits outside the bit-mask's bounds." )
-
-    //! Exception class to handle the case where we were unable to validate the packet.
-    //UHAL_DEFINE_EXCEPTION_CLASS ( ValidationError , "Exception class to handle the case where we were unable to validate the packet." )
-
-    //! Exception class to handle a NULL buffer being passed to the transport class.
-    //UHAL_DEFINE_EXCEPTION_CLASS ( NullBufferException , "Exception class to handle a NULL buffer being passed to the transport class." )
-
-    //UHAL_DEFINE_EXCEPTION_CLASS ( PacketLevelError, "Base exception class covering situations in which a packet-level error occurs.")
-
-    //UHAL_DEFINE_EXCEPTION_CLASS ( TransactionLevelError, "Base exception class covering situations in which a transaction-level error occurs (i.e. error occurs in individual read/write).")
-
-    //UHAL_DEFINE_EXCEPTION_CLASS ( ClientTimeout, "Base exception class covering timeouts when waiting for reply from device")
-
-    //UHAL_DEFINE_EXCEPTION_CLASS ( TransportLayerError, "Base exception class covering non-timeout transport-layer-specific errors.")
+    UHAL_DEFINE_EXCEPTION_CLASS ( UnmatchedLabel , "Exception class to handle the case where matching a label to a device failed." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( BadUIODevice , "Exception class to handle the case where uio device cannot be opened." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( UnimplementedFunction , "Exception class to handle the case where an unimplemented function is called." )
   }
 
 class UIO : public ClientInterface {
