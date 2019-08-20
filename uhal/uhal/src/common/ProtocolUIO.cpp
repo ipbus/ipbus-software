@@ -141,7 +141,7 @@ int
 UIO::checkDevice (int i) {
   if (!hw[i]) {
     // Todo: replace with an exception
-	  uhal::exception::BadUIODevice* lExc = new::exception::BadUIODevice();
+	  uhal::exception::BadUIODevice* lExc = new uhal::exception::BadUIODevice();
 	  log (*lExc , "No device with number ", Integer(i, IntFmt< hex, fixed>() ));
       return 1;
   }
