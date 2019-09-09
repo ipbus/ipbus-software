@@ -4,6 +4,7 @@
 #include <uhal/ClientInterface.hpp>
 #include <uhal/ValMem.hpp>
 #include "uhal/log/exception.hpp"
+#include <signal.h> //for handling of SIG_BUS signals
 
 namespace uioaxi {
 
@@ -32,6 +33,7 @@ namespace uhal {
     UHAL_DEFINE_EXCEPTION_CLASS ( UnmatchedLabel , "Exception class to handle the case where matching a label to a device failed." )
     UHAL_DEFINE_EXCEPTION_CLASS ( BadUIODevice , "Exception class to handle the case where uio device cannot be opened." )
     UHAL_DEFINE_EXCEPTION_CLASS ( UnimplementedFunction , "Exception class to handle the case where an unimplemented function is called." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( UIOBusError , "Exception class for when an axi transaction causes a BUS_ERROR." )
   }
 
 class UIO : public ClientInterface {
@@ -72,6 +74,8 @@ class UIO : public ClientInterface {
     void primeDispatch ();
     void openDevice (int devnum, uint32_t size, const char *name);
     int checkDevice (int devnum);
+    struct sigaction saBusError;
+    struct sigaction saBusError_old;
 };
 
 }
