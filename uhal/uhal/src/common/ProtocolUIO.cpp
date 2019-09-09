@@ -36,9 +36,8 @@ void static signal_handler(int sig){
 //     uint32_t readval;
 //     BUS_ERROR_PROTECTION(readval = hw[da.device][da.word])
 #define BUS_ERROR_PROTECTION(ACCESS) \
-  if(SIGBUS == setjmp(env)){ \
+  if(SIGBUS == sigsetjmp(env,1)){						\
     uhal::exception::UIOBusError * e = new uhal::exception::UIOBusError();\
-    log(*e, "Caught BUS_ERROR signal");\
     throw *e;\
   }else{ \
     ACCESS;					\
