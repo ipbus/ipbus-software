@@ -51,6 +51,7 @@
 #include <iostream>                                         // for operator<<
 #include <sys/stat.h>
 #include <stdlib.h>                                         // for size_t, free
+#include <stdio.h>
 #include <string.h>                                         // for memcpy
 #include <unistd.h>
 
@@ -59,6 +60,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>                          // for sleep_for
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
+#include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include "uhal/grammars/URI.hpp"                            // for URI
 #include "uhal/log/LogLevels.hpp"                           // for BaseLogLevel
@@ -305,12 +307,131 @@ void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
 
 
 
+PCIe::RobustMutex::RobustMutex() :
+  mCount(0),
+  mLastOwnerDied(false)
+{
+  pthread_mutexattr_t lAttr;
+
+  int s = pthread_mutexattr_init(&lAttr);
+  if (s != 0) {
+    exception::MutexError lExc;
+    log(lExc, "Error code ", Integer(s), " (", strerror(s), ") returned in mutex attr initialisation");
+    throw lExc;
+  }
+
+  s = pthread_mutexattr_setpshared(&lAttr, PTHREAD_PROCESS_SHARED);
+  if (s != 0) {
+    exception::MutexError lExc;
+    log(lExc, "Error code ", Integer(s), " (", strerror(s), ") returned by pthread_mutexattr_setpshared");
+    throw lExc;
+  }
+
+  s = pthread_mutexattr_setrobust(&lAttr, PTHREAD_MUTEX_ROBUST);
+  if (s != 0) {
+    exception::MutexError lExc;
+    log(lExc, "Error code ", Integer(s), " (", strerror(s), ") returned by pthread_mutexattr_setrobust");
+    throw lExc;
+  }
+
+  s = pthread_mutex_init(&mMutex, &lAttr);
+  if (s != 0) {
+    exception::MutexError lExc;
+    log(lExc, "Error code ", Integer(s), " (", strerror(s), ") returned in mutex initialisation");
+    throw lExc;
+  }
+}
+
+
+PCIe::RobustMutex::~RobustMutex()
+{
+}
+
+
+void PCIe::RobustMutex::lock()
+{
+  int s = pthread_mutex_lock(&mMutex);
+  mLastOwnerDied = (s == EOWNERDEAD);
+  if (mLastOwnerDied)
+    s = pthread_mutex_consistent(&mMutex);
+
+  if (s != 0) {
+    exception::MutexError lExc;
+    log(lExc, "Error code ", Integer(s), " (", strerror(s), ") returned when ", mLastOwnerDied ? "making mutex state consistent" : "locking mutex");
+    throw lExc;
+  }
+
+  mCount++;
+}
+
+
+void PCIe::RobustMutex::unlock()
+{
+  int s = pthread_mutex_unlock(&mMutex);
+  if (s != 0)
+    log(Error(), "Error code ", Integer(s), " (", strerror(s), ") returned when unlocking mutex");
+}
+
+
+uint64_t PCIe::RobustMutex::getLockCount() const
+{
+  return mCount;
+}
+
+
+bool PCIe::RobustMutex::lastOwnerDied() const
+{
+  return mLastOwnerDied;
+}
+
+
+
+
+template <class T>
+PCIe::SharedObject<T>::SharedObject(const std::string& aName) :
+  mName(aName),
+  mSharedMem(boost::interprocess::open_or_create, aName.c_str(), 1024),
+  mObj(mSharedMem.find_or_construct<T>(boost::interprocess::unique_instance)())
+{
+}
+
+template <class T>
+PCIe::SharedObject<T>::~SharedObject()
+{
+  // boost::interprocess::shared_memory_object::remove(mName.c_str());
+}
+
+template <class T>
+T* PCIe::SharedObject<T>::operator->()
+{
+  return mObj;
+}
+
+template <class T>
+T& PCIe::SharedObject<T>::operator*()
+{
+  return *mObj;
+}
+
+
+
+
+std::string PCIe::getSharedMemName(const std::string& aPath)
+{
+  std::string lSanitizedPath(aPath);
+  std::replace(lSanitizedPath.begin(), lSanitizedPath.end(), '/', ':');
+
+  return "/uhal::ipbuspcie-2.0:" + lSanitizedPath;
+}
+
+
 PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   IPbus< 2 , 0 > ( aId , aUri ),
   mConnected(false),
   mDeviceFileHostToFPGA(aUri.mHostname.substr(0, aUri.mHostname.find(",")), O_RDWR ),
   mDeviceFileFPGAToHost(aUri.mHostname.substr(aUri.mHostname.find(",")+1), O_RDWR | O_NONBLOCK  /* for read might need O_RDWR | O_NONBLOCK */),
   mDeviceFileFPGAEvent("", O_RDONLY),
+  mIPCMutex(getSharedMemName(mDeviceFileHostToFPGA.getPath())),
   mXdma7seriesWorkaround(false),
   mUseInterrupt(false),
   mNumberOfPages(0),
@@ -394,6 +515,7 @@ void PCIe::Flush( )
   while ( !mReplyQueue.empty() )
     read();
 
+  mIPCLock.reset();
 }
 
 
@@ -402,6 +524,9 @@ void PCIe::dispatchExceptionHandler()
   log(Notice(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
+
+  mIPCLock.reset();
+
   disconnect();
 
   InnerProtocol::dispatchExceptionHandler();
@@ -432,6 +557,16 @@ void PCIe::connect()
   mDeviceFileHostToFPGA.open();
 
   log ( Debug() , "PCIe client is opening device file " , Quote ( mDeviceFileFPGAToHost.getPath() ) , " (device-to-client)" );
+  mDeviceFileFPGAToHost.open();
+
+  boost::scoped_ptr<IPCScopedLock_t> lLock;
+  if (not mIPCLock)
+    lLock.reset(new IPCScopedLock_t(*mIPCMutex));
+
+  // Read current value of lock counter when reading status info from FPGA
+  // (So that can check whether this info is up-to-date later on, when sending next request packet)
+  mIPCLockCount = mIPCMutex->getLockCount();
+
   std::vector<uint32_t> lValues;
   mDeviceFileFPGAToHost.read(0x0, 4, lValues);
   log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
@@ -480,6 +615,17 @@ void PCIe::disconnect()
 
 void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
 {
+  if (not mIPCLock) {
+    mIPCLock.reset(new IPCScopedLock_t(*mIPCMutex));
+
+    // If these two numbers don't match, another client/process has sent packets
+    // more recently than this client has, so must re-read status info
+    if (((mIPCMutex->getLockCount() - 1) != mIPCLockCount) or mIPCMutex->lastOwnerDied())
+      connect();
+    else
+      mIPCLockCount = mIPCMutex->getLockCount();
+  }
+
   log (Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFileHostToFPGA.getPath()));
 
   const uint32_t lHeaderWord = (0x10000 | (((aBuffers->sendCounter() / 4) - 1) & 0xFFFF));
