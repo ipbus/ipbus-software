@@ -149,16 +149,8 @@ namespace uhal
   {
     log ( Info() , "Attempting to create TCP connection to '" , mEndpoint->host_name() , "' port " , mEndpoint->service_name() , "." );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
-    boost::system::error_code lErrorCode = boost::asio::error::would_block;
-    boost::asio::async_connect ( mSocket , mEndpoint , boost::lambda::var ( lErrorCode ) = boost::lambda::_1 );
-
-    // Unlock mutex whilst connect runs in other thread, to avoid deadlock in case timeout occurs
-    mTransportLayerMutex.unlock();
-    do
-    {
-    }
-    while ( lErrorCode == boost::asio::error::would_block );
-    mTransportLayerMutex.lock();
+    boost::system::error_code lErrorCode;
+    boost::asio::connect ( mSocket , mEndpoint , lErrorCode );
 
     if ( lErrorCode )
     {
