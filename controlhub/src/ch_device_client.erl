@@ -841,8 +841,7 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
     after 0 ->
         receive 
             {send, Pkt} ->
-                {IP1, IP2, IP3, IP4} = IP,
-                true = erlang:port_command(Socket, [?GEN_UDP_PORT_COMMAND_PREFIX, [((Port) bsr 8) band 16#ff, (Port) band 16#ff], [IP1 band 16#ff, IP2 band 16#ff, IP3 band 16#ff, IP4 band 16#ff], Pkt]);
+                udp_send(Socket, IP, Port, Pkt);
             {inet_reply, Socket, ok} ->
                 void;
             {inet_reply, Socket, SendError} ->
@@ -871,3 +870,12 @@ udp_proc_loop(Socket, IP, Port, ParentPid) ->
     end,
     udp_proc_loop(Socket, IP, Port, ParentPid).
 
+
+-ifdef(bypass_gen_udp_send).
+udp_send(Socket, IP, Port, Pkt) ->
+    {IP1, IP2, IP3, IP4} = IP,
+    true = erlang:port_command(Socket, [?GEN_UDP_PORT_COMMAND_PREFIX, [((Port) bsr 8) band 16#ff, (Port) band 16#ff], [IP1 band 16#ff, IP2 band 16#ff, IP3 band 16#ff, IP4 band 16#ff], Pkt]).
+-else.
+udp_send(Socket, IP, Port, Pkt) ->
+    ok = gen_udp:send(Socket, IP, Port, Pkt).
+-endif.
