@@ -113,9 +113,9 @@ namespace uhal
         */
         void AnalyzeReceivedAndCreateReply ( const uint32_t& aByteCount );
   
-      private:
-
         void SetEndpoint( const uint32_t& aAddress , const uint32_t&  aValue );
+
+      private:
 
         uint32_t GetEndpoint( const uint32_t& aAddress );
 
