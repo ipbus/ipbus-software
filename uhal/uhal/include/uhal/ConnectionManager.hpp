@@ -45,6 +45,7 @@
 #include "uhal/HwInterface.hpp"
 
 #include <boost/filesystem/path.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <vector>
 #include <set>

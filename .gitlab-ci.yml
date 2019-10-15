@@ -115,13 +115,13 @@ build:centos7:
     when: always
     expire_in: 1 day
 
-build:fedora26:
+build:fedora30-python2:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python2:2019-10-12__erlang21.3_gcc9.2.1_boost1.69.0_pugixml1.9
 
-build:fedora26-python3:
+build:fedora30-python3:
   <<: *simple_build_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python3:2019-10-12__erlang21.3_gcc9.2.1_boost1.69.0_pugixml1.9
 
 build:ubuntu16:
   <<: *simple_build_jobTemplate
@@ -189,20 +189,20 @@ publish_build_job:
     - ls -al /opt/cactus /opt/cactus/*
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
 
-.job_template: &fedora26_test_jobTemplate
+.job_template: &fedora30_python2_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26:2018-01-14__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python2:2019-10-12__erlang21.3_gcc9.2.1_boost1.69.0_pugixml1.9
   dependencies:
-    - build:fedora26
+    - build:fedora30-python2
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
 
-.job_template: &fedora26_python3_test_jobTemplate
+.job_template: &fedora30_python3_test_jobTemplate
   <<: *simpleInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora26-python3:master__erlang19.3_gcc7.1.1_boost1.63.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python3:2019-10-12__erlang21.3_gcc9.2.1_boost1.69.0_pugixml1.9
   dependencies:
-    - build:fedora26-python3
+    - build:fedora30-python3
   variables:
     UHAL_ENABLE_IPBUS_PCIE: ""
     UHAL_GUI_DEPENDENCIES: python3-wxpython4
@@ -322,45 +322,45 @@ test_controlhub:centos7:
   <<: *test_controlhub_plainScripts_jobTemplate
 
 
-test_core:fedora26:
-  <<: *fedora26_test_jobTemplate
+test_core:fedora30-python2:
+  <<: *fedora30_python2_test_jobTemplate
   <<: *test_core_jobTemplate
 
-test_python:fedora26:
-  <<: *fedora26_test_jobTemplate
+test_python:fedora30-python2:
+  <<: *fedora30_python2_test_jobTemplate
   <<: *test_python_jobTemplate
 
-test_gui:fedora26:
-  <<: *fedora26_test_jobTemplate
+test_gui:fedora30-python2:
+  <<: *fedora30_python2_test_jobTemplate
   <<: *test_gui_jobTemplate
 
-test_tools:fedora26:
-  <<: *fedora26_test_jobTemplate
+test_tools:fedora30-python2:
+  <<: *fedora30_python2_test_jobTemplate
   <<: *test_tools_jobTemplate
 
-test_controlhub:fedora26:
-  <<: *fedora26_test_jobTemplate
+test_controlhub:fedora30-python2:
+  <<: *fedora30_python2_test_jobTemplate
   <<: *test_controlhub_plainScripts_jobTemplate
 
 
-test_core:fedora26-python3:
-  <<: *fedora26_python3_test_jobTemplate
+test_core:fedora30-python3:
+  <<: *fedora30_python3_test_jobTemplate
   <<: *test_core_jobTemplate
 
-test_python:fedora26-python3:
-  <<: *fedora26_python3_test_jobTemplate
+test_python:fedora30-python3:
+  <<: *fedora30_python3_test_jobTemplate
   <<: *test_python_jobTemplate
 
-test_gui:fedora26-python3:
-  <<: *fedora26_python3_test_jobTemplate
+test_gui:fedora30-python3:
+  <<: *fedora30_python3_test_jobTemplate
   <<: *test_gui_jobTemplate
 
-test_tools:fedora26-python3:
-  <<: *fedora26_python3_test_jobTemplate
+test_tools:fedora30-python3:
+  <<: *fedora30_python3_test_jobTemplate
   <<: *test_tools_jobTemplate
 
-test_controlhub:fedora26-python3:
-  <<: *fedora26_python3_test_jobTemplate
+test_controlhub:fedora30-python3:
+  <<: *fedora30_python3_test_jobTemplate
   <<: *test_controlhub_plainScripts_jobTemplate
 
 
