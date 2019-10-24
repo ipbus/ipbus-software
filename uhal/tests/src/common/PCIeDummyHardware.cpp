@@ -165,10 +165,6 @@ void PCIeDummyHardware::run()
     fileWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage, lPageHeader); // FIXME: Define template fileWrite method that takes const T& as final argument, so that don't have to define vector
     fileWrite(mDeviceFileFPGAToHost, 4 + mNextPageIndex * mWordsPerPage + 1, mReply);
 
-    std::vector<uint32_t> lData;
-    lData.push_back(mPublishedPageCount+1); // FIXME: Define template fileWrite method that takes const T& as final argument, so that don't have to define vector
-    fileWrite(mDeviceFileFPGAToHost, 3, lData);
-
     mNextPageIndex = (mNextPageIndex + 1) % mNumberOfPages;
     mPublishedPageCount++;
 
