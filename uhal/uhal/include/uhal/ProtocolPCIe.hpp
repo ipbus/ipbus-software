@@ -54,7 +54,7 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/locks.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
@@ -117,10 +117,17 @@ namespace uhal
 
         void write(const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData);
 
+        bool haveLock() const;
+
+        void lock();
+
+        void unlock();
+
       private:
         std::string mPath;
         int mFd;
         int mFlags;
+        bool mLocked;
         size_t mBufferSize;
         char* mBuffer;
       };
@@ -136,7 +143,13 @@ namespace uhal
 
         void unlock();
 
-        uint64_t getLockCount() const;
+        uint64_t getCounter() const;
+
+        bool isActive() const;
+
+        void startSession();
+
+        void endSession();
 
         bool lastOwnerDied() const;
 
@@ -146,6 +159,7 @@ namespace uhal
         pthread_mutex_t mMutex;
         uint64_t mCount;
         bool mLastOwnerDied;
+        bool mSessionActive;
       };
 
       template <class T>
@@ -165,6 +179,9 @@ namespace uhal
       };
 
       static std::string getSharedMemName(const std::string& );
+
+      typedef RobustMutex IPCMutex_t;
+      typedef boost::unique_lock<IPCMutex_t> IPCScopedLock_t;
 
     public:
       /**
@@ -219,6 +236,9 @@ namespace uhal
       //! Set up the connection to the device
       void connect();
 
+      //! Set up the connection to the device
+      void connect(IPCScopedLock_t& );
+
       //! Close the connection to the device
       void disconnect();
 
@@ -237,15 +257,11 @@ namespace uhal
       //! FPGA-to-host interrupt (event) file
       File mDeviceFileFPGAEvent;
 
-      typedef RobustMutex IPCMutex_t;
-      typedef boost::lock_guard<IPCMutex_t> IPCScopedLock_t;
-
       // FIXME: "robust" mutex needed in long term (to cope with processes being killed)
       SharedObject<IPCMutex_t> mIPCMutex;
 
-      boost::scoped_ptr<IPCScopedLock_t> mIPCLock;
-
-      uint64_t mIPCLockCount;
+      bool mIPCExternalSessionActive;
+      uint64_t mIPCSessionCount;
 
       bool mXdma7seriesWorkaround;
 

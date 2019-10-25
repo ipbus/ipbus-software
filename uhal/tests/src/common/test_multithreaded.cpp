@@ -146,7 +146,6 @@ void job_single ( HwInterface& hw )
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_hwinterface, DummyHardwareFixture,
 {
-  if (deviceType != IPBUS_2_0_PCIE) {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
     HwInterface hw = getHwInterface();
@@ -163,7 +162,6 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_hwinterface, 
       delete jobs[i];
     }
   }
-}
 }
 )
 
@@ -193,7 +191,6 @@ void job_single_copied ( HwInterface hw )
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_copied_hwinterface, DummyHardwareFixture,
 {
-  if (deviceType != IPBUS_2_0_PCIE) {
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
     HwInterface hw = getHwInterface();
@@ -210,7 +207,6 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_copied_hwinte
       delete jobs[i];
     }
   }
-}
 }
 )
 
