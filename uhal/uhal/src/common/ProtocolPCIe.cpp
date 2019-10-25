@@ -49,6 +49,7 @@
 #include <fcntl.h>
 #include <iomanip>                                          // for operator<<
 #include <iostream>                                         // for operator<<
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <stdlib.h>                                         // for size_t, free
 #include <stdio.h>
@@ -112,6 +113,7 @@ PCIe::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
   mFd(-1),
   mFlags(aFlags),
+  mLocked(false),
   mBufferSize(0),
   mBuffer(NULL)
 {
@@ -154,6 +156,8 @@ void PCIe::File::open()
 void PCIe::File::close()
 {
   if (mFd != -1) {
+    if (haveLock())
+      unlock();
     int rc = ::close(mFd);
     mFd = -1;
     if (rc == -1)
@@ -305,11 +309,39 @@ void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
 }
 
 
+bool PCIe::File::haveLock() const
+{
+  return mLocked;
+}
+
+
+void PCIe::File::lock()
+{
+  if ( flock(mFd, LOCK_EX) == -1 ) {
+    exception::MutexError lExc;
+    log(lExc, "Failed to lock device file ", Quote(mPath), "; errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
+    throw lExc;
+  }
+  mLocked = true;
+}
+
+
+void PCIe::File::unlock()
+{
+  if ( flock(mFd, LOCK_UN) == -1 ) {
+    log(Warning(), "Failed to unlock device file ", Quote(mPath), "; errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
+  }
+  else
+    mLocked = false;
+}
+
+
 
 
 PCIe::RobustMutex::RobustMutex() :
   mCount(0),
-  mLastOwnerDied(false)
+  mLastOwnerDied(false),
+  mSessionActive(false)
 {
   pthread_mutexattr_t lAttr;
 
@@ -360,8 +392,6 @@ void PCIe::RobustMutex::lock()
     log(lExc, "Error code ", Integer(s), " (", strerror(s), ") returned when ", mLastOwnerDied ? "making mutex state consistent" : "locking mutex");
     throw lExc;
   }
-
-  mCount++;
 }
 
 
@@ -373,9 +403,27 @@ void PCIe::RobustMutex::unlock()
 }
 
 
-uint64_t PCIe::RobustMutex::getLockCount() const
+uint64_t PCIe::RobustMutex::getCounter() const
 {
   return mCount;
+}
+
+
+bool PCIe::RobustMutex::isActive() const
+{
+  return mSessionActive;
+}
+
+
+void PCIe::RobustMutex::startSession()
+{
+  mCount++;
+  mSessionActive = true;
+}
+
+void PCIe::RobustMutex::endSession()
+{
+  mSessionActive = false;
 }
 
 
@@ -515,7 +563,10 @@ void PCIe::Flush( )
   while ( !mReplyQueue.empty() )
     read();
 
-  mIPCLock.reset();
+  mDeviceFileHostToFPGA.unlock();
+
+  IPCScopedLock_t lLockGuard(*mIPCMutex);
+  mIPCMutex->endSession();
 }
 
 
@@ -525,7 +576,7 @@ void PCIe::dispatchExceptionHandler()
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
 
-  mIPCLock.reset();
+  mDeviceFileHostToFPGA.unlock();
 
   disconnect();
 
@@ -553,19 +604,24 @@ uint32_t PCIe::getMaxReplySize()
 
 void PCIe::connect()
 {
+  IPCScopedLock_t lLockGuard(*mIPCMutex);
+  connect(lLockGuard);
+}
+
+
+void PCIe::connect(IPCScopedLock_t& aGuard)
+{
+  // Read current value of session counter when reading status info from FPGA
+  // (So that can check whether this info is up-to-date later on, when sending next request packet)
+  mIPCExternalSessionActive = mIPCMutex->isActive() and (not mDeviceFileHostToFPGA.haveLock());
+  mIPCSessionCount = mIPCMutex->getCounter();
+  aGuard.unlock();
+
   log ( Debug() , "PCIe client is opening device file " , Quote ( mDeviceFileHostToFPGA.getPath() ) , " (client-to-device)" );
   mDeviceFileHostToFPGA.open();
 
   log ( Debug() , "PCIe client is opening device file " , Quote ( mDeviceFileFPGAToHost.getPath() ) , " (device-to-client)" );
   mDeviceFileFPGAToHost.open();
-
-  boost::scoped_ptr<IPCScopedLock_t> lLock;
-  if (not mIPCLock)
-    lLock.reset(new IPCScopedLock_t(*mIPCMutex));
-
-  // Read current value of lock counter when reading status info from FPGA
-  // (So that can check whether this info is up-to-date later on, when sending next request packet)
-  mIPCLockCount = mIPCMutex->getLockCount();
 
   std::vector<uint32_t> lValues;
   mDeviceFileFPGAToHost.read(0x0, 4, lValues);
@@ -615,15 +671,18 @@ void PCIe::disconnect()
 
 void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
 {
-  if (not mIPCLock) {
-    mIPCLock.reset(new IPCScopedLock_t(*mIPCMutex));
+  if (not mDeviceFileHostToFPGA.haveLock()) {
+    mDeviceFileHostToFPGA.lock();
+
+    IPCScopedLock_t lGuard(*mIPCMutex);
+    mIPCMutex->startSession();
+    mIPCSessionCount++;
 
     // If these two numbers don't match, another client/process has sent packets
     // more recently than this client has, so must re-read status info
-    if (((mIPCMutex->getLockCount() - 1) != mIPCLockCount) or mIPCMutex->lastOwnerDied())
-      connect();
-    else
-      mIPCLockCount = mIPCMutex->getLockCount();
+    if (mIPCExternalSessionActive or (mIPCMutex->getCounter() != mIPCSessionCount)) {
+      connect(lGuard);
+    }
   }
 
   log (Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFileHostToFPGA.getPath()));
