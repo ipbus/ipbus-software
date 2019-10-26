@@ -137,6 +137,15 @@ find ./ -type d -exec chmod 755 {} \;
 %{_prefix}/etc
 %{_prefix}/include
 
+# Temporary workaround for subpackages not being built on CentOS8
+%if %{defined _build_debuginfo_package}
+%if %{_os} == centos8
+/usr/lib/debug
+/usr/src/debug
+%endif
+%endif
+
+
 #
 # Files that go in the debuginfo RPM
 #
