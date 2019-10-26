@@ -103,6 +103,13 @@ build:centos7:
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "centos7_x86_64"
 
+build:centos8:
+  <<: *build_rpm_yumrepo_jobTemplate
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:2019-10-26__boost1.66.0_pugixml1.9
+  variables:
+    YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
+    OUTPUT_REPO_SUBDIR: "centos8_x86_64"
+
 
 
 .job_template: &simple_build_jobTemplate
@@ -182,6 +189,16 @@ publish_build_job:
     UHAL_ENABLE_IPBUS_PCIE: ""
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
+
+.job_template: &centos8_test_jobTemplate
+  <<: *rpmInstall_test_jobTemplate
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2019-10-26
+  variables:
+    REPO_URL_OS_SUBDIR: centos8_x86_64
+    UHAL_ENABLE_IPBUS_PCIE: ""
+    TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
+    UHAL_GUI_DEPENDENCIES: "python3-numpy"
     VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 
@@ -321,6 +338,23 @@ test_tools:centos7:
 
 test_controlhub:centos7:
   <<: *centos7_test_jobTemplate
+  <<: *test_controlhub_plainScripts_jobTemplate
+
+
+test_core:centos8:
+  <<: *centos8_test_jobTemplate
+  <<: *test_core_jobTemplate
+
+test_python:centos8:
+  <<: *centos8_test_jobTemplate
+  <<: *test_python_jobTemplate
+
+test_tools:centos8:
+  <<: *centos8_test_jobTemplate
+  <<: *test_tools_jobTemplate
+
+test_controlhub:centos8:
+  <<: *centos8_test_jobTemplate
   <<: *test_controlhub_plainScripts_jobTemplate
 
 
