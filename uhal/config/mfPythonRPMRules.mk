@@ -34,10 +34,12 @@ _rpmbuild: _setup_update
 	echo "include */*.so" > ${RPMBUILD_DIR}/MANIFEST.in
 	# Change into rpm/pkg to finally run the customized setup.py
 	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
+	echo '%debug_package %{nil}' >> ~/.rpmmacros
 	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py bdist_rpm \
 	  --release ${PACKAGE_RELEASE}.${CACTUS_OS}.${CXX_VERSION_TAG}.python${PYTHON_VERSION} \
 	  --requires "python `find ${RPMBUILD_DIR} -type f -exec file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' '`" \
-	  --binary-only --force-arch=`uname -m`
+	  --binary-only --force-arch=`uname -m` 
+	sed -i '$ d' ~/.rpmmacros
 	# Harvest the crop
 	find ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} ${PackagePath}/rpm \;
 

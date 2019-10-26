@@ -76,12 +76,14 @@ fi
 if [ -d %{_packagedir}/bin ]; then
   cd %{_packagedir}/bin; \
 # find . -name "*" -exec install -D -m 755 {} $RPM_BUILD_ROOT/%{_prefix}/bin/{} \;
-  find . -name "*" -exec $BUILD_HOME/uhal/config/install.sh {} %{_prefix}/bin/%{_project}/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
+  find . -type f -exec $BUILD_HOME/uhal/config/install.sh {} %{_prefix}/bin/%{_project}/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
 fi
 
+%define versioned_python_command %(echo "$(python -c \"from sys import version_info; print('python' + str(version_info[0]))\")")
 if [ -d %{_packagedir}/scripts ]; then
   cd %{_packagedir}/scripts; \
-  find . -name ".svn" -prune -o -name "*" -exec install -D -m 755 {} $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/{} \;
+  find . -type f -exec install -D -m 755 {} $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/{} \;
+  find $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/ -type f -exec sed -i "s|#!/usr/bin/env python|#!/usr/bin/env "%{versioned_python_command}"|" {} \;
 fi
 
 if [ -d %{_packagedir}/lib ]; then
@@ -100,7 +102,7 @@ fi
 
 if [ -d %{_packagedir}/etc ]; then
   cd %{_packagedir}/etc; \
-  find . -name ".svn" -prune -o -name "*" -exec install -D -m 644 {} $RPM_BUILD_ROOT/%{_prefix}/etc/{} \;
+  find . -type f -exec install -D -m 644 {} $RPM_BUILD_ROOT/%{_prefix}/etc/{} \;
 fi
 
 #cp -rp %{_sources_dir}/* $RPM_BUILD_ROOT%{_prefix}/.

@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 """
 This script prints the values in a remote device, of registers below a specified uHAL node.

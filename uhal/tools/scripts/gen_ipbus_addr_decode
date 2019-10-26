@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 """
 usage: gen_ipus_addr_decode [options] <uhal_address_table.xml>
 

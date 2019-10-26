@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 """
 Usage: ipbus_perf_suite.py <config file>
 
