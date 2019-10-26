@@ -18,6 +18,8 @@ ifeq ($(UNAME),Linux)
         CACTUS_OS=centos6
     else ifneq ($(findstring centos-7,$(CACTUS_PLATFORM)),)
         CACTUS_OS=centos7
+    else ifneq ($(findstring centos-8,$(CACTUS_PLATFORM)),)
+        CACTUS_OS=centos8
     endif
 else ifeq ($(UNAME),Darwin)
     CACTUS_OS=osx
