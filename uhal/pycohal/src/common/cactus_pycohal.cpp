@@ -182,7 +182,7 @@ namespace pycohal
       try {
         bounds = aSlice.get_indicies<>(valVec.begin(), valVec.end());
       }
-      catch (std::invalid_argument) {
+      catch (const std::invalid_argument&) {
         return std::vector<T>();
       }
 
