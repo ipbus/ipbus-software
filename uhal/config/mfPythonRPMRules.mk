@@ -16,7 +16,7 @@ include $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/mfInstallVariables.mk
 
 RPMBUILD_DIR=${PackagePath}/rpm/RPMBUILD
 
-
+VERSIONED_PYTHON_COMMAND := $(shell python -c "from sys import version_info; print('python' + str(version_info[0]))")
 
 .PHONY: rpm _rpmall
 rpm: _rpmall
@@ -37,7 +37,7 @@ _rpmbuild: _setup_update
 	echo '%debug_package %{nil}' >> ~/.rpmmacros
 	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py bdist_rpm \
 	  --release ${PACKAGE_RELEASE}.${CACTUS_OS}.${CXX_VERSION_TAG}.python${PYTHON_VERSION} \
-	  --requires "python `find ${RPMBUILD_DIR} -type f -exec file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' '`" \
+	  --requires "${VERSIONED_PYTHON_COMMAND} `find ${RPMBUILD_DIR} -type f -exec file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' '`" \
 	  --binary-only --force-arch=`uname -m` 
 	sed -i '$ d' ~/.rpmmacros
 	# Harvest the crop
