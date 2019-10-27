@@ -4,7 +4,7 @@ import wx
 class RefreshButtonsPanel(wx.Panel):
 
     def __init__(self, parent):
-        print "DEBUG: Refresh button panel instantiated"
+        print("DEBUG: Refresh button panel instantiated")
         wx.Panel.__init__(self, parent)
 
 
@@ -35,7 +35,7 @@ class RefreshButtonsPanel(wx.Panel):
         sizer.Fit(self)
 
     def __on_click_refresh(self, event):
-        print "DEBUG: Refresh button clicked. Calling default GUI"
+        print("DEBUG: Refresh button clicked. Calling default GUI")
         self.__parent.start_hw_thread()        
 
     '''
