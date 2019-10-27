@@ -1,4 +1,4 @@
-#!/bin/env escript
+#!/usr/bin/env escript
 
 % Basic Erlang script that sends IPbus 2.0 status request packet to a given target, and prints the response packet with nice formatting
 % Tom Williams, Nov 2013
