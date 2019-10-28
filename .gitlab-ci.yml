@@ -169,7 +169,7 @@ publish_build_job:
     - cat /etc/yum.repos.d/ipbus-sw-ci.repo
     - sudo rpm --rebuilddb && sudo yum clean all 
     - sudo yum -y groupinstall ${YUM_GROUPINSTALL_ARGUMENTS} ipbus-sw
-    - sudo yum -y install 'cactuscore-uhal-*-debuginfo'
+    - if [ "$REPO_URL_OS_SUBDIR" != "centos8_x86_64" ]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
     - rpm -qa | grep cactus | sort
 
 .job_template: &slc6_test_jobTemplate
