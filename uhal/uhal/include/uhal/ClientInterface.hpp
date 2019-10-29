@@ -134,7 +134,7 @@ namespace uhal
       	Return the url of the target for this client
       	@return the url of the target for this client
       */
-      std::string uri() const;
+      const std::string& uri() const;
 
       //! Method to dispatch all queued transactions, and wait until all corresponding responses have been received
       void dispatch ();
@@ -409,6 +409,8 @@ namespace uhal
 
       //! a struct containing the full URI of the target for this client
       URI mUri;
+
+      std::string mUriString;
 
       /**
         Function which checks the available space in the currently filling buffer against requested send and receive sizes and, if there is insufficient space in the currently filling buffer, then dispatch it and create a new buffer

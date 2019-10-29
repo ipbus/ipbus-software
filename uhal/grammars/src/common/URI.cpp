@@ -34,6 +34,7 @@
 
 
 #include <iostream>
+#include <sstream>
 
 
 namespace uhal {
@@ -55,5 +56,49 @@ namespace uhal {
     aStr << std::flush;
     return aStr;
   }
+
+
+  std::string ToString( const uhal::URI& aURI )
+  {
+    std::stringstream lReturn;
+    // url is always of the form "protocol://hostname:port"
+    lReturn << aURI.mProtocol << "://" << aURI.mHostname;
+    if ( !aURI.mPort.empty() )
+      lReturn << ":" << aURI.mPort;
+
+    // there is sometimes a path
+    if ( aURI.mPath != "" )
+    {
+      lReturn << "/" << aURI.mPath;
+    }
+
+    // there is sometimes a filename extension
+    if ( aURI.mExtension != "" )
+    {
+      lReturn << "." << aURI.mExtension;
+    }
+
+    // there are sometimes arguments
+    if ( aURI.mArguments.size() )
+    {
+      lReturn << "?";
+      uhal::NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin();
+
+      while ( true )
+      {
+        lReturn << lIt->first << "=" << lIt->second;
+
+        if ( ++lIt == aURI.mArguments.end() )
+        {
+          break;
+        }
+
+        lReturn << "&";
+      }
+    }
+
+    return lReturn.str();    
+  }
+
 
 }
