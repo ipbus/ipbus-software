@@ -109,13 +109,16 @@ std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket)
 PCIe::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
   mFd(-1),
-  mFlags(aFlags)
+  mFlags(aFlags),
+  mBufferSize(0),
+  mBuffer(NULL)
 {
 }
 
 
 PCIe::File::~File()
 {
+  free(mBuffer);
   close();
 }
 
@@ -157,21 +160,35 @@ void PCIe::File::close()
 }
 
 
+
+void PCIe::File::createBuffer(const size_t aNrBytes)
+{
+  if (mBuffer != NULL) {
+    if (mBufferSize >= aNrBytes)
+      return;
+    else {
+      delete mBuffer;
+      mBuffer = NULL;
+    }
+  }
+
+  posix_memalign((void**)&mBuffer, 4096/*alignment*/, aNrBytes + 4096);
+  if (mBuffer == NULL) {
+    exception::PCIeCommunicationError lExc;
+    log(lExc, "Failed to allocate ", Integer(aNrBytes + 4096), " bytes in PCIe::File::createBuffer");
+    throw lExc;
+  }
+}
+
+
 void PCIe::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
 {
   if (mFd == -1)
     open();
 
-  char *allocated = NULL;
-  posix_memalign((void **)&allocated, 4096/*alignment*/, 4*aNrWords + 4096);
-  if (allocated == NULL) {
-    exception::PCIeCommunicationError lExc;
-    log(lExc, "Failed to allocate ", Integer(4*aNrWords + 4096), " bytes in File::read function");
-    throw lExc;
-  }
+  createBuffer(4 * aNrWords);
 
   /* select AXI MM address */
-  char* buffer = allocated;
   off_t off = lseek(mFd, 4*aAddr, SEEK_SET);
   if ( off != off_t(4 * aAddr)) {
     exception::PCIeCommunicationError lExc;
@@ -180,7 +197,7 @@ void PCIe::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
   }
 
   /* read data from AXI MM into buffer using SGDMA */
-  int rc = ::read(mFd, buffer, 4*aNrWords);
+  int rc = ::read(mFd, mBuffer, 4*aNrWords);
   if (rc == -1) {
     exception::PCIeCommunicationError lExc;
     log(lExc, "Read of ", Integer(4*aNrWords), " bytes at address ", Integer(4 * aAddr), " failed! errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
@@ -192,9 +209,7 @@ void PCIe::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
     throw lExc;
   }
 
-  aValues.insert(aValues.end(), reinterpret_cast<uint32_t*>(buffer), reinterpret_cast<uint32_t*>(buffer)+ aNrWords);
-
-  free(allocated);
+  aValues.insert(aValues.end(), reinterpret_cast<uint32_t*>(mBuffer), reinterpret_cast<uint32_t*>(mBuffer)+ aNrWords);
 }
 
 
@@ -211,17 +226,10 @@ void PCIe::File::write(const uint32_t aAddr, const uint8_t* const aPtr, const si
 
   assert((aNrBytes % 4) == 0);
 
-  char *allocated = NULL;
-  posix_memalign((void **)&allocated, 4096/*alignment*/, aNrBytes + 4096);
-  if (allocated == NULL) {
-    exception::PCIeCommunicationError lExc;
-    log(lExc, "Failed to allocate ", Integer(aNrBytes + 4096), " bytes in File::write/3 function");
-    throw lExc;
-  }
+  createBuffer(aNrBytes);
 
   // data to write to register address
-  char* buffer = allocated;
-  memcpy(buffer, aPtr, aNrBytes);
+  memcpy(mBuffer, aPtr, aNrBytes);
 
   /* select AXI MM address */
   off_t off = lseek(mFd, aAddr, SEEK_SET);
@@ -235,7 +243,7 @@ void PCIe::File::write(const uint32_t aAddr, const uint8_t* const aPtr, const si
   }
 
   /* write buffer to AXI MM address using SGDMA */
-  int rc = ::write(mFd, buffer, aNrBytes);
+  int rc = ::write(mFd, mBuffer, aNrBytes);
   if (rc == -1) {
     exception::PCIeCommunicationError lExc;
     log(lExc, "Write of ", Integer(aNrBytes), " bytes at address ", Integer(aAddr), " failed! errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
@@ -246,8 +254,6 @@ void PCIe::File::write(const uint32_t aAddr, const uint8_t* const aPtr, const si
     log(lExc, "Only ", Integer(rc), " bytes transferred in write of ", Integer(aNrBytes), " bytes at address ", Integer(aAddr));
     throw lExc;
   }
-
-  free(allocated);
 }
 
 
@@ -262,19 +268,12 @@ void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
 
   assert((lNrBytes % 4) == 0);
 
-  char *allocated = NULL;
-  posix_memalign((void **)&allocated, 4096/*alignment*/, lNrBytes + 4096);
-  if (allocated == NULL) {
-    exception::PCIeCommunicationError lExc;
-    log(lExc, "Failed to allocate ", Integer(lNrBytes + 4096), " bytes in File::write/2 function");
-    throw lExc;
-  }
+  createBuffer(lNrBytes);
 
   // data to write to register address
-  char* buffer = allocated;
   size_t lNrBytesCopied = 0;
   for (size_t i = 0; i < aData.size(); i++) {
-    memcpy(buffer + lNrBytesCopied, aData.at(i).first, aData.at(i).second);
+    memcpy(mBuffer + lNrBytesCopied, aData.at(i).first, aData.at(i).second);
     lNrBytesCopied += aData.at(i).second;
   }
 
@@ -290,7 +289,7 @@ void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
   }
 
   /* write buffer to AXI MM address using SGDMA */
-  int rc = ::write(mFd, buffer, lNrBytes);
+  int rc = ::write(mFd, mBuffer, lNrBytes);
   if (rc == -1) {
     exception::PCIeCommunicationError lExc;
     log(lExc, "Write of ", Integer(lNrBytes), " bytes at address ", Integer(aAddr), " failed! errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
@@ -301,8 +300,6 @@ void PCIe::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
     log(lExc, "Only ", Integer(rc), " bytes transferred in write of ", Integer(lNrBytes), " bytes at address ", Integer(aAddr));
     throw lExc;
   }
-
-  free(allocated);
 }
 
 
@@ -317,19 +314,14 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   mXdma7seriesWorkaround(false),
   mUseInterrupt(false),
   mNumberOfPages(0),
+  mMaxInFlight(0),
   mPageSize(0),
+  mMaxPacketSize(0),
   mIndexNextPage(0),
   mPublishedReplyPageCount(0),
   mReadReplyPageCount(0),
   mAsynchronousException ( NULL )
 {
-  if ( getenv("UHAL_ENABLE_IPBUS_PCIE") == NULL ) {
-    exception::ProtocolDoesNotExist lExc;
-    log(lExc, "The IPbus 2.0 PCIe client is still an experimental feature, since the software-driver interface could change in the future.");
-    log(lExc, "In order to enable the IPbus 2.0 PCIe client, you need to define the environment variable 'UHAL_ENABLE_IPBUS_PCIE'");
-    throw lExc;
-  }
-
   if ( aUri.mHostname.find(",") == std::string::npos ) {
     exception::PCIeInitialisationError lExc;
     log(lExc, "No comma found in hostname of PCIe client URI '" + uri() + "'; cannot construct 2 paths for device files");
@@ -359,6 +351,14 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
       mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
       log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
     }
+    else if (lIt->first == "max_in_flight") {
+      mMaxInFlight = boost::lexical_cast<size_t>(lIt->second);
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum number of packets in flight' set to ", boost::lexical_cast<size_t>(lIt->second), " by URI 'max_in_flight' attribute");
+    }
+    else if (lIt->first == "max_packet_size") {
+      mMaxPacketSize = boost::lexical_cast<size_t>(lIt->second);
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum packet size (in 32-bit words) set to ", boost::lexical_cast<size_t>(lIt->second), " by URI 'max_packet_size' attribute");
+    }
     else if (lIt->first == "xdma_7series_workaround") {
       mXdma7seriesWorkaround = true;
       log (Notice() , "PCIe client with URI ", Quote (uri()), " : Adjusting size of PCIe reads to a few fixed sizes as workaround for 7-series xdma firmware bug");
@@ -382,7 +382,7 @@ void PCIe::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
   if ( ! mConnected )
     connect();
 
-  if ( mReplyQueue.size() == mNumberOfPages )
+  if ( mReplyQueue.size() == mMaxInFlight )
     read();
   write(aBuffers);
 }
@@ -413,7 +413,7 @@ uint32_t PCIe::getMaxSendSize()
   if ( ! mConnected )
     connect();
 
-  return (mPageSize - 1) * 4;
+  return mMaxPacketSize * 4;
 }
 
 
@@ -422,7 +422,7 @@ uint32_t PCIe::getMaxReplySize()
   if ( ! mConnected )
     connect();
 
-  return (mPageSize - 1) * 4;
+  return mMaxPacketSize * 4;
 }
 
 
@@ -437,10 +437,17 @@ void PCIe::connect()
   log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
-  mPageSize = std::min(uint32_t(4096), lValues.at(1));
+  if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
+    mMaxInFlight = mNumberOfPages;
+  mPageSize = lValues.at(1);
+  if ( (mMaxPacketSize == 0) or (mMaxPacketSize >= mPageSize) )
+    mMaxPacketSize = mPageSize - 1;
   mIndexNextPage = lValues.at(2);
   mPublishedReplyPageCount = lValues.at(3);
   mReadReplyPageCount = mPublishedReplyPageCount;
+
+  mDeviceFileFPGAToHost.createBuffer(4 * mPageSize);
+  mDeviceFileHostToFPGA.createBuffer(4 * mPageSize);
 
   if (lValues.at(1) > 0xFFFF) {
     exception::PCIeInitialisationError lExc;
@@ -524,8 +531,8 @@ void PCIe::read()
     {
       uint32_t lHwPublishedPageCount = 0x0;
 
+      std::vector<uint32_t> lValues;
       while ( true ) {
-        std::vector<uint32_t> lValues;
         // FIXME : Improve by simply adding fileWrite method that takes uint32_t ref as argument (or returns uint32_t)
         mDeviceFileFPGAToHost.read(0, (mXdma7seriesWorkaround ? 8 : 4), lValues);
         lHwPublishedPageCount = lValues.at(3);
@@ -546,6 +553,7 @@ void PCIe::read()
         log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
         if (mSleepDuration > boost::chrono::microseconds(0))
           boost::this_thread::sleep_for( mSleepDuration );
+        lValues.clear();
       }
 
       log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");

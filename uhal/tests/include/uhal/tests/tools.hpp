@@ -103,6 +103,9 @@ double measureWriteLatency(ClientInterface& aClient, uint32_t aBaseAddr, uint32_
 
 double measureWriteLatency(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose);
 
+double measureFileReadLatency(const std::string& aFilePath, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aVerbose);
+
+double measureFileWriteLatency(const std::string& aFilePath, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aVerbose);
 
 } // end ns tests
 } // end ns uhal
