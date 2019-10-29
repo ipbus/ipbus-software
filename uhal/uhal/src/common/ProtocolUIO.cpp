@@ -24,7 +24,9 @@ using namespace boost::filesystem;
 //Signal handling for sigbus
 sigjmp_buf static env;
 void static signal_handler(int sig){
-  siglongjmp(env,sig);    
+  if(SIGBUS == sig){
+    siglongjmp(env,sig);    
+  }
 }
 //This macro handles the possibility of a SIG_BUS signal and property throws an exception
 //The command you want to run is passed via ACESS and will be in a if{}else{} block, so
