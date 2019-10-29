@@ -105,7 +105,7 @@ build:centos7:
 
 build:centos8:
   <<: *build_rpm_yumrepo_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:2019-10-26__boost1.66.0_pugixml1.9
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:2019-10-29__boost1.66.0_pugixml1.9
   variables:
     YUMGROUPS_FILE: "ci/yumgroups-centos7.xml"
     OUTPUT_REPO_SUBDIR: "centos8_x86_64"
@@ -191,7 +191,7 @@ publish_build_job:
 
 .job_template: &centos8_test_jobTemplate
   <<: *rpmInstall_test_jobTemplate
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2019-10-26
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2019-10-29
   variables:
     REPO_URL_OS_SUBDIR: centos8_x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
