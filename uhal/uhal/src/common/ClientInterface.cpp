@@ -56,7 +56,8 @@ namespace uhal
     //    mCurrentBuffers ( NULL ),
     mId ( aId ),
     mTimeoutPeriod ( aTimeoutPeriod ),
-    mUri ( aUri )
+    mUri ( aUri ),
+    mUriString( ToString(aUri) )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -71,7 +72,8 @@ namespace uhal
     //    mCurrentBuffers ( NULL ),
     mId ( ),
     mTimeoutPeriod ( boost::posix_time::pos_infin ),
-    mUri ( )
+    mUri ( ),
+    mUriString( "" )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -86,7 +88,8 @@ namespace uhal
     //    mCurrentBuffers ( NULL ),
     mId ( aClientInterface.mId ),
     mTimeoutPeriod ( aClientInterface.mTimeoutPeriod ),
-    mUri ( aClientInterface.mUri )
+    mUri ( aClientInterface.mUri ),
+    mUriString( aClientInterface.mUriString )
   {
     //     log ( Warning() , ThisLocation()  );
   }
@@ -97,6 +100,7 @@ namespace uhal
     deleteBuffers();
     mId  = aClientInterface.mId;
     mUri = aClientInterface.mUri;
+    mUriString = aClientInterface.mUriString;
     mTimeoutPeriod = aClientInterface.mTimeoutPeriod;
     return *this;
   }
@@ -139,46 +143,9 @@ namespace uhal
   // }
 
 
-  std::string ClientInterface::uri() const
+  const std::string& ClientInterface::uri() const
   {
-    std::stringstream lReturn;
-    // url is always of the form "protocol://hostname:port"
-    lReturn << mUri.mProtocol << "://" << mUri.mHostname;
-    if ( !mUri.mPort.empty() )
-      lReturn << ":" << mUri.mPort;
-
-    // there is sometimes a path
-    if ( mUri.mPath != "" )
-    {
-      lReturn << "/" << mUri.mPath;
-    }
-
-    // there is sometimes a filename extension
-    if ( mUri.mExtension != "" )
-    {
-      lReturn << "." << mUri.mExtension;
-    }
-
-    // there are sometimes arguments
-    if ( mUri.mArguments.size() )
-    {
-      lReturn << "?";
-      uhal::NameValuePairVectorType::const_iterator lIt = mUri.mArguments.begin();
-
-      while ( true )
-      {
-        lReturn << lIt->first << "=" << lIt->second;
-
-        if ( ++lIt == mUri.mArguments.end() )
-        {
-          break;
-        }
-
-        lReturn << "&";
-      }
-    }
-
-    return lReturn.str();
+    return mUriString;
   }
 
 
