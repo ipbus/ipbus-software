@@ -1,3 +1,19 @@
+/*
+---------------------------------------------------------------------------
+This is an extension of uHAL to directly access AXI slaves via the linux
+UIO driver.
+
+Dan Gastler, Boston University
+email dgastler <AT> bu.edu
+---------------------------------------------------------------------------
+ */
+
+
+/**
+	@file
+	@author Siqi Yuan / Dan Gastler / Theron Jasper Tarigo
+*/
+
 #ifndef _uiouhal_ProtocolUIO_hpp_
 #define _uiouhal_ProtocolUIO_hpp_
 

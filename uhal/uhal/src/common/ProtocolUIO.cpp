@@ -1,3 +1,19 @@
+/*
+---------------------------------------------------------------------------
+This is an extension of uHAL to directly access AXI slaves via the linux
+UIO driver.
+
+Dan Gastler, Boston University
+email dgastler <AT> bu.edu
+---------------------------------------------------------------------------
+ */
+
+
+/**
+	@file
+	@author Siqi Yuan / Dan Gastler / Theron Jasper Tarigo
+*/
+
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
@@ -133,7 +149,6 @@ namespace uhal {
 
   
     //Now that everything created sucessfully, we can deal with signal handling
-    //    busError = false;
     memset(&saBusError,0,sizeof(saBusError)); //Clear struct
     saBusError.sa_handler = signal_handler; //assign signal handler
     sigemptyset(&saBusError.sa_mask);
