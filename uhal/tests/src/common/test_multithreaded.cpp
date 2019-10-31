@@ -116,7 +116,8 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterface
     delete jobs[i];
   }
 
-  log ( Warning() , ThisLocation() );  
+  log ( Warning() , ThisLocation() );
+}
 )
 
 
