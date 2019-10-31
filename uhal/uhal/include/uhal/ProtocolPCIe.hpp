@@ -151,14 +151,11 @@ namespace uhal
 
         void endSession();
 
-        bool lastOwnerDied() const;
-
       private:
         RobustMutex(const RobustMutex&);
 
         pthread_mutex_t mMutex;
         uint64_t mCount;
-        bool mLastOwnerDied;
         bool mSessionActive;
       };
 
@@ -257,9 +254,7 @@ namespace uhal
       //! FPGA-to-host interrupt (event) file
       File mDeviceFileFPGAEvent;
 
-      // FIXME: "robust" mutex needed in long term (to cope with processes being killed)
       SharedObject<IPCMutex_t> mIPCMutex;
-
       bool mIPCExternalSessionActive;
       uint64_t mIPCSessionCount;
 
