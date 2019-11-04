@@ -51,7 +51,7 @@ Libraries = \
 		\
 		pthread \
 
-ExecutableLibraries = \
+ExecutableLibraries = rt \
 		cactus_uhal_tests \
 		${Libraries} \
 		boost_chrono \
