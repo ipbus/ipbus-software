@@ -39,19 +39,24 @@ ExecutableDependentLibraries += $(addprefix -l,${ExecutableLibraries})
 ifeq ("${Library}","")
   LibraryFile ?=
 else
-  ifeq ("${LIBRARY_VER_ABI}","")
-    LibraryFile ?= lib/lib${Library}.so
+  ifdef BUILD_STATIC
+      LibraryFile = lib/lib${Library}.a
   else
-    ifeq ($(CACTUS_OS), osx)
-      LDFLAGS_SONAME ?= -Wl,-install_name,lib${Library}.so.${LIBRARY_VER_ABI}
+    ifeq ("${LIBRARY_VER_ABI}","")
+      LibraryFile ?= lib/lib${Library}.so
     else
-      LDFLAGS_SONAME ?= -Wl,-soname,lib${Library}.so.${LIBRARY_VER_ABI}
+      ifeq ($(CACTUS_OS), osx)
+        LDFLAGS_SONAME ?= -Wl,-install_name,lib${Library}.so.${LIBRARY_VER_ABI}
+      else
+        LDFLAGS_SONAME ?= -Wl,-soname,lib${Library}.so.${LIBRARY_VER_ABI}
+      endif
+      LibraryFile ?= lib/lib${Library}.so.${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}
+      LibraryLinkSONAME ?= lib/lib${Library}.so.${LIBRARY_VER_ABI}
+      LibraryLinkPlain ?= lib/lib${Library}.so
     endif
-    LibraryFile ?= lib/lib${Library}.so.${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}
-    LibraryLinkSONAME ?= lib/lib${Library}.so.${LIBRARY_VER_ABI}
-    LibraryLinkPlain ?= lib/lib${Library}.so
   endif
 endif
+
 
 .PHONY: default
 default: build
@@ -87,7 +92,11 @@ ${PackagePath}/obj/%.o : ${PackagePath}/src/common/%.cxx  | $$(dir ${PackagePath
 
 # Main target: shared library
 ${LibraryFile}: ${LibraryObjectFiles}  | ${PackagePath}/lib
+ifndef BUILD_STATIC
 	${LD} -shared ${LDFLAGS_SONAME} ${LDFLAGS} ${LibraryObjectFiles} ${DependentLibraries} -o $@
+else
+	${AR} ${ARFLAGS} $@ ${LibraryObjectFiles}
+endif
 ifneq ("${LibraryLinkSONAME}","")
 	ln -s -f ${PackagePath}/${LibraryFile} ${LibraryLinkSONAME}
 ifneq ("${LibraryLinkPlain}", "")

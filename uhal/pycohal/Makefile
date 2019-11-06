@@ -78,6 +78,11 @@ else
   LDFLAGS += -Wl,-h -Wl,-Bstatic -Wl,-Bdynamic
 endif
 
+ifndef BUILD_STATIC
+  CXXFLAGS += -DBOOST_TEST_DYN_LINK
+  IncludePaths += ${BUILD_HOME}/uhal/uhal/include/_static
+endif
+
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
 include $(BUILD_HOME)/uhal/config/mfPythonRPMRules.mk
