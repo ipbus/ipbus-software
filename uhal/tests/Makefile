@@ -71,7 +71,7 @@ ifndef BUILD_STATIC
   CXXFLAGS += -DBOOST_TEST_DYN_LINK
 else
   IncludePaths += ${BUILD_HOME}/uhal/uhal/include/_static
-  Libraries = $(filter-out pugixml, ${Libraries})
+  Libraries := $(filter-out pugixml, ${Libraries})
 endif
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
