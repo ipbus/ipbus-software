@@ -150,6 +150,8 @@ namespace uhal
        */
       static HwInterface getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr );
 
+      static HwInterface getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr , const std::vector<std::string>& aUserClientActivationList );
+
       //! Clears cache of Node tree structure for previously-opened address files (thread safe)
       static void clearAddressFileCache();
 

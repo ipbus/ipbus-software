@@ -182,6 +182,7 @@ publish_build_job:
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2019-01-08
   variables:
     REPO_URL_OS_SUBDIR: slc6_x86_64
+    UHAL_ENABLE_IPBUS_MMAP: ""
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
     VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests_slc6.supp"
 
@@ -190,6 +191,7 @@ publish_build_job:
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-cc7:2019-01-08
   variables:
     REPO_URL_OS_SUBDIR: centos7_x86_64
+    UHAL_ENABLE_IPBUS_MMAP: ""
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
     VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
@@ -199,6 +201,7 @@ publish_build_job:
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2019-10-29
   variables:
     REPO_URL_OS_SUBDIR: centos8_x86_64
+    UHAL_ENABLE_IPBUS_MMAP: ""
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
     UHAL_GUI_DEPENDENCIES: "python3-numpy"
@@ -218,7 +221,7 @@ publish_build_job:
   dependencies:
     - build:fedora30-python2
   variables:
-    UHAL_ENABLE_IPBUS_PCIE: ""
+    UHAL_ENABLE_IPBUS_MMAP: ""
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
     VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
@@ -228,7 +231,7 @@ publish_build_job:
   dependencies:
     - build:fedora30-python3
   variables:
-    UHAL_ENABLE_IPBUS_PCIE: ""
+    UHAL_ENABLE_IPBUS_MMAP: ""
     UHAL_GUI_DEPENDENCIES: python3-wxpython4
     VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
@@ -238,7 +241,7 @@ publish_build_job:
   dependencies:
     - build:ubuntu16
   variables:
-    UHAL_ENABLE_IPBUS_PCIE: ""
+    UHAL_ENABLE_IPBUS_MMAP: ""
     VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
 
 

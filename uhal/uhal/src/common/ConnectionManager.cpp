@@ -168,6 +168,17 @@ namespace uhal
   }
 
 
+  HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr, const std::vector<std::string>& aUserClientActivationList )
+  {
+    //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
+    log ( Info() , "ConnectionManager created node tree: " , *lNode );
+    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri , aUserClientActivationList ) );
+    return HwInterface ( lClientInterface , lNode );
+  }
+
+
   //Given a regex return the ids that match the
   std::vector<std::string> ConnectionManager::getDevices ( ) const
   {
