@@ -109,7 +109,7 @@ namespace uhal
   }
 
 
-  std::string HwInterface::uri() const
+  const std::string& HwInterface::uri() const
   {
     return mClientInterface->uri();
   }

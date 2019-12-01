@@ -57,7 +57,7 @@ namespace uhal
     mId ( aId ),
     mTimeoutPeriod ( aTimeoutPeriod ),
     mUri ( aUri ),
-    mUriString( ToString(aUri) )
+    mUriString( toString(aUri) )
   {
     //     log ( Warning() , ThisLocation()  );
   }

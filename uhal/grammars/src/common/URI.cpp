@@ -58,7 +58,7 @@ namespace uhal {
   }
 
 
-  std::string ToString( const uhal::URI& aURI )
+  std::string toString( const uhal::URI& aURI )
   {
     std::stringstream lReturn;
     // url is always of the form "protocol://hostname:port"
