@@ -65,7 +65,7 @@ namespace uhal
   std::ostream& operator<< ( std::ostream& aStr , const uhal::URI& aURI );
 
 
-  std::string ToString( const URI& aURI );
+  std::string toString( const URI& aURI );
 
 
 }

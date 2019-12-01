@@ -88,7 +88,7 @@ namespace uhal
       	Return the url of the target for this client
       	@return the url of the target for this client
       */
-      std::string uri() const;
+      const std::string& uri() const;
 
       /**
       	Return the identifier of the target for this client
