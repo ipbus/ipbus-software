@@ -324,15 +324,15 @@ BOOST_PYTHON_MODULE ( _core )
   ;
 
   class_< uhal::Node::const_iterator >( "NodeConstIterator" , no_init )
-  .def("next" , NextNodeConstIterator , pycohal::norm_ref_return_policy() )
-  .def("__iter__" , pass_through , pycohal::norm_ref_return_policy() )
-  ;
+    .def("next" , NextNodeConstIterator , pycohal::norm_ref_return_policy() )
+    .def("__iter__" , pass_through , pycohal::norm_ref_return_policy() )
+    ;
 
   // Wrap uhal::ClientInterface
   class_<uhal::ClientInterface, boost::noncopyable /* no to-python converter (would require a copy CTOR) */,
          boost::shared_ptr<uhal::ClientInterface> /* all instances are held within boost::shared_ptr */> ( "ClientInterface", no_init /* no CTORs */ )
-         .def ( "id",     &uhal::ClientInterface::id,   pycohal::const_ref_return_policy() )
-         .def ( "uri",    &uhal::ClientInterface::uri )
+         .def ( "id",     &uhal::ClientInterface::id, pycohal::const_ref_return_policy() )
+         .def ( "uri",    &uhal::ClientInterface::uri, pycohal::const_ref_return_policy() )
          .def ( "write", ( uhal::ValHeader ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t&, const uint32_t& ) ) 0, uhal_ClientInterface_write_overloads() )
          .def ( "read", ( uhal::ValWord<uint32_t> ( uhal::ClientInterface::* ) ( const uint32_t&, const uint32_t& ) ) 0,                  uhal_ClientInterface_read_overloads() )
          .def ( "writeBlock", &uhal::ClientInterface::writeBlock, uhal_ClientInterface_writeBlock_overloads() )
@@ -385,7 +385,7 @@ BOOST_PYTHON_MODULE ( _core )
   // Wrap uhal::HwInterface
   class_<uhal::HwInterface> ( "HwInterface", init<const uhal::HwInterface&>() )
   .def ( "getClient", &uhal::HwInterface::getClient, pycohal::norm_ref_return_policy() )
-  .def ( "uri", &uhal::HwInterface::uri )
+  .def ( "uri", &uhal::HwInterface::uri, pycohal::const_ref_return_policy() )
   .def ( "id",  &uhal::HwInterface::id, pycohal::const_ref_return_policy() )
   .def ( "dispatch", &uhal::HwInterface::dispatch )
   .def ( "setTimeoutPeriod", &uhal::HwInterface::setTimeoutPeriod )
