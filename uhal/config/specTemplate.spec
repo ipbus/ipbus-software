@@ -12,10 +12,9 @@
 %define _author __author__
 %define _summary __summary__
 %define _url __url__
-#%define _buildarch __buildarch__
-#%define _includedirs __includedirs__
 
-#
+
+
 # SWATCH Specfile template
 # References: 
 # cmsos template file: https://svnweb.cern.ch/trac/cmsos/browser/trunk/config/spec.template
@@ -46,16 +45,19 @@ __description__
 # Devel RPM specified attributes (extension to binary rpm with include files)
 #
 %if %{defined _build_debuginfo_package}
-%package -n %{_packagename}-debuginfo
-Summary:  Debuginfo package for %{_summary}
+%package debuginfo
+Summary: Debuginfo package for %{_summary}
 
-%description -n %{_packagename}-debuginfo
+%description debuginfo
 __description__
 %endif
 
-#%prep
 
-#%build
+%prep
+
+
+%build
+
 
 %install 
 # copy files to RPM_BUILD_ROOT
@@ -114,12 +116,10 @@ cd %{_packagedir}
 #find src -name '*.cpp' -o -name '*.cxx' -fprintf rpm/debug.source "%p\0"
 #find src include -name '*.h' -print > rpm/debug.source -o -name '*.cc' -print > rpm/debug.source
 
-cat %{_packagedir}/rpm/debug.source | sort -z -u | egrep -v -z '(<internal>|<built-in>)$' | egrep -v -z %{_packagedir} >  %{_packagedir}/rpm/debug.source.clean
+cat %{_packagedir}/rpm/debug.source | sort -z -u | grep -E -v -z '(<internal>|<built-in>)$' | grep -E -v -z %{_packagedir} >  %{_packagedir}/rpm/debug.source.clean
 # Copy all sources and include files for debug RPMs
 cat  %{_packagedir}/rpm/debug.source.clean | ( cpio -pd0mL --quiet "$RPM_BUILD_ROOT/usr/src/debug/%{_packagename}-%{_version}" )
 
-#cat %{_packagedir}/rpm/debug.source | sort -z -u | egrep -v -z '(<internal>|<built-in>)$' | ( cpio -pd0mL --quiet "$RPM_BUILD_ROOT/usr/src/debug/%{_packagename}-%{_version}" )
-#cat %{_packagedir}/rpm/debug.include | sort -z -u | egrep -v -z '(<internal>|<built-in>)$' | ( cpio -pd0mL --quiet "$RPM_BUILD_ROOT/usr/src/debug/%{_packagename}-%{_version}" )
 # correct permissions on the created directories
 cd "$RPM_BUILD_ROOT/usr/src/debug/"
 find ./ -type d -exec chmod 755 {} \;
@@ -131,6 +131,7 @@ find ./ -type d -exec chmod 755 {} \;
 %post 
 
 %postun 
+
 
 %files 
 %defattr(-, root, root, -) 
@@ -147,12 +148,11 @@ find ./ -type d -exec chmod 755 {} \;
 %endif
 %endif
 
-
 #
 # Files that go in the debuginfo RPM
 #
 %if %{defined _build_debuginfo_package}
-%files -n %{_packagename}-debuginfo
+%files debuginfo
 %defattr(-,root,root,-)
 /usr/lib/debug
 /usr/src/debug
