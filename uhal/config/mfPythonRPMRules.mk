@@ -34,12 +34,16 @@ _rpmbuild: _setup_update
 	echo "include */*.so" > ${RPMBUILD_DIR}/MANIFEST.in
 	# Change into rpm/pkg to finally run the customized setup.py
 	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
-	echo '%debug_package %{nil}' >> ~/.rpmmacros
-	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py bdist_rpm \
+	cd ${RPMBUILD_DIR} && python ${PackageName}.py bdist_rpm --spec-only \
 	  --release ${PACKAGE_RELEASE}.${CACTUS_OS}.${CXX_VERSION_TAG}.python${PYTHON_VERSION} \
 	  --requires "${VERSIONED_PYTHON_COMMAND} `find ${RPMBUILD_DIR} -type f -exec file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' '`" \
-	  --binary-only --force-arch=`uname -m` 
-	sed -i '$ d' ~/.rpmmacros
+	  --binary-only --force-arch=`uname -m`
+	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py sdist
+	mkdir -p ${RPMBUILD_DIR}/build/bdist.linux-x86_64/rpm/SOURCES
+	cp ${RPMBUILD_DIR}/dist/${PackageName}-*.tar.gz ${RPMBUILD_DIR}/build/bdist.linux-x86_64/rpm/SOURCES/
+	cd ${RPMBUILD_DIR} && bindir=$(bindir) rpmbuild -bb --define 'debug_package %{nil}' \
+	  --define '_topdir '${RPMBUILD_DIR}'/build/bdist.linux-x86_64/rpm' \
+	  --clean dist/${PackageName}.spec
 	# Harvest the crop
 	find ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} ${PackagePath}/rpm \;
 
@@ -61,7 +65,7 @@ _setup_update:
 .PHONY: cleanrpm _cleanrpm
 cleanrpm: _cleanrpm
 _cleanrpm:
-	-rm -r rpm
+	rm -rf ${PackagePath}/rpm
 
 
 .PHONY: install
