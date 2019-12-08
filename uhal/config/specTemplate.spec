@@ -12,10 +12,9 @@
 %define _author __author__
 %define _summary __summary__
 %define _url __url__
-#%define _buildarch __buildarch__
-#%define _includedirs __includedirs__
 
-#
+
+
 # SWATCH Specfile template
 # References: 
 # cmsos template file: https://svnweb.cern.ch/trac/cmsos/browser/trunk/config/spec.template
@@ -46,16 +45,19 @@ __description__
 # Devel RPM specified attributes (extension to binary rpm with include files)
 #
 %if %{defined _build_debuginfo_package}
-%package -n %{_packagename}-debuginfo
-Summary:  Debuginfo package for %{_summary}
+%package debuginfo
+Summary: Debuginfo package for %{_summary}
 
-%description -n %{_packagename}-debuginfo
+%description debuginfo
 __description__
 %endif
 
-#%prep
 
-#%build
+%prep
+
+
+%build
+
 
 %install 
 # copy files to RPM_BUILD_ROOT
@@ -76,12 +78,14 @@ fi
 if [ -d %{_packagedir}/bin ]; then
   cd %{_packagedir}/bin; \
 # find . -name "*" -exec install -D -m 755 {} $RPM_BUILD_ROOT/%{_prefix}/bin/{} \;
-  find . -name "*" -exec $BUILD_HOME/uhal/config/install.sh {} %{_prefix}/bin/%{_project}/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
+  find . -type f -exec $BUILD_HOME/uhal/config/install.sh {} %{_prefix}/bin/%{_project}/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
 fi
 
+%define versioned_python_command %(echo "$(python -c \"from sys import version_info; print('python' + str(version_info[0]))\")")
 if [ -d %{_packagedir}/scripts ]; then
   cd %{_packagedir}/scripts; \
-  find . -name ".svn" -prune -o -name "*" -exec install -D -m 755 {} $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/{} \;
+  find . -type f -exec install -D -m 755 {} $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/{} \;
+  find $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/ -type f -exec sed -i "s|#!/usr/bin/env python|#!/usr/bin/env "%{versioned_python_command}"|" {} \;
 fi
 
 if [ -d %{_packagedir}/lib ]; then
@@ -100,7 +104,7 @@ fi
 
 if [ -d %{_packagedir}/etc ]; then
   cd %{_packagedir}/etc; \
-  find . -name ".svn" -prune -o -name "*" -exec install -D -m 644 {} $RPM_BUILD_ROOT/%{_prefix}/etc/{} \;
+  find . -type f -exec install -D -m 644 {} $RPM_BUILD_ROOT/%{_prefix}/etc/{} \;
 fi
 
 #cp -rp %{_sources_dir}/* $RPM_BUILD_ROOT%{_prefix}/.
@@ -112,12 +116,10 @@ cd %{_packagedir}
 #find src -name '*.cpp' -o -name '*.cxx' -fprintf rpm/debug.source "%p\0"
 #find src include -name '*.h' -print > rpm/debug.source -o -name '*.cc' -print > rpm/debug.source
 
-cat %{_packagedir}/rpm/debug.source | sort -z -u | egrep -v -z '(<internal>|<built-in>)$' | egrep -v -z %{_packagedir} >  %{_packagedir}/rpm/debug.source.clean
+cat %{_packagedir}/rpm/debug.source | sort -z -u | grep -E -v -z '(<internal>|<built-in>)$' | grep -E -v -z %{_packagedir} >  %{_packagedir}/rpm/debug.source.clean
 # Copy all sources and include files for debug RPMs
 cat  %{_packagedir}/rpm/debug.source.clean | ( cpio -pd0mL --quiet "$RPM_BUILD_ROOT/usr/src/debug/%{_packagename}-%{_version}" )
 
-#cat %{_packagedir}/rpm/debug.source | sort -z -u | egrep -v -z '(<internal>|<built-in>)$' | ( cpio -pd0mL --quiet "$RPM_BUILD_ROOT/usr/src/debug/%{_packagename}-%{_version}" )
-#cat %{_packagedir}/rpm/debug.include | sort -z -u | egrep -v -z '(<internal>|<built-in>)$' | ( cpio -pd0mL --quiet "$RPM_BUILD_ROOT/usr/src/debug/%{_packagename}-%{_version}" )
 # correct permissions on the created directories
 cd "$RPM_BUILD_ROOT/usr/src/debug/"
 find ./ -type d -exec chmod 755 {} \;
@@ -130,6 +132,7 @@ find ./ -type d -exec chmod 755 {} \;
 
 %postun 
 
+
 %files 
 %defattr(-, root, root, -) 
 %{_prefix}/bin
@@ -137,11 +140,19 @@ find ./ -type d -exec chmod 755 {} \;
 %{_prefix}/etc
 %{_prefix}/include
 
+# Temporary workaround for subpackages not being built on CentOS8
+%if %{defined _build_debuginfo_package}
+%if %{_os} == centos8
+/usr/lib/debug
+/usr/src/debug
+%endif
+%endif
+
 #
 # Files that go in the debuginfo RPM
 #
 %if %{defined _build_debuginfo_package}
-%files -n %{_packagename}-debuginfo
+%files debuginfo
 %defattr(-,root,root,-)
 /usr/lib/debug
 /usr/src/debug

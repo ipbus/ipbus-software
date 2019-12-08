@@ -2,6 +2,8 @@
 # spec file for controlhub
 #
 
+%define _build_id_links none
+
 Name: %{name}
 Summary: IPbus packet-router
 Version: %{version}
