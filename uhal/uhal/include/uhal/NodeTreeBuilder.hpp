@@ -122,6 +122,8 @@ namespace uhal
       //! Clears address filename -> Node tree cache. NOT thread safe; for tread-safety, use ConnectionManager method
       void clearAddressFileCache();
 
+      Node* build(const pugi::xml_node& aNode, const boost::filesystem::path& aAddressFilePath);
+
     private:
       /**
       	Method called once the file specified in the call to getNodeTree( aFilenameExpr ) has been opened
@@ -131,7 +133,6 @@ namespace uhal
       	@param aAddressTable The address table constructed from the file
       */
       void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< const Node* >& aAddressTable );
-
 
       /**
       	Propagate the addresses down through the hierarchical structure

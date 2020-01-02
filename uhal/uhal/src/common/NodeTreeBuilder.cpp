@@ -188,6 +188,17 @@ namespace uhal
   }
 
 
+  Node* NodeTreeBuilder::build(const pugi::xml_node& aNode, const boost::filesystem::path& aAddressFilePath)
+  {
+    mFileCallStack.push_back ( aAddressFilePath );
+    Node* lNode ( mTopLevelNodeParser ( aNode ) );
+    mFileCallStack.pop_back( );
+    calculateHierarchicalAddresses ( lNode , 0x00000000 );
+    checkForAddressCollisions ( lNode , aAddressFilePath );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
+    return lNode;
+  }
+
+
   void NodeTreeBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< const Node* >& aNodes )
   {
     std::string lName ( aProtocol + ( aPath.string() ) );
@@ -222,11 +233,7 @@ namespace uhal
         return;
       }
 
-      mFileCallStack.push_back ( aPath );
-      Node* lNode ( mTopLevelNodeParser ( lXmlNode ) );
-      mFileCallStack.pop_back( );
-      calculateHierarchicalAddresses ( lNode , 0x00000000 );
-      checkForAddressCollisions ( lNode , aPath );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
+      Node* lNode ( build ( lXmlNode , aPath ) );
       mNodes.insert ( std::make_pair ( lName , lNode ) );
       aNodes.push_back ( lNode );
       return;
@@ -434,17 +441,15 @@ namespace uhal
   void NodeTreeBuilder::setPermissions ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
     //Permissions is an optional attribute for specifying read/write permissions
-    std::string lPermission;
+    std::string lPermissionAttr;
 
-    if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , "permission" , lPermission ) )
+    if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mPermissionsAttribute , lPermissionAttr ) )
     {
-      boost::spirit::qi::phrase_parse (
-        lPermission.begin(),
-        lPermission.end(),
-        NodeTreeBuilder::mPermissionsLut,
-        boost::spirit::ascii::space,
-        aNode->mPermission
-      );
+      const defs::NodePermission* const lPermission = mPermissionsLut.find(lPermissionAttr.c_str());
+      if (lPermission == NULL)
+        throw exception::NodeAttributeIncorrectValue();
+      else
+        aNode->mPermission = *lPermission;
     }
   }
 
