@@ -82,6 +82,9 @@ namespace uhal
 
     //! Exception class to handle the case when someone tries to give a bit-masked node a child.
     UHAL_DEFINE_EXCEPTION_CLASS ( MaskedNodeCannotHaveChild , "Exception class to handle the case when someone tries to give a bit-masked node a child." )
+
+    //! Exception class to handle the case when a node attribute has the incorrect value.
+    UHAL_DEFINE_EXCEPTION_CLASS ( NodeAttributeIncorrectValue , "Exception class to handle the case when a node attribute has the incorrect value." )
   }
 
 

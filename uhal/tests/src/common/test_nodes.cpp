@@ -42,31 +42,45 @@
 namespace uhal {
 namespace tests {
 
-struct NodeFixture : public AbstractFixture {
+struct NodeProperties {
+  NodeProperties(const std::string& aIdPath, const uint32_t aAddress, const defs::BlockReadWriteMode aMode, const defs::NodePermission aPermission, const size_t aSize, const std::string& aModule, const size_t aNrDescendants);
+  ~NodeProperties() {}
+
+  std::string path;
+  std::string id;
+  uint32_t address;
+  defs::BlockReadWriteMode mode;
+  defs::NodePermission permission;
+  size_t size;
+  uint32_t mask;
+  std::string description;
+  std::string module;
+  std::vector<std::string> descendantIds;
+  std::map<std::string, const std::type_info*> descendantTypes;
+  std::string tags;
+  boost::unordered_map<std::string,std::string> parameters;
+  boost::unordered_map<std::string,std::string> fwInfo;
+  const std::type_info* type;
+};
+
+
+struct SimpleAddressTableFixture {
 public:
-  NodeFixture();
-  ~NodeFixture() {}
+  SimpleAddressTableFixture();
+  ~SimpleAddressTableFixture() {}
 
-  struct Properties {
-    Properties(const std::string& aIdPath, const uint32_t aAddress, const defs::BlockReadWriteMode aMode, const defs::NodePermission aPermission, const size_t aSize, const std::string& aModule, const size_t aNrDescendants);
-    ~Properties() {}
+  const std::string addrTableStr;
+  pugi::xml_document addrTableDoc;
 
-    std::string path;
-    std::string id;
-    uint32_t address;
-    defs::BlockReadWriteMode mode;
-    defs::NodePermission permission;
-    size_t size;
-    uint32_t mask;
-    std::string description;
-    std::string module;
-    std::vector<std::string> descendantIds;
-    std::map<std::string, const std::type_info*> descendantTypes;
-    std::string tags;
-    boost::unordered_map<std::string,std::string> parameters;
-    boost::unordered_map<std::string,std::string> fwInfo;
-    const std::type_info* type;
-  };
+  std::vector<NodeProperties> nodeProperties;
+};
+
+
+//! Fixture for tests based on 'dummy' address files
+struct DummyAddressFileFixture : public AbstractFixture {
+public:
+  DummyAddressFileFixture();
+  ~DummyAddressFileFixture() {}
 
   std::string getAddrFileAbsPath(const std::string& aSuffix)
   {
@@ -79,160 +93,12 @@ public:
   const std::string addrFileAbsPath;
   std::string addrFileLevel2AbsPath;
   std::string addrFileLevel3AbsPath;
-  std::vector<Properties> nodeProperties;
+  std::vector<NodeProperties> nodeProperties;
 };
 
 
-NodeFixture::NodeFixture() :
-  AbstractFixture(),
-  addrFileURI(connectionFileURI.replace(connectionFileURI.size() - 15, 11, "address")),
-  addrFileAbsPath(boost::filesystem::absolute(boost::filesystem::path(addrFileURI.substr(7))).native()),
-  addrFileLevel2AbsPath(addrFileAbsPath),
-  addrFileLevel3AbsPath(addrFileAbsPath)
-{
-  addrFileLevel2AbsPath.replace(addrFileAbsPath.size() - 11, 0, "level2_");
-  addrFileLevel3AbsPath.replace(addrFileAbsPath.size() - 11, 0, "level3_");
 
-  nodeProperties.push_back(Properties("", 0, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 55));
-
-  nodeProperties.push_back(Properties("REG", 1, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("REG_READ_ONLY", 2, defs::SINGLE, defs::READ, 1, addrFileAbsPath, 0));
-  nodeProperties.push_back(Properties("REG_WRITE_ONLY", 3, defs::SINGLE, defs::WRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.push_back(Properties("REG_UPPER_MASK", 4, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.back().mask = 0xffff0000;
-  nodeProperties.push_back(Properties("REG_LOWER_MASK", 4, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.back().mask = 0xffff;
-  nodeProperties.push_back(Properties("REG_MASKED_READ_ONLY", 5, defs::SINGLE, defs::READ, 1, addrFileAbsPath, 0));
-  nodeProperties.back().mask = 0xffff0000;
-  nodeProperties.push_back(Properties("REG_MASKED_WRITE_ONLY", 5, defs::SINGLE, defs::WRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.back().mask = 0xffff;
-  nodeProperties.push_back(Properties("REG_PARS", 6, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.back().parameters["arg0"] = "val100";
-  nodeProperties.back().parameters["arg1"] = "val101";
-  nodeProperties.push_back(Properties("FIFO", 0x100, defs::NON_INCREMENTAL, defs::READWRITE, 268435456, addrFileAbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("REG_OUT_OF_ORDER", 6, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.push_back(Properties("MEM", 0x100000, defs::INCREMENTAL, defs::READWRITE, 262144, addrFileAbsPath, 0));
-  nodeProperties.back().description = "A block memory in an example XML file";
-
-  nodeProperties.push_back(Properties("SUBSYSTEM1", 0x210001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 5));
-  nodeProperties.back().parameters["arg0"] = "val200";
-  nodeProperties.back().parameters["arg1"] = "val201";
-  nodeProperties.back().parameters["arg2"] = "val202";
-  nodeProperties.push_back(Properties("SUBSYSTEM1.REG", 0x210002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel2AbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM1.MEM", 0x210003, defs::INCREMENTAL, defs::READWRITE, 262144, addrFileLevel2AbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM1.SUBMODULE", 0x270001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileLevel2AbsPath, 2));
-  nodeProperties.back().parameters["arg0"] = "val300";
-  nodeProperties.back().parameters["arg1"] = "val301";
-  nodeProperties.back().parameters["arg2"] = "val10302";
-  nodeProperties.back().parameters["arg3"] = "val10303";
-  nodeProperties.push_back(Properties("SUBSYSTEM1.SUBMODULE.REG", 0x270002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel3AbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM1.SUBMODULE.MEM", 0x270003, defs::INCREMENTAL, defs::READWRITE, 256, addrFileLevel3AbsPath, 0));
-  nodeProperties.back().tags = "test";
-
-  nodeProperties.push_back(Properties("SUBSYSTEM2", 0x310001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 5));
-  nodeProperties.back().parameters["arg0"] = "val10000";
-  nodeProperties.back().parameters["arg1"] = "val201";
-  nodeProperties.back().parameters["arg2"] = "val202";
-  nodeProperties.back().parameters["arg5"] = "val10005";
-  nodeProperties.push_back(Properties("SUBSYSTEM2.REG", 0x310002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel2AbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM2.MEM", 0x310003, defs::INCREMENTAL, defs::READWRITE, 262144, addrFileLevel2AbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM2.SUBMODULE", 0x370001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileLevel2AbsPath, 2));
-  nodeProperties.back().parameters["arg0"] = "val300";
-  nodeProperties.back().parameters["arg1"] = "val301";
-  nodeProperties.back().parameters["arg2"] = "val10302";
-  nodeProperties.back().parameters["arg3"] = "val10303";
-  nodeProperties.push_back(Properties("SUBSYSTEM2.SUBMODULE.REG", 0x370002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel3AbsPath, 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM2.SUBMODULE.MEM", 0x370003, defs::INCREMENTAL, defs::READWRITE, 256, addrFileLevel3AbsPath, 0));
-  nodeProperties.back().tags = "test";
-
-  nodeProperties.push_back(Properties("SMALL_MEM", 0x400000, defs::INCREMENTAL, defs::READWRITE, 256, addrFileAbsPath, 0));
-  nodeProperties.push_back(Properties("LARGE_MEM", 0x500000, defs::INCREMENTAL, defs::READWRITE, 26214400, addrFileAbsPath, 0));
-
-  nodeProperties.push_back(Properties("SUBSYSTEM3", 0x600000, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 28));
-
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDNODE", 0x600000, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
-  nodeProperties.back().type = &typeid(DummyParentNode);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDNODE.REG", 0x600001, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDNODE.REG_WRITE_ONLY", 0x600003, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDNODE.REG_UPPER_MASK", 0x600004, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.back().mask = 0xFFFF0000;
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDNODE.REG_LOWER_MASK", 0x600004, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.back().mask = 0xFFFF;
-
-  // 0x600000 + 0x10 + 0x10010
-  const uint32_t lDerivedModule1Addr = 0x600000 + (0x10 | 0x10010);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE1", lDerivedModule1Addr, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 2));
-  nodeProperties.back().type = &typeid(DummyChildNode);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE1.REG", lDerivedModule1Addr + 1, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level2_module1"), 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE1.MEM", lDerivedModule1Addr + 2, defs::INCREMENTAL, defs::READWRITE, 262144, getAddrFileAbsPath("derived_level2_module1"), 0));
-  nodeProperties.back().tags = "test";
-
-  const uint32_t lDerivedModule2Addr = 0x600000 + (0x30 | 0x10010 | 0x10010);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE2", lDerivedModule2Addr, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
-  nodeProperties.back().parameters["arg3"] = "val3";
-  nodeProperties.back().type = &typeid(DummyChildNode);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE2.REG", lDerivedModule2Addr + 1, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE2.REG_WRITE_ONLY", lDerivedModule2Addr + 3, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE2.REG_UPPER_MASK", lDerivedModule2Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
-  nodeProperties.back().mask = 0xFFFF0000;
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE2.REG_LOWER_MASK", lDerivedModule2Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
-  nodeProperties.back().mask = 0xFFFF;
-
-  const uint32_t lDerivedModule3Addr = 0x600000 + (0x50 | 0x10010 | 0x10010);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE3", lDerivedModule3Addr, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
-  nodeProperties.back().parameters["arg3"] = "val3";
-  nodeProperties.back().type = &typeid(DummyChildNode);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE3.REG", lDerivedModule3Addr + 1, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE3.REG_WRITE_ONLY", lDerivedModule3Addr + 3, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE3.REG_UPPER_MASK", lDerivedModule3Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.back().mask = 0xFFFF0000;
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE3.REG_LOWER_MASK", lDerivedModule3Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.back().mask = 0xFFFF;
-
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE4", 0x610070, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
-  nodeProperties.back().type = &typeid(DummyChildNode);
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE4.REG", 0x610071, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.back().tags = "test";
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE4.REG_WRITE_ONLY", 0x610073, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE4.REG_UPPER_MASK", 0x610074, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.back().mask = 0xFFFF0000;
-  nodeProperties.push_back(Properties("SUBSYSTEM3.DERIVEDMODULE4.REG_LOWER_MASK", 0x610074, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
-  nodeProperties.back().mask = 0xFFFF;
-
-  nodeProperties.push_back(Properties("SUBSYSTEM3.BADNODE", 0x600100, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.BADNODE.REG", 0x600101, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.BADNODE.REG_WRITE_ONLY", 0x600103, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.push_back(Properties("SUBSYSTEM3.BADNODE.REG_UPPER_MASK", 0x600104, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.back().mask = 0xFFFF0000;
-  nodeProperties.push_back(Properties("SUBSYSTEM3.BADNODE.REG_LOWER_MASK", 0x600104, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
-  nodeProperties.back().mask = 0xFFFF;
-
-  nodeProperties.push_back(Properties("IPBUS_ENDPOINT", 0x700000, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
-  nodeProperties.back().fwInfo["type"] = "endpoint";
-  nodeProperties.back().fwInfo["width"] = "0x10";
-
-  for (size_t i=0; i < nodeProperties.size(); i++) {
-    BOOST_REQUIRE_LE(nodeProperties.at(i).descendantIds.size(), (nodeProperties.size() - i - 1));
-    for (size_t j=0; j < nodeProperties.at(i).descendantIds.size(); j++) {
-      std::string lRelativePath = nodeProperties.at(i+j+1).path.substr(nodeProperties.at(i).path.empty() ? 0 : nodeProperties.at(i).path.size() + 1);
-      nodeProperties.at(i).descendantIds.at(j) = lRelativePath;
-      nodeProperties.at(i).descendantTypes[lRelativePath] = nodeProperties.at(i+j+1).type;
-    }
-  }
-}
-
-NodeFixture::Properties::Properties(const std::string& aIdPath, const uint32_t aAddress, const defs::BlockReadWriteMode aMode, const defs::NodePermission aPermission, const size_t aSize, const std::string& aModule, const size_t aNrDescendants) :
+NodeProperties::NodeProperties(const std::string& aIdPath, const uint32_t aAddress, const defs::BlockReadWriteMode aMode, const defs::NodePermission aPermission, const size_t aSize, const std::string& aModule, const size_t aNrDescendants) :
   path(aIdPath),
   id((aIdPath.rfind('.') == std::string::npos) ? aIdPath : aIdPath.substr(aIdPath.rfind('.') + 1)),
   address(aAddress),
@@ -247,7 +113,176 @@ NodeFixture::Properties::Properties(const std::string& aIdPath, const uint32_t a
 }
 
 
-void checkProperties(const uhal::Node& aNode, const NodeFixture::Properties& aExpected)
+SimpleAddressTableFixture::SimpleAddressTableFixture() :
+  addrTableStr("<node>"
+    "<node id='regA' address='0x0' />"
+    "<node id='regB' address='0x1' />"
+    "<node id='ram1' address='0x100' mode='block' size='256' />"
+    "<node id='ram2' address='0x210' mode='block' size='16' />"
+    "<node id='aPort' address='0x300' mode='port' size='1024' />"
+    "</node>")
+{
+  BOOST_REQUIRE(addrTableDoc.load(addrTableStr.c_str()));
+
+  nodeProperties.push_back(NodeProperties("regA", 0, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.push_back(NodeProperties("regB", 1, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.push_back(NodeProperties("ram1", 256, defs::INCREMENTAL, defs::READWRITE, 256, "", 0));
+  nodeProperties.push_back(NodeProperties("ram2", 528, defs::INCREMENTAL, defs::READWRITE, 16, "", 0));
+  nodeProperties.push_back(NodeProperties("aPort", 768, defs::NON_INCREMENTAL, defs::READWRITE, 1024, "", 0));
+}
+
+
+DummyAddressFileFixture::DummyAddressFileFixture() :
+  AbstractFixture(),
+  addrFileURI(connectionFileURI.replace(connectionFileURI.size() - 15, 11, "address")),
+  addrFileAbsPath(boost::filesystem::absolute(boost::filesystem::path(addrFileURI.substr(7))).native()),
+  addrFileLevel2AbsPath(addrFileAbsPath),
+  addrFileLevel3AbsPath(addrFileAbsPath)
+{
+  addrFileLevel2AbsPath.replace(addrFileAbsPath.size() - 11, 0, "level2_");
+  addrFileLevel3AbsPath.replace(addrFileAbsPath.size() - 11, 0, "level3_");
+
+  nodeProperties.push_back(NodeProperties("", 0, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 55));
+
+  nodeProperties.push_back(NodeProperties("REG", 1, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("REG_READ_ONLY", 2, defs::SINGLE, defs::READ, 1, addrFileAbsPath, 0));
+  nodeProperties.push_back(NodeProperties("REG_WRITE_ONLY", 3, defs::SINGLE, defs::WRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.push_back(NodeProperties("REG_UPPER_MASK", 4, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.back().mask = 0xffff0000;
+  nodeProperties.push_back(NodeProperties("REG_LOWER_MASK", 4, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.back().mask = 0xffff;
+  nodeProperties.push_back(NodeProperties("REG_MASKED_READ_ONLY", 5, defs::SINGLE, defs::READ, 1, addrFileAbsPath, 0));
+  nodeProperties.back().mask = 0xffff0000;
+  nodeProperties.push_back(NodeProperties("REG_MASKED_WRITE_ONLY", 5, defs::SINGLE, defs::WRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.back().mask = 0xffff;
+  nodeProperties.push_back(NodeProperties("REG_PARS", 6, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.back().parameters["arg0"] = "val100";
+  nodeProperties.back().parameters["arg1"] = "val101";
+  nodeProperties.push_back(NodeProperties("FIFO", 0x100, defs::NON_INCREMENTAL, defs::READWRITE, 268435456, addrFileAbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("REG_OUT_OF_ORDER", 6, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.push_back(NodeProperties("MEM", 0x100000, defs::INCREMENTAL, defs::READWRITE, 262144, addrFileAbsPath, 0));
+  nodeProperties.back().description = "A block memory in an example XML file";
+
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM1", 0x210001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 5));
+  nodeProperties.back().parameters["arg0"] = "val200";
+  nodeProperties.back().parameters["arg1"] = "val201";
+  nodeProperties.back().parameters["arg2"] = "val202";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM1.REG", 0x210002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel2AbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM1.MEM", 0x210003, defs::INCREMENTAL, defs::READWRITE, 262144, addrFileLevel2AbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM1.SUBMODULE", 0x270001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileLevel2AbsPath, 2));
+  nodeProperties.back().parameters["arg0"] = "val300";
+  nodeProperties.back().parameters["arg1"] = "val301";
+  nodeProperties.back().parameters["arg2"] = "val10302";
+  nodeProperties.back().parameters["arg3"] = "val10303";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM1.SUBMODULE.REG", 0x270002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel3AbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM1.SUBMODULE.MEM", 0x270003, defs::INCREMENTAL, defs::READWRITE, 256, addrFileLevel3AbsPath, 0));
+  nodeProperties.back().tags = "test";
+
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM2", 0x310001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 5));
+  nodeProperties.back().parameters["arg0"] = "val10000";
+  nodeProperties.back().parameters["arg1"] = "val201";
+  nodeProperties.back().parameters["arg2"] = "val202";
+  nodeProperties.back().parameters["arg5"] = "val10005";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM2.REG", 0x310002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel2AbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM2.MEM", 0x310003, defs::INCREMENTAL, defs::READWRITE, 262144, addrFileLevel2AbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM2.SUBMODULE", 0x370001, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileLevel2AbsPath, 2));
+  nodeProperties.back().parameters["arg0"] = "val300";
+  nodeProperties.back().parameters["arg1"] = "val301";
+  nodeProperties.back().parameters["arg2"] = "val10302";
+  nodeProperties.back().parameters["arg3"] = "val10303";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM2.SUBMODULE.REG", 0x370002, defs::SINGLE, defs::READWRITE, 1, addrFileLevel3AbsPath, 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM2.SUBMODULE.MEM", 0x370003, defs::INCREMENTAL, defs::READWRITE, 256, addrFileLevel3AbsPath, 0));
+  nodeProperties.back().tags = "test";
+
+  nodeProperties.push_back(NodeProperties("SMALL_MEM", 0x400000, defs::INCREMENTAL, defs::READWRITE, 256, addrFileAbsPath, 0));
+  nodeProperties.push_back(NodeProperties("LARGE_MEM", 0x500000, defs::INCREMENTAL, defs::READWRITE, 26214400, addrFileAbsPath, 0));
+
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3", 0x600000, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 28));
+
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDNODE", 0x600000, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
+  nodeProperties.back().type = &typeid(DummyParentNode);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDNODE.REG", 0x600001, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDNODE.REG_WRITE_ONLY", 0x600003, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDNODE.REG_UPPER_MASK", 0x600004, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.back().mask = 0xFFFF0000;
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDNODE.REG_LOWER_MASK", 0x600004, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.back().mask = 0xFFFF;
+
+  // 0x600000 + 0x10 + 0x10010
+  const uint32_t lDerivedModule1Addr = 0x600000 + (0x10 | 0x10010);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE1", lDerivedModule1Addr, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 2));
+  nodeProperties.back().type = &typeid(DummyChildNode);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE1.REG", lDerivedModule1Addr + 1, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level2_module1"), 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE1.MEM", lDerivedModule1Addr + 2, defs::INCREMENTAL, defs::READWRITE, 262144, getAddrFileAbsPath("derived_level2_module1"), 0));
+  nodeProperties.back().tags = "test";
+
+  const uint32_t lDerivedModule2Addr = 0x600000 + (0x30 | 0x10010 | 0x10010);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE2", lDerivedModule2Addr, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
+  nodeProperties.back().parameters["arg3"] = "val3";
+  nodeProperties.back().type = &typeid(DummyChildNode);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE2.REG", lDerivedModule2Addr + 1, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE2.REG_WRITE_ONLY", lDerivedModule2Addr + 3, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE2.REG_UPPER_MASK", lDerivedModule2Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
+  nodeProperties.back().mask = 0xFFFF0000;
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE2.REG_LOWER_MASK", lDerivedModule2Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_plain"), 0));
+  nodeProperties.back().mask = 0xFFFF;
+
+  const uint32_t lDerivedModule3Addr = 0x600000 + (0x50 | 0x10010 | 0x10010);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE3", lDerivedModule3Addr, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
+  nodeProperties.back().parameters["arg3"] = "val3";
+  nodeProperties.back().type = &typeid(DummyChildNode);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE3.REG", lDerivedModule3Addr + 1, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE3.REG_WRITE_ONLY", lDerivedModule3Addr + 3, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE3.REG_UPPER_MASK", lDerivedModule3Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.back().mask = 0xFFFF0000;
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE3.REG_LOWER_MASK", lDerivedModule3Addr + 4, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.back().mask = 0xFFFF;
+
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE4", 0x610070, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
+  nodeProperties.back().type = &typeid(DummyChildNode);
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE4.REG", 0x610071, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.back().tags = "test";
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE4.REG_WRITE_ONLY", 0x610073, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE4.REG_UPPER_MASK", 0x610074, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.back().mask = 0xFFFF0000;
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.DERIVEDMODULE4.REG_LOWER_MASK", 0x610074, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_level3_class"), 0));
+  nodeProperties.back().mask = 0xFFFF;
+
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.BADNODE", 0x600100, defs::HIERARCHICAL, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 4));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.BADNODE.REG", 0x600101, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.BADNODE.REG_WRITE_ONLY", 0x600103, defs::SINGLE, defs::WRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.BADNODE.REG_UPPER_MASK", 0x600104, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.back().mask = 0xFFFF0000;
+  nodeProperties.push_back(NodeProperties("SUBSYSTEM3.BADNODE.REG_LOWER_MASK", 0x600104, defs::SINGLE, defs::READWRITE, 1, getAddrFileAbsPath("derived_address"), 0));
+  nodeProperties.back().mask = 0xFFFF;
+
+  nodeProperties.push_back(NodeProperties("IPBUS_ENDPOINT", 0x700000, defs::SINGLE, defs::READWRITE, 1, addrFileAbsPath, 0));
+  nodeProperties.back().fwInfo["type"] = "endpoint";
+  nodeProperties.back().fwInfo["width"] = "0x10";
+
+  for (size_t i=0; i < nodeProperties.size(); i++) {
+    BOOST_REQUIRE_LE(nodeProperties.at(i).descendantIds.size(), (nodeProperties.size() - i - 1));
+    for (size_t j=0; j < nodeProperties.at(i).descendantIds.size(); j++) {
+      std::string lRelativePath = nodeProperties.at(i+j+1).path.substr(nodeProperties.at(i).path.empty() ? 0 : nodeProperties.at(i).path.size() + 1);
+      nodeProperties.at(i).descendantIds.at(j) = lRelativePath;
+      nodeProperties.at(i).descendantTypes[lRelativePath] = nodeProperties.at(i+j+1).type;
+    }
+  }
+}
+
+
+void checkProperties(const uhal::Node& aNode, const NodeProperties& aExpected)
 {
   BOOST_CHECK_EQUAL(aNode.getPath(), aExpected.path);
   BOOST_CHECK_EQUAL(aNode.getId(), aExpected.id);
@@ -287,7 +322,7 @@ void checkProperties(const uhal::Node& aNode, const NodeFixture::Properties& aEx
 }
 
 
-void checkExceptionsThrownByReadWrite(const uhal::Node& aNode, const NodeFixture::Properties& aProperties)
+void checkExceptionsThrownByReadWrite(const uhal::Node& aNode, const NodeProperties& aProperties)
 {
   // Single-word read/write methods - check exceptions thrown when they should be
   if (aProperties.permission == defs::READ)
@@ -361,7 +396,7 @@ void checkExceptionsThrownByReadWrite(const uhal::Node& aNode, const NodeFixture
 }
 
 
-void checkDescendants (const uhal::Node& aNode, const NodeFixture::Properties& aProperties)
+void checkDescendants (const uhal::Node& aNode, const NodeProperties& aProperties)
 {
   // 1) Given an empty ID string, 'getNode' should return same object
   BOOST_CHECK_EQUAL(&aNode.getNode(""), &aNode);
@@ -430,7 +465,7 @@ bool nodeAddrCompare (const Node* aNodeL, const Node* aNodeR)
 }
 
 
-void checkIteration(const uhal::Node& aNode, const NodeFixture::Properties& aProperties)
+void checkIteration(const uhal::Node& aNode, const NodeProperties& aProperties)
 {
   // Check that sequence of nodes returned by iterator is correct
   std::vector<const uhal::Node*> lExpectedNodes;
@@ -450,9 +485,9 @@ void checkIteration(const uhal::Node& aNode, const NodeFixture::Properties& aPro
 }
 
 
-void checkNodeTree(const uhal::Node& aNode, const std::vector<NodeFixture::Properties>& aExpectedProperties)
+void checkNodeTree(const uhal::Node& aNode, const std::vector<NodeProperties>& aExpectedProperties, const bool aUseClient = true)
 {
-  for (std::vector<NodeFixture::Properties>::const_iterator lIt = aExpectedProperties.begin(); lIt != aExpectedProperties.end(); lIt++) {
+  for (std::vector<NodeProperties>::const_iterator lIt = aExpectedProperties.begin(); lIt != aExpectedProperties.end(); lIt++) {
     BOOST_TEST_MESSAGE("Node '" << lIt->path << "'");
     const uhal::Node& lNode = (lIt->path.empty() ? aNode : aNode.getNode(lIt->path));
 
@@ -464,15 +499,68 @@ void checkNodeTree(const uhal::Node& aNode, const std::vector<NodeFixture::Prope
 }
 
 
+pugi::xml_node getNthChild(const pugi::xml_node& aNode, const size_t aIndex)
+{
+  pugi::xml_node lNode = aNode.first_child();
+  for (size_t i = 0; i < aIndex; i++)
+    lNode = lNode.next_sibling();
+  return lNode;
+}
+
+void setAttribute(pugi::xml_node aNode, const std::string& aName, const std::string& aValue)
+{
+  aNode.remove_attribute(aName.c_str());
+  aNode.append_attribute(aName.c_str()).set_value(aValue.c_str());
+}
+
 
 BOOST_AUTO_TEST_SUITE( nodes )
 
-BOOST_AUTO_TEST_SUITE( valid )
 
-BOOST_FIXTURE_TEST_CASE (baseline, NodeFixture) {
+BOOST_FIXTURE_TEST_CASE (dummy_address_files, DummyAddressFileFixture) {
   const boost::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
 
   checkNodeTree(*lTopNode, nodeProperties);
+}
+
+
+BOOST_AUTO_TEST_SUITE( simple )
+
+BOOST_FIXTURE_TEST_CASE (valid_default, SimpleAddressTableFixture)
+{
+  boost::shared_ptr<Node> lNode(NodeTreeBuilder::getInstance().build(addrTableDoc.child ( "node" ), boost::filesystem::path()));
+  checkNodeTree(*lNode, nodeProperties, false);
+}
+
+BOOST_FIXTURE_TEST_CASE (simple_reg_badpermission, SimpleAddressTableFixture)
+{
+  std::vector<std::string> lBadValues;
+  lBadValues.push_back("bob");
+  lBadValues.push_back("some_invalid_string");
+  lBadValues.push_back("");
+  lBadValues.push_back("R");
+  lBadValues.push_back("W");
+  lBadValues.push_back("RW");
+  lBadValues.push_back("WR");
+  lBadValues.push_back("READ");
+  lBadValues.push_back("WRITE");
+  lBadValues.push_back("READWRITE");
+  lBadValues.push_back("WRITEREAD");
+
+  lBadValues.push_back("r ");
+
+  for (std::vector<std::string>::const_iterator lIt = lBadValues.begin(); lIt != lBadValues.end(); lIt++)
+  {
+    for (size_t i = 0; i < nodeProperties.size(); i++) {
+      BOOST_TEST_MESSAGE("Setting 'permission' attribute of node " << i << " to '" << *lIt << "'");
+
+      pugi::xml_document lDoc;
+      lDoc.load(addrTableStr.c_str());
+      setAttribute(getNthChild(lDoc.child("node"), i), "permission", *lIt);
+
+      BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
+    }
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
