@@ -272,7 +272,7 @@ namespace uhal
           }
         }
 
-        if ( lAttrStr.find_first_not_of("0123456789", lBasePrefixLength) != std::string::npos )
+        if ( lAttrStr.find_first_not_of(lBasePrefixLength ? "0123456789abcdefABCDEF" : "0123456789", lBasePrefixLength) != std::string::npos )
           throw exception::NodeAttributeIncorrectValue("XML attribute '" + aAttrName + "' has value '" + lAttrStr + "' that cannot be converted to uint32_t");
 
         ss << lAttrStr.substr(lBasePrefixLength);

@@ -609,6 +609,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_mask, SimpleAddressTableFixture)
   lBadValues.push_back(" ");
   lBadValues.push_back("   ");
   lBadValues.push_back("-1");
+  lBadValues.push_back("42a");
   lBadValues.push_back("-0x11");
   lBadValues.push_back("0x");
   lBadValues.push_back("x");
@@ -640,6 +641,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_size, SimpleAddressTableFixture)
   lBadValues.push_back(" ");
   lBadValues.push_back("   ");
   lBadValues.push_back("-1");
+  lBadValues.push_back("42a");
   lBadValues.push_back("-0x11");
   lBadValues.push_back("0x");
   lBadValues.push_back("x");
