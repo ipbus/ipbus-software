@@ -58,18 +58,18 @@ using boost::placeholders::_3;
 namespace uhal
 {
 
-  const char* NodeTreeBuilder::mIdAttribute = "id";
-  const char* NodeTreeBuilder::mAddressAttribute = "address";
-  const char* NodeTreeBuilder::mParametersAttribute = "parameters";
-  const char* NodeTreeBuilder::mTagsAttribute = "tags";
-  const char* NodeTreeBuilder::mDescriptionAttribute = "description";
-  const char* NodeTreeBuilder::mPermissionsAttribute = "permission";
-  const char* NodeTreeBuilder::mMaskAttribute = "mask";
-  const char* NodeTreeBuilder::mModeAttribute = "mode";
-  const char* NodeTreeBuilder::mSizeAttribute = "size";
-  const char* NodeTreeBuilder::mClassAttribute = "class";
-  const char* NodeTreeBuilder::mModuleAttribute = "module";
-  const char* NodeTreeBuilder::mFirmwareInfo = "fwinfo";
+  const std::string NodeTreeBuilder::mIdAttribute = "id";
+  const std::string NodeTreeBuilder::mAddressAttribute = "address";
+  const std::string NodeTreeBuilder::mParametersAttribute = "parameters";
+  const std::string NodeTreeBuilder::mTagsAttribute = "tags";
+  const std::string NodeTreeBuilder::mDescriptionAttribute = "description";
+  const std::string NodeTreeBuilder::mPermissionsAttribute = "permission";
+  const std::string NodeTreeBuilder::mMaskAttribute = "mask";
+  const std::string NodeTreeBuilder::mModeAttribute = "mode";
+  const std::string NodeTreeBuilder::mSizeAttribute = "size";
+  const std::string NodeTreeBuilder::mClassAttribute = "class";
+  const std::string NodeTreeBuilder::mModuleAttribute = "module";
+  const std::string NodeTreeBuilder::mFirmwareInfo = "fwinfo";
 
 
   boost::shared_ptr<NodeTreeBuilder> NodeTreeBuilder::mInstance;
@@ -345,7 +345,7 @@ namespace uhal
     if ( aRequireId and ( not lHasId ) )
     {
       //error description is given in the function itself so no more elaboration required
-      throw exception::NodeMustHaveUID();
+      throw exception::NodeMustHaveUID("'id' attribute is missing from address table node");
     }
 
     if ( lHasId )

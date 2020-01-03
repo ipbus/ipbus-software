@@ -533,6 +533,19 @@ BOOST_FIXTURE_TEST_CASE (valid_default, SimpleAddressTableFixture)
   checkNodeTree(*lNode, nodeProperties, false);
 }
 
+BOOST_FIXTURE_TEST_CASE (missing_ID, SimpleAddressTableFixture)
+{
+  for (size_t i = 0; i < nodeProperties.size(); i++) {
+    BOOST_TEST_MESSAGE("Removing 'id' attribute from node " << i);
+
+    pugi::xml_document lDoc;
+    lDoc.load(addrTableStr.c_str());
+    getNthChild(lDoc.child("node"), i).remove_attribute("id");
+
+    BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NoRulesPassed);
+  }
+}
+
 BOOST_FIXTURE_TEST_CASE (invalid_ID, SimpleAddressTableFixture)
 {
   std::vector<std::string> lBadValues;
