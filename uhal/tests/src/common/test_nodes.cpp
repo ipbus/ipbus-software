@@ -29,6 +29,7 @@
 #include <typeinfo>
 
 #include "uhal/NodeTreeBuilder.hpp"
+#include "uhal/utilities/xml.hpp"
 #include "uhal/uhal.hpp"
 
 #include "uhal/tests/DummyDerivedNode.hpp"
@@ -532,7 +533,125 @@ BOOST_FIXTURE_TEST_CASE (valid_default, SimpleAddressTableFixture)
   checkNodeTree(*lNode, nodeProperties, false);
 }
 
-BOOST_FIXTURE_TEST_CASE (simple_reg_badpermission, SimpleAddressTableFixture)
+BOOST_FIXTURE_TEST_CASE (invalid_ID, SimpleAddressTableFixture)
+{
+  std::vector<std::string> lBadValues;
+  lBadValues.push_back("");
+  lBadValues.push_back(" ");
+  lBadValues.push_back("   ");
+  lBadValues.push_back(".");
+  lBadValues.push_back("bob.");
+  lBadValues.push_back(".bob");
+  lBadValues.push_back("some.value");
+
+  for (std::vector<std::string>::const_iterator lIt = lBadValues.begin(); lIt != lBadValues.end(); lIt++)
+  {
+    for (size_t i = 0; i < nodeProperties.size(); i++) {
+      BOOST_TEST_MESSAGE("Setting 'id' attribute of node " << i << " to '" << *lIt << "'");
+
+      pugi::xml_document lDoc;
+      lDoc.load(addrTableStr.c_str());
+      setAttribute(getNthChild(lDoc.child("node"), i), "id", *lIt);
+
+      BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
+    }
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE (invalid_address, SimpleAddressTableFixture)
+{
+  std::vector<std::string> lBadValues;
+  lBadValues.push_back("");
+  lBadValues.push_back(" ");
+  lBadValues.push_back("   ");
+  lBadValues.push_back("-1");
+  lBadValues.push_back("-0x11");
+  lBadValues.push_back("0x");
+  lBadValues.push_back("x");
+  lBadValues.push_back("3.14");
+  lBadValues.push_back("bob");
+  lBadValues.push_back("0x1234bob5678");
+
+  // lBadValues.push_back("0x100000000");
+  // lBadValues.push_back("0x1FFF1234abcd");
+
+  for (std::vector<std::string>::const_iterator lIt = lBadValues.begin(); lIt != lBadValues.end(); lIt++)
+  {
+    for (size_t i = 0; i < nodeProperties.size(); i++) {
+      BOOST_TEST_MESSAGE("Setting 'address' attribute of node " << i << " to '" << *lIt << "'");
+
+      pugi::xml_document lDoc;
+      lDoc.load(addrTableStr.c_str());
+      setAttribute(getNthChild(lDoc.child("node"), i), "address", *lIt);
+
+      BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
+    }
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE (invalid_mask, SimpleAddressTableFixture)
+{
+  std::vector<std::string> lBadValues;
+  lBadValues.push_back("");
+  lBadValues.push_back(" ");
+  lBadValues.push_back("   ");
+  lBadValues.push_back("-1");
+  lBadValues.push_back("-0x11");
+  lBadValues.push_back("0x");
+  lBadValues.push_back("x");
+  lBadValues.push_back("3.14");
+  lBadValues.push_back("bob");
+  lBadValues.push_back("0x1234bob5678");
+
+  // lBadValues.push_back("0x100000000");
+  // lBadValues.push_back("0x1FFF1234abcd");
+
+  for (std::vector<std::string>::const_iterator lIt = lBadValues.begin(); lIt != lBadValues.end(); lIt++)
+  {
+    for (size_t i = 0; i < 2; i++) {
+      BOOST_TEST_MESSAGE("Setting 'mask' attribute of node " << i << " to '" << *lIt << "'");
+
+      pugi::xml_document lDoc;
+      lDoc.load(addrTableStr.c_str());
+      setAttribute(getNthChild(lDoc.child("node"), i), "mask", *lIt);
+
+      BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
+    }
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE (invalid_size, SimpleAddressTableFixture)
+{
+  std::vector<std::string> lBadValues;
+  lBadValues.push_back("");
+  lBadValues.push_back(" ");
+  lBadValues.push_back("   ");
+  lBadValues.push_back("-1");
+  lBadValues.push_back("-0x11");
+  lBadValues.push_back("0x");
+  lBadValues.push_back("x");
+  lBadValues.push_back("3.14");
+  lBadValues.push_back("bob");
+  lBadValues.push_back("0x1234bob5678");
+
+  // lBadValues.push_back("0x100000000");
+  // lBadValues.push_back("0x1FFF1234abcd");
+
+  for (std::vector<std::string>::const_iterator lIt = lBadValues.begin(); lIt != lBadValues.end(); lIt++)
+  {
+    for (size_t i = 2; i < nodeProperties.size(); i++) {
+      BOOST_TEST_MESSAGE("Setting 'size' attribute of node " << i << " to '" << *lIt << "'");
+
+      pugi::xml_document lDoc;
+      lDoc.load(addrTableStr.c_str());
+      setAttribute(getNthChild(lDoc.child("node"), i), "size", *lIt);
+
+      BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
+    }
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE (invalid_permission, SimpleAddressTableFixture)
 {
   std::vector<std::string> lBadValues;
   lBadValues.push_back("bob");
@@ -557,6 +676,36 @@ BOOST_FIXTURE_TEST_CASE (simple_reg_badpermission, SimpleAddressTableFixture)
       pugi::xml_document lDoc;
       lDoc.load(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), i), "permission", *lIt);
+
+      BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
+    }
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE (invalid_mode, SimpleAddressTableFixture)
+{
+  std::vector<std::string> lBadValues;
+  lBadValues.push_back("bob");
+  lBadValues.push_back("some_invalid_string");
+  lBadValues.push_back("");
+  lBadValues.push_back("SINGLE");
+  lBadValues.push_back("BLOCK");
+  lBadValues.push_back("INCREMENTAL");
+  lBadValues.push_back("INC");
+  lBadValues.push_back("PORT");
+  lBadValues.push_back("NON-INCREMENTAL");
+  lBadValues.push_back("NON-INC");
+
+  lBadValues.push_back("single ");
+
+  for (std::vector<std::string>::const_iterator lIt = lBadValues.begin(); lIt != lBadValues.end(); lIt++)
+  {
+    for (size_t i = 0; i < nodeProperties.size(); i++) {
+      BOOST_TEST_MESSAGE("Setting 'mode' attribute of node " << i << " to '" << *lIt << "'");
+
+      pugi::xml_document lDoc;
+      lDoc.load(addrTableStr.c_str());
+      setAttribute(getNthChild(lDoc.child("node"), i), "mode", *lIt);
 
       BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
     }
