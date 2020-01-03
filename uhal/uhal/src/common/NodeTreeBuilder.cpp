@@ -340,17 +340,22 @@ namespace uhal
 
   void NodeTreeBuilder::setUid ( const bool& aRequireId , const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    if ( aRequireId )
+    const bool lHasId = uhal::utilities::GetXMLattribute<true> ( aXmlNode , NodeTreeBuilder::mIdAttribute , aNode->mUid );
+
+    if ( aRequireId and ( not lHasId ) )
     {
-      if ( ! uhal::utilities::GetXMLattribute<true> ( aXmlNode , NodeTreeBuilder::mIdAttribute , aNode->mUid ) )
-      {
-        //error description is given in the function itself so no more elaboration required
-        throw exception::NodeMustHaveUID();
-      }
+      //error description is given in the function itself so no more elaboration required
+      throw exception::NodeMustHaveUID();
     }
-    else
+
+    if ( lHasId )
     {
-      uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mIdAttribute , aNode->mUid );
+      if ( aNode->mUid.empty() )
+        throw exception::NodeAttributeIncorrectValue("Invalid node ID specified (empty)");
+      else if ( aNode->mUid.find('.') != std::string::npos )
+        throw exception::NodeAttributeIncorrectValue("Invalid node ID '" + aNode->mUid + "' specified (contains dots)");
+      else if ( ( aNode->mUid.at(0) == ' ' ) or ( aNode->mUid.at(aNode->mUid.size()-1) == ' ' ) )
+        throw exception::NodeAttributeIncorrectValue("Invalid node ID '" + aNode->mUid + "' specified (contains spaces)");
     }
   }
 
@@ -447,7 +452,9 @@ namespace uhal
     {
       const defs::NodePermission* const lPermission = mPermissionsLut.find(lPermissionAttr.c_str());
       if (lPermission == NULL)
-        throw exception::NodeAttributeIncorrectValue();
+      {
+        throw exception::NodeAttributeIncorrectValue("Permission attribute for node with ID '" + aNode->mUid + "' has incorrect value '" + lPermissionAttr + "'");
+      }
       else
         aNode->mPermission = *lPermission;
     }
@@ -464,17 +471,17 @@ namespace uhal
   void NodeTreeBuilder::setModeAndSize ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
     //Mode is an optional attribute for specifying whether a block is incremental, non-incremental or a single register
-    std::string lMode;
+    std::string lModeAttr;
 
-    if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mModeAttribute , lMode ) )
+    if ( uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mModeAttribute , lModeAttr ) )
     {
-      boost::spirit::qi::phrase_parse (
-        lMode.begin(),
-        lMode.end(),
-        NodeTreeBuilder::mModeLut,
-        boost::spirit::ascii::space,
-        aNode->mMode
-      );
+      const defs::BlockReadWriteMode* const lMode = mModeLut.find(lModeAttr.c_str());
+      if (lMode == NULL)
+      {
+        throw exception::NodeAttributeIncorrectValue("Mode attribute for node with ID '" + aNode->mUid + "' has incorrect value '" + lModeAttr + "'");
+      }
+      else
+        aNode->mMode = *lMode;
 
       if ( aNode->mMode == defs::INCREMENTAL )
       {

@@ -113,9 +113,9 @@ namespace uhal
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget )
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , std::string& aTarget )
     {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
 
       if ( ! lAttr.empty() )
       {
@@ -133,14 +133,14 @@ namespace uhal
       }
     }
 
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget );
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName , std::string& aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName , std::string& aTarget );
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget )
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , const char* aTarget )
     {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
 
       if ( ! lAttr.empty() )
       {
@@ -158,14 +158,14 @@ namespace uhal
       }
     }
 
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget );
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName , const char* aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName , const char* aTarget );
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget )
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , int32_t& aTarget )
     {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
 
       if ( ! lAttr.empty() )
       {
@@ -234,47 +234,49 @@ namespace uhal
       }
     }
 
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget );
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName , int32_t& aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName , int32_t& aTarget );
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget )
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , uint32_t& aTarget )
     {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
 
       if ( ! lAttr.empty() )
       {
         std::string lAttrStr ( lAttr.value() );
         std::stringstream ss;
 
+        size_t lBasePrefixLength = 0;
+
+        if ( lAttrStr.empty() )
+          throw exception::NodeAttributeIncorrectValue("XML attribute '" + aAttrName + "' is empty, so cannot be converted to uint32_t");
+
         //if string is of the form "x89abcdef" , "X89abcdef" , "0x89abcdef" , "0X89abcdef"
         if ( lAttrStr.size() > 2 )
         {
-          if ( ( lAttrStr[1] == 'x' ) || ( lAttrStr[1] == 'X' ) )
+          if ( ( lAttrStr[0] == '0' ) and ( ( lAttrStr[1] == 'x' ) or ( lAttrStr[1] == 'X' ) ) )
           {
-            ss << std::hex << lAttrStr.substr ( 2 );
-          }
-          else
-          {
-            ss << lAttrStr;
+            lBasePrefixLength = 2;
+            ss << std::hex;
           }
         }
-        else if ( lAttrStr.size() > 1 )
+
+        if ( lAttrStr.size() > 1 )
         {
           if ( ( lAttrStr[0] == 'x' ) || ( lAttrStr[0] == 'X' ) )
           {
-            ss << std::hex << lAttrStr.substr ( 1 );
-          }
-          else
-          {
-            ss << lAttrStr;
+            lBasePrefixLength = 1;
+            ss << std::hex;
           }
         }
-        else
-        {
-          ss << lAttrStr;
-        }
+
+        if ( lAttrStr.find_first_not_of("0123456789", lBasePrefixLength) != std::string::npos )
+          throw exception::NodeAttributeIncorrectValue("XML attribute '" + aAttrName + "' has value '" + lAttrStr + "' that cannot be converted to uint32_t");
+
+        ss << lAttrStr.substr(lBasePrefixLength);
+        
 
         if ( ss.str().size() > 10 )
         {
@@ -307,14 +309,14 @@ namespace uhal
       }
     }
 
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget );
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName , uint32_t& aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName , uint32_t& aTarget );
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget )
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , double& aTarget )
     {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
 
       if ( ! lAttr.empty() )
       {
@@ -332,14 +334,14 @@ namespace uhal
       }
     }
 
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget );
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName , double& aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName , double& aTarget );
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget )
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , float& aTarget )
     {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
 
       if ( ! lAttr.empty() )
       {
@@ -357,14 +359,14 @@ namespace uhal
       }
     }
 
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget );
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName , float& aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName , float& aTarget );
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , bool& aTarget )
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , bool& aTarget )
     {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName );
+      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
 
       if ( ! lAttr.empty() )
       {
@@ -382,7 +384,7 @@ namespace uhal
       }
     }
 
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const char* aAttrName, bool& aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const char* aAttrName, bool& aTarget );
+    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName, bool& aTarget );
+    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName, bool& aTarget );
   }
 }

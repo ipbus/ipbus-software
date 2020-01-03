@@ -61,6 +61,9 @@ namespace uhal
   {
     //! Exception class to handle the case where the string will not fit into a 32-bit number.
     UHAL_DEFINE_EXCEPTION_CLASS ( StringNumberWillNotFitInto32BitNumber , "Exception class to handle the case where the string will not fit into a 32-bit number." )
+
+    //! Exception class to handle the case when a node attribute has the incorrect value.
+    UHAL_DEFINE_EXCEPTION_CLASS ( NodeAttributeIncorrectValue , "Exception class to handle the case when a node attribute has the incorrect value." )
   }
 
   namespace utilities
@@ -82,7 +85,7 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , std::string& aTarget );
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , std::string& aTarget );
 
 
     /**
@@ -93,7 +96,7 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , const char* aTarget );
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , const char* aTarget );
 
 
     /**
@@ -104,7 +107,7 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , int32_t& aTarget );
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , int32_t& aTarget );
 
 
     /**
@@ -115,7 +118,7 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , uint32_t& aTarget );
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , uint32_t& aTarget );
 
 
     /**
@@ -126,7 +129,7 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , double& aTarget );
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , double& aTarget );
 
 
     /**
@@ -137,7 +140,7 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , float& aTarget );
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , float& aTarget );
 
 
     /**
@@ -148,7 +151,7 @@ namespace uhal
       @return success/failure status
     */
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const char* aAttrName , bool& aTarget );
+    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , bool& aTarget );
 
   }
 }
