@@ -124,6 +124,11 @@ build:centos8:
     when: always
     expire_in: 1 day
 
+build:centos7:static:
+  <<: *simple_build_jobTemplate
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-cc7-static:2020-01-04__boost1.53.0_pugixml1.8
+  variables:
+    BUILD_STATIC: 1
 build:fedora30-python2:
   <<: *simple_build_jobTemplate
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python2:2019-10-12__erlang21.3_gcc9.2.1_boost1.69.0_pugixml1.9

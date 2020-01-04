@@ -38,27 +38,30 @@ LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX} \
 		${BUILD_HOME}/uhal/uhal/lib \
 		lib
 
+LIBFLAGPREFIX = -Wl,
+
 Libraries = \
 		cactus_uhal_uhal \
 		cactus_uhal_grammars \
 		cactus_uhal_log \
-		\
+		$(if ${BUILD_STATIC}, ${LIBFLAGPREFIX}--no-whole-archive,) \
 		boost_chrono \
 		boost_filesystem \
-		boost_system \
 		${BOOST_THREAD_LIB} \
 		boost_program_options \
 		boost_unit_test_framework \
-		\
-		pthread \
-
-ExecutableLibraries = rt \
-		cactus_uhal_tests \
-		${Libraries} \
-		boost_chrono \
 		boost_regex \
 		boost_system \
+		\
 		pugixml \
+		\
+		rt \
+		pthread \
+
+ExecutableLibraries = \
+		$(if ${BUILD_STATIC}, ${LIBFLAGPREFIX}--whole-archive,) \
+		cactus_uhal_tests \
+		${Libraries} \
 		stdc++
 
 
@@ -67,7 +70,12 @@ ifeq ($(CACTUS_OS),osx)
 CXXFLAGS += -Wno-c++11-extensions
 endif
 
-
+ifndef BUILD_STATIC
+  CXXFLAGS += -DBOOST_TEST_DYN_LINK
+else
+  IncludePaths += ${BUILD_HOME}/uhal/uhal/include/_static
+  Libraries := $(filter-out pugixml, ${Libraries})
+endif
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
 include $(BUILD_HOME)/uhal/config/mfRPMRules.mk

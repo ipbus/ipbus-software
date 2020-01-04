@@ -41,7 +41,6 @@
 
 
 
-#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE uhalTests
 
 // BOOST_TEST_NO_MAIN: Disable auto-generation of main function, in order to define our own, which parses some arguments
@@ -60,6 +59,8 @@
 #include "uhal/tests/tools.hpp"
 #include "uhal/log/log.hpp"
 
+
+#ifdef BOOST_TEST_DYN_LINK
 
 // Inspired by https://stackoverflow.com/questions/25385011/getting-all-boost-test-suites-test-cases
 struct ListWritingVisitor : boost::unit_test::test_tree_visitor
@@ -200,3 +201,5 @@ main( int argc, char* argv[] )
   lArgvForBoostUTF.push_back(0);
   return ::boost::unit_test::unit_test_main( &init_unit_test, lArgvForBoostUTF.size()-1, const_cast<char**>(lArgvForBoostUTF.data()) );
 }
+
+#endif

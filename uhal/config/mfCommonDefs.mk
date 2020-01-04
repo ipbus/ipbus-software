@@ -6,12 +6,17 @@ $(info Using BUILD_HOME=${BUILD_HOME})
 # Compilers
 CXX = g++
 LD = ${CXX}
+AR = ar
 
 # Compiler flags
 CXXFLAGS = -g -Wall -pedantic -O3 -MMD -MP -fPIC
-#						-fprofile-arcs -ftest-coverages
-LDFLAGS = -Wall -g -O3 -fPIC
-#										 -lgcov -coverage
+ARFLAGS = rc
+
+ifdef BUILD_STATIC
+  LDFLAGS = -static -Wl,-Bstatic -shared-libgcc -Wall -g -O3 -fPIC
+else
+  LDFLAGS = -Wall -g -O3 -fPIC
+endif
 
 # Tools
 MakeDir = mkdir -p
@@ -28,9 +33,9 @@ CXX_VERSION_TAG := ${CXX_VERSION_TAG}$(shell ${CXX} -dumpfullversion -dumpversio
 CXX_VERSION_TAG := $(subst .,_,${CXX_VERSION_TAG})
 
 
-ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.dylib))
+ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.a ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.dylib))
   BOOST_THREAD_LIB = boost_thread-mt
-else ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.dylib))
+else ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.a ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.dylib))
   BOOST_THREAD_LIB = boost_thread
 else ifeq (,$(shell LANG=C ${CXX} -lboost_thread-mt 2>&1 | grep -E 'ld: (cannot find|library not found)'))
   BOOST_THREAD_LIB = boost_thread-mt

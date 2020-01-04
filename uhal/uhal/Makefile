@@ -57,6 +57,12 @@ ifeq ($(CACTUS_OS),osx)
 CXXFLAGS += -Wno-c++11-extensions -fdelayed-template-parsing
 endif
 
+ifdef BUILD_STATIC
+  IncludePaths += include/_static
+  Libraries = $(filter-out pugixml, ${Libraries})
+else
+  IgnoreSources = src/common/pugixml.cpp
+endif
 
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
