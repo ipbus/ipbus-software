@@ -38,11 +38,13 @@ LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX} \
 		${BUILD_HOME}/uhal/uhal/lib \
 		lib
 
+LIBFLAGPREFIX = -Wl,
+
 Libraries = \
 		cactus_uhal_uhal \
 		cactus_uhal_grammars \
 		cactus_uhal_log \
-		\
+		$(if ${BUILD_STATIC}, ${LIBFLAGPREFIX}--no-whole-archive,) \
 		boost_chrono \
 		boost_filesystem \
 		${BOOST_THREAD_LIB} \
@@ -57,6 +59,7 @@ Libraries = \
 		pthread \
 
 ExecutableLibraries = \
+		$(if ${BUILD_STATIC}, ${LIBFLAGPREFIX}--whole-archive,) \
 		cactus_uhal_tests \
 		${Libraries} \
 		stdc++

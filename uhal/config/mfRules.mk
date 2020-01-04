@@ -34,6 +34,7 @@ DependentLibraries += $(addprefix -l,${Libraries})
 # Executable dependencies
 ExecutableDependentLibraries += $(addprefix -L,${LibraryPaths})
 ExecutableDependentLibraries += $(addprefix -l,${ExecutableLibraries})
+ExecutableDependentLibraries := $(patsubst -l-%,-%,${ExecutableDependentLibraries})
 
 
 ifeq ("${Library}","")
