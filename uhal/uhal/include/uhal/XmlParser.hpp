@@ -234,7 +234,7 @@ namespace uhal
       */
       R operator() ( const pugi::xml_node& aNode );
 
-      private:
+    private:
       //! One-hot encoded hash for rules
       uint64_t mNextHash;
       //! Map of the tags to the one-hot encoded hash
@@ -243,7 +243,6 @@ namespace uhal
       std::deque< Rule<R> > mRules;
       //! Member to track rule numbers for giving each rule a unique ID
       uint32_t mRuleCounter;
-
   };
 
 }

@@ -50,6 +50,7 @@
  class ClassName : public BaseClassName {\
  public:\
  ClassName() : BaseClassName() {}\
+ ClassName(const std::string& aMessage) : BaseClassName() {append(aMessage.c_str());}\
  void ThrowAsDerivedType_(){ throw ClassName(*this); } \
  exception* clone(){ return new ClassName(*this); } \
  protected:\

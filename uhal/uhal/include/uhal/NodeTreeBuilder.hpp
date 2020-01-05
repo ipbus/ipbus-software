@@ -119,6 +119,8 @@ namespace uhal
       //! Clears address filename -> Node tree cache. NOT thread safe; for tread-safety, use ConnectionManager method
       void clearAddressFileCache();
 
+      Node* build(const pugi::xml_node& aNode, const boost::filesystem::path& aAddressFilePath);
+
     private:
       /**
       	Method called once the file specified in the call to getNodeTree( aFilenameExpr ) has been opened
@@ -128,7 +130,6 @@ namespace uhal
       	@param aAddressTable The address table constructed from the file
       */
       void CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< const Node* >& aAddressTable );
-
 
       /**
       	Propagate the addresses down through the hierarchical structure
@@ -159,18 +160,18 @@ namespace uhal
       void setFirmwareInfo ( const pugi::xml_node& aXmlNode , Node* aNode );
       void addChildren ( const pugi::xml_node& aXmlNode , Node* aNode );
 
-      static const char* mIdAttribute;
-      static const char* mAddressAttribute;
-      static const char* mParametersAttribute;
-      static const char* mTagsAttribute;
-      static const char* mDescriptionAttribute;
-      static const char* mPermissionsAttribute;
-      static const char* mMaskAttribute;
-      static const char* mModeAttribute;
-      static const char* mSizeAttribute;
-      static const char* mClassAttribute;
-      static const char* mModuleAttribute;
-      static const char* mFirmwareInfo;
+      static const std::string mIdAttribute;
+      static const std::string mAddressAttribute;
+      static const std::string mParametersAttribute;
+      static const std::string mTagsAttribute;
+      static const std::string mDescriptionAttribute;
+      static const std::string mPermissionsAttribute;
+      static const std::string mMaskAttribute;
+      static const std::string mModeAttribute;
+      static const std::string mSizeAttribute;
+      static const std::string mClassAttribute;
+      static const std::string mModuleAttribute;
+      static const std::string mFirmwareInfo;
 
       Parser< Node* > mTopLevelNodeParser;
       Parser< Node* > mNodeParser;
