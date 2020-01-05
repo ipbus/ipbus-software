@@ -486,7 +486,7 @@ void checkIteration(const uhal::Node& aNode, const NodeProperties& aProperties)
 }
 
 
-void checkNodeTree(const uhal::Node& aNode, const std::vector<NodeProperties>& aExpectedProperties, const bool aUseClient = true)
+void checkNodeTree(const uhal::Node& aNode, const std::vector<NodeProperties>& aExpectedProperties)
 {
   for (std::vector<NodeProperties>::const_iterator lIt = aExpectedProperties.begin(); lIt != aExpectedProperties.end(); lIt++) {
     BOOST_TEST_MESSAGE("Node '" << lIt->path << "'");
@@ -530,7 +530,7 @@ BOOST_AUTO_TEST_SUITE( simple )
 BOOST_FIXTURE_TEST_CASE (valid_default, SimpleAddressTableFixture)
 {
   boost::shared_ptr<Node> lNode(NodeTreeBuilder::getInstance().build(addrTableDoc.child ( "node" ), boost::filesystem::path()));
-  checkNodeTree(*lNode, nodeProperties, false);
+  checkNodeTree(*lNode, nodeProperties);
 }
 
 BOOST_FIXTURE_TEST_CASE (missing_ID, SimpleAddressTableFixture)
