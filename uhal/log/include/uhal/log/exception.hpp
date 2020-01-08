@@ -119,11 +119,8 @@ namespace uhal
         /// The time at which the exception was thrown
         timeval mTime;
 
-        /// Memory which the call to "what()" uses when formatting the output string
+        /// Memory into which message is added by calls to append
         char* mString;
-
-        /// Memory into which additional information is added by calls to append
-        char* mAdditionalInfo;
     };
 
   }
