@@ -47,14 +47,13 @@
 
 //!	Macro for simplifying the declaration and definition of derived exception types
 #define UHAL_DEFINE_DERIVED_EXCEPTION_CLASS( ClassName , BaseClassName, ClassDescription )\
- class ClassName : public BaseClassName {\
- public:\
- ClassName() : BaseClassName() {}\
- ClassName(const std::string& aMessage) : BaseClassName() {append(aMessage.c_str());}\
- void throwAsDerivedType(){ throw ClassName(*this); } \
- exception* clone(){ return new ClassName(*this); } \
- protected:\
- std::string description() const throw() { return std::string( ClassDescription ); } \
+  class ClassName : public BaseClassName {\
+  public:\
+    ClassName() : BaseClassName() {}\
+    ClassName(const std::string& aMessage) : BaseClassName() {append(aMessage.c_str());}\
+    void throwAsDerivedType(){ throw ClassName(*this); } \
+  protected:\
+    std::string description() const throw() { return std::string( ClassDescription ); } \
 };
 
 #define UHAL_DEFINE_EXCEPTION_CLASS( ClassName , ClassDescription ) UHAL_DEFINE_DERIVED_EXCEPTION_CLASS(ClassName, uhal::exception::exception, ClassDescription)
@@ -94,12 +93,6 @@ namespace uhal
 
         //!	Function which casts a pointer from the base type of this object to a derived type of this object and rethrows as the derived type
         virtual void throwAsDerivedType() = 0;
-
-        /**
-        	Return a new object of the derived exception type cloned from this object
-        	@return a new object of the derived exception type
-        */
-        virtual exception* clone() = 0;
 
         /**
         	Add additional information to the exception message
