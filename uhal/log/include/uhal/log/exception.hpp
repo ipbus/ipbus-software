@@ -59,9 +59,6 @@
 
 #define UHAL_DEFINE_EXCEPTION_CLASS( ClassName , ClassDescription ) UHAL_DEFINE_DERIVED_EXCEPTION_CLASS(ClassName, uhal::exception::exception, ClassDescription)
 
-#define ExceptionClass UHAL_DEFINE_EXCEPTION_CLASS
-
-
 //!	Macro version of the member function to wrap the ThrowAsDerivedType but also tell the compiler that this function always throws
 #define ThrowAsDerivedType() ThrowAsDerivedType_(); throw 0;
 
