@@ -486,7 +486,7 @@ void Mmap::read()
 
   if ( mAsynchronousException )
   {
-    mAsynchronousException->ThrowAsDerivedType();
+    mAsynchronousException->throwAsDerivedType();
   }
 }
 
