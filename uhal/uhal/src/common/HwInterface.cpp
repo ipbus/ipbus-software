@@ -51,6 +51,7 @@ namespace uhal
     mNode ( aNode )
   {
     claimNode ( *mNode );
+    mClientInterface->mNode = mNode;
   }
 
 
@@ -59,6 +60,7 @@ namespace uhal
     mNode ( otherHw.mNode->clone() )
   {
     claimNode ( *mNode );
+    mClientInterface->mNode = mNode;
   }
 
 

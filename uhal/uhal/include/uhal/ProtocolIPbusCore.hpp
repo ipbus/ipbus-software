@@ -99,11 +99,16 @@ namespace uhal
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreUnparsableTransactionHeader , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header could not be parsed." )
-    //     UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." )
-    //! Exception class to handle the case where the IPbus transaction header response code indicated an error.
-    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
     //! Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned.
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , TransactionLevelError, "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
+
+    class IPbusCoreResponseCodeSet : public TransactionLevelError {
+    public:
+      IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t aId, eIPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets);
+
+      std::string description() const throw();
+    };
+
   }
 
 
