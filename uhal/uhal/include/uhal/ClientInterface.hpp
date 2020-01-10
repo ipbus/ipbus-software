@@ -69,7 +69,7 @@ namespace uhal
 
   namespace detail
   {
-    std::string getAddressDescription(const ClientInterface&, const uint32_t aAddress);
+    std::string getAddressDescription(const ClientInterface&, const uint32_t, const size_t&);
   }
 
   namespace exception
@@ -416,7 +416,7 @@ namespace uhal
 
       friend class IPbusCore;
       friend class HwInterface;
-      friend std::string detail::getAddressDescription(const ClientInterface&, const uint32_t);
+      friend std::string detail::getAddressDescription(const ClientInterface&, const uint32_t, const size_t&);
 
     protected:
 

@@ -44,10 +44,10 @@ namespace uhal
   namespace detail
   {
     //! Generates a short string summarising which nodes match the specified address
-    std::string getAddressDescription(const Node& aNode, const uint32_t aAddress);
+    std::string getAddressDescription(const Node& aNode, const uint32_t aAddress, const size_t& aMaxListSize);
 
     //! Generates a short string summarising which nodes match the specified address
-    std::string getAddressDescription(const ClientInterface& aClient, const uint32_t aAddress);
+    std::string getAddressDescription(const ClientInterface& aClient, const uint32_t aAddress, const size_t& aMaxListSize);
   }
 }
 

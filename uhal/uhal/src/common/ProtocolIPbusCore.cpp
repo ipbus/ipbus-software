@@ -42,6 +42,7 @@
 #include <boost/thread/lock_guard.hpp>          // for lock_guard
 #include <boost/thread/mutex.hpp>               // for mutex
 
+#include "uhal/detail/utilities.hpp"
 #include "uhal/log/LogLevels.hpp"               // for BaseLogLevel, Debug
 #include "uhal/log/log.hpp"
 #include "uhal/log/log_inserters.integer.hpp"   // for Integer, _Integer
@@ -99,7 +100,7 @@ namespace uhal
       lOSS << aType << " at base address 0x" << aBaseAddress << " (";
       if (aWordCount != 0)
         lOSS << "offset 0x" << aWordCount << ", ";
-      lOSS << detail::getAddressDescription(aClient, aBaseAddress + ( (aType == NI_READ) or (aType == NI_WRITE) ? 0 : aWordCount) ) << "). ";
+      lOSS << detail::getAddressDescription(aClient, aBaseAddress + ( (aType == NI_READ) or (aType == NI_WRITE) ? 0 : aWordCount) , 5) << "). ";
       lOSS << " URI: \"" << aClient.uri() << "\". Sent/received headers: 0x" << aHeaders.first << " / 0x" << aHeaders.second;
       lOSS << " (" << std::dec << aPacketOffsets.first << "/" << aPacketOffsets.second << " bytes into IPbus payload)";
 

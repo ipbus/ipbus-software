@@ -559,36 +559,45 @@ BOOST_FIXTURE_TEST_CASE (dummy_address_files, DummyAddressFileFixture) {
 BOOST_FIXTURE_TEST_CASE (address_description, DummyAddressFileFixture) {
   const boost::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
 
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0), "no matching nodes");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 1), "node \"REG\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 2), "node \"REG_READ_ONLY\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 3), "node \"REG_WRITE_ONLY\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4), "2 descendants of node \"\" match");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5), "2 descendants of node \"\" match");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6), "2 descendants of node \"\" match");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 7), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 1, 0), "node \"REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 2, 0), "node \"REG_READ_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 3, 0), "node \"REG_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 0), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 1), "2 nodes match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 2), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 3), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 0), "nodes \"REG_MASKED_READ_ONLY\", \"REG_MASKED_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 1), "2 nodes match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 2), "nodes \"REG_MASKED_READ_ONLY\", \"REG_MASKED_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 3), "nodes \"REG_MASKED_READ_ONLY\", \"REG_MASKED_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 0), "nodes \"REG_PARS\", \"REG_OUT_OF_ORDER\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 1), "2 nodes match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 2), "nodes \"REG_PARS\", \"REG_OUT_OF_ORDER\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 3), "nodes \"REG_PARS\", \"REG_OUT_OF_ORDER\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 7, 0), "no matching nodes");
 
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x0fffff), "no matching nodes");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100000), "node \"MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100001), "node \"MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100010), "node \"MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x130000), "node \"MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x13ffff), "node \"MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x140000), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x0fffff, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100000, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100001, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100010, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x130000, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x13ffff, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x140000, 0), "no matching nodes");
 
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x200000), "no matching nodes");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210002), "node \"SUBSYSTEM1.REG\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210003), "node \"SUBSYSTEM1.MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210004), "node \"SUBSYSTEM1.MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x250002), "node \"SUBSYSTEM1.MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x250003), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x200000, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210002, 0), "node \"SUBSYSTEM1.REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210003, 0), "node \"SUBSYSTEM1.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210004, 0), "node \"SUBSYSTEM1.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x250002, 0), "node \"SUBSYSTEM1.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x250003, 0), "no matching nodes");
 
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270001), "no matching nodes");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270002), "node \"SUBSYSTEM1.SUBMODULE.REG\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270003), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270004), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270102), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
-  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270103), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270001, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270002, 0), "node \"SUBSYSTEM1.SUBMODULE.REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270003, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270004, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270102, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270103, 0), "no matching nodes");
 }
 
 

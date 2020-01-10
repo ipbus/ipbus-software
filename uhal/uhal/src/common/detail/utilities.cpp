@@ -39,7 +39,7 @@
 namespace uhal {
   namespace detail {
 
-    std::string getAddressDescription(const Node& aNode, const uint32_t aAddress)
+    std::string getAddressDescription(const Node& aNode, const uint32_t aAddress, const size_t& aMaxListSize)
     {
       std::vector<const Node*> lMatches;
       for ( Node::const_iterator lIt = aNode.begin(); lIt != aNode.end(); lIt++ ) {
@@ -71,19 +71,38 @@ namespace uhal {
           if ( lCommonAncestorLineage.at(i) != lLineage.at(i) )
             break;
 
-        	lCommonAncestor = lLineage.at(i);
+          lCommonAncestor = lLineage.at(i);
         }
         lCommonAncestorLineage.assign(lLineage.begin(), lLineage.begin() + i + 1);
       }
 
-    	return boost::lexical_cast<std::string>(lMatches.size()) + " descendants of node \"" + lCommonAncestor->getPath() + "\" match";
+      if ( (aMaxListSize != 0) and (lMatches.size() > aMaxListSize) )
+      {
+        if ( lCommonAncestor == &aNode )
+          return boost::lexical_cast<std::string>(lMatches.size()) + " nodes match";
+        else
+          return boost::lexical_cast<std::string>(lMatches.size()) + " descendants of node \"" + lCommonAncestor->getPath() + "\" match";
+      }
+      else
+      {
+        const std::string lCommonAncestorPath(lCommonAncestor->getPath());
+        std::ostringstream lOSS;
+        lOSS << "nodes \"" << lMatches.front()->getPath().substr(lCommonAncestorPath.size()) << "\"";
+        for (std::vector<const Node*>::const_iterator lIt = lMatches.begin() + 1; lIt < lMatches.end(); lIt++)
+          lOSS << ", \"" << (*lIt)->getPath().substr(lCommonAncestorPath.size()) << "\"";
+
+        if (lCommonAncestor != &aNode)
+          lOSS << " under \"" << lCommonAncestorPath << "\"";
+
+        return lOSS.str();
+      }
     }
 
 
-    std::string getAddressDescription(const ClientInterface& aClient, const uint32_t aAddress)
+    std::string getAddressDescription(const ClientInterface& aClient, const uint32_t aAddress, const size_t& aMaxListSize)
     {
       if ( boost::shared_ptr<Node> lNode = aClient.mNode.lock() )
-        return getAddressDescription(*lNode, aAddress);
+        return getAddressDescription(*lNode, aAddress, aMaxListSize);
       else
         return "";
     }
