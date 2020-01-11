@@ -53,7 +53,7 @@
 namespace uhal
 {
 
-  std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType )
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::IPbusTransactionType& aIPbusTransactionType )
   {
     switch ( aIPbusTransactionType )
     {
@@ -93,7 +93,7 @@ namespace uhal
   namespace exception
   {
 
-    IPbusCoreResponseCodeSet::IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t aId, eIPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets)
+    IPbusCoreResponseCodeSet::IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t aId, IPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets)
     {
       std::ostringstream lOSS;
       lOSS << "Bad response code (0x" << std::hex << aResponseCode << " = '" << aResponseMsg << "') received for ";
@@ -148,7 +148,7 @@ namespace uhal
     const uint8_t* lSendBufferFirstByte = aSendBufferStart;
     uint32_t lNrSendBytesProcessed = 0;
     uint32_t lNrReplyBytesValidated = 0;
-    eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
+    IPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
     uint8_t lSendResponseGood , lReplyResponseGood;
@@ -332,7 +332,7 @@ namespace uhal
     uint32_t lReplyByteCount ( 1 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? WRITE : NI_WRITE );
+    IPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? WRITE : NI_WRITE );
     int32_t lPayloadByteCount ( aSource.size() << 2 );
     uint8_t* lSourcePtr ( ( uint8_t* ) ( aSource.empty() ? NULL : & ( aSource.at ( 0 ) ) ) );
     uint32_t lAddr ( aAddr );
@@ -413,7 +413,7 @@ namespace uhal
     uint32_t  lReplyBytesAvailable;
     std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > lReply ( CreateValVector ( aSize ) );
     uint8_t* lReplyPtr = ( uint8_t* ) ( aSize == 0 ? NULL : & ( lReply.second->value.at(0) ) );
-    eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
+    IPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
     int32_t lPayloadByteCount ( aSize << 2 );
     uint32_t lAddr ( aAddr );
     boost::shared_ptr< Buffers > lBuffers;

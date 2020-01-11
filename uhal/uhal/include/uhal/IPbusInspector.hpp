@@ -64,7 +64,7 @@ namespace uhal
       //! The current raw transaction header
       uint32_t mHeader;
       //! The current transaction type
-      eIPbusTransactionType mType;
+      IPbusTransactionType mType;
       //! The current word count
       uint32_t mWordCounter;
       //! The current transaction id
@@ -174,7 +174,7 @@ namespace uhal
       //! The current raw transaction header
       uint32_t mHeader;
       //! The current transaction type
-      eIPbusTransactionType mType;
+      IPbusTransactionType mType;
       //! The current word count
       uint32_t mWordCounter;
       //! The current transaction id
