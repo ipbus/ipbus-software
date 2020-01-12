@@ -15,6 +15,13 @@ std::string AbstractFixture::connectionFileURI = "";
 size_t AbstractFixture::timeout = 1;
 bool AbstractFixture::quickTest = false;
 
+std::string AbstractFixture::getAddressFileURI()
+{
+  std::string lURI(connectionFileURI);
+  lURI.replace(lURI.size() - 15, 11, "address");
+  return lURI;
+}
+
 template <>
 MinimalFixture<IPBUS_1_3_UDP>::MinimalFixture() : 
   devicePort(50001),

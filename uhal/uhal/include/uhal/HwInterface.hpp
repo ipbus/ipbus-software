@@ -73,7 +73,7 @@ namespace uhal
         Calls the clone method on the Node Tree
         @param hwInterface a Hardware Interface instance to copy
       */
-      HwInterface ( const HwInterface& hwInterface );
+      HwInterface ( const HwInterface& );
 
       //! Destructor
       virtual ~HwInterface();

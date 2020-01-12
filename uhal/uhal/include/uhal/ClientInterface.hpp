@@ -49,6 +49,7 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "uhal/grammars/URI.hpp"
@@ -61,7 +62,15 @@ namespace uhal
 {
   // Forward declaration
   class Buffers;
+  class ClientInterface;
+  class HwInterface;
   class IPbusCore;
+  class Node;
+
+  namespace detail
+  {
+    std::string getAddressDescription(const ClientInterface&, const uint32_t, const size_t&);
+  }
 
   namespace exception
   {
@@ -403,7 +412,11 @@ namespace uhal
       //! Timeout period for transactions
       boost::posix_time::time_duration mTimeoutPeriod;
 
+      boost::weak_ptr<Node> mNode;
+
       friend class IPbusCore;
+      friend class HwInterface;
+      friend std::string detail::getAddressDescription(const ClientInterface&, const uint32_t, const size_t&);
 
     protected:
 

@@ -112,7 +112,7 @@ namespace uhal
     if ( mAsynchronousException )
     {
       log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from 'implementDispatch' method of " , Type<TCP< InnerProtocol , nr_buffers_per_send > >() );
-      mAsynchronousException->ThrowAsDerivedType();
+      mAsynchronousException->throwAsDerivedType();
     }
 
     if ( ! mSocket.is_open() )
@@ -572,7 +572,7 @@ namespace uhal
 
     if ( mAsynchronousException )
     {
-      mAsynchronousException->ThrowAsDerivedType();
+      mAsynchronousException->throwAsDerivedType();
     }
   }
 

@@ -52,26 +52,24 @@ namespace uhal
 
     exception::exception ( ) :
       std::exception (),
-      mString ( ( char* ) malloc ( 65536 ) ),
-      mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
+      mString ( ( char* ) malloc ( 65536 ) )
     {
       gettimeofday ( &mTime, NULL );
-      mAdditionalInfo[0] = '\0'; //malloc is not required to initialize to null, so do it manually, just in case
+      mString[0] = '\0'; //malloc is not required to initialize to null, so do it manually, just in case
     }
 
 
     exception::exception ( const exception& aExc ) :
       std::exception (),
       mTime ( aExc.mTime ),
-      mString ( ( char* ) malloc ( 65536 ) ),
-      mAdditionalInfo ( ( char* ) malloc ( 65536 ) )
+      mString ( ( char* ) malloc ( 65536 ) )
     {
-      strcpy ( mAdditionalInfo , aExc.mAdditionalInfo );
+      strcpy ( mString , aExc.mString );
     }
 
     exception& exception::operator= ( const exception& aExc )
     {
-      strcpy ( mAdditionalInfo , aExc.mAdditionalInfo );
+      strcpy ( mString , aExc.mString );
       mTime = aExc.mTime;
       return *this;
     }
@@ -83,49 +81,29 @@ namespace uhal
         free ( mString );
         mString = NULL;
       }
-
-      if ( mAdditionalInfo )
-      {
-        free ( mAdditionalInfo );
-        mAdditionalInfo = NULL;
-      }
     }
 
 
     const char* exception::what() const throw()
     {
-      if ( mString == NULL )
+
+      if ( strlen ( mString ) )
       {
-        std::cout << "Could not allocate memory for exception message" << std::endl;
         return mString;
-      }
-
-      std::stringstream lStr;
-
-      if ( strlen ( mAdditionalInfo ) )
-      {
-        lStr << mAdditionalInfo;
       }
       else
       {
+        std::stringstream lStr;
         lStr << description() << " (no additional info)";
+        std::string lString ( lStr.str() );
+        strncpy ( mString , lString.c_str() , 65536 );
+        return mString;
       }
-
-      std::string lString ( lStr.str() );
-      strncpy ( mString , lString.c_str() , 65536 );
-
-      if ( lString.size() > 65536 )
-      {
-        strcpy ( mString+65530 , "..." );
-      }
-
-      return mString;
     }
-
 
     void exception::append ( const char* aCStr ) throw()
     {
-      strncat ( mAdditionalInfo, aCStr , 65536-strlen ( mAdditionalInfo ) );
+      strncat ( mString, aCStr , 65536-strlen ( mString ) );
     }
 
   }

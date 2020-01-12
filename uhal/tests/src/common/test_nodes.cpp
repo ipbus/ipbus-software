@@ -32,6 +32,7 @@
 #include "uhal/utilities/xml.hpp"
 #include "uhal/uhal.hpp"
 
+#include "uhal/detail/utilities.hpp"
 #include "uhal/tests/DummyDerivedNode.hpp"
 #include "uhal/tests/fixtures.hpp"
 
@@ -135,7 +136,7 @@ SimpleAddressTableFixture::SimpleAddressTableFixture() :
 
 DummyAddressFileFixture::DummyAddressFileFixture() :
   AbstractFixture(),
-  addrFileURI(connectionFileURI.replace(connectionFileURI.size() - 15, 11, "address")),
+  addrFileURI(getAddressFileURI()),
   addrFileAbsPath(boost::filesystem::absolute(boost::filesystem::path(addrFileURI.substr(7))).native()),
   addrFileLevel2AbsPath(addrFileAbsPath),
   addrFileLevel3AbsPath(addrFileAbsPath)
@@ -204,7 +205,7 @@ DummyAddressFileFixture::DummyAddressFileFixture() :
   nodeProperties.back().tags = "test";
 
   nodeProperties.push_back(NodeProperties("SMALL_MEM", 0x400000, defs::INCREMENTAL, defs::READWRITE, 256, addrFileAbsPath, 0));
-  nodeProperties.push_back(NodeProperties("LARGE_MEM", 0x500000, defs::INCREMENTAL, defs::READWRITE, 26214400, addrFileAbsPath, 0));
+  nodeProperties.push_back(NodeProperties("LARGE_MEM", 0x1000000, defs::INCREMENTAL, defs::READWRITE, 26214400, addrFileAbsPath, 0));
 
   nodeProperties.push_back(NodeProperties("SUBSYSTEM3", 0x600000, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 28));
 
@@ -456,7 +457,7 @@ void checkDescendants (const uhal::Node& aNode, const NodeProperties& aPropertie
     }
   }
 
-  // TODO: Add test that vector returned by getNodes("someRgex") is correct
+  // TODO: Add test that vector returned by getNodes("someRegex") is correct
 }
 
 
@@ -486,6 +487,31 @@ void checkIteration(const uhal::Node& aNode, const NodeProperties& aProperties)
 }
 
 
+void checkLineage(const uhal::Node& aTopNode, const uhal::Node& aNode)
+{
+  // 1) Check lineage returned with top-most node as argument
+  std::vector<const Node*> lExpected(1, &aTopNode);
+  const std::string lPath(aNode.getPath());
+
+  size_t lDotIndex = aNode.getPath().find('.');
+  while (lDotIndex != std::string::npos) {
+    lExpected.push_back(&aTopNode.getNode(lPath.substr(0, lDotIndex)));
+    lDotIndex = aNode.getPath().find('.', lDotIndex + 1);
+  }
+
+  const std::vector<const Node*> lReturned = aNode.getLineage(aTopNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lReturned.begin(), lReturned.end(), lExpected.begin(), lExpected.end());
+
+  // 2) Check lineage returned with intermediate-level nodes as argument (e.g. top node's child, grandchild, etc)
+  for (size_t i = 1; i < lExpected.size(); i++) {
+    const std::vector<const Node*> lExpected2(lExpected.begin()+i, lExpected.end());
+    const std::vector<const Node*> lReturned2(aNode.getLineage(*lExpected.at(i)));
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(lReturned2.begin(), lReturned2.end(), lExpected2.begin(), lExpected2.end());
+  }
+}
+
+
 void checkNodeTree(const uhal::Node& aNode, const std::vector<NodeProperties>& aExpectedProperties)
 {
   for (std::vector<NodeProperties>::const_iterator lIt = aExpectedProperties.begin(); lIt != aExpectedProperties.end(); lIt++) {
@@ -496,6 +522,11 @@ void checkNodeTree(const uhal::Node& aNode, const std::vector<NodeProperties>& a
     checkExceptionsThrownByReadWrite(lNode, *lIt);
     checkDescendants(lNode, *lIt);
     checkIteration(lNode, *lIt);
+
+    if (&lNode != &aNode)
+      checkLineage(aNode, lNode);
+    else
+      BOOST_CHECK_THROW(lNode.getLineage(aNode), std::runtime_error);
   }
 }
 
@@ -522,6 +553,61 @@ BOOST_FIXTURE_TEST_CASE (dummy_address_files, DummyAddressFileFixture) {
   const boost::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
 
   checkNodeTree(*lTopNode, nodeProperties);
+}
+
+
+BOOST_FIXTURE_TEST_CASE (address_description, DummyAddressFileFixture) {
+  const boost::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
+
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 1, 0), "node \"REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 2, 0), "node \"REG_READ_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 3, 0), "node \"REG_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 0), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 1), "2 nodes match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 2), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 4, 3), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 0), "nodes \"REG_MASKED_READ_ONLY\", \"REG_MASKED_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 1), "2 nodes match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 2), "nodes \"REG_MASKED_READ_ONLY\", \"REG_MASKED_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 5, 3), "nodes \"REG_MASKED_READ_ONLY\", \"REG_MASKED_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 0), "nodes \"REG_PARS\", \"REG_OUT_OF_ORDER\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 1), "2 nodes match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 2), "nodes \"REG_PARS\", \"REG_OUT_OF_ORDER\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 6, 3), "nodes \"REG_PARS\", \"REG_OUT_OF_ORDER\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 7, 0), "no matching nodes");
+
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x0fffff, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100000, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100001, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x100010, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x130000, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x13ffff, 0), "node \"MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x140000, 0), "no matching nodes");
+
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x200000, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210002, 0), "node \"SUBSYSTEM1.REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210003, 0), "node \"SUBSYSTEM1.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x210004, 0), "node \"SUBSYSTEM1.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x250002, 0), "node \"SUBSYSTEM1.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x250003, 0), "no matching nodes");
+
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270001, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270002, 0), "node \"SUBSYSTEM1.SUBMODULE.REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270003, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270004, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270102, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270103, 0), "no matching nodes");
+
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600000, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600001, 0), "node \"SUBSYSTEM3.DERIVEDNODE.REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600002, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600003, 0), "node \"SUBSYSTEM3.DERIVEDNODE.REG_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 0), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\" under \"SUBSYSTEM3.DERIVEDNODE\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 1), "2 nodes under \"SUBSYSTEM3.DERIVEDNODE\" match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 2), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\" under \"SUBSYSTEM3.DERIVEDNODE\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 3), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\" under \"SUBSYSTEM3.DERIVEDNODE\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600005, 0), "no matching nodes");
 }
 
 

@@ -47,23 +47,16 @@
 
 //!	Macro for simplifying the declaration and definition of derived exception types
 #define UHAL_DEFINE_DERIVED_EXCEPTION_CLASS( ClassName , BaseClassName, ClassDescription )\
- class ClassName : public BaseClassName {\
- public:\
- ClassName() : BaseClassName() {}\
- ClassName(const std::string& aMessage) : BaseClassName() {append(aMessage.c_str());}\
- void ThrowAsDerivedType_(){ throw ClassName(*this); } \
- exception* clone(){ return new ClassName(*this); } \
- protected:\
- std::string description() const throw() { return std::string( ClassDescription ); } \
+  class ClassName : public BaseClassName {\
+  public:\
+    ClassName() : BaseClassName() {}\
+    ClassName(const std::string& aMessage) : BaseClassName() {append(aMessage.c_str());}\
+    void throwAsDerivedType(){ throw ClassName(*this); } \
+  protected:\
+    std::string description() const throw() { return std::string( ClassDescription ); } \
 };
 
 #define UHAL_DEFINE_EXCEPTION_CLASS( ClassName , ClassDescription ) UHAL_DEFINE_DERIVED_EXCEPTION_CLASS(ClassName, uhal::exception::exception, ClassDescription)
-
-#define ExceptionClass UHAL_DEFINE_EXCEPTION_CLASS
-
-
-//!	Macro version of the member function to wrap the ThrowAsDerivedType but also tell the compiler that this function always throws
-#define ThrowAsDerivedType() ThrowAsDerivedType_(); throw 0;
 
 
 namespace uhal
@@ -73,19 +66,13 @@ namespace uhal
   namespace exception
   {
 
-    //! An abstract base exception class providing an interface to a throw/ThrowAsDerivedType mechanism which will allow us to catch the base type and ThrowAsDerivedType the derived type
+    //! An abstract base exception class, including an interface to throw as the derived type (for passing exceptions between threads)
     class exception : public std::exception
     {
       public:
-        /**
-        	Constructor
-        */
+
         exception ();
 
-        /**
-          Copy constructor
-        		  @param aExc an exception to copy
-        */
         exception ( const exception& aExc );
 
         /**
@@ -95,9 +82,6 @@ namespace uhal
         */
         exception& operator= ( const exception& aExc );
 
-        /**
-        	Destructor
-        */
         virtual ~exception() throw();
 
         /**
@@ -107,16 +91,8 @@ namespace uhal
         */
         virtual const char* what() const throw();
 
-        /**
-        	Function which casts a pointer from the base type of this object to a derived type of this object and rethrows as the derived type
-        */
-        virtual void ThrowAsDerivedType_() = 0;
-
-        /**
-        	Return a new object of the derived exception type cloned from this object
-        	@return a new object of the derived exception type
-        */
-        virtual exception* clone() = 0;
+        //!	Function which casts a pointer from the base type of this object to a derived type of this object and rethrows as the derived type
+        virtual void throwAsDerivedType() = 0;
 
         /**
         	Add additional information to the exception message
@@ -136,11 +112,8 @@ namespace uhal
         /// The time at which the exception was thrown
         timeval mTime;
 
-        /// Memory which the call to "what()" uses when formatting the output string
+        /// Memory into which message is added by calls to append
         char* mString;
-
-        /// Memory into which additional information is added by calls to append
-        char* mAdditionalInfo;
     };
 
   }

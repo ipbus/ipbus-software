@@ -680,6 +680,24 @@ namespace uhal
   }
 
 
+  std::vector<const Node*> Node::getLineage(const Node& aAncestor) const
+  {
+    std::vector<const Node*> lAncestors;
+    const Node* lAncestor = mParent;
+
+    do {
+      if (lAncestor == NULL)
+        throw std::runtime_error("Node '" + aAncestor.getPath() + "' is not an ancestor of '" + getPath() + "'");
+
+      lAncestors.push_back(lAncestor);
+      lAncestor = lAncestor->mParent;
+    }
+    while (lAncestors.back() != &aAncestor);
+
+    return std::vector<const Node*>(lAncestors.rbegin(), lAncestors.rend());
+  }
+
+
   Node::const_iterator::const_iterator() : mBegin ( NULL )
   {}
 

@@ -104,7 +104,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+      static uint32_t CalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
         Abstract interface of function to calculate the IPbus header for a particular protocol version
@@ -114,7 +114,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+      static uint32_t ExpectedHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
         Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -125,7 +125,7 @@ namespace uhal
         @param aInfoCode return the response status of the IPbus header
         @return whether extraction succeeded
       */
-      static bool ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+      static bool ExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
 
     protected:
@@ -138,7 +138,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
+      uint32_t implementCalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
 
       /**
         Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -149,7 +149,7 @@ namespace uhal
         @param aInfoCode return the response status of the IPbus header
         @return whether extraction succeeded
       */
-      bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+      bool implementExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
       //! Returns the InfoCode for request transactions in this IPbus version.
       uint8_t requestTransactionInfoCode () const
@@ -220,7 +220,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      static uint32_t CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+      static uint32_t CalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
         Abstract interface of function to calculate the IPbus header for a particular protocol version
@@ -230,7 +230,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      static uint32_t ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
+      static uint32_t ExpectedHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode = 0 );
 
       /**
         Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -241,7 +241,7 @@ namespace uhal
         @param aInfoCode return the response status of the IPbus header
         @return whether extraction succeeded
       */
-      static bool ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+      static bool ExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
 
     protected:
@@ -267,7 +267,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
+      uint32_t implementCalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode );
 
       /**
         Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -278,7 +278,7 @@ namespace uhal
         @param aInfoCode return the response status of the IPbus header
         @return whether extraction succeeded
       */
-      bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
+      bool implementExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode );
 
       //! Returns the InfoCode for request transactions in this IPbus version.
       uint8_t requestTransactionInfoCode () const

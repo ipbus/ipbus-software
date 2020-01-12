@@ -37,10 +37,12 @@
 #include <ostream>                              // for operator<<
 #include <stddef.h>                             // for NULL
 
+#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>                 // for shared_ptr
 #include <boost/thread/lock_guard.hpp>          // for lock_guard
 #include <boost/thread/mutex.hpp>               // for mutex
 
+#include "uhal/detail/utilities.hpp"
 #include "uhal/log/LogLevels.hpp"               // for BaseLogLevel, Debug
 #include "uhal/log/log.hpp"
 #include "uhal/log/log_inserters.integer.hpp"   // for Integer, _Integer
@@ -51,42 +53,67 @@
 namespace uhal
 {
 
-  std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType )
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::IPbusTransactionType& aIPbusTransactionType )
   {
     switch ( aIPbusTransactionType )
     {
       case uhal::B_O_T:
-        aStr << "\"Byte Order Transaction\"";
+        aStr << "Byte order transaction";
         break;
       case uhal::R_A_I:
-        aStr << "\"Reserved Address Information\"";
+        aStr << "Reserved address information transaction";
         break;
       case uhal::NI_READ:
-        aStr << "\"Non-incrementing Read\"";
+        aStr << "Non-incrementing read";
         break;
       case uhal::READ:
-        aStr << "\"Incrementing Read\"";
+        aStr << "Incrementing read";
         break;
       case uhal::NI_WRITE:
-        aStr << "\"Non-incrementing Write\"";
+        aStr << "Non-incrementing write";
         break;
       case uhal::WRITE:
-        aStr << "\"Incrementing Write\"";
+        aStr << "Incrementing write";
         break;
       case uhal::RMW_SUM:
-        aStr << "\"Read-Modify-Write Sum\"";
+        aStr << "Read-Modify-Write sum transaction";
         break;
       case uhal::RMW_BITS:
-        aStr << "\"Read-Modify-Write Bits\"";
+        aStr << "Read-Modify-Write bits";
         break;
       case uhal::CONFIG_SPACE_READ:
-        aStr << "\"Configuration space read\"";
+        aStr << "Configuration space read";
         break;
     }
 
     return aStr;
   }
 
+
+  namespace exception
+  {
+
+    IPbusCoreResponseCodeSet::IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t aId, IPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets)
+    {
+      std::ostringstream lOSS;
+      lOSS << "Bad response code (0x" << std::hex << aResponseCode << " = '" << aResponseMsg << "') received for ";
+      lOSS << aType << " at base address 0x" << aBaseAddress << " (";
+      if (aWordCount != 0)
+        lOSS << "offset 0x" << aWordCount << ", ";
+      lOSS << detail::getAddressDescription(aClient, aBaseAddress + ( (aType == NI_READ) or (aType == NI_WRITE) ? 0 : aWordCount) , 5) << "). ";
+      lOSS << " URI: \"" << aClient.uri() << "\". Sent/received headers: 0x" << aHeaders.first << " / 0x" << aHeaders.second;
+      lOSS << " (" << std::dec << aPacketOffsets.first << "/" << aPacketOffsets.second << " bytes into IPbus payload)";
+
+      log(Error(), lOSS.str());
+      append(lOSS.str().c_str());
+    }
+
+    std::string IPbusCoreResponseCodeSet::description() const throw ()
+    {
+      return "Exception class to handle the case where the IPbus transaction header response code indicated an error.";
+    }
+
+  }
 
 
   IPbusCore::IPbusCore ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod ) :
@@ -121,7 +148,7 @@ namespace uhal
     const uint8_t* lSendBufferFirstByte = aSendBufferStart;
     uint32_t lNrSendBytesProcessed = 0;
     uint32_t lNrReplyBytesValidated = 0;
-    eIPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
+    IPbusTransactionType lSendIPbusTransactionType , lReplyIPbusTransactionType;
     uint32_t lSendWordCount , lReplyWordCount;
     uint32_t lSendTransactionId , lReplyTransactionId;
     uint8_t lSendResponseGood , lReplyResponseGood;
@@ -175,18 +202,15 @@ namespace uhal
 
       if ( lReplyResponseGood )
       {
-        uhal::exception::IPbusCoreResponseCodeSet* lExc = new uhal::exception::IPbusCoreResponseCodeSet();
-        log ( *lExc , "Transaction header returned from URI " , Quote ( this->uri() ) , ", " ,
-              Integer ( * ( ( uint32_t* ) ( aReplyStartIt->first ) ), IntFmt< hex , fixed >() ),
-              " (ID = " , Integer ( lReplyTransactionId, IntFmt< hex , fixed >() ) ,
-              ", type = " , lReplyIPbusTransactionType ,
-              ", word count = " , Integer ( lReplyWordCount ) ,
-              ") has response field = " , Integer ( lReplyResponseGood, IntFmt< hex , fixed >() ) ,
-              " = '", TranslatedFmt<uint8_t>(lReplyResponseGood, getInfoCodeTranslator()) , "' indicating an error (" ,
-              Integer ( lNrReplyBytesValidated+1 ) , " bytes into IPbus reply payload)" );
-        log ( *lExc , "Original sent header was ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart ) ), IntFmt< hex , fixed >() ) ,
-                      ", for base address ", Integer ( * ( ( uint32_t* ) ( aSendBufferStart+4 ) ), IntFmt< hex , fixed >() ), 
-                      ", " , Integer ( lNrSendBytesProcessed+1 ) , " bytes into IPbus send payload" );
+        const uint32_t lSentHeader( * ( ( uint32_t* ) ( aSendBufferStart ) ) );
+        const uint32_t lRecvHeader( * ( ( uint32_t* ) ( aReplyStartIt->first ) ) );
+        const uint32_t lBaseAddr( * ( ( uint32_t* ) ( aSendBufferStart+4 ) ) );
+
+        exception::exception* lExc = new exception::IPbusCoreResponseCodeSet(*this,
+          lReplyTransactionId, lReplyIPbusTransactionType, lReplyWordCount, lReplyResponseGood,
+          boost::lexical_cast<std::string>(TranslatedFmt<uint8_t>(lReplyResponseGood, getInfoCodeTranslator())),
+          lBaseAddr, std::pair<uint32_t, uint32_t>(lSentHeader, lRecvHeader),
+          std::pair<uint32_t, uint32_t>(lNrSendBytesProcessed+1, lNrReplyBytesValidated+1) );
         return lExc;
       }
 
@@ -308,7 +332,7 @@ namespace uhal
     uint32_t lReplyByteCount ( 1 << 2 );
     uint32_t lSendBytesAvailable;
     uint32_t  lReplyBytesAvailable;
-    eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? WRITE : NI_WRITE );
+    IPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? WRITE : NI_WRITE );
     int32_t lPayloadByteCount ( aSource.size() << 2 );
     uint8_t* lSourcePtr ( ( uint8_t* ) ( aSource.empty() ? NULL : & ( aSource.at ( 0 ) ) ) );
     uint32_t lAddr ( aAddr );
@@ -389,7 +413,7 @@ namespace uhal
     uint32_t  lReplyBytesAvailable;
     std::pair < ValVector<uint32_t> , _ValVector_<uint32_t>* > lReply ( CreateValVector ( aSize ) );
     uint8_t* lReplyPtr = ( uint8_t* ) ( aSize == 0 ? NULL : & ( lReply.second->value.at(0) ) );
-    eIPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
+    IPbusTransactionType lType ( ( aMode == defs::INCREMENTAL ) ? READ : NI_READ );
     int32_t lPayloadByteCount ( aSize << 2 );
     uint32_t lAddr ( aAddr );
     boost::shared_ptr< Buffers > lBuffers;

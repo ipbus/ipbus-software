@@ -41,9 +41,10 @@
 #define _uhal_Node_hpp_
 
 
-#include <vector>
-#include <string>
 #include <iterator>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "boost/unordered_map.hpp"
 
@@ -313,6 +314,9 @@ namespace uhal
       	@return the IPbus client that will be used to issue a dispatch
       */
       ClientInterface& getClient() const;
+
+      //! Returns ancestry path of nodes from (but not including) aAncestor to this node
+      std::vector<const Node*> getLineage(const Node& aAncestor) const;
 
     private:
 

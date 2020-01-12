@@ -50,6 +50,8 @@ protected:
   AbstractFixture() {}
   virtual ~AbstractFixture() {}
 
+  static std::string getAddressFileURI();
+
 public:
   static std::string connectionFileURI;
   // HW client timeout in milliseconds

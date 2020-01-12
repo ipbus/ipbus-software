@@ -70,7 +70,7 @@ namespace uhal
   	Enumerated type to define the IPbus transaction type.
   	Note that they are stored here as (raw_type << 3) so that the LSL operation does not need to be performed every time a new transaction is created
   */
-  enum eIPbusTransactionType
+  enum IPbusTransactionType
   {
     B_O_T,
     READ,
@@ -84,12 +84,12 @@ namespace uhal
   };
 
   /**
-    Streaming operator for formatting objects of the uhal::eIPbusTransactionType
+    Streaming operator for formatting objects of the uhal::IPbusTransactionType
     @param aStr a stream to which to append the formatted data
     @param aIPbusTransactionType an enum object to be formatted
     @return a reference to the stream for chaining stram calls
   */
-  std::ostream& operator<< ( std::ostream& aStr , const uhal::eIPbusTransactionType& aIPbusTransactionType );
+  std::ostream& operator<< ( std::ostream& aStr , const uhal::IPbusTransactionType& aIPbusTransactionType );
 }
 
 
@@ -99,11 +99,16 @@ namespace uhal
   {
     //! Exception class to handle the case where the IPbus header could not be parsed.
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreUnparsableTransactionHeader , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header could not be parsed." )
-    //     UHAL_DEFINE_EXCEPTION_CLASS ( IPbusCoreZeroSizeTransaction , "Exception class to handle the case where a transaction of size zero was requested." )
-    //! Exception class to handle the case where the IPbus transaction header response code indicated an error.
-    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusCoreResponseCodeSet , TransactionLevelError, "Exception class to handle the case where the IPbus transaction header response code indicated an error." )
     //! Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned.
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( IPbusTransactionFieldsIncorrect , TransactionLevelError, "Exception class to handle the case where an incorrect value for the IPbus transaction type and/or ID was returned." )
+
+    class IPbusCoreResponseCodeSet : public TransactionLevelError {
+    public:
+      IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t aId, IPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets);
+
+      std::string description() const throw();
+    };
+
   }
 
 
@@ -223,7 +228,7 @@ namespace uhal
         @param aInfoCode the response status of the transaction
         @return an IPbus header
       */
-      virtual uint32_t implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode ) = 0;
+      virtual uint32_t implementCalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode ) = 0;
 
       /**
         Abstract interface of function to parse an IPbus header for a particular protocol version
@@ -234,7 +239,7 @@ namespace uhal
         @param aInfoCode return the response status of the IPbus header
         @return whether extraction succeeded
       */
-      virtual bool implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode ) = 0;
+      virtual bool implementExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode ) = 0;
 
       //! Returns the InfoCode for request transactions in this IPbus version.
       virtual uint8_t requestTransactionInfoCode() const = 0;

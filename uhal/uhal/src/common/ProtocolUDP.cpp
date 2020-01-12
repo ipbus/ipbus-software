@@ -108,7 +108,7 @@ namespace uhal
     if ( mAsynchronousException )
     {
       log ( *mAsynchronousException , "Rethrowing Asynchronous Exception from 'implementDispatch' method of " , Type<UDP< InnerProtocol > >() );
-      mAsynchronousException->ThrowAsDerivedType();
+      mAsynchronousException->throwAsDerivedType();
     }
 
     if ( ! mSocket.is_open() )
@@ -433,7 +433,7 @@ namespace uhal
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
     if ( mAsynchronousException )
     {
-      mAsynchronousException->ThrowAsDerivedType();
+      mAsynchronousException->throwAsDerivedType();
     }
   }
 

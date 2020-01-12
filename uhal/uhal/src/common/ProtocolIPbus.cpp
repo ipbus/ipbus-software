@@ -105,7 +105,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 1 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  uint32_t IPbus< 1 , IPbus_minor >::CalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -148,14 +148,14 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 1 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 1 , IPbus_minor >::ExpectedHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     return ( IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode | 0x4 ) );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 1 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 1 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -204,14 +204,14 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 1 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  uint32_t IPbus< 1 , IPbus_minor >::implementCalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     return IPbus< 1 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 1 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 1 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     return IPbus< 1 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }
@@ -310,7 +310,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 2 , IPbus_minor >::CalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 2 , IPbus_minor >::CalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     uint8_t lType ( 0x00 );
 
@@ -356,14 +356,14 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 2 , IPbus_minor >::ExpectedHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
+  uint32_t IPbus< 2 , IPbus_minor >::ExpectedHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId, const uint8_t& aInfoCode )
   {
     return ( IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode ) );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 2 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 2 , IPbus_minor >::ExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     uint32_t lProtocolVersion ( ( aHeader >> 28 ) & 0xF );
 
@@ -409,14 +409,14 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  uint32_t IPbus< 2 , IPbus_minor >::implementCalculateHeader ( const eIPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
+  uint32_t IPbus< 2 , IPbus_minor >::implementCalculateHeader ( const IPbusTransactionType& aType , const uint32_t& aWordCount , const uint32_t& aTransactionId , const uint8_t& aInfoCode )
   {
     return IPbus< 2 , IPbus_minor >::CalculateHeader ( aType , aWordCount , aTransactionId , aInfoCode );
   }
 
 
   template< uint8_t IPbus_minor >
-  bool IPbus< 2 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , eIPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
+  bool IPbus< 2 , IPbus_minor >::implementExtractHeader ( const uint32_t& aHeader , IPbusTransactionType& aType , uint32_t& aWordCount , uint32_t& aTransactionId , uint8_t& aInfoCode )
   {
     return IPbus< 2 , IPbus_minor >::ExtractHeader ( aHeader , aType , aWordCount , aTransactionId , aInfoCode );
   }

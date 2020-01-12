@@ -173,7 +173,7 @@ void PCIe::File::createBuffer(const size_t aNrBytes)
     if (mBufferSize >= aNrBytes)
       return;
     else {
-      delete mBuffer;
+      free(mBuffer);
       mBuffer = NULL;
       mBufferSize = 0;
     }
@@ -814,7 +814,7 @@ void PCIe::read()
 
   if ( mAsynchronousException )
   {
-    mAsynchronousException->ThrowAsDerivedType();
+    mAsynchronousException->throwAsDerivedType();
   }
 }
 
