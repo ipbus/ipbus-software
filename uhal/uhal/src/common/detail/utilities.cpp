@@ -63,17 +63,15 @@ namespace uhal {
       std::vector<const Node*> lCommonAncestorLineage = lCommonAncestor->getLineage(aNode);
 
       for ( std::vector<const Node*>::const_iterator lIt = lMatches.begin()+1; lIt != lMatches.end(); lIt++ ) {
-        std::vector<const Node*> lLineage = (*lIt)->getLineage(aNode);
-        lLineage.push_back(*lIt);
+        const std::vector<const Node*> lLineage = (*lIt)->getLineage(aNode);
 
         size_t i = 0;
         for ( ; i < std::min(lLineage.size(), lCommonAncestorLineage.size()); i++ ) {
           if ( lCommonAncestorLineage.at(i) != lLineage.at(i) )
             break;
-
-          lCommonAncestor = lLineage.at(i);
         }
-        lCommonAncestorLineage.assign(lLineage.begin(), lLineage.begin() + i + 1);
+        lCommonAncestor = lLineage.at(i - 1);
+        lCommonAncestorLineage.assign(lLineage.begin(), lLineage.begin() + i);
       }
 
       if ( (aMaxListSize != 0) and (lMatches.size() > aMaxListSize) )
@@ -81,15 +79,16 @@ namespace uhal {
         if ( lCommonAncestor == &aNode )
           return boost::lexical_cast<std::string>(lMatches.size()) + " nodes match";
         else
-          return boost::lexical_cast<std::string>(lMatches.size()) + " descendants of node \"" + lCommonAncestor->getPath() + "\" match";
+          return boost::lexical_cast<std::string>(lMatches.size()) + " nodes under \"" + lCommonAncestor->getPath() + "\" match";
       }
       else
       {
         const std::string lCommonAncestorPath(lCommonAncestor->getPath());
+        const size_t lCommonPathLength(lCommonAncestor == &aNode ? 0 : lCommonAncestorPath.size() + 1);
         std::ostringstream lOSS;
-        lOSS << "nodes \"" << lMatches.front()->getPath().substr(lCommonAncestorPath.size()) << "\"";
+        lOSS << "nodes \"" << lMatches.front()->getPath().substr(lCommonPathLength) << "\"";
         for (std::vector<const Node*>::const_iterator lIt = lMatches.begin() + 1; lIt < lMatches.end(); lIt++)
-          lOSS << ", \"" << (*lIt)->getPath().substr(lCommonAncestorPath.size()) << "\"";
+          lOSS << ", \"" << (*lIt)->getPath().substr(lCommonPathLength) << "\"";
 
         if (lCommonAncestor != &aNode)
           lOSS << " under \"" << lCommonAncestorPath << "\"";

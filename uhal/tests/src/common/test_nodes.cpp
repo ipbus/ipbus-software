@@ -205,7 +205,7 @@ DummyAddressFileFixture::DummyAddressFileFixture() :
   nodeProperties.back().tags = "test";
 
   nodeProperties.push_back(NodeProperties("SMALL_MEM", 0x400000, defs::INCREMENTAL, defs::READWRITE, 256, addrFileAbsPath, 0));
-  nodeProperties.push_back(NodeProperties("LARGE_MEM", 0x500000, defs::INCREMENTAL, defs::READWRITE, 26214400, addrFileAbsPath, 0));
+  nodeProperties.push_back(NodeProperties("LARGE_MEM", 0x1000000, defs::INCREMENTAL, defs::READWRITE, 26214400, addrFileAbsPath, 0));
 
   nodeProperties.push_back(NodeProperties("SUBSYSTEM3", 0x600000, defs::HIERARCHICAL, defs::READWRITE, 1, addrFileAbsPath, 28));
 
@@ -598,6 +598,16 @@ BOOST_FIXTURE_TEST_CASE (address_description, DummyAddressFileFixture) {
   BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270004, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
   BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270102, 0), "node \"SUBSYSTEM1.SUBMODULE.MEM\"");
   BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x270103, 0), "no matching nodes");
+
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600000, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600001, 0), "node \"SUBSYSTEM3.DERIVEDNODE.REG\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600002, 0), "no matching nodes");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600003, 0), "node \"SUBSYSTEM3.DERIVEDNODE.REG_WRITE_ONLY\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 0), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\" under \"SUBSYSTEM3.DERIVEDNODE\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 1), "2 nodes under \"SUBSYSTEM3.DERIVEDNODE\" match");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 2), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\" under \"SUBSYSTEM3.DERIVEDNODE\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600004, 3), "nodes \"REG_UPPER_MASK\", \"REG_LOWER_MASK\" under \"SUBSYSTEM3.DERIVEDNODE\"");
+  BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0x600005, 0), "no matching nodes");
 }
 
 
