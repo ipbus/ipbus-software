@@ -129,10 +129,6 @@ namespace uhal
     }
     else if (lIt->second.userDefined)
     {
-      // std::cout << "  ----- ACTIVATION LIST: START -----" << std::endl;
-      // for (std::vector<std::string>::const_iterator lIt=aUserClientActivationList.begin(); lIt != aUserClientActivationList.end(); lIt++)
-      //   std::cout << " * " << std::endl;
-      // std::cout << "  ----- ACTIVATION LIST"
       std::vector<std::string>::const_iterator lIt2 = std::find(aUserClientActivationList.begin(), aUserClientActivationList.end(), lUri.mProtocol);
 
       if (lIt2 == aUserClientActivationList.end()) {

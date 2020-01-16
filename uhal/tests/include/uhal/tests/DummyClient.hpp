@@ -3,7 +3,6 @@
 
 #include "uhal/ClientInterface.hpp"
 
-#include "uhal/log/log.hpp"
 #include <iostream>
 
 
