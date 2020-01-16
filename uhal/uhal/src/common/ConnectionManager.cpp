@@ -79,6 +79,7 @@ namespace uhal
     aSuccess=true;
   }
 
+
   bool ConnectionManager::ConnectionDescriptor::operator== ( const ConnectionDescriptor& aConnectionDescriptor ) const
   {
     if ( id != aConnectionDescriptor.id )
@@ -102,8 +103,6 @@ namespace uhal
 
 
 
-
-  // Given a glob expression, parse all the files matching it (e.g. $BUILD/config/*.xml). If one parsing fails throw an exception and return filename and line number
   ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr )
   {
     //Mutex lock here to be on the safe side
@@ -118,15 +117,26 @@ namespace uhal
   }
 
 
+  ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr , const std::vector<std::string>& aUserClientActivationList ) :
+    mUserClientActivationList(aUserClientActivationList)
+  {
+    //Mutex lock here to be on the safe side
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    std::vector< std::pair<std::string, std::string> >  lConnectionFiles; //protocol, filename
+    uhal::utilities::ParseSemicolonDelimitedUriList ( aFilenameExpr , lConnectionFiles );
+
+    for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = lConnectionFiles.begin() ; lIt != lConnectionFiles.end() ; ++lIt )
+    {
+      uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , boost::bind ( &ConnectionManager::CallBack, boost::ref ( *this ) , _1 , _2 , _3 ) );
+    }
+  }
+
+
   ConnectionManager::~ConnectionManager ()
   {
   }
 
 
-  /*
-  	Retrieves protocol, host, and port from the connection file to create the ClientInterface.
-  	Retrieves the address table file from the connection file to create the HwInterface.
-  */
   HwInterface ConnectionManager::getDevice ( const std::string& aId )
   {
     //We need a mutex lock here to protect access to the NodeTreeBuilder and the ClientFactory
@@ -151,12 +161,11 @@ namespace uhal
     //The node tree builder returns a newly created Node which we can safely wrap as a shared_ptr
     boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
-    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri ) );
+    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri , mUserClientActivationList ) );
     return HwInterface ( lClientInterface , lNode );
   }
 
 
-  //Static method for building device on the fly
   HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr )
   {
     //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
@@ -168,7 +177,17 @@ namespace uhal
   }
 
 
-  //Given a regex return the ids that match the
+  HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr, const std::vector<std::string>& aUserClientActivationList )
+  {
+    //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
+    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
+    log ( Info() , "ConnectionManager created node tree: " , *lNode );
+    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri , aUserClientActivationList ) );
+    return HwInterface ( lClientInterface , lNode );
+  }
+
+
   std::vector<std::string> ConnectionManager::getDevices ( ) const
   {
     std::vector<std::string> lDevices;

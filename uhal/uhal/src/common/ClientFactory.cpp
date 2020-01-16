@@ -32,6 +32,7 @@
 
 #include "uhal/ClientFactory.hpp"
 
+#include <algorithm>
 
 #include <boost/spirit/include/qi.hpp>
 
@@ -67,17 +68,17 @@ namespace uhal
     {
       mInstance.reset(new ClientFactory());
       // ---------------------------------------------------------------------
-      mInstance->add< UDP< IPbus< 1 , 3 > > > ( "ipbusudp-1.3" , "Direct access to hardware via UDP, using IPbus version 1.3" );
-      mInstance->add< UDP< IPbus< 2 , 0 > > > ( "ipbusudp-2.0" , "Direct access to hardware via UDP, using IPbus version 2.0" );
+      mInstance->add< UDP< IPbus< 1 , 3 > > > ( "ipbusudp-1.3" , "Direct access to hardware via UDP, using IPbus version 1.3", false );
+      mInstance->add< UDP< IPbus< 2 , 0 > > > ( "ipbusudp-2.0" , "Direct access to hardware via UDP, using IPbus version 2.0", false );
       // ---------------------------------------------------------------------
-      mInstance->add< TCP< IPbus< 1 , 3 > , 1 > > ( "ipbustcp-1.3" , "Direct access to hardware via TCP, using IPbus version 1.3" );
-      mInstance->add< TCP< IPbus< 2 , 0 > , 1 > > ( "ipbustcp-2.0" , "Direct access to hardware via TCP, using IPbus version 2.0" );
+      mInstance->add< TCP< IPbus< 1 , 3 > , 1 > > ( "ipbustcp-1.3" , "Direct access to hardware via TCP, using IPbus version 1.3", false );
+      mInstance->add< TCP< IPbus< 2 , 0 > , 1 > > ( "ipbustcp-2.0" , "Direct access to hardware via TCP, using IPbus version 2.0", false );
       // ---------------------------------------------------------------------
-      mInstance->add< TCP< ControlHub < IPbus< 1 , 3 > > , 3 > > ( "chtcp-1.3", "Hardware access via the Control Hub, using IPbus version 1.3" );
-      mInstance->add< TCP< ControlHub < IPbus< 2 , 0 > > , 3 > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0" );
+      mInstance->add< TCP< ControlHub < IPbus< 1 , 3 > > , 3 > > ( "chtcp-1.3", "Hardware access via the Control Hub, using IPbus version 1.3", false );
+      mInstance->add< TCP< ControlHub < IPbus< 2 , 0 > > , 3 > > ( "chtcp-2.0", "Hardware access via the Control Hub, using IPbus version 2.0", false );
       // ---------------------------------------------------------------------
-      mInstance->add< PCIe > ( "ipbuspcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0" );
-      mInstance->add< Mmap > ( "ipbusmmap-2.0" , "Direct access to hardware via mmap, using IPbus version 2.0" );
+      mInstance->add< PCIe > ( "ipbuspcie-2.0" , "Direct access to hardware via PCIe, using IPbus version 2.0", false );
+      mInstance->add< Mmap > ( "ipbusmmap-2.0" , "Direct access to hardware via mmap, using IPbus version 2.0", false );
       // ---------------------------------------------------------------------
 
     }
@@ -87,6 +88,12 @@ namespace uhal
 
 
   boost::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri )
+  {
+    return getClient(aId, aUri, std::vector<std::string>());
+  }
+
+
+  boost::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri, const std::vector<std::string>& aUserClientActivationList )
   {
     URI lUri;
 
@@ -105,23 +112,33 @@ namespace uhal
     }
 
     log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
-    boost::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( lUri.mProtocol );
+    boost::unordered_map< std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( lUri.mProtocol );
 
-    if ( lIt == mCreators.end() )
+    if ( lIt == mClientMap.end() )
     {
       std::stringstream lStr;
 
-      for ( std::map< std::string , std::string >::const_iterator lIt = mProductDescriptions.begin() ; lIt != mProductDescriptions.end() ; ++lIt )
+      for (lIt = mClientMap.begin() ; lIt != mClientMap.end() ; ++lIt )
       {
-        lStr << "\n > " << lIt->first << "\t: " << lIt->second;
+        lStr << "\n > " << lIt->first << "\t: " << lIt->second.description;
       }
 
       exception::ProtocolDoesNotExist lExc;
       log ( lExc , "Protocol " , Quote ( lUri.mProtocol ) , " does not exists in map of creators. Options are:" , lStr.str() );
       throw lExc;
     }
+    else if (lIt->second.userDefined)
+    {
+      std::vector<std::string>::const_iterator lIt2 = std::find(aUserClientActivationList.begin(), aUserClientActivationList.end(), lUri.mProtocol);
 
-    return lIt->second->create ( aId , lUri );
+      if (lIt2 == aUserClientActivationList.end()) {
+        exception::ProtocolNotEnabled lExc;
+        log ( lExc , "Protocol " , Quote ( lUri.mProtocol ) , " with user-defined client is not activated");
+        throw lExc;
+      }
+    }
+
+    return lIt->second.creator->create ( aId , lUri );
   }
 
 }

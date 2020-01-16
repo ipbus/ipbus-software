@@ -35,18 +35,36 @@ namespace uhal
 {
 
   template <class T>
-  void ClientFactory::add ( const std::string& aProtocol , const std::string& aDescription )
+  bool ClientFactory::RegistrationHelper<T>::init(const std::string& aUri, const std::string& aDescription)
   {
-    boost::unordered_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aProtocol ) ;
+    ClientFactory::getInstance().registerClient<T>(aUri, aDescription);
+    return true;
+  }
 
-    if ( lIt != mCreators.end() )
+
+  template <class T>
+  void ClientFactory::add ( const std::string& aProtocol , const std::string& aDescription, bool aUserDefined )
+  {
+    boost::unordered_map<std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( aProtocol ) ;
+
+    if ( lIt != mClientMap.end() )
     {
       log ( Warning() , "Protocol \"" , aProtocol , "\" already exists in map of creators. Continuing for now, but be warned." );
       return;
     }
 
-    mCreators[aProtocol] =  boost::shared_ptr<CreatorInterface> ( new Creator<T>() );
-    mProductDescriptions.insert ( std::make_pair ( aProtocol , aDescription ) );
+    ClientInfo lClientInfo;
+    lClientInfo.creator.reset( new Creator<T>() );
+    lClientInfo.userDefined = aUserDefined;
+    lClientInfo.description = aDescription;
+    mClientMap[aProtocol] = lClientInfo;
+  }
+
+
+  template <class T>
+  void ClientFactory::registerClient ( const std::string& aProtocol , const std::string& aDescription )
+  {
+    add<T>(aProtocol, aDescription, true);
   }
 
 
@@ -55,6 +73,5 @@ namespace uhal
   {
     return boost::shared_ptr<ClientInterface> ( new T ( aId , aUri ) );
   }
-
 
 }
