@@ -48,7 +48,6 @@ Libraries = pthread \
 		cactus_uhal_log
 
 #-DNO_PREEMPTIVE_DISPATCH
-#-D THROW_ON_ADDRESS_SPACE_OVERLAP
 
 # NOTE: Adding this flag is a dirty hack to make uhal/uhal compile on
 # OS X. The fact that this is necessary really means the code is

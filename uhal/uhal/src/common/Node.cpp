@@ -173,15 +173,13 @@ namespace uhal
 
   Node::const_iterator Node::begin() const
   {
-    Node::const_iterator lIt ( this );
-    return lIt;
+    return Node::const_iterator ( this );
   }
 
 
   Node::const_iterator Node::end() const
   {
-    Node::const_iterator lIt;
-    return lIt;
+    return Node::const_iterator();
   }
 
 
