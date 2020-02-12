@@ -647,18 +647,17 @@ namespace uhal
     lReport << std::hex << std::setfill ( '0' );
     const Node* lNode1, *lNode2;
 
-    for (Node::const_iterator lIt = ++aNode->begin() ; lIt != aNode->end() ; ++lIt )
+    for (Node::const_iterator lIt = aNode->begin() ; lIt.next() ; )
     {
       lNode1 = &*lIt;
       Node::const_iterator lIt2 = lIt;
-      lIt2++;
 
       if ( lNode1->mMode == defs::INCREMENTAL )
       {
         uint32_t lBottom1 ( lNode1->mAddr );
         uint32_t lTop1 ( lNode1->mAddr + ( lNode1->mSize - 1 ) );
 
-        for ( ; lIt2 != aNode->end() ; ++lIt2 )
+        for ( ; lIt2.next() ; )
         {
           lNode2 = &*lIt2;
 
@@ -675,9 +674,6 @@ namespace uhal
                       << "] which overlaps with branch '" << lNode2->getPath()
                       << "' which has address range [0x"  << std::setw ( 8 )  <<  lBottom2  << " - 0x" << std::setw ( 8 ) <<  lTop2
                       << "]." << std::endl;
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-              throw exception::AddressSpaceOverlap();
-#endif
             }
           }
           else if ( lNode2->mMode != defs::HIERARCHICAL )
@@ -692,9 +688,6 @@ namespace uhal
                       << "] which overlaps with branch '" << lNode2->getPath()
                       << "' which has address 0x"  << std::setw ( 8 ) << lAddr2
                       << "." << std::endl;
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-              throw exception::AddressSpaceOverlap();
-#endif
             }
           }
         }
@@ -703,7 +696,7 @@ namespace uhal
       {
         uint32_t lAddr1 ( lNode1->mAddr );
 
-        for ( ; lIt2 != aNode->end() ; ++lIt2 )
+        for ( ; lIt2.next() ; )
         {
           lNode2 = &*lIt2;
 
@@ -720,9 +713,6 @@ namespace uhal
                       <<" which overlaps with branch '" << lNode2->getPath()
                       <<"' which has address range [0x"   << std::setw ( 8 ) << lBottom2 << " - 0x"   << std::setw ( 8 ) << lTop2
                       << "]."<< std::endl;
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-              throw exception::AddressSpaceOverlap();
-#endif
             }
           }
           else if ( lNode2->mMode != defs::HIERARCHICAL )
@@ -771,9 +761,6 @@ namespace uhal
                           << "' which has address 0x" << std::setw ( 8 ) << lAddr2
                           << " and mask 0x" << std::setw ( 8 ) << lNode2->mMask
                           << "." << std::endl;
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-                  throw exception::AddressSpaceOverlap();
-#endif
                 }
               }
             }

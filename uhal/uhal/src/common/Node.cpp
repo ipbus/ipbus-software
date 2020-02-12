@@ -173,15 +173,13 @@ namespace uhal
 
   Node::const_iterator Node::begin() const
   {
-    Node::const_iterator lIt ( this );
-    return lIt;
+    return Node::const_iterator ( this );
   }
 
 
   Node::const_iterator Node::end() const
   {
-    Node::const_iterator lIt;
-    return lIt;
+    return Node::const_iterator();
   }
 
 
@@ -698,15 +696,19 @@ namespace uhal
   }
 
 
-  Node::const_iterator::const_iterator() : mBegin ( NULL )
+  Node::const_iterator::const_iterator() :
+    mBegin ( NULL )
   {}
 
 
-  Node::const_iterator::const_iterator ( const Node* aBegin ) : mBegin ( aBegin )
+  Node::const_iterator::const_iterator ( const Node* aBegin ) :
+    mBegin ( aBegin )
   {}
 
 
-  Node::const_iterator::const_iterator ( const const_iterator& aOrig ) : mBegin ( aOrig.mBegin ) , mItStack ( aOrig.mItStack )
+  Node::const_iterator::const_iterator ( const const_iterator& aOrig ) :
+    mBegin ( aOrig.mBegin ) ,
+    mItStack ( aOrig.mItStack )
   {}
 
 
@@ -728,7 +730,7 @@ namespace uhal
 
   const Node& Node::const_iterator::value() const
   {
-    return ( mItStack.size() ) ? ( **mItStack[0] ) : ( *mBegin );
+    return ( mItStack.empty() ) ? ( *mBegin ) : ( **mItStack.front() );
   }
 
 
@@ -755,7 +757,7 @@ namespace uhal
       return false;
     }
 
-    if ( ! mItStack.size() )
+    if ( mItStack.empty() )
     {
       //We have just started and have no stack...
       if ( mBegin->mChildren.size() )
@@ -771,17 +773,17 @@ namespace uhal
     }
 
     //We are already in the tree...
-    if ( ( **mItStack[0] ).mChildren.size() )
+    if ( not ( **mItStack.front() ).mChildren.empty() )
     {
       // Entry has children, recurse...
-      mItStack.push_front ( ( **mItStack[0] ).mChildren.begin() );
+      mItStack.push_front ( ( **mItStack.front() ).mChildren.begin() );
       return true;
     }
 
     // No children so go to the next entry on this level
-    while ( mItStack.size() )
+    while ( not mItStack.empty() )
     {
-      if ( ++ ( mItStack[0] ) != ( ( mItStack.size() == 1 ) ? ( *mBegin ) : ( **mItStack[1] ) ).mChildren.end() )
+      if ( ++ ( mItStack.front() ) != ( ( mItStack.size() == 1 ) ? ( *mBegin ) : ( **mItStack.at(1) ) ).mChildren.end() )
       {
         // Next entry on this level is valid - return
         return true;

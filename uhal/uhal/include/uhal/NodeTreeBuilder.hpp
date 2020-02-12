@@ -72,11 +72,6 @@ namespace uhal
     //! Exception class to handle the case where a memory block has a size which would exceed the available register space.
     UHAL_DEFINE_EXCEPTION_CLASS ( ArraySizeExceedsRegisterBound , "Exception class to handle the case where a memory block has a size which would exceed the available register space." )
 
-#ifdef THROW_ON_ADDRESS_SPACE_OVERLAP
-    //! Exception class to handle the case where two addresses overlap.
-    UHAL_DEFINE_EXCEPTION_CLASS ( AddressSpaceOverlap , "Exception class to handle the case where two addresses overlap." )
-#endif
-
     //! Exception class to handle the case when someone tries to give a block access node a child.
     UHAL_DEFINE_EXCEPTION_CLASS ( BlockAccessNodeCannotHaveChild , "Exception class to handle the case when someone tries to give a block access node a child." )
 

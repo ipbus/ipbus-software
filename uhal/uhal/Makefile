@@ -10,7 +10,7 @@ PackageName = cactuscore-uhal-uhal
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 7
-PACKAGE_VER_PATCH = 0
+PACKAGE_VER_PATCH = 1
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageSummary = uHAL Library
@@ -48,7 +48,6 @@ Libraries = pthread \
 		cactus_uhal_log
 
 #-DNO_PREEMPTIVE_DISPATCH
-#-D THROW_ON_ADDRESS_SPACE_OVERLAP
 
 # NOTE: Adding this flag is a dirty hack to make uhal/uhal compile on
 # OS X. The fact that this is necessary really means the code is
