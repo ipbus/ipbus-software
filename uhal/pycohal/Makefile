@@ -10,7 +10,7 @@ PackageName = cactuscore-uhal-pycohal
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 7
-PACKAGE_VER_PATCH = 1
+PACKAGE_VER_PATCH = 2
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageDescription = Python bindings for the uHAL library
