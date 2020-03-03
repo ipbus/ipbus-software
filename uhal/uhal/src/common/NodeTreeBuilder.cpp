@@ -340,7 +340,7 @@ namespace uhal
 
   void NodeTreeBuilder::setUid ( const bool& aRequireId , const pugi::xml_node& aXmlNode , Node* aNode )
   {
-    const bool lHasId = uhal::utilities::GetXMLattribute<true> ( aXmlNode , NodeTreeBuilder::mIdAttribute , aNode->mUid );
+    const bool lHasId = uhal::utilities::GetXMLattribute<false> ( aXmlNode , NodeTreeBuilder::mIdAttribute , aNode->mUid );
 
     if ( aRequireId and ( not lHasId ) )
     {
