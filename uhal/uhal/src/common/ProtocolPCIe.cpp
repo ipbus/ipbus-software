@@ -799,6 +799,7 @@ void PCIe::read()
 
 
   // PART 3 : Validate the packet contents
+  mAsynchronousException = NULL;
   try
   {
     if ( uhal::exception::exception* lExc = ClientInterface::validate ( lBuffers ) ) //Control of the pointer has been passed back to the client interface
