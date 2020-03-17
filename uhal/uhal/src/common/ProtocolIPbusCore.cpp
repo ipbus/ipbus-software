@@ -96,7 +96,7 @@ namespace uhal
     IPbusCoreResponseCodeSet::IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t aId, IPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets)
     {
       std::ostringstream lOSS;
-      lOSS << "Bad response code (0x" << std::hex << aResponseCode << " = '" << aResponseMsg << "') received for ";
+      lOSS << "Bad response code (0x" << std::hex << Integer( aResponseCode ) << " = '" << aResponseMsg << "') received for ";
       lOSS << aType << " at base address 0x" << aBaseAddress << " (";
       if (aWordCount != 0)
         lOSS << "offset 0x" << aWordCount << ", ";
