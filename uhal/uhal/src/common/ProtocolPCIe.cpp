@@ -799,22 +799,19 @@ void PCIe::read()
 
 
   // PART 3 : Validate the packet contents
+  mAsynchronousException = NULL;
   try
   {
     if ( uhal::exception::exception* lExc = ClientInterface::validate ( lBuffers ) ) //Control of the pointer has been passed back to the client interface
     {
-      mAsynchronousException = lExc;
+      lExc->throwAsDerivedType();
     }
   }
   catch ( exception::exception& aExc )
   {
-    mAsynchronousException = new exception::ValidationError ();
-    log ( *mAsynchronousException , "Exception caught during reply validation for PCIe device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
-  }
-
-  if ( mAsynchronousException )
-  {
-    mAsynchronousException->throwAsDerivedType();
+    exception::ValidationError lExc;
+    log ( lExc , "Exception caught during reply validation for PCIe device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
+    throw lExc;
   }
 }
 
