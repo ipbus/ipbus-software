@@ -27,20 +27,6 @@ namespace pycohal {
     static void construct ( PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data );
   };
 
-  struct Converter_vec_uint32_from_list {
-    // Default CTOR. Registers this converter to boost::python
-
-    Converter_vec_uint32_from_list() {
-      boost::python::converter::registry::push_back(&convertible, &construct, boost::python::type_id< std::vector<uint32_t> >());
-    }
-
-    // Determine if obj_ptr can be converted to vector<uint32_t>
-    static void* convertible(PyObject* obj_ptr);
-
-    // Convert obj_ptr to a C++ vector<uint32_t>
-    static void construct(PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data);
-  };
-
   template <class T>
   struct Converter_std_vector_to_list {
     static PyObject* convert(const std::vector<T>& v);
