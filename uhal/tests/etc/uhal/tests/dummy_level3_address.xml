@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-
 <node parameters="arg0=val300;arg1=val301;arg2=val302">
     <node id="REG" address="0x0001" permission="rw" tags="test"/>
 

@@ -352,6 +352,57 @@ class TestValWordIntMethods(unittest.TestCase):
 #    Tests of normal use cases, involving actual interaction with (dummy) hardware
 #    (There is usually an equivalent C++ executable in uhal/tests.)
 
+
+class TestConnectionManager(unittest.TestCase):
+    """
+    TestCase sub-class checking that connection manager returns objects with correct attributes (incl. for user-defined clients).
+    """
+
+    def setUp(self):
+        self.manager = uhal.ConnectionManager(CONNECTIONS_FILE)
+
+    def check_hw_properties(self, hw, id, uri, clientType):
+        self.assertEqual(hw.id(),  id)
+        self.assertEqual(hw.uri(), uri)
+        self.assertEqual(hw.getClient().id(),  id)
+        self.assertEqual(hw.getClient().uri(), uri)
+        self.assertEqual(type(hw.getClient()), clientType)
+
+    def exe_test_getDevice_member(self, id, uri, clientType):
+        hw = self.manager.getDevice(id)
+        self.check_hw_properties(hw, id, uri, clientType)
+
+    def exe_test_getDevice_static(self, id, uri, clientType):
+        hw = uhal.getDevice(id, uri, ADDRESS_FILE)
+        self.check_hw_properties(hw, id, uri, clientType)
+
+    def test_getDevice_coreClients(self):
+        self.exe_test_getDevice_member('dummy.udp', 'ipbusudp-1.3://localhost:50001', uhal._core._UDP_IPbus_1_3)
+        self.exe_test_getDevice_member('dummy.udp2', 'ipbusudp-2.0://localhost:60001', uhal._core._UDP_IPbus_2_0)
+        self.exe_test_getDevice_member('dummy.tcp', 'ipbustcp-1.3://localhost:50002', uhal._core._TCP_IPbus_1_3)
+        self.exe_test_getDevice_member('dummy.tcp2', 'ipbustcp-2.0://localhost:60002', uhal._core._TCP_IPbus_2_0)
+        self.exe_test_getDevice_member('dummy.controlhub', 'chtcp-1.3://localhost:10203?target=localhost:50001', uhal._core._TCP_ControlHub_IPbus_1_3)
+        self.exe_test_getDevice_member('dummy.controlhub2', 'chtcp-2.0://localhost:10203?target=localhost:60001', uhal._core._TCP_ControlHub_IPbus_2_0)
+        self.exe_test_getDevice_member('dummy.pcie2', 'ipbuspcie-2.0:///tmp/uhal_pcie_client2device,/tmp/uhal_pcie_device2client', uhal.ClientInterface)
+
+        self.exe_test_getDevice_static('alice', 'ipbusudp-1.3://localhost:50001', uhal._core._UDP_IPbus_1_3)
+        self.exe_test_getDevice_static('bob', 'ipbusudp-2.0://localhost:50001', uhal._core._UDP_IPbus_2_0)
+        self.exe_test_getDevice_static('charlie', 'ipbustcp-1.3://localhost:50001', uhal._core._TCP_IPbus_1_3)
+        self.exe_test_getDevice_static('dave', 'ipbustcp-2.0://localhost:50001', uhal._core._TCP_IPbus_2_0)
+        self.exe_test_getDevice_static('x', 'chtcp-1.3://localhost:12345?target=localhost:50001', uhal._core._TCP_ControlHub_IPbus_1_3)
+        self.exe_test_getDevice_static('y', 'chtcp-2.0://localhost:12345?target=localhost:50001', uhal._core._TCP_ControlHub_IPbus_2_0)
+        self.exe_test_getDevice_static('z', 'ipbuspcie-2.0:///path1,/path2', uhal.ClientInterface)
+        self.exe_test_getDevice_static('z', 'ipbusmmap-2.0:///path/to/file', uhal.ClientInterface)
+
+        self.assertRaises(uhal.exception, uhal.getDevice, 'some_id', 'unknown_protocol://localhost:50001', ADDRESS_FILE)
+
+    def test_getDevice_userClients(self):
+        self.check_hw_properties(uhal.getDevice('bob', '__test__://localhost:50001', ADDRESS_FILE, ['__test__']), 'bob', '__test__://localhost:50001', uhal.ClientInterface)
+
+        self.assertRaises(uhal.exception, uhal.getDevice, 'bob', '__test__://localhost:50001', ADDRESS_FILE)
+        self.assertRaises(uhal.exception, uhal.getDevice, 'bob', '__test__://localhost:50001', ADDRESS_FILE, [])
+
+
 class TestSingle(unittest.TestCase):
     """
     TestCase sub-class checking write & read behaviour for a single register.
