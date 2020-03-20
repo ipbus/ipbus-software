@@ -398,11 +398,13 @@ BOOST_PYTHON_MODULE ( _core )
   ;
   // Wrap uhal::ConnectionManager
   class_< uhal::ConnectionManager, boost::noncopyable > ( "ConnectionManager", init<const std::string&>() )
-  .def ( "getDevice",  static_cast< uhal::HwInterface ( uhal::ConnectionManager::* ) ( const std::string& ) > ( &uhal::ConnectionManager::getDevice ) )
+  .def ( init<const std::string&, const std::vector<std::string>&>() )
+  .def ( "getDevice", static_cast< uhal::HwInterface ( uhal::ConnectionManager::* ) ( const std::string& ) > ( &uhal::ConnectionManager::getDevice ) )
   .def ( "getDevices", static_cast< std::vector<std::string> ( uhal::ConnectionManager::* ) ()                   const > ( &uhal::ConnectionManager::getDevices ) )
   .def ( "getDevices", static_cast< std::vector<std::string> ( uhal::ConnectionManager::* ) ( const std::string& ) const > ( &uhal::ConnectionManager::getDevices ) )
   .def ( "clearAddressFileCache", &uhal::ConnectionManager::clearAddressFileCache )
   .staticmethod("clearAddressFileCache");
   def ( "getDevice", static_cast<uhal::HwInterface (* ) ( const std::string&, const std::string&, const std::string& ) > ( &uhal::ConnectionManager::getDevice ) );
+  def ( "getDevice", static_cast<uhal::HwInterface (* ) ( const std::string&, const std::string&, const std::string&, const std::vector<std::string>& ) > ( &uhal::ConnectionManager::getDevice ) );
 }
 

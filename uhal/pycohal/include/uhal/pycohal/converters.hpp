@@ -12,18 +12,19 @@
 
 namespace pycohal {
 
-  struct Converter_vec_uint32_from_list {
+
+  // CONVERTERS
+  template<class T>
+  struct Converter_std_vector_from_list {
+
     // Default CTOR. Registers this converter to boost::python
+    Converter_std_vector_from_list();
 
-    Converter_vec_uint32_from_list() {
-      boost::python::converter::registry::push_back(&convertible, &construct, boost::python::type_id< std::vector<uint32_t> >());
-    }
+    // Determine if obj_ptr can be converted to vector<T>
+    static void* convertible ( PyObject* obj_ptr );
 
-    // Determine if obj_ptr can be converted to vector<uint32_t>
-    static void* convertible(PyObject* obj_ptr);
-
-    // Convert obj_ptr to a C++ vector<uint32_t>
-    static void construct(PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data);
+    // Convert obj_ptr to a C++ vector<T>
+    static void construct ( PyObject* obj_ptr, boost::python::converter::rvalue_from_python_stage1_data* data );
   };
 
   template <class T>
@@ -76,5 +77,7 @@ PyObject* pycohal::Converter_boost_unorderedmap_to_dict<U,T>::convert(const boos
 
   return bpy::incref(theDict.ptr());
 }
+
+#include "uhal/pycohal/converters.hxx"
 
 #endif
