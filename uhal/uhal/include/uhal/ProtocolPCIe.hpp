@@ -265,12 +265,6 @@ namespace uhal
 
       //! The list of buffers still awaiting a reply
       std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
-
-      /**
-        A pointer to an exception object for passing exceptions from the worker thread to the main thread.
-        Exceptions must always be created on the heap (i.e. using `new`) and deletion will be handled in the main thread
-      */
-      uhal::exception::exception* mAsynchronousException;
   };
 
   std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket);
