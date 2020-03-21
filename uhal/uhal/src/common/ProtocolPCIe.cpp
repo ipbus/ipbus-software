@@ -484,8 +484,7 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
   mMaxPacketSize(0),
   mIndexNextPage(0),
   mPublishedReplyPageCount(0),
-  mReadReplyPageCount(0),
-  mAsynchronousException ( NULL )
+  mReadReplyPageCount(0)
 {
   if ( aUri.mHostname.find(",") == std::string::npos ) {
     exception::PCIeInitialisationError lExc;
@@ -799,20 +798,20 @@ void PCIe::read()
 
 
   // PART 3 : Validate the packet contents
-  mAsynchronousException = NULL;
+  uhal::exception::exception* lExc = NULL;
   try
   {
-    if ( uhal::exception::exception* lExc = ClientInterface::validate ( lBuffers ) ) //Control of the pointer has been passed back to the client interface
-    {
-      lExc->throwAsDerivedType();
-    }
+    lExc = ClientInterface::validate ( lBuffers );
   }
   catch ( exception::exception& aExc )
   {
-    exception::ValidationError lExc;
-    log ( lExc , "Exception caught during reply validation for PCIe device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
-    throw lExc;
+    exception::ValidationError lExc2;
+    log ( lExc2 , "Exception caught during reply validation for PCIe device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
+    throw lExc2;
   }
+
+  if (lExc != NULL)
+    lExc->throwAsDerivedType();
 }
 
 
