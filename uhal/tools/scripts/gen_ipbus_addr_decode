@@ -176,11 +176,11 @@ class nodetree(object):
 
     def get_flagged_nodes(self, n):
         l = list()
-        if n.flag:
-            l.append(n)
-        elif n.desc:
-            for i in n.desc:
-                l.extend(self.get_flagged_nodes(i))
+        for i in n.desc:
+            if i.flag:
+                l.append(i)
+            else:
+                l.append(self.get_flagged_nodes(i))
         return l
 
 #===========================================================================================
