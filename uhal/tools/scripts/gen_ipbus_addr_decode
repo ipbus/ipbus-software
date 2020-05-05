@@ -95,7 +95,7 @@ class node(object):
         self.desc = list()
 
     def __str__(self):
-    	w = hex(self.width) if self.width is not None else 'None' 
+        w = hex(self.width) if self.width is not None else 'None' 
         return self.name + " " + hex(self.addr) + " " + w + " " + str(self.flag)
         
 # Sort my descendants into address order
@@ -104,7 +104,7 @@ class node(object):
         self.desc = sorted(self.desc, key = lambda x: x.addr)
         
 class nodetree(object):
-	
+
     def __init__(self):
         self.root = node("TOP")
 
@@ -242,12 +242,12 @@ def main():
     for i in device.getNodes():
         d = device.getNode(i)
         if d.getMask() == 0xffffffff:
-        	f = d.getFirmwareInfo()
-        	p = "type" in f and f["type"] == "endpoint"
-        	s = d.getSize() if d.getMode() == uhal.BlockReadWriteMode.INCREMENTAL else 1
-        	w = int(f["width"]) if "width" in f else None
-    		t.add(node(i, d.getAddress(), p, s, w))
-    		
+            f = d.getFirmwareInfo()
+            p = "type" in f and f["type"] == "endpoint"
+            s = d.getSize() if d.getMode() == uhal.BlockReadWriteMode.INCREMENTAL else 1
+            w = int(f["width"]) if "width" in f else None
+            t.add(node(i, d.getAddress(), p, s, w))
+
 # Assign widths
 
     if not t.assign_widths():
