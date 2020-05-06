@@ -164,9 +164,9 @@ class nodetree(object):
             if n.width is None:
                 n.width = int(math.ceil(math.log(max_addr - n.addr,2)))
             elif max_addr > n.addr + 2 ** n.width:
-                log.error("Endpoint node <<" + n.name + ">> has insufficient width to contain its descendants")
+                log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has insufficient width to contain its descendants (maximum address " + hex(max_addr) + ")")
                 errors_detected.append(n.name)
-        if n.size > 2 ** n.width: # Check our own size
+                if n.size > 2 ** n.width: # Check our own size
             log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
             errors_detected.append(n.name)
         if n.addr % pow(2, n.width) != 0: # Check our alignment
