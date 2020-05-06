@@ -155,20 +155,20 @@ class nodetree(object):
                 max_addr = 0
                 for i in l:
                     if i.addr < max_addr:
-                        log.error("Address overlap between nodes detected: " + i.name + " " + hex(saddr) + " " + hex(max_addr))
+                        log.error("Node <<" + i.name + ">> address " + hex(i.addr) + " overlaps with previous node address space")
                         errors_detected.append(i.name)
                     max_addr = i.addr + pow(2, self._assign_width(i, errors_detected))
                 n.width = int(math.ceil(math.log(max_addr - n.addr,2)))
         else:
             if n.size > 2 ** n.width:
-                log.error("Endpoint node " + n.name + " declared size " + hex(n.size) + " that exceeds address width " + hex(n.width))
+                log.error("Endpoint node <<" + n.name + ">> declared size " + hex(n.size) + " that exceeds address width " + hex(n.width))
                 errors_detected.append(n.name)
             for i in n.desc:
                 if i.addr + i.size - 1 > n.addr + 2 ** n.width:
-                    log.error("Endpoint node " + n.name + " has a sub-node " + i.name + " that overflows its address space")
+                    log.error("Endpoint node <<" + n.name + ">> has a sub-node " + i.name + " that overflows its address space")
                     errors_detected.append(i.name)
         if n.addr % pow(2, n.width) != 0:
-            log.error("Node '" + n.name + "' at " + hex(addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
+            log.error("Node <<" + n.name + ">> at " + hex(addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
             errors_detected.append(n.name)
         return n.width
 
@@ -270,7 +270,7 @@ def main():
         mask_bits = BitArray(2 ** i.width - 1)
         log.info("uHAL slave %s,%s,0b%s,0b%s" % (n, i.name, addr_bits, mask_bits))
         if (addr_bits & mask_bits).uint() != 0:
-            log.error("ERROR: Non Aligned address 0b%s with respect to address bit mask 0b%s" % (str(addr_bits), str(mask_bits)))
+            log.error("Node <<" + i.name + ">> has a non-aligned address " + str(addr_bits) + " with respect to address bit mask " + str(mask_bits))
         or_prod = or_prod | (addr_bits & ~mask_bits)
         and_prod = and_prod & (addr_bits | mask_bits)
         slaves.append((n, i.name, addr_bits, mask_bits))
