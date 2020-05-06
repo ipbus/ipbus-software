@@ -145,32 +145,55 @@ class nodetree(object):
 
     def _assign_width(self, n, errors_detected):
         n.sort()
-        if n.width is None:
-            n.width = 0
-            l = self.get_flagged_nodes(n)
-            if not l:
-                log.error("Fatal error - no endpoint descendants and no width parameter for node: " + n.name)
-                errors_detected.append(n.name)
-            else:
-                max_addr = 0
-                for i in l:
-                    if i.addr < max_addr:
-                        log.error("Node <<" + i.name + ">> address " + hex(i.addr) + " overlaps with previous node address space")
-                        errors_detected.append(i.name)
-                    max_addr = i.addr + pow(2, self._assign_width(i, errors_detected))
-                n.width = int(math.ceil(math.log(max_addr - n.addr,2)))
-        else:
-            if n.size > 2 ** n.width:
-                log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds address width " + hex(n.width))
-                errors_detected.append(n.name)
-            for i in n.desc:
-                if i.addr + i.size - 1 > n.addr + 2 ** n.width:
-                    log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has a sub-node <<" + i.name + ">> (base address " + hex(i.addr) + ", size " + hex(i.size) + ") that overflows the address space")
+        l = self.get_flagged_nodes(n)
+        if not l: # This is a bottom-layer endpoint nod
+            if n.width is None: # Error, we must have an explicit width
+                log.warning("Node <<" + n.name + ">> has no endpoint descendants and no width parameter - assuming width 0")
+                n.width = 0
+            for i in self.get_desc(n): # Check that our node content does not overflow our address range
+                if i.addr + i.size -1 > n.addr + 2 ** n.width:
+                    log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has a sub-node <<" + i.name + ">> (base address " + hex(i.addr) + ", size " + hex(i.size) + ") that overflows its address space")
                     errors_detected.append(i.name)
-        if n.addr % pow(2, n.width) != 0:
+        else: # This is an intermediate-layer endpoint node that may or may not have a width assigned explicitly
+            if self.get_leaves(n):
+                log.error("Endpoint node <<" + n.name + ">> has a mixture of endpoint and non-endpoint descendants")
+                errors_detected.append(n.name)
+            max_addr = 0
+            for i in l: # Find the maximum span of our endpoint descendants
+                max_addr = i.addr + pow(2, self._assign_width(i, errors_detected))
+            if n.width is None:
+                n.width = int(math.ceil(math.log(max_addr - n.addr,2)))
+            elif max_addr > n.addr + 2 ** n.width:
+                log.error("Endpoint node <<" + n.name + ">> has insufficient width to contain its descendants")
+                errors_detected.append(n.name)
+        if n.size > 2 ** n.width: # Check our own size
+            log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
+            errors_detected.append(n.name)
+        if n.addr % pow(2, n.width) != 0: # Check our alignment
             log.error("Node <<" + n.name + ">> at " + hex(addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
             errors_detected.append(n.name)
         return n.width
+
+# Get all descendants of a node
+
+    def get_desc(self, n):
+        l = list()
+        for i in n.desc:
+            l.append(i)
+            l.extend(self.get_desc(i))
+        return l
+
+# Get all bottom-layer leaves below a node
+
+    def get_leaves(self, n):
+        l = list()
+        for i in n.desc:
+            if not i.flag:
+                if not i.desc:
+                    l.append(i)
+                else:
+                    l.extend(self.get_leaves(i))
+        return l
 
 # Get immediate endpoint descendants of a node
 
