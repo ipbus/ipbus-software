@@ -161,11 +161,11 @@ class nodetree(object):
                 n.width = int(math.ceil(math.log(max_addr - n.addr,2)))
         else:
             if n.size > 2 ** n.width:
-                log.error("Endpoint node <<" + n.name + ">> declared size " + hex(n.size) + " that exceeds address width " + hex(n.width))
+                log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds address width " + hex(n.width))
                 errors_detected.append(n.name)
             for i in n.desc:
                 if i.addr + i.size - 1 > n.addr + 2 ** n.width:
-                    log.error("Endpoint node <<" + n.name + ">> has a sub-node " + i.name + " that overflows its address space")
+                    log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has a sub-node <<" + i.name + ">> (base address " + hex(i.addr) + ", size " + hex(i.size) + ") that overflows the address space")
                     errors_detected.append(i.name)
         if n.addr % pow(2, n.width) != 0:
             log.error("Node <<" + n.name + ">> at " + hex(addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
