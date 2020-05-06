@@ -180,7 +180,7 @@ class nodetree(object):
             if i.flag:
                 l.append(i)
             else:
-                l.append(self.get_flagged_nodes(i))
+                l.extend(self.get_flagged_nodes(i))
         return l
 
 #===========================================================================================
@@ -247,6 +247,10 @@ def main():
             s = d.getSize() if d.getMode() == uhal.BlockReadWriteMode.INCREMENTAL else 1
             w = int(f["width"]) if "width" in f else None
             t.add(node(i, d.getAddress(), p, s, w))
+
+
+    for l in str(t).splitlines():
+        log.debug(l)
 
 # Assign widths
 
