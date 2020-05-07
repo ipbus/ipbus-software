@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 """
-usage: gen_ipus_addr_decode [options] <uhal_address_table.xml>
-
 The script generates the address select logic in the
 file for the ipbus system.
 
@@ -11,18 +9,13 @@ The script takes an uHAL compliant XML input file and prints out the vhdl module
 Note that full address decoding is not performed (would be very
 inefficient with 32b address space), so slaves will appear at many
 locations.
-
-options:
-   -v, --verbose                            verbose
-   -d  --debug                              debug output
-   -t <file>, --template=<file>             uses a different vhdl template file
-                                            (default
-                                            /opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd)
 """
 
 from __future__ import print_function
+from builtins import range
 
-import getopt
+# import getopt
+import argparse
 import sys
 import os.path
 import time
@@ -32,8 +25,8 @@ import uhal
 
 #===========================================================================================
 # In Python 3 "xrange" doesn't exist, since Python 3's "range" is just as efficient as Python 2's "xrange"
-if (sys.version_info[0] > 2):
-    xrange = range
+# if (sys.version_info[0] > 2):
+#     xrange = range
 
         
 class BitArray:
@@ -43,7 +36,7 @@ class BitArray:
         if (value> (1<<self.length)-1):
             raise Exception("Value '%d' too big. It does not fit in %d bits\n" % (value,self.length))
         
-        self.bits = [value>>i & 1 for i in xrange(self.length)]
+        self.bits = [value>>i & 1 for i in range(self.length)]
 
     def __getitem__(self,index):
         return self.bits[index]
@@ -82,9 +75,13 @@ class BitArray:
     def hex(self):
         return "0x%08x" % self.uint()
 
-# Class representing one address tree node
 
 class node(object):
+
+    """
+    Class representing one address tree node
+    
+    """
     
     def __init__(self, name, addr = 0, flag = False, size = 0, width = None):
         self.name = name
@@ -98,9 +95,11 @@ class node(object):
         w = hex(self.width) if self.width is not None else 'None' 
         return self.name + " " + hex(self.addr) + " " + w + " " + str(self.flag)
         
-# Sort my descendants into address order
 
     def sort(self):
+        """
+        Sort my descendants into address order
+        """
         self.desc = sorted(self.desc, key = lambda x: x.addr)
         
 class nodetree(object):
@@ -167,8 +166,8 @@ class nodetree(object):
                 log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has insufficient width to contain its descendants (maximum address " + hex(max_addr) + ")")
                 errors_detected.append(n.name)
                 if n.size > 2 ** n.width: # Check our own size
-            log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
-            errors_detected.append(n.name)
+                    log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
+                    errors_detected.append(n.name)
         if n.addr % pow(2, n.width) != 0: # Check our alignment
             log.error("Node <<" + n.name + ">> at " + hex(addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
             errors_detected.append(n.name)
@@ -208,56 +207,45 @@ class nodetree(object):
 
 #===========================================================================================
 
-EXIT_CODE_INCORRECT_ARGUMENTS = 1
-EXIT_CODE_ARG_PARSING_ERROR   = 2
-EXIT_CODE_NODE_ADDRESS_ERRORS = 3
+EXIT_CODE_ARG_PARSING_ERROR   = 1
+EXIT_CODE_NODE_ADDRESS_ERRORS = 2
 
 def main():    
+    logging.basicConfig(level=logging.WARNING, format='%(levelname)s\t: %(message)s')
 
     # configure logger
     global log
     log = logging.getLogger("main")
-    formatter = logging.Formatter('%(name)s %(levelname)s: %(message)s')
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-    log.addHandler(handler)
-    log.setLevel(logging.WARNING)
+
     uhal.setLogLevelTo(uhal.LogLevel.WARNING)
 
     # options for verbosity level and VHDL template
     nflag = False
     template_fn = "/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd"
+
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+        )
+    parser.add_argument('-v', '--verbose', help="increase output verbosity (default: %(default)s)", action="store_true")
+    parser.add_argument('-d', '--debug', help="enable debug messages (default: %(default)s)", action="store_true")
+    parser.add_argument('-n', '--dry-run', help="Dry run (default: %(default)s)", action="store_true", default=False)
+    parser.add_argument('-t', '--template', help="Decoder template path (default: %(default)s)", default='/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd')
+    parser.add_argument('addrtab', help="Address table file")
+    args = parser.parse_args()
+
+    if args.verbose:
+        log.setLevel(logging.INFO)
+        uhal.setLogLevelTo(uhal.LogLevel.INFO)
+    if args.verbose:
+        log.setLevel(logging.DEBUG)
+        uhal.setLogLevelTo(uhal.LogLevel.DEBUG)  
+
+    # Ask the API to read and parse the address tree
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "vdnht:", ["verbose","debug","dry-run","help","template="])
-    except getopt.GetoptError as err:
-        log.critical(__doc__)
-        sys.exit(EXIT_CODE_ARG_PARSING_ERROR)
-    for o, a in opts:
-        if o in ("-v", "--verbose"):
-            log.setLevel(logging.INFO)
-            uhal.setLogLevelTo(uhal.LogLevel.INFO)
-        elif o in ("-d", "--debug"):
-            log.setLevel(logging.DEBUG)
-            uhal.setLogLevelTo(uhal.LogLevel.DEBUG)
-        elif o in ("-h", "--help"):
-            print(__doc__)
-            sys.exit(0)
-        elif o in ("-t", "--template"):
-            template_fn = a
-        elif o in ("-n", "--dry-run"):
-            nflag = True
-
-    # make sure that exactly one argument was given, later assumed to be the xml file name
-    if len(args) != 1:
-        log.critical("Incorrect usage - invalid number of arguments! Make sure that options come before argument.\n" + __doc__)
-        sys.exit(EXIT_CODE_INCORRECT_ARGUMENTS)
-
-# Ask the API to read and parse the address tree
-
-    try:
-        device = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345","file://" + args[0])
+        device = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345","file://" + args.addrtab)
     except Exception:
-        raise Exception("File '%s' does not exist or has incorrect format" % args[0])
+        raise Exception("File '%s' does not exist or has incorrect format" % args.addrtab)
         
 # Build the node tree
 
@@ -283,7 +271,7 @@ def main():
         
 # Figure out address masks
 
-    moduleName = os.path.splitext(os.path.basename(args[0]))[0]
+    moduleName = os.path.splitext(os.path.basename(args.addrtab))[0]
     or_prod = BitArray(0x0)
     and_prod = BitArray(0xffffffff)
     slaves = []
@@ -307,7 +295,7 @@ def main():
 
 # Generate VHDL code
 
-    if not nflag:
+    if not args.dry_run:
 
         # generate vhdl snippet with symbolic constants
         snippet1 = "-- START automatically  generated VHDL the %s \n" % time.asctime()
