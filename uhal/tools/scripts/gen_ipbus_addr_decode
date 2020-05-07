@@ -23,12 +23,7 @@ import logging
 import math
 import uhal
 
-#===========================================================================================
-# In Python 3 "xrange" doesn't exist, since Python 3's "range" is just as efficient as Python 2's "xrange"
-# if (sys.version_info[0] > 2):
-#     xrange = range
-
-        
+       
 class BitArray:
     
     def __init__(self,value=0):
