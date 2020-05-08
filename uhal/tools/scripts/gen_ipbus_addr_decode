@@ -232,7 +232,7 @@ def main():
     if args.verbose:
         log.setLevel(logging.INFO)
         uhal.setLogLevelTo(uhal.LogLevel.INFO)
-    if args.verbose:
+    if args.debug:
         log.setLevel(logging.DEBUG)
         uhal.setLogLevelTo(uhal.LogLevel.DEBUG)  
 
