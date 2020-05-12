@@ -145,6 +145,9 @@ class nodetree(object):
             if n.width is None: # Error, we must have an explicit width
                 log.warning("Node <<" + n.name + ">> has no endpoint descendants and no width parameter - assuming width 0")
                 n.width = 0
+            if n.size > 2 ** n.width: # Check our own size
+                log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
+                errors_detected.append(n.name)
             for i in self.get_desc(n): # Check that our node content does not overflow our address range
                 if i.addr + i.size - 1 >= n.addr + 2 ** n.width:
                     log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has a sub-node <<" + i.name + ">> (base address " + hex(i.addr) + ", size " + hex(i.size) + ") that overflows its address space")
@@ -161,9 +164,6 @@ class nodetree(object):
             elif max_addr > n.addr + 2 ** n.width:
                 log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has insufficient width to contain its descendants (maximum address " + hex(max_addr) + ")")
                 errors_detected.append(n.name)
-                if n.size > 2 ** n.width: # Check our own size
-                    log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
-                    errors_detected.append(n.name)
         if n.addr % pow(2, n.width) != 0: # Check our alignment
             log.error("Node <<" + n.name + ">> at " + hex(n.addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
             errors_detected.append(n.name)
