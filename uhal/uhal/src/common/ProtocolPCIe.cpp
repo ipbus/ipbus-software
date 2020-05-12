@@ -434,7 +434,7 @@ void PCIe::RobustMutex::endSession()
 template <class T>
 PCIe::SharedObject<T>::SharedObject(const std::string& aName) :
   mName(aName),
-  mSharedMem(boost::interprocess::open_or_create, aName.c_str(), 1024),
+  mSharedMem(boost::interprocess::open_or_create, aName.c_str(), 1024, 0x0, boost::interprocess::permissions(0666)),
   mObj(mSharedMem.find_or_construct<T>(boost::interprocess::unique_instance)())
 {
 }
