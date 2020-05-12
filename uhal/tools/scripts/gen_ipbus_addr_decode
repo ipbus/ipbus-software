@@ -1,27 +1,28 @@
 #!/usr/bin/env python
 
 """
-The script generates the address select logic in the
-file for the ipbus system.
+This script automatically generates address select logic for IPbus-based firmware designs.
 
-The script takes an uHAL compliant XML input file and prints out the vhdl module.
+The script takes a uHAL-compliant XML address file and writes a VHDL module containing the
+corresponding address decoder function to a file named 'ipbus_decode_<addr_table_name>.vhd'.
 
-Note that full address decoding is not performed (would be very
-inefficient with 32b address space), so slaves will appear at many
-locations.
+Note that full address decoding is not performed (would be very inefficient with 32b address
+space), so slaves will appear at many locations.
 """
 
 from __future__ import print_function
-from builtins import range
 
-# import getopt
 import argparse
-import sys
-import os.path
-import time
 import logging
 import math
+import os.path
+import sys
+import time
 import uhal
+
+if sys.version_info[0] < 3:
+    range = xrange
+
 
        
 class BitArray:
@@ -214,10 +215,6 @@ def main():
 
     uhal.setLogLevelTo(uhal.LogLevel.WARNING)
 
-    # options for verbosity level and VHDL template
-    nflag = False
-    template_fn = "/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd"
-
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawTextHelpFormatter
@@ -313,7 +310,7 @@ def main():
                 snippet2 += "    elsif "
     
             snippet2 += "std_match(addr, \""
-            for i in range(32)[::-1]:
+            for i in range(31, -1, -1):
                 if not mask[i]:
                     snippet2 += "-"
                 elif addr_bits[i]:
@@ -331,7 +328,7 @@ def main():
         # print vhdl code
         vhdlfilename = "ipbus_decode_"+moduleName+".vhd"
         vhdlfile=open(vhdlfilename,"w")
-        vhdlfile.write(open(template_fn).read().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
+        vhdlfile.write(open(args.template).read().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
                        .replace("-- INSERT_SELECTION_HERE",snippet2)\
                        .replace("INSERT_SEL_WIDTH_HERE","%s"%ipbus_sel_width)\
                        .replace("PACKAGENAME",moduleName))
