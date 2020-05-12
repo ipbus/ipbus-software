@@ -790,11 +790,16 @@ namespace uhal
       try{
         if ( !boost::filesystem::is_directory ( lDir ) )
         {
-          if ( !boost::filesystem::create_directories ( lDir ) )
+          if ( boost::filesystem::create_directories ( lDir ) )
+          {
+            boost::filesystem::permissions( lDir , boost::filesystem::all_all );
+          }
+          else
           {
             log ( Error() , "Address overlaps observed - attempted and failed to create directory " , Quote ( lDirName ) );
             return;
           }
+
         }
       }
       catch(const boost::filesystem::filesystem_error& e)
@@ -806,6 +811,8 @@ namespace uhal
       std::string lFilename ( aPath.string() );
       boost::replace_all ( lFilename , "/" , "-" );
       lDir /= ( "OverlapReport" + lFilename + ".txt" );
+      const bool lNewlyCreatedFile = not boost::filesystem::is_regular_file( lDir );
+
       std::ofstream lReportFile ( lDir.c_str() );
 
       if ( lReportFile.is_open() )
@@ -816,6 +823,11 @@ namespace uhal
         lReportFile << lReport.rdbuf();
         lReportFile.close();
         log ( Warning() , "Address overlaps observed - report file written at " , Quote ( lDir.string() ) );
+
+        if ( lNewlyCreatedFile )
+        {
+          boost::filesystem::permissions( lDir , boost::filesystem::perms( 0666 ) );
+        }
       }
       else
       {
