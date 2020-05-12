@@ -165,7 +165,7 @@ class nodetree(object):
                     log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
                     errors_detected.append(n.name)
         if n.addr % pow(2, n.width) != 0: # Check our alignment
-            log.error("Node <<" + n.name + ">> at " + hex(addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
+            log.error("Node <<" + n.name + ">> at " + hex(n.addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
             errors_detected.append(n.name)
         return n.width
 
