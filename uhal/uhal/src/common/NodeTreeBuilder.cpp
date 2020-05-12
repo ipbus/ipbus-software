@@ -502,6 +502,11 @@ namespace uhal
         }
       }
     }
+    else if ( not aXmlNode.attribute ( NodeTreeBuilder::mSizeAttribute.c_str() ).empty() )
+    {
+      log ( Warning() , "Invalid combination of attributes for node " , Quote ( aNode->mUid ) , ": Size attribute specified, but mode missing, hence size ignored. Please specify mode here or remove the size attribute. Address table parser will throw an exception for this in future releases.");
+    }
+
   }
 
   void NodeTreeBuilder::setFirmwareInfo ( const pugi::xml_node& aXmlNode , Node* aNode )

@@ -813,6 +813,21 @@ BOOST_FIXTURE_TEST_CASE (invalid_mode, SimpleAddressTableFixture)
   }
 }
 
+BOOST_FIXTURE_TEST_CASE (size_without_node_attribute, SimpleAddressTableFixture)
+{
+  for (size_t i = 0; i < 2; i++) {
+    BOOST_TEST_MESSAGE("Adding 'size' attribute to node " << i << ", that doesn't have 'mode' attribute");
+
+    pugi::xml_document lDoc;
+    lDoc.load(addrTableStr.c_str());
+    setAttribute(getNthChild(lDoc.child("node"), i), "size", "42");
+
+    // This should change to 'BOOST_CHECK_THROW' in future release (after grace period discussed in issue #194 has ended)
+    BOOST_CHECK_NO_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  }
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
