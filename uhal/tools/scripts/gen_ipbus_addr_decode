@@ -141,12 +141,12 @@ class nodetree(object):
     def _assign_width(self, n, errors_detected):
         n.sort()
         l = self.get_flagged_nodes(n)
-        if not l: # This is a bottom-layer endpoint nod
+        if not l: # This is a bottom-layer endpoint node
             if n.width is None: # Error, we must have an explicit width
                 log.warning("Node <<" + n.name + ">> has no endpoint descendants and no width parameter - assuming width 0")
                 n.width = 0
             for i in self.get_desc(n): # Check that our node content does not overflow our address range
-                if i.addr + i.size -1 > n.addr + 2 ** n.width:
+                if i.addr + i.size - 1 >= n.addr + 2 ** n.width:
                     log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has a sub-node <<" + i.name + ">> (base address " + hex(i.addr) + ", size " + hex(i.size) + ") that overflows its address space")
                     errors_detected.append(i.name)
         else: # This is an intermediate-layer endpoint node that may or may not have a width assigned explicitly
