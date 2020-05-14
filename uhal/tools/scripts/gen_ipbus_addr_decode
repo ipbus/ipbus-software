@@ -1,41 +1,30 @@
 #!/usr/bin/env python
 
 """
-usage: gen_ipus_addr_decode [options] <uhal_address_table.xml>
+This script automatically generates address select logic for IPbus-based firmware designs.
 
-The script generates the address select logic in the
-file for the ipbus system.
+The script takes a uHAL-compliant XML address file and writes a VHDL module containing the
+corresponding address decoder function to a file named 'ipbus_decode_<addr_table_name>.vhd'.
 
-The script takes an uHAL compliant XML input file and prints out the vhdl module.
-
-Note that full address decoding is not performed (would be very
-inefficient with 32b address space), so slaves will appear at many
-locations.
-
-options:
-   -v, --verbose                            verbose
-   -d  --debug                              debug output
-   -t <file>, --template=<file>             uses a different vhdl template file
-                                            (default
-                                            /opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd)
+Note that full address decoding is not performed (would be very inefficient with 32b address
+space), so slaves will appear at many locations.
 """
 
 from __future__ import print_function
 
-import getopt
-import sys
-import os.path
-import time
+import argparse
 import logging
 import math
+import os.path
+import sys
+import time
 import uhal
 
-#===========================================================================================
-# In Python 3 "xrange" doesn't exist, since Python 3's "range" is just as efficient as Python 2's "xrange"
-if (sys.version_info[0] > 2):
-    xrange = range
+if sys.version_info[0] < 3:
+    range = xrange
 
-        
+
+       
 class BitArray:
     
     def __init__(self,value=0):
@@ -43,7 +32,7 @@ class BitArray:
         if (value> (1<<self.length)-1):
             raise Exception("Value '%d' too big. It does not fit in %d bits\n" % (value,self.length))
         
-        self.bits = [value>>i & 1 for i in xrange(self.length)]
+        self.bits = [value>>i & 1 for i in range(self.length)]
 
     def __getitem__(self,index):
         return self.bits[index]
@@ -82,178 +71,214 @@ class BitArray:
     def hex(self):
         return "0x%08x" % self.uint()
 
+
 class node(object):
+
+    """
+    Class representing one address tree node
     
-    def __init__(self, name, ref, flag, width = None, desc = None):
+    """
+    
+    def __init__(self, name, addr = 0, flag = False, size = 0, width = None):
         self.name = name
-        self.ref = ref
         self.flag = flag
-        if width is None:
-            self.width = 0
-        else:
-            self.width = width
+        self.addr = addr
+        self.size = size
+        self.width = width
         self.desc = list()
-        if desc is not None: self.desc.append(desc)
+
+    def __str__(self):
+        w = hex(self.width) if self.width is not None else 'None' 
+        return self.name + " " + hex(self.addr) + " " + w + " " + str(self.flag)
         
+
     def sort(self):
-        self.desc = sorted(self.desc, key = lambda x: x.ref.getAddress())
+        """
+        Sort my descendants into address order
+        """
+        self.desc = sorted(self.desc, key = lambda x: x.addr)
         
 class nodetree(object):
-	
+
     def __init__(self):
-        self.root = node("TOP", None, False)
-        
+        self.root = node("TOP")
+
+# Add a node to the tree
+
     def add(self, n):
         np = self.root
         m = n.name.split('.')
-        for i in range(len(m) - 1):
+        for i in range(len(m)):
             name = '.'.join(m[: i + 1])
             l = [x.name for x in np.desc]
             if name not in l:
-                c = node(name, None, False)
-                np.desc.append(c)
-                np = c
+                np.desc.append(n)
+                break
             else:
                 np = np.desc[l.index(name)]
-        l = [x.name for x in np.desc]
-        if n.name not in l:
-            np.desc.append(n)
-        else:
-            np.desc[l.index(n.name)].ref = n.ref
-            np.desc[l.index(n.name)].flag = n.flag
     
     def __str__(self):
         return self.dump(self.root, "")
+
+# Dump the tree in human readable format
     
     def dump(self, n, prefix):
         s = ""
         for i in n.desc:
-            s = s + prefix + i.name + " " + hex(i.ref.getAddress()) + " " + hex(i.width) + " " + str(i.flag) + "\n"
+            s = s + prefix + str(i) + "\n"
             if i.desc: s = s + self.dump(i, prefix + "  ")
         return s
 
-    def assign_width(self, n):
+# Assign widths to endpoint nodes
+
+    def assign_widths(self):
         errors = []
-        self._assign_width(n, errors)
+        self._assign_width(self.root, errors)
         return len(errors) == 0
+
+# Assign a width to an endpoint node based on addresses of descendants
 
     def _assign_width(self, n, errors_detected):
         n.sort()
-        if n.ref is not None:
-            addr = n.ref.getAddress()
-        else:
-            addr = 0
-        max_addr = 0
-        top_addr = 0
-        if n.ref is not None and "width" in n.ref.getFirmwareInfo():
-            n.width = int(n.ref.getFirmwareInfo()["width"])
-        else:
-            if not n.desc:
-                log.error("Fatal error - no width parameter found for node: " + n.name)
-                raise SystemExit(1)
-            for i in n.desc:
-                saddr = i.ref.getAddress()
-                if saddr < max_addr:
-                    log.error("Overlap between nodes detected: " + i.name + " " + hex(saddr) + " "+ hex(max_addr))
+        l = self.get_flagged_nodes(n)
+        if not l: # This is a bottom-layer endpoint node
+            if n.width is None: # Error, we must have an explicit width
+                log.warning("Node <<" + n.name + ">> has no endpoint descendants and no width parameter - assuming width 0")
+                n.width = 0
+            if n.size > 2 ** n.width: # Check our own size
+                log.error("Endpoint node <<" + n.name + ">> has declared size " + hex(n.size) + " that exceeds its address width " + hex(n.width))
+                errors_detected.append(n.name)
+            for i in self.get_desc(n): # Check that our node content does not overflow our address range
+                if i.addr + i.size - 1 >= n.addr + 2 ** n.width:
+                    log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has a sub-node <<" + i.name + ">> (base address " + hex(i.addr) + ", size " + hex(i.size) + ") that overflows its address space")
                     errors_detected.append(i.name)
-                max_addr = saddr + pow(2, self._assign_width(i, errors_detected))
-                if max_addr > top_addr:
-                    top_addr = max_addr
-            n.width = int(math.ceil(math.log(top_addr - addr,2)))
-        if addr % pow(2, n.width) != 0:
-            log.error("Node '" + n.name + "' at " + hex(addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
+        else: # This is an intermediate-layer endpoint node that may or may not have a width assigned explicitly
+            if self.get_leaves(n):
+                log.error("Endpoint node <<" + n.name + ">> has a mixture of endpoint and non-endpoint descendants")
+                errors_detected.append(n.name)
+            max_addr = 0
+            for i in l: # Find the maximum span of our endpoint descendants
+                max_addr = i.addr + pow(2, self._assign_width(i, errors_detected))
+            if n.width is None:
+                n.width = int(math.ceil(math.log(max_addr - n.addr,2)))
+            elif max_addr > n.addr + 2 ** n.width:
+                log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has insufficient width to contain its descendants (maximum address " + hex(max_addr) + ")")
+                errors_detected.append(n.name)
+        if n.addr % pow(2, n.width) != 0: # Check our alignment
+            log.error("Node <<" + n.name + ">> at " + hex(n.addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
             errors_detected.append(n.name)
         return n.width
 
-    def get_nodes(self, n):
+# Get all descendants of a node
+
+    def get_desc(self, n):
         l = list()
-        if n.flag:
-            l.append((n.name, n.ref.getAddress(), n.width))
-        elif n.desc:
-            for i in n.desc:
-                l.extend(self.get_nodes(i))
+        for i in n.desc:
+            l.append(i)
+            l.extend(self.get_desc(i))
+        return l
+
+# Get all bottom-layer leaves below a node
+
+    def get_leaves(self, n):
+        l = list()
+        for i in n.desc:
+            if not i.flag:
+                if not i.desc:
+                    l.append(i)
+                else:
+                    l.extend(self.get_leaves(i))
+        return l
+
+# Get immediate endpoint descendants of a node
+
+    def get_flagged_nodes(self, n):
+        l = list()
+        for i in n.desc:
+            if i.flag:
+                l.append(i)
+            else:
+                l.extend(self.get_flagged_nodes(i))
         return l
 
 #===========================================================================================
 
-EXIT_CODE_INCORRECT_ARGUMENTS = 1
-EXIT_CODE_ARG_PARSING_ERROR   = 2
-EXIT_CODE_NODE_ADDRESS_ERRORS = 3
+EXIT_CODE_ARG_PARSING_ERROR   = 1
+EXIT_CODE_NODE_ADDRESS_ERRORS = 2
 
 def main():    
+    logging.basicConfig(level=logging.WARNING, format='%(levelname)s\t: %(message)s')
 
     # configure logger
     global log
     log = logging.getLogger("main")
-    formatter = logging.Formatter('%(name)s %(levelname)s: %(message)s')
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-    log.addHandler(handler)
-    log.setLevel(logging.WARNING)
+
     uhal.setLogLevelTo(uhal.LogLevel.WARNING)
 
-    # options for verbosity level and VHDL template
-    nflag = False
-    template_fn = "/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd"
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+        )
+    parser.add_argument('-v', '--verbose', help="increase output verbosity (default: %(default)s)", action="store_true")
+    parser.add_argument('-d', '--debug', help="enable debug messages (default: %(default)s)", action="store_true")
+    parser.add_argument('-n', '--dry-run', help="Dry run (default: %(default)s)", action="store_true", default=False)
+    parser.add_argument('-t', '--template', help="Decoder template path (default: %(default)s)", default='/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd')
+    parser.add_argument('addrtab', help="Address table file")
+    args = parser.parse_args()
+
+    if args.verbose:
+        log.setLevel(logging.INFO)
+        uhal.setLogLevelTo(uhal.LogLevel.INFO)
+    if args.debug:
+        log.setLevel(logging.DEBUG)
+        uhal.setLogLevelTo(uhal.LogLevel.DEBUG)  
+
+    # Ask the API to read and parse the address tree
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "vdnht:", ["verbose","debug","dry-run","help","template="])
-    except getopt.GetoptError as err:
-        log.critical(__doc__)
+        device = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345","file://" + args.addrtab)
+    except Exception as e:
+        log.error("Exception thrown when parsing address table '{}'".format(args.addrtab))
+        log.error(str(e))
         sys.exit(EXIT_CODE_ARG_PARSING_ERROR)
-    for o, a in opts:
-        if o in ("-v", "--verbose"):
-            log.setLevel(logging.INFO)
-            uhal.setLogLevelTo(uhal.LogLevel.INFO)
-        elif o in ("-d", "--debug"):
-            log.setLevel(logging.DEBUG)
-            uhal.setLogLevelTo(uhal.LogLevel.DEBUG)
-        elif o in ("-h", "--help"):
-            print(__doc__)
-            sys.exit(0)
-        elif o in ("-t", "--template"):
-            template_fn = a
-        elif o in ("-n", "--dry-run"):
-            nflag = True
-
-    # make sure that exactly one argument was given, later assumed to be the xml file name
-    if len(args) != 1:
-        log.critical("Incorrect usage - invalid number of arguments! Make sure that options come before argument.\n" + __doc__)
-        sys.exit(EXIT_CODE_INCORRECT_ARGUMENTS)
-
-    try:
-        device = uhal.getDevice("dummy","ipbusudp-1.3://localhost:12345","file://" + args[0])
-    except Exception:
-        raise Exception("File '%s' does not exist or has incorrect format" % args[0])
+        
+# Build the node tree
 
     t = nodetree()
     for i in device.getNodes():
         d = device.getNode(i)
-        f = d.getFirmwareInfo()
-        p = "type" in f and f["type"] == "endpoint"
-        t.add(node(i,d,p))
-    node_address_errors_detected = False
-    if not t.assign_width(t.root):
-        log.error("Node errors detected (e.g. non-aligned addresses, or address overlaps); exiting early before writing output")
-        sys.exit(EXIT_CODE_NODE_ADDRESS_ERRORS)
+        if d.getMask() == 0xffffffff:
+            f = d.getFirmwareInfo()
+            p = "type" in f and f["type"] == "endpoint"
+            s = d.getSize() if d.getMode() == uhal.BlockReadWriteMode.INCREMENTAL else 1
+            w = int(f["width"]) if "width" in f else None
+            t.add(node(i, d.getAddress(), p, s, w))
 
-    uhal_slaves = t.get_nodes(t.root)
-    moduleName = os.path.splitext(os.path.basename(args[0]))[0]
+
+    for l in str(t).splitlines():
+        log.debug(l)
+
+# Assign widths
+
+    if not t.assign_widths():
+        log.error("Node errors detected, exiting early before writing output")
+        sys.exit(EXIT_CODE_NODE_ADDRESS_ERRORS)
         
-    # retrieve masks and addresses
+# Figure out address masks
+
+    moduleName = os.path.splitext(os.path.basename(args.addrtab))[0]
     or_prod = BitArray(0x0)
     and_prod = BitArray(0xffffffff)
-
     slaves = []
-    for n,(id,addr,width) in enumerate(uhal_slaves):
-        addr_bits = BitArray(addr)
-        mask_bits = BitArray(2**width - 1)
-        log.info("uHAL slave %s,%s,0b%s,0b%s" % (n,id,addr_bits, mask_bits))
-        if (addr_bits & mask_bits).uint() != 0:
-            log.error("ERROR: Non Aligned address 0b%s with respect to address bit mask 0b%s" % (str(addr_bits),str(mask_bits)))
     
+    for n, i in enumerate(t.get_flagged_nodes(t.root)):
+        addr_bits = BitArray(i.addr)
+        mask_bits = BitArray(2 ** i.width - 1)
+        log.info("uHAL slave %s,%s,0b%s,0b%s" % (n, i.name, addr_bits, mask_bits))
+        if (addr_bits & mask_bits).uint() != 0:
+            log.error("Node <<" + i.name + ">> has a non-aligned address " + str(addr_bits) + " with respect to address bit mask " + str(mask_bits))
         or_prod = or_prod | (addr_bits & ~mask_bits)
         and_prod = and_prod & (addr_bits | mask_bits)
-        slaves.append((n,id,addr_bits,mask_bits))
+        slaves.append((n, i.name, addr_bits, mask_bits))
 
     addr_mask = or_prod & ~and_prod
     log.info("Significant address bits 0b%s" % str(addr_mask))
@@ -262,7 +287,9 @@ def main():
 # compared in the VHDL in some circumstances. Could add a loop here to calculate the
 # number of address bits needed for a unique match for a given slave.
 
-    if not nflag:
+# Generate VHDL code
+
+    if not args.dry_run:
 
         # generate vhdl snippet with symbolic constants
         snippet1 = "-- START automatically  generated VHDL the %s \n" % time.asctime()
@@ -285,7 +312,7 @@ def main():
                 snippet2 += "    elsif "
     
             snippet2 += "std_match(addr, \""
-            for i in range(32)[::-1]:
+            for i in range(31, -1, -1):
                 if not mask[i]:
                     snippet2 += "-"
                 elif addr_bits[i]:
@@ -303,7 +330,7 @@ def main():
         # print vhdl code
         vhdlfilename = "ipbus_decode_"+moduleName+".vhd"
         vhdlfile=open(vhdlfilename,"w")
-        vhdlfile.write(open(template_fn).read().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
+        vhdlfile.write(open(args.template).read().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
                        .replace("-- INSERT_SELECTION_HERE",snippet2)\
                        .replace("INSERT_SEL_WIDTH_HERE","%s"%ipbus_sel_width)\
                        .replace("PACKAGENAME",moduleName))
