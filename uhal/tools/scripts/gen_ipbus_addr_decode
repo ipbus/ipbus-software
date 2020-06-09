@@ -14,6 +14,7 @@ from __future__ import print_function
 
 import argparse
 import logging
+import itertools
 import math
 import os.path
 import sys
@@ -165,7 +166,7 @@ class nodetree(object):
                 log.error("Endpoint node <<" + n.name + ">> (base address " + hex(n.addr) + ", width " + str(n.width) + ") has insufficient width to contain its descendants (maximum address " + hex(max_addr) + ")")
                 errors_detected.append(n.name)
         if n.addr % pow(2, n.width) != 0: # Check our alignment
-            log.error("Node <<" + n.name + ">> at " + hex(n.addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address")
+            log.error("Node <<" + n.name + ">> at " + hex(n.addr) + ": Width, " + hex(n.width) + ", produces address mask " + hex(pow(2,n.width)) + " that is not aligned with node's base address. The address must be a multiple of 2^width.")
             errors_detected.append(n.name)
         return n.width
 
@@ -262,20 +263,30 @@ def main():
     if not t.assign_widths():
         log.error("Node errors detected, exiting early before writing output")
         sys.exit(EXIT_CODE_NODE_ADDRESS_ERRORS)
-        
+
+# Check for overlaps in address ranges of different endpoints
+
+    error_count = 0
+    endpoint_nodes = t.get_flagged_nodes(t.root)
+    for n1, n2 in itertools.permutations(endpoint_nodes, 2):
+        if n1.addr <= n2.addr:
+            if (n1.addr + 2 ** n1.width - 1) >= n2.addr:
+                log.error("Node <<{0[0]}>> (address range 0x{0[1]:x} to 0x{0[2]:x}) overlaps with node <<{1[0]}>> (0x{1[1]:x} to 0x{1[2]:x})".format(*[(x.name, x.addr, x.addr + 2 ** x.width - 1) for x in [n1,n2]]))
+                error_count += 1
+
 # Figure out address masks
 
-    moduleName = os.path.splitext(os.path.basename(args.addrtab))[0]
     or_prod = BitArray(0x0)
     and_prod = BitArray(0xffffffff)
     slaves = []
-    
-    for n, i in enumerate(t.get_flagged_nodes(t.root)):
+
+    for n, i in enumerate(endpoint_nodes):
         addr_bits = BitArray(i.addr)
         mask_bits = BitArray(2 ** i.width - 1)
         log.info("uHAL slave %s,%s,0b%s,0b%s" % (n, i.name, addr_bits, mask_bits))
         if (addr_bits & mask_bits).uint() != 0:
             log.error("Node <<" + i.name + ">> has a non-aligned address " + str(addr_bits) + " with respect to address bit mask " + str(mask_bits))
+            error_count += 1
         or_prod = or_prod | (addr_bits & ~mask_bits)
         and_prod = and_prod & (addr_bits | mask_bits)
         slaves.append((n, i.name, addr_bits, mask_bits))
@@ -283,12 +294,18 @@ def main():
     addr_mask = or_prod & ~and_prod
     log.info("Significant address bits 0b%s" % str(addr_mask))
 
+    if error_count > 0:
+        log.error("Node errors detected, exiting early before writing output")
+        sys.exit(EXIT_CODE_NODE_ADDRESS_ERRORS)
+
+
 # FIXME: this algorithm leads to more than the required number of address bits being
 # compared in the VHDL in some circumstances. Could add a loop here to calculate the
 # number of address bits needed for a unique match for a given slave.
 
 # Generate VHDL code
 
+    moduleName = os.path.splitext(os.path.basename(args.addrtab))[0]
     if not args.dry_run:
 
         # generate vhdl snippet with symbolic constants
