@@ -20,7 +20,6 @@ PackagerEmail = tom.williams@cern.ch
 
 
 PythonModules = ["uhal.gui","uhal.gui.guis","uhal.gui.customguis","uhal.gui.utilities","uhal.gui.test"]
-PackageScripts = ["uhal_gui.exe"]
 
 
 .PHONY: _all build clean

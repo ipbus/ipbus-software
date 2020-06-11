@@ -1,22 +1,27 @@
+BUILD_UTILS_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+RPMBUILD_DIR=${PackagePath}/rpm/RPMBUILD
 
 ifndef PythonModules
-    $(error Python module names missing "PythonModules")
+	$(error Python module names missing "PythonModules")
 endif
-PackageScripts ?= []
+
 PackageDescription ?= None
+PackageURL ?= None
+
+CACTUS_ROOT ?= /opt/cactus
+
+PYTHON_VERSIONED_COMMAND := $(shell python -c "from sys import version_info; print('python' + str(version_info[0]))")
+BUILD_ARCH = $(shell uname -m)
 
 # By default, install Python bindings using same prefix & exec_prefix as main Python installation
 ifdef prefix
-    CUSTOM_INSTALL_PREFIX = true
+	CUSTOM_INSTALL_PREFIX = true
 endif
 ifdef exec_prefix
 	CUSTOM_INSTALL_EXEC_PREFIX = true
 endif
 include $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/mfInstallVariables.mk
 
-RPMBUILD_DIR=${PackagePath}/rpm/RPMBUILD
-
-VERSIONED_PYTHON_COMMAND := $(shell python -c "from sys import version_info; print('python' + str(version_info[0]))")
 
 .PHONY: rpm _rpmall
 rpm: _rpmall
@@ -27,45 +32,52 @@ _rpmall: _all _setup_update _rpmbuild
 # Copy the libraries into python module
 .PHONY: _rpmbuild
 _rpmbuild: _setup_update
-	# Change directory into pkg and copy everything into rpm/pkg
-	cd pkg && \
-	  find . -name "*" -exec install -D \{\} ${RPMBUILD_DIR}/\{\} \;
+	find pkg -not -type d -printf '%P\0' | xargs -0 -n1 -I {} install -D pkg/{} ${RPMBUILD_DIR}/{}
+	find scripts etc -not -type d -printf '%p\0' | xargs -0 -n1 -I {} cp --parents {} ${RPMBUILD_DIR}
+	find ${RPMBUILD_DIR} -type f -exec sed -i "s|#!/usr/bin/env python|#!/usr/bin/env "${PYTHON_VERSIONED_COMMAND}"|" {} \;
 	# Add a manifest file
 	echo "include */*.so" > ${RPMBUILD_DIR}/MANIFEST.in
 	# Change into rpm/pkg to finally run the customized setup.py
-	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
-	cd ${RPMBUILD_DIR} && python ${PackageName}.py bdist_rpm --spec-only \
-	  --release ${PACKAGE_RELEASE}.${CACTUS_OS}.${CXX_VERSION_TAG}.python${PYTHON_VERSION} \
-	  --requires "${VERSIONED_PYTHON_COMMAND} `find ${RPMBUILD_DIR} -type f -exec file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' '`" \
-	  --binary-only --force-arch=`uname -m`
-	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py sdist
-	mkdir -p ${RPMBUILD_DIR}/build/bdist.linux-x86_64/rpm/SOURCES
-	cp ${RPMBUILD_DIR}/dist/${PackageName}-*.tar.gz ${RPMBUILD_DIR}/build/bdist.linux-x86_64/rpm/SOURCES/
-	cd ${RPMBUILD_DIR} && bindir=$(bindir) rpmbuild -bb --define 'debug_package %{nil}' \
-	  --define '_topdir '${RPMBUILD_DIR}'/build/bdist.linux-x86_64/rpm' \
-	  --clean dist/${PackageName}.spec
+	cd ${RPMBUILD_DIR} && \
+	  LIB_REQUIRES=$$(find ${RPMBUILD_DIR} -type f -print0 | xargs -0 -n1 -I {} file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' ') && \
+	  python ${PackageName}.py bdist_rpm --spec-only \
+	    --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} \
+	    --requires "${PYTHON_VERSIONED_COMMAND} $$LIB_REQUIRES" \
+	    --force-arch=${BUILD_ARCH} \
+	    --binary-only
+	cd ${RPMBUILD_DIR} && \
+	  bindir=$(bindir) python ${PackageName}.py sdist
+	mkdir -p ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES
+	cp ${RPMBUILD_DIR}/dist/${PackageName}-*.tar.gz ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES/
+	cd ${RPMBUILD_DIR} && \
+	  bindir=$(bindir) rpmbuild -bb \
+	    --define 'debug_package %{nil}' \
+	    --define '_topdir '${RPMBUILD_DIR}'/build/bdist.linux-${BUILD_ARCH}/rpm' \
+	    --clean dist/${PackageName}.spec
 	# Harvest the crop
-	find ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} ${PackagePath}/rpm \;
+	find ${RPMBUILD_DIR} -name "*.rpm" -print0 | xargs -0 -n1 -I {} mv {} rpm/
 
 
-.PHONY: _setup_update
+.PHONY: _setup_update	
 _setup_update:
 	${MakeDir} ${RPMBUILD_DIR}
-	cp ${BUILD_HOME}/uhal/config/setupTemplate.py ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__python_packages__#${PythonModules}#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__packagename__#${PackageName}#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__version__#$(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR).$(PACKAGE_VER_PATCH)#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__author__#${Packager}#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__author_email__#${PackagerEmail}#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__description__#${PackageDescription}#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__url__#${PackageURL}#' ${RPMBUILD_DIR}/${PackageName}.py
-	sed -i 's#__scripts__#${PackageScripts}#' ${RPMBUILD_DIR}/${PackageName}.py
+	cp ${BUILD_UTILS_DIR}/setupTemplate.py ${RPMBUILD_DIR}/${PackageName}.py
+	sed -i -e 's#__python_packages__#${PythonModules}#' \
+	       -e 's#__packagename__#${PackageName}#' \
+	       -e 's#__version__#${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}#' \
+	       -e 's#__author__#${Packager}#' \
+	       -e 's#__description__#${PackageDescription}#' \
+	       -e 's#__url__#${PackageURL}#' \
+	       -e 's#__project__#${Project}#' \
+	       -e 's#__install_dir__#${CACTUS_ROOT}#' \
+	       -e 's#__package_build_dir__#${RPMBUILD_DIR}#' \
+	       ${RPMBUILD_DIR}/${PackageName}.py
 
 
 .PHONY: cleanrpm _cleanrpm
 cleanrpm: _cleanrpm
 _cleanrpm:
-	rm -rf ${PackagePath}/rpm
+	rm -rf rpm
 
 
 .PHONY: install
