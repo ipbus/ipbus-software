@@ -1,0 +1,248 @@
+
+variables:
+  UHAL_ENABLE_IPBUS_MMAP: ""
+  VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests.supp"
+
+
+.template_test_rpmInstall:
+  stage: test
+  dependencies: []
+  before_script:
+    - export OUTPUT_PIPELINE_URL=${OUTPUT_ROOT_URL}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
+    - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_URL=${OUTPUT_PIPELINE_URL/commits/tags} ; fi
+    - sudo cp ci/yum/ipbus-sw-ci.repo /etc/yum.repos.d/ipbus-sw-ci.repo
+    - sudo sed -i -re "s|^baseurl=.*|baseurl=${OUTPUT_PIPELINE_URL}/repos/${REPO_URL_OS_SUBDIR}|g" /etc/yum.repos.d/ipbus-sw-ci.repo
+    - cat /etc/yum.repos.d/ipbus-sw-ci.repo
+    - sudo rpm --rebuilddb && sudo yum clean all 
+    - sudo yum -y groupinstall ${YUM_GROUPINSTALL_ARGUMENTS} ipbus-sw
+    - if [ "$REPO_URL_OS_SUBDIR" != "centos8/x86_64" ]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
+    - if [ "$REPO_URL_OS_SUBDIR" == "slc6/x86_64" ]; then sudo yum -y install python-argparse; fi
+    - rpm -qa | grep cactus | sort
+
+.template_test:slc6:
+  extends: .template_test_rpmInstall
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-slc6:2020-06-13
+  needs:
+    - job: publish:yum:slc6
+      artifacts: false
+  variables:
+    REPO_URL_OS_SUBDIR: slc6/x86_64
+    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    VALGRIND_ARGS: "--suppressions=/opt/cactus/etc/uhal/tests/valgrind/uhal_tests_slc6.supp"
+
+.template_test:centos7:
+  extends: .template_test_rpmInstall
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2020-06-13
+  needs:
+    - job: publish:yum:centos7
+      artifacts: false
+  variables:
+    REPO_URL_OS_SUBDIR: centos7/x86_64
+    TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
+    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+
+.template_test:centos8:
+  extends: .template_test_rpmInstall
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2020-06-13
+  needs:
+    - job: publish:yum:centos8
+      artifacts: false
+  variables:
+    REPO_URL_OS_SUBDIR: centos8/x86_64
+    TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
+    YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
+    UHAL_GUI_DEPENDENCIES: "python3-numpy"
+
+
+.template_test_simpleInstall:
+  stage: test
+  before_script:
+    - sudo make -k Set=all install
+    - ls -al /opt/cactus /opt/cactus/*
+    - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
+
+.template_test:fedora30-python2:
+  extends: .template_test_simpleInstall
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python2:2020-06-13__erlang21.3_gcc9.3.1_boost1.69.0_pugixml1.9
+  needs:
+    - build:fedora30-python2
+  variables:
+    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+
+.template_test:fedora30-python3:
+  extends: .template_test_simpleInstall
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python3:2020-06-13__erlang21.3_gcc9.3.1_boost1.69.0_pugixml1.9
+  needs:
+    - build:fedora30-python3
+  variables:
+    UHAL_GUI_DEPENDENCIES: python3-wxpython4
+
+.template_test:ubuntu16:
+  extends: .template_test_simpleInstall
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2020-06-13__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  needs:
+    - build:ubuntu16
+
+
+.job_template: &test_core_jobScript
+  tags:
+    - docker-cap-net-admin
+  script:
+    - export PATH=/opt/cactus/bin:/opt/cactus/bin/uhal/tests:$PATH
+    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
+    - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
+    - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
+    - service controlhub stop || /opt/cactus/bin/controlhub_stop
+    - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbusudp* --log_level=test_suite
+
+.job_template: &test_python_jobScript
+  script:
+    - export PATH=/opt/cactus/bin/uhal/tests:$PATH
+    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
+    - uhal_test_suite.py -v -s pycohal
+
+.job_template: &test_gui_jobScript
+  script:
+    - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install ${UHAL_GUI_DEPENDENCIES} ; else sudo apt-get update && sudo apt-get -y install python-wx* ; fi'
+    - export PATH=/opt/cactus/bin/uhal/tests:$PATH
+    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
+    - uhal_test_suite.py -v -s gui
+
+.job_template: &test_tools_jobScript
+  script:
+    - export PATH=/opt/cactus/bin/uhal/tests:/opt/cactus/bin/uhal/tools:$PATH
+    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
+    - uhal_test_suite.py -v -s tools
+
+.job_template: &test_controlhub_service_jobScript
+  script:
+    - /sbin/service controlhub stop
+    - 'for i in `seq 1 50`; do /sbin/service controlhub start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /sbin/service controlhub status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /sbin/service controlhub stop; done'
+
+.job_template: &test_controlhub_plainScripts_jobScript
+  script:
+    - /opt/cactus/bin/controlhub_stop || true
+    - 'for i in `seq 1 50`; do /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /opt/cactus/bin/controlhub_stop; done'
+
+
+test_core:slc6:
+  extends: .template_test:slc6
+  <<: *test_core_jobScript
+
+test_python:slc6:
+  extends: .template_test:slc6
+  <<: *test_python_jobScript
+
+test_gui:slc6:
+  extends: .template_test:slc6
+  <<: *test_gui_jobScript
+
+test_tools:slc6:
+  extends: .template_test:slc6
+  <<: *test_tools_jobScript
+
+test_controlhub:slc6:
+  extends: .template_test:slc6
+  <<: *test_controlhub_service_jobScript
+
+
+test_core:centos7:
+  extends: .template_test:centos7
+  <<: *test_core_jobScript
+
+test_python:centos7:
+  extends: .template_test:centos7
+  <<: *test_python_jobScript
+
+test_gui:centos7:
+  extends: .template_test:centos7
+  <<: *test_gui_jobScript
+
+test_tools:centos7:
+  extends: .template_test:centos7
+  <<: *test_tools_jobScript
+
+test_controlhub:centos7:
+  extends: .template_test:centos7
+  <<: *test_controlhub_plainScripts_jobScript
+
+
+test_core:centos8:
+  extends: .template_test:centos8
+  <<: *test_core_jobScript
+
+test_python:centos8:
+  extends: .template_test:centos8
+  <<: *test_python_jobScript
+
+test_tools:centos8:
+  extends: .template_test:centos8
+  <<: *test_tools_jobScript
+
+test_controlhub:centos8:
+  extends: .template_test:centos8
+  <<: *test_controlhub_plainScripts_jobScript
+
+
+test_core:fedora30-python2:
+  extends: .template_test:fedora30-python2
+  <<: *test_core_jobScript
+
+test_python:fedora30-python2:
+  extends: .template_test:fedora30-python2
+  <<: *test_python_jobScript
+
+test_gui:fedora30-python2:
+  extends: .template_test:fedora30-python2
+  <<: *test_gui_jobScript
+
+test_tools:fedora30-python2:
+  extends: .template_test:fedora30-python2
+  <<: *test_tools_jobScript
+
+test_controlhub:fedora30-python2:
+  extends: .template_test:fedora30-python2
+  <<: *test_controlhub_plainScripts_jobScript
+
+
+test_core:fedora30-python3:
+  extends: .template_test:fedora30-python3
+  <<: *test_core_jobScript
+
+test_python:fedora30-python3:
+  extends: .template_test:fedora30-python3
+  <<: *test_python_jobScript
+
+test_gui:fedora30-python3:
+  extends: .template_test:fedora30-python3
+  <<: *test_gui_jobScript
+
+test_tools:fedora30-python3:
+  extends: .template_test:fedora30-python3
+  <<: *test_tools_jobScript
+
+test_controlhub:fedora30-python3:
+  extends: .template_test:fedora30-python3
+  <<: *test_controlhub_plainScripts_jobScript
+
+
+test_core:ubuntu16:
+  extends: .template_test:ubuntu16
+  <<: *test_core_jobScript
+
+test_python:ubuntu16:
+  extends: .template_test:ubuntu16
+  <<: *test_python_jobScript
+
+test_gui:ubuntu16:
+  extends: .template_test:ubuntu16
+  <<: *test_gui_jobScript
+
+test_tools:ubuntu16:
+  extends: .template_test:ubuntu16
+  <<: *test_tools_jobScript
+
+test_controlhub:ubuntu16:
+  extends: .template_test:ubuntu16
+  <<: *test_controlhub_plainScripts_jobScript

@@ -1,0 +1,68 @@
+
+.template_build_rpm_yumrepo:
+  stage: build
+  before_script:
+    - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
+    - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
+  script:
+    - cd .. && sudo rm -rf ipbus-software___ && mv ipbus-software ipbus-software___ && mkdir ipbus-software && cd ipbus-software___
+    - make -k Set=all
+    - make -k Set=all PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
+    - make -C uhal/log generate_files
+    - git diff --exit-code
+    - mkdir -p ${REPO_DIR}
+    - cp `find . -iname "*.rpm"` ${REPO_DIR} && cp ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
+    - ls ${REPO_DIR}
+    - createrepo -vg yumgroups.xml ${REPO_DIR}
+  artifacts:
+    paths:
+      - ci_results/repos/${OUTPUT_REPO_SUBDIR}
+    when: always
+    expire_in: 1 day
+
+
+build:slc6:
+  extends: .template_build_rpm_yumrepo
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-slc6:2020-06-13
+  variables:
+    YUMGROUPS_FILE: ci/yum/yumgroups-slc6.xml
+    OUTPUT_REPO_SUBDIR: slc6/x86_64
+
+build:centos7:
+  extends: .template_build_rpm_yumrepo
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7:2020-06-13__boost1.53.0_pugixml1.8
+  variables:
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+    OUTPUT_REPO_SUBDIR: centos7/x86_64
+
+build:centos8:
+  extends: .template_build_rpm_yumrepo
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:2020-06-13__boost1.66.0_pugixml1.9
+  variables:
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+    OUTPUT_REPO_SUBDIR: centos8/x86_64
+
+
+publish:yum:slc6:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/slc6/x86_64
+    DEPLOY_SUBDIR: repos/slc6/x86_64
+  needs:
+    - build:slc6
+
+publish:yum:centos7:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/centos7/x86_64
+    DEPLOY_SUBDIR: repos/centos7/x86_64
+  needs:
+    - build:centos7
+
+publish:yum:centos8:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/centos8/x86_64
+    DEPLOY_SUBDIR: repos/centos8/x86_64
+  needs:
+    - build:centos8

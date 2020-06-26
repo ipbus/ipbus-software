@@ -1,0 +1,27 @@
+
+.template_github_commit_status:
+  image: cern/cc7-base:20170113
+  except:
+    - tags
+  dependencies: []
+
+github_commit_status:start:
+  extends: .template_github_commit_status
+  stage: initial_report
+  when: always
+  script:
+    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"pending\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"CI pipeline has started\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"
+
+github_commit_status:end:failure:
+  extends: .template_github_commit_status
+  stage: final_report
+  when: on_failure
+  script:
+    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"failure\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"Jobs have failed in CI pipeline\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"
+
+github_commit_status:end:success:
+  extends: .template_github_commit_status
+  stage: final_report
+  when: on_success
+  script:
+    - "curl -H \"Authorization: token ${GITHUB_STATUS_TOKEN}\" --data '{\"state\" : \"success\", \"target_url\" : \"'\"${CI_PROJECT_URL}\"'/pipelines/'\"${CI_PIPELINE_ID}\"'\", \"description\" : \"CI pipeline completed successfully!\", \"context\" : \"gitlab-ci\"}' ${GITHUB_REPO_API_URL}/statuses/${CI_BUILD_REF}"

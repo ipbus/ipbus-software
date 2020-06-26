@@ -1,0 +1,24 @@
+build:doxygen:
+  stage: build
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2020-06-13__doxygen1.8.18
+  tags:
+    - docker
+  script:
+    - ./scripts/doxygen/api_uhal.sh "(${CI_COMMIT_TAG:-commit ${CI_COMMIT_SHA}})"
+    - ls -al /tmp
+    - mkdir -p ${CI_PROJECT_DIR}/ci_results/
+    - mv /tmp/api_uhal ${CI_PROJECT_DIR}/ci_results/api_uhal
+  artifacts:
+    paths:
+      - ci_results/api_uhal
+    when: always
+    expire_in: 1 day
+
+
+publish:doxygen:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/api_uhal
+    DEPLOY_SUBDIR: api_uhal
+  needs:
+    - build:doxygen
