@@ -20,30 +20,31 @@ _rpmall: _all _spec_update _rpmbuild
 _rpmbuild: _spec_update
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}
 	rpmbuild --quiet -bb -bl --buildroot=${RPMBUILD_DIR}/BUILD --define  "_topdir ${RPMBUILD_DIR}" rpm/${PackageName}.spec
-	find  ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} $(PackagePath)/rpm \;
+	find ${RPMBUILD_DIR} -name "*.rpm" -print0 | xargs -0 -n1 -I {} mv {} rpm/
 
-.PHONY: _spec_update	
+.PHONY: _spec_update
 _spec_update:
 	mkdir -p ${PackagePath}/rpm
 	cp ${BUILD_HOME}/uhal/config/specTemplate.spec ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__package__#${Package}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__packagename__#${PackageName}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__version__#$(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR).$(PACKAGE_VER_PATCH)#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__release__#${PACKAGE_RELEASE}.${RPM_RELEASE_SUFFIX}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__prefix__#${CACTUS_ROOT}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__sources_dir__#${RPMBUILD_DIR}/SOURCES#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__packagedir__#${PackagePath}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__os__#${CACTUS_OS}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__platform__#None#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__project__#${Project}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__author__#${Packager}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__summary__#${PackageSummary}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__description__#${PackageDescription}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__url__#${PackageURL}#' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's#__includedirs__#${IncludePaths}#' $(PackagePath)/rpm/$(PackageName).spec
-	sed -i 's|^.*__build_requires__.*|${BUILD_REQUIRES_TAG}|' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's|^.*__requires__.*|${REQUIRES_TAG}|' ${PackagePath}/rpm/${PackageName}.spec
-	sed -i 's|^BuildArch:.*|$(if ${PackageBuildArch},BuildArch: ${PackageBuildArch},\# BuildArch not specified)|' ${PackagePath}/rpm/${PackageName}.spec
+	sed -i -e 's#__package__#${Package}#' \
+	       -e 's#__packagename__#${PackageName}#' \
+	       -e 's#__version__#$(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR).$(PACKAGE_VER_PATCH)#' \
+	       -e 's#__release__#${PACKAGE_RELEASE}.${RPM_RELEASE_SUFFIX}#' \
+	       -e 's#__prefix__#${CACTUS_ROOT}#' \
+	       -e 's#__sources_dir__#${RPMBUILD_DIR}/SOURCES#' \
+	       -e 's#__packagedir__#${PackagePath}#' \
+	       -e 's#__os__#${CACTUS_OS}#' \
+	       -e 's#__platform__#None#' \
+	       -e 's#__project__#${Project}#' \
+	       -e 's#__author__#${Packager}#' \
+	       -e 's#__summary__#${PackageSummary}#' \
+	       -e 's#__description__#${PackageDescription}#' \
+	       -e 's#__url__#${PackageURL}#' \
+	       -e 's#__includedirs__#${IncludePaths}#' \
+	       -e 's|^.*__build_requires__.*|${BUILD_REQUIRES_TAG}|' \
+	       -e 's|^.*__requires__.*|${REQUIRES_TAG}|' \
+	       -e 's|^BuildArch:.*|$(if ${PackageBuildArch},BuildArch: ${PackageBuildArch},\# BuildArch not specified)|' \
+	       ${PackagePath}/rpm/${PackageName}.spec
 	if [ "${BuildDebuginfoRPM}" == "1" ]; then sed -i '1 i\%define _build_debuginfo_package %{nil}' ${PackagePath}/rpm/${PackageName}.spec; fi
 
 .PHONY: cleanrpm _cleanrpm
