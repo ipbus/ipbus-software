@@ -695,6 +695,11 @@ namespace uhal
     return std::vector<const Node*>(lAncestors.rbegin(), lAncestors.rend());
   }
 
+  bool Node::isChildOf(const Node& aParent) const
+  {
+    return (&aParent == mParent);
+  }
+
 
   Node::const_iterator::const_iterator() :
     mBegin ( NULL )
