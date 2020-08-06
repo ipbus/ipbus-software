@@ -674,10 +674,10 @@ namespace uhal
 
             if ( ( ( lTop2 >= lBottom1 ) && ( lTop2 <= lTop1 ) ) || ( ( lTop1 >= lBottom2 ) && ( lTop1 <= lTop2 ) ) )
             {
-              lReport << "Branch '" << lNode1->getPath()
-                      << "' has address range [0x" << std::setw ( 8 ) << lBottom1 << " - 0x" << std::setw ( 8 ) <<  lTop1
-                      << "] which overlaps with branch '" << lNode2->getPath()
-                      << "' which has address range [0x"  << std::setw ( 8 )  <<  lBottom2  << " - 0x" << std::setw ( 8 ) <<  lTop2
+              lReport << "Node '" << lNode1->getPath()
+                      << "' [addresses 0x" << std::setw ( 8 ) << lBottom1 << " - 0x" << std::setw ( 8 ) <<  lTop1
+                      << "] overlaps with '" << lNode2->getPath()
+                      << "' [addresses 0x"  << std::setw ( 8 )  <<  lBottom2  << " - 0x" << std::setw ( 8 ) <<  lTop2
                       << "]." << std::endl;
             }
           }
@@ -688,11 +688,11 @@ namespace uhal
 
             if ( ( lAddr2 >= lBottom1 ) && ( lAddr2 <= lTop1 ) )
             {
-              lReport << "Branch '" << lNode1->getPath()
-                      << "' has address range [0x"  << std::setw ( 8 ) << lBottom1 << " - 0x"  << std::setw ( 8 ) << lTop1
-                      << "] which overlaps with branch '" << lNode2->getPath()
-                      << "' which has address 0x"  << std::setw ( 8 ) << lAddr2
-                      << "." << std::endl;
+              lReport << "Node '" << lNode1->getPath()
+                      << "' [addresses 0x"  << std::setw ( 8 ) << lBottom1 << " - 0x"  << std::setw ( 8 ) << lTop1
+                      << "] overlaps with '" << lNode2->getPath()
+                      << "' [address 0x"  << std::setw ( 8 ) << lAddr2
+                      << "]." << std::endl;
             }
           }
         }
@@ -713,10 +713,10 @@ namespace uhal
 
             if ( ( lAddr1 >= lBottom2 ) && ( lAddr1 <= lTop2 ) )
             {
-              lReport <<  "Branch '" << lNode1->getPath()
-                      <<"' has address 0x"  << std::setw ( 8 ) << lAddr1
-                      <<" which overlaps with branch '" << lNode2->getPath()
-                      <<"' which has address range [0x"   << std::setw ( 8 ) << lBottom2 << " - 0x"   << std::setw ( 8 ) << lTop2
+              lReport <<  "Node '" << lNode1->getPath()
+                      <<"' [address 0x"  << std::setw ( 8 ) << lAddr1
+                      <<"] overlaps with '" << lNode2->getPath()
+                      <<"' [addresses 0x"   << std::setw ( 8 ) << lBottom2 << " - 0x"   << std::setw ( 8 ) << lTop2
                       << "]."<< std::endl;
             }
           }
@@ -748,13 +748,13 @@ namespace uhal
 
                 if ( lShouldThrow )
                 {
-                  lReport <<  "Branch '" << lNode1->getPath()
-                          << "' has address 0x" << std::setw ( 8 ) << lAddr1
-                          << " and mask 0x" << std::setw ( 8 ) << lNode1->mMask
-                          << " which overlaps with branch '" << lNode2->getPath()
-                          << "' which has address 0x" << std::setw ( 8 ) << lAddr2
-                          << " and mask 0x" << std::setw ( 8 ) << lNode2->mMask
-                          << "." << std::endl;
+                  lReport <<  "Node '" << lNode1->getPath()
+                          << "' [address 0x" << std::setw ( 8 ) << lAddr1
+                          << ", mask 0x" << std::setw ( 8 ) << lNode1->mMask
+                          << "] overlaps with '" << lNode2->getPath()
+                          << "' [address 0x" << std::setw ( 8 ) << lAddr2
+                          << ", mask 0x" << std::setw ( 8 ) << lNode2->mMask
+                          << "]." << std::endl;
                 }
               }
             }
