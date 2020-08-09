@@ -53,8 +53,6 @@ namespace uhal
 
     std::vector<std::pair<const Node*, const Node*> > getAddressOverlaps(const Node& aNode);
 
-    std::vector<std::pair<const Node*, const Node*> > getAddressOverlapsNew(const Node& aNode);
-
     void printNodeOverlapDescription(std::ostream& aStream, const Node& aNode1, const Node& aNode2);
 
     bool writeNodeOverlapReport(const std::string& aFilePath, const std::vector<std::pair<const Node*, const Node*> >& aNodes, const std::string& aHeader);
