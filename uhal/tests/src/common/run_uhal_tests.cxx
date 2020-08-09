@@ -154,13 +154,16 @@ main( int argc, char* argv[] )
     boost::unit_test::traverse_test_tree( boost::unit_test::framework::master_test_suite(), lVisitor);
     exit ( 0 );
   }
-  else if ( vm.count (kOptionConnFile) == 0)
+
+  if ( vm.count (kOptionConnFile) == 0)
   {
     std::cerr << " ERROR : Option '" << kOptionConnFile << "' must be specified under normal running mode." << std::endl << std::endl;
     std::cout << "Usage: " << argv[0] << " [OPTIONS]" << std::endl;
     std::cout << lDesc << std::endl;
     exit ( 1 );
   }
+  else if ( AbstractFixture::connectionFileURI.find("file://") != 0 )
+    AbstractFixture::connectionFileURI = "file://" + AbstractFixture::connectionFileURI;
 
   AbstractFixture::quickTest = ( vm.count(kOptionQuickTest) > 0);
 
