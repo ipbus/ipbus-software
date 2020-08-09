@@ -135,8 +135,6 @@ namespace uhal
 
       void checkForAddressCollisions ( Node* aNode , const boost::filesystem::path& aPath );
 
-      static bool compareNodePtr ( Node* aNodeL, Node* aNodeR );
-
       Node* plainNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
       //       Node* classNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
       Node* moduleNodeCreator ( const bool& aRequireId , const pugi::xml_node& aXmlNode );
