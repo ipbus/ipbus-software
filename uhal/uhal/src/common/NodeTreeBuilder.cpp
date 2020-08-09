@@ -191,21 +191,12 @@ namespace uhal
 
   Node* NodeTreeBuilder::build(const pugi::xml_node& aNode, const boost::filesystem::path& aAddressFilePath)
   {
-    typedef boost::chrono::steady_clock Clock_t;
-    Clock_t::time_point lStart(Clock_t::now());
     mFileCallStack.push_back ( aAddressFilePath );
     Node* lNode ( mTopLevelNodeParser ( aNode ) );
     mFileCallStack.pop_back( );
-    Clock_t::time_point lMid1(Clock_t::now());
     calculateHierarchicalAddresses ( lNode , 0x00000000 );
-    Clock_t::time_point lMid2(Clock_t::now());
     checkForAddressCollisions ( lNode , aAddressFilePath );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
-    Clock_t::time_point lEnd(Clock_t::now());
 
-    size_t lNodeCount = 0;
-    for (Node::const_iterator lIt = lNode->begin() ; lIt.next() ; )
-      lNodeCount++;
-    std::cout << "NodeTreeBuilder::build(\"" << aAddressFilePath.filename().native() << "\" => " << lNodeCount << " nodes): " << lEnd - lStart << " = " << lMid1 - lStart << " + " << lMid2 - lMid1 << " + " << lEnd - lMid2 << std::endl;
     return lNode;
   }
 

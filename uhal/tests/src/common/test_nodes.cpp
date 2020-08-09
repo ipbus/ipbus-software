@@ -1023,10 +1023,6 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_1, AddressTableOverlapFixture)
 
   // Compare expectations with result
   std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
-  for (size_t i=0; i < lResult.size(); i++) {
-    detail::printNodeOverlapDescription(std::cout, *lResult.at(i).first, *lResult.at(i).second);
-    std::cout << std::endl;
-  }
   BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
 }
 
@@ -1046,10 +1042,6 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_2, AddressTableOverlapFixture)
 
   // Compare expectations with result
   std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
-  for (size_t i=0; i < lResult.size(); i++) {
-    detail::printNodeOverlapDescription(std::cout, *lResult.at(i).first, *lResult.at(i).second);
-    std::cout << std::endl;
-  }
   BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
 }
 
@@ -1181,10 +1173,6 @@ BOOST_FIXTURE_TEST_CASE (overlap_ram, AddressTableOverlapFixture)
 
       // Compare expectations with result
       std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
-  for (size_t i=0; i < lResult.size(); i++) {
-    detail::printNodeOverlapDescription(std::cout, *lResult.at(i).first, *lResult.at(i).second);
-    std::cout << std::endl;
-  }
       BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
     }
   }
