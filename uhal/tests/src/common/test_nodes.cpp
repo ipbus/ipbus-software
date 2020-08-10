@@ -26,6 +26,7 @@
 ---------------------------------------------------------------------------
 */
 
+#include <iomanip>
 #include <typeinfo>
 
 #include "uhal/NodeTreeBuilder.hpp"
@@ -42,6 +43,27 @@
 
 
 namespace uhal {
+
+
+std::ostream& operator<< (std::ostream& aStream, const std::pair<const Node*, const Node*>& aNodes)
+{
+  aStream << "{";
+  if (aNodes.first != NULL)
+    aStream << "'" << aNodes.first->getPath() << "'";
+  else
+    aStream << "NULL";
+
+  aStream << ", ";
+  if (aNodes.second != NULL)
+    aStream << "'" << aNodes.second->getPath() << "'";
+  else
+    aStream << "NULL";
+
+  aStream << "}";
+  return aStream;
+}
+
+
 namespace tests {
 
 struct NodeProperties {
@@ -70,6 +92,18 @@ struct SimpleAddressTableFixture {
 public:
   SimpleAddressTableFixture();
   ~SimpleAddressTableFixture() {}
+
+  const std::string addrTableStr;
+  pugi::xml_document addrTableDoc;
+
+  std::vector<NodeProperties> nodeProperties;
+};
+
+
+struct AddressTableOverlapFixture {
+public:
+  AddressTableOverlapFixture();
+  ~AddressTableOverlapFixture() {}
 
   const std::string addrTableStr;
   pugi::xml_document addrTableDoc;
@@ -131,6 +165,109 @@ SimpleAddressTableFixture::SimpleAddressTableFixture() :
   nodeProperties.push_back(NodeProperties("ram1", 256, defs::INCREMENTAL, defs::READWRITE, 256, "", 0));
   nodeProperties.push_back(NodeProperties("ram2", 528, defs::INCREMENTAL, defs::READWRITE, 16, "", 0));
   nodeProperties.push_back(NodeProperties("aPort", 768, defs::NON_INCREMENTAL, defs::READWRITE, 1024, "", 0));
+}
+
+
+AddressTableOverlapFixture::AddressTableOverlapFixture() :
+  addrTableStr("<node>"
+    "<node id='reg1' address='0x0'/>"
+    "<node id='reg2' address='0x1'/>"
+
+    "<node id='reg3' address='0x2'>"
+    "  <node id='A' mask='0x0000ffff'/>"
+    "  <node id='B' mask='0xffff0000'/>"
+    "</node>"
+    "<node id='reg4' address='0x3'>"
+    "  <node id='A' mask='0x000000ff'/>"
+    "  <node id='B' mask='0x0000ff00'/>"
+    "  <node id='C' mask='0x00ff0000'/>"
+    "  <node id='D' mask='0xff000000'/>"
+    "</node>"
+
+    "<node id='port1' address='0x4' mode='port' size='256'/>"
+    "<node id='port2' address='0x5' mode='port' size='1024'/>"
+    "<node id='ram1' address='0x08' mode='block' size='8'/>"
+    "<node id='ram2' address='0x10' mode='block' size='16'/>"
+
+    "<node id='module1' address='0x40'>"
+    "  <node id='reg1' address='0x0'/>"
+    "  <node id='reg2' address='0x1'>"
+    "    <node id='mask1' mask='0x00000fff'/>"
+    "    <node id='mask2' mask='0x00fff000'/>"
+    "    <node id='mask3' mask='0xff000000'/>"
+    "  </node>"
+    "  <node id='port' address='0x2' mode='port' size='256'/>"
+    "  <node id='ram' address='0x10' mode='block' size='16'/>"
+    "</node>"
+
+    "<node id='module2' address='0x60'>"
+    "  <node id='regA' address='0x0'/>"
+    "  <node id='regB' address='0x1'>"
+    "    <node id='A' mask='0x00000fff'/>"
+    "    <node id='B' mask='0x00fff000'/>"
+    "    <node id='C' mask='0xff000000'/>"
+    "  </node>"
+    "  <node id='fifo' address='0x2' mode='port' size='256'/>"
+    "  <node id='block' address='0x10' mode='block' size='16'/>"
+    "</node>"
+    "</node>")
+{
+  BOOST_REQUIRE(addrTableDoc.load(addrTableStr.c_str()));
+
+  nodeProperties.push_back(NodeProperties("reg1", 0, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.push_back(NodeProperties("reg2", 1, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.push_back(NodeProperties("reg3", 2, defs::SINGLE, defs::READWRITE, 1, "", 2));
+  nodeProperties.push_back(NodeProperties("reg3.A", 2, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xffff;
+  nodeProperties.push_back(NodeProperties("reg3.B", 2, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xffff0000;
+  nodeProperties.push_back(NodeProperties("reg4", 3, defs::SINGLE, defs::READWRITE, 1, "", 4));
+  nodeProperties.push_back(NodeProperties("reg4.A", 3, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xff;
+  nodeProperties.push_back(NodeProperties("reg4.B", 3, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xff00;
+  nodeProperties.push_back(NodeProperties("reg4.C", 3, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xff0000;
+  nodeProperties.push_back(NodeProperties("reg4.D", 3, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xff000000;
+
+  nodeProperties.push_back(NodeProperties("port1", 4, defs::NON_INCREMENTAL, defs::READWRITE, 256, "", 0));
+  nodeProperties.push_back(NodeProperties("port2", 5, defs::NON_INCREMENTAL, defs::READWRITE, 1024, "", 0));
+  nodeProperties.push_back(NodeProperties("ram1", 8, defs::INCREMENTAL, defs::READWRITE, 8, "", 0));
+  nodeProperties.push_back(NodeProperties("ram2", 16, defs::INCREMENTAL, defs::READWRITE, 16, "", 0));
+
+  nodeProperties.push_back(NodeProperties("module1", 64, defs::HIERARCHICAL, defs::READWRITE, 1, "", 7));
+  nodeProperties.push_back(NodeProperties("module1.reg1", 64, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.push_back(NodeProperties("module1.reg2", 65, defs::SINGLE, defs::READWRITE, 1, "", 3));
+  nodeProperties.push_back(NodeProperties("module1.reg2.mask1", 65, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xfff;
+  nodeProperties.push_back(NodeProperties("module1.reg2.mask2", 65, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xfff000;
+  nodeProperties.push_back(NodeProperties("module1.reg2.mask3", 65, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xff000000;
+  nodeProperties.push_back(NodeProperties("module1.port", 66, defs::NON_INCREMENTAL, defs::READWRITE, 256, "", 0));
+  nodeProperties.push_back(NodeProperties("module1.ram", 80, defs::INCREMENTAL, defs::READWRITE, 16, "", 0));
+
+  nodeProperties.push_back(NodeProperties("module2", 96, defs::HIERARCHICAL, defs::READWRITE, 1, "", 7));
+  nodeProperties.push_back(NodeProperties("module2.regA", 96, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.push_back(NodeProperties("module2.regB", 97, defs::SINGLE, defs::READWRITE, 1, "", 3));
+  nodeProperties.push_back(NodeProperties("module2.regB.A", 97, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xfff;
+  nodeProperties.push_back(NodeProperties("module2.regB.B", 97, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xfff000;
+  nodeProperties.push_back(NodeProperties("module2.regB.C", 97, defs::SINGLE, defs::READWRITE, 1, "", 0));
+  nodeProperties.back().mask = 0xff000000;
+  nodeProperties.push_back(NodeProperties("module2.fifo", 98, defs::NON_INCREMENTAL, defs::READWRITE, 256, "", 0));
+  nodeProperties.push_back(NodeProperties("module2.block", 112, defs::INCREMENTAL, defs::READWRITE, 16, "", 0));
+
+  for (size_t i=0; i < nodeProperties.size(); i++) {
+    BOOST_REQUIRE_LE(nodeProperties.at(i).descendantIds.size(), (nodeProperties.size() - i - 1));
+    for (size_t j=0; j < nodeProperties.at(i).descendantIds.size(); j++) {
+      std::string lRelativePath = nodeProperties.at(i+j+1).path.substr(nodeProperties.at(i).path.empty() ? 0 : nodeProperties.at(i).path.size() + 1);
+      nodeProperties.at(i).descendantIds.at(j) = lRelativePath;
+      nodeProperties.at(i).descendantTypes[lRelativePath] = nodeProperties.at(i+j+1).type;
+    }
+  }
 }
 
 
@@ -829,6 +966,277 @@ BOOST_FIXTURE_TEST_CASE (size_without_node_attribute, SimpleAddressTableFixture)
 
 
 BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE( overlapChecks )
+
+
+BOOST_FIXTURE_TEST_CASE (no_overlap, AddressTableOverlapFixture)
+{
+  boost::shared_ptr<Node> lNode(NodeTreeBuilder::getInstance().build(addrTableDoc.child ( "node" ), boost::filesystem::path()));
+
+  checkNodeTree(*lNode, nodeProperties);
+
+  BOOST_CHECK_EQUAL(detail::getAddressOverlaps(*lNode).size(), 0);
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_unmasked_registers, AddressTableOverlapFixture)
+{
+  // Move reg1 to same address as reg2 (0x1)
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x1");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg1"), &lNode->getNode("reg2")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_1, AddressTableOverlapFixture)
+{
+  // Move reg4 to same address as reg3 (0x2)
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 3), "address", "0x2");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3"), &lNode->getNode("reg4")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3"), &lNode->getNode("reg4.A")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3"), &lNode->getNode("reg4.B")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3"), &lNode->getNode("reg4.C")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3"), &lNode->getNode("reg4.D")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.A"), &lNode->getNode("reg4")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.A"), &lNode->getNode("reg4.A")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.A"), &lNode->getNode("reg4.B")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.B"), &lNode->getNode("reg4")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.B"), &lNode->getNode("reg4.C")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.B"), &lNode->getNode("reg4.D")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_2, AddressTableOverlapFixture)
+{
+  // Change mask of reg4.A to 0x10100ff to overlap with reg4.C and reg4.D
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(getNthChild(lDoc.child("node"), 3), 0), "mask", "0x10100ff");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg4.A"), &lNode->getNode("reg4.C")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg4.A"), &lNode->getNode("reg4.D")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_ports, AddressTableOverlapFixture)
+{
+  // Move port1 to same address as port2 (0x5)
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 4), "address", "0x5");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("port1"), &lNode->getNode("port2")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_unmasked_reg_vs_masked_reg, AddressTableOverlapFixture)
+{
+  // Move reg1 to same address as reg3 (0x2)
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x2");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg1"), &lNode->getNode("reg3")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg1"), &lNode->getNode("reg3.A")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg1"), &lNode->getNode("reg3.B")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_unmasked_reg_vs_port, AddressTableOverlapFixture)
+{
+  // Move reg1 to same address as port1 (0x4)
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x4");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg1"), &lNode->getNode("port1")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_masked_reg_vs_port, AddressTableOverlapFixture)
+{
+  // Move reg3 to same address as port1 (0x4)
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 2), "address", "0x4");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3"), &lNode->getNode("port1")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.A"), &lNode->getNode("port1")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg3.B"), &lNode->getNode("port1")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_ram, AddressTableOverlapFixture)
+{
+  // Create list of nodes that will be moved
+  //   pair.first = index of XML nodes
+  //   pair.second = node paths that will be flagged by overlap check
+  std::vector<std::pair<size_t, std::vector<std::string> > > lModifiedNodes(4);
+
+  lModifiedNodes.at(0).first = 0;
+  lModifiedNodes.at(0).second.push_back("reg1");
+
+  lModifiedNodes.at(1).first = 2;
+  lModifiedNodes.at(1).second.push_back("reg3");
+  lModifiedNodes.at(1).second.push_back("reg3.A");
+  lModifiedNodes.at(1).second.push_back("reg3.B");
+
+  lModifiedNodes.at(2).first = 4;
+  lModifiedNodes.at(2).second.push_back("port1");
+
+  lModifiedNodes.at(3).first = 6;
+  lModifiedNodes.at(3).second.push_back("ram1");
+
+  // Target addresses that above nodes will be moved to. First, middle and last address of 'ram2'
+  std::vector<std::string> lAddresses;
+  lAddresses.push_back("0x10");
+  lAddresses.push_back("0x1a");
+  lAddresses.push_back("0x1f");
+
+  for (std::vector<std::pair<size_t, std::vector<std::string> > >::const_iterator lNodeIt = lModifiedNodes.begin(); lNodeIt != lModifiedNodes.end(); lNodeIt++)
+  {
+    for (std::vector<std::string>::const_iterator lAddrIt = lAddresses.begin(); lAddrIt != lAddresses.end(); lAddrIt++)
+    {
+      BOOST_TEST_MESSAGE("Moving '" << lNodeIt->second.front() << "' to address " << *lAddrIt);
+
+      // Move node to get an overlap
+      pugi::xml_document lDoc;
+      lDoc.load(addrTableStr.c_str());
+      setAttribute(getNthChild(lDoc.child("node"), lNodeIt->first), "address", lAddrIt->c_str());
+      boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+      // Expected overlaps
+      std::vector<std::pair<const Node*, const Node*> > lExpected;
+      for (size_t i = 0; i < lNodeIt->second.size(); i++)
+      {
+        if (lAddrIt == lAddresses.begin())
+          lExpected.push_back( std::make_pair(&lNode->getNode(lNodeIt->second.at(i)), &lNode->getNode("ram2")) );
+        else
+          lExpected.push_back( std::make_pair(&lNode->getNode("ram2"), &lNode->getNode(lNodeIt->second.at(i))) );
+      }
+
+      // Compare expectations with result
+      std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+      BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+    }
+  }
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_multiple_1, AddressTableOverlapFixture)
+{
+  // Move module 1 to address 0x0
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 8), "address", "0x0");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("reg1"), &lNode->getNode("module1.reg1")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2"), &lNode->getNode("reg2")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask1"), &lNode->getNode("reg2")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask2"), &lNode->getNode("reg2")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask3"), &lNode->getNode("reg2")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.port"), &lNode->getNode("reg3")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.port"), &lNode->getNode("reg3.A")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.port"), &lNode->getNode("reg3.B")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.ram"), &lNode->getNode("ram2")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_FIXTURE_TEST_CASE (overlap_multiple_2, AddressTableOverlapFixture)
+{
+  // Move module 2 to same address as module 1 (0x40)
+  pugi::xml_document lDoc;
+  lDoc.load(addrTableStr.c_str());
+  setAttribute(getNthChild(lDoc.child("node"), 9), "address", "0x40");
+  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+
+  // Expected overlaps
+  std::vector<std::pair<const Node*, const Node*> > lExpected;
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg1"), &lNode->getNode("module2.regA")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2"), &lNode->getNode("module2.regB")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2"), &lNode->getNode("module2.regB.A")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2"), &lNode->getNode("module2.regB.B")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2"), &lNode->getNode("module2.regB.C")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask1"), &lNode->getNode("module2.regB")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask1"), &lNode->getNode("module2.regB.A")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask2"), &lNode->getNode("module2.regB")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask2"), &lNode->getNode("module2.regB.B")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask3"), &lNode->getNode("module2.regB")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.reg2.mask3"), &lNode->getNode("module2.regB.C")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.port"), &lNode->getNode("module2.fifo")) );
+  lExpected.push_back( std::make_pair(&lNode->getNode("module1.ram"), &lNode->getNode("module2.block")) );
+
+  // Compare expectations with result
+  std::vector<std::pair<const Node*, const Node*> > lResult = detail::getAddressOverlaps(*lNode);
+  BOOST_CHECK_EQUAL_COLLECTIONS(lResult.begin(), lResult.end(), lExpected.begin(), lExpected.end());
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

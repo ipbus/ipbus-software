@@ -33,14 +33,15 @@
 #include "uhal/NodeTreeBuilder.hpp"
 
 
-#include <fstream>
-
 #include <boost/bind.hpp>
+#include <boost/chrono/chrono_io.hpp>
+#include <boost/chrono/system_clocks.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 
+#include "uhal/detail/utilities.hpp"
 #include "uhal/DerivedNodeFactory.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/utilities/files.hpp"
@@ -195,6 +196,7 @@ namespace uhal
     mFileCallStack.pop_back( );
     calculateHierarchicalAddresses ( lNode , 0x00000000 );
     checkForAddressCollisions ( lNode , aAddressFilePath );  // Needs further investigation - disabled for now as it causes exceptions with valid tables.
+
     return lNode;
   }
 
@@ -531,11 +533,6 @@ namespace uhal
     }
   }
 
-  bool NodeTreeBuilder::compareNodePtr ( Node* aNodeL, Node* aNodeR )
-  {
-    return ( aNodeL->mAddr < aNodeR->mAddr );
-  }
-
 
   void NodeTreeBuilder::addChildren ( const pugi::xml_node& aXmlNode , Node* aNode )
   {
@@ -641,140 +638,15 @@ namespace uhal
       calculateHierarchicalAddresses ( *lIt , aNode->mAddr );
     }
 
-    std::sort ( aNode->mChildren.begin() , aNode->mChildren.end() , NodeTreeBuilder::compareNodePtr );
+    std::sort ( aNode->mChildren.begin() , aNode->mChildren.end() , detail::compareNodeAddr );
   }
-
 
 
   void NodeTreeBuilder::checkForAddressCollisions ( Node* aNode , const boost::filesystem::path& aPath )
   {
-    std::stringstream lReport;
-    lReport << std::hex << std::setfill ( '0' );
-    const Node* lNode1, *lNode2;
+    std::vector<std::pair<const Node*, const Node*> > lOverlappingNodes = detail::getAddressOverlaps(*aNode);
 
-    for (Node::const_iterator lIt = aNode->begin() ; lIt.next() ; )
-    {
-      lNode1 = &*lIt;
-      Node::const_iterator lIt2 = lIt;
-
-      if ( lNode1->mMode == defs::INCREMENTAL )
-      {
-        uint32_t lBottom1 ( lNode1->mAddr );
-        uint32_t lTop1 ( lNode1->mAddr + ( lNode1->mSize - 1 ) );
-
-        for ( ; lIt2.next() ; )
-        {
-          lNode2 = &*lIt2;
-
-          if ( lNode2->mMode == defs::INCREMENTAL )
-          {
-            //Node1 and Node2 are both incremental
-            uint32_t lBottom2 ( lNode2->mAddr );
-            uint32_t lTop2 ( lNode2->mAddr + ( lNode2->mSize - 1 ) );
-
-            if ( ( ( lTop2 >= lBottom1 ) && ( lTop2 <= lTop1 ) ) || ( ( lTop1 >= lBottom2 ) && ( lTop1 <= lTop2 ) ) )
-            {
-              lReport << "Branch '" << lNode1->getPath()
-                      << "' has address range [0x" << std::setw ( 8 ) << lBottom1 << " - 0x" << std::setw ( 8 ) <<  lTop1
-                      << "] which overlaps with branch '" << lNode2->getPath()
-                      << "' which has address range [0x"  << std::setw ( 8 )  <<  lBottom2  << " - 0x" << std::setw ( 8 ) <<  lTop2
-                      << "]." << std::endl;
-            }
-          }
-          else if ( lNode2->mMode != defs::HIERARCHICAL )
-          {
-            //Node1 is incremental and Node2 is single address
-            uint32_t lAddr2 ( lNode2->mAddr );
-
-            if ( ( lAddr2 >= lBottom1 ) && ( lAddr2 <= lTop1 ) )
-            {
-              lReport << "Branch '" << lNode1->getPath()
-                      << "' has address range [0x"  << std::setw ( 8 ) << lBottom1 << " - 0x"  << std::setw ( 8 ) << lTop1
-                      << "] which overlaps with branch '" << lNode2->getPath()
-                      << "' which has address 0x"  << std::setw ( 8 ) << lAddr2
-                      << "." << std::endl;
-            }
-          }
-        }
-      }
-      else if ( lNode1->mMode != defs::HIERARCHICAL )
-      {
-        uint32_t lAddr1 ( lNode1->mAddr );
-
-        for ( ; lIt2.next() ; )
-        {
-          lNode2 = &*lIt2;
-
-          if ( lNode2->mMode == defs::INCREMENTAL )
-          {
-            //Node1 is single address and Node2 is incremental
-            uint32_t lBottom2 ( lNode2->mAddr );
-            uint32_t lTop2 ( lNode2->mAddr + ( lNode2->mSize - 1 ) );
-
-            if ( ( lAddr1 >= lBottom2 ) && ( lAddr1 <= lTop2 ) )
-            {
-              lReport <<  "Branch '" << lNode1->getPath()
-                      <<"' has address 0x"  << std::setw ( 8 ) << lAddr1
-                      <<" which overlaps with branch '" << lNode2->getPath()
-                      <<"' which has address range [0x"   << std::setw ( 8 ) << lBottom2 << " - 0x"   << std::setw ( 8 ) << lTop2
-                      << "]."<< std::endl;
-            }
-          }
-          else if ( lNode2->mMode != defs::HIERARCHICAL )
-          {
-            //Node1 and Node2 are both single addresses
-            uint32_t lAddr2 ( lNode2->mAddr );
-
-            if ( lAddr1 == lAddr2 )
-            {
-              if ( lNode1->mMask & lNode2->mMask )
-              {
-                bool lShouldThrow ( true );
-
-                if ( lNode1->mMask == 0xFFFFFFFF )
-                {
-                  // Node 1 is a full register, Node 2 is a masked region. Check if Node 2 is a child of Node 1 and, if not, then throw
-                  for ( std::vector< Node* >::const_iterator lIt = lNode1->mChildren.begin() ; lIt != lNode1->mChildren.end() ; ++lIt )
-                  {
-                    if ( *lIt == lNode2 )
-                    {
-                      lShouldThrow = false;
-                      break;
-                    }
-                  }
-                }
-
-                if ( lShouldThrow && ( lNode2->mMask == 0xFFFFFFFF ) )
-                {
-                  // Node 2 is a full register, Node 1 is a masked region. Check if Node 1 is a child of Node 2 and, if not, then throw
-                  for ( std::vector< Node* >::const_iterator lIt = lNode2->mChildren.begin() ; lIt != lNode2->mChildren.end() ; ++lIt )
-                  {
-                    if ( *lIt == lNode1 )
-                    {
-                      lShouldThrow = false;
-                      break;
-                    }
-                  }
-                }
-
-                if ( lShouldThrow )
-                {
-                  lReport <<  "Branch '" << lNode1->getPath()
-                          << "' has address 0x" << std::setw ( 8 ) << lAddr1
-                          << " and mask 0x" << std::setw ( 8 ) << lNode1->mMask
-                          << " which overlaps with branch '" << lNode2->getPath()
-                          << "' which has address 0x" << std::setw ( 8 ) << lAddr2
-                          << " and mask 0x" << std::setw ( 8 ) << lNode2->mMask
-                          << "." << std::endl;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if ( lReport.tellp() )
+    if ( not lOverlappingNodes.empty() )
     {
       // Add username to the collisions report filepath if environment variable USER is defined
       std::string lDirName("/tmp");
@@ -810,28 +682,15 @@ namespace uhal
 
       std::string lFilename ( aPath.string() );
       boost::replace_all ( lFilename , "/" , "-" );
-      lDir /= ( "OverlapReport" + lFilename + ".txt" );
-      const bool lNewlyCreatedFile = not boost::filesystem::is_regular_file( lDir );
+      const std::string lReportPath( ( lDir / ( "OverlapReport" + lFilename + ".txt" ) ).string() );
 
-      std::ofstream lReportFile ( lDir.c_str() );
-
-      if ( lReportFile.is_open() )
+      if ( detail::writeNodeOverlapReport(lReportPath, lOverlappingNodes, "Overlap report for \"" + aPath.string() + "\".") )
       {
-        lReportFile << "Overlap report for " << aPath << "." << std::endl;
-        lReportFile << "Written at " << boost::posix_time::microsec_clock::local_time() << "." << std::endl;
-        lReportFile << std::endl;
-        lReportFile << lReport.rdbuf();
-        lReportFile.close();
-        log ( Warning() , "Address overlaps observed - report file written at " , Quote ( lDir.string() ) );
-
-        if ( lNewlyCreatedFile )
-        {
-          boost::filesystem::permissions( lDir , boost::filesystem::perms( 0666 ) );
-        }
+        log ( Warning() , "Address overlaps observed - report file written at " , Quote ( lReportPath ) );
       }
       else
       {
-        log ( Error() , "Address overlaps observed - failed to create report file " , Quote ( lDir.string() ) );
+        log ( Error() , "Address overlaps observed - failed to create report file " , Quote ( lReportPath ) );
       }
     }
   }

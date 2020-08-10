@@ -318,6 +318,9 @@ namespace uhal
       //! Returns ancestry path of nodes from (but not including) aAncestor to this node
       std::vector<const Node*> getLineage(const Node& aAncestor) const;
 
+      //! Returns whether this node is child of the function's argument 
+      bool isChildOf(const Node& aParent) const;
+
     private:
 
       std::string getRelativePath(const Node& aAncestor) const;

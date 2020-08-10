@@ -30,6 +30,11 @@
 #include "uhal/detail/utilities.hpp"
 
 
+#include <fstream>
+#include <iomanip>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
 #include "boost/lexical_cast.hpp"
 #include "boost/shared_ptr.hpp"
 
@@ -105,5 +110,125 @@ namespace uhal {
       else
         return "";
     }
+
+
+    bool compareNodeAddr ( const Node* aNodeL, const Node* aNodeR )
+    {
+      return ( aNodeL->getAddress() < aNodeR->getAddress() );
+    }
+
+
+    std::vector<std::pair<const Node*, const Node*> > getAddressOverlaps(const Node& aNode)
+    {
+      std::vector<const Node*> lNodes;
+      for (Node::const_iterator lIt = aNode.begin() ; lIt.next() ; )
+        lNodes.push_back(&*lIt);
+      std::stable_sort ( lNodes.begin() , lNodes.end() , compareNodeAddr );
+
+      std::vector<std::pair<const Node*, const Node*> > lOverlappingNodes;
+      if (lNodes.size() < 2)
+        return lOverlappingNodes;
+
+      for (std::vector<const Node*>::const_iterator lIt1 = lNodes.begin() ; lIt1 != (lNodes.end() - 1); lIt1++)
+      {
+        const Node& lNode1 = **lIt1;
+        if (lNode1.getMode() == defs::HIERARCHICAL)
+          continue;
+
+        const uint32_t lMaxAddr1(lNode1.getMode() == defs::INCREMENTAL ? lNode1.getAddress() + lNode1.getSize() - 1 : lNode1.getAddress());
+
+        for (std::vector<const Node*>::const_iterator lIt2(lIt1 + 1) ; (lIt2 != lNodes.end()) and (*lIt2)->getAddress() <= lMaxAddr1; lIt2++)
+        {
+          if ((*lIt2)->getMode() == defs::HIERARCHICAL)
+            continue;
+
+          const Node& lNode2 = **lIt2;
+
+          if (lNode1.getMode() != defs::SINGLE or lNode2.getMode() != defs::SINGLE)
+            lOverlappingNodes.push_back( std::make_pair(&lNode1, &lNode2) );
+
+          else if (lNode1.getMask() & lNode2.getMask())
+          {
+            if (lNode1.getMask() == defs::NOMASK and lNode2.isChildOf(lNode1))
+            {
+              // Node 2 is masked child of node 1: No overlap
+            }
+            else if (lNode2.getMask() == defs::NOMASK and lNode1.isChildOf(lNode2))
+            {
+              // Node 1 is masked child of node 2: No overlap
+            }
+            else
+              lOverlappingNodes.push_back( std::make_pair(&lNode1, &lNode2) );
+          }
+        }
+      }
+
+      return lOverlappingNodes;
+    }
+
+
+    void printNodeOverlapDescription(std::ostream& aStream, const Node& aNode1, const Node& aNode2)
+    {
+      std::ios_base::fmtflags lInitialFlags = aStream.flags();
+      char lInitialFillChar = aStream.fill('0');
+      aStream << std::hex;
+
+      aStream << "Node '" << aNode1.getPath() << "' [";
+      if (aNode1.getMode() == defs::INCREMENTAL)
+        aStream << "addresses 0x"  << std::setw ( 8 ) << aNode1.getAddress() << " - 0x"  << std::setw ( 8 ) << aNode1.getAddress() + aNode1.getSize() - 1;
+      else if ( aNode2.getMode() == defs::INCREMENTAL )
+        aStream << "address 0x" << std::setw ( 8 ) << aNode1.getAddress();
+      else
+        aStream << "address 0x" << std::setw ( 8 ) << aNode1.getAddress() << ", mask 0x" << std::setw ( 8 ) << aNode1.getMask();
+
+      aStream << "] overlaps with '" << aNode2.getPath() << "' [";
+      if (aNode2.getMode() == defs::INCREMENTAL)
+        aStream << "addresses 0x"  << std::setw ( 8 ) << aNode2.getAddress() << " - 0x"  << std::setw ( 8 ) << aNode2.getAddress() + aNode2.getSize() - 1;
+      else if ( aNode1.getMode() == defs::INCREMENTAL )
+        aStream << "address 0x" << std::setw ( 8 ) << aNode2.getAddress();
+      else
+        aStream << "address 0x" << std::setw ( 8 ) << aNode2.getAddress() << ", mask 0x" << std::setw ( 8 ) << aNode2.getMask();
+      aStream << "].";
+
+      aStream.flags(lInitialFlags);
+      aStream.fill(lInitialFillChar);
+    }
+
+
+    bool writeNodeOverlapReport(const std::string& aFilePath, const std::vector<std::pair<const Node*, const Node*> >& aNodes, const std::string& aHeader)
+    {
+      // 1. Create main contents of report
+      std::stringstream lReport;
+      lReport << std::hex << std::setfill ( '0' );
+
+      for (std::vector<std::pair<const Node*, const Node*> >::const_iterator lIt = aNodes.begin(); lIt != aNodes.end(); lIt++)
+      {
+        printNodeOverlapDescription(lReport, *lIt->first, *lIt->second);
+        lReport << std::endl;
+      }
+
+      // 2. Write report to file
+      const bool lNewlyCreatedFile = not boost::filesystem::is_regular_file( boost::filesystem::path(aFilePath) );
+      std::ofstream lReportFile ( aFilePath.c_str() );
+
+      if ( lReportFile.is_open() )
+      {
+        lReportFile << aHeader << std::endl;
+        lReportFile << "Written at " << boost::posix_time::microsec_clock::local_time() << "." << std::endl;
+        lReportFile << std::endl;
+        lReportFile << lReport.rdbuf();
+        lReportFile.close();
+
+        if ( lNewlyCreatedFile )
+        {
+          boost::filesystem::permissions( aFilePath , boost::filesystem::perms( 0666 ) );
+        }
+
+        return true;
+      }
+      else
+        return false;
+    }
+
   }
 }

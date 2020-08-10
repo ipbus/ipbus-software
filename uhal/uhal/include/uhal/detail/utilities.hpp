@@ -48,6 +48,15 @@ namespace uhal
 
     //! Generates a short string summarising which nodes match the specified address
     std::string getAddressDescription(const ClientInterface& aClient, const uint32_t aAddress, const size_t& aMaxListSize);
+
+    bool compareNodeAddr ( const Node* aNodeL, const Node* aNodeR );
+
+    std::vector<std::pair<const Node*, const Node*> > getAddressOverlaps(const Node& aNode);
+
+    void printNodeOverlapDescription(std::ostream& aStream, const Node& aNode1, const Node& aNode2);
+
+    bool writeNodeOverlapReport(const std::string& aFilePath, const std::vector<std::pair<const Node*, const Node*> >& aNodes, const std::string& aHeader);
+
   }
 }
 
