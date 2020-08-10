@@ -10,7 +10,7 @@ PackageURL ?= None
 
 CACTUS_ROOT ?= /opt/cactus
 
-PYTHON_VERSIONED_COMMAND := $(shell python -c "from sys import version_info; print('python' + str(version_info[0]))")
+PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "from sys import version_info; print('python' + str(version_info[0]))")
 BUILD_ARCH = $(shell rpm --eval "%{_target_cpu}")
 
 # By default, install Python bindings using same prefix & exec_prefix as main Python installation
@@ -40,13 +40,13 @@ _rpmbuild: _setup_update
 	# Change into rpm/pkg to finally run the customized setup.py
 	cd ${RPMBUILD_DIR} && \
 	  LIB_REQUIRES=$$(find ${RPMBUILD_DIR} -type f -print0 | xargs -0 -n1 -I {} file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' ') && \
-	  python ${PackageName}.py bdist_rpm --spec-only \
+	  ${PYTHON} ${PackageName}.py bdist_rpm --spec-only \
 	    --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} \
 	    --requires "${PYTHON_VERSIONED_COMMAND} $$LIB_REQUIRES" \
 	    --force-arch=${BUILD_ARCH} \
 	    --binary-only
 	cd ${RPMBUILD_DIR} && \
-	  bindir=$(bindir) python ${PackageName}.py sdist
+	  bindir=$(bindir) ${PYTHON} ${PackageName}.py sdist
 	mkdir -p ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES
 	cp ${RPMBUILD_DIR}/dist/${PackageName}-*.tar.gz ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES/
 	cd ${RPMBUILD_DIR} && \
@@ -89,4 +89,5 @@ install: _setup_update
 	echo "include */*.so" > ${RPMBUILD_DIR}/MANIFEST.in
 	# Change into rpm/pkg to finally run the customized setup.py
 	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
-	cd ${RPMBUILD_DIR} && bindir=$(bindir) python ${PackageName}.py install $(if ${CUSTOM_INSTALL_PREFIX},--prefix=${prefix},) $(if ${CUSTOM_INSTALL_PREFIX}${CUSTOM_INSTALL_EXEC_PREFIX},--exec-prefix=${exec_prefix},)
+	cd ${RPMBUILD_DIR} && \
+	  bindir=$(bindir) ${PYTHON} ${PackageName}.py install $(if ${CUSTOM_INSTALL_PREFIX},--prefix=${prefix},) $(if ${CUSTOM_INSTALL_PREFIX}${CUSTOM_INSTALL_EXEC_PREFIX},--exec-prefix=${exec_prefix},)

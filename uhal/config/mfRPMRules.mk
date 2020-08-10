@@ -10,6 +10,8 @@ REQUIRES_TAG = $(if ${PackageRequires} ,Requires: ${PackageRequires} ,\# No Requ
 
 RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
 
+PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "from sys import version_info; print('python' + str(version_info[0]))")
+
 export BUILD_HOME
 
 .PHONY: rpm _rpmall
@@ -44,6 +46,7 @@ _spec_update:
 	       -e 's|^.*__build_requires__.*|${BUILD_REQUIRES_TAG}|' \
 	       -e 's|^.*__requires__.*|${REQUIRES_TAG}|' \
 	       -e 's|^BuildArch:.*|$(if ${PackageBuildArch},BuildArch: ${PackageBuildArch},\# BuildArch not specified)|' \
+	       -e 's#__python_versioned_command__#${PYTHON_VERSIONED_COMMAND}#' \
 	       ${PackagePath}/rpm/${PackageName}.spec
 	if [ "${BuildDebuginfoRPM}" == "1" ]; then sed -i '1 i\%define _build_debuginfo_package %{nil}' ${PackagePath}/rpm/${PackageName}.spec; fi
 

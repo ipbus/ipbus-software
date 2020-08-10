@@ -1,7 +1,7 @@
 BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
-include #(BUILD_HOME)/config/Makefile.macros
+include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
 Project = uhal/tools
 Package = uhal/tools

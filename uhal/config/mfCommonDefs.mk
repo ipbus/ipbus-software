@@ -22,9 +22,10 @@ endif
 MakeDir = mkdir -p
 
 
-PYTHON_VERSION ?= $(shell python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_version())")
-PYTHON_INCLUDE_PREFIX ?= $(shell python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())")
-PYTHON_LIB_PREFIX ?= $(shell python -c "from distutils.sysconfig import get_python_lib; import os.path; print(os.path.split(get_python_lib(standard_lib=True))[0])")
+PYTHON ?= python
+PYTHON_VERSION ?= $(shell ${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_version())")
+PYTHON_INCLUDE_PREFIX ?= $(shell ${PYTHON} -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_inc())")
+PYTHON_LIB_PREFIX ?= $(shell ${PYTHON} -c "from distutils.sysconfig import get_python_lib; import os.path; print(os.path.split(get_python_lib(standard_lib=True))[0])")
 
 # Construct C++ compiler suffix for RPM release field (tested with clang & gcc)
 CXX_VERSION_TAG = $(word 1, $(shell ${CXX} --version))

@@ -5,7 +5,8 @@ CACTUS_ROOT ?= /opt/cactus
 CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
 
-CACTUS_PLATFORM=$(shell python -c "import platform; print(platform.platform())")
+PYTHON ?= python
+CACTUS_PLATFORM=$(shell ${PYTHON} -c "import platform; print(platform.platform())")
 CACTUS_OS=unknown.os
 
 UNAME=$(strip $(shell uname -s))
