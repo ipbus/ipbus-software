@@ -1,7 +1,7 @@
 BUILD_HOME = $(shell pwd)/../..
 
 include $(BUILD_HOME)/config/Makefile.macros
-include #(BUILD_HOME)/config/Makefile.macros
+include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
 Project = uhal/tools
 Package = uhal/tools
@@ -10,7 +10,7 @@ PackageName = cactuscore-uhal-tools
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 7
-PACKAGE_VER_PATCH = 5
+PACKAGE_VER_PATCH = 6
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageSummary = uTCA HW Development Tools that depend on uHAL

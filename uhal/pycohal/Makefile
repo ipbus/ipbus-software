@@ -10,7 +10,7 @@ PackageName = cactuscore-uhal-pycohal
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 7
-PACKAGE_VER_PATCH = 5
+PACKAGE_VER_PATCH = 6
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageDescription = Python bindings for the uHAL library
@@ -22,8 +22,8 @@ PackagerEmail = tom.williams@cern.ch
 PythonModules = ["uhal"]
 LibraryFile = pkg/uhal/_core.so
 
-PYTHON_VERSION_MAJOR_MINOR=$(shell python -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
-PYTHON_VERSION_MAJOR=$(shell python -c "import sys; print(sys.version_info.major)")
+PYTHON_VERSION_MAJOR_MINOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
+PYTHON_VERSION_MAJOR=$(shell ${PYTHON} -c "import sys; print(sys.version_info.major)")
 ifeq (,$(shell ${CXX} -lboost_python${PYTHON_VERSION_MAJOR_MINOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
   EXTERN_BOOST_PYTHON_LIB = boost_python${PYTHON_VERSION_MAJOR_MINOR}
 else ifeq (,$(shell ${CXX} -lboost_python${PYTHON_VERSION_MAJOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
