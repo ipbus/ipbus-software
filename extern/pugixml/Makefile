@@ -40,9 +40,10 @@ build: _all
 buildall: _all
 _all:
 	if [ ! -f  ${ZIP_NAME}/.build_done ]; then \
-	unzip -q -u ${ZIP_FILE} -d ${ZIP_NAME};												\
-	cd ${ZIP_NAME};													\
-	${CXX} ${CXXFLAGS} -shared -o ${LIBRARY} src/pugixml.cpp;								\
+	unzip -q -u ${ZIP_FILE} -d ${ZIP_NAME};                     \
+	chmod -R a+r ${ZIP_NAME};                                   \
+	cd ${ZIP_NAME};                                             \
+	${CXX} ${CXXFLAGS} -shared -o ${LIBRARY} src/pugixml.cpp;   \
 	date > .build_done;											\
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS};	\
 	mkdir -p ${RPMBUILD_DIR}/SOURCES/{lib,include};								\
