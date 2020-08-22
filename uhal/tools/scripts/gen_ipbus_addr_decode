@@ -224,6 +224,7 @@ def main():
     parser.add_argument('-d', '--debug', help="enable debug messages (default: %(default)s)", action="store_true")
     parser.add_argument('-n', '--dry-run', help="Dry run (default: %(default)s)", action="store_true", default=False)
     parser.add_argument('-t', '--template', help="Decoder template path (default: %(default)s)", default='/opt/cactus/etc/uhal/tools/ipbus_addr_decode.vhd')
+    parser.add_argument('--no-timestamp', help="Do not include timestamp in comments (default: %(default)s)", action="store_true", default=False)
     parser.add_argument('addrtab', help="Address table file")
     args = parser.parse_args()
 
@@ -308,8 +309,10 @@ def main():
     moduleName = os.path.splitext(os.path.basename(args.addrtab))[0]
     if not args.dry_run:
 
+        timestamp_suffix = "" if args.no_timestamp else (" (" + time.asctime() + ")" )
+
         # generate vhdl snippet with symbolic constants
-        snippet1 = "-- START automatically  generated VHDL the %s \n" % time.asctime()
+        snippet1 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
         slaveIds={}
         maxN=0
         for n,id,addr_bits,mask_bits in slaves:
@@ -320,7 +323,7 @@ def main():
         snippet1 += "-- END automatically generated VHDL\n"
         
         # generate vhdl snippet with selection code
-        snippet2 = "-- START automatically  generated VHDL the %s \n" % time.asctime()
+        snippet2 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
         for n,id,addr_bits,mask_bits in slaves:
             mask = addr_mask & ~mask_bits
             if n == 0:
