@@ -4,7 +4,7 @@ import sys
 try:
     from ._core import *
 except ImportError as e:
-    message = 'Could not load uHAL Python bindings (typical cause: paths missing from LD_LIBRARY_PATH).'
+    message = 'Failed to load uHAL bindings.'
     message += '\nDetails: "{}"'
 
     if sys.version_info[0] > 2:

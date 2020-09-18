@@ -217,8 +217,7 @@ def main():
     try:
         import uhal
     except ImportError as e:
-        print("Exception raised when importing uHAL ... ")
-        print(type(e).__name__ + ': ' + str(e))
+        print('ERROR: ' + str(e))
         sys.exit(EXIT_CODE_IMPORT_ERROR)
 
     uhal.setLogLevelTo(uhal.LogLevel.WARNING)
