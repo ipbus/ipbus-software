@@ -8,7 +8,7 @@ except ImportError as e:
     message += '\nDetails: "{}"'
 
     if sys.version_info[0] > 2:
-        raise type(e)(message.format(e.msg)).with_traceback(sys.exc_info()[2])
+        exec('raise type(e)(message.format(e.msg)).with_traceback(sys.exc_info()[2]) from None')
     else:
         exec('raise type(e), message.format(e.message), sys.exc_info()[2]')
 
