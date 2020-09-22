@@ -19,7 +19,6 @@ import math
 import os.path
 import sys
 import time
-import uhal
 
 if sys.version_info[0] < 3:
     range = xrange
@@ -206,6 +205,7 @@ class nodetree(object):
 
 EXIT_CODE_ARG_PARSING_ERROR   = 1
 EXIT_CODE_NODE_ADDRESS_ERRORS = 2
+EXIT_CODE_IMPORT_ERROR        = 3
 
 def main():    
     logging.basicConfig(level=logging.WARNING, format='%(levelname)s\t: %(message)s')
@@ -213,6 +213,12 @@ def main():
     # configure logger
     global log
     log = logging.getLogger("main")
+
+    try:
+        import uhal
+    except ImportError as e:
+        print('ERROR: ' + str(e))
+        sys.exit(EXIT_CODE_IMPORT_ERROR)
 
     uhal.setLogLevelTo(uhal.LogLevel.WARNING)
 

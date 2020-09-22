@@ -2,18 +2,15 @@
 import sys
 
 try:
-   from ._core import *
+    from ._core import *
 except ImportError as e:
-    from os import environ
-    if ('LD_LIBRARY_PATH' not in environ) or '/opt/cactus/lib' not in environ['LD_LIBRARY_PATH'].split():
-        msg_suffix = '\nN.B. ImportError (or derived exception) raised when uHAL\'s __init__.py tries to load python bindings library\n     Maybe you need to add "/opt/cactus/lib", or some other path, to the "LD_LIBRARY_PATH" environment variable?'
-        if sys.version_info[0] > 2:
-            # raise type(e)(type(e)(new_msg)).with_traceback()
-            exec('raise type(e)(e.msg + msg_suffix) from e')
-        else:
-            exec('raise type(e), type(e)(e.message + msg_suffix), sys.exc_info()[2]')
+    message = 'Failed to load uHAL bindings.'
+    message += '\nDetails: "{}"'
+
+    if sys.version_info[0] > 2:
+        exec('raise type(e)(message.format(e.msg)).with_traceback(sys.exc_info()[2]) from None')
     else:
-        raise
+        exec('raise type(e), message.format(e.message), sys.exc_info()[2]')
 
 
 ##################################################
