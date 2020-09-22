@@ -10,6 +10,8 @@ PackageURL ?= None
 
 CACTUS_ROOT ?= /opt/cactus
 
+RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},).python${PYTHON_VERSION}
+
 PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "from sys import version_info; print('python' + str(version_info[0]))")
 BUILD_ARCH = $(shell rpm --eval "%{_target_cpu}")
 
@@ -41,7 +43,7 @@ _rpmbuild: _setup_update
 	cd ${RPMBUILD_DIR} && \
 	  LIB_REQUIRES=$$(find ${RPMBUILD_DIR} -type f -print0 | xargs -0 -n1 -I {} file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' ') && \
 	  ${PYTHON} ${PackageName}.py bdist_rpm --spec-only \
-	    --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION} \
+	    --release ${PACKAGE_RELEASE}.${RPM_RELEASE_SUFFIX} \
 	    --requires "${PYTHON_VERSIONED_COMMAND} $$LIB_REQUIRES" \
 	    --force-arch=${BUILD_ARCH} \
 	    --binary-only
