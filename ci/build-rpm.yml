@@ -131,3 +131,12 @@ publish:yum:centos8:
     DEPLOY_SUBDIR: repos/centos8/x86_64
   needs:
     - build:centos8
+
+publish:yum:centos8-python38:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/centos8_python38/x86_64
+    DEPLOY_SUBDIR: repos/centos8_python38/x86_64
+  needs:
+    - build:centos8-python38
+
