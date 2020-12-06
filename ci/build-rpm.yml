@@ -73,6 +73,33 @@ build:centos7-gcc8:
     expire_in: 1 day
 
 
+build:centos8-python38:
+  stage: build
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8-python38:feature-centos8-python38__pugixml1.9
+  variables:
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos8-python38.xml
+    OUTPUT_REPO_SUBDIR: centos8_python38/x86_64
+  before_script:
+    - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
+    - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
+    - curl -L https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2 -o extern/boost/boost_1_66_0.tar.bz2
+    - sed -i "s/PACKAGE_VER_MINOR = 53/PACKAGE_VER_MINOR = 66/g" extern/boost/Makefile
+    - git diff
+  script:
+    - cd .. && sudo rm -rf ipbus-software___ && mv ipbus-software ipbus-software___ && mkdir ipbus-software && cd ipbus-software___
+    - make -k Set=all BUILD_BOOST=1
+    - make -k Set=all BUILD_BOOST=1 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
+    - mkdir -p ${REPO_DIR}
+    - cp `find . -iname "*.rpm"` ${REPO_DIR} && cp ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
+    - ls ${REPO_DIR}
+    - createrepo -vg yumgroups.xml ${REPO_DIR}
+  artifacts:
+    paths:
+      - ci_results/repos/${OUTPUT_REPO_SUBDIR}
+    when: always
+    expire_in: 1 day
+
+
 publish:yum:slc6:
   extends: .template_publish
   variables:
