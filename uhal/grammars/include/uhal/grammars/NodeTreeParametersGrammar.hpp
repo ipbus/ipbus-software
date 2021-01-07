@@ -35,12 +35,12 @@
 
 
 #include <string>
+#include <unordered_map>
 #include <utility>   // for pair
 
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/spirit/include/qi_char.hpp>
 #include <boost/spirit/include/qi_grammar.hpp>
-#include <boost/unordered_map.hpp>
 
 
 namespace uhal
@@ -48,12 +48,12 @@ namespace uhal
 namespace grammars
 {
   //! A struct wrapping a set of rules as a grammar that can parse a NodeTreeParametersGrammar of the form "name1=val1;name2=val2;name3=val3"
-  struct NodeTreeParametersGrammar : boost::spirit::qi::grammar<std::string::const_iterator, boost::unordered_map<std::string, std::string>()>
+  struct NodeTreeParametersGrammar : boost::spirit::qi::grammar<std::string::const_iterator, std::unordered_map<std::string, std::string>()>
   {
     //! Default Constructor where we will define the boost::qi rules relating the members
     NodeTreeParametersGrammar();
     //! Boost spirit parsing rule for parsing a NodeTree Parameters attribute    
-    boost::spirit::qi::rule<std::string::const_iterator, boost::unordered_map<std::string, std::string>()> query;
+    boost::spirit::qi::rule<std::string::const_iterator, std::unordered_map<std::string, std::string>()> query;
     //! Boost spirit parsing rule for parsing each of the "name-value pairs" of a NodeTree Parameters attribute
     boost::spirit::qi::rule<std::string::const_iterator, std::pair<std::string, std::string>()> pair;
     //! Boost spirit parsing rule for parsing the "name" part of the "name-value pairs" of a NodeTreeParameters attribute

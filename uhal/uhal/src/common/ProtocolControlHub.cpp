@@ -40,6 +40,7 @@
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_eps.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 #include "uhal/Buffers.hpp"
 #include "uhal/ProtocolIPbus.hpp"

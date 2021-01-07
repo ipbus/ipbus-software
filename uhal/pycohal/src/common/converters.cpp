@@ -26,9 +26,9 @@ void pycohal::register_converters()
     bpy::to_python_converter< std::vector<std::string>, pycohal::Converter_std_vector_to_list<std::string> >();
   }
 
-  reg = bpy::converter::registry::query(bpy::type_id< boost::unordered_map<std::string, std::string> >());
+  reg = bpy::converter::registry::query(bpy::type_id< std::unordered_map<std::string, std::string> >());
   if (reg == NULL or (*reg).m_to_python == NULL)
-    bpy::to_python_converter< boost::unordered_map<std::string, std::string>, pycohal::Converter_boost_unorderedmap_to_dict<std::string,std::string> >();
+    bpy::to_python_converter< std::unordered_map<std::string, std::string>, pycohal::Converter_std_unorderedmap_to_dict<std::string,std::string> >();
 }
 
 

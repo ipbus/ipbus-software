@@ -4,13 +4,12 @@
 
 
 #include <iosfwd>  // for ostream
+#include <mutex>   // for lock_guard, mutex
 
 #include <uhal/log/log_inserters.hpp>
 #include <uhal/log/LogLevels.hpp>
 #include <uhal/log/exception.hpp>
 
-
-namespace boost { class mutex; }
 
 namespace uhal{
 
@@ -37,7 +36,7 @@ void disableLogging();
 /**
 	Function to retrieve the mutex lock used by the logger
 */
-boost::mutex& GetLoggingMutex();
+std::mutex& GetLoggingMutex();
 /**
 	Function to specify, at runtime, that only messages with a severity level above Fatal should be logged
 */
@@ -156,9 +155,9 @@ class log_configuration
 	static const bool mFalse;
 
 	//!Make GetLoggingMutex function a friend so it can access our private members
-	friend boost::mutex& GetLoggingMutex();
+	friend std::mutex& GetLoggingMutex();
 	//!Define a static Mutex lock for thread safe logging
-	static boost::mutex mMutex;
+	static std::mutex mMutex;
 };
 
 // ======================================================================================================================================================

@@ -1,14 +1,16 @@
 #ifndef _uhal_pycohal_converters_hpp_
 #define _uhal_pycohal_converters_hpp_
 
+
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 // The following python boost patch is required to compile on apple
 #include "uhal/pycohal/boost_python.hpp"
 
 #include "boost/python/converter/rvalue_from_python_data.hpp"
-#include "boost/unordered_map.hpp"
+
 
 namespace pycohal {
 
@@ -32,12 +34,10 @@ namespace pycohal {
     static PyObject* convert(const std::vector<T>& v);
   };
 
-  /**
-   Templated converter from boost::unordered_map to dict
-   */
+  //! Templated converter from std::unordered_map to dict
   template <class U, class T>
-  struct Converter_boost_unorderedmap_to_dict {
-    static PyObject * convert(const boost::unordered_map<U, T>& m);
+  struct Converter_std_unorderedmap_to_dict {
+    static PyObject * convert(const std::unordered_map<U, T>& m);
   };
 
   // Registers to boost::python all of the pycohal to-python and from-python converters
@@ -64,14 +64,14 @@ PyObject* pycohal::Converter_std_vector_to_list<T>::convert(const std::vector<T>
 }
 
 //-----------------------------------------------//
-// --- Converter_boost_unorderedmap_to_dict --- //
+// --- Converter_std_unorderedmap_to_dict --- //
 //----------------------------------------------//
 template <class U, class T>
-PyObject* pycohal::Converter_boost_unorderedmap_to_dict<U,T>::convert(const boost::unordered_map<U, T>& m) {
+PyObject* pycohal::Converter_std_unorderedmap_to_dict<U,T>::convert(const std::unordered_map<U, T>& m) {
   namespace bpy = boost::python;
   bpy::dict theDict;
 
-  for (typename boost::unordered_map<U, T>::const_iterator it = m.begin(); it != m.end(); it++) {
+  for (typename std::unordered_map<U, T>::const_iterator it = m.begin(); it != m.end(); it++) {
     theDict[it->first] = bpy::object(it->second);
   }
 

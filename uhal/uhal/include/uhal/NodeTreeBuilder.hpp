@@ -176,7 +176,7 @@ namespace uhal
       static boost::shared_ptr<NodeTreeBuilder> mInstance;
 
       //! Hash map associating a Node tree with a file name so that we do not need to repeatedly parse the xml documents if someone asks for a second copy of a particular node tree
-      boost::unordered_map< std::string , const Node* > mNodes;
+      std::unordered_map< std::string , const Node* > mNodes;
 
       //! A look-up table that the boost qi parser uses for associating strings ("r","w","rw","wr","read","write","readwrite","writeread") with enumerated permissions types
       static const struct permissions_lut : boost::spirit::qi::symbols<char, defs::NodePermission>

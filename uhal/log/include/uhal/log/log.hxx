@@ -1,9 +1,7 @@
 
+#include <mutex>                           // for lock_guard, mutex
 #include <sstream>                         // for ostream, stringstream, endl
 #include <string>                          // for operator+, basic_string
-
-#include <boost/thread/lock_guard.hpp>     // for lock_guard
-#include <boost/thread/mutex.hpp>          // for mutex
 
 #include "uhal/log/exception.hpp"          // for exception
 #include "uhal/log/LogLevels.hpp"          // for insert, ErrorLevel, DebugL...
@@ -21,7 +19,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -35,7 +33,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1  )
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -50,7 +48,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -66,7 +64,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -83,7 +81,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -101,7 +99,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -120,7 +118,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -140,7 +138,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -161,7 +159,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -183,7 +181,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -206,7 +204,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -230,7 +228,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -255,7 +253,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -281,7 +279,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -308,7 +306,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -336,7 +334,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -365,7 +363,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -395,7 +393,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -426,7 +424,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -458,7 +456,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -491,7 +489,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -525,7 +523,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -560,7 +558,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -596,7 +594,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -633,7 +631,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -671,7 +669,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -710,7 +708,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -750,7 +748,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -791,7 +789,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -833,7 +831,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -876,7 +874,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -920,7 +918,7 @@ void log (  FatalLevel& aFatal , const T0& aArg0 , const T1& aArg1 , const T2& a
 {
 	#ifndef LOGGING_EXCLUDE_FATAL
 		if( LoggingIncludes( aFatal ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aFatal.stream() );
 			aFatal.head();
 			insert( lStr , aArg0 );
@@ -970,7 +968,7 @@ void log (  ErrorLevel& aError , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -986,7 +984,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1003,7 +1001,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1021,7 +1019,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1040,7 +1038,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1060,7 +1058,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1081,7 +1079,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1103,7 +1101,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1126,7 +1124,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1150,7 +1148,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1175,7 +1173,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1201,7 +1199,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1228,7 +1226,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1256,7 +1254,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1285,7 +1283,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1315,7 +1313,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1346,7 +1344,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1378,7 +1376,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1411,7 +1409,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1445,7 +1443,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1480,7 +1478,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1516,7 +1514,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1553,7 +1551,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1591,7 +1589,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1630,7 +1628,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1670,7 +1668,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1711,7 +1709,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1753,7 +1751,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1796,7 +1794,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1840,7 +1838,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1885,7 +1883,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1931,7 +1929,7 @@ void log (  ErrorLevel& aError , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_FATAL
 	#ifndef LOGGING_EXCLUDE_ERROR
 		if( LoggingIncludes( aError ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aError.stream() );
 			aError.head();
 			insert( lStr , aArg0 );
@@ -1983,7 +1981,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2001,7 +1999,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2020,7 +2018,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2040,7 +2038,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2061,7 +2059,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2083,7 +2081,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2106,7 +2104,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2130,7 +2128,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2155,7 +2153,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2181,7 +2179,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2208,7 +2206,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2236,7 +2234,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2265,7 +2263,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2295,7 +2293,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2326,7 +2324,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2358,7 +2356,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2391,7 +2389,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2425,7 +2423,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2460,7 +2458,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2496,7 +2494,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2533,7 +2531,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2571,7 +2569,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2610,7 +2608,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2650,7 +2648,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2691,7 +2689,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2733,7 +2731,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2776,7 +2774,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2820,7 +2818,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2865,7 +2863,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2911,7 +2909,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -2958,7 +2956,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -3006,7 +3004,7 @@ void log (  WarningLevel& aWarning , const T0& aArg0 , const T1& aArg1 , const T
 	#ifndef LOGGING_EXCLUDE_ERROR
 	#ifndef LOGGING_EXCLUDE_WARNING
 		if( LoggingIncludes( aWarning ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aWarning.stream() );
 			aWarning.head();
 			insert( lStr , aArg0 );
@@ -3060,7 +3058,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3080,7 +3078,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3101,7 +3099,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3123,7 +3121,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3146,7 +3144,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3170,7 +3168,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3195,7 +3193,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3221,7 +3219,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3248,7 +3246,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3276,7 +3274,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3305,7 +3303,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3335,7 +3333,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3366,7 +3364,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3398,7 +3396,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3431,7 +3429,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3465,7 +3463,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3500,7 +3498,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3536,7 +3534,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3573,7 +3571,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3611,7 +3609,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3650,7 +3648,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3690,7 +3688,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3731,7 +3729,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3773,7 +3771,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3816,7 +3814,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3860,7 +3858,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3905,7 +3903,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3951,7 +3949,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -3998,7 +3996,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -4046,7 +4044,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -4095,7 +4093,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -4145,7 +4143,7 @@ void log (  NoticeLevel& aNotice , const T0& aArg0 , const T1& aArg1 , const T2&
 	#ifndef LOGGING_EXCLUDE_WARNING
 	#ifndef LOGGING_EXCLUDE_NOTICE
 		if( LoggingIncludes( aNotice ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aNotice.stream() );
 			aNotice.head();
 			insert( lStr , aArg0 );
@@ -4201,7 +4199,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4223,7 +4221,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4246,7 +4244,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4270,7 +4268,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4295,7 +4293,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4321,7 +4319,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4348,7 +4346,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4376,7 +4374,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4405,7 +4403,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4435,7 +4433,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4466,7 +4464,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4498,7 +4496,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4531,7 +4529,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4565,7 +4563,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4600,7 +4598,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4636,7 +4634,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4673,7 +4671,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4711,7 +4709,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4750,7 +4748,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4790,7 +4788,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4831,7 +4829,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4873,7 +4871,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4916,7 +4914,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -4960,7 +4958,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5005,7 +5003,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5051,7 +5049,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5098,7 +5096,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5146,7 +5144,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5195,7 +5193,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5245,7 +5243,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5296,7 +5294,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5348,7 +5346,7 @@ void log (  InfoLevel& aInfo , const T0& aArg0 , const T1& aArg1 , const T2& aAr
 	#ifndef LOGGING_EXCLUDE_NOTICE
 	#ifndef LOGGING_EXCLUDE_INFO
 		if( LoggingIncludes( aInfo ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aInfo.stream() );
 			aInfo.head();
 			insert( lStr , aArg0 );
@@ -5406,7 +5404,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0  )
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5430,7 +5428,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1  )
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5455,7 +5453,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5481,7 +5479,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5508,7 +5506,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5536,7 +5534,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5565,7 +5563,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5595,7 +5593,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5626,7 +5624,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5658,7 +5656,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5691,7 +5689,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5725,7 +5723,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5760,7 +5758,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5796,7 +5794,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5833,7 +5831,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5871,7 +5869,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5910,7 +5908,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5950,7 +5948,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -5991,7 +5989,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6033,7 +6031,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6076,7 +6074,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6120,7 +6118,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6165,7 +6163,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6211,7 +6209,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6258,7 +6256,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6306,7 +6304,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6355,7 +6353,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6405,7 +6403,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6456,7 +6454,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6508,7 +6506,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6561,7 +6559,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6615,7 +6613,7 @@ void log (  DebugLevel& aDebug , const T0& aArg0 , const T1& aArg1 , const T2& a
 	#ifndef LOGGING_EXCLUDE_INFO
 	#ifndef LOGGING_EXCLUDE_DEBUG
 		if( LoggingIncludes( aDebug ) ){
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			std::ostream& lStr( aDebug.stream() );
 			aDebug.head();
 			insert( lStr , aArg0 );
@@ -6669,7 +6667,7 @@ void log (  exception::exception& aExc , const T0& aArg0  )
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			aExc.append( ( lStr.str() + "\n" ).c_str() );
 			}
@@ -6681,7 +6679,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1  )
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			aExc.append( ( lStr.str() + "\n" ).c_str() );
@@ -6694,7 +6692,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6708,7 +6706,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6723,7 +6721,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6739,7 +6737,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6756,7 +6754,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6774,7 +6772,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6793,7 +6791,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6813,7 +6811,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6834,7 +6832,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6856,7 +6854,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6879,7 +6877,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6903,7 +6901,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6928,7 +6926,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6954,7 +6952,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -6981,7 +6979,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7009,7 +7007,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7038,7 +7036,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7068,7 +7066,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7099,7 +7097,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7131,7 +7129,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7164,7 +7162,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7198,7 +7196,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7233,7 +7231,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7269,7 +7267,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7306,7 +7304,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7344,7 +7342,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7383,7 +7381,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7423,7 +7421,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7464,7 +7462,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );
@@ -7506,7 +7504,7 @@ void log (  exception::exception& aExc , const T0& aArg0 , const T1& aArg1 , con
 {
 			std::stringstream lStr;
 			{
-			boost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );
+			std::lock_guard<std::mutex> lLock ( GetLoggingMutex() );
 			insert( lStr , aArg0 );
 			insert( lStr , aArg1 );
 			insert( lStr , aArg2 );

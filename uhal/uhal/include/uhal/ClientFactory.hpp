@@ -42,10 +42,10 @@
 
 
 #include <map>
+#include <unordered_map>
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
 
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"
@@ -195,7 +195,7 @@ namespace uhal
       //! The single instance of the class
       static boost::shared_ptr<ClientFactory> mInstance;
       //! Hash map associating a creator for a particular protocol with a file name
-      boost::unordered_map< std::string , ClientInfo > mClientMap; //map string name of each protocol to a creator for that protocol
+      std::unordered_map< std::string , ClientInfo > mClientMap; //map string name of each protocol to a creator for that protocol
   };
 
 }

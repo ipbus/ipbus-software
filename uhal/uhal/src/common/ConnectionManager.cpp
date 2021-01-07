@@ -43,6 +43,7 @@
 
 #include <boost/regex.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 
 #if BOOST_VERSION >= 106000

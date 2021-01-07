@@ -66,13 +66,12 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << "#define _uhal_log_log_hpp_\n"
             << "\n\n"
             << "#include <iosfwd>  // for ostream\n"
+            << "#include <mutex>   // for lock_guard, mutex\n"
             << "\n"
             << "#include <uhal/log/log_inserters.hpp>\n"
             << "#include <uhal/log/LogLevels.hpp>\n"
             << "#include <uhal/log/exception.hpp>\n"
             << "\n"
-            << "\n"
-            << "namespace boost { class mutex; }\n"
             << "\n"
             << "namespace uhal{\n"
             << "\n"
@@ -86,11 +85,9 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << gDivider
             << "\n";
   aHxxFile	<< "\n"
+            << "#include <mutex>                           // for lock_guard, mutex\n"
             << "#include <sstream>                         // for ostream, stringstream, endl\n"
             << "#include <string>                          // for operator+, basic_string\n"
-            << "\n"
-            << "#include <boost/thread/lock_guard.hpp>     // for lock_guard\n"
-            << "#include <boost/thread/mutex.hpp>          // for mutex\n"
             << "\n"
             << "#include \"uhal/log/exception.hpp\"          // for exception\n"
             << "#include \"uhal/log/LogLevels.hpp\"          // for insert, ErrorLevel, DebugL...\n"
@@ -101,9 +98,8 @@ void fileHeaders ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::ofst
             << gDivider
             << "\n";
   aCppFile	<< "\n"
+            << "#include <mutex>                             // for lock_guard, mutex\n"
             << "#include <stdlib.h>                          // for getenv\n"
-            << "\n"
-            << "#include <boost/thread/mutex.hpp>            // for mutex\n"
             << "\n"
             << "#include \"uhal/log/LogLevels.hpp\"            // for BaseLogLevel, Info, Info...\n"
             << "#include \"uhal/log/log.hpp\"                  // for log\n"
@@ -176,8 +172,8 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
   aHppFile << "/**\n"
            << "\tFunction to retrieve the mutex lock used by the logger\n"
            << "*/\n"
-           << "boost::mutex& GetLoggingMutex();\n";
-  aCppFile << "boost::mutex& GetLoggingMutex()\n"
+           << "std::mutex& GetLoggingMutex();\n";
+  aCppFile << "std::mutex& GetLoggingMutex()\n"
            << "{\n"
            << "\treturn log_configuration::mMutex;\n"
            << "}\n"
@@ -278,16 +274,16 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\tstatic const bool mFalse;\n"
            << "\n"
            << "\t//!Make GetLoggingMutex function a friend so it can access our private members\n"
-           << "\tfriend boost::mutex& GetLoggingMutex();\n"
+           << "\tfriend std::mutex& GetLoggingMutex();\n"
            << "\t//!Define a static Mutex lock for thread safe logging\n"
-           << "\tstatic boost::mutex mMutex;\n"
+           << "\tstatic std::mutex mMutex;\n"
            << "};\n"
            << "\n";
   aCppFile << "\n"
            << "const bool log_configuration::mTrue = true;\n"
            << "const bool log_configuration::mFalse = false;\n"
            << "\n"
-           << "boost::mutex log_configuration::mMutex;\n"
+           << "std::mutex log_configuration::mMutex;\n"
            << "\n";
   aHppFile	<< gDivider
             << "\n";
@@ -348,7 +344,7 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << "{\n"
                << lIfDefs.str()
                << "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
-               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
+               << "\t\t\tstd::lock_guard<std::mutex> lLock ( GetLoggingMutex() );\n"
                << "\t\t\tstd::ostream& lStr( a" << *lIt << ".stream() );\n"
                << "\t\t\ta" << *lIt << ".head();\n"
                << lInstructions.str()
@@ -394,7 +390,7 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << "{\n"
                << "\t\t\tstd::stringstream lStr;\n"
                << "\t\t\t{\n"
-               << "\t\t\tboost::lock_guard<boost::mutex> lLock ( GetLoggingMutex() );\n"
+               << "\t\t\tstd::lock_guard<std::mutex> lLock ( GetLoggingMutex() );\n"
                << lInstructions.str()
                << "\t\t\taExc.append( ( lStr.str() + \"\\n\" ).c_str() );\n"
                << "\t\t\t}\n"

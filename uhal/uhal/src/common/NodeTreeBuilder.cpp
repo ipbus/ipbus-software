@@ -181,7 +181,7 @@ namespace uhal
 
   void NodeTreeBuilder::clearAddressFileCache()
   {
-    for(boost::unordered_map<std::string, const Node*>::const_iterator it=mNodes.begin(); it != mNodes.end(); it++)
+    for(std::unordered_map<std::string, const Node*>::const_iterator it=mNodes.begin(); it != mNodes.end(); it++)
     {
       delete it->second;
     } 
@@ -204,7 +204,7 @@ namespace uhal
   void NodeTreeBuilder::CallBack ( const std::string& aProtocol , const boost::filesystem::path& aPath , std::vector<uint8_t>& aFile , std::vector< const Node* >& aNodes )
   {
     std::string lName ( aProtocol + ( aPath.string() ) );
-    boost::unordered_map< std::string , const Node* >::iterator lNodeIt = mNodes.find ( lName );
+    std::unordered_map< std::string , const Node* >::iterator lNodeIt = mNodes.find ( lName );
 
     if ( lNodeIt != mNodes.end() )
     {
@@ -390,7 +390,7 @@ namespace uhal
       //parse the string into a NodeTreeParameters object
       std::string::const_iterator lBegin ( lParsStr.begin() );
       std::string::const_iterator lEnd ( lParsStr.end() );
-      boost::unordered_map<std::string, std::string> lPars;
+      std::unordered_map<std::string, std::string> lPars;
       boost::spirit::qi::phrase_parse ( lBegin , lEnd , mNodeTreeParametersGrammar , boost::spirit::ascii::space , lPars );
       // Update the parameters map
       // Add to lPars those previously defined (module node)

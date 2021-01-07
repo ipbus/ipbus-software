@@ -33,7 +33,7 @@
 #include "uhal/log/log_inserters.threadID.hpp"
 
 
-#include "boost/thread/thread.hpp"
+#include <thread>
 
 
 namespace uhal
@@ -41,7 +41,7 @@ namespace uhal
 
   std::ostream& operator<< ( std::ostream& aStr , const ThisThreadID& aThisThreadID )
   {
-    aStr << boost::this_thread::get_id();
+    aStr << std::this_thread::get_id();
     return aStr;
   }
 

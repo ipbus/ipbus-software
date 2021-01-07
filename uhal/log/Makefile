@@ -28,9 +28,7 @@ IncludePaths = include  \
 
 LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX}
 
-Libraries = pthread \
-	$(BOOST_THREAD_LIB) \
-	boost_system
+Libraries = pthread
 
 CXXFLAGS += -D MAX_NUM_ARGS=32
 

@@ -45,7 +45,7 @@ namespace uhal
   template <class T>
   void ClientFactory::add ( const std::string& aProtocol , const std::string& aDescription, bool aUserDefined )
   {
-    boost::unordered_map<std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( aProtocol ) ;
+    std::unordered_map<std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( aProtocol ) ;
 
     if ( lIt != mClientMap.end() )
     {

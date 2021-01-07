@@ -112,7 +112,7 @@ namespace uhal
     }
 
     log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
-    boost::unordered_map< std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( lUri.mProtocol );
+    std::unordered_map< std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( lUri.mProtocol );
 
     if ( lIt == mClientMap.end() )
     {

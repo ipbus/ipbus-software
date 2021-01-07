@@ -82,8 +82,8 @@ struct NodeProperties {
   std::vector<std::string> descendantIds;
   std::map<std::string, const std::type_info*> descendantTypes;
   std::string tags;
-  boost::unordered_map<std::string,std::string> parameters;
-  boost::unordered_map<std::string,std::string> fwInfo;
+  std::unordered_map<std::string,std::string> parameters;
+  std::unordered_map<std::string,std::string> fwInfo;
   const std::type_info* type;
 };
 
@@ -437,25 +437,25 @@ void checkProperties(const uhal::Node& aNode, const NodeProperties& aExpected)
 
   // Validate parameters map
   BOOST_CHECK_EQUAL(aNode.getParameters().size(), aExpected.parameters.size());
-  for (boost::unordered_map<std::string,std::string>::const_iterator lIt=aExpected.parameters.begin(); lIt!=aExpected.parameters.end(); lIt++) {
+  for (std::unordered_map<std::string,std::string>::const_iterator lIt=aExpected.parameters.begin(); lIt!=aExpected.parameters.end(); lIt++) {
     BOOST_CHECK_MESSAGE(aNode.getParameters().count(lIt->first) == size_t(1), "Parameter '" << lIt->first << "' was not found");
     if (aNode.getParameters().count(lIt->first) == size_t(1)){
       BOOST_CHECK_MESSAGE(aNode.getParameters().find(lIt->first)->second == lIt->second, "Parameter '" << lIt->first << "' has value '" << aNode.getParameters().find(lIt->first)->second << "'; expected value '" << lIt->second <<  "'");
     }
   }
-  for (boost::unordered_map<std::string,std::string>::const_iterator lIt=aNode.getParameters().begin(); lIt!=aNode.getParameters().end(); lIt++) {
+  for (std::unordered_map<std::string,std::string>::const_iterator lIt=aNode.getParameters().begin(); lIt!=aNode.getParameters().end(); lIt++) {
     BOOST_CHECK_MESSAGE(aExpected.parameters.count(lIt->first) == size_t(1), "Node has unexpected parameter '" << lIt->first << "'" << " (value: '" << lIt->second << "')");
   }
 
   // Validate firmware info map
   BOOST_CHECK_EQUAL(aNode.getFirmwareInfo().size(), aExpected.fwInfo.size());
-  for (boost::unordered_map<std::string,std::string>::const_iterator lIt=aExpected.fwInfo.begin(); lIt!=aExpected.fwInfo.end(); lIt++) {
+  for (std::unordered_map<std::string,std::string>::const_iterator lIt=aExpected.fwInfo.begin(); lIt!=aExpected.fwInfo.end(); lIt++) {
     BOOST_CHECK_MESSAGE(aNode.getFirmwareInfo().count(lIt->first) == size_t(1), "FW info '" << lIt->first << "' was not found");
     if (aNode.getFirmwareInfo().count(lIt->first) == size_t(1)){
       BOOST_CHECK_MESSAGE(aNode.getFirmwareInfo().find(lIt->first)->second == lIt->second, "FW info '" << lIt->first << "' has value '" << aNode.getFirmwareInfo().find(lIt->first)->second << "'; expected value '" << lIt->second <<  "'");
     }
   }
-  for (boost::unordered_map<std::string,std::string>::const_iterator lIt=aNode.getFirmwareInfo().begin(); lIt!=aNode.getFirmwareInfo().end(); lIt++) {
+  for (std::unordered_map<std::string,std::string>::const_iterator lIt=aNode.getFirmwareInfo().begin(); lIt!=aNode.getFirmwareInfo().end(); lIt++) {
     BOOST_CHECK_MESSAGE(aExpected.fwInfo.count(lIt->first) == size_t(1), "Node has unexpected FW info '" << lIt->first << "'" << " (value: '" << lIt->second << "')");
   }
 }

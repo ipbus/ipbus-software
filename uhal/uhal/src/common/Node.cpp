@@ -305,13 +305,13 @@ namespace uhal
   }
 
 
-  const boost::unordered_map< std::string, std::string >& Node::getParameters() const
+  const std::unordered_map< std::string, std::string >& Node::getParameters() const
   {
     return mParameters;
   }
 
 
-  const boost::unordered_map< std::string, std::string >& Node::getFirmwareInfo() const
+  const std::unordered_map< std::string, std::string >& Node::getFirmwareInfo() const
   {
     return mFirmwareInfo;
   }
@@ -393,7 +393,7 @@ namespace uhal
     if ( mParameters.size() )
     {
       aStr << ", Parameters: ";
-      boost::unordered_map<std::string, std::string>::const_iterator lIt;
+      std::unordered_map<std::string, std::string>::const_iterator lIt;
 
       for ( lIt = mParameters.begin(); lIt != mParameters.end(); ++lIt )
       {
@@ -426,7 +426,7 @@ namespace uhal
 
     do {
       lDotIdx = aId.find('.', lStartIdx);
-      boost::unordered_map< std::string , Node* >::const_iterator lIt = lDescendant->mChildrenMap.find ( aId.substr(lStartIdx, lDotIdx - lStartIdx) );
+      std::unordered_map< std::string , Node* >::const_iterator lIt = lDescendant->mChildrenMap.find ( aId.substr(lStartIdx, lDotIdx - lStartIdx) );
 
       if (lIt != lDescendant->mChildrenMap.end()) {
         lDescendant = lIt->second;
