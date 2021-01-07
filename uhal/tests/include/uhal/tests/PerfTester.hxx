@@ -98,7 +98,7 @@ namespace uhal
         typedef std::map<std::string, std::string> TestDescMap;
 
         /// Typedef for a ClientInterface shared_ptr
-        typedef boost::shared_ptr<uhal::ClientInterface> ClientPtr;
+        typedef std::shared_ptr<uhal::ClientInterface> ClientPtr;
 
         /// Typedef for a vector of raw client interfaces
         typedef std::vector< ClientPtr > ClientVec;

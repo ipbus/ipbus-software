@@ -42,10 +42,10 @@
 
 
 #include <map>
+#include <memory>
 #include <unordered_map>
 
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"
@@ -97,7 +97,7 @@ namespace uhal
         @param aUri a string containing the full URI of the target. This string is parsed to extract the protocol, and it is this which is used to identify the relevent creator which is then used to create the client.
         @return a shared pointer to the newly created client
       */
-      boost::shared_ptr<ClientInterface> getClient ( const std::string& aId , const std::string& aUri );
+      std::shared_ptr<ClientInterface> getClient ( const std::string& aId , const std::string& aUri );
 
       /**
         Construct an IPbus client based on the protocol identifier specified
@@ -106,7 +106,7 @@ namespace uhal
         @param aUserClientMaps a vector of names of protocols for user clients that should be enabled
         @return a shared pointer to the newly created client
       */
-      boost::shared_ptr<ClientInterface> getClient ( const std::string& aId , const std::string& aUri, const std::vector<std::string>& aUserClientActivationList );
+      std::shared_ptr<ClientInterface> getClient ( const std::string& aId , const std::string& aUri, const std::vector<std::string>& aUserClientActivationList );
 
       /**
         Method to create an associate between a protocol identifier and a Creator of a particular type
@@ -155,7 +155,7 @@ namespace uhal
           	@param aUri a string containing the full URI of the target. This string is parsed to extract the protocol, and it is this which is used to identify the relevent creator which is then used to create the client.
           	@return a shared pointer to the newly created client
           */
-          virtual boost::shared_ptr<ClientInterface> create ( const std::string& aId , const URI& aUri ) = 0;
+          virtual std::shared_ptr<ClientInterface> create ( const std::string& aId , const URI& aUri ) = 0;
       };
 
       //! Templated concrete implementation with a CreatorInterface interface
@@ -180,20 +180,20 @@ namespace uhal
           	@param aUri a string containing the full URI of the target. This string is parsed to extract the protocol, and it is this which is used to identify the relevent creator which is then used to create the client.
           	@return a shared pointer to the newly created client
           */
-          boost::shared_ptr<ClientInterface> create ( const std::string& aId , const URI& aUri );
+          std::shared_ptr<ClientInterface> create ( const std::string& aId , const URI& aUri );
       };
 
 
     private:
 
       struct ClientInfo {
-        boost::shared_ptr<CreatorInterface> creator;
+        std::shared_ptr<CreatorInterface> creator;
         bool userDefined;
         std::string description;
       };
 
       //! The single instance of the class
-      static boost::shared_ptr<ClientFactory> mInstance;
+      static std::shared_ptr<ClientFactory> mInstance;
       //! Hash map associating a creator for a particular protocol with a file name
       std::unordered_map< std::string , ClientInfo > mClientMap; //map string name of each protocol to a creator for that protocol
   };

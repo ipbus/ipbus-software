@@ -50,7 +50,7 @@ void checkClientFactory(const std::string& aId, const std::string& aURI, const s
     BOOST_TEST_MESSAGE("  - '" << aUserClientActivationList.at(i) << "'");
   }
 
-  boost::shared_ptr<ClientInterface> lClient(ClientFactory::getInstance().getClient(aId, aURI, aUserClientActivationList));
+  std::shared_ptr<ClientInterface> lClient(ClientFactory::getInstance().getClient(aId, aURI, aUserClientActivationList));
   BOOST_REQUIRE(lClient);
   BOOST_CHECK_EQUAL(lClient->id(), aId);
   BOOST_CHECK_EQUAL(lClient->uri(), aURI);
@@ -62,7 +62,7 @@ template <class T>
 void checkClientFactory(const std::string& aId, const std::string& aURI)
 {
   BOOST_TEST_MESSAGE("Creating client with ID '" << aId << "', URI '" << aURI << "'");
-  boost::shared_ptr<ClientInterface> lClient(ClientFactory::getInstance().getClient(aId, aURI));
+  std::shared_ptr<ClientInterface> lClient(ClientFactory::getInstance().getClient(aId, aURI));
   BOOST_REQUIRE(lClient);
   BOOST_CHECK_EQUAL(lClient->id(), aId);
   BOOST_CHECK_EQUAL(lClient->uri(), aURI);

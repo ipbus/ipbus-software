@@ -46,7 +46,7 @@ namespace boost {
 namespace uhal
 {
 
-  HwInterface::HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) :
+  HwInterface::HwInterface ( const std::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) :
     mClientInterface ( aClientInterface ),
     mNode ( aNode )
   {

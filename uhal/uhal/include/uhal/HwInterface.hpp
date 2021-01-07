@@ -40,6 +40,7 @@
 #define _uhal_HwInterface_hpp_
 
 
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -65,7 +66,7 @@ namespace uhal
       	@param aClientInterface a shared pointer to a client interface which performs the transport
       	@param aNode a shared pointer to a >>freshly cloned<< node representing the >>full<< endpoint structure
       */
-      HwInterface ( const boost::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode );
+      HwInterface ( const std::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode );
 
       /**
       	Copy Constructor
@@ -159,7 +160,7 @@ namespace uhal
       void claimNode ( Node& aNode );
 
       //! A shared pointer to the IPbus client through which the transactions will be sent
-      boost::shared_ptr<ClientInterface> mClientInterface;
+      std::shared_ptr<ClientInterface> mClientInterface;
 
       //! A node tree
       boost::shared_ptr<Node> mNode;

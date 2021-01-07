@@ -1,15 +1,15 @@
 
 #include "uhal/pycohal/enums_logging.hpp"
 
-// The following python boost patch is required to compile on apple
-#include "uhal/pycohal/boost_python.hpp"
+
+#include "pybind11/pybind11.h"
 
 #include "uhal/definitions.hpp"
 #include "uhal/log/log.hpp"
 #include "uhal/pycohal/exceptions.hpp"
 
 
-namespace bpy = boost::python ;
+namespace py = pybind11;
 
 
 void pycohal::setLogLevelTo ( const pycohal::LogLevel& logLevel )
@@ -62,35 +62,35 @@ const bool& pycohal::LoggingIncludes ( const pycohal::LogLevel& logLevel )
 }
 
 
-void pycohal::wrap_enums()
+void pycohal::wrap_enums(pybind11::module_& aModule)
 {
-  bpy::enum_<uhal::defs::NodePermission> ( "NodePermission" )
-  .value ( "READ", uhal::defs::READ )
-  .value ( "WRITE", uhal::defs::WRITE )
-  .value ( "READWRITE", uhal::defs::READWRITE )
-  ;
-  bpy::enum_<uhal::defs::BlockReadWriteMode> ( "BlockReadWriteMode" )
-  .value ( "SINGLE", uhal::defs::SINGLE )
-  .value ( "INCREMENTAL", uhal::defs::INCREMENTAL )
-  .value ( "NON_INCREMENTAL", uhal::defs::NON_INCREMENTAL )
-  .value ( "HIERARCHICAL", uhal::defs::HIERARCHICAL )
-  ;
-  bpy::enum_<pycohal::LogLevel> ( "LogLevel" )
-  .value ( "FATAL",   pycohal::FATAL )
-  .value ( "ERROR",   pycohal::ERROR )
-  .value ( "WARNING", pycohal::WARNING )
-  .value ( "NOTICE",  pycohal::NOTICE )
-  .value ( "INFO",    pycohal::INFO )
-  .value ( "DEBUG",   pycohal::DEBUG )
-  ;
+  py::enum_<uhal::defs::NodePermission> ( aModule, "NodePermission" )
+    .value ( "READ", uhal::defs::READ )
+    .value ( "WRITE", uhal::defs::WRITE )
+    .value ( "READWRITE", uhal::defs::READWRITE )
+    ;
+  py::enum_<uhal::defs::BlockReadWriteMode> ( aModule, "BlockReadWriteMode" )
+    .value ( "SINGLE", uhal::defs::SINGLE )
+    .value ( "INCREMENTAL", uhal::defs::INCREMENTAL )
+    .value ( "NON_INCREMENTAL", uhal::defs::NON_INCREMENTAL )
+    .value ( "HIERARCHICAL", uhal::defs::HIERARCHICAL )
+    ;
+  py::enum_<pycohal::LogLevel> ( aModule, "LogLevel" )
+    .value ( "FATAL",   pycohal::FATAL )
+    .value ( "ERROR",   pycohal::ERROR )
+    .value ( "WARNING", pycohal::WARNING )
+    .value ( "NOTICE",  pycohal::NOTICE )
+    .value ( "INFO",    pycohal::INFO )
+    .value ( "DEBUG",   pycohal::DEBUG )
+    ;
 }
 
-void pycohal::wrap_logging_functions()
+void pycohal::wrap_logging_functions(pybind11::module_& aModule)
 {
-  bpy::def ( "setLogLevelFromEnvironment", uhal::setLogLevelFromEnvironment );
-  bpy::def ( "disableLogging", uhal::disableLogging );
-  bpy::def ( "setLogLevelTo", pycohal::setLogLevelTo );
-  bpy::def ( "LoggingIncludes", pycohal::LoggingIncludes, bpy::return_value_policy<bpy::copy_const_reference>() );
+  aModule.def ( "setLogLevelFromEnvironment", uhal::setLogLevelFromEnvironment );
+  aModule.def ( "disableLogging", uhal::disableLogging );
+  aModule.def ( "setLogLevelTo", pycohal::setLogLevelTo );
+  aModule.def ( "LoggingIncludes", pycohal::LoggingIncludes, py::return_value_policy::copy );
 }
 
 

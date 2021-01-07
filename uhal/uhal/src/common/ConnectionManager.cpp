@@ -162,7 +162,7 @@ namespace uhal
     //The node tree builder returns a newly created Node which we can safely wrap as a shared_ptr
     boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
-    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri , mUserClientActivationList ) );
+    std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri , mUserClientActivationList ) );
     return HwInterface ( lClientInterface , lNode );
   }
 
@@ -173,7 +173,7 @@ namespace uhal
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
-    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
+    std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
     return HwInterface ( lClientInterface , lNode );
   }
 
@@ -184,7 +184,7 @@ namespace uhal
     boost::lock_guard<boost::mutex> lLock ( mMutex );
     boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
-    boost::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri , aUserClientActivationList ) );
+    std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri , aUserClientActivationList ) );
     return HwInterface ( lClientInterface , lNode );
   }
 
