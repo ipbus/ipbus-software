@@ -6,20 +6,16 @@ CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
 
 PYTHON ?= python
-CACTUS_PLATFORM=$(shell ${PYTHON} -c "import platform; print(platform.platform())")
+CACTUS_PLATFORM=$(shell cat /etc/system-release)
 CACTUS_OS=unknown.os
 
 UNAME=$(strip $(shell uname -s))
 ifeq ($(UNAME),Linux)
-    ifneq ($(findstring redhat-5,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=slc5
-    else ifneq ($(findstring redhat-6,$(CACTUS_PLATFORM)),)
+    ifneq ($(findstring Scientific Linux CERN SLC release 6,$(CACTUS_PLATFORM)),)
         CACTUS_OS=slc6
-    else ifneq ($(findstring centos-6,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=centos6
-    else ifneq ($(findstring centos-7,$(CACTUS_PLATFORM)),)
+    else ifneq ($(findstring CentOS Linux release 7,$(CACTUS_PLATFORM)),)
         CACTUS_OS=centos7
-    else ifneq ($(findstring centos-8,$(CACTUS_PLATFORM)),)
+    else ifneq ($(findstring CentOS Linux release 8,$(CACTUS_PLATFORM)),)
         CACTUS_OS=centos8
     endif
 else ifeq ($(UNAME),Darwin)

@@ -146,17 +146,17 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
 
     cmds += [["TEST PYCOHAL",
               ["DummyHardwareUdp.exe --version 1 --port 50001",
-               "test_pycohal -c %s -v" % (conn_file),
+               sys.executable + " $(which test_pycohal) -c %s -v" % (conn_file),
                "KILL_BACKGROUND_PROCS"]
             ]]
 
     cmds += [["TEST uHAL GUI",
-              ["/usr/bin/python -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
+              [sys.executable + " -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
             ]]
 
     cmds += [["TEST uHAL TOOLS",
               [#uhal.tools.ipbus_addr_map
-               "gen_ipbus_addr_decode -t %s %s" % (uhal_tools_template_vhdl, join(os.path.split(uhal_tools_template_vhdl)[0],'addr_table.xml')),
+               sys.executable + " $(which gen_ipbus_addr_decode) -t %s %s" % (uhal_tools_template_vhdl, join(os.path.split(uhal_tools_template_vhdl)[0],'addr_table.xml')),
               ]
             ]]
 
