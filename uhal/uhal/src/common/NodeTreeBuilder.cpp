@@ -73,7 +73,7 @@ namespace uhal
   const std::string NodeTreeBuilder::mFirmwareInfo = "fwinfo";
 
 
-  boost::shared_ptr<NodeTreeBuilder> NodeTreeBuilder::mInstance;
+  std::shared_ptr<NodeTreeBuilder> NodeTreeBuilder::mInstance;
 
 
   NodeTreeBuilder::NodeTreeBuilder ()

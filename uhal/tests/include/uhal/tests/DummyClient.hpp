@@ -17,7 +17,7 @@ namespace uhal {
 
     private:
 
-      void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
+      void implementDispatch ( std::shared_ptr< Buffers > aBuffers );
 
       ValHeader implementBOT( );
 

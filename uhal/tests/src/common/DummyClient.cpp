@@ -18,7 +18,7 @@ DummyClient::~DummyClient()
 {
 }
 
-void DummyClient::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+void DummyClient::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
 {
 }
 

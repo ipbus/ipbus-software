@@ -33,10 +33,9 @@
 #include "uhal/DerivedNodeFactory.hpp"
 
 
+#include <memory>
 #include <stddef.h>                          // for NULL
 #include <unordered_map>
-
-#include <boost/shared_ptr.hpp>              // for shared_ptr
 
 #include "uhal/log/LogLevels.hpp"            // for Warning
 #include "uhal/log/log_inserters.quote.hpp"  // for Quote, _Quote
@@ -47,7 +46,7 @@
 namespace uhal
 {
 
-  boost::shared_ptr<DerivedNodeFactory> DerivedNodeFactory::mInstance;
+  std::shared_ptr<DerivedNodeFactory> DerivedNodeFactory::mInstance;
 
 
   DerivedNodeFactory::DerivedNodeFactory ()
@@ -73,7 +72,7 @@ namespace uhal
 
   Node* DerivedNodeFactory::convertToClassType ( Node* aNode )
   {
-    std::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNode->mClassName );
+    std::unordered_map< std::string , std::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNode->mClassName );
 
     if ( lIt == mCreators.end() )
     {
@@ -83,7 +82,7 @@ namespace uhal
       {
         log ( Warning , "Known types are:" );
 
-        for ( std::unordered_map< std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
+        for ( std::unordered_map< std::string , std::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.begin() ; lIt != mCreators.end() ; ++lIt )
         {
           log ( Warning , "    > " , lIt->first );
         }

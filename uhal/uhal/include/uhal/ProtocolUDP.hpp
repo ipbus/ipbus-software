@@ -42,11 +42,11 @@
 
 #include <deque>
 #include <iostream>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -117,7 +117,7 @@ namespace uhal
       	@param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
       	If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
       */
-      void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
+      void implementDispatch ( std::shared_ptr< Buffers > aBuffers );
 
       //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       virtual void Flush( );
@@ -210,9 +210,9 @@ namespace uhal
       boost::mutex mTransportLayerMutex;
 
       //! The list of buffers still waiting to be sent
-      std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
+      std::deque < std::shared_ptr< Buffers > > mDispatchQueue;
       //! The list of buffers still awaiting a reply
-      std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
+      std::deque < std::shared_ptr< Buffers > > mReplyQueue;
 
       //! Counter of how many writes have been sent, for which no reply has yet been received
       uint32_t mPacketsInFlight;
@@ -225,9 +225,9 @@ namespace uhal
       bool mFlushDone;
 
       //! The send operation currently in progress
-      boost::shared_ptr< Buffers > mDispatchBuffers;
+      std::shared_ptr< Buffers > mDispatchBuffers;
       //! The receive operation currently in progress or the next to be done
-      boost::shared_ptr< Buffers > mReplyBuffers;
+      std::shared_ptr< Buffers > mReplyBuffers;
 
       /**
         A pointer to an exception object for passing exceptions from the worker thread to the main thread.

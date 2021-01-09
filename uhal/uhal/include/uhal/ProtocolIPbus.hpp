@@ -42,6 +42,7 @@
 
 #include <deque>
 #include <iosfwd>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <utility>
@@ -52,10 +53,6 @@
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"              // for PacketLevelError
 #include "uhal/ProtocolIPbusCore.hpp"
-
-
-// Forward declarations
-namespace boost { template <class Y> class shared_ptr; }
 
 
 namespace uhal
@@ -87,13 +84,13 @@ namespace uhal
 
     protected:
       //! Add a preamble to an IPbus buffer
-      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void preamble ( std::shared_ptr< Buffers > aBuffers );
 
       //! Return the size of the preamble
       virtual uint32_t getPreambleSize();
 
       //! Finalize the buffer before it is transmitted
-      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void predispatch ( std::shared_ptr< Buffers > aBuffers );
 
     public:
       /**
@@ -203,13 +200,13 @@ namespace uhal
 
     protected:
       //! Add a preamble to an IPbus buffer
-      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void preamble ( std::shared_ptr< Buffers > aBuffers );
 
       //! Return the size of the preamble
       virtual uint32_t getPreambleSize();
 
       //! Finalize the buffer before it is transmitted
-      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void predispatch ( std::shared_ptr< Buffers > aBuffers );
 
     public:
       /**

@@ -160,7 +160,7 @@ namespace uhal
     }
 
     //The node tree builder returns a newly created Node which we can safely wrap as a shared_ptr
-    boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
+    std::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( lIt->second.address_table , lIt->second.connection_file ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
     std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( lIt->second.id , lIt->second.uri , mUserClientActivationList ) );
     return HwInterface ( lClientInterface , lNode );
@@ -171,7 +171,7 @@ namespace uhal
   {
     //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
     boost::lock_guard<boost::mutex> lLock ( mMutex );
-    boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
+    std::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
     std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
     return HwInterface ( lClientInterface , lNode );
@@ -182,7 +182,7 @@ namespace uhal
   {
     //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
     boost::lock_guard<boost::mutex> lLock ( mMutex );
-    boost::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
+    std::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
     std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri , aUserClientActivationList ) );
     return HwInterface ( lClientInterface , lNode );

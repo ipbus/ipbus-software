@@ -297,7 +297,7 @@ Mmap::~Mmap()
 }
 
 
-void Mmap::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+void Mmap::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
 {
   log(Debug(), "mmap client (URI: ", Quote(uri()), ") : implementDispatch method called");
 
@@ -386,7 +386,7 @@ void Mmap::disconnect()
 }
 
 
-void Mmap::write(const boost::shared_ptr<Buffers>& aBuffers)
+void Mmap::write(const std::shared_ptr<Buffers>& aBuffers)
 {
   log (Info(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFile.getPath()));
 
@@ -441,7 +441,7 @@ void Mmap::read()
   mReadReplyPageCount++;
   
   // PART 1 : Read the page
-  boost::shared_ptr<Buffers> lBuffers = mReplyQueue.front();
+  std::shared_ptr<Buffers> lBuffers = mReplyQueue.front();
   mReplyQueue.pop_front();
 
   uint32_t lNrWordsToRead(lBuffers->replyCounter() >> 2);

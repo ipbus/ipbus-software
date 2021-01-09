@@ -105,7 +105,7 @@ namespace uhal
 
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
-  void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
   {
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 
@@ -203,7 +203,7 @@ namespace uhal
     {
       mDispatchBuffers.push_back ( mDispatchQueue.front() );
       mDispatchQueue.pop_front();
-      const boost::shared_ptr<Buffers>& lBuffer = mDispatchBuffers.back();
+      const std::shared_ptr<Buffers>& lBuffer = mDispatchBuffers.back();
       mSendByteCounter += lBuffer->sendCounter();
       lAsioSendBuffer.push_back ( boost::asio::const_buffer ( lBuffer->getSendBuffer() , lBuffer->sendCounter() ) );
     }
@@ -342,7 +342,7 @@ namespace uhal
     uint32_t lRequestBytes = 0;
     uint32_t lExpectedReplyBytes = 0;
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       lNrReplyBuffers += ( *lBufIt )->getReplyBuffer().size();
       lRequestBytes += ( *lBufIt )->sendCounter();
@@ -429,7 +429,7 @@ namespace uhal
     lAsioReplyBuffer.reserve ( lNrReplyBuffers );
     log ( Debug() , "Expecting " , Integer ( lExpectedReplyBytes ) , " bytes in reply, for ", Integer ( mReplyBuffers.first.size() ), " buffers" );
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( ( *lBufIt )->getReplyBuffer() );
 
@@ -472,7 +472,7 @@ namespace uhal
     }
 
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       try
       {

@@ -34,19 +34,20 @@
 
 #include "uhal/uhal.hpp"
 
+
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <typeinfo>
+#include <vector>
+
+#include <boost/test/unit_test.hpp>
+
 #include "uhal/tests/definitions.hpp"
 #include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
-
-#include <boost/shared_ptr.hpp>
-#include <boost/test/unit_test.hpp>
-
-#include <vector>
-#include <algorithm>
-#include <string>
-#include <iostream>
-#include <cstdlib>
-#include <typeinfo>
 
 
 namespace uhal {

@@ -33,9 +33,9 @@
 #include "uhal/ClientInterface.hpp"
 
 
+#include <memory>
 #include <sstream>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/thread/lock_guard.hpp>
 
 #include "uhal/Buffers.hpp"
@@ -150,7 +150,7 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
       log ( Info() , "mNoPreemptiveDispatchBuffers.size() = " , Integer ( mNoPreemptiveDispatchBuffers.size() ) );
 
-      for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
+      for ( std::deque < std::shared_ptr< Buffers > >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
       {
         this->predispatch ( *lIt );
         this->implementDispatch ( *lIt ); //responsibility for *lIt passed to the implementDispatch function
@@ -185,7 +185,7 @@ namespace uhal
   {}
 
 
-  exception::exception* ClientInterface::validate ( boost::shared_ptr< Buffers > aBuffers )
+  exception::exception* ClientInterface::validate ( std::shared_ptr< Buffers > aBuffers )
   {
     exception::exception* lRet = this->validate ( aBuffers->getSendBuffer() ,
                                  aBuffers->getSendBuffer() + aBuffers->sendCounter() ,
@@ -209,16 +209,16 @@ namespace uhal
   }
 
 
-  void ClientInterface::preamble ( boost::shared_ptr< Buffers > aBuffers )
+  void ClientInterface::preamble ( std::shared_ptr< Buffers > aBuffers )
   {}
 
 
-  void ClientInterface::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void ClientInterface::predispatch ( std::shared_ptr< Buffers > aBuffers )
   {}
 
 
 
-  void ClientInterface::returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers )
+  void ClientInterface::returnBufferToPool ( std::shared_ptr< Buffers >& aBuffers )
   {
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 
@@ -230,11 +230,11 @@ namespace uhal
   }
 
 
-  void ClientInterface::returnBufferToPool ( std::deque< boost::shared_ptr< Buffers > >& aBuffers )
+  void ClientInterface::returnBufferToPool ( std::deque< std::shared_ptr< Buffers > >& aBuffers )
   {
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 
-    for ( std::deque < boost::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
+    for ( std::deque < std::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
     {
       if ( *lIt )
       {
@@ -246,11 +246,11 @@ namespace uhal
   }
 
 
-  void ClientInterface::returnBufferToPool ( std::vector< boost::shared_ptr<Buffers> >& aBuffers )
+  void ClientInterface::returnBufferToPool ( std::vector< std::shared_ptr<Buffers> >& aBuffers )
   {
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 
-    for ( std::vector < boost::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
+    for ( std::vector < std::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
     {
       if ( *lIt )
       {
@@ -262,13 +262,13 @@ namespace uhal
   }
 
 
-  void ClientInterface::returnBufferToPool ( std::deque< std::vector< boost::shared_ptr<Buffers> > >& aBuffers )
+  void ClientInterface::returnBufferToPool ( std::deque< std::vector< std::shared_ptr<Buffers> > >& aBuffers )
   {
     boost::lock_guard<boost::mutex> lLock ( mBufferMutex );
 
-    for ( std::deque < std::vector < boost::shared_ptr< Buffers > > >::iterator lIt1 = aBuffers.begin(); lIt1 != aBuffers.end(); ++lIt1 )
+    for ( std::deque < std::vector < std::shared_ptr< Buffers > > >::iterator lIt1 = aBuffers.begin(); lIt1 != aBuffers.end(); ++lIt1 )
     {
-      for ( std::vector< boost::shared_ptr<Buffers> >::iterator lIt2 = lIt1->begin(); lIt2 != lIt1->end(); ++lIt2 )
+      for ( std::vector< std::shared_ptr<Buffers> >::iterator lIt2 = lIt1->begin(); lIt2 != lIt1->end(); ++lIt2 )
       {
         if ( *lIt2 )
         {
@@ -282,7 +282,7 @@ namespace uhal
 
 
   //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  boost::shared_ptr< Buffers > ClientInterface::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
+  std::shared_ptr< Buffers > ClientInterface::checkBufferSpace ( const uint32_t& aRequestedSendSize , const uint32_t& aRequestedReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize )
   {
     log ( Debug() , "Checking buffer space" );
     //if there are no existing buffers in the pool, create them
@@ -352,7 +352,7 @@ namespace uhal
         {
           for ( uint32_t i=0; i!=10; ++i )
           {
-            mBuffers.push_back ( boost::shared_ptr< Buffers > ( new Buffers ( this->getMaxSendSize() ) ) );
+            mBuffers.push_back ( std::shared_ptr< Buffers > ( new Buffers ( this->getMaxSendSize() ) ) );
           }
         }
 

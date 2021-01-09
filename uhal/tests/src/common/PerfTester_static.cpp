@@ -468,7 +468,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
     // ACTUAL MEAT OF SOAK TEST
     uint32_t type, addr, blockSize;
     uint32_t tempUInt1, tempUInt2;
-    vector< boost::shared_ptr<QueuedTransaction> > queuedTransactions;
+    vector< std::shared_ptr<QueuedTransaction> > queuedTransactions;
     uint32_t nrQueuedWords = 0;
 
     for ( unsigned i = 1; i <= aNrIterations; i++ )
@@ -484,7 +484,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
           log ( Notice(), "Soak test - queueing: ", Integer ( blockSize ), "-word read at ", Integer ( addr, IntFmt<hex,fixed>() ) );
 
           ValVector<uint32_t> result = client->readBlock ( addr, blockSize, defs::INCREMENTAL );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockRead ( addr, result, registers.begin() + ( addr - aBaseAddr ) ) ) );
+          queuedTransactions.push_back ( std::shared_ptr<QueuedTransaction> ( new QueuedBlockRead ( addr, result, registers.begin() + ( addr - aBaseAddr ) ) ) );
           nrQueuedWords += blockSize;
           break;
         }
@@ -496,7 +496,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
           vector<uint32_t> randomData = getRandomBuffer ( blockSize );
           ValHeader result = client->writeBlock ( addr, randomData, defs::INCREMENTAL );
           std::copy ( randomData.begin(), randomData.end(), registers.begin() + ( addr - aBaseAddr ) );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedBlockWrite ( addr, blockSize, result ) ) );
+          queuedTransactions.push_back ( std::shared_ptr<QueuedTransaction> ( new QueuedBlockWrite ( addr, blockSize, result ) ) );
           nrQueuedWords += blockSize;
           break;
         }
@@ -514,7 +514,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
           }
 
           ValWord<uint32_t> result = client->rmw_bits ( addr, tempUInt1, tempUInt2 );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwBits ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
+          queuedTransactions.push_back ( std::shared_ptr<QueuedTransaction> ( new QueuedRmwBits ( addr, tempUInt1, tempUInt2, result, *regIt ) ) );
           nrQueuedWords += 1;
 
           if ( ipbus_vsn == 2 )
@@ -537,7 +537,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
           }
 
           ValWord<uint32_t> result = client->rmw_sum ( addr, tempUInt1 );
-          queuedTransactions.push_back ( boost::shared_ptr<QueuedTransaction> ( new QueuedRmwSum ( addr, tempUInt1, result, *regIt ) ) );
+          queuedTransactions.push_back ( std::shared_ptr<QueuedTransaction> ( new QueuedRmwSum ( addr, tempUInt1, result, *regIt ) ) );
           nrQueuedWords += 1;
 
           if ( ipbus_vsn == 2 )
@@ -556,7 +556,7 @@ bool uhal::tests::PerfTester::runValidationTest(const std::vector<ClientInterfac
         log ( Notice(), "Soak test - issuing empty dispatch" );
         client->dispatch();
 
-        for ( vector< boost::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++ )
+        for ( vector< std::shared_ptr<QueuedTransaction> >::const_iterator it = queuedTransactions.begin(); it != queuedTransactions.end(); it++ )
         {
           if ( ! ( *it )->check_values() )
           {

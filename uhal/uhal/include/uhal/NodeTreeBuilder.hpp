@@ -41,9 +41,10 @@
 #define _uhal_NodeTreeBuilder_hpp_
 
 
+#include <memory>
+
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 #include "pugixml.hpp"
@@ -173,7 +174,7 @@ namespace uhal
 
     private:
       //! The single instance of the class
-      static boost::shared_ptr<NodeTreeBuilder> mInstance;
+      static std::shared_ptr<NodeTreeBuilder> mInstance;
 
       //! Hash map associating a Node tree with a file name so that we do not need to repeatedly parse the xml documents if someone asks for a second copy of a particular node tree
       std::unordered_map< std::string , const Node* > mNodes;

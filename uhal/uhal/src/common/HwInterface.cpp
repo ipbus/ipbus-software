@@ -34,19 +34,16 @@
 
 
 #include <deque>
+#include <memory>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/Node.hpp"
 
 
-namespace boost {
-  template <class Y> class shared_ptr;
-}
-
 namespace uhal
 {
 
-  HwInterface::HwInterface ( const std::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode ) :
+  HwInterface::HwInterface ( const std::shared_ptr<ClientInterface>& aClientInterface , const std::shared_ptr< Node >& aNode ) :
     mClientInterface ( aClientInterface ),
     mNode ( aNode )
   {

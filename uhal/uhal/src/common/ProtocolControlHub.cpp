@@ -162,7 +162,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::preamble ( boost::shared_ptr< Buffers > aBuffers )
+  void ControlHub< InnerProtocol >::preamble ( std::shared_ptr< Buffers > aBuffers )
   {
     // -------------------------------------------------------------------------------------------------------------
     // 8 bytes form the preamble:
@@ -203,7 +203,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void ControlHub< InnerProtocol >::predispatch ( std::shared_ptr< Buffers > aBuffers )
   {
     InnerProtocol::predispatch ( aBuffers );
     boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );

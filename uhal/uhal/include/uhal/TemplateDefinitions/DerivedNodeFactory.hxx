@@ -43,7 +43,7 @@ namespace uhal
   template <class T>
   void DerivedNodeFactory::add ( const std::string& aNodeClassName )
   {
-    std::unordered_map<std::string , boost::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNodeClassName ) ;
+    std::unordered_map<std::string , std::shared_ptr<CreatorInterface> >::const_iterator lIt = mCreators.find ( aNodeClassName ) ;
 
     if ( lIt != mCreators.end() )
     {
@@ -51,7 +51,7 @@ namespace uhal
       return;
     }
 
-    mCreators[aNodeClassName] =  boost::shared_ptr<CreatorInterface> ( new Creator<T>() );
+    mCreators[aNodeClassName] =  std::shared_ptr<CreatorInterface> ( new Creator<T>() );
   }
 
 

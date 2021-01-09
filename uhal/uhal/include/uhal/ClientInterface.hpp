@@ -42,14 +42,13 @@
 
 
 #include <deque>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "uhal/grammars/URI.hpp"
@@ -241,7 +240,7 @@ namespace uhal
         Pure virtual function which actually performs the dispatch operation
         @param aBuffers the buffer to be dispatched
       */
-      virtual void implementDispatch ( boost::shared_ptr< Buffers > aBuffers ) = 0;
+      virtual void implementDispatch ( std::shared_ptr< Buffers > aBuffers ) = 0;
 
       //! Virtual function to dispatch all buffers and block until all replies are received
       virtual void Flush( );
@@ -301,7 +300,7 @@ namespace uhal
       virtual ValWord< uint32_t > implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend ) = 0;
 
       //! Add a preamble to an IPbus buffer
-      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void preamble ( std::shared_ptr< Buffers > aBuffers );
 
       //! Return the size of the preamble
       virtual uint32_t getPreambleSize();
@@ -310,7 +309,7 @@ namespace uhal
       	Finalize the buffer before it is transmitted
         @param aBuffers the buffer to finalize before dispatch
       */
-      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void predispatch ( std::shared_ptr< Buffers > aBuffers );
 
       /**
         Helper function to create a ValHeader object
@@ -338,7 +337,7 @@ namespace uhal
           @param aBuffers the buffer to validate when it is propagated with replies
         	@return whether the returned packet is valid
         */
-      virtual  exception::exception* validate ( boost::shared_ptr< Buffers > aBuffers );
+      virtual  exception::exception* validate ( std::shared_ptr< Buffers > aBuffers );
 
 
     protected:
@@ -362,22 +361,22 @@ namespace uhal
         Function to return a buffer to the buffer pool
         @param aBuffers a shared-pointer to a buffer to be returned to the buffer pool
       */
-      void returnBufferToPool ( boost::shared_ptr< Buffers >& aBuffers );
+      void returnBufferToPool ( std::shared_ptr< Buffers >& aBuffers );
       /**
         Function to return a collection of buffers to the buffer pool
         @param aBuffers a collection of shared-pointers to a buffer to be returned to the buffer pool
       */
-      void returnBufferToPool ( std::deque< boost::shared_ptr< Buffers > >& aBuffers );
+      void returnBufferToPool ( std::deque< std::shared_ptr< Buffers > >& aBuffers );
       /**
         Function to return a collection of buffers to the buffer pool
         @param aBuffers a collection of shared-pointers to a buffer to be returned to the buffer pool
       */
-      void returnBufferToPool ( std::vector< boost::shared_ptr< Buffers > >& aBuffers );
+      void returnBufferToPool ( std::vector< std::shared_ptr< Buffers > >& aBuffers );
       /**
         Function to return a collection of buffers to the buffer pool
         @param aBuffers a collection of shared-pointers to a buffer to be returned to the buffer pool
       */
-      void returnBufferToPool ( std::deque< std::vector< boost::shared_ptr< Buffers > > >& aBuffers );
+      void returnBufferToPool ( std::deque< std::vector< std::shared_ptr< Buffers > > >& aBuffers );
 
     private:
       /**
@@ -396,15 +395,15 @@ namespace uhal
       boost::mutex mBufferMutex;
 
       //! A memory pool of buffers which will be dispatched
-      std::deque < boost::shared_ptr< Buffers > > mBuffers;
+      std::deque < std::shared_ptr< Buffers > > mBuffers;
 
 #ifdef NO_PREEMPTIVE_DISPATCH
       //! A deque to store buffers pending dispatch for the case where pre-emptive dispatch is disabled
-      std::deque < boost::shared_ptr< Buffers > > mNoPreemptiveDispatchBuffers;
+      std::deque < std::shared_ptr< Buffers > > mNoPreemptiveDispatchBuffers;
 #endif
 
       //! A pointer to a buffer-wrapper object
-      boost::shared_ptr< Buffers > mCurrentBuffers;
+      std::shared_ptr< Buffers > mCurrentBuffers;
 
       //! the identifier of the target for this client
       std::string mId;
@@ -412,7 +411,7 @@ namespace uhal
       //! Timeout period for transactions
       boost::posix_time::time_duration mTimeoutPeriod;
 
-      boost::weak_ptr<Node> mNode;
+      std::weak_ptr<Node> mNode;
 
       friend class IPbusCore;
       friend class HwInterface;
@@ -432,7 +431,7 @@ namespace uhal
         @param aAvailableSendSize return the amount of space available for outgoing IPbus packets
         @param aAvailableReplySize return the amount of space available for incoming IPbus packets
       */
-      virtual boost::shared_ptr< Buffers > checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
+      virtual std::shared_ptr< Buffers > checkBufferSpace ( const uint32_t& aSendSize , const uint32_t& aReplySize , uint32_t& aAvailableSendSize , uint32_t& aAvailableReplySize );
 
       /**
         Return the maximum number of packets in flight

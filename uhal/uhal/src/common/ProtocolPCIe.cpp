@@ -539,7 +539,7 @@ PCIe::~PCIe()
 }
 
 
-void PCIe::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+void PCIe::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
 {
   log(Debug(), "PCIe client (URI: ", Quote(uri()), ") : implementDispatch method called");
 
@@ -664,7 +664,7 @@ void PCIe::disconnect()
 }
 
 
-void PCIe::write(const boost::shared_ptr<Buffers>& aBuffers)
+void PCIe::write(const std::shared_ptr<Buffers>& aBuffers)
 {
   if (not mDeviceFileHostToFPGA.haveLock()) {
     mDeviceFileHostToFPGA.lock();
@@ -764,7 +764,7 @@ void PCIe::read()
   mReadReplyPageCount++;
   
   // PART 1 : Read the page
-  boost::shared_ptr<Buffers> lBuffers = mReplyQueue.front();
+  std::shared_ptr<Buffers> lBuffers = mReplyQueue.front();
   mReplyQueue.pop_front();
 
   uint32_t lNrWordsToRead(lBuffers->replyCounter() >> 2);

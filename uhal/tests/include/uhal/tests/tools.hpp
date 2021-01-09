@@ -38,11 +38,11 @@
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <sys/time.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
 #include "uhal/ConnectionManager.hpp"
@@ -64,7 +64,7 @@ public:
   void setReplyDelay (const boost::chrono::microseconds& aDelay);
 
 private:
-  boost::scoped_ptr<DummyHardwareInterface> mHw;
+  std::unique_ptr<DummyHardwareInterface> mHw;
   boost::thread mHwThread;
 };
 

@@ -101,7 +101,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void UDP< InnerProtocol >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void UDP< InnerProtocol >::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
   {
     boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
 

@@ -32,11 +32,11 @@
 
 #include <fstream>
 #include <iomanip>
+#include <memory>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem.hpp>
 #include "boost/lexical_cast.hpp"
-#include "boost/shared_ptr.hpp"
 
 #include "uhal/Node.hpp"
 
@@ -105,7 +105,7 @@ namespace uhal {
 
     std::string getAddressDescription(const ClientInterface& aClient, const uint32_t aAddress, const size_t& aMaxListSize)
     {
-      if ( boost::shared_ptr<Node> lNode = aClient.mNode.lock() )
+      if ( std::shared_ptr<Node> lNode = aClient.mNode.lock() )
         return getAddressDescription(*lNode, aAddress, aMaxListSize);
       else
         return "";

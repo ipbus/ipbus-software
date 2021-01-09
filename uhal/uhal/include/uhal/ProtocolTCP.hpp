@@ -42,11 +42,11 @@
 
 #include <deque>
 #include <iostream>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -117,7 +117,7 @@ namespace uhal
       	@param aBuffers the buffer object wrapping the send and receive buffers that are to be transported
       	If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
       */
-      void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
+      void implementDispatch ( std::shared_ptr< Buffers > aBuffers );
 
       //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       virtual void Flush( );
@@ -206,9 +206,9 @@ namespace uhal
       boost::mutex mTransportLayerMutex;
 
       //! The list of buffers still waiting to be sent
-      std::deque < boost::shared_ptr< Buffers > > mDispatchQueue;
+      std::deque < std::shared_ptr< Buffers > > mDispatchQueue;
       //! The list of buffers still awaiting a reply
-      std::deque < std::pair<std::vector< boost::shared_ptr< Buffers > >, SteadyClock_t::time_point> > mReplyQueue;
+      std::deque < std::pair<std::vector< std::shared_ptr< Buffers > >, SteadyClock_t::time_point> > mReplyQueue;
 
       //! Counter of how many writes have been sent, for which no reply has yet been received
       uint32_t mPacketsInFlight;
@@ -242,13 +242,13 @@ namespace uhal
         The buffers containing the payload for the send operation that's currently in progress
         @note When communicating with the ControlHub it is more efficient to send as much data as possible - i.e. multiple IPbus packets - to minimise the number of TCP chunks that are unpacked at each end of the TCP connection.
       */
-      std::vector< boost::shared_ptr< Buffers > > mDispatchBuffers;
+      std::vector< std::shared_ptr< Buffers > > mDispatchBuffers;
 
       /**
         The buffers containing the payloads for the receive operation that's currently in progress
         @note When communicating with the ControlHub it is more efficient to send as much data as possible - i.e. multiple IPbus packets - to minimise the number of TCP chunks that are unpacked at each end of the TCP connection.
       */
-      std::pair< std::vector< boost::shared_ptr< Buffers > >, SteadyClock_t::time_point > mReplyBuffers;
+      std::pair< std::vector< std::shared_ptr< Buffers > >, SteadyClock_t::time_point > mReplyBuffers;
 
       /**
         A pointer to an exception object for passing exceptions from the worker thread to the main thread.
