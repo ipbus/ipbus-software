@@ -40,7 +40,7 @@
 #define _uhal_DerivedNode_hpp_
 
 
-#include <boost/static_assert.hpp>
+#include <type_traits>
 
 #include "uhal/Node.hpp"
 
@@ -54,16 +54,13 @@
   uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname ); \
   uhal::Node* classname::clone() const \
   { \
+    static_assert((std::is_base_of<uhal::Node, classname>::value), "Derived node class must be a descendant of uhal::Node"); \
     return new classname ( static_cast<const classname&> ( *this ) ); \
   }
 
 
-/**
- Macro which adds the clone method implementation for derived classesk
- */
+//! Macro which adds the clone method implementation for derived classes
 #define UHAL_DERIVEDNODE(DerivedType) \
-private: \
-  BOOST_STATIC_ASSERT(( boost::is_base_of<Node, uhal::Node>::value )); \
 protected: \
   virtual uhal::Node* clone() const;
 
