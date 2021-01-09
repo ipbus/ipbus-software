@@ -25,14 +25,14 @@ build:centos7:
   extends: .template_build_rpm_yumrepo
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7:2020-06-13__boost1.53.0_pugixml1.8
   variables:
-    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+    YUMGROUPS_FILE: ci/yum/yumgroups.xml
     OUTPUT_REPO_SUBDIR: centos7/x86_64
 
 build:centos8:
   extends: .template_build_rpm_yumrepo
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:2020-06-13__boost1.66.0_pugixml1.9
   variables:
-    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+    YUMGROUPS_FILE: ci/yum/yumgroups.xml
     OUTPUT_REPO_SUBDIR: centos8/x86_64
 
 
@@ -40,7 +40,7 @@ build:centos7-gcc8:
   stage: build
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:2020-08-20
   variables:
-    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos7-gcc8.xml
     OUTPUT_REPO_SUBDIR: centos7_gcc8/x86_64
   before_script:
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
