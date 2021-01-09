@@ -1,0 +1,4 @@
+[submodule "uhal/pycohal/pybind11"]
+	path = uhal/pycohal/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = v2.6.1

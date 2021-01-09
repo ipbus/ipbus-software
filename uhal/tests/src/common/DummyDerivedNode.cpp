@@ -27,8 +27,8 @@ namespace uhal {
 #endif
 
       std::cout << "This is " << ss.str() << std::endl;
-      const boost::unordered_map<std::string, std::string>& lParameters = getParameters();
-      boost::unordered_map<std::string, std::string>::const_iterator it;
+      const std::unordered_map<std::string, std::string>& lParameters = getParameters();
+      std::unordered_map<std::string, std::string>::const_iterator it;
       uint32_t k = 0;
       for (it = lParameters.begin(); it != lParameters.end(); ++it, ++k)
         std::cout << ss.str() << " par[" << k << "]: key=" << it->first << ", val=" << it->second << std::endl;

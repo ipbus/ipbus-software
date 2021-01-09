@@ -42,10 +42,10 @@
 
 
 #include <string>
+#include <unordered_map>
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
 
 
 namespace boost {
@@ -157,7 +157,7 @@ namespace uhal
       static boost::shared_ptr<DerivedNodeFactory> mInstance;
 
       //! Hash map associating a creator for a particular node type with a string identifier for that node type
-      boost::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;
+      std::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;
   };
 }
 

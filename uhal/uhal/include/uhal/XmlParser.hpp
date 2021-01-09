@@ -238,7 +238,7 @@ namespace uhal
       //! One-hot encoded hash for rules
       uint64_t mNextHash;
       //! Map of the tags to the one-hot encoded hash
-      boost::unordered_map< std::string , uint64_t > mHashes;
+      std::unordered_map< std::string , uint64_t > mHashes;
       //! Container for storing rule objects
       std::deque< Rule<R> > mRules;
       //! Member to track rule numbers for giving each rule a unique ID

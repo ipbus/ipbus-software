@@ -120,7 +120,7 @@ class TestUInt32s(unittest.TestCase):
         #print "Invalid numbers ..."
         for i in self.gen_list_invalid_numbers():
             #print "  ", i, " ", type(i)
-            self.assertRaises(OverflowError, uhal.tests.check_uint32_argument, i, str(i).rstrip("L") )
+            self.assertRaises(TypeError, uhal.tests.check_uint32_argument, i, str(i).rstrip("L") )
         #print "Valid numbers ... "
         for i in self.gen_list_valid_numbers():
             #print "  ", i, " ", type(i)
@@ -148,8 +148,8 @@ class TestConverters(unittest.TestCase):
         self.exe_test_vec_uint32_from_list_and_to_list( list_randuint32s( randint(1000,10000) ) )
 
         # Now check conversion that should fail
-        self.assertRaises( OverflowError, uhal.tests.copy_vec_uint32, ([42, -1, 76]) )
-        self.assertRaises( OverflowError, uhal.tests.copy_vec_uint32, ([3, 6, 22222222222222222222222222222222222222223]) )
+        self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, ([42, -1, 76]) )
+        self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, ([3, 6, 22222222222222222222222222222222222222223]) )
         self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, ([1,2.1,3]) )
         self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, ([[], []]) )
         self.assertRaises( TypeError, uhal.tests.copy_vec_uint32, (['bob']) )

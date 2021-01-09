@@ -33,6 +33,11 @@ CXX_VERSION_TAG := $(subst g++,gcc,${CXX_VERSION_TAG})
 CXX_VERSION_TAG := ${CXX_VERSION_TAG}$(shell ${CXX} -dumpfullversion -dumpversion)
 CXX_VERSION_TAG := $(subst .,_,${CXX_VERSION_TAG})
 
+# Minimum C++ standard: C++11 (default standard is C++14 from GCC 6.1)
+ifneq (,$(findstring gcc4,${CXX_VERSION_TAG})$(findstring gcc5,${CXX_VERSION_TAG})$(findstring gcc6_0,${CXX_VERSION_TAG}))
+  CXXFLAGS += -std=c++11
+endif
+
 
 ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.a ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.dylib))
   BOOST_THREAD_LIB = boost_thread-mt

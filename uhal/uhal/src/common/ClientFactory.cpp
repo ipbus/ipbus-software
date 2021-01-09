@@ -49,7 +49,7 @@
 namespace uhal
 {
 
-  boost::shared_ptr<ClientFactory> ClientFactory::mInstance;
+  std::shared_ptr<ClientFactory> ClientFactory::mInstance;
 
 
   ClientFactory::ClientFactory()
@@ -87,13 +87,13 @@ namespace uhal
   }
 
 
-  boost::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri )
+  std::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri )
   {
     return getClient(aId, aUri, std::vector<std::string>());
   }
 
 
-  boost::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri, const std::vector<std::string>& aUserClientActivationList )
+  std::shared_ptr<ClientInterface> ClientFactory::getClient ( const std::string& aId , const std::string& aUri, const std::vector<std::string>& aUserClientActivationList )
   {
     URI lUri;
 
@@ -112,7 +112,7 @@ namespace uhal
     }
 
     log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
-    boost::unordered_map< std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( lUri.mProtocol );
+    std::unordered_map< std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( lUri.mProtocol );
 
     if ( lIt == mClientMap.end() )
     {

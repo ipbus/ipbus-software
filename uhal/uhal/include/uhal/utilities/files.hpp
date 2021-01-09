@@ -40,6 +40,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <wordexp.h>
@@ -65,8 +66,6 @@
 
 #include "uhal/log/log.hpp"
 #include "uhal/log/exception.hpp"
-
-#include "boost/unordered_map.hpp"
 
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

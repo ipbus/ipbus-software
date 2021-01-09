@@ -44,9 +44,8 @@
 #include <iterator>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
-
-#include "boost/unordered_map.hpp"
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/definitions.hpp"
@@ -251,13 +250,13 @@ namespace uhal
         Return parameters of the current node
         @return parameters of the current node
       */
-      const boost::unordered_map< std::string, std::string >& getParameters() const;
+      const std::unordered_map< std::string, std::string >& getParameters() const;
 
       /**
         Return parameters for inferring the VHDL address decoding
         @return parameters for inferring the VHDL address decoding
       */
-      const boost::unordered_map< std::string, std::string >& getFirmwareInfo() const;
+      const std::unordered_map< std::string, std::string >& getFirmwareInfo() const;
 
       /**
       	A streaming helper function to create pretty, indented tree diagrams
@@ -363,10 +362,10 @@ namespace uhal
       std::string mClassName;
 
       //! Additional parameters of the node
-      boost::unordered_map< std::string, std::string > mParameters;
+      std::unordered_map< std::string, std::string > mParameters;
 
       //!  parameters to infer the VHDL address decoding
-      boost::unordered_map< std::string, std::string > mFirmwareInfo;
+      std::unordered_map< std::string, std::string > mFirmwareInfo;
 
       //! The parent of the current node
       Node* mParent;
@@ -375,7 +374,7 @@ namespace uhal
       std::vector< Node* > mChildren;
 
       //! Helper to assist look-up of a particular child node, given a name
-      boost::unordered_map< std::string , Node* > mChildrenMap;
+      std::unordered_map< std::string , Node* > mChildrenMap;
   };
 
   std::ostream& operator<< ( std::ostream& aStr ,  const uhal::Node& aNode );

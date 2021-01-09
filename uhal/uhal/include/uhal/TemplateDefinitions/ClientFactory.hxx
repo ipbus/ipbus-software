@@ -45,7 +45,7 @@ namespace uhal
   template <class T>
   void ClientFactory::add ( const std::string& aProtocol , const std::string& aDescription, bool aUserDefined )
   {
-    boost::unordered_map<std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( aProtocol ) ;
+    std::unordered_map<std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( aProtocol ) ;
 
     if ( lIt != mClientMap.end() )
     {
@@ -69,9 +69,9 @@ namespace uhal
 
 
   template <class T>
-  boost::shared_ptr<ClientInterface> ClientFactory::Creator<T>::create ( const std::string& aId , const URI& aUri )
+  std::shared_ptr<ClientInterface> ClientFactory::Creator<T>::create ( const std::string& aId , const URI& aUri )
   {
-    return boost::shared_ptr<ClientInterface> ( new T ( aId , aUri ) );
+    return std::shared_ptr<ClientInterface> ( new T ( aId , aUri ) );
   }
 
 }

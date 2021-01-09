@@ -41,15 +41,16 @@
 #define _uhal_ConnectionManager_hpp_
 
 
-#include "uhal/log/exception.hpp"
-#include "uhal/HwInterface.hpp"
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <vector>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <vector>
-#include <set>
-#include <map>
+#include "uhal/log/exception.hpp"
+#include "uhal/HwInterface.hpp"
 
 
 // Forward declarations

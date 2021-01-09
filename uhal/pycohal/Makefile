@@ -22,17 +22,9 @@ PackagerEmail = tom.williams@cern.ch
 PythonModules = ["uhal"]
 LibraryFile = pkg/uhal/_core.so
 
-PYTHON_VERSION_MAJOR_MINOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
-PYTHON_VERSION_MAJOR=$(shell ${PYTHON} -c "import sys; print(sys.version_info.major)")
-ifeq (,$(shell ${CXX} -lboost_python${PYTHON_VERSION_MAJOR_MINOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
-  EXTERN_BOOST_PYTHON_LIB = boost_python${PYTHON_VERSION_MAJOR_MINOR}
-else ifeq (,$(shell ${CXX} -lboost_python${PYTHON_VERSION_MAJOR} 2>&1 | grep -E 'ld: (cannot find|library not found)'))
-  EXTERN_BOOST_PYTHON_LIB = boost_python${PYTHON_VERSION_MAJOR}
-else
-  EXTERN_BOOST_PYTHON_LIB = boost_python
-endif
 
 IncludePaths = include  \
+		pybind11/include \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
 		${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		${PYTHON_INCLUDE_PREFIX} \
@@ -58,7 +50,6 @@ Libraries = \
 		pugixml \
 		\
 		boost_filesystem \
-		${EXTERN_BOOST_PYTHON_LIB} \
 		boost_regex \
 		boost_system \
 		$(BOOST_THREAD_LIB) \
@@ -86,15 +77,3 @@ endif
 
 include $(BUILD_HOME)/uhal/config/mfRules.mk
 include $(BUILD_HOME)/uhal/config/mfPythonRPMRules.mk
-
-
-# FIXME: Add missing lib dependencies (hopefully in a generic way) ...
-
-# rpm: _rpmall
-# _rpmall: ${BINDINGS_LIB}
-# 	rm -rf /var/tmp/cactus*
-# 	$(eval LIB_DEPENDENCIES := $(shell ldd ${BINDINGS_LIB} | sed -n 's/\s*\(libboost_python.so[^ ]*\).*/\1()(64bit)/p'))
-# 	$(eval LIB_DEPENDENCIES += $(shell ldd ${BINDINGS_LIB} | sed -n 's/\s*\(libcactus_uhal_uhal.so[^ ]*\).*/\1()(64bit)/p'))
-# 	$(info LIB_DEPENDENCIES=${LIB_DEPENDENCIES})
-# 	python setup.py bdist_rpm --binary-only --force-arch=`uname -m` --requires "${LIB_DEPENDENCIES}" \
-# 	        --release ${PACKAGE_RELEASE}.${CACTUS_OS}.python${PYTHON_VERSION}
