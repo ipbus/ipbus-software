@@ -46,6 +46,7 @@
 #include <chrono>
 #include <deque>                           // for deque
 #include <memory>
+#include <mutex>
 #include <stddef.h>                        // for size_t
 #include <stdint.h>                        // for uint32_t, uint8_t
 #include <string>                          // for string
@@ -174,7 +175,7 @@ namespace uhal
       static std::string getSharedMemName(const std::string& );
 
       typedef RobustMutex IPCMutex_t;
-      typedef boost::unique_lock<IPCMutex_t> IPCScopedLock_t;
+      typedef std::unique_lock<IPCMutex_t> IPCScopedLock_t;
 
     public:
       /**

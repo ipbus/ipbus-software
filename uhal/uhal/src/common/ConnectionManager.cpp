@@ -32,6 +32,12 @@
 
 #include "uhal/ConnectionManager.hpp"
 
+
+#include <mutex>
+
+#include <boost/regex.hpp>
+#include <boost/spirit/include/qi.hpp>
+
 #include "uhal/Node.hpp"
 #include "uhal/NodeTreeBuilder.hpp"
 #include "uhal/ClientInterface.hpp"
@@ -41,13 +47,10 @@
 
 #include "uhal/log/log.hpp"
 
-#include <boost/regex.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/thread/lock_guard.hpp>
 
 
 #if BOOST_VERSION >= 106000
-// Resolve boost bind placeholders (_1, _2, ...) that moved within boost::laceholders namespace from v1.60
+// Resolve boost bind placeholders (_1, _2, ...) that moved within boost::placeholders namespace from v1.60
 using boost::placeholders::_1;
 using boost::placeholders::_2;
 using boost::placeholders::_3;
@@ -107,7 +110,7 @@ namespace uhal
   ConnectionManager::ConnectionManager ( const std::string& aFilenameExpr )
   {
     //Mutex lock here to be on the safe side
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    std::lock_guard<std::mutex> lLock ( mMutex );
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles;	//protocol, filename
     uhal::utilities::ParseSemicolonDelimitedUriList ( aFilenameExpr , lConnectionFiles );
 
@@ -122,7 +125,7 @@ namespace uhal
     mUserClientActivationList(aUserClientActivationList)
   {
     //Mutex lock here to be on the safe side
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    std::lock_guard<std::mutex> lLock ( mMutex );
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles; //protocol, filename
     uhal::utilities::ParseSemicolonDelimitedUriList ( aFilenameExpr , lConnectionFiles );
 
@@ -141,7 +144,7 @@ namespace uhal
   HwInterface ConnectionManager::getDevice ( const std::string& aId )
   {
     //We need a mutex lock here to protect access to the NodeTreeBuilder and the ClientFactory
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    std::lock_guard<std::mutex> lLock ( mMutex );
 
     if ( mConnectionDescriptors.size() == 0 )
     {
@@ -170,7 +173,7 @@ namespace uhal
   HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr )
   {
     //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    std::lock_guard<std::mutex> lLock ( mMutex );
     std::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
     std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri ) );
@@ -181,7 +184,7 @@ namespace uhal
   HwInterface ConnectionManager::getDevice ( const std::string& aId , const std::string& aUri , const std::string& aAddressFileExpr, const std::vector<std::string>& aUserClientActivationList )
   {
     //We need a mutex lock here to protect access to the TodeTreeBuilder and the ClientFactory
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    std::lock_guard<std::mutex> lLock ( mMutex );
     std::shared_ptr< Node > lNode ( NodeTreeBuilder::getInstance().getNodeTree ( aAddressFileExpr , boost::filesystem::current_path() / "." ) );
     log ( Info() , "ConnectionManager created node tree: " , *lNode );
     std::shared_ptr<ClientInterface> lClientInterface ( ClientFactory::getInstance().getClient ( aId , aUri , aUserClientActivationList ) );
@@ -225,7 +228,7 @@ namespace uhal
   void ConnectionManager::clearAddressFileCache()
   {
     // Need a mutex lock here to protect access to NodeTreeBuilder
-    boost::lock_guard<boost::mutex> lLock ( mMutex );
+    std::lock_guard<std::mutex> lLock ( mMutex );
     log( Info(), "ConnectionManager is clearing the address filename -> Node tree cache");
     NodeTreeBuilder::getInstance().clearAddressFileCache();
   }
@@ -289,7 +292,7 @@ namespace uhal
   }
 
 
-  boost::mutex ConnectionManager::mMutex;
+  std::mutex ConnectionManager::mMutex;
 
 }
 

@@ -35,12 +35,11 @@
 
 #include <algorithm>                            // for min
 #include <memory>
+#include <mutex>
 #include <ostream>                              // for operator<<
 #include <stddef.h>                             // for NULL
 
 #include <boost/lexical_cast.hpp>
-#include <boost/thread/lock_guard.hpp>          // for lock_guard
-#include <boost/thread/mutex.hpp>               // for mutex
 
 #include "uhal/detail/utilities.hpp"
 #include "uhal/log/LogLevels.hpp"               // for BaseLogLevel, Debug
@@ -129,13 +128,13 @@ namespace uhal
 
   ValWord< uint32_t > IPbusCore::readConfigurationSpace ( const uint32_t& aAddr )
   {
-    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    std::lock_guard<std::mutex> lLock ( mUserSideMutex );
     return implementReadConfigurationSpace ( aAddr );
   }
 
   ValWord< uint32_t > IPbusCore::readConfigurationSpace ( const uint32_t& aAddr, const uint32_t& aMask )
   {
-    boost::lock_guard<boost::mutex> lLock ( mUserSideMutex );
+    std::lock_guard<std::mutex> lLock ( mUserSideMutex );
     return implementReadConfigurationSpace ( aAddr, aMask );
   }
 

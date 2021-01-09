@@ -40,8 +40,6 @@
 
 #include <boost/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <iostream>

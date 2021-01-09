@@ -40,6 +40,7 @@
 #define _uhal_ProtocolUDP_hpp_
 
 
+#include <condition_variable>
 #include <deque>
 #include <iostream>
 #include <memory>
@@ -52,8 +53,6 @@
 #include <boost/asio/deadline_timer.hpp>
 
 #include <boost/thread/thread.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
@@ -207,7 +206,7 @@ namespace uhal
       boost::thread mDispatchThread;
 
       //! A MutEx lock used to make sure the access functions are thread safe
-      boost::mutex mTransportLayerMutex;
+      std::mutex mTransportLayerMutex;
 
       //! The list of buffers still waiting to be sent
       std::deque < std::shared_ptr< Buffers > > mDispatchQueue;
@@ -218,9 +217,9 @@ namespace uhal
       uint32_t mPacketsInFlight;
 
       //! A mutex for use by the conditional variable
-      boost::mutex mConditionalVariableMutex;
+      std::mutex mConditionalVariableMutex;
       //! A conditional variable for blocking the main thread until the variable with which it is associated is set correctly
-      boost::condition_variable mConditionalVariable;
+      std::condition_variable mConditionalVariable;
       //! A variable associated with the conditional variable which specifies whether all packets have been sent and all replies have been received
       bool mFlushDone;
 

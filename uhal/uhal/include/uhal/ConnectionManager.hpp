@@ -160,7 +160,7 @@ namespace uhal
 
     private:
       //! A mutex lock to protect access to the factory methods in multithreaded environments
-      static boost::mutex mMutex;
+      static std::mutex mMutex;
 
       /**
       	Method called once the file specified in the constructor has been opened

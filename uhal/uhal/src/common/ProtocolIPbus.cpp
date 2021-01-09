@@ -34,11 +34,11 @@
 
 
 #include <memory>
+#include <mutex>
 #include <ostream>
 #include <stdint.h>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for seconds
-#include <boost/thread/lock_guard.hpp>                      // for lock_guard
 
 #include "uhal/Buffers.hpp"
 #include "uhal/ClientInterface.hpp"
@@ -263,7 +263,7 @@ namespace uhal
   {
     aBuffers->send ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
     {
-      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      std::lock_guard<std::mutex> lLock ( mReceivePacketMutex );
       mReceivePacketHeader.push_back ( 0x00000000 );
       aBuffers->receive ( mReceivePacketHeader.back() );
     }
@@ -299,7 +299,7 @@ namespace uhal
     }
 
     {
-      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      std::lock_guard<std::mutex> lLock ( mReceivePacketMutex );
       mReceivePacketHeader.pop_front();
     }
 

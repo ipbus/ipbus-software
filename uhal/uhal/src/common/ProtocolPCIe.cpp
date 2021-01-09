@@ -61,7 +61,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>                          // for sleep_for
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
-#include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include "uhal/grammars/URI.hpp"                            // for URI
 #include "uhal/log/LogLevels.hpp"                           // for BaseLogLevel

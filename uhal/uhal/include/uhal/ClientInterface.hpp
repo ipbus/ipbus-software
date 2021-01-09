@@ -43,13 +43,13 @@
 
 #include <deque>
 #include <memory>
+#include <mutex>
 #include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/thread/mutex.hpp>
 
 #include "uhal/grammars/URI.hpp"
 #include "uhal/log/exception.hpp"
@@ -389,10 +389,10 @@ namespace uhal
 
     private:
       //! A MutEx lock used to make sure the access functions are thread safe
-      boost::mutex mUserSideMutex;
+      std::mutex mUserSideMutex;
       
       //! A MutEx lock used to make sure the access to the buffers is thread safe
-      boost::mutex mBufferMutex;
+      std::mutex mBufferMutex;
 
       //! A memory pool of buffers which will be dispatched
       std::deque < std::shared_ptr< Buffers > > mBuffers;

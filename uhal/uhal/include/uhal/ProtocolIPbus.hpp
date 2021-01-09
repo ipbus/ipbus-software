@@ -48,7 +48,6 @@
 #include <utility>
 
 #include <boost/function.hpp>                    // for function
-#include <boost/thread/mutex.hpp>                // for mutex
 
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"              // for PacketLevelError
@@ -304,7 +303,7 @@ namespace uhal
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint16_t mPacketCounter;
 
-      boost::mutex mReceivePacketMutex;
+      std::mutex mReceivePacketMutex;
       std::deque< uint32_t > mReceivePacketHeader;
   };
 
