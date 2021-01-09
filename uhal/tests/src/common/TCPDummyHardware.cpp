@@ -2,6 +2,8 @@
 #include "uhal/tests/TCPDummyHardware.hpp"
 
 
+#include <boost/bind.hpp>
+
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log.hpp"
 

@@ -44,8 +44,6 @@
 #include <deque>
 #include <vector>
 
-#include <boost/thread/thread.hpp>
-
 #include "uhal/IPbusInspector.hpp"
 
 

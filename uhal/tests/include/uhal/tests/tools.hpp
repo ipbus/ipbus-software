@@ -43,8 +43,7 @@
 #include <stdint.h>
 #include <string>
 #include <sys/time.h>
-
-#include <boost/thread/thread.hpp>
+#include <thread>
 
 #include "uhal/ConnectionManager.hpp"
 #include "uhal/HwInterface.hpp"
@@ -66,7 +65,7 @@ public:
 
 private:
   std::unique_ptr<DummyHardwareInterface> mHw;
-  boost::thread mHwThread;
+  std::thread mHwThread;
 };
 
 

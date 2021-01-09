@@ -32,22 +32,22 @@
 ---------------------------------------------------------------------------
 */
 
+#include <iostream>
+#include <cstdlib>
+#include <thread>
+#include <typeinfo>
+
+// Linux C++ headers
+#include <sys/time.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/test/unit_test.hpp>
+
 #include "uhal/uhal.hpp"
 #include "uhal/tests/definitions.hpp"
 #include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 #include "uhal/log/log.hpp"
-
-#include <boost/thread.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/test/unit_test.hpp>
-
-#include <iostream>
-#include <cstdlib>
-#include <typeinfo>
-
-// Linux C++ headers
-#include <sys/time.h>
 
 
 #define N_THREADS     5
@@ -97,12 +97,12 @@ void job_multiple ( const std::string& connection, const std::string& id, const 
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterfaces, DummyHardwareFixture,
 {
-  std::vector<boost::thread*> jobs;
+  std::vector<std::shared_ptr<std::thread>> jobs;
 
   for ( size_t i=0; i!=N_THREADS; ++i )
   {
     log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-    jobs.push_back ( new boost::thread ( job_multiple, connectionFileURI, deviceId, timeout ) );
+    jobs.push_back ( std::make_shared<std::thread> (job_multiple, connectionFileURI, deviceId, timeout) );
   }
 
   for ( size_t i=0; i!=N_THREADS; ++i )
@@ -111,7 +111,6 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterface
     //boost::posix_time::time_duration timeout = boost::posix_time::seconds ( TIMEOUT_S );
     //CACTUS_CHECK ( jobs[i]->timed_join ( timeout ) );
     jobs[i]->join();
-    delete jobs[i];
   }
 
   log ( Warning() , ThisLocation() );
@@ -148,17 +147,16 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_hwinterface, 
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
     HwInterface hw = getHwInterface();
-    std::vector<boost::thread*> jobs;
+    std::vector<std::shared_ptr<std::thread>> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
-      jobs.push_back ( new boost::thread ( job_single,hw ) );
+      jobs.push_back ( std::make_shared<std::thread> ( [&hw] () {job_single(hw);} ) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
       jobs[i]->join();
-      delete jobs[i];
     }
   }
 }
@@ -193,17 +191,16 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_copied_hwinte
   for ( size_t iter=0; iter!= N_ITERATIONS ; ++iter )
   {
     HwInterface hw = getHwInterface();
-    std::vector<boost::thread*> jobs;
+    std::vector<std::shared_ptr<std::thread>> jobs;
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
-      jobs.push_back ( new boost::thread ( job_single_copied,hw ) );
+      jobs.push_back ( std::make_shared<std::thread>( [hw] () {job_single_copied(hw);} ) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
       jobs[i]->join();
-      delete jobs[i];
     }
   }
 }

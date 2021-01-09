@@ -57,7 +57,6 @@
 #include <unistd.h>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/thread/thread.hpp>                          // for sleep_for
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
 
 #include "uhal/grammars/URI.hpp"                            // for URI

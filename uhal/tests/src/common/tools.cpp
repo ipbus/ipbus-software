@@ -49,7 +49,7 @@ namespace tests {
 
 DummyHardwareRunner::DummyHardwareRunner(DummyHardwareInterface* aHw) :
   mHw(aHw),
-  mHwThread(boost::bind(&DummyHardwareInterface::run, aHw))
+  mHwThread([aHw] () {aHw->run();})
 {
 }
 

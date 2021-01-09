@@ -66,7 +66,7 @@ namespace uhal
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( 1500 , 0x00000000 ),
     mIOserviceWork ( mIOservice ),
-    mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
+    mDispatchThread ( [this] () { mIOservice.run(); } ),
     mDispatchQueue(),
     mReplyQueue(),
     mPacketsInFlight ( 0 ),

@@ -56,7 +56,6 @@
 #include <boost/function.hpp>              // for function
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/thread/locks.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"

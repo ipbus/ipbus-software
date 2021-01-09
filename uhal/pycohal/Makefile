@@ -52,7 +52,6 @@ Libraries = \
 		boost_filesystem \
 		boost_regex \
 		boost_system \
-		$(BOOST_THREAD_LIB) \
 		\
 		pthread \
 		dl \

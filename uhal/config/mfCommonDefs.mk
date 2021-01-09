@@ -37,14 +37,3 @@ CXX_VERSION_TAG := $(subst .,_,${CXX_VERSION_TAG})
 ifneq (,$(findstring gcc4,${CXX_VERSION_TAG})$(findstring gcc5,${CXX_VERSION_TAG})$(findstring gcc6_0,${CXX_VERSION_TAG}))
   CXXFLAGS += -std=c++11
 endif
-
-
-ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.a ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread-mt.dylib))
-  BOOST_THREAD_LIB = boost_thread-mt
-else ifneq (,$(wildcard ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.so ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.a ${EXTERN_BOOST_LIB_PREFIX}/libboost_thread.dylib))
-  BOOST_THREAD_LIB = boost_thread
-else ifeq (,$(shell LANG=C ${CXX} -lboost_thread-mt 2>&1 | grep -E 'ld: (cannot find|library not found)'))
-  BOOST_THREAD_LIB = boost_thread-mt
-else
-  BOOST_THREAD_LIB = boost_thread
-endif

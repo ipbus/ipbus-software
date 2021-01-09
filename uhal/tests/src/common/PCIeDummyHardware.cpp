@@ -45,8 +45,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <boost/thread/thread.hpp>
-
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
 #include "uhal/log/log_inserters.quote.hpp"

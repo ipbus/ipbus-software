@@ -47,12 +47,12 @@
 #include <memory>
 #include <stdint.h>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
-#include <boost/thread/thread.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
@@ -199,7 +199,7 @@ namespace uhal
       boost::asio::io_service::work mIOserviceWork;
 
       //! The Worker thread in Multi-threaded mode
-      boost::thread mDispatchThread;
+      std::thread mDispatchThread;
 
       //! A MutEx lock used to make sure the access functions are thread safe
       std::mutex mTransportLayerMutex;
