@@ -36,6 +36,7 @@
 #define _uhal_tests_tools_hpp_
 
 
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -61,7 +62,7 @@ public:
   DummyHardwareRunner(DummyHardwareInterface* aHw);
   ~DummyHardwareRunner();
 
-  void setReplyDelay (const boost::chrono::microseconds& aDelay);
+  void setReplyDelay (const std::chrono::microseconds& aDelay);
 
 private:
   std::unique_ptr<DummyHardwareInterface> mHw;

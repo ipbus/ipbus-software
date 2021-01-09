@@ -2,11 +2,7 @@
 #include "uhal/utilities/TimeIntervalStats.hpp"
 
 
-#include <boost/chrono/duration.hpp>    // for operator/, operator<, operator>
-#include <boost/chrono/time_point.hpp>  // for operator-
-#include <boost/ratio/ratio.hpp>        // for ratio
-#include <boost/ratio/ratio_fwd.hpp>    // for milli
-
+#include <chrono>
 #include <ostream>                      // for operator<<, ostream, basic_os...
 
 
@@ -84,7 +80,7 @@ std::ostream& operator<<(std::ostream& aStream, const TimeIntervalStats& aStats)
   if (aStats.size() == 0)
   	aStream << "no values recorded";
   else {
-    typedef boost::chrono::duration<float, boost::milli> MilliSec_t;
+    typedef std::chrono::duration<float, std::milli> MilliSec_t;
 
   	aStream << "min / mean / max = " << MilliSec_t(aStats.min()).count() << " / " 
             << MilliSec_t(aStats.mean()).count() << " / " << MilliSec_t(aStats.max()).count() << " ms";

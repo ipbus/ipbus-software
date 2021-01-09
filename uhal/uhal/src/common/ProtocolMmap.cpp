@@ -44,6 +44,7 @@
 
 #include <algorithm>                                        // for min
 #include <assert.h>
+#include <chrono>
 #include <cstdlib>
 #include <fcntl.h>
 #include <iomanip>                                          // for operator<<
@@ -52,10 +53,9 @@
 #include <sys/stat.h>
 #include <stdlib.h>                                         // for size_t, free
 #include <string.h>                                         // for memcpy
+#include <thread>
 #include <unistd.h>
 
-#include <boost/chrono/duration.hpp>                        // for operator>
-#include <boost/chrono/time_point.hpp>                      // for operator-
 #include <boost/lexical_cast.hpp>
 #include <boost/thread/thread.hpp>                          // for sleep_for
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
@@ -271,11 +271,11 @@ Mmap::Mmap ( const std::string& aId, const URI& aUri ) :
     throw lExc;
   }
 
-  mSleepDuration = boost::chrono::microseconds(50);
+  mSleepDuration = std::chrono::microseconds(50);
 
   for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
     if (lIt->first == "sleep") {
-      mSleepDuration = boost::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
+      mSleepDuration = std::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
       log (Notice() , "mmap client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
     }
     else if (lIt->first == "offset") {
@@ -425,15 +425,15 @@ void Mmap::read()
       }
       // FIXME: Throw if published page count is invalid number
 
-      if (SteadyClock_t::now() - lStartTime > boost::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
+      if (SteadyClock_t::now() - lStartTime > std::chrono::microseconds(getBoostTimeoutPeriod().total_microseconds())) {
         exception::MmapTimeout lExc;
         log(lExc, "Next page (index ", Integer(lPageIndexToRead), " count ", Integer(mPublishedReplyPageCount+1), ") of mmap device '" + mDeviceFile.getPath() + "' is not ready after timeout period");
         throw lExc;
       }
 
       log(Debug(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
-      if (mSleepDuration > boost::chrono::microseconds(0))
-        boost::this_thread::sleep_for( mSleepDuration );
+      if (mSleepDuration > std::chrono::microseconds(0))
+        std::this_thread::sleep_for( mSleepDuration );
     }
 
     log(Info(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");

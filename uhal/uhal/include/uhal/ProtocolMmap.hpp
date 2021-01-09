@@ -43,6 +43,7 @@
 #define _uhal_ProtocolMmap_hpp_
 
 
+#include <chrono>
 #include <deque>                           // for deque
 #include <istream>                         // for istream
 #include <memory>
@@ -52,7 +53,6 @@
 #include <utility>                         // for pair
 #include <vector>                          // for vector
 
-#include <boost/chrono/system_clocks.hpp>  // for steady_clock
 #include <boost/function.hpp>              // for function
 
 #include "uhal/ClientInterface.hpp"
@@ -161,7 +161,7 @@ namespace uhal
 
       typedef IPbus< 2 , 0 > InnerProtocol;
 
-      typedef boost::chrono::steady_clock SteadyClock_t;
+      typedef std::chrono::steady_clock SteadyClock_t;
 
       /**
         Return the maximum size to be sent based on the buffer size in the target
@@ -191,7 +191,7 @@ namespace uhal
 
       File mDeviceFile;
 
-      boost::chrono::microseconds mSleepDuration;
+      std::chrono::microseconds mSleepDuration;
 
       uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
 

@@ -33,6 +33,7 @@
 #include "uhal/ProtocolTCP.hpp"
 
 
+#include <chrono>
 #include <sys/time.h>
 
 #include <boost/bind/bind.hpp>
@@ -42,7 +43,6 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/chrono/chrono_io.hpp>
 
 #include "uhal/Buffers.hpp"
 #include "uhal/grammars/URI.hpp"
@@ -366,8 +366,8 @@ namespace uhal
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI '", this->uri(), "'. ",
               Integer(mPacketsInFlight), " packets in flight, ", Integer(mReplyBuffers.first.size()), " in this chunk (",
               Integer(lRequestBytes), "/", Integer(lExpectedReplyBytes), " bytes sent/expected). Last send / receive queued ",
-              boost::chrono::duration<float, boost::milli>(lNow - mLastSendQueued).count(), " / ",
-              boost::chrono::duration<float, boost::milli>(lNow - mLastRecvQueued), " ago.");
+              std::chrono::duration<float, std::milli>(lNow - mLastSendQueued).count(), " / ",
+              std::chrono::duration<float, std::milli>(lNow - mLastRecvQueued).count(), " ms ago.");
 
         log ( Error(), "Extra timeout-related info - round-trip times: ", mRTTStats);
         log ( Error(), "Extra timeout-related info - send-recv  times: ", mLSTStats);

@@ -36,7 +36,6 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem.hpp>
-#include "boost/lexical_cast.hpp"
 
 #include "uhal/Node.hpp"
 
@@ -82,9 +81,9 @@ namespace uhal {
       if ( (aMaxListSize != 0) and (lMatches.size() > aMaxListSize) )
       {
         if ( lCommonAncestor == &aNode )
-          return boost::lexical_cast<std::string>(lMatches.size()) + " nodes match";
+          return std::to_string(lMatches.size()) + " nodes match";
         else
-          return boost::lexical_cast<std::string>(lMatches.size()) + " nodes under \"" + lCommonAncestor->getPath() + "\" match";
+          return std::to_string(lMatches.size()) + " nodes under \"" + lCommonAncestor->getPath() + "\" match";
       }
       else
       {

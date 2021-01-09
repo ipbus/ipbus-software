@@ -40,10 +40,10 @@
 #define _uhal_tests_DummyHardware_hpp_
 
 
+#include <chrono>
 #include <deque>
 #include <vector>
 
-#include <boost/chrono/chrono_io.hpp>
 #include <boost/thread/thread.hpp>
 
 #include "uhal/IPbusInspector.hpp"
@@ -65,7 +65,7 @@ namespace uhal
     //! Common abstract base class for IPbus 1.3 and 2.0 dummy hardware
     class DummyHardwareInterface {
     public:
-      DummyHardwareInterface(const boost::chrono::microseconds& aReplyDelay) :
+      DummyHardwareInterface(const std::chrono::microseconds& aReplyDelay) :
         mReplyDelay(aReplyDelay)
       {
       }
@@ -86,7 +86,7 @@ namespace uhal
 
       protected:
         //! The delay in seconds between the request and reply of the first transaction
-        boost::chrono::microseconds mReplyDelay;
+        std::chrono::microseconds mReplyDelay;
     };
 
 

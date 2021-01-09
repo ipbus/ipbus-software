@@ -35,6 +35,7 @@
 #include "uhal/tests/tools.hpp"
 
 
+#include <chrono>
 #include <fcntl.h>
 #include <vector>
 
@@ -58,7 +59,7 @@ DummyHardwareRunner::~DummyHardwareRunner()
   mHwThread.join();
 }
 
-void DummyHardwareRunner::setReplyDelay(const boost::chrono::microseconds& aDelay)
+void DummyHardwareRunner::setReplyDelay(const std::chrono::microseconds& aDelay)
 {
   mHw->setReplyDelay(aDelay);
 }

@@ -43,6 +43,7 @@
 #define _uhal_ProtocolPCIe_hpp_
 
 
+#include <chrono>
 #include <deque>                           // for deque
 #include <memory>
 #include <stddef.h>                        // for size_t
@@ -51,7 +52,6 @@
 #include <utility>                         // for pair
 #include <vector>                          // for vector
 
-#include <boost/chrono/system_clocks.hpp>  // for steady_clock
 #include <boost/function.hpp>              // for function
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/noncopyable.hpp>
@@ -208,7 +208,7 @@ namespace uhal
 
       typedef IPbus< 2 , 0 > InnerProtocol;
 
-      typedef boost::chrono::steady_clock SteadyClock_t;
+      typedef std::chrono::steady_clock SteadyClock_t;
 
       /**
         Return the maximum size to be sent based on the buffer size in the target
@@ -254,7 +254,7 @@ namespace uhal
 
       bool mUseInterrupt;
 
-      boost::chrono::microseconds mSleepDuration;
+      std::chrono::microseconds mSleepDuration;
 
       uint32_t mNumberOfPages, mMaxInFlight, mPageSize, mMaxPacketSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
 

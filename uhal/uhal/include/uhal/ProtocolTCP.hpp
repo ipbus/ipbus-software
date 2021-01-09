@@ -40,6 +40,7 @@
 #define _uhal_ProtocolTCP_hpp_
 
 
+#include <chrono>
 #include <deque>
 #include <iostream>
 #include <memory>
@@ -50,7 +51,6 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
-#include <boost/chrono/system_clocks.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
@@ -182,7 +182,7 @@ namespace uhal
 
 
     private:
-      typedef boost::chrono::steady_clock SteadyClock_t;
+      typedef std::chrono::steady_clock SteadyClock_t;
 
       //! The boost::asio::io_service used to create the connections
       boost::asio::io_service mIOservice;
