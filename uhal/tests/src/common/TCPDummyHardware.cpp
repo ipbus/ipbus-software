@@ -2,8 +2,6 @@
 #include "uhal/tests/TCPDummyHardware.hpp"
 
 
-#include <boost/bind.hpp>
-
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log.hpp"
 
@@ -12,8 +10,7 @@ template< uint8_t IPbus_major , uint8_t IPbus_minor >
 void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::run()
 {
     mSocket.close();
-    mAcceptor.async_accept ( mSocket,
-            boost::bind(&TCPDummyHardware< IPbus_major , IPbus_minor >::handle_accept, this, boost::asio::placeholders::error) );
+    mAcceptor.async_accept ( mSocket, [&] (const boost::system::error_code& e) {this->handle_accept(e);} );
 
     mIOservice.run();  
     mIOservice.reset();
@@ -33,7 +30,7 @@ void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_accept(c
   boost::asio::async_read ( mSocket , 
           boost::asio::buffer ( &mByteCountHeader, 4 ) ,
           boost::asio::transfer_exactly ( 4 ),
-          boost::bind(&TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chunk_header, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred) );
+          [&] (const boost::system::error_code& e, std::size_t n) { this->handle_read_chunk_header(e, n);} );
 }
 
 
@@ -44,8 +41,7 @@ void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chu
   {
     // Connection closed cleanly by peer.
     mSocket.close();
-    mAcceptor.async_accept ( mSocket,
-            boost::bind(&TCPDummyHardware< IPbus_major , IPbus_minor >::handle_accept, this, boost::asio::placeholders::error) );
+    mAcceptor.async_accept ( mSocket, [&] (const boost::system::error_code& e) {this->handle_accept(e);} );
     return; 
   }
   else if ( aError )
@@ -58,7 +54,7 @@ void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chu
   boost::asio::async_read ( mSocket ,
           boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ) , 
           boost::asio::transfer_exactly ( mByteCountHeader ),
-          boost::bind(&TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chunk_payload, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred) );
+          [&] (const boost::system::error_code& e, std::size_t n) { this->handle_read_chunk_payload(e, n);} );
 }
 
 
@@ -69,8 +65,7 @@ void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chu
   {
     // Connection closed cleanly by peer.
     mSocket.close();
-    mAcceptor.async_accept ( mSocket,
-            boost::bind(&TCPDummyHardware< IPbus_major , IPbus_minor >::handle_accept, this, boost::asio::placeholders::error) );
+    mAcceptor.async_accept ( mSocket, [&] (const boost::system::error_code& e) {this->handle_accept(e);} );
     return;
   }
   else if ( aError )
@@ -94,7 +89,7 @@ void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chu
   boost::asio::async_read ( mSocket , 
           boost::asio::buffer ( &mByteCountHeader, 4 ) ,
           boost::asio::transfer_exactly ( 4 ),
-          boost::bind(&TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chunk_header, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred) );
+          [&] (const boost::system::error_code& e, std::size_t n) { this->handle_read_chunk_header(e, n);} );
 }
 
 

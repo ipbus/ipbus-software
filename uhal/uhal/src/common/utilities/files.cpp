@@ -35,6 +35,23 @@
 
 #include "uhal/utilities/files.hpp"
 
+
+#include <fstream>
+#include <iostream>
+
+#include <wordexp.h>
+
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/asio/error.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/streambuf.hpp>
+#include <boost/asio/read.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/spirit/include/qi.hpp>
+
 #include "uhal/log/log.hpp"
 
 
@@ -114,6 +131,219 @@ namespace uhal
         {
           log ( Debug() , " > [file] " , lIt->c_str() );
         }
+      }
+    }
+
+
+    template < bool DebugInfo >
+    bool HttpGet ( const std::string& aURL , HttpResponseType& aResponse )
+    {
+      if ( DebugInfo )
+      {
+        try
+        {
+          log ( Info() , "Retrieving URL http://" , aURL );
+        }
+        catch ( const std::exception& aExc )
+        {
+          log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );            // Just debugging so although exception is worrying, it is not critical
+        }
+      }
+
+      std::pair<std::string, std::string> lURLPair;
+
+      try
+      {
+        //split at the first slash
+        boost::spirit::qi::phrase_parse ( aURL.begin() ,
+                                          aURL.end() ,
+                                          + ( boost::spirit::qi::char_ - "/" ) >> -boost::spirit::qi::lit ( "/" ) >> + ( boost::spirit::qi::char_ ) ,
+                                          boost::spirit::ascii::space ,
+                                          lURLPair );
+      }
+      catch ( const std::exception& aExc )
+      {
+        // log ( Error() , "Exception " , Quote ( aExc.what() ) , " caught at " , ThisLocation() );
+        return false;
+      }
+
+      boost::system::error_code lErrorCode ( boost::asio::error::host_not_found );
+      // The IO service everything will go through
+      boost::asio::io_service io_service;
+      // Get a list of endpoints corresponding to the server name.
+      boost::asio::ip::tcp::resolver resolver ( io_service );
+      boost::asio::ip::tcp::resolver::query query ( lURLPair.first , "http" );
+      boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve ( query );
+      boost::asio::ip::tcp::resolver::iterator end;
+      // Try each endpoint until we successfully establish a connection.
+      boost::asio::ip::tcp::socket socket ( io_service );
+
+      try
+      {
+        while ( lErrorCode && endpoint_iterator != end )
+        {
+          socket.close();
+          socket.connect ( *endpoint_iterator++, lErrorCode );
+        }
+
+        if ( lErrorCode )
+        {
+          throw boost::system::system_error ( lErrorCode );
+        }
+      }
+      catch ( const std::exception& aExc )
+      {
+        return false;
+      }
+
+      // Form the request. We specify the "Connection: close" header so that the server will close the socket after transmitting the response. This will allow us to treat all data up until the EOF as the content.
+      boost::asio::streambuf request;
+      std::ostream request_stream ( &request );
+      request_stream << "GET /" << lURLPair.second << " HTTP/1.0\r\n";
+      request_stream << "Host: " << lURLPair.first << "\r\n";
+      request_stream << "Accept: */*\r\n";
+      request_stream << "Connection: close\r\n\r\n";
+
+      try
+      {
+        // Send the request...
+        boost::asio::write ( socket , request , lErrorCode );
+
+        if ( lErrorCode )
+        {
+          throw boost::system::system_error ( lErrorCode );
+        }
+      }
+      catch ( const std::exception& aExc )
+      {
+        return false;
+      }
+
+      // ... and get the reply. First we need a buffer to write the reply in to...
+      static const int mDefaultBufferSize ( 65536 );
+      typedef std::vector<uint8_t> BufferType;
+      BufferType mBuffer ( mDefaultBufferSize , uint8_t ( 0 ) );
+      std::size_t lSize ( 0 );
+
+      // Just keep reading and, if we have not reached the EOF, extend the buffer and read some more.
+      try
+      {
+        while ( true )
+        {
+          lSize += boost::asio::read ( socket, boost::asio::buffer ( &mBuffer[lSize] , mDefaultBufferSize ) , lErrorCode );
+
+          if ( lErrorCode )
+          {
+            if ( lErrorCode == boost::asio::error::eof )
+            {
+              break;
+            }
+            else
+            {
+              throw boost::system::system_error ( lErrorCode );
+            }
+          }
+
+          mBuffer.insert ( mBuffer.end() , mDefaultBufferSize , uint8_t ( 0 ) );
+        }
+      }
+      catch ( const std::exception& aExc )
+      {
+        return false;
+      }
+
+      mBuffer.resize ( lSize );
+      //Parse the recieved data into an HttpResponseType object
+      grammars::HttpResponseGrammar lGrammar2;
+      boost::spirit::qi::phrase_parse ( mBuffer.begin() , mBuffer.end() , lGrammar2 , boost::spirit::ascii::space , aResponse );
+
+      if ( DebugInfo )
+      {
+        try
+        {
+          log ( Info() , "HTTP response parsed as:\n" , aResponse );
+        }
+        catch ( const std::exception& aExc )
+        {
+          log ( Error() , "EXCEPTION: " , aExc.what() , " caught in " , ThisLocation() , " Continuing." );
+          // Just debugging so although exception is worrying, it is not critical
+        }
+      }
+
+      if ( aResponse.method != "HTTP" || aResponse.status != 200 )
+      {
+        return false;
+      }
+
+      return true;
+    }
+
+
+    template bool HttpGet<false> ( const std::string& , HttpResponseType& );
+    template bool HttpGet<true> ( const std::string& , HttpResponseType& );
+
+
+    void OpenFileLocal ( const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , const detail::FileCallback_t& aCallback)
+    {
+      std::vector< boost::filesystem::path > lFilePaths;
+      uhal::utilities::ShellExpandFilenameExpr ( aFilenameExpr , aParentPath , lFilePaths );
+
+      for ( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 )
+      {
+        std::ifstream lStr ( lIt2->c_str() );
+
+        if ( !lStr.is_open() )
+        {
+          uhal::exception::CannotOpenFile lExc;
+          log ( lExc , "Failed to open file " , Quote ( lIt2->c_str() ) );
+          throw lExc ;
+        }
+        else
+        {
+          lStr.seekg ( 0, std::ios::end );
+          std::vector<uint8_t> lFile ( lStr.tellg() , 0 );
+          lStr.seekg ( 0, std::ios::beg );
+          lStr.read ( ( char* ) & ( lFile[0] ) , lFile.size() );
+          aCallback ( std::string ( "file" ) , *lIt2 , lFile);
+        }
+
+        lStr.close();
+      }
+    }
+
+
+    void OpenFileHttp ( const std::string& aURL , const detail::FileCallback_t& aCallback )
+    {
+      HttpResponseType lHttpResponse;
+
+      if ( ! uhal::utilities::HttpGet<true> ( aURL , lHttpResponse ) )
+      {
+        uhal::exception::CannotOpenFile lExc;
+        log ( lExc , "Failed to download file " , Quote ( aURL ) );
+        throw lExc;
+      }
+
+      boost::filesystem::path lFilePath = boost::filesystem::path ( aURL );
+      aCallback ( std::string ( "http" ) , lFilePath , lHttpResponse.content );
+    }
+
+
+    void OpenFile ( const std::string& aProtocol , const std::string& aFilenameExpr , const boost::filesystem::path& aParentPath , const detail::FileCallback_t& aCallback )
+    {
+      if ( aProtocol == "file" )
+      {
+        uhal::utilities::OpenFileLocal ( aFilenameExpr , aParentPath , aCallback );
+      }
+      else if ( aProtocol == "http" )
+      {
+        uhal::utilities::OpenFileHttp ( aFilenameExpr , aCallback );
+      }
+      else
+      {
+        uhal::exception::NonSupportedUriProtocol lExc;
+        log ( lExc , "The protocol " , Quote ( aProtocol ) , " for file " , Quote ( aFilenameExpr ) , " is not supported." );
+        log ( lExc , "The supported protocols are " , Quote ( "file://" ) , " and " , Quote ( "http://" ) );
+        throw lExc;
       }
     }
   }

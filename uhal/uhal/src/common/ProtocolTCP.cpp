@@ -37,8 +37,6 @@
 #include <mutex>
 #include <sys/time.h>
 
-#include <boost/bind/bind.hpp>
-#include <boost/lambda/lambda.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
@@ -76,7 +74,7 @@ namespace uhal
     mFlushDone ( true ),
     mAsynchronousException ( NULL )
   {
-    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 
@@ -221,7 +219,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+    boost::asio::async_write ( mSocket , lAsioSendBuffer , [&] (const boost::system::error_code& e, std::size_t n) { this->write_callback(e, n); });
     mPacketsInFlight += mDispatchBuffers.size();
 
     SteadyClock_t::time_point lNow = SteadyClock_t::now();
@@ -324,8 +322,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
-
+    boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), [&] (const boost::system::error_code& e, std::size_t n) { this->read_callback(e, n); });
     SteadyClock_t::time_point lNow = SteadyClock_t::now();
     if (mLastRecvQueued > SteadyClock_t::time_point())
       mInterRecvTimeStats.add(mLastRecvQueued, lNow);
@@ -550,7 +547,7 @@ namespace uhal
     }
 
     // Put the actor back to sleep.
-    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 

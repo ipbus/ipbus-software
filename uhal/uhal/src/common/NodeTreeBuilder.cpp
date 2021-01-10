@@ -34,8 +34,8 @@
 
 
 #include <chrono>
+#include <functional>
 
-#include <boost/bind.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -48,12 +48,8 @@
 #include "uhal/utilities/xml.hpp"
 
 
-#if BOOST_VERSION >= 106000
-// Resolve boost bind placeholders (_1, _2, ...) that moved within boost::laceholders namespace from v1.60
-using boost::placeholders::_1;
-using boost::placeholders::_2;
-using boost::placeholders::_3;
-#endif
+// Resolve std bind placeholders (_1, _2, ...)
+namespace arg = std::placeholders;
 
 
 namespace uhal
@@ -120,17 +116,17 @@ namespace uhal
     .optional ( NodeTreeBuilder::mTagsAttribute )
     .optional ( NodeTreeBuilder::mDescriptionAttribute );
     //------------------------------------------------------------------------------------------------------------------------
-    mTopLevelNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , _1 ) );
-    mTopLevelNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , false , _1 ) );
-    mTopLevelNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , false , _1 ) );
+    mTopLevelNodeParser.addRule ( lPlainNode , std::bind ( &NodeTreeBuilder::plainNodeCreator , this , false , arg::_1 ) );
+    mTopLevelNodeParser.addRule ( lBitMask , std::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , false , arg::_1 ) );
+    mTopLevelNodeParser.addRule ( lModule , std::bind ( &NodeTreeBuilder::moduleNodeCreator , this , false , arg::_1 ) );
     //------------------------------------------------------------------------------------------------------------------------
     lPlainNode.require ( NodeTreeBuilder::mIdAttribute );
     lBitMask.require ( NodeTreeBuilder::mIdAttribute );
     lModule.require ( NodeTreeBuilder::mIdAttribute );
     //------------------------------------------------------------------------------------------------------------------------
-    mNodeParser.addRule ( lPlainNode , boost::bind ( &NodeTreeBuilder::plainNodeCreator , this , true , _1 ) );
-    mNodeParser.addRule ( lBitMask , boost::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , true , _1 ) );
-    mNodeParser.addRule ( lModule , boost::bind ( &NodeTreeBuilder::moduleNodeCreator , this , true , _1 ) );
+    mNodeParser.addRule ( lPlainNode , std::bind ( &NodeTreeBuilder::plainNodeCreator , this , true , arg::_1 ) );
+    mNodeParser.addRule ( lBitMask , std::bind ( &NodeTreeBuilder::bitmaskNodeCreator , this , true , arg::_1 ) );
+    mNodeParser.addRule ( lModule , std::bind ( &NodeTreeBuilder::moduleNodeCreator , this , true , arg::_1 ) );
     //------------------------------------------------------------------------------------------------------------------------
   }
 
@@ -165,7 +161,7 @@ namespace uhal
     }
 
     std::vector< const Node* > lNodes;
-    uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , boost::bind ( &NodeTreeBuilder::CallBack, boost::ref ( *this ) , _1 , _2 , _3 , boost::ref ( lNodes ) ) );
+    uhal::utilities::OpenFile ( lAddressFiles[0].first , lAddressFiles[0].second , aPath.parent_path() , std::bind ( &NodeTreeBuilder::CallBack, std::ref ( *this ) , arg::_1 , arg::_2 , arg::_3 , std::ref ( lNodes ) ) );
 
     if ( lNodes.size() != 1 )
     {

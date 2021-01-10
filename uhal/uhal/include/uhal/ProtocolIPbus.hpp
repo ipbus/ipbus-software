@@ -41,13 +41,12 @@
 
 
 #include <deque>
+#include <functional>
 #include <iosfwd>
 #include <memory>
 #include <stdint.h>
 #include <string>
 #include <utility>
-
-#include <boost/function.hpp>                    // for function
 
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"              // for PacketLevelError
@@ -167,7 +166,7 @@ namespace uhal
       virtual void dispatchExceptionHandler();
 
   private:
-      boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
+      std::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
 
       static void translateInfoCode(std::ostream& aStream, const uint8_t& aErrorCode);
   };
@@ -296,7 +295,7 @@ namespace uhal
       virtual void dispatchExceptionHandler();
 
     private:
-      boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
+      std::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
 
       static void translateInfoCode(std::ostream& aStream, const uint8_t& aErrorCode);
 

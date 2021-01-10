@@ -35,6 +35,7 @@
 
 #include <mutex>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/regex.hpp>
 #include <boost/spirit/include/qi.hpp>
 
@@ -48,13 +49,8 @@
 #include "uhal/log/log.hpp"
 
 
-
-#if BOOST_VERSION >= 106000
-// Resolve boost bind placeholders (_1, _2, ...) that moved within boost::placeholders namespace from v1.60
-using boost::placeholders::_1;
-using boost::placeholders::_2;
-using boost::placeholders::_3;
-#endif
+// Resolve std bind placeholders (_1, _2, ...)
+namespace arg = std::placeholders;
 
 
 namespace uhal
@@ -116,7 +112,7 @@ namespace uhal
 
     for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = lConnectionFiles.begin() ; lIt != lConnectionFiles.end() ; ++lIt )
     {
-      uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , boost::bind ( &ConnectionManager::CallBack, boost::ref ( *this ) , _1 , _2 , _3 ) );
+      uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , std::bind ( &ConnectionManager::CallBack, this , arg::_1 , arg::_2 , arg::_3 ) );
     }
   }
 
@@ -131,7 +127,7 @@ namespace uhal
 
     for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = lConnectionFiles.begin() ; lIt != lConnectionFiles.end() ; ++lIt )
     {
-      uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , boost::bind ( &ConnectionManager::CallBack, boost::ref ( *this ) , _1 , _2 , _3 ) );
+      uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , std::bind ( &ConnectionManager::CallBack, this , arg::_1 , arg::_2 , arg::_3 ) );
     }
   }
 

@@ -37,8 +37,6 @@
 #include <mutex>
 #include <utility>
 
-#include <boost/bind/bind.hpp>
-#include <boost/lambda/lambda.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
@@ -73,7 +71,7 @@ namespace uhal
     mFlushDone ( true ),
     mAsynchronousException ( NULL )
   {
-    mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 
@@ -179,7 +177,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , [&] (const boost::system::error_code& e, std::size_t n) { this->write_callback(e, n); });
     mPacketsInFlight++;
   }
 
@@ -271,7 +269,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    mSocket.async_receive ( lAsioReplyBuffer , 0 , boost::bind ( &UDP<InnerProtocol>::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+    mSocket.async_receive ( lAsioReplyBuffer , 0 , [&] (const boost::system::error_code& e, std::size_t n) { this->read_callback(e, n); });
   }
 
 
@@ -422,7 +420,7 @@ namespace uhal
     }
 
     // Put the actor back to sleep.
-    mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 

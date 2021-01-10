@@ -41,13 +41,12 @@
 
 
 #include <deque>
+#include <functional>
 #include <iosfwd>
 #include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <boost/function.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/definitions.hpp"
@@ -252,7 +251,7 @@ namespace uhal
 
     private:
 
-      virtual boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() = 0;
+      virtual std::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() = 0;
 
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint32_t mTransactionCounter;
@@ -262,15 +261,15 @@ namespace uhal
   template<typename T>
   struct TranslatedFmt {
   public:
-    TranslatedFmt(const T& aData, const boost::function<void (std::ostream&, const T&)>& aFunction);
+    TranslatedFmt(const T& aData, const std::function<void (std::ostream&, const T&)>& aFunction);
     ~TranslatedFmt();
 
     const T& mData;
-    const boost::function<void (std::ostream&, const T&)>& mFunc;
+    const std::function<void (std::ostream&, const T&)>& mFunc;
   };
 
   template <typename T>
-  TranslatedFmt<T>::TranslatedFmt(const T& aData, const boost::function<void (std::ostream&, const T&)>& aFunction) :
+  TranslatedFmt<T>::TranslatedFmt(const T& aData, const std::function<void (std::ostream&, const T&)>& aFunction) :
     mData(aData),
     mFunc(aFunction)
   {
