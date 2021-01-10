@@ -53,8 +53,6 @@
 #include <utility>                         // for pair
 #include <vector>                          // for vector
 
-#include <boost/function.hpp>              // for function
-
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbus.hpp"

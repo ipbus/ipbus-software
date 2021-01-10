@@ -45,8 +45,6 @@
 #include <string>
 #include <unordered_map>
 
-#include <boost/noncopyable.hpp>
-
 
 namespace uhal
 {
@@ -61,7 +59,7 @@ namespace uhal
     A singleton class to register derived nodes, and create instances of them later
     NOTE! This is a factory method and must be Mutex protected if it is used in multithreaded environments!
   */
-  class DerivedNodeFactory: private boost::noncopyable
+  class DerivedNodeFactory
   {
     friend class NodeTreeBuilder;
 
@@ -78,6 +76,10 @@ namespace uhal
       DerivedNodeFactory ();
 
     public:
+
+      DerivedNodeFactory(const DerivedNodeFactory&) = delete;
+      DerivedNodeFactory& operator=(const DerivedNodeFactory&) = delete;
+
       //! Destructor
       virtual ~DerivedNodeFactory ();
 

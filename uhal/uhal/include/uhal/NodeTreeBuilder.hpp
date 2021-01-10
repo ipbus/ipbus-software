@@ -44,7 +44,6 @@
 #include <memory>
 
 #include <boost/filesystem/path.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 #include "pugixml.hpp"
@@ -81,11 +80,8 @@ namespace uhal
   }
 
 
-  /**
-    A class to build a node tree from an Address table file
-    NOTE! This is a factory method and must be Mutex protected if it is used in multithreaded environments!
-  */
-  class NodeTreeBuilder: private boost::noncopyable
+  //! A class to build a node tree from an address table file
+  class NodeTreeBuilder
   {
     private:
       /**
@@ -95,6 +91,10 @@ namespace uhal
       NodeTreeBuilder ();
 
     public:
+
+      NodeTreeBuilder(const NodeTreeBuilder&) = delete;
+      NodeTreeBuilder& operator=(const NodeTreeBuilder&) = delete;
+
       //! Destructor
       virtual ~NodeTreeBuilder ();
 

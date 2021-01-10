@@ -47,7 +47,6 @@
 #include <vector>
 
 #include <boost/filesystem/path.hpp>
-#include <boost/noncopyable.hpp>
 
 #include "uhal/log/exception.hpp"
 #include "uhal/HwInterface.hpp"
@@ -76,7 +75,7 @@ namespace uhal
   }
 
   //! A class to open and manage XML connection files and wrap up the interfaces to the NodeTreeBuilder and the ClientFactory
-  class ConnectionManager: private boost::noncopyable
+  class ConnectionManager
   {
     public:
       //! A struct to hold the fields of each entry in the XML connections file
@@ -108,6 +107,10 @@ namespace uhal
       };
 
     public:
+
+      ConnectionManager(const ConnectionManager&) = delete;
+      ConnectionManager& operator=(const ConnectionManager&) = delete;
+
       /**
       	Default constructor
       	Given a semi-colon delimeted list of glob expressions, parse all the files matching it (e.g. $BUILD/config/c*.xml). If one parsing fails throw an exception and return filename and line number

@@ -53,9 +53,7 @@
 #include <utility>                         // for pair
 #include <vector>                          // for vector
 
-#include <boost/function.hpp>              // for function
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/noncopyable.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
@@ -156,8 +154,12 @@ namespace uhal
       };
 
       template <class T>
-      class SharedObject : public boost::noncopyable {
+      class SharedObject {
       public:
+
+        SharedObject(const SharedObject<T>&) = delete;
+        SharedObject<T>& operator=(const SharedObject<T>&) = delete;
+
         SharedObject(const std::string& aName);
         ~SharedObject();
 
