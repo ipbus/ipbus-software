@@ -102,7 +102,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, multiple_hwinterface
   for ( size_t i=0; i!=N_THREADS; ++i )
   {
     log ( Warning() , ThisLocation() , ":" , Integer ( i ) );
-    jobs.push_back ( std::make_shared<std::thread> (job_multiple, connectionFileURI, deviceId, timeout) );
+    jobs.emplace_back ( new std::thread(job_multiple, connectionFileURI, deviceId, timeout) );
   }
 
   for ( size_t i=0; i!=N_THREADS; ++i )
@@ -151,7 +151,7 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_hwinterface, 
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
-      jobs.push_back ( std::make_shared<std::thread> ( [&hw] () {job_single(hw);} ) );
+      jobs.emplace_back ( new std::thread( [&hw] () {job_single(hw);} ) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )
@@ -195,13 +195,14 @@ UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(MultithreadedTestSuite, single_copied_hwinte
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
-      jobs.push_back ( std::make_shared<std::thread>( [hw] () {job_single_copied(hw);} ) );
+      jobs.emplace_back ( new std::thread ( [hw] () {job_single_copied(hw);} ) );
     }
 
     for ( size_t i=0; i!=N_THREADS; ++i )
     {
       jobs[i]->join();
     }
+    jobs.clear();
   }
 }
 )
