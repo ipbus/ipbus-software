@@ -18,7 +18,7 @@
 # ==26180==    by 0x5F22CCD: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
 # ==26180==    by 0x5F23532: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
 # ==26180==    by 0x5F38361: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==26180== 
+# ==26180==
 {
    uhal_tests__pthread_create_GLIBC2.2.5__ipbusudp_1_3_runner_BlockReadWriteTestSuite
    Memcheck:Leak
@@ -28,7 +28,7 @@
    fun:_dl_allocate_tls
    ...
    fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZNSt6thread15_M_start_threadESt10shared_ptrINS_10_Impl_baseEE
+   fun:_ZNSt6thread15_M_start_threadESt10*
    ...
    fun:_ZN4uhal5tests19DummyHardwareRunnerC1EPNS0_22DummyHardwareInterfaceE
    fun:_ZN4uhal5tests20DummyHardwareFixtureILNS0_10DeviceTypeE0EEC1Ev
@@ -71,8 +71,8 @@
    fun:_dl_allocate_tls
    ...
    fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZNSt6thread15_M_start_threadESt10shared_ptrINS_10_Impl_baseEE
-   fun:thread<uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method()::__lambda10>
+   fun:_ZNSt6thread15_M_start_threadESt10*
+   fun:thread<uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method()::*lambda*>
    fun:_ZN4uhal5tests12*22MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
    fun:_ZN4uhal5tests12*22MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
    ...
@@ -111,8 +111,29 @@
    fun:_dl_allocate_tls
    ...
    fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZNSt6thread15_M_start_threadESt10shared_ptrINS_10_Impl_baseEE
-   fun:_ZNSt6threadC2IRFvRKSsS2_mEIRSsS5_RmEEEOT_DpOT0_.constprop.471
+   fun:_ZNSt6thread15_M_start_threadESt10*
+   fun:_ZNSt6threadC2IRFvRK*
+   fun:_ZN4uhal5tests12*22MultithreadedTestSuite21multiple_hwinterfaces11test_methodEv
+   fun:_ZN4uhal5tests12*22MultithreadedTestSuiteL29multiple_hwinterfaces_invokerEv
+   ...
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+}
+
+{
+   uhal_tests__pthread_create_GLIBC2.2.5__*_MultithreadedTestSuite_multiple_hwinterfaces_fedora30
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   ...
+   fun:_dl_allocate_tls
+   ...
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:_ZNSt6thread15_M_start_threadESt10*
+   fun:thread<void *>
    fun:_ZN4uhal5tests12*22MultithreadedTestSuite21multiple_hwinterfaces11test_methodEv
    fun:_ZN4uhal5tests12*22MultithreadedTestSuiteL29multiple_hwinterfaces_invokerEv
    ...
