@@ -33,12 +33,12 @@
 #include "uhal/ProtocolIPbus.hpp"
 
 
+#include <memory>
+#include <mutex>
 #include <ostream>
 #include <stdint.h>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for seconds
-#include <boost/shared_ptr.hpp>                             // for shared_ptr
-#include <boost/thread/lock_guard.hpp>                      // for lock_guard
 
 #include "uhal/Buffers.hpp"
 #include "uhal/ClientInterface.hpp"
@@ -66,7 +66,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  void IPbus< 1 , IPbus_minor >::preamble ( boost::shared_ptr< Buffers > aBuffers )
+  void IPbus< 1 , IPbus_minor >::preamble ( std::shared_ptr< Buffers > aBuffers )
   {
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
@@ -80,7 +80,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  void IPbus< 1 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void IPbus< 1 , IPbus_minor >::predispatch ( std::shared_ptr< Buffers > aBuffers )
   {
     uint32_t lWords ( aBuffers->sendCounter()  >> 2 );
     //IPbus 1.3 requires that there are 8 words of IPbus payload, excluding any non-payload preamble. In this version of the protocol, the preamble is really just initializing the payload, rather than a true preamble, so, if nothing else was sent, then we need 7 more words of padding.
@@ -259,11 +259,11 @@ namespace uhal
   }
 
   template< uint8_t IPbus_minor >
-  void IPbus< 2 , IPbus_minor >:: preamble ( boost::shared_ptr< Buffers > aBuffers )
+  void IPbus< 2 , IPbus_minor >:: preamble ( std::shared_ptr< Buffers > aBuffers )
   {
     aBuffers->send ( 0x200000F0 | ( ( mPacketCounter&0xffff ) <<8 ) );
     {
-      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      std::lock_guard<std::mutex> lLock ( mReceivePacketMutex );
       mReceivePacketHeader.push_back ( 0x00000000 );
       aBuffers->receive ( mReceivePacketHeader.back() );
     }
@@ -278,7 +278,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  void IPbus< 2 , IPbus_minor >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void IPbus< 2 , IPbus_minor >::predispatch ( std::shared_ptr< Buffers > aBuffers )
   {
   }
 
@@ -299,7 +299,7 @@ namespace uhal
     }
 
     {
-      boost::lock_guard<boost::mutex> lLock ( mReceivePacketMutex );
+      std::lock_guard<std::mutex> lLock ( mReceivePacketMutex );
       mReceivePacketHeader.pop_front();
     }
 

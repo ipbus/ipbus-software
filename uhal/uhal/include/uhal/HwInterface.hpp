@@ -45,15 +45,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include "uhal/ClientInterface.hpp" // IWYU pragma: keep
 #include "uhal/Node.hpp"            // IWYU pragma: keep
 
-
-namespace boost {
-  template <class Y> class shared_ptr;
-}
 
 namespace uhal
 {
@@ -66,7 +60,7 @@ namespace uhal
       	@param aClientInterface a shared pointer to a client interface which performs the transport
       	@param aNode a shared pointer to a >>freshly cloned<< node representing the >>full<< endpoint structure
       */
-      HwInterface ( const std::shared_ptr<ClientInterface>& aClientInterface , const boost::shared_ptr< Node >& aNode );
+      HwInterface ( const std::shared_ptr<ClientInterface>& aClientInterface , const std::shared_ptr< Node >& aNode );
 
       /**
       	Copy Constructor
@@ -163,7 +157,7 @@ namespace uhal
       std::shared_ptr<ClientInterface> mClientInterface;
 
       //! A node tree
-      boost::shared_ptr<Node> mNode;
+      std::shared_ptr<Node> mNode;
   };
 
 }

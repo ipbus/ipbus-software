@@ -45,8 +45,6 @@
 #include <memory>
 #include <unordered_map>
 
-#include <boost/noncopyable.hpp>
-
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/log.hpp"
@@ -71,7 +69,7 @@ namespace uhal
   NOTE! This is a factory method and must be Mutex protected if it is used in multithreaded environments!
   */
 
-  class ClientFactory: private boost::noncopyable
+  class ClientFactory
   {
 
     private:
@@ -82,6 +80,10 @@ namespace uhal
       ClientFactory();
 
     public:
+
+      ClientFactory(const ClientFactory&) = delete;
+      ClientFactory& operator=(const ClientFactory&) = delete;
+
       //! Destructor
       virtual ~ClientFactory();
 

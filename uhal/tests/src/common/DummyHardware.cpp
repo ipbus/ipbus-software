@@ -33,13 +33,12 @@
 #include "uhal/tests/DummyHardware.hpp"
 
 
+#include <chrono>
 #include <deque>
+#include <thread>
 #include <vector>
 
 #include <arpa/inet.h>
-
-#include <boost/chrono/chrono_io.hpp>
-#include <boost/thread/thread.hpp>
 
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
@@ -54,7 +53,7 @@ namespace uhal
   
     template< uint8_t IPbus_major , uint8_t IPbus_minor >
     DummyHardware<IPbus_major, IPbus_minor>::DummyHardware ( const uint32_t& aReplyDelay, const bool& aBigEndianHack ) :
-      DummyHardwareInterface( boost::chrono::seconds(aReplyDelay) ),
+      DummyHardwareInterface( std::chrono::seconds(aReplyDelay) ),
       HostToTargetInspector< IPbus_major , IPbus_minor >(),
       mMemory (),
       mConfigurationSpace(),
@@ -125,11 +124,11 @@ namespace uhal
         mReplyHistory.pop_front();
       }
 
-      if ( mReplyDelay > boost::chrono::microseconds(0) )
+      if ( mReplyDelay > std::chrono::microseconds(0) )
       {
-        log ( Info() , "Sleeping for " , mReplyDelay );
-        boost::this_thread::sleep_for( mReplyDelay );
-        mReplyDelay = boost::chrono::microseconds(0);
+        log ( Info() , "Sleeping for " , mReplyDelay.count(), "ms" );
+        std::this_thread::sleep_for( mReplyDelay );
+        mReplyDelay = std::chrono::microseconds(0);
         log ( Info() , "Now replying " );
       }
 

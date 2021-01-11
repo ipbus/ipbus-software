@@ -102,7 +102,7 @@ namespace uhal
       	Add a preamble to an IPbus buffer
         @param aBuffers a buffer to which to add the preamble
       */
-      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void preamble ( std::shared_ptr< Buffers > aBuffers );
 
       /**
         Get the size of the preamble added by this protocol layer
@@ -114,7 +114,7 @@ namespace uhal
       	Finalize an IPbus buffer before it is transmitted
         @param aBuffers a buffer on which to do the predispatch operation
       */
-      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void predispatch ( std::shared_ptr< Buffers > aBuffers );
 
       /**
       	Function which the dispatch calls when the reply is received to check that the headers are as expected
@@ -169,8 +169,7 @@ namespace uhal
       //! A queue of preample structs making the memory used by the preambles persistent during the dispatch. Must lock mPreamblesMutex when accessing this deque.
       std::deque< tpreamble > mPreambles;
       //! Mutex to be used when accessing mPreambles
-      boost::mutex mPreamblesMutex;
-
+      std::mutex mPreamblesMutex;
   };
 
 

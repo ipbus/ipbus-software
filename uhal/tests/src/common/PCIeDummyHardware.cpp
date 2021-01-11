@@ -35,16 +35,15 @@
 #include "uhal/tests/PCIeDummyHardware.hpp"
 
 
+#include <chrono>
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <thread>
+#include <string>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
-#include <boost/chrono/duration.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/lexical_cast.hpp>
+#include <unistd.h>
 
 #include "uhal/log/LogLevels.hpp"
 #include "uhal/log/log_inserters.integer.hpp"
@@ -71,13 +70,13 @@ PCIeDummyHardware::PCIeDummyHardware(const std::string& aDevicePathHostToFPGA, c
   log(Debug(), "PCIe dummy hardware is creating client-to-device named PIPE ", Quote (mDevicePathHostToFPGA));
   int rc = mkfifo(mDevicePathHostToFPGA.c_str(), 0666);
   if ( rc != 0 ) {
-    std::runtime_error lExc("Cannot create FIFO; mkfifo returned " + boost::lexical_cast<std::string>(rc) + ", errno=" + boost::lexical_cast<std::string>(errno));
+    std::runtime_error lExc("Cannot create FIFO; mkfifo returned " + std::to_string(rc) + ", errno=" + std::to_string(errno));
     throw lExc;
   }
 
   mDeviceFileHostToFPGA = open(mDevicePathHostToFPGA.c_str(), O_RDONLY | O_NONBLOCK); /* O_NONBLOCK so that open does not hang */
   if ( mDeviceFileHostToFPGA < 0 ) {
-    std::runtime_error lExc("Problem opening host-to-FPGA device file '" + mDevicePathHostToFPGA + "', errno=" + boost::lexical_cast<std::string>(errno) + " (dummy hw)");
+    std::runtime_error lExc("Problem opening host-to-FPGA device file '" + mDevicePathHostToFPGA + "', errno=" + std::to_string(errno) + " (dummy hw)");
     throw lExc;
   }
 
@@ -131,7 +130,7 @@ void PCIeDummyHardware::run()
     assert (lRC == 0);
 
     if (lNrBytes == 0) {
-      boost::this_thread::sleep_for(boost::chrono::microseconds(50));
+      std::this_thread::sleep_for(std::chrono::microseconds(50));
       continue;
     }
 

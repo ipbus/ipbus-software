@@ -43,10 +43,9 @@
 
 #include <cstddef>                 // for size_t
 #include <deque>
+#include <memory>
 #include <stdint.h>                // for uint32_t, uint8_t
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
 
 #include "uhal/log/exception.hpp"
 #include "uhal/definitions.hpp"
@@ -180,7 +179,7 @@ namespace uhal
 
     protected:
       //! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory
-      boost::shared_ptr< _ValHeader_ > mMembers;
+      std::shared_ptr< _ValHeader_ > mMembers;
   };
 
 
@@ -263,7 +262,7 @@ namespace uhal
 
     private:
       //! A shared pointer to a _ValWord_ struct, so that every copy of this ValWord points to the same underlying memory
-      boost::shared_ptr< _ValWord_<T> > mMembers;
+      std::shared_ptr< _ValWord_<T> > mMembers;
 
   };
 
@@ -396,7 +395,7 @@ namespace uhal
 
     private:
       //! A shared pointer to a _ValVector_ struct, so that every copy of this ValVector points to the same underlying memory
-      boost::shared_ptr< _ValVector_<T> > mMembers;
+      std::shared_ptr< _ValVector_<T> > mMembers;
 
   };
 

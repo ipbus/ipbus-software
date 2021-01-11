@@ -33,6 +33,7 @@
 #include "uhal/ProtocolControlHub.hpp"
 
 
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -40,7 +41,6 @@
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_eps.hpp>
-#include <boost/thread/lock_guard.hpp>
 
 #include "uhal/Buffers.hpp"
 #include "uhal/ProtocolIPbus.hpp"
@@ -162,7 +162,7 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::preamble ( boost::shared_ptr< Buffers > aBuffers )
+  void ControlHub< InnerProtocol >::preamble ( std::shared_ptr< Buffers > aBuffers )
   {
     // -------------------------------------------------------------------------------------------------------------
     // 8 bytes form the preamble:
@@ -177,7 +177,7 @@ namespace uhal
     // Error code (2 bytes)
     // -------------------------------------------------------------------------------------------------------------
     {
-      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+      std::lock_guard<std::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.push_back ( tpreamble () );
       tpreamble* lPreambles = & mPreambles.back();
       //     lPreambles->mSendByteCountPtr = ( uint32_t* ) ( aBuffers->send ( ( uint32_t ) ( 0 ) ) );
@@ -203,10 +203,10 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void ControlHub< InnerProtocol >::predispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void ControlHub< InnerProtocol >::predispatch ( std::shared_ptr< Buffers > aBuffers )
   {
     InnerProtocol::predispatch ( aBuffers );
-    boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+    std::lock_guard<std::mutex> lPreamblesLock ( mPreamblesMutex );
     tpreamble& lPreambles = mPreambles.back();
     uint32_t lByteCount ( aBuffers->sendCounter() );
     * ( lPreambles.mSendWordCountPtr ) = htons ( ( lByteCount-8 ) >>2 );
@@ -228,7 +228,7 @@ namespace uhal
       log ( *lExc , "Returned IP address " , Integer ( lReplyIPaddress , IntFmt< hex , fixed >() ) ,
             " does not match that sent " , Integer ( mDeviceIPaddress, IntFmt< hex , fixed >() ) ,
             " for device with URI: " , this->uri() );
-      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+      std::lock_guard<std::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
       return lExc;
     }
@@ -242,7 +242,7 @@ namespace uhal
       log ( *lExc , "Returned Port number " , Integer ( lReplyPort ) ,
             " does not match that sent " , Integer ( mDevicePort ) ,
             " for device with URI: " , this->uri() );
-      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+      std::lock_guard<std::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
       return lExc;
     }
@@ -252,7 +252,7 @@ namespace uhal
 
     if ( lErrorCode != 0 )
     {
-      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+      std::lock_guard<std::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
 
       if ( lErrorCode == 1 || lErrorCode == 3 || lErrorCode == 4 )
@@ -271,7 +271,7 @@ namespace uhal
     }
 
     {
-      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+      std::lock_guard<std::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.pop_front();
     }
     return InnerProtocol::validate ( ( aSendBufferStart+=8 ) , aSendBufferEnd , ( ++aReplyStartIt ) , aReplyEndIt );
@@ -289,7 +289,7 @@ namespace uhal
   void ControlHub< InnerProtocol >::dispatchExceptionHandler()
   {
     {
-      boost::lock_guard<boost::mutex> lPreamblesLock ( mPreamblesMutex );
+      std::lock_guard<std::mutex> lPreamblesLock ( mPreamblesMutex );
       mPreambles.clear();
     }
     InnerProtocol::dispatchExceptionHandler();

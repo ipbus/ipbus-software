@@ -33,16 +33,15 @@
 #include "uhal/ProtocolTCP.hpp"
 
 
+#include <chrono>
+#include <mutex>
 #include <sys/time.h>
 
-#include <boost/bind/bind.hpp>
-#include <boost/lambda/lambda.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/chrono/chrono_io.hpp>
 
 #include "uhal/Buffers.hpp"
 #include "uhal/grammars/URI.hpp"
@@ -67,7 +66,7 @@ namespace uhal
     mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     mIOserviceWork ( mIOservice ),
-    mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
+    mDispatchThread ( [this] () { mIOservice.run(); } ),
     mDispatchQueue(),
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
@@ -75,7 +74,7 @@ namespace uhal
     mFlushDone ( true ),
     mAsynchronousException ( NULL )
   {
-    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 
@@ -105,9 +104,9 @@ namespace uhal
 
 
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
-  void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void TCP< InnerProtocol , nr_buffers_per_send >::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
   {
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
     {
@@ -203,7 +202,7 @@ namespace uhal
     {
       mDispatchBuffers.push_back ( mDispatchQueue.front() );
       mDispatchQueue.pop_front();
-      const boost::shared_ptr<Buffers>& lBuffer = mDispatchBuffers.back();
+      const std::shared_ptr<Buffers>& lBuffer = mDispatchBuffers.back();
       mSendByteCounter += lBuffer->sendCounter();
       lAsioSendBuffer.push_back ( boost::asio::const_buffer ( lBuffer->getSendBuffer() , lBuffer->sendCounter() ) );
     }
@@ -220,7 +219,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    boost::asio::async_write ( mSocket , lAsioSendBuffer , boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+    boost::asio::async_write ( mSocket , lAsioSendBuffer , [&] (const boost::system::error_code& e, std::size_t n) { this->write_callback(e, n); });
     mPacketsInFlight += mDispatchBuffers.size();
 
     SteadyClock_t::time_point lNow = SteadyClock_t::now();
@@ -234,7 +233,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
     mSendByteCounter = ntohl ( mSendByteCounter );
 
     if ( mAsynchronousException )
@@ -323,8 +322,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), boost::bind ( &TCP< InnerProtocol , nr_buffers_per_send >::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
-
+    boost::asio::async_read ( mSocket , lAsioReplyBuffer ,  boost::asio::transfer_exactly ( 4 ), [&] (const boost::system::error_code& e, std::size_t n) { this->read_callback(e, n); });
     SteadyClock_t::time_point lNow = SteadyClock_t::now();
     if (mLastRecvQueued > SteadyClock_t::time_point())
       mInterRecvTimeStats.add(mLastRecvQueued, lNow);
@@ -342,7 +340,7 @@ namespace uhal
     uint32_t lRequestBytes = 0;
     uint32_t lExpectedReplyBytes = 0;
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       lNrReplyBuffers += ( *lBufIt )->getReplyBuffer().size();
       lRequestBytes += ( *lBufIt )->sendCounter();
@@ -350,7 +348,7 @@ namespace uhal
     }
 
     {
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       if ( mAsynchronousException )
       {
         NotifyConditionalVariable ( true );
@@ -366,8 +364,8 @@ namespace uhal
               ( this->uri().find ( "chtcp-" ) == 0 ? "ControlHub" : "TCP server" ) , " with URI '", this->uri(), "'. ",
               Integer(mPacketsInFlight), " packets in flight, ", Integer(mReplyBuffers.first.size()), " in this chunk (",
               Integer(lRequestBytes), "/", Integer(lExpectedReplyBytes), " bytes sent/expected). Last send / receive queued ",
-              boost::chrono::duration<float, boost::milli>(lNow - mLastSendQueued).count(), " / ",
-              boost::chrono::duration<float, boost::milli>(lNow - mLastRecvQueued), " ago.");
+              std::chrono::duration<float, std::milli>(lNow - mLastSendQueued).count(), " / ",
+              std::chrono::duration<float, std::milli>(lNow - mLastRecvQueued).count(), " ms ago.");
 
         log ( Error(), "Extra timeout-related info - round-trip times: ", mRTTStats);
         log ( Error(), "Extra timeout-related info - send-recv  times: ", mLSTStats);
@@ -387,7 +385,7 @@ namespace uhal
 
     if ( ( aErrorCode && ( aErrorCode != boost::asio::error::eof ) ) || ( aBytesTransferred != 4 ) )
     {
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       mAsynchronousException = new exception::ASIOTcpError();
 
       if ( aErrorCode )
@@ -429,7 +427,7 @@ namespace uhal
     lAsioReplyBuffer.reserve ( lNrReplyBuffers );
     log ( Debug() , "Expecting " , Integer ( lExpectedReplyBytes ) , " bytes in reply, for ", Integer ( mReplyBuffers.first.size() ), " buffers" );
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( ( *lBufIt )->getReplyBuffer() );
 
@@ -444,7 +442,7 @@ namespace uhal
 
     if ( ( lErrorCode && ( lErrorCode != boost::asio::error::eof ) ) || ( lBytesTransferred != mReplyByteCounter ) )
     {
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       mSocket.close();
 
       if ( mDeadlineTimer.expires_at () == boost::posix_time::pos_infin )
@@ -472,19 +470,19 @@ namespace uhal
     }
 
 
-    for ( std::vector< boost::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
     {
       try
       {
         if ( uhal::exception::exception* lExc =  ClientInterface::validate ( *lBufIt ) ) //Control of the pointer has been passed back to the client interface
         {
-          boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+          std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
           mAsynchronousException = lExc;
         }
       }
       catch ( exception::exception& aExc )
       {
-        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+        std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
         mAsynchronousException = new exception::ValidationError ();
         log ( *mAsynchronousException , "Exception caught during reply validation for TCP device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
       }
@@ -496,7 +494,7 @@ namespace uhal
       }
     }
 
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
     mPacketsInFlight -= mReplyBuffers.first.size();
 
     if ( mReplyQueue.size() )
@@ -527,7 +525,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::CheckDeadline()
   {
-    boost::lock_guard<boost::mutex> lLock ( this->mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( this->mTransportLayerMutex );
 
     // Check whether the deadline has passed. We compare the deadline against the current time since a new asynchronous operation may have moved the deadline before this actor had a chance to run.
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
@@ -549,7 +547,7 @@ namespace uhal
     }
 
     // Put the actor back to sleep.
-    mDeadlineTimer.async_wait ( boost::bind ( &TCP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 
@@ -557,7 +555,7 @@ namespace uhal
   void TCP< InnerProtocol , nr_buffers_per_send >::Flush( )
   {
     {
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       mFlushStarted = true;
 
       if ( mDispatchQueue.size() && mDispatchBuffers.empty() )
@@ -568,7 +566,7 @@ namespace uhal
 
     WaitOnConditionalVariable();
 
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex ); 
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex ); 
 
     if ( mAsynchronousException )
     {
@@ -621,7 +619,7 @@ namespace uhal
   void TCP< InnerProtocol , nr_buffers_per_send >::NotifyConditionalVariable ( const bool& aValue )
   {
     {
-      boost::lock_guard<boost::mutex> lLock ( mConditionalVariableMutex );
+      std::lock_guard<std::mutex> lLock ( mConditionalVariableMutex );
       mFlushDone = aValue;
     }
     mConditionalVariable.notify_one();
@@ -630,7 +628,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::WaitOnConditionalVariable()
   {
-    boost::unique_lock<boost::mutex> lLock ( mConditionalVariableMutex );
+    std::unique_lock<std::mutex> lLock ( mConditionalVariableMutex );
 
     while ( !mFlushDone )
     {

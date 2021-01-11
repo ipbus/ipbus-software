@@ -45,9 +45,7 @@ Libraries = \
 		cactus_uhal_grammars \
 		cactus_uhal_log \
 		$(if ${BUILD_STATIC}, ${LIBFLAGPREFIX}--no-whole-archive,) \
-		boost_chrono \
 		boost_filesystem \
-		${BOOST_THREAD_LIB} \
 		boost_program_options \
 		boost_unit_test_framework \
 		boost_regex \

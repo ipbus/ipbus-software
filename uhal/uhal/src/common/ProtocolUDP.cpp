@@ -34,10 +34,9 @@
 
 
 #include <exception>
+#include <mutex>
 #include <utility>
 
-#include <boost/bind/bind.hpp>
-#include <boost/lambda/lambda.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
@@ -65,14 +64,14 @@ namespace uhal
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( 1500 , 0x00000000 ),
     mIOserviceWork ( mIOservice ),
-    mDispatchThread ( boost::bind ( &boost::asio::io_service::run , & ( mIOservice ) ) ),
+    mDispatchThread ( [this] () { mIOservice.run(); } ),
     mDispatchQueue(),
     mReplyQueue(),
     mPacketsInFlight ( 0 ),
     mFlushDone ( true ),
     mAsynchronousException ( NULL )
   {
-    mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 
@@ -88,7 +87,7 @@ namespace uhal
 
       mIOservice.stop();
       mDispatchThread.join();
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       ClientInterface::returnBufferToPool ( mDispatchQueue );
       ClientInterface::returnBufferToPool ( mReplyQueue );
     }
@@ -101,9 +100,9 @@ namespace uhal
 
 
   template < typename InnerProtocol >
-  void UDP< InnerProtocol >::implementDispatch ( boost::shared_ptr< Buffers > aBuffers )
+  void UDP< InnerProtocol >::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
   {
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
     {
@@ -178,7 +177,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , boost::bind ( &UDP< InnerProtocol >::write_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , [&] (const boost::system::error_code& e, std::size_t n) { this->write_callback(e, n); });
     mPacketsInFlight++;
   }
 
@@ -186,7 +185,7 @@ namespace uhal
   template < typename InnerProtocol >
   void UDP< InnerProtocol >::write_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
     {
@@ -270,7 +269,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    mSocket.async_receive ( lAsioReplyBuffer , 0 , boost::bind ( &UDP<InnerProtocol>::read_callback, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred ) );
+    mSocket.async_receive ( lAsioReplyBuffer , 0 , [&] (const boost::system::error_code& e, std::size_t n) { this->read_callback(e, n); });
   }
 
 
@@ -278,7 +277,7 @@ namespace uhal
   void UDP< InnerProtocol >::read_callback ( const boost::system::error_code& aErrorCode , std::size_t aBytesTransferred )
   {
     {
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       if ( mAsynchronousException )
       {
         NotifyConditionalVariable ( true );
@@ -315,7 +314,7 @@ namespace uhal
     {
       mSocket.close();
 
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       mAsynchronousException = new exception::ASIOUdpError();
       log ( *mAsynchronousException , "Error ", Quote ( aErrorCode.message() ) , " encountered during receive from UDP target with URI: " , this->uri() );
 
@@ -344,18 +343,18 @@ namespace uhal
     {
       if ( uhal::exception::exception* lExc = ClientInterface::validate ( mReplyBuffers ) ) //Control of the pointer has been passed back to the client interface
       {
-        boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+        std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
         mAsynchronousException = lExc;
       }
     }
     catch ( exception::exception& aExc )
     {
-      boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+      std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
       mAsynchronousException = new exception::ValidationError ();
       log ( *mAsynchronousException , "Exception caught during reply validation for UDP device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
     }
 
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
 
     if ( mAsynchronousException )
     {
@@ -398,7 +397,7 @@ namespace uhal
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
-    boost::lock_guard<boost::mutex> lLock ( this->mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( this->mTransportLayerMutex );
 
     if ( mDeadlineTimer.expires_at() <= boost::asio::deadline_timer::traits_type::now() )
     {
@@ -421,7 +420,7 @@ namespace uhal
     }
 
     // Put the actor back to sleep.
-    mDeadlineTimer.async_wait ( boost::bind ( &UDP::CheckDeadline, this ) );
+    mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
   }
 
 
@@ -430,7 +429,7 @@ namespace uhal
   {
     WaitOnConditionalVariable();
 
-    boost::lock_guard<boost::mutex> lLock ( mTransportLayerMutex );
+    std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
     if ( mAsynchronousException )
     {
       mAsynchronousException->throwAsDerivedType();
@@ -482,7 +481,7 @@ namespace uhal
   void UDP< InnerProtocol >::NotifyConditionalVariable ( const bool& aValue )
   {
     {
-      boost::lock_guard<boost::mutex> lLock ( mConditionalVariableMutex );
+      std::lock_guard<std::mutex> lLock ( mConditionalVariableMutex );
       mFlushDone = aValue;
     }
     mConditionalVariable.notify_one();
@@ -492,7 +491,7 @@ namespace uhal
   template < typename InnerProtocol  >
   void UDP< InnerProtocol >::WaitOnConditionalVariable()
   {
-    boost::unique_lock<boost::mutex> lLock ( mConditionalVariableMutex );
+    std::unique_lock<std::mutex> lLock ( mConditionalVariableMutex );
 
     while ( !mFlushDone )
     {

@@ -41,21 +41,16 @@
 
 
 #include <deque>
+#include <functional>
 #include <iosfwd>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <utility>
 
-#include <boost/function.hpp>                    // for function
-#include <boost/thread/mutex.hpp>                // for mutex
-
 #include "uhal/log/exception.hpp"
 #include "uhal/ClientInterface.hpp"              // for PacketLevelError
 #include "uhal/ProtocolIPbusCore.hpp"
-
-
-// Forward declarations
-namespace boost { template <class Y> class shared_ptr; }
 
 
 namespace uhal
@@ -87,13 +82,13 @@ namespace uhal
 
     protected:
       //! Add a preamble to an IPbus buffer
-      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void preamble ( std::shared_ptr< Buffers > aBuffers );
 
       //! Return the size of the preamble
       virtual uint32_t getPreambleSize();
 
       //! Finalize the buffer before it is transmitted
-      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void predispatch ( std::shared_ptr< Buffers > aBuffers );
 
     public:
       /**
@@ -171,7 +166,7 @@ namespace uhal
       virtual void dispatchExceptionHandler();
 
   private:
-      boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
+      std::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
 
       static void translateInfoCode(std::ostream& aStream, const uint8_t& aErrorCode);
   };
@@ -203,13 +198,13 @@ namespace uhal
 
     protected:
       //! Add a preamble to an IPbus buffer
-      virtual void preamble ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void preamble ( std::shared_ptr< Buffers > aBuffers );
 
       //! Return the size of the preamble
       virtual uint32_t getPreambleSize();
 
       //! Finalize the buffer before it is transmitted
-      virtual void predispatch ( boost::shared_ptr< Buffers > aBuffers );
+      virtual void predispatch ( std::shared_ptr< Buffers > aBuffers );
 
     public:
       /**
@@ -300,14 +295,14 @@ namespace uhal
       virtual void dispatchExceptionHandler();
 
     private:
-      boost::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
+      std::function<void (std::ostream&, const uint8_t&)> getInfoCodeTranslator() { return translateInfoCode; }
 
       static void translateInfoCode(std::ostream& aStream, const uint8_t& aErrorCode);
 
       //! The transaction counter which will be incremented in the sent IPbus headers
       uint16_t mPacketCounter;
 
-      boost::mutex mReceivePacketMutex;
+      std::mutex mReceivePacketMutex;
       std::deque< uint32_t > mReceivePacketHeader;
   };
 

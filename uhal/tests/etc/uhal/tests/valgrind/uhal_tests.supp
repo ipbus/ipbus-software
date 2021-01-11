@@ -2,24 +2,23 @@
 # Suppress false positive encountered when running with '--run-libc-freeres=no' (which is required to prevent segfault with certain versions of glibc) 
 # Refs: http://valgrind.org/docs/manual/faq.html#faq.exit_errors  &  https://bugzilla.redhat.com/show_bug.cgi?id=1596537
 #
-# ==875== 608 bytes in 1 blocks are possibly lost in loss record 28 of 33
-# ==875==    at 0x4C2B9B5: calloc (vg_replace_malloc.c:711)
-# ==875==    by 0x4011F04: _dl_allocate_tls (in /usr/lib64/ld-2.17.so)
-# ==875==    by 0x65D89C0: pthread_create@@GLIBC_2.2.5 (in /usr/lib64/libpthread-2.17.so)
-# ==875==    by 0x5A99A38: boost::thread::start_thread_noexcept() (in /usr/lib64/libboost_thread-mt.so.1.53.0)
-# ==875==    by 0x4FC3EA8: start_thread (thread.hpp:180)
-# ==875==    by 0x4FC3EA8: thread<boost::_bi::bind_t<void, boost::_mfi::mf0<void, uhal::tests::DummyHardwareInterface>, boost::_bi::list1<boost::_bi::value<uhal::tests::DummyHardwareInterface*> > > > (thread.hpp:302)
-# ==875==    by 0x4FC3EA8: uhal::tests::DummyHardwareRunner::DummyHardwareRunner(uhal::tests::DummyHardwareInterface*) (tools.cpp:47)
-# ==875==    by 0x4F3E4AB: uhal::tests::DummyHardwareFixture<(uhal::tests::DeviceType)0>::DummyHardwareFixture() (fixtures.cpp:89)
-# ==875==    by 0x4F1AEA4: block_write_read (test_block.cpp:83)
-# ==875==    by 0x4F1AEA4: uhal::tests::ipbusudp_1_3::BlockReadWriteTestSuite::block_write_read_invoker() (test_block.cpp:83)
-# ==875==    by 0x4F2A406: invoke<void (*)()> (callback.hpp:56)
-# ==875==    by 0x4F2A406: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
-# ==875==    by 0x6394270: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875==    by 0x637ECED: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875==    by 0x637F552: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875==    by 0x6394381: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875== 
+# ==26180== 608 bytes in 1 blocks are possibly lost in loss record 15 of 20
+# ==26180==    at 0x4C2C089: calloc (vg_replace_malloc.c:762)
+# ==26180==    by 0x4012774: _dl_allocate_tls (in /usr/lib64/ld-2.17.so)
+# ==26180==    by 0x6AC787B: pthread_create@@GLIBC_2.2.5 (in /usr/lib64/libpthread-2.17.so)
+# ==26180==    by 0x6D902D6: std::thread::_M_start_thread(std::shared_ptr<std::thread::_Impl_base>) (in /usr/lib64/libstdc++.so.6.0.19)
+# ==26180==    by 0x501AA17: thread<uhal::tests::DummyHardwareRunner::DummyHardwareRunner(uhal::tests::DummyHardwareInterface*)::__lambda0> (thread:135)
+# ==26180==    by 0x501AA17: uhal::tests::DummyHardwareRunner::DummyHardwareRunner(uhal::tests::DummyHardwareInterface*) (tools.cpp:52)
+# ==26180==    by 0x4F1098B: uhal::tests::DummyHardwareFixture<(uhal::tests::DeviceType)0>::DummyHardwareFixture() (fixtures.cpp:96)
+# ==26180==    by 0x4F38444: block_write_read (test_block.cpp:83)
+# ==26180==    by 0x4F38444: uhal::tests::ipbusudp_1_3::BlockReadWriteTestSuite::block_write_read_invoker() (test_block.cpp:83)
+# ==26180==    by 0x4F4FB66: invoke<void (*)()> (callback.hpp:56)
+# ==26180==    by 0x4F4FB66: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+# ==26180==    by 0x5F38250: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==26180==    by 0x5F22CCD: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==26180==    by 0x5F23532: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==26180==    by 0x5F38361: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==26180==
 {
    uhal_tests__pthread_create_GLIBC2.2.5__ipbusudp_1_3_runner_BlockReadWriteTestSuite
    Memcheck:Leak
@@ -29,7 +28,7 @@
    fun:_dl_allocate_tls
    ...
    fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZN5boost6thread21start_thread_noexceptEv
+   fun:_ZNSt6thread15_M_start_threadESt10*
    ...
    fun:_ZN4uhal5tests19DummyHardwareRunnerC1EPNS0_22DummyHardwareInterfaceE
    fun:_ZN4uhal5tests20DummyHardwareFixtureILNS0_10DeviceTypeE0EEC1Ev
@@ -47,22 +46,22 @@
 # Suppress false positive encountered when running with '--run-libc-freeres=no' (which is required to prevent segfault with certain versions of glibc) 
 # Refs: http://valgrind.org/docs/manual/faq.html#faq.exit_errors  &  https://bugzilla.redhat.com/show_bug.cgi?id=1596537
 #
-# ==875== 608 bytes in 1 blocks are possibly lost in loss record 29 of 33
-# ==875==    at 0x4C2B9B5: calloc (vg_replace_malloc.c:711)
-# ==875==    by 0x4011F04: _dl_allocate_tls (in /usr/lib64/ld-2.17.so)
-# ==875==    by 0x65D89C0: pthread_create@@GLIBC_2.2.5 (in /usr/lib64/libpthread-2.17.so)
-# ==875==    by 0x5A99A38: boost::thread::start_thread_noexcept() (in /usr/lib64/libboost_thread-mt.so.1.53.0)
-# ==875==    by 0x5019E6A: start_thread (thread.hpp:180)
-# ==875==    by 0x5019E6A: boost::thread::thread<void (*)(uhal::HwInterface), uhal::HwInterface>(void (*)(uhal::HwInterface), uhal::HwInterface, boost::disable_if<boost::thread_detail::is_convertible<void (*&)(uhal::HwInterface), boost::thread_attributes>, boost::thread::dummy*>::type) [clone .constprop.296] (thread.hpp:391)
-# ==875==    by 0x501CA1D: uhal::tests::ipbustcp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method() (test_multithreaded.cpp:198)
-# ==875==    by 0x501CB7D: uhal::tests::ipbustcp_2_0::MultithreadedTestSuite::single_copied_hwinterface_invoker() (test_multithreaded.cpp:198)
-# ==875==    by 0x4F2A406: invoke<void (*)()> (callback.hpp:56)
-# ==875==    by 0x4F2A406: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
-# ==875==    by 0x6394270: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875==    by 0x637ECED: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875==    by 0x637F552: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875==    by 0x6394381: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==875== 
+# ==27586== 1,216 bytes in 2 blocks are possibly lost in loss record 18 of 20
+# ==27586==    at 0x4C2C089: calloc (vg_replace_malloc.c:762)
+# ==27586==    by 0x4012774: _dl_allocate_tls (in /usr/lib64/ld-2.17.so)
+# ==27586==    by 0x6AC687B: pthread_create@@GLIBC_2.2.5 (in /usr/lib64/libpthread-2.17.so)
+# ==27586==    by 0x6D8F2D6: std::thread::_M_start_thread(std::shared_ptr<std::thread::_Impl_base>) (in /usr/lib64/libstdc++.so.6.0.19)
+# ==27586==    by 0x4F970A9: thread<uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method()::__lambda10> (thread:135)
+# ==27586==    by 0x4F970A9: uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method() (test_multithreaded.cpp:189)
+# ==27586==    by 0x4F9728D: uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::single_copied_hwinterface_invoker() (test_multithreaded.cpp:189)
+# ==27586==    by 0x4F4FAE6: invoke<void (*)()> (callback.hpp:56)
+# ==27586==    by 0x4F4FAE6: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+# ==27586==    by 0x5F37250: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==    by 0x5F21CCD: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==    by 0x5F22532: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==    by 0x5F37361: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==    by 0x5F246E3: boost::unit_test::framework_impl::visit(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==
 {
    uhal_tests__pthread_create_GLIBC2.2.5__*_MultithreadedTestSuite_single_copied_hwinterface
    Memcheck:Leak
@@ -72,9 +71,8 @@
    fun:_dl_allocate_tls
    ...
    fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZN5boost6thread21start_thread_noexceptEv
-   fun:start_thread
-   fun:_ZN5boost6threadC2IPFvN4uhal11HwInterfaceEES3_EET_T0_NS_10disable_ifINS_13thread_detail14is_convertibleIRS6_NS_17thread_attributesEEEPNS0_5dummyEE4typeE.constprop.*
+   fun:_ZNSt6thread15_M_start_threadESt10*
+   fun:thread<uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method()::*lambda*>
    fun:_ZN4uhal5tests12*22MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
    fun:_ZN4uhal5tests12*22MultithreadedTestSuiteL33single_copied_hwinterface_invokerEv
    ...
@@ -89,22 +87,21 @@
 # Suppress false positive encountered when running with '--run-libc-freeres=no' (which is required to prevent segfault with certain versions of glibc) 
 # Refs: http://valgrind.org/docs/manual/faq.html#faq.exit_errors  &  https://bugzilla.redhat.com/show_bug.cgi?id=1596537
 #
-# ==22564== 608 bytes in 1 blocks are possibly lost in loss record 31 of 34
-# ==22564==    at 0x4C2B955: calloc (vg_replace_malloc.c:711)
-# ==22564==    by 0x40126C4: _dl_allocate_tls (in /usr/lib64/ld-2.17.so)
-# ==22564==    by 0x65507AB: pthread_create@@GLIBC_2.2.5 (in /usr/lib64/libpthread-2.17.so)
-# ==22564==    by 0x5A11A38: boost::thread::start_thread_noexcept() (in /usr/lib64/libboost_thread-mt.so.1.53.0)
-# ==22564==    by 0x4FC310F: start_thread (thread.hpp:180)
-# ==22564==    by 0x4FC310F: boost::thread::thread<void (*)(std::string const&, std::string const&, unsigned long), std::string, std::string, unsigned long>(void (*)(std::string const&, std::string const&, unsigned long), std::string, std::string, unsigned long) [clone .constprop.298] (thread.hpp:404)
-# ==22564==    by 0x4FC3F40: uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::multiple_hwinterfaces::test_method() (test_multithreaded.cpp:100)
-# ==22564==    by 0x4FC40ED: uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::multiple_hwinterfaces_invoker() (test_multithreaded.cpp:100)
-# ==22564==    by 0x4F1D9D6: invoke<void (*)()> (callback.hpp:56)
-# ==22564==    by 0x4F1D9D6: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
-# ==22564==    by 0x630C270: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==22564==    by 0x62F6CED: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==22564==    by 0x62F7552: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==22564==    by 0x630C381: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
-# ==22564== 
+# ==27586== 608 bytes in 1 blocks are possibly lost in loss record 16 of 20
+# ==27586==    at 0x4C2C089: calloc (vg_replace_malloc.c:762)
+# ==27586==    by 0x4012774: _dl_allocate_tls (in /usr/lib64/ld-2.17.so)
+# ==27586==    by 0x6AC687B: pthread_create@@GLIBC_2.2.5 (in /usr/lib64/libpthread-2.17.so)
+# ==27586==    by 0x6D8F2D6: std::thread::_M_start_thread(std::shared_ptr<std::thread::_Impl_base>) (in /usr/lib64/libstdc++.so.6.0.19)
+# ==27586==    by 0x4F91FF6: std::thread::thread<void (&)(std::string const&, std::string const&, unsigned long), std::string&, std::string&, unsigned long&>(void (&)(std::string const&, std::string const&, unsigned long), std::string&, std::string&, unsigned long&) [clone .constprop.471] (thread:135)
+# ==27586==    by 0x4F941BF: uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::multiple_hwinterfaces::test_method() (test_multithreaded.cpp:98)
+# ==27586==    by 0x4F942FD: uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::multiple_hwinterfaces_invoker() (test_multithreaded.cpp:98)
+# ==27586==    by 0x4F4FAE6: invoke<void (*)()> (callback.hpp:56)
+# ==27586==    by 0x4F4FAE6: boost::unit_test::ut_detail::callback0_impl_t<boost::unit_test::ut_detail::unused, void (*)()>::invoke() (callback.hpp:89)
+# ==27586==    by 0x5F37250: ??? (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==    by 0x5F21CCD: boost::execution_monitor::catch_signals(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==    by 0x5F22532: boost::execution_monitor::execute(boost::unit_test::callback0<int> const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==    by 0x5F37361: boost::unit_test::unit_test_monitor_t::execute_and_translate(boost::unit_test::test_case const&) (in /usr/lib64/libboost_unit_test_framework.so.1.53.0)
+# ==27586==
 {
    uhal_tests__pthread_create_GLIBC2.2.5__*_MultithreadedTestSuite_multiple_hwinterfaces
    Memcheck:Leak
@@ -114,9 +111,29 @@
    fun:_dl_allocate_tls
    ...
    fun:pthread_create@@GLIBC_2.2.5
-   fun:_ZN5boost6thread21start_thread_noexceptEv
-   fun:start_thread
-   fun:_ZN5boost6threadC2IPFv*
+   fun:_ZNSt6thread15_M_start_threadESt10*
+   fun:_ZNSt6threadC2IRFvRK*
+   fun:_ZN4uhal5tests12*22MultithreadedTestSuite21multiple_hwinterfaces11test_methodEv
+   fun:_ZN4uhal5tests12*22MultithreadedTestSuiteL29multiple_hwinterfaces_invokerEv
+   ...
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+   obj:/usr/lib*/libboost_unit_test_framework.so.*
+}
+
+{
+   uhal_tests__pthread_create_GLIBC2.2.5__*_MultithreadedTestSuite_multiple_hwinterfaces_fedora30
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   ...
+   fun:_dl_allocate_tls
+   ...
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:_ZNSt6thread15_M_start_threadESt10*
+   fun:thread<void *>
    fun:_ZN4uhal5tests12*22MultithreadedTestSuite21multiple_hwinterfaces11test_methodEv
    fun:_ZN4uhal5tests12*22MultithreadedTestSuiteL29multiple_hwinterfaces_invokerEv
    ...

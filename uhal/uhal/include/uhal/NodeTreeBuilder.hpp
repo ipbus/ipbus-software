@@ -41,9 +41,9 @@
 #define _uhal_NodeTreeBuilder_hpp_
 
 
+#include <memory>
+
 #include <boost/filesystem/path.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 #include "pugixml.hpp"
@@ -80,11 +80,8 @@ namespace uhal
   }
 
 
-  /**
-    A class to build a node tree from an Address table file
-    NOTE! This is a factory method and must be Mutex protected if it is used in multithreaded environments!
-  */
-  class NodeTreeBuilder: private boost::noncopyable
+  //! A class to build a node tree from an address table file
+  class NodeTreeBuilder
   {
     private:
       /**
@@ -94,6 +91,10 @@ namespace uhal
       NodeTreeBuilder ();
 
     public:
+
+      NodeTreeBuilder(const NodeTreeBuilder&) = delete;
+      NodeTreeBuilder& operator=(const NodeTreeBuilder&) = delete;
+
       //! Destructor
       virtual ~NodeTreeBuilder ();
 
@@ -173,7 +174,7 @@ namespace uhal
 
     private:
       //! The single instance of the class
-      static boost::shared_ptr<NodeTreeBuilder> mInstance;
+      static std::shared_ptr<NodeTreeBuilder> mInstance;
 
       //! Hash map associating a Node tree with a file name so that we do not need to repeatedly parse the xml documents if someone asks for a second copy of a particular node tree
       std::unordered_map< std::string , const Node* > mNodes;

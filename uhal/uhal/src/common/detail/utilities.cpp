@@ -32,11 +32,10 @@
 
 #include <fstream>
 #include <iomanip>
+#include <memory>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem.hpp>
-#include "boost/lexical_cast.hpp"
-#include "boost/shared_ptr.hpp"
 
 #include "uhal/Node.hpp"
 
@@ -82,9 +81,9 @@ namespace uhal {
       if ( (aMaxListSize != 0) and (lMatches.size() > aMaxListSize) )
       {
         if ( lCommonAncestor == &aNode )
-          return boost::lexical_cast<std::string>(lMatches.size()) + " nodes match";
+          return std::to_string(lMatches.size()) + " nodes match";
         else
-          return boost::lexical_cast<std::string>(lMatches.size()) + " nodes under \"" + lCommonAncestor->getPath() + "\" match";
+          return std::to_string(lMatches.size()) + " nodes under \"" + lCommonAncestor->getPath() + "\" match";
       }
       else
       {
@@ -105,7 +104,7 @@ namespace uhal {
 
     std::string getAddressDescription(const ClientInterface& aClient, const uint32_t aAddress, const size_t& aMaxListSize)
     {
-      if ( boost::shared_ptr<Node> lNode = aClient.mNode.lock() )
+      if ( std::shared_ptr<Node> lNode = aClient.mNode.lock() )
         return getAddressDescription(*lNode, aAddress, aMaxListSize);
       else
         return "";

@@ -1,15 +1,13 @@
 
 #include "uhal/tests/UDPDummyHardware.hpp"
 
-#include "boost/bind.hpp"
-
 
 template< uint8_t IPbus_major, uint8_t IPbus_minor>
 void uhal::tests::UDPDummyHardware<IPbus_major,IPbus_minor>::run()
 {
   mSocket.async_receive_from(boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ),
       mSenderEndpoint,
-      boost::bind(&UDPDummyHardware<IPbus_major,IPbus_minor>::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+      [&] (const boost::system::error_code& e, std::size_t n) { this->handle_receive(e, n); });
 
   mIOservice.run();
 }
@@ -38,7 +36,7 @@ void uhal::tests::UDPDummyHardware<IPbus_major,IPbus_minor>::handle_receive(cons
 
   mSocket.async_receive_from(boost::asio::buffer ( & ( base_type::mReceive[0] ), base_type::mReceive.size() <<2 ),
       mSenderEndpoint,
-      boost::bind(&UDPDummyHardware<IPbus_major,IPbus_minor>::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+      [&] (const boost::system::error_code& e, std::size_t n) { this->handle_receive(e, n); });
 
   // std::cout << "> Dummy HW exiting handle_receive" << std::endl;
 }

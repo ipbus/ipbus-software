@@ -43,7 +43,6 @@
 
 // Boost headers
 #include <boost/program_options.hpp>
-#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 #include <boost/mem_fn.hpp>
 

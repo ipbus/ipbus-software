@@ -34,6 +34,15 @@
 
 #include "uhal/uhal.hpp"
 
+
+#include <chrono>
+#include <cstdlib>
+#include <iostream>
+#include <thread>
+#include <typeinfo>
+
+#include <boost/test/unit_test.hpp>
+
 #include "uhal/ProtocolUDP.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolPCIe.hpp"
@@ -43,13 +52,6 @@
 #include "uhal/tests/fixtures.hpp"
 #include "uhal/tests/tools.hpp"
 
-#include <boost/chrono/chrono_io.hpp>
-#include <boost/test/unit_test.hpp>
-
-#include <iostream>
-#include <cstdlib>
-#include <typeinfo>
-
 
 namespace uhal {
 namespace tests {
@@ -57,15 +59,15 @@ namespace tests {
 
 UHAL_TESTS_DEFINE_CLIENT_TEST_CASES(TimeoutTestSuite, check_timeout, DummyHardwareFixture,
 {
-  hwRunner.setReplyDelay( boost::chrono::milliseconds(timeout) + boost::chrono::seconds(1) );
+  hwRunner.setReplyDelay( std::chrono::milliseconds(timeout) + std::chrono::seconds(1) );
   HwInterface hw = getHwInterface();
 
   // Check we get an exception when first packet timeout occurs (dummy hardware only has delay on first packet)
   BOOST_CHECK_THROW ( { hw.getNode ( "REG" ).read();  hw.dispatch(); } , uhal::exception::ClientTimeout );
 
-  const boost::chrono::milliseconds sleepDuration = boost::chrono::milliseconds(timeout) + boost::chrono::seconds(1);
-  BOOST_TEST_MESSAGE("Sleeping for " << sleepDuration << " seconds to allow DummyHardware to clear itself");
-  boost::this_thread::sleep_for(sleepDuration);
+  const std::chrono::milliseconds sleepDuration = std::chrono::milliseconds(timeout) + std::chrono::seconds(1);
+  BOOST_TEST_MESSAGE("Sleeping for " << sleepDuration.count() << "ms to allow DummyHardware to clear itself");
+  std::this_thread::sleep_for(sleepDuration);
   // Check we can continue as normal without further exceptions.
   uint32_t x = static_cast<uint32_t> ( rand() );
   ValWord<uint32_t> y;

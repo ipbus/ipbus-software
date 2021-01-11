@@ -687,14 +687,14 @@ BOOST_AUTO_TEST_SUITE( nodes )
 
 
 BOOST_FIXTURE_TEST_CASE (dummy_address_files, DummyAddressFileFixture) {
-  const boost::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
+  const std::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
 
   checkNodeTree(*lTopNode, nodeProperties);
 }
 
 
 BOOST_FIXTURE_TEST_CASE (address_description, DummyAddressFileFixture) {
-  const boost::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
+  const std::shared_ptr<uhal::Node> lTopNode(NodeTreeBuilder::getInstance().getNodeTree(addrFileURI, boost::filesystem::current_path() / "."));
 
   BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 0, 0), "no matching nodes");
   BOOST_CHECK_EQUAL(detail::getAddressDescription(*lTopNode, 1, 0), "node \"REG\"");
@@ -752,7 +752,7 @@ BOOST_AUTO_TEST_SUITE( simple )
 
 BOOST_FIXTURE_TEST_CASE (valid_default, SimpleAddressTableFixture)
 {
-  boost::shared_ptr<Node> lNode(NodeTreeBuilder::getInstance().build(addrTableDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<Node> lNode(NodeTreeBuilder::getInstance().build(addrTableDoc.child ( "node" ), boost::filesystem::path()));
   checkNodeTree(*lNode, nodeProperties);
 }
 
@@ -973,7 +973,7 @@ BOOST_AUTO_TEST_SUITE( overlapChecks )
 
 BOOST_FIXTURE_TEST_CASE (no_overlap, AddressTableOverlapFixture)
 {
-  boost::shared_ptr<Node> lNode(NodeTreeBuilder::getInstance().build(addrTableDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<Node> lNode(NodeTreeBuilder::getInstance().build(addrTableDoc.child ( "node" ), boost::filesystem::path()));
 
   checkNodeTree(*lNode, nodeProperties);
 
@@ -987,7 +987,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_unmasked_registers, AddressTableOverlapFixture)
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x1");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1005,7 +1005,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_1, AddressTableOverlapFixture)
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 3), "address", "0x2");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1033,7 +1033,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_2, AddressTableOverlapFixture)
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(getNthChild(lDoc.child("node"), 3), 0), "mask", "0x10100ff");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1052,7 +1052,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_ports, AddressTableOverlapFixture)
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 4), "address", "0x5");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1070,7 +1070,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_unmasked_reg_vs_masked_reg, AddressTableOverlap
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x2");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1090,7 +1090,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_unmasked_reg_vs_port, AddressTableOverlapFixtur
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x4");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1108,7 +1108,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_reg_vs_port, AddressTableOverlapFixture)
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 2), "address", "0x4");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1159,7 +1159,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_ram, AddressTableOverlapFixture)
       pugi::xml_document lDoc;
       lDoc.load(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), lNodeIt->first), "address", lAddrIt->c_str());
-      boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+      std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
       // Expected overlaps
       std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1185,7 +1185,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_multiple_1, AddressTableOverlapFixture)
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 8), "address", "0x0");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;
@@ -1211,7 +1211,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_multiple_2, AddressTableOverlapFixture)
   pugi::xml_document lDoc;
   lDoc.load(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 9), "address", "0x40");
-  boost::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
+  std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
   // Expected overlaps
   std::vector<std::pair<const Node*, const Node*> > lExpected;

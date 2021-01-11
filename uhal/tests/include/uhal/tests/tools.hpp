@@ -36,14 +36,14 @@
 #define _uhal_tests_tools_hpp_
 
 
+#include <chrono>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <sys/time.h>
-
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread/thread.hpp>
+#include <thread>
 
 #include "uhal/ConnectionManager.hpp"
 #include "uhal/HwInterface.hpp"
@@ -61,11 +61,11 @@ public:
   DummyHardwareRunner(DummyHardwareInterface* aHw);
   ~DummyHardwareRunner();
 
-  void setReplyDelay (const boost::chrono::microseconds& aDelay);
+  void setReplyDelay (const std::chrono::microseconds& aDelay);
 
 private:
-  boost::scoped_ptr<DummyHardwareInterface> mHw;
-  boost::thread mHwThread;
+  std::unique_ptr<DummyHardwareInterface> mHw;
+  std::thread mHwThread;
 };
 
 

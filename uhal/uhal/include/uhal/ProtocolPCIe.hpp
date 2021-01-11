@@ -43,29 +43,22 @@
 #define _uhal_ProtocolPCIe_hpp_
 
 
+#include <chrono>
 #include <deque>                           // for deque
+#include <memory>
+#include <mutex>
 #include <stddef.h>                        // for size_t
 #include <stdint.h>                        // for uint32_t, uint8_t
 #include <string>                          // for string
 #include <utility>                         // for pair
 #include <vector>                          // for vector
 
-#include <boost/chrono/system_clocks.hpp>  // for steady_clock
-#include <boost/function.hpp>              // for function
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread/locks.hpp>
 
 #include "uhal/ClientInterface.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 
-
-namespace boost
-{
-  template <class Y> class shared_ptr;
-}
 
 namespace uhal
 {
@@ -161,8 +154,12 @@ namespace uhal
       };
 
       template <class T>
-      class SharedObject : public boost::noncopyable {
+      class SharedObject {
       public:
+
+        SharedObject(const SharedObject<T>&) = delete;
+        SharedObject<T>& operator=(const SharedObject<T>&) = delete;
+
         SharedObject(const std::string& aName);
         ~SharedObject();
 
@@ -179,7 +176,7 @@ namespace uhal
       static std::string getSharedMemName(const std::string& );
 
       typedef RobustMutex IPCMutex_t;
-      typedef boost::unique_lock<IPCMutex_t> IPCScopedLock_t;
+      typedef std::unique_lock<IPCMutex_t> IPCScopedLock_t;
 
     public:
       /**
@@ -203,7 +200,7 @@ namespace uhal
         @param aBuffers the buffer object wrapping the send and recieve buffers that are to be transported
         If multithreaded, adds buffer to the dispatch queue and returns. If single-threaded, calls the dispatch-worker dispatch function directly and blocks until the response is validated.
       */
-      void implementDispatch ( boost::shared_ptr< Buffers > aBuffers );
+      void implementDispatch ( std::shared_ptr< Buffers > aBuffers );
 
       //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
       virtual void Flush( );
@@ -213,7 +210,7 @@ namespace uhal
 
       typedef IPbus< 2 , 0 > InnerProtocol;
 
-      typedef boost::chrono::steady_clock SteadyClock_t;
+      typedef std::chrono::steady_clock SteadyClock_t;
 
       /**
         Return the maximum size to be sent based on the buffer size in the target
@@ -237,7 +234,7 @@ namespace uhal
       void disconnect();
 
       //! Write request packet to next page in host-to-FPGA device file 
-      void write(const boost::shared_ptr<Buffers>& aBuffers);
+      void write(const std::shared_ptr<Buffers>& aBuffers);
 
       //! Read next pending reply packet from appropriate page of FPGA-to-host device file, and validate contents
       void read();
@@ -259,12 +256,12 @@ namespace uhal
 
       bool mUseInterrupt;
 
-      boost::chrono::microseconds mSleepDuration;
+      std::chrono::microseconds mSleepDuration;
 
       uint32_t mNumberOfPages, mMaxInFlight, mPageSize, mMaxPacketSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
 
       //! The list of buffers still awaiting a reply
-      std::deque < boost::shared_ptr< Buffers > > mReplyQueue;
+      std::deque < std::shared_ptr< Buffers > > mReplyQueue;
   };
 
   std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket);

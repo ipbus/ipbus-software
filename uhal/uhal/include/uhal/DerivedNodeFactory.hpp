@@ -41,16 +41,10 @@
 #define _uhal_DerivedNodeFactory_hpp_
 
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-
-
-namespace boost {
-  template <class Y> class shared_ptr;
-}
 
 namespace uhal
 {
@@ -65,7 +59,7 @@ namespace uhal
     A singleton class to register derived nodes, and create instances of them later
     NOTE! This is a factory method and must be Mutex protected if it is used in multithreaded environments!
   */
-  class DerivedNodeFactory: private boost::noncopyable
+  class DerivedNodeFactory
   {
     friend class NodeTreeBuilder;
 
@@ -82,6 +76,10 @@ namespace uhal
       DerivedNodeFactory ();
 
     public:
+
+      DerivedNodeFactory(const DerivedNodeFactory&) = delete;
+      DerivedNodeFactory& operator=(const DerivedNodeFactory&) = delete;
+
       //! Destructor
       virtual ~DerivedNodeFactory ();
 
@@ -154,10 +152,10 @@ namespace uhal
 
     private:
       //! The single instance of the class
-      static boost::shared_ptr<DerivedNodeFactory> mInstance;
+      static std::shared_ptr<DerivedNodeFactory> mInstance;
 
       //! Hash map associating a creator for a particular node type with a string identifier for that node type
-      std::unordered_map< std::string , boost::shared_ptr< CreatorInterface > > mCreators;
+      std::unordered_map< std::string , std::shared_ptr< CreatorInterface > > mCreators;
   };
 }
 

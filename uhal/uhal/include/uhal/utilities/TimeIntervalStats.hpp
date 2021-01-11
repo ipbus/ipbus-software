@@ -3,18 +3,17 @@
 #define _uhal_TimeIntervalStats_hpp_
 
 
+#include <chrono>
 #include <iosfwd>                          // for ostream
 #include <queue>
 #include <stddef.h>                        // for size_t
-
-#include <boost/chrono/system_clocks.hpp>  // for steady_clock
 
 
 namespace uhal {
 
 class TimeIntervalStats {
 public:
-  typedef boost::chrono::steady_clock Clock_t;
+  typedef std::chrono::steady_clock Clock_t;
 
   TimeIntervalStats();
   ~TimeIntervalStats();

@@ -41,7 +41,6 @@ Libraries = pthread \
 		boost_filesystem \
 		boost_regex \
 		boost_system \
-		${BOOST_THREAD_LIB} \
 		boost_chrono \
 		\
 		cactus_uhal_grammars \
