@@ -42,7 +42,7 @@ namespace uhal
 {
 
   template< typename T >
-  std::ostream& operator<< ( std::ostream& aStr ,  const _Type< T >& aType )
+  std::ostream& operator<< ( std::ostream& aStr ,  const _Type< T >& )
   {
 #ifdef __GNUG__
     // this is fugly but necessary due to the way that typeid::name() returns the object type name under g++.
