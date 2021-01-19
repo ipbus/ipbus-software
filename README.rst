@@ -16,7 +16,14 @@ The IPbus suite of software and firmware implement a reliable high-performance c
 
 This repository contains the source code for the ControlHub and uHAL. 
 
-*Further reading*
+**Documentation**
+
+The IPbus suite user guide can be found on our website, https://cern.ch/ipbus . In particular:
+
+ * Installation instructions reside at https://ipbus.web.cern.ch/doc/user/html/software/installation.html
+ * Release notes listing all of the changes in the tagged releases can be found from https://ipbus.web.cern.ch/doc/user/html/software/releases/index.html
+
+**Further reading**
 
 The **most recent paper** describing IPbus is from the proceedings for TWEPP2014:
 
