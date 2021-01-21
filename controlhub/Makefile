@@ -176,7 +176,7 @@ install:
 ifeq (,$(shell /bin/bash -c "command -v service"))
 	@echo " WARNING : 'service' command not detected! After the installation has finished, you should restart rsyslog to ensure that the ControlHub syslog config is loaded"
 else
-	service rsyslog restart
+	-service rsyslog restart
 endif
 
 uninstall:
