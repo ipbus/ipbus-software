@@ -21,7 +21,7 @@ void uhal::tests::UDPDummyHardware<IPbus_major,IPbus_minor>::stop()
 
 
 template< uint8_t IPbus_major, uint8_t IPbus_minor>
-void uhal::tests::UDPDummyHardware<IPbus_major,IPbus_minor>::handle_receive(const boost::system::error_code& ec, std::size_t length)
+void uhal::tests::UDPDummyHardware<IPbus_major,IPbus_minor>::handle_receive(const boost::system::error_code&, std::size_t length)
 {
   // std::cout << "> Dummy HW entering handle_receive" << std::endl;
 
@@ -43,4 +43,3 @@ void uhal::tests::UDPDummyHardware<IPbus_major,IPbus_minor>::handle_receive(cons
 
 template class uhal::tests::UDPDummyHardware<1,3>;
 template class uhal::tests::UDPDummyHardware<2,0>;
-

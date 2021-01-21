@@ -39,7 +39,7 @@
 namespace uhal
 {
 
-  std::ostream& operator<< ( std::ostream& aStr , const ThisThreadID& aThisThreadID )
+  std::ostream& operator<< ( std::ostream& aStr , const ThisThreadID& )
   {
     aStr << std::this_thread::get_id();
     return aStr;

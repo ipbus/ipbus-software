@@ -92,7 +92,7 @@ namespace uhal
   namespace exception
   {
 
-    IPbusCoreResponseCodeSet::IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t aId, IPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets)
+    IPbusCoreResponseCodeSet::IPbusCoreResponseCodeSet(const ClientInterface& aClient, uint32_t, IPbusTransactionType aType, uint32_t aWordCount, uint8_t aResponseCode, const std::string& aResponseMsg, uint32_t aBaseAddress, const std::pair<uint32_t, uint32_t>& aHeaders, const std::pair<uint32_t, uint32_t>& aPacketOffsets)
     {
       std::ostringstream lOSS;
       lOSS << "Bad response code (0x" << std::hex << Integer( aResponseCode ) << " = '" << aResponseMsg << "') received for ";
@@ -101,7 +101,7 @@ namespace uhal
         lOSS << "offset 0x" << aWordCount << ", ";
       lOSS << detail::getAddressDescription(aClient, aBaseAddress + ( (aType == NI_READ) or (aType == NI_WRITE) ? 0 : aWordCount) , 5) << "). ";
       lOSS << " URI: \"" << aClient.uri() << "\". Sent/received headers: 0x" << aHeaders.first << " / 0x" << aHeaders.second;
-      lOSS << " (" << std::dec << aPacketOffsets.first << "/" << aPacketOffsets.second << " bytes into IPbus payload)";
+      lOSS << " (transaction " << std::dec << aPacketOffsets.first << "/" << aPacketOffsets.second << " bytes into IPbus payload)";
 
       log(Error(), lOSS.str());
       append(lOSS.str().c_str());

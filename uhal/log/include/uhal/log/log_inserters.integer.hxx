@@ -45,14 +45,14 @@ namespace uhal
     return _Integer< T , IntFmt<> > ( aT );
   }
 
-  template< typename T , integer_base BASE , integer_format FORMAT , uint32_t WIDTH > _Integer< T , IntFmt<BASE , FORMAT , WIDTH> > Integer ( const T& aT , const IntFmt<BASE , FORMAT , WIDTH>& aFmt )
+  template< typename T , integer_base BASE , integer_format FORMAT , uint32_t WIDTH > _Integer< T , IntFmt<BASE , FORMAT , WIDTH> > Integer ( const T& aT , const IntFmt<BASE , FORMAT , WIDTH>& )
   {
     return _Integer< T , IntFmt<BASE , FORMAT , WIDTH> > ( aT );
   }
 
 
   template< typename T >
-  void sign_helper ( std::ostream& aStr, const T& aInt ) {}
+  void sign_helper ( std::ostream&, const T& ) {}
 
 
 
