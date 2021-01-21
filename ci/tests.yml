@@ -61,7 +61,6 @@ variables:
     REPO_URL_OS_SUBDIR: centos8/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
-    UHAL_GUI_DEPENDENCIES: "python3-numpy"
 
 .template_test:centos8-python38:
   extends: .template_test_rpmInstall
@@ -73,7 +72,6 @@ variables:
     PYTHON: "python3.8"
     REPO_URL_OS_SUBDIR: centos8_python38/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
-    UHAL_GUI_DEPENDENCIES: "python38-numpy"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
 
 
@@ -91,7 +89,7 @@ variables:
     - build:fedora33
   variables:
     PYTHON: python3.9
-    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    UHAL_GUI_DEPENDENCIES: python3-wxpython4
 
 .template_test:ubuntu20:
   extends: .template_test_simpleInstall
@@ -111,7 +109,7 @@ variables:
     - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
     - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
     - service controlhub stop || /opt/cactus/bin/controlhub_stop
-    - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    - ${PYTHON} $(which uhal_test_suite.py) -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbusudp* --log_level=test_suite
 
 .job_template: &test_python_jobScript
@@ -256,10 +254,6 @@ test_core:ubuntu20:
 test_python:ubuntu20:
   extends: .template_test:ubuntu20
   <<: *test_python_jobScript
-
-test_gui:ubuntu20:
-  extends: .template_test:ubuntu20
-  <<: *test_gui_jobScript
 
 test_tools:ubuntu20:
   extends: .template_test:ubuntu20
