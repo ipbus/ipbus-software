@@ -80,7 +80,7 @@ variables:
 .template_test_simpleInstall:
   stage: test
   before_script:
-    - sudo make -k Set=all install
+    - sudo make -k Set=all install PYTHON=${PYTHON}
     - ls -al /opt/cactus /opt/cactus/*
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
 
