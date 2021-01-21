@@ -186,7 +186,7 @@ void PCIeDummyHardware::stop()
 }
 
 
-void PCIeDummyHardware::fifoRead(int aFileDescriptor, const uint32_t aAddr, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
+void PCIeDummyHardware::fifoRead(int aFileDescriptor, const uint32_t, const uint32_t aNrWords, std::vector<uint32_t>& aValues)
 {
   char *allocated = NULL;
   posix_memalign((void **)&allocated, 4096/*alignment*/, 4*aNrWords + 4096);

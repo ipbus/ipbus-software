@@ -208,11 +208,11 @@ namespace uhal
   }
 
 
-  void ClientInterface::preamble ( std::shared_ptr< Buffers > aBuffers )
+  void ClientInterface::preamble ( std::shared_ptr< Buffers > )
   {}
 
 
-  void ClientInterface::predispatch ( std::shared_ptr< Buffers > aBuffers )
+  void ClientInterface::predispatch ( std::shared_ptr< Buffers > )
   {}
 
 

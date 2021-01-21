@@ -222,7 +222,7 @@ void PCIe::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
 
 void PCIe::File::write(const uint32_t aAddr, const std::vector<uint32_t>& aValues)
 {
-  write(4 * aAddr, reinterpret_cast<const uint8_t* const>(aValues.data()), 4 * aValues.size());
+  write(4 * aAddr, reinterpret_cast<const uint8_t*>(aValues.data()), 4 * aValues.size());
 }
 
 

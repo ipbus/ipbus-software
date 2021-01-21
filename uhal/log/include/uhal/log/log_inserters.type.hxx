@@ -63,7 +63,7 @@ namespace uhal
   }
 
   template< typename T >
-  _Type< T > Type ( const T& aT )
+  _Type< T > Type ( const T& )
   {
     return _Type< T > ( );
   }

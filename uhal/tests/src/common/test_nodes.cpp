@@ -158,7 +158,7 @@ SimpleAddressTableFixture::SimpleAddressTableFixture() :
     "<node id='aPort' address='0x300' mode='port' size='1024' />"
     "</node>")
 {
-  BOOST_REQUIRE(addrTableDoc.load(addrTableStr.c_str()));
+  BOOST_REQUIRE(addrTableDoc.load_string(addrTableStr.c_str()));
 
   nodeProperties.push_back(NodeProperties("regA", 0, defs::SINGLE, defs::READWRITE, 1, "", 0));
   nodeProperties.push_back(NodeProperties("regB", 1, defs::SINGLE, defs::READWRITE, 1, "", 0));
@@ -212,7 +212,7 @@ AddressTableOverlapFixture::AddressTableOverlapFixture() :
     "</node>"
     "</node>")
 {
-  BOOST_REQUIRE(addrTableDoc.load(addrTableStr.c_str()));
+  BOOST_REQUIRE(addrTableDoc.load_string(addrTableStr.c_str()));
 
   nodeProperties.push_back(NodeProperties("reg1", 0, defs::SINGLE, defs::READWRITE, 1, "", 0));
   nodeProperties.push_back(NodeProperties("reg2", 1, defs::SINGLE, defs::READWRITE, 1, "", 0));
@@ -762,7 +762,7 @@ BOOST_FIXTURE_TEST_CASE (missing_ID, SimpleAddressTableFixture)
     BOOST_TEST_MESSAGE("Removing 'id' attribute from node " << i);
 
     pugi::xml_document lDoc;
-    lDoc.load(addrTableStr.c_str());
+    lDoc.load_string(addrTableStr.c_str());
     getNthChild(lDoc.child("node"), i).remove_attribute("id");
 
     BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NoRulesPassed);
@@ -786,7 +786,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_ID, SimpleAddressTableFixture)
       BOOST_TEST_MESSAGE("Setting 'id' attribute of node " << i << " to '" << *lIt << "'");
 
       pugi::xml_document lDoc;
-      lDoc.load(addrTableStr.c_str());
+      lDoc.load_string(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), i), "id", *lIt);
 
       BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
@@ -817,7 +817,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_address, SimpleAddressTableFixture)
       BOOST_TEST_MESSAGE("Setting 'address' attribute of node " << i << " to '" << *lIt << "'");
 
       pugi::xml_document lDoc;
-      lDoc.load(addrTableStr.c_str());
+      lDoc.load_string(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), i), "address", *lIt);
 
       BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
@@ -849,7 +849,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_mask, SimpleAddressTableFixture)
       BOOST_TEST_MESSAGE("Setting 'mask' attribute of node " << i << " to '" << *lIt << "'");
 
       pugi::xml_document lDoc;
-      lDoc.load(addrTableStr.c_str());
+      lDoc.load_string(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), i), "mask", *lIt);
 
       BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
@@ -881,7 +881,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_size, SimpleAddressTableFixture)
       BOOST_TEST_MESSAGE("Setting 'size' attribute of node " << i << " to '" << *lIt << "'");
 
       pugi::xml_document lDoc;
-      lDoc.load(addrTableStr.c_str());
+      lDoc.load_string(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), i), "size", *lIt);
 
       BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
@@ -912,7 +912,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_permission, SimpleAddressTableFixture)
       BOOST_TEST_MESSAGE("Setting 'permission' attribute of node " << i << " to '" << *lIt << "'");
 
       pugi::xml_document lDoc;
-      lDoc.load(addrTableStr.c_str());
+      lDoc.load_string(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), i), "permission", *lIt);
 
       BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
@@ -942,7 +942,7 @@ BOOST_FIXTURE_TEST_CASE (invalid_mode, SimpleAddressTableFixture)
       BOOST_TEST_MESSAGE("Setting 'mode' attribute of node " << i << " to '" << *lIt << "'");
 
       pugi::xml_document lDoc;
-      lDoc.load(addrTableStr.c_str());
+      lDoc.load_string(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), i), "mode", *lIt);
 
       BOOST_CHECK_THROW(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()), exception::NodeAttributeIncorrectValue);
@@ -956,7 +956,7 @@ BOOST_FIXTURE_TEST_CASE (size_without_node_attribute, SimpleAddressTableFixture)
     BOOST_TEST_MESSAGE("Adding 'size' attribute to node " << i << ", that doesn't have 'mode' attribute");
 
     pugi::xml_document lDoc;
-    lDoc.load(addrTableStr.c_str());
+    lDoc.load_string(addrTableStr.c_str());
     setAttribute(getNthChild(lDoc.child("node"), i), "size", "42");
 
     // This should change to 'BOOST_CHECK_THROW' in future release (after grace period discussed in issue #194 has ended)
@@ -985,7 +985,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_unmasked_registers, AddressTableOverlapFixture)
 {
   // Move reg1 to same address as reg2 (0x1)
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x1");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1003,7 +1003,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_1, AddressTableOverlapFixture)
 {
   // Move reg4 to same address as reg3 (0x2)
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 3), "address", "0x2");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1031,7 +1031,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_registers_2, AddressTableOverlapFixture)
 {
   // Change mask of reg4.A to 0x10100ff to overlap with reg4.C and reg4.D
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(getNthChild(lDoc.child("node"), 3), 0), "mask", "0x10100ff");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1050,7 +1050,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_ports, AddressTableOverlapFixture)
 {
   // Move port1 to same address as port2 (0x5)
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 4), "address", "0x5");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1068,7 +1068,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_unmasked_reg_vs_masked_reg, AddressTableOverlap
 {
   // Move reg1 to same address as reg3 (0x2)
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x2");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1088,7 +1088,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_unmasked_reg_vs_port, AddressTableOverlapFixtur
 {
   // Move reg1 to same address as port1 (0x4)
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 0), "address", "0x4");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1106,7 +1106,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_masked_reg_vs_port, AddressTableOverlapFixture)
 {
   // Move reg3 to same address as port1 (0x4)
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 2), "address", "0x4");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1157,7 +1157,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_ram, AddressTableOverlapFixture)
 
       // Move node to get an overlap
       pugi::xml_document lDoc;
-      lDoc.load(addrTableStr.c_str());
+      lDoc.load_string(addrTableStr.c_str());
       setAttribute(getNthChild(lDoc.child("node"), lNodeIt->first), "address", lAddrIt->c_str());
       std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1183,7 +1183,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_multiple_1, AddressTableOverlapFixture)
 {
   // Move module 1 to address 0x0
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 8), "address", "0x0");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 
@@ -1209,7 +1209,7 @@ BOOST_FIXTURE_TEST_CASE (overlap_multiple_2, AddressTableOverlapFixture)
 {
   // Move module 2 to same address as module 1 (0x40)
   pugi::xml_document lDoc;
-  lDoc.load(addrTableStr.c_str());
+  lDoc.load_string(addrTableStr.c_str());
   setAttribute(getNthChild(lDoc.child("node"), 9), "address", "0x40");
   std::shared_ptr<const Node> lNode(NodeTreeBuilder::getInstance().build(lDoc.child ( "node" ), boost::filesystem::path()));
 

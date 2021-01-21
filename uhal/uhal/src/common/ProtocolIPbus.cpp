@@ -66,7 +66,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  void IPbus< 1 , IPbus_minor >::preamble ( std::shared_ptr< Buffers > aBuffers )
+  void IPbus< 1 , IPbus_minor >::preamble ( std::shared_ptr< Buffers > )
   {
     implementBOT();   //this is really just initializing the payload, rather than a true preamble
   }
@@ -278,7 +278,7 @@ namespace uhal
 
 
   template< uint8_t IPbus_minor >
-  void IPbus< 2 , IPbus_minor >::predispatch ( std::shared_ptr< Buffers > aBuffers )
+  void IPbus< 2 , IPbus_minor >::predispatch ( std::shared_ptr< Buffers > )
   {
   }
 
