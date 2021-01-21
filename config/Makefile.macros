@@ -6,7 +6,7 @@ CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
 
 PYTHON ?= python
-CACTUS_PLATFORM=$(shell cat /etc/system-release)
+CACTUS_PLATFORM=$(shell if [ -f /etc/system-release ]; then cat /etc/system-release; fi)
 CACTUS_OS=unknown.os
 
 UNAME=$(strip $(shell uname -s))
