@@ -433,7 +433,7 @@ namespace uhal
     }
   }
 
-  void NodeTreeBuilder::setModule ( const pugi::xml_node& aXmlNode , Node* aNode )
+  void NodeTreeBuilder::setModule ( const pugi::xml_node& , Node* aNode )
   {
     if ( mFileCallStack.size() )
     {

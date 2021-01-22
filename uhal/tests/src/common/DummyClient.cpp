@@ -18,7 +18,7 @@ DummyClient::~DummyClient()
 {
 }
 
-void DummyClient::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
+void DummyClient::implementDispatch ( std::shared_ptr< Buffers > )
 {
 }
 
@@ -27,40 +27,40 @@ ValHeader DummyClient::implementBOT( )
   return ValHeader();
 }
 
-ValHeader DummyClient::implementWrite ( const uint32_t& aAddr, const uint32_t& aValue )
+ValHeader DummyClient::implementWrite ( const uint32_t&, const uint32_t& )
 {
   return ValHeader();
 }
 
-ValHeader DummyClient::implementWriteBlock ( const uint32_t& aAddr, const std::vector< uint32_t >& aValues, const defs::BlockReadWriteMode& aMode )
+ValHeader DummyClient::implementWriteBlock ( const uint32_t&, const std::vector< uint32_t >&, const defs::BlockReadWriteMode& )
 {
   return ValHeader();
 }
 
-ValWord< uint32_t > DummyClient::implementRead ( const uint32_t& aAddr, const uint32_t& aMask )
+ValWord< uint32_t > DummyClient::implementRead ( const uint32_t&, const uint32_t& )
 {
   return ValWord<uint32_t>();
 }
 
-ValVector< uint32_t > DummyClient::implementReadBlock ( const uint32_t& aAddr, const uint32_t& aSize, const defs::BlockReadWriteMode& aMode )
+ValVector< uint32_t > DummyClient::implementReadBlock ( const uint32_t&, const uint32_t&, const defs::BlockReadWriteMode& )
 {
   return ValVector< uint32_t >();
 }
 
-ValWord< uint32_t > DummyClient::implementRMWbits ( const uint32_t& aAddr , const uint32_t& aANDterm , const uint32_t& aORterm )
+ValWord< uint32_t > DummyClient::implementRMWbits ( const uint32_t& , const uint32_t& , const uint32_t& )
 {
   return ValWord<uint32_t>();
 }
 
-ValWord< uint32_t > DummyClient::implementRMWsum ( const uint32_t& aAddr , const int32_t& aAddend )
+ValWord< uint32_t > DummyClient::implementRMWsum ( const uint32_t& , const int32_t& )
 {
   return ValWord<uint32_t>();
 }
 
-exception::exception* DummyClient::validate ( uint8_t* aSendBufferStart ,
-  uint8_t* aSendBufferEnd ,
-  std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyStartIt ,
-  std::deque< std::pair< uint8_t* , uint32_t > >::iterator aReplyEndIt )
+exception::exception* DummyClient::validate ( uint8_t* ,
+  uint8_t* ,
+  std::deque< std::pair< uint8_t* , uint32_t > >::iterator ,
+  std::deque< std::pair< uint8_t* , uint32_t > >::iterator )
 {
   return NULL;
 }

@@ -61,7 +61,6 @@ variables:
     REPO_URL_OS_SUBDIR: centos8/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
-    UHAL_GUI_DEPENDENCIES: "python3-numpy"
 
 .template_test:centos8-python38:
   extends: .template_test_rpmInstall
@@ -73,38 +72,32 @@ variables:
     PYTHON: "python3.8"
     REPO_URL_OS_SUBDIR: centos8_python38/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
-    UHAL_GUI_DEPENDENCIES: "python38-numpy"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
 
 
 .template_test_simpleInstall:
   stage: test
   before_script:
-    - sudo make -k Set=all install
+    - sudo make -k Set=all install PYTHON=${PYTHON}
     - ls -al /opt/cactus /opt/cactus/*
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
 
-.template_test:fedora30-python2:
+.template_test:fedora33:
   extends: .template_test_simpleInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python2:2020-06-13__erlang21.3_gcc9.3.1_boost1.69.0_pugixml1.9
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:feature-update-alt-os__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
   needs:
-    - build:fedora30-python2
+    - build:fedora33
   variables:
-    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
-
-.template_test:fedora30-python3:
-  extends: .template_test_simpleInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python3:2020-06-13__erlang21.3_gcc9.3.1_boost1.69.0_pugixml1.9
-  needs:
-    - build:fedora30-python3
-  variables:
+    PYTHON: python3.9
     UHAL_GUI_DEPENDENCIES: python3-wxpython4
 
-.template_test:ubuntu16:
+.template_test:ubuntu20:
   extends: .template_test_simpleInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2020-06-13__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:feature-update-alt-os__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10
   needs:
-    - build:ubuntu16
+    - build:ubuntu20
+  variables:
+    PYTHON: python3.8
 
 
 .job_template: &test_core_jobScript
@@ -116,7 +109,7 @@ variables:
     - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
     - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
     - service controlhub stop || /opt/cactus/bin/controlhub_stop
-    - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    - ${PYTHON} $(which uhal_test_suite.py) -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbusudp* --log_level=test_suite
 
 .job_template: &test_python_jobScript
@@ -233,64 +226,39 @@ test_controlhub:centos8-python38:
   <<: *test_controlhub_plainScripts_jobScript
 
 
-test_core:fedora30-python2:
-  extends: .template_test:fedora30-python2
+test_core:fedora33:
+  extends: .template_test:fedora33
   <<: *test_core_jobScript
 
-test_python:fedora30-python2:
-  extends: .template_test:fedora30-python2
+test_python:fedora33:
+  extends: .template_test:fedora33
   <<: *test_python_jobScript
 
-test_gui:fedora30-python2:
-  extends: .template_test:fedora30-python2
+test_gui:fedora33:
+  extends: .template_test:fedora33
   <<: *test_gui_jobScript
 
-test_tools:fedora30-python2:
-  extends: .template_test:fedora30-python2
+test_tools:fedora33:
+  extends: .template_test:fedora33
   <<: *test_tools_jobScript
 
-test_controlhub:fedora30-python2:
-  extends: .template_test:fedora30-python2
+test_controlhub:fedora33:
+  extends: .template_test:fedora33
   <<: *test_controlhub_plainScripts_jobScript
 
 
-test_core:fedora30-python3:
-  extends: .template_test:fedora30-python3
+test_core:ubuntu20:
+  extends: .template_test:ubuntu20
   <<: *test_core_jobScript
 
-test_python:fedora30-python3:
-  extends: .template_test:fedora30-python3
+test_python:ubuntu20:
+  extends: .template_test:ubuntu20
   <<: *test_python_jobScript
 
-test_gui:fedora30-python3:
-  extends: .template_test:fedora30-python3
-  <<: *test_gui_jobScript
-
-test_tools:fedora30-python3:
-  extends: .template_test:fedora30-python3
+test_tools:ubuntu20:
+  extends: .template_test:ubuntu20
   <<: *test_tools_jobScript
 
-test_controlhub:fedora30-python3:
-  extends: .template_test:fedora30-python3
-  <<: *test_controlhub_plainScripts_jobScript
-
-
-test_core:ubuntu16:
-  extends: .template_test:ubuntu16
-  <<: *test_core_jobScript
-
-test_python:ubuntu16:
-  extends: .template_test:ubuntu16
-  <<: *test_python_jobScript
-
-test_gui:ubuntu16:
-  extends: .template_test:ubuntu16
-  <<: *test_gui_jobScript
-
-test_tools:ubuntu16:
-  extends: .template_test:ubuntu16
-  <<: *test_tools_jobScript
-
-test_controlhub:ubuntu16:
-  extends: .template_test:ubuntu16
+test_controlhub:ubuntu20:
+  extends: .template_test:ubuntu20
   <<: *test_controlhub_plainScripts_jobScript

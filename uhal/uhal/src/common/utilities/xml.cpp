@@ -138,31 +138,6 @@ namespace uhal
 
 
     template < bool DebugInfo >
-    bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , const char* aTarget )
-    {
-      pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );
-
-      if ( ! lAttr.empty() )
-      {
-        aTarget = lAttr.value();
-        return true;
-      }
-      else
-      {
-        if ( DebugInfo )
-        {
-          log ( Error() , "Failed to get attribute " , Quote ( aAttrName ) , " from XML node." );
-        }
-
-        return false;
-      }
-    }
-
-    template bool GetXMLattribute<true>( const pugi::xml_node& aNode , const std::string& aAttrName , const char* aTarget );
-    template bool GetXMLattribute<false>( const pugi::xml_node& aNode , const std::string& aAttrName , const char* aTarget );
-
-
-    template < bool DebugInfo >
     bool GetXMLattribute ( const pugi::xml_node& aNode , const std::string& aAttrName , int32_t& aTarget )
     {
       pugi::xml_attribute lAttr = aNode.attribute ( aAttrName.c_str() );

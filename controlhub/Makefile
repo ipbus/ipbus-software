@@ -62,19 +62,31 @@ build: _all
 buildall: _all
 
 _all:
-	${ESCRIPT} ./rebar get-deps compile
-	cd rel && ${ESCRIPT} ../rebar generate
+	${ESCRIPT} ${REBAR} get-deps compile
+	cd rel && ${ESCRIPT} ${REBAR} generate
 
 ifeq ($(BUILD_ERLANG), 1)
     _all: _erlang
 endif
 
 
+ERLANG_VERSION_MAJOR:=$(shell erl -noshell -eval 'io:fwrite("~s\n", [erlang:system_info(otp_release)]).' -s erlang halt)
+# Extract major number in case formatted as RxxByy-z (e.g. R16B03-1)
+ERLANG_VERSION_MAJOR:=$(shell echo ${ERLANG_VERSION_MAJOR} | sed 's@^[^0-9]*\([0-9]\+\).*@\1@')
+
+# Use ./rebar for Erlang versions >= 23.0
+ifeq ($(shell [ ${ERLANG_VERSION_MAJOR} -gt 22 ] && echo true),true)
+    REBAR=$(shell pwd)/rebar
+else
+	REBAR=$(shell pwd)/legacy/rebar
+endif
+
 ifeq (${CACTUS_OS}, centos7)
     RPMSPEC_SNIPPET_OS_TAG=rhel7
 else
     RPMSPEC_SNIPPET_OS_TAG=rhelLeq6
 endif
+
 
 rpm: _rpmall
 _rpmall: build
@@ -110,8 +122,8 @@ cleanrpm:
 
 clean: _cleanall
 _cleanall:
-	${ESCRIPT} ./rebar clean
-	rm -rf $(RPMBUILD_DIR)
+	${ESCRIPT} ${REBAR} clean
+	rm -rf $(RPMBUILD_DIR) .rebar rpm deps ebin/*.beam erlang rel/controlhub ${PackageName}.spec
 
 
 ERL_TARBALL_FILE=otp_src_R16B01.tar.gz
@@ -164,7 +176,7 @@ install:
 ifeq (,$(shell /bin/bash -c "command -v service"))
 	@echo " WARNING : 'service' command not detected! After the installation has finished, you should restart rsyslog to ensure that the ControlHub syslog config is loaded"
 else
-	service rsyslog restart
+	-service rsyslog restart
 endif
 
 uninstall:

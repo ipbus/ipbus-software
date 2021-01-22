@@ -15,14 +15,14 @@ build:centos7:static:
   variables:
     BUILD_STATIC: 1
 
-build:fedora30-python2:
+build:fedora33:
   extends: .template_build_simple
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python2:2020-06-13__erlang21.3_gcc9.3.1_boost1.69.0_pugixml1.9
+  variables:
+    PYTHON: python3.9
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:feature-update-alt-os__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
 
-build:fedora30-python3:
+build:ubuntu20:
   extends: .template_build_simple
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora30-python3:2020-06-13__erlang21.3_gcc9.3.1_boost1.69.0_pugixml1.9
-
-build:ubuntu16:
-  extends: .template_build_simple
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu16:2020-06-13__erlang18.3_gcc5.3.1_boost1.58.0_pugixml1.7
+  variables:
+    PYTHON: python3.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:feature-update-alt-os__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10

@@ -25,7 +25,7 @@ void uhal::tests::TCPDummyHardware<IPbus_major,IPbus_minor>::stop()
 
 
 template< uint8_t IPbus_major , uint8_t IPbus_minor >
-void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_accept(const boost::system::error_code& aError)
+void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_accept(const boost::system::error_code&)
 {
   boost::asio::async_read ( mSocket , 
           boost::asio::buffer ( &mByteCountHeader, 4 ) ,
@@ -35,7 +35,7 @@ void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_accept(c
 
 
 template< uint8_t IPbus_major , uint8_t IPbus_minor >
-void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chunk_header(const boost::system::error_code& aError, std::size_t aNrBytes)
+void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::handle_read_chunk_header(const boost::system::error_code& aError, std::size_t)
 {
   if ( aError == boost::asio::error::eof )
   {
