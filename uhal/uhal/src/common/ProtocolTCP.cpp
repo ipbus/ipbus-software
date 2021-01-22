@@ -61,6 +61,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   TCP< InnerProtocol, nr_buffers_per_send >::TCP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
+    mMaxPayloadSize (350 * 4),
     mIOservice ( ),
     mSocket ( mIOservice ),
     mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aUri.mHostname , aUri.mPort ) ) ),
@@ -75,6 +76,19 @@ namespace uhal
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
+
+    // Extract value of 'max_payload_size' attribute, if present
+    for (const auto& lArg : aUri.mArguments) {
+      if (lArg.first == "max_payload_size") {
+        try {
+          mMaxPayloadSize = boost::lexical_cast<size_t>(lArg.second);
+        }
+        catch (const boost::bad_lexical_cast&) {
+          throw exception::InvalidURI("Client URI \"" + this->uri() + "\": Invalid value, \"" + lArg.second + "\", specified for attribute \"" + lArg.first + "\"");
+        }
+        log (Info(), "Client with URI ", Quote(this->uri()), ": Maximum UDP payload size set to ", std::to_string(mMaxPayloadSize), " bytes");
+      }
+    }
   }
 
 
@@ -132,14 +146,14 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   uint32_t TCP< InnerProtocol , nr_buffers_per_send >::getMaxSendSize()
   {
-    return (350 * 4);
+    return mMaxPayloadSize;
   }
 
  
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   uint32_t TCP< InnerProtocol , nr_buffers_per_send >::getMaxReplySize()
   {
-    return (350 * 4);
+    return mMaxPayloadSize;
   }
 
 

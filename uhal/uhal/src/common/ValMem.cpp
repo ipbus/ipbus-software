@@ -392,5 +392,4 @@ namespace uhal
   template class ValVector< uint8_t >;
   template class ValVector< uint32_t >;
 
-
 }
