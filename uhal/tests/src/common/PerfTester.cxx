@@ -43,7 +43,6 @@
 
 // Boost headers
 #include <boost/program_options.hpp>
-#include <boost/foreach.hpp>
 #include <boost/mem_fn.hpp>
 
 // uHAL headers
@@ -296,7 +295,7 @@ void uhal::tests::PerfTester::bandwidthRxTest()
 {
   if ( ! m_includeConnect )
   {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
+    for ( ClientPtr& iClient: m_clients )
     {
       iClient->readBlock ( m_baseAddr, 1, defs::NON_INCREMENTAL );
       iClient->dispatch();
@@ -304,7 +303,7 @@ void uhal::tests::PerfTester::bandwidthRxTest()
   }
 
   std::vector<ClientInterface*> lClients;
-  BOOST_FOREACH ( ClientPtr& iClient, m_clients )
+  for ( ClientPtr& iClient: m_clients )
   {
     lClients.push_back( &*iClient );
   }
@@ -323,7 +322,7 @@ void uhal::tests::PerfTester::bandwidthTxTest()
 {
   if ( ! m_includeConnect )
   {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
+    for ( ClientPtr& iClient: m_clients )
     {
       iClient->writeBlock ( m_baseAddr, std::vector<uint32_t>(1,0x0), defs::NON_INCREMENTAL );
       iClient->dispatch();
@@ -331,7 +330,7 @@ void uhal::tests::PerfTester::bandwidthTxTest()
   }
 
   std::vector<ClientInterface*> lClients;
-  BOOST_FOREACH ( ClientPtr& iClient, m_clients )
+  for ( ClientPtr& iClient: m_clients )
   {
     lClients.push_back( &*iClient );
   }
@@ -349,10 +348,10 @@ void uhal::tests::PerfTester::bandwidthTxTest()
 void uhal::tests::PerfTester::validationTest()
 {
   std::vector<ClientInterface*> lClients;
-  for(ClientVec::iterator lIt = m_clients.begin(); lIt != m_clients.end(); lIt++)
-    lClients.push_back(&**lIt);
+  for (const auto& c: m_clients)
+    lClients.push_back(&*c);
 
-  if (! runValidationTest(lClients, m_baseAddr, m_bandwidthTestDepth, m_iterations, m_perIterationDispatch, m_verbose) )
+  if (not runValidationTest(lClients, m_baseAddr, m_bandwidthTestDepth, m_iterations, m_perIterationDispatch, m_verbose) )
     std::exit( 1 );
 }
 
@@ -361,7 +360,7 @@ void uhal::tests::PerfTester::sandbox()
 {
   try
   {
-    BOOST_FOREACH ( ClientPtr& iClient, m_clients )
+    for ( ClientPtr& iClient: m_clients )
     {
       // *** Your code here ***
       // For example:

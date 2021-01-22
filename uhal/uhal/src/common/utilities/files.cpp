@@ -76,9 +76,9 @@ namespace uhal
 
       log ( Debug() , "Parsed " , Quote ( aSemicolonDelimitedUriList ) , " to:" );
 
-      for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = aUriList.begin() ; lIt != aUriList.end() ; ++lIt )
+      for (const auto& x: aUriList)
       {
-        log ( Debug() , "    > [" , lIt->first , "] " , Quote ( lIt->second ) );
+        log ( Debug() , "    > [" , x.first , "] " , Quote ( x.second ) );
       }
     }
 
@@ -127,10 +127,8 @@ namespace uhal
       {
         log ( Debug() , "Shell expansion of " , Quote ( aFilenameExpr.c_str() ) , " returned:" );
 
-        for ( std::vector< boost::filesystem::path >::iterator lIt = aFiles.begin() ; lIt !=  aFiles.end() ; ++lIt )
-        {
-          log ( Debug() , " > [file] " , lIt->c_str() );
-        }
+        for (const auto& lFile: aFiles)
+          log ( Debug() , " > [file] " , lFile.c_str() );
       }
     }
 
@@ -288,14 +286,14 @@ namespace uhal
       std::vector< boost::filesystem::path > lFilePaths;
       uhal::utilities::ShellExpandFilenameExpr ( aFilenameExpr , aParentPath , lFilePaths );
 
-      for ( std::vector< boost::filesystem::path >::iterator lIt2 = lFilePaths.begin() ; lIt2 != lFilePaths.end() ; ++ lIt2 )
+      for (const auto& lPath: lFilePaths)
       {
-        std::ifstream lStr ( lIt2->c_str() );
+        std::ifstream lStr ( lPath.c_str() );
 
         if ( !lStr.is_open() )
         {
           uhal::exception::CannotOpenFile lExc;
-          log ( lExc , "Failed to open file " , Quote ( lIt2->c_str() ) );
+          log ( lExc , "Failed to open file " , Quote ( lPath.c_str() ) );
           throw lExc ;
         }
         else
@@ -304,7 +302,7 @@ namespace uhal
           std::vector<uint8_t> lFile ( lStr.tellg() , 0 );
           lStr.seekg ( 0, std::ios::beg );
           lStr.read ( ( char* ) & ( lFile[0] ) , lFile.size() );
-          aCallback ( std::string ( "file" ) , *lIt2 , lFile);
+          aCallback ( std::string ( "file" ) , lPath , lFile);
         }
 
         lStr.close();

@@ -40,28 +40,6 @@ void pycohal::setLogLevelTo ( const pycohal::LogLevel& logLevel )
 }
 
 
-const bool& pycohal::LoggingIncludes ( const pycohal::LogLevel& logLevel )
-{
-  switch ( logLevel )
-  {
-    case pycohal::DEBUG :
-      return  uhal::LoggingIncludes ( uhal::Debug() );
-    case pycohal::INFO :
-      return uhal::LoggingIncludes ( uhal::Info() );
-    case pycohal::NOTICE :
-      return uhal::LoggingIncludes ( uhal::Notice() );
-    case pycohal::WARNING :
-      return uhal::LoggingIncludes ( uhal::Warning() );
-    case pycohal::ERROR :
-      return uhal::LoggingIncludes ( uhal::Error() );
-    case pycohal::FATAL :
-      return uhal::LoggingIncludes ( uhal::Fatal() );
-    default :
-      throw PycohalLogLevelEnumError();
-  }
-}
-
-
 void pycohal::wrap_enums(pybind11::module_& aModule)
 {
   py::enum_<uhal::defs::NodePermission> ( aModule, "NodePermission" )
@@ -90,7 +68,6 @@ void pycohal::wrap_logging_functions(pybind11::module_& aModule)
   aModule.def ( "setLogLevelFromEnvironment", uhal::setLogLevelFromEnvironment );
   aModule.def ( "disableLogging", uhal::disableLogging );
   aModule.def ( "setLogLevelTo", pycohal::setLogLevelTo );
-  aModule.def ( "LoggingIncludes", pycohal::LoggingIncludes, py::return_value_policy::copy );
 }
 
 

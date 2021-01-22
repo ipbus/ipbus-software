@@ -354,11 +354,11 @@ namespace uhal
     uint32_t lRequestBytes = 0;
     uint32_t lExpectedReplyBytes = 0;
 
-    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for (const auto& lBuf: mReplyBuffers.first)
     {
-      lNrReplyBuffers += ( *lBufIt )->getReplyBuffer().size();
-      lRequestBytes += ( *lBufIt )->sendCounter();
-      lExpectedReplyBytes += ( *lBufIt )->replyCounter();
+      lNrReplyBuffers += lBuf->getReplyBuffer().size();
+      lRequestBytes += lBuf->sendCounter();
+      lExpectedReplyBytes += lBuf->replyCounter();
     }
 
     {
@@ -484,11 +484,11 @@ namespace uhal
     }
 
 
-    for ( std::vector< std::shared_ptr<Buffers> >::const_iterator lBufIt = mReplyBuffers.first.begin(); lBufIt != mReplyBuffers.first.end(); lBufIt++ )
+    for (const auto& lBuf: mReplyBuffers.first)
     {
       try
       {
-        if ( uhal::exception::exception* lExc =  ClientInterface::validate ( *lBufIt ) ) //Control of the pointer has been passed back to the client interface
+        if ( uhal::exception::exception* lExc =  ClientInterface::validate ( lBuf ) ) //Control of the pointer has been passed back to the client interface
         {
           std::lock_guard<std::mutex> lLock ( mTransportLayerMutex );
           mAsynchronousException = lExc;

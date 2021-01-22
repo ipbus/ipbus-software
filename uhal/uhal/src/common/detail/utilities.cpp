@@ -91,7 +91,7 @@ namespace uhal {
         const size_t lCommonPathLength(lCommonAncestor == &aNode ? 0 : lCommonAncestorPath.size() + 1);
         std::ostringstream lOSS;
         lOSS << "nodes \"" << lMatches.front()->getPath().substr(lCommonPathLength) << "\"";
-        for (std::vector<const Node*>::const_iterator lIt = lMatches.begin() + 1; lIt < lMatches.end(); lIt++)
+        for (auto lIt = lMatches.begin() + 1; lIt < lMatches.end(); lIt++)
           lOSS << ", \"" << (*lIt)->getPath().substr(lCommonPathLength) << "\"";
 
         if (lCommonAncestor != &aNode)
@@ -200,9 +200,9 @@ namespace uhal {
       std::stringstream lReport;
       lReport << std::hex << std::setfill ( '0' );
 
-      for (std::vector<std::pair<const Node*, const Node*> >::const_iterator lIt = aNodes.begin(); lIt != aNodes.end(); lIt++)
+      for (const auto& x: aNodes)
       {
-        printNodeOverlapDescription(lReport, *lIt->first, *lIt->second);
+        printNodeOverlapDescription(lReport, *x.first, *x.second);
         lReport << std::endl;
       }
 

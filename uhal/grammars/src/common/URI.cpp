@@ -48,9 +48,9 @@ namespace uhal {
     aStr << " > extension : " << aURI.mExtension << "\n";
     aStr << " > arguments :\n";
 
-    for ( uhal::NameValuePairVectorType::const_iterator lIt = aURI.mArguments.begin() ; lIt != aURI.mArguments.end() ; ++lIt )
+    for ( const auto& lArg: aURI.mArguments )
     {
-      aStr << "   > " << lIt->first << " = " << lIt->second << "\n";
+      aStr << "   > " << lArg.first << " = " << lArg.second << "\n";
     }
 
     aStr << std::flush;

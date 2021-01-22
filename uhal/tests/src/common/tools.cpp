@@ -73,7 +73,6 @@ double measureReadLatency(ClientInterface& aClient, uint32_t aBaseAddr, uint32_t
 
 double measureReadLatency(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose)
 {
-  typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
   Timer myTimer;
 
   for ( unsigned i = 0; i < aNrIterations ; ++i )
@@ -83,26 +82,20 @@ double measureReadLatency(const std::vector<ClientInterface*>& aClients, uint32_
       std::cout << "Iteration " << i << std::endl;
     }
 
-    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
-    {
-      (*lIt)->readBlock ( aBaseAddr, aDepth, defs::NON_INCREMENTAL );
-    }
+    for (const auto& c: aClients)
+      c->readBlock ( aBaseAddr, aDepth, defs::NON_INCREMENTAL );
 
     if ( aDispatchEachIteration )
     {
-      for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
-      {
-        (*lIt)->dispatch();
-      }
+      for (const auto& c: aClients)
+        c->dispatch();
     }
   }
 
   if ( !aDispatchEachIteration )
   {
-    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
-    {
-      (*lIt)->dispatch();
-    }
+    for (const auto& c: aClients)
+      c->dispatch();
   }
 
   return myTimer.elapsedSeconds();
@@ -117,8 +110,6 @@ double measureWriteLatency(ClientInterface& aClient, uint32_t aBaseAddr, uint32_
 
 double measureWriteLatency(const std::vector<ClientInterface*>& aClients, uint32_t aBaseAddr, uint32_t aDepth, size_t aNrIterations, bool aDispatchEachIteration, bool aVerbose)
 {
-  typedef std::vector<ClientInterface*>::const_iterator ClientIterator_t;
-
   // Send buffer - lots of "cafebabe" (in little-endian)
   std::vector<uint32_t> sendBuffer ( aDepth, 0xbebafeca );
   Timer myTimer;
@@ -131,26 +122,20 @@ double measureWriteLatency(const std::vector<ClientInterface*>& aClients, uint32
     }
 
     // Create the packet
-    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
-    {
-      (*lIt)->writeBlock ( aBaseAddr, sendBuffer, defs::NON_INCREMENTAL );
-    }
+    for (const auto& c: aClients)
+      c->writeBlock ( aBaseAddr, sendBuffer, defs::NON_INCREMENTAL );
 
     if ( aDispatchEachIteration )
     {
-      for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
-      {
-        (*lIt)->dispatch();
-      }
+      for (const auto& c: aClients)
+        c->dispatch();
     }
   }
 
   if ( !aDispatchEachIteration )
   {
-    for (ClientIterator_t lIt = aClients.begin(); lIt != aClients.end(); lIt++)
-    {
-      (*lIt)->dispatch();
-    }
+    for (const auto& c: aClients)
+      c->dispatch();
   }
 
   return myTimer.elapsedSeconds();
