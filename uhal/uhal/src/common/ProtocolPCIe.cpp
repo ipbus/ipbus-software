@@ -497,8 +497,8 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
 
   mSleepDuration = std::chrono::microseconds(mUseInterrupt ? 0 : 50);
 
-  for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
-    if (lIt->first == "events") {
+  for (const auto& lArg: aUri.mArguments) {
+    if (lArg.first == "events") {
       if (mUseInterrupt) {
         exception::PCIeInitialisationError lExc;
         log(lExc, "PCIe client URI ", Quote(uri()), ": 'events' attribute is specified multiple times");
@@ -506,27 +506,27 @@ PCIe::PCIe ( const std::string& aId, const URI& aUri ) :
       }
 
       mUseInterrupt = true;
-      mDeviceFileFPGAEvent.setPath(lIt->second);
+      mDeviceFileFPGAEvent.setPath(lArg.second);
       log (Info() , "PCIe client with URI ", Quote (uri()), " is configured to use interrupts");
     }
-    else if (lIt->first == "sleep") {
-      mSleepDuration = std::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
-      log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
+    else if (lArg.first == "sleep") {
+      mSleepDuration = std::chrono::microseconds(boost::lexical_cast<size_t>(lArg.second));
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lArg.second), " us by URI 'sleep' attribute");
     }
-    else if (lIt->first == "max_in_flight") {
-      mMaxInFlight = boost::lexical_cast<size_t>(lIt->second);
-      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum number of packets in flight' set to ", boost::lexical_cast<size_t>(lIt->second), " by URI 'max_in_flight' attribute");
+    else if (lArg.first == "max_in_flight") {
+      mMaxInFlight = boost::lexical_cast<size_t>(lArg.second);
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum number of packets in flight' set to ", boost::lexical_cast<size_t>(lArg.second), " by URI 'max_in_flight' attribute");
     }
-    else if (lIt->first == "max_packet_size") {
-      mMaxPacketSize = boost::lexical_cast<size_t>(lIt->second);
-      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum packet size (in 32-bit words) set to ", boost::lexical_cast<size_t>(lIt->second), " by URI 'max_packet_size' attribute");
+    else if (lArg.first == "max_packet_size") {
+      mMaxPacketSize = boost::lexical_cast<size_t>(lArg.second);
+      log (Notice() , "PCIe client with URI ", Quote (uri()), " : 'Maximum packet size (in 32-bit words) set to ", boost::lexical_cast<size_t>(lArg.second), " by URI 'max_packet_size' attribute");
     }
-    else if (lIt->first == "xdma_7series_workaround") {
+    else if (lArg.first == "xdma_7series_workaround") {
       mXdma7seriesWorkaround = true;
       log (Notice() , "PCIe client with URI ", Quote (uri()), " : Adjusting size of PCIe reads to a few fixed sizes as workaround for 7-series xdma firmware bug");
     }
     else
-      log (Warning() , "Unknown attribute ", Quote (lIt->first), " used in URI ", Quote(uri()));
+      log (Warning() , "Unknown attribute ", Quote (lArg.first), " used in URI ", Quote(uri()));
   }
 }
 
@@ -783,14 +783,14 @@ void PCIe::read()
     log (Warning(), "Expected reply packet to contain ", Integer(lBuffers->replyCounter() >> 2), " words, but it actually contains ", Integer(lNrWordsInPacket), " words");
 
   size_t lNrBytesCopied = 0;
-  for ( std::deque< std::pair< uint8_t* , uint32_t > >::const_iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+  for (const auto& lBuffer: lReplyBuffers)
   {
     // Don't copy more of page than was written to, for cases when less data received than expected
     if ( lNrBytesCopied >= 4*lNrWordsInPacket)
       break;
 
-    size_t lNrBytesToCopy = std::min( lIt->second , uint32_t(4*lNrWordsInPacket - lNrBytesCopied) );
-    memcpy ( lIt->first, &lPageContents.at(1 + (lNrBytesCopied / 4)), lNrBytesToCopy );
+    size_t lNrBytesToCopy = std::min( lBuffer.second , uint32_t(4*lNrWordsInPacket - lNrBytesCopied) );
+    memcpy ( lBuffer.first, &lPageContents.at(1 + (lNrBytesCopied / 4)), lNrBytesToCopy );
     lNrBytesCopied += lNrBytesToCopy;
   }
 

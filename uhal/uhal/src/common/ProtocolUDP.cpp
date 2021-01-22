@@ -344,16 +344,14 @@ namespace uhal
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
-    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    for (const auto& lBuffer: lReplyBuffers)
     {
       // Don't copy more of mReplyMemory than was written to, for cases when less data received than expected
       if ( static_cast<uint32_t> ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) >= aBytesTransferred )
-      {
         break;
-      }
 
-      uint32_t lNrBytesToCopy = std::min ( lIt->second , static_cast<uint32_t> ( aBytesTransferred - ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) ) );
-      memcpy ( lIt->first, lReplyBuf, lNrBytesToCopy );
+      uint32_t lNrBytesToCopy = std::min ( lBuffer.second , static_cast<uint32_t> ( aBytesTransferred - ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) ) );
+      memcpy ( lBuffer.first, lReplyBuf, lNrBytesToCopy );
       lReplyBuf += lNrBytesToCopy;
     }
 

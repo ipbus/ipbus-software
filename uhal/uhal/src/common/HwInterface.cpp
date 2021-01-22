@@ -70,10 +70,8 @@ namespace uhal
   {
     aNode.mHw = this;
 
-    for ( std::vector< Node* >::iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
-    {
-      claimNode ( **lIt );
-    }
+    for (Node* lChild: aNode.mChildren)
+      claimNode ( *lChild );
   }
 
 

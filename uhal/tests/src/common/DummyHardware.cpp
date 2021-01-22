@@ -150,10 +150,8 @@ namespace uhal
       {
         if ( mBigEndianHack || base_type::mPacketType == 1 )
         {
-          for ( std::vector<uint32_t>::iterator lIt ( mReply.begin() ) ; lIt != mReply.end() ; ++lIt )
-          {
-            *lIt = htonl ( *lIt );
-          }
+          for ( auto& x: mReply )
+            x = htonl ( x );
         }
       }
     }
@@ -436,14 +434,14 @@ namespace uhal
         mReply.push_back ( lTemp );;
       }
 
-      for ( std::deque< uint32_t >::const_iterator i = mReceivedControlPacketHeaderHistory.begin(); i != mReceivedControlPacketHeaderHistory.end() ; ++i )
+      for ( const auto& x: mReceivedControlPacketHeaderHistory )
       {
-        mReply.push_back ( *i );
+        mReply.push_back ( x );
       }
 
-      for ( std::deque< uint32_t >::const_iterator i = mSentControlPacketHeaderHistory.begin(); i != mSentControlPacketHeaderHistory.end() ; ++i )
+      for ( const auto& x: mSentControlPacketHeaderHistory )
       {
-        mReply.push_back ( *i );
+        mReply.push_back ( x );
       }
 
       mTrafficHistory.push_back ( 3 );

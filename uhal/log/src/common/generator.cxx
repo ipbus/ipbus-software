@@ -134,11 +134,11 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\tswitch ( lEnvVar[0] )\n"
            << "\t{\n";
 
-  for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+  for ( const auto& lLevel: gLogLevels )
   {
-    aCppFile << "\t\tcase '" << char ( std::tolower ( lIt->at ( 0 ) ) ) << "' :\n"
-             << "\t\tcase '" << char ( std::toupper ( lIt->at ( 0 ) ) ) << "' :\n"
-             << "\t\t\tsetLogLevelTo ( " << *lIt << "() );\n"
+    aCppFile << "\t\tcase '" << char ( std::tolower ( lLevel.at ( 0 ) ) ) << "' :\n"
+             << "\t\tcase '" << char ( std::toupper ( lLevel.at ( 0 ) ) ) << "' :\n"
+             << "\t\t\tsetLogLevelTo ( " << lLevel << "() );\n"
              << "\t\t\tbreak;\n";
   }
 
@@ -159,9 +159,9 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
   aCppFile << "void disableLogging()\n"
            << "{\n";
 
-  for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+  for ( const auto& lLevel: gLogLevels )
   {
-    aCppFile << "\tlog_configuration::mLoggingIncludes" << *lIt << " = false;\n";
+    aCppFile << "\tlog_configuration::mLoggingIncludes" << lLevel << " = false;\n";
   }
 
   aCppFile << "}\n"
@@ -242,29 +242,29 @@ void log_configuration_functions ( std::ofstream& aHppFile , std::ofstream& aHxx
            << "\n";
   bool lIncludeLevelByDefault ( true );
 
-  for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+  for ( const auto& lLevel: gLogLevels )
   {
-    aHppFile << "\t//! static bool storing whether the " << *lIt << " level is to be included in the log output\n"
-             << "\tstatic bool mLoggingIncludes" << *lIt << ";\n";
+    aHppFile << "\t//! static bool storing whether the " << lLevel << " level is to be included in the log output\n"
+             << "\tstatic bool mLoggingIncludes" << lLevel << ";\n";
 
     if ( lIncludeLevelByDefault )
     {
-      aCppFile << "bool log_configuration::mLoggingIncludes" << *lIt << " = true; // No #ifdefs required here since they are implemented in all the access functions.\n";
+      aCppFile << "bool log_configuration::mLoggingIncludes" << lLevel << " = true; // No #ifdefs required here since they are implemented in all the access functions.\n";
     }
     else
     {
-      aCppFile << "bool log_configuration::mLoggingIncludes" << *lIt << " = false; // No #ifdefs required here since they are implemented in all the access functions.\n";
+      aCppFile << "bool log_configuration::mLoggingIncludes" << lLevel << " = false; // No #ifdefs required here since they are implemented in all the access functions.\n";
     }
 
-    if ( *lIt == gDefaultLevel )
+    if ( lLevel == gDefaultLevel )
     {
       lIncludeLevelByDefault = false;
     }
 
     aHppFile << "\t//!Make setLogLevelTo function a friend so it can access our private members\n"
-             << "\tfriend void setLogLevelTo ( const " << *lIt << "Level& );\n"
+             << "\tfriend void setLogLevelTo ( const " << lLevel << "Level& );\n"
              << "\t//!Make LoggingIncludes function a friend so it can access our private members\n"
-             << "\tfriend const bool& LoggingIncludes ( const " << *lIt << "Level& );\n"
+             << "\tfriend const bool& LoggingIncludes ( const " << lLevel << "Level& );\n"
              << "\n";
   }
 
@@ -310,16 +310,16 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
 {
   std::stringstream lIfDefs , lEndIfs;
 
-  for ( std::vector< std::string >::const_iterator lIt = gLogLevels.begin() ; lIt != gLogLevels.end() ; ++lIt )
+  for ( const auto& lLevel: gLogLevels )
   {
-    lIfDefs << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( *lIt ) << "\n";
+    lIfDefs << "\t#ifndef LOGGING_EXCLUDE_" << boost::to_upper_copy ( lLevel ) << "\n";
     lEndIfs << "\t#endif\n";
     std::stringstream lTemplates;
     std::stringstream lArgs;
     std::stringstream lInstructions;
     std::stringstream lDoxygen;
-    lDoxygen << "\t\tFunction to add a log entry at " << *lIt << " level\n"
-             << "\t\t@param a" << *lIt << " a dummy parameter to choose the specialization of the function for the " << *lIt << " level\n";
+    lDoxygen << "\t\tFunction to add a log entry at " << lLevel << " level\n"
+             << "\t\t@param a" << lLevel << " a dummy parameter to choose the specialization of the function for the " << lLevel << " level\n";
 
     for ( uint32_t i = 0 ; i!=MAX_NUM_ARGS ; ++i )
     {
@@ -335,20 +335,20 @@ void log_functions ( std::ofstream& aHppFile , std::ofstream& aHxxFile , std::of
                << lDoxygen.str()
                << "\t*/\n"
                << "\ttemplate<" << lTemplatesStr << ">\n"
-               //               << "\tvoid operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << ");\n"
-               << "\tvoid log ( " <<*lIt << "Level& a" << *lIt << " ," << lArgsStr << ");\n"
+               //               << "\tvoid operator() ( const " <<lLevel << "& a" << lLevel << " ," << lArgsStr << ");\n"
+               << "\tvoid log ( " <<lLevel << "Level& a" << lLevel << " ," << lArgsStr << ");\n"
                << "\n";
       aHxxFile << "template<" << lTemplatesStr << ">\n"
-               //               << "void logger::operator() ( const " <<*lIt << "& a" << *lIt << " ," << lArgsStr << " )\n"
-               << "void log (  " <<*lIt << "Level& a" << *lIt << " ," << lArgsStr << " )\n"
+               //               << "void logger::operator() ( const " <<lLevel << "& a" << lLevel << " ," << lArgsStr << " )\n"
+               << "void log (  " <<lLevel << "Level& a" << lLevel << " ," << lArgsStr << " )\n"
                << "{\n"
                << lIfDefs.str()
-               << "\t\tif( LoggingIncludes( a" << *lIt << " ) ){\n"
+               << "\t\tif( LoggingIncludes( a" << lLevel << " ) ){\n"
                << "\t\t\tstd::lock_guard<std::mutex> lLock ( GetLoggingMutex() );\n"
-               << "\t\t\tstd::ostream& lStr( a" << *lIt << ".stream() );\n"
-               << "\t\t\ta" << *lIt << ".head();\n"
+               << "\t\t\tstd::ostream& lStr( a" << lLevel << ".stream() );\n"
+               << "\t\t\ta" << lLevel << ".head();\n"
                << lInstructions.str()
-               << "\t\t\ta" << *lIt << ".tail();\n"
+               << "\t\t\ta" << lLevel << ".tail();\n"
                << "\t\t}\n"
                << lEndIfs.str()
                << "}\n"

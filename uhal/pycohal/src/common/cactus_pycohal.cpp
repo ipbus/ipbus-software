@@ -52,9 +52,9 @@ namespace pycohal
       boost::algorithm::split ( sVec, aString, boost::algorithm::is_any_of ( "," ) );
       result.reserve ( sVec.size() );
 
-      for ( std::vector<std::string>::const_iterator it = sVec.begin(); it != sVec.end(); it++ )
+      for ( const auto& x: sVec )
       {
-        result.push_back ( boost::lexical_cast<T> ( *it ) );
+        result.push_back ( boost::lexical_cast<T> ( x ) );
       }
     }
 

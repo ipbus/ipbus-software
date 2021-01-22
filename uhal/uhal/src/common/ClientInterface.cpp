@@ -149,11 +149,11 @@ namespace uhal
 #ifdef NO_PREEMPTIVE_DISPATCH
       log ( Info() , "mNoPreemptiveDispatchBuffers.size() = " , Integer ( mNoPreemptiveDispatchBuffers.size() ) );
 
-      for ( std::deque < std::shared_ptr< Buffers > >::iterator lIt = mNoPreemptiveDispatchBuffers.begin(); lIt != mNoPreemptiveDispatchBuffers.end(); ++lIt )
+      for (auto& lBuffer: mNoPreemptiveDispatchBuffers)
       {
-        this->predispatch ( *lIt );
-        this->implementDispatch ( *lIt ); //responsibility for *lIt passed to the implementDispatch function
-        lIt->reset();
+        this->predispatch ( lBuffer );
+        this->implementDispatch ( lBuffer ); //responsibility for lBuffer passed to the implementDispatch function
+        lBuffer.reset();
       }
 
       {
@@ -233,12 +233,10 @@ namespace uhal
   {
     std::lock_guard<std::mutex> lLock ( mBufferMutex );
 
-    for ( std::deque < std::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
+    for (auto& lBuf : aBuffers)
     {
-      if ( *lIt )
-      {
-        mBuffers.push_back ( *lIt );
-      }
+      if (lBuf)
+        mBuffers.push_back(lBuf);
     }
 
     aBuffers.clear();
@@ -249,12 +247,10 @@ namespace uhal
   {
     std::lock_guard<std::mutex> lLock ( mBufferMutex );
 
-    for ( std::vector < std::shared_ptr< Buffers > >::iterator lIt = aBuffers.begin(); lIt != aBuffers.end(); ++lIt )
+    for (auto& lBuf: aBuffers)
     {
-      if ( *lIt )
-      {
-        mBuffers.push_back ( *lIt );
-      }
+      if (lBuf)
+        mBuffers.push_back (lBuf);
     }
 
     aBuffers.clear();

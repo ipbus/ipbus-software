@@ -27,11 +27,11 @@ namespace uhal {
 #endif
 
       std::cout << "This is " << ss.str() << std::endl;
-      const std::unordered_map<std::string, std::string>& lParameters = getParameters();
-      std::unordered_map<std::string, std::string>::const_iterator it;
       uint32_t k = 0;
-      for (it = lParameters.begin(); it != lParameters.end(); ++it, ++k)
-        std::cout << ss.str() << " par[" << k << "]: key=" << it->first << ", val=" << it->second << std::endl;
+      for (const auto& lParam: getParameters()) {
+        std::cout << ss.str() << " par[" << k << "]: key=" << lParam.first << ", val=" << lParam.second << std::endl;
+        k++;
+      }
 
       // print the list of childs as well?
     }

@@ -177,10 +177,8 @@ namespace uhal
 
   void NodeTreeBuilder::clearAddressFileCache()
   {
-    for(std::unordered_map<std::string, const Node*>::const_iterator it=mNodes.begin(); it != mNodes.end(); it++)
-    {
-      delete it->second;
-    } 
+    for(const auto& x: mNodes)
+      delete x.second;
     mNodes.clear();
   }
 
@@ -550,10 +548,8 @@ namespace uhal
         aNode->mChildren.push_back ( mNodeParser ( lXmlNode ) );
       }
 
-      for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
-      {
-        aNode->mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
-      }
+      for (const auto& lChild: aNode->mChildren)
+        aNode->mChildrenMap.insert ( std::make_pair ( lChild->mUid , lChild ) );
     }
   }
 
@@ -570,12 +566,10 @@ namespace uhal
         // bool lAnyMasked( false );
         bool lAllMasked ( true );
 
-        for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+        for (Node* lChild: aNode->mChildren)
         {
-          if ( ( **lIt ).mMask == defs::NOMASK )
-          {
+          if ( lChild->mMask == defs::NOMASK )
             lAllMasked = false;
-          }
 
           // else
           // {
@@ -628,10 +622,10 @@ namespace uhal
 
     aNode->mAddr = aNode->mPartialAddr + aAddr;
 
-    for ( std::vector< Node* >::iterator lIt = aNode->mChildren.begin(); lIt != aNode->mChildren.end(); ++lIt )
+    for (Node* lChild: aNode->mChildren)
     {
-      ( **lIt ).mParent = aNode;
-      calculateHierarchicalAddresses ( *lIt , aNode->mAddr );
+      lChild->mParent = aNode;
+      calculateHierarchicalAddresses ( lChild , aNode->mAddr );
     }
 
     std::sort ( aNode->mChildren.begin() , aNode->mChildren.end() , detail::compareNodeAddr );

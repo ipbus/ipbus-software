@@ -47,9 +47,9 @@ namespace uhal {
     aStr << " > NameValuePairs =\n" << aHttpResponse.headers << "\n";
     aStr << " > Content =\n";
 
-    for ( std::vector<uint8_t>::const_iterator lIt = aHttpResponse.content.begin() ; lIt != aHttpResponse.content.end() ; ++lIt )
+    for ( auto& x: aHttpResponse.content )
     {
-      aStr << char ( *lIt );
+      aStr << char ( x );
     }
 
     aStr << std::endl;

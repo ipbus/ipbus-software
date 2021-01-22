@@ -14,9 +14,6 @@ namespace pycohal
   /// Wrapper function for uhal::setLogLevelTo - converts pycohal::LogLevel enum values to C++ uhal log-level classes
   void setLogLevelTo ( const pycohal::LogLevel& logLevel );
 
-  /// Wrapper function for uhal::LoggingIncludes - converts pycohal::LogLevel enum values to C++ uhal log-level classes
-  const bool& LoggingIncludes ( const pycohal::LogLevel& logLevel );
-
   void wrap_enums(pybind11::module_&);
 
   void wrap_logging_functions(pybind11::module_&);
