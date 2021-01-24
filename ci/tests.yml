@@ -62,18 +62,6 @@ variables:
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
 
-.template_test:centos8-python38:
-  extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2020-06-13
-  needs:
-    - job: publish:yum:centos8-python38
-      artifacts: false
-  variables:
-    PYTHON: "python3.8"
-    REPO_URL_OS_SUBDIR: centos8_python38/x86_64
-    TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
-    YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
-
 
 .template_test_simpleInstall:
   stage: test
@@ -149,6 +137,9 @@ test_core:centos7:
 test_python:centos7:
   extends: .template_test:centos7
   <<: *test_python_jobScript
+  parallel:
+    matrix:
+      - PYTHON: [python2.7, python3.4, python3.6]
 
 test_gui:centos7:
   extends: .template_test:centos7
@@ -178,6 +169,9 @@ test_core:centos7-gcc8:
 test_python:centos7-gcc8:
   extends: .template_test:centos7-gcc8
   <<: *test_python_jobScript
+  parallel:
+    matrix:
+      - PYTHON: [python2.7, python3.4, python3.6]
 
 test_gui:centos7-gcc8:
   extends: .template_test:centos7-gcc8
@@ -199,6 +193,9 @@ test_core:centos8:
 test_python:centos8:
   extends: .template_test:centos8
   <<: *test_python_jobScript
+  parallel:
+    matrix:
+      - PYTHON: [python3.6, python3.8]
 
 test_tools:centos8:
   extends: .template_test:centos8
@@ -206,23 +203,6 @@ test_tools:centos8:
 
 test_controlhub:centos8:
   extends: .template_test:centos8
-  <<: *test_controlhub_plainScripts_jobScript
-
-
-test_core:centos8-python38:
-  extends: .template_test:centos8-python38
-  <<: *test_core_jobScript
-
-test_python:centos8-python38:
-  extends: .template_test:centos8-python38
-  <<: *test_python_jobScript
-
-test_tools:centos8-python38:
-  extends: .template_test:centos8-python38
-  <<: *test_tools_jobScript
-
-test_controlhub:centos8-python38:
-  extends: .template_test:centos8-python38
   <<: *test_controlhub_plainScripts_jobScript
 
 
