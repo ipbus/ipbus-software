@@ -8,8 +8,8 @@
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
   script:
     - cd .. && sudo rm -rf ipbus-software___ && mv ipbus-software ipbus-software___ && mkdir ipbus-software && cd ipbus-software___
-    - make -k Set=all BUILD_UHAL_PYCOHAL=0 BUILD_UHAL_GUI=0
-    - make -k Set=all BUILD_UHAL_PYCOHAL=0 BUILD_UHAL_GUI=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
+    - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0
+    - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - make -C uhal/log generate_files
     - git diff --exit-code
     - mkdir -p ${REPO_DIR}
@@ -20,12 +20,12 @@
         echo "PYTHON: ${PYTHON}"
         make -C uhal/gui PYTHON=$PYTHON
         make -C uhal/gui PYTHON=$PYTHON rpm
-        make -C uhal/pycohal PYTHON=$PYTHON
-        make -C uhal/pycohal PYTHON=$PYTHON rpm
-        cp -v `find uhal/gui uhal/pycohal -iname "*.rpm"` ${REPO_DIR}
+        make -C uhal/python PYTHON=$PYTHON
+        make -C uhal/python PYTHON=$PYTHON rpm
+        cp -v `find uhal/gui uhal/python -iname "*.rpm"` ${REPO_DIR}
         make -C uhal/gui PYTHON=$PYTHON clean cleanrpm
-        make -C uhal/pycohal PYTHON=$PYTHON clean cleanrpm
-        echo
+        make -C uhal/python PYTHON=$PYTHON clean cleanrpm
+        echo &&
         echo
       done
     - ls ${REPO_DIR}
@@ -43,7 +43,7 @@ build:centos7:
   variables:
     OUTPUT_REPO_SUBDIR: centos7/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
-    YUMGROUPS_FILE: ci/yum/yumgroups.xml
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
 
 build:centos8:
   extends: .template_build_rpm_yumrepo
@@ -51,7 +51,7 @@ build:centos8:
   variables:
     OUTPUT_REPO_SUBDIR: centos8/x86_64
     PYTHONS: "python3.6 python3.8"
-    YUMGROUPS_FILE: ci/yum/yumgroups.xml
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos8.xml
 
 
 build:centos7-gcc8:
@@ -73,22 +73,22 @@ build:centos7-gcc8:
     - git diff
   script:
     - cd .. && sudo rm -rf ipbus-software___ && mv ipbus-software ipbus-software___ && mkdir ipbus-software && cd ipbus-software___
-    - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYCOHAL=0
-    - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYCOHAL=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
+    - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0
+    - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - mkdir -p ${REPO_DIR}
     - cp `find . -iname "*.rpm"` ${REPO_DIR}
     - cp ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
     - |
       for PYTHON in ${PYTHONS}; do
         echo "PYTHON: ${PYTHON}"
-        make -C uhal/gui PYTHON=$PYTHON
+        make -C uhal/gui PYTHON=$PYTHON BUILD_BOOST=1 BUILD_PUGIXML=1
         make -C uhal/gui PYTHON=$PYTHON rpm
-        make -C uhal/pycohal PYTHON=$PYTHON
-        make -C uhal/pycohal PYTHON=$PYTHON rpm
-        cp -v `find uhal/gui uhal/pycohal -iname "*.rpm"` ${REPO_DIR}
+        make -C uhal/python PYTHON=$PYTHON BUILD_BOOST=1 BUILD_PUGIXML=1
+        make -C uhal/python PYTHON=$PYTHON rpm
+        cp -v `find uhal/gui uhal/python -iname "*.rpm"` ${REPO_DIR}
         make -C uhal/gui PYTHON=$PYTHON clean cleanrpm
-        make -C uhal/pycohal PYTHON=$PYTHON clean cleanrpm
-        echo
+        make -C uhal/python PYTHON=$PYTHON clean cleanrpm
+        echo &&
         echo
       done
     - ls ${REPO_DIR}

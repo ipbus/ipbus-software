@@ -10,8 +10,8 @@ gui/dist/
 
 log/generator.exe
 
-pycohal/MANIFEST
-pycohal/build/
-pycohal/dist/
-pycohal/pkg/uhal/__init__.pyc
-pycohal/pkg/uhal/_core.so
+python/MANIFEST
+python/build/
+python/dist/
+python/pkg/uhal/__init__.pyc
+python/pkg/uhal/_core.so

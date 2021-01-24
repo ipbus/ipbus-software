@@ -17,6 +17,7 @@ variables:
     - sudo rpm --rebuilddb && sudo yum clean all 
     - sudo yum -y groupinstall ${YUM_GROUPINSTALL_ARGUMENTS} uhal controlhub
     - if [[ ! "$REPO_URL_OS_SUBDIR" =~ ^centos8.+ ]]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
+    - if [[ -n "$UHAL_PYTHON_RPM" ]]; then sudo yum -y install $UHAL_PYTHON_RPM; fi
     - rpm -qa | grep cactus | sort
 
 .template_test:centos7:
@@ -139,7 +140,12 @@ test_python:centos7:
   <<: *test_python_jobScript
   parallel:
     matrix:
-      - PYTHON: [python2.7, python3.4, python3.6]
+      - PYTHON: python2.7
+        UHAL_PYTHON_RPM: cactuscore-uhal-python27
+      - PYTHON: python3.4
+        UHAL_PYTHON_RPM: cactuscore-uhal-python34
+      - PYTHON: python3.6
+        UHAL_PYTHON_RPM: cactuscore-uhal-python36
 
 test_gui:centos7:
   extends: .template_test:centos7
@@ -171,7 +177,12 @@ test_python:centos7-gcc8:
   <<: *test_python_jobScript
   parallel:
     matrix:
-      - PYTHON: [python2.7, python3.4, python3.6]
+      - PYTHON: python2.7
+        UHAL_PYTHON_RPM: cactuscore-uhal-python27
+      - PYTHON: python3.4
+        UHAL_PYTHON_RPM: cactuscore-uhal-python34
+      - PYTHON: python3.6
+        UHAL_PYTHON_RPM: cactuscore-uhal-python36
 
 test_gui:centos7-gcc8:
   extends: .template_test:centos7-gcc8
@@ -195,7 +206,10 @@ test_python:centos8:
   <<: *test_python_jobScript
   parallel:
     matrix:
-      - PYTHON: [python3.6, python3.8]
+      - PYTHON: python3.6
+        UHAL_PYTHON_RPM: cactuscore-uhal-python36
+      - PYTHON: python3.8
+        UHAL_PYTHON_RPM: cactuscore-uhal-python38
 
 test_tools:centos8:
   extends: .template_test:centos8

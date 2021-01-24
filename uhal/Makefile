@@ -7,7 +7,7 @@ PACKAGES = \
 	grammars \
 	uhal \
 	tests \
-	pycohal \
+	python \
 	gui \
 	tools
 
@@ -17,9 +17,9 @@ ifneq ($(BUILD_UHAL_TESTS), 1)
 	PACKAGES := $(filter-out tests, $(PACKAGES))
 endif
 
-BUILD_UHAL_PYCOHAL?=1
-ifneq ($(BUILD_UHAL_PYCOHAL), 1)
-	PACKAGES := $(filter-out pycohal, $(PACKAGES))
+BUILD_UHAL_PYTHON?=1
+ifneq ($(BUILD_UHAL_PYTHON), 1)
+	PACKAGES := $(filter-out python, $(PACKAGES))
 endif
 
 BUILD_UHAL_GUI?=1
