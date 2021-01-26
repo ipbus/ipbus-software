@@ -3,10 +3,13 @@ BUILD_HOME = $(shell pwd)/../..
 include $(BUILD_HOME)/config/Makefile.macros
 include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
+PYTHON_VERSION_MAJOR_MINOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
+
+
 Project = uhal
-Package = uhal/pycohal
+Package = uhal/python
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
-PackageName = cactuscore-uhal-pycohal
+PackageName = cactuscore-uhal-python${PYTHON_VERSION_MAJOR_MINOR}
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 7
@@ -58,7 +61,8 @@ Libraries = \
 		util
 
 
-CXXFLAGS += -ftemplate-depth-128 -O0 -rdynamic -finline-functions -Wno-inline -DNDEBUG
+CXXFLAGS += -ftemplate-depth-128 -O0 -rdynamic -finline-functions -Wno-inline -DNDEBUG $(shell ${PYTHON}-config --includes)
+LDFLAGS += $(shell ${PYTHON}-config --libs)
 
 ifeq (${CACTUS_OS},osx)
   CXXFLAGS += -Wno-c++11-extensions

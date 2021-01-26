@@ -90,15 +90,13 @@ namespace uhal
     mChildrenMap ( )
   {
     mChildren.reserve(aNode.mChildren.size());
-    for ( std::vector< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
-    {
-      mChildren.push_back ( ( **lIt ).clone() );
-    }
+    for (Node* lChild : aNode.mChildren)
+      mChildren.push_back (lChild->clone());
 
-    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for (Node* lChild : mChildren)
     {
-      ( **lIt ).mParent = this;
-      mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
+      lChild->mParent = this;
+      mChildrenMap.insert ( std::make_pair ( lChild->mUid , lChild ) );
     }
   }
 
@@ -119,12 +117,12 @@ namespace uhal
     mClassName = aNode.mClassName;
     mParameters = aNode.mParameters;
 
-    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for (Node* lChild: mChildren)
     {
-      if ( *lIt )
+      if (lChild)
       {
-        delete ( *lIt );
-        ( *lIt ) = NULL;
+        delete lChild;
+        lChild = NULL;
       }
     }
 
@@ -132,15 +130,13 @@ namespace uhal
     mChildrenMap.clear();
 
     mChildren.reserve(aNode.mChildren.size());
-    for ( std::vector< Node* >::const_iterator lIt = aNode.mChildren.begin(); lIt != aNode.mChildren.end(); ++lIt )
-    {
-      mChildren.push_back ( ( **lIt ).clone() );
-    }
+    for (Node* lNode: aNode.mChildren)
+      mChildren.push_back ( lNode->clone() );
 
-    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for (Node* lNode: mChildren)
     {
-      ( **lIt ).mParent = this;
-      mChildrenMap.insert ( std::make_pair ( ( **lIt ).mUid , *lIt ) );
+      lNode->mParent = this;
+      mChildrenMap.insert ( std::make_pair ( lNode->mUid , lNode ) );
     }
 
     return *this;
@@ -155,12 +151,12 @@ namespace uhal
 
   Node::~Node()
   {
-    for ( std::vector< Node* >::iterator lIt = mChildren.begin(); lIt != mChildren.end(); ++lIt )
+    for (Node* lNode: mChildren)
     {
-      if ( *lIt )
+      if (lNode)
       {
-        delete ( *lIt );
-        ( *lIt ) = NULL;
+        delete lNode;
+        lNode = NULL;
       }
     }
 
@@ -204,11 +200,11 @@ namespace uhal
     getAncestors ( lPath );
     std::string lRet;
 
-    for ( std::deque< const Node* >::iterator lIt ( lPath.begin() ) ; lIt != lPath.end() ; ++lIt )
+    for (const Node* lNode: lPath)
     {
-      if ( ( **lIt ).mUid.size() )
+      if ( lNode->mUid.size() )
       {
-        lRet += ( **lIt ).mUid;
+        lRet += lNode->mUid;
         lRet += ".";
       }
     }

@@ -3,10 +3,13 @@ BUILD_HOME = $(shell pwd)/../..
 include $(BUILD_HOME)/config/Makefile.macros
 include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
+PYTHON_VERSION_MAJOR_MINOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
+
+
 Project = uhal
 Package = uhal/gui
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
-PackageName = cactuscore-uhal-gui
+PackageName = cactuscore-uhal-python${PYTHON_VERSION_MAJOR_MINOR}-gui
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 7

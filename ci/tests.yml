@@ -17,11 +17,12 @@ variables:
     - sudo rpm --rebuilddb && sudo yum clean all 
     - sudo yum -y groupinstall ${YUM_GROUPINSTALL_ARGUMENTS} uhal controlhub
     - if [[ ! "$REPO_URL_OS_SUBDIR" =~ ^centos8.+ ]]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
+    - if [[ -n "$UHAL_PYTHON_RPM" ]]; then sudo yum -y install $UHAL_PYTHON_RPM; fi
     - rpm -qa | grep cactus | sort
 
 .template_test:centos7:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2020-06-13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2021-01-26
   needs:
     - job: publish:yum:centos7
       artifacts: false
@@ -32,7 +33,7 @@ variables:
 
 .template_test:centos7:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2020-06-13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2021-01-26
   needs:
     - job: publish:yum:centos7
       artifacts: false
@@ -52,25 +53,13 @@ variables:
 
 .template_test:centos8:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2020-06-13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2021-01-26
   needs:
     - job: publish:yum:centos8
       artifacts: false
   variables:
     PYTHON: "python3.6"
     REPO_URL_OS_SUBDIR: centos8/x86_64
-    TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
-    YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
-
-.template_test:centos8-python38:
-  extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2020-06-13
-  needs:
-    - job: publish:yum:centos8-python38
-      artifacts: false
-  variables:
-    PYTHON: "python3.8"
-    REPO_URL_OS_SUBDIR: centos8_python38/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
 
@@ -84,7 +73,7 @@ variables:
 
 .template_test:fedora33:
   extends: .template_test_simpleInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:feature-update-alt-os__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:2021-01-26__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
   needs:
     - build:fedora33
   variables:
@@ -93,7 +82,7 @@ variables:
 
 .template_test:ubuntu20:
   extends: .template_test_simpleInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:feature-update-alt-os__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:2021-01-26__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10
   needs:
     - build:ubuntu20
   variables:
@@ -149,6 +138,14 @@ test_core:centos7:
 test_python:centos7:
   extends: .template_test:centos7
   <<: *test_python_jobScript
+  parallel:
+    matrix:
+      - PYTHON: python2.7
+        UHAL_PYTHON_RPM: cactuscore-uhal-python27
+      - PYTHON: python3.4
+        UHAL_PYTHON_RPM: cactuscore-uhal-python34
+      - PYTHON: python3.6
+        UHAL_PYTHON_RPM: cactuscore-uhal-python36
 
 test_gui:centos7:
   extends: .template_test:centos7
@@ -178,6 +175,14 @@ test_core:centos7-gcc8:
 test_python:centos7-gcc8:
   extends: .template_test:centos7-gcc8
   <<: *test_python_jobScript
+  parallel:
+    matrix:
+      - PYTHON: python2.7
+        UHAL_PYTHON_RPM: cactuscore-uhal-python27
+      - PYTHON: python3.4
+        UHAL_PYTHON_RPM: cactuscore-uhal-python34
+      - PYTHON: python3.6
+        UHAL_PYTHON_RPM: cactuscore-uhal-python36
 
 test_gui:centos7-gcc8:
   extends: .template_test:centos7-gcc8
@@ -199,6 +204,12 @@ test_core:centos8:
 test_python:centos8:
   extends: .template_test:centos8
   <<: *test_python_jobScript
+  parallel:
+    matrix:
+      - PYTHON: python3.6
+        UHAL_PYTHON_RPM: cactuscore-uhal-python36
+      - PYTHON: python3.8
+        UHAL_PYTHON_RPM: cactuscore-uhal-python38
 
 test_tools:centos8:
   extends: .template_test:centos8
@@ -206,23 +217,6 @@ test_tools:centos8:
 
 test_controlhub:centos8:
   extends: .template_test:centos8
-  <<: *test_controlhub_plainScripts_jobScript
-
-
-test_core:centos8-python38:
-  extends: .template_test:centos8-python38
-  <<: *test_core_jobScript
-
-test_python:centos8-python38:
-  extends: .template_test:centos8-python38
-  <<: *test_python_jobScript
-
-test_tools:centos8-python38:
-  extends: .template_test:centos8-python38
-  <<: *test_tools_jobScript
-
-test_controlhub:centos8-python38:
-  extends: .template_test:centos8-python38
   <<: *test_controlhub_plainScripts_jobScript
 
 

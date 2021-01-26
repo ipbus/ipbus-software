@@ -10,9 +10,11 @@ PackageURL ?= None
 
 CACTUS_ROOT ?= /opt/cactus
 
-RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},).python${PYTHON_VERSION}
+RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
 
-PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "from sys import version_info; print('python' + str(version_info[0]))")
+PYTHON_MAJOR_COMMAND := $(shell ${PYTHON} -c "import sys; print('python{}'.format(sys.version_info.major))")
+PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "import sys; print('python{}.{}'.format(sys.version_info.major,sys.version_info.minor))")
+PYTHON_RPM_CAPABILITY := $(shell ${PYTHON} -c "import sys; print('python' + str(sys.version_info.major) + (str(sys.version_info.minor) if sys.version_info.major > 2 else ''))")
 BUILD_ARCH = $(shell rpm --eval "%{_target_cpu}")
 
 # By default, install Python bindings using same prefix & exec_prefix as main Python installation
@@ -44,9 +46,10 @@ _rpmbuild: _setup_update
 	  LIB_REQUIRES=$$(find ${RPMBUILD_DIR} -type f -print0 | xargs -0 -n1 -I {} file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' ') && \
 	  ${PYTHON} ${PackageName}.py bdist_rpm --spec-only \
 	    --release ${PACKAGE_RELEASE}.${RPM_RELEASE_SUFFIX} \
-	    --requires "${PYTHON_VERSIONED_COMMAND} $$LIB_REQUIRES" \
+	    --requires "${PYTHON_RPM_CAPABILITY} $$LIB_REQUIRES" \
 	    --force-arch=${BUILD_ARCH} \
 	    --binary-only
+	sed -i "s|^"${PYTHON_MAJOR_COMMAND}" |"${PYTHON_VERSIONED_COMMAND}" |" ${RPMBUILD_DIR}/dist/*.spec
 	cd ${RPMBUILD_DIR} && \
 	  bindir=$(bindir) ${PYTHON} ${PackageName}.py sdist
 	mkdir -p ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES

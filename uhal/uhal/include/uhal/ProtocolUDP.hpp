@@ -179,6 +179,9 @@ namespace uhal
       void WaitOnConditionalVariable();
 
     private:
+      //! The maximum UDP payload size (in bytes)
+      size_t mMaxPayloadSize;
+
       //! The boost::asio::io_service used to create the connections
       boost::asio::io_service mIOservice;
 

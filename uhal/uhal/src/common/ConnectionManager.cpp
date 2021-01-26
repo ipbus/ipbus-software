@@ -110,10 +110,8 @@ namespace uhal
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles;	//protocol, filename
     uhal::utilities::ParseSemicolonDelimitedUriList ( aFilenameExpr , lConnectionFiles );
 
-    for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = lConnectionFiles.begin() ; lIt != lConnectionFiles.end() ; ++lIt )
-    {
-      uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , std::bind ( &ConnectionManager::CallBack, this , arg::_1 , arg::_2 , arg::_3 ) );
-    }
+    for (const auto& x: lConnectionFiles)
+      uhal::utilities::OpenFile ( x.first , x.second , boost::filesystem::current_path() , std::bind ( &ConnectionManager::CallBack, this , arg::_1 , arg::_2 , arg::_3 ) );
   }
 
 
@@ -125,10 +123,8 @@ namespace uhal
     std::vector< std::pair<std::string, std::string> >  lConnectionFiles; //protocol, filename
     uhal::utilities::ParseSemicolonDelimitedUriList ( aFilenameExpr , lConnectionFiles );
 
-    for ( std::vector< std::pair<std::string, std::string> >::iterator lIt = lConnectionFiles.begin() ; lIt != lConnectionFiles.end() ; ++lIt )
-    {
-      uhal::utilities::OpenFile ( lIt->first , lIt->second , boost::filesystem::current_path() , std::bind ( &ConnectionManager::CallBack, this , arg::_1 , arg::_2 , arg::_3 ) );
-    }
+    for (const auto& x: lConnectionFiles)
+      uhal::utilities::OpenFile ( x.first , x.second , boost::filesystem::current_path() , std::bind ( &ConnectionManager::CallBack, this , arg::_1 , arg::_2 , arg::_3 ) );
   }
 
 

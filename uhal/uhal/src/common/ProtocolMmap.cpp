@@ -272,19 +272,19 @@ Mmap::Mmap ( const std::string& aId, const URI& aUri ) :
 
   mSleepDuration = std::chrono::microseconds(50);
 
-  for (NameValuePairVectorType::const_iterator lIt = aUri.mArguments.begin(); lIt != aUri.mArguments.end(); lIt++) {
-    if (lIt->first == "sleep") {
-      mSleepDuration = std::chrono::microseconds(boost::lexical_cast<size_t>(lIt->second));
-      log (Notice() , "mmap client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lIt->second), " us by URI 'sleep' attribute");
+  for (const auto& lArg: aUri.mArguments) {
+    if (lArg.first == "sleep") {
+      mSleepDuration = std::chrono::microseconds(boost::lexical_cast<size_t>(lArg.second));
+      log (Notice() , "mmap client with URI ", Quote (uri()), " : Inter-poll-/-interrupt sleep duration set to ", boost::lexical_cast<size_t>(lArg.second), " us by URI 'sleep' attribute");
     }
-    else if (lIt->first == "offset") {
-      const bool lIsHex = (lIt->second.find("0x") == 0) or (lIt->second.find("0X") == 0);
-      const size_t lOffset = (lIsHex ? boost::lexical_cast<HexTo<size_t> >(lIt->second) : boost::lexical_cast<size_t>(lIt->second));
+    else if (lArg.first == "offset") {
+      const bool lIsHex = (lArg.second.find("0x") == 0) or (lArg.second.find("0X") == 0);
+      const size_t lOffset = (lIsHex ? boost::lexical_cast<HexTo<size_t> >(lArg.second) : boost::lexical_cast<size_t>(lArg.second));
       mDeviceFile.setOffset(lOffset);
       log (Notice(), "mmap client with URI ", Quote (uri()), " : Address offset set to ", Integer(lOffset, IntFmt<hex>()));
     }
     else {
-      log (Warning() , "Unknown attribute ", Quote (lIt->first), " used in URI ", Quote(uri()));
+      log (Warning() , "Unknown attribute ", Quote (lArg.first), " used in URI ", Quote(uri()));
     }
   }
 }
@@ -457,14 +457,14 @@ void Mmap::read()
     log (Warning(), "Expected reply packet to contain ", Integer(lBuffers->replyCounter() >> 2), " words, but it actually contains ", Integer(lNrWordsInPacket), " words");
 
   size_t lNrBytesCopied = 0;
-  for ( std::deque< std::pair< uint8_t* , uint32_t > >::const_iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+  for (const auto& lBuffers: lReplyBuffers)
   {
     // Don't copy more of page than was written to, for cases when less data received than expected
     if ( lNrBytesCopied >= 4*lNrWordsInPacket)
       break;
 
-    size_t lNrBytesToCopy = std::min( lIt->second , uint32_t(4*lNrWordsInPacket - lNrBytesCopied) );
-    memcpy ( lIt->first, &lPageContents.at(1 + (lNrBytesCopied / 4)), lNrBytesToCopy );
+    size_t lNrBytesToCopy = std::min( lBuffers.second , uint32_t(4*lNrWordsInPacket - lNrBytesCopied) );
+    memcpy ( lBuffers.first, &lPageContents.at(1 + (lNrBytesCopied / 4)), lNrBytesToCopy );
     lNrBytesCopied += lNrBytesToCopy;
   }
 

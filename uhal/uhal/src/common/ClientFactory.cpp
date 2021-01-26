@@ -112,16 +112,14 @@ namespace uhal
     }
 
     log ( Info() , "URI " , Quote ( aUri ) , " parsed as:\n" , lUri );
-    std::unordered_map< std::string , ClientInfo >::const_iterator lIt = mClientMap.find ( lUri.mProtocol );
+    const auto lIt = mClientMap.find ( lUri.mProtocol );
 
     if ( lIt == mClientMap.end() )
     {
       std::stringstream lStr;
 
-      for (lIt = mClientMap.begin() ; lIt != mClientMap.end() ; ++lIt )
-      {
-        lStr << "\n > " << lIt->first << "\t: " << lIt->second.description;
-      }
+      for (const auto& c: mClientMap)
+        lStr << "\n > " << c.first << "\t: " << c.second.description;
 
       exception::ProtocolDoesNotExist lExc;
       log ( lExc , "Protocol " , Quote ( lUri.mProtocol ) , " does not exists in map of creators. Options are:" , lStr.str() );

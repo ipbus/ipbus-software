@@ -106,20 +106,14 @@ namespace uhal
 
   void Buffers::validate ( )
   {
-    for ( std::deque< ValHeader >::iterator lIt = mValHeaders.begin() ; lIt != mValHeaders.end() ; ++lIt )
-    {
-      lIt->valid ( true );
-    }
+    for (auto& x: mValHeaders)
+      x.valid ( true );
 
-    for ( std::deque< ValWord< uint32_t > >::iterator lIt = mUnsignedValWords.begin() ; lIt != mUnsignedValWords.end() ; ++lIt )
-    {
-      lIt->valid ( true );
-    }
+    for (auto& x: mUnsignedValWords)
+      x.valid ( true );
 
-    for ( std::deque< ValVector< uint32_t > >::iterator lIt = mUnsignedValVectors.begin() ; lIt != mUnsignedValVectors.end() ; ++lIt )
-    {
-      lIt->valid ( true );
-    }
+    for (auto& x: mUnsignedValVectors)
+      x.valid ( true );
   }
 
 

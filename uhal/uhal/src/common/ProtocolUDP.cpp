@@ -58,11 +58,12 @@ namespace uhal
   template < typename InnerProtocol >
   UDP< InnerProtocol >::UDP ( const std::string& aId, const URI& aUri ) :
     InnerProtocol ( aId , aUri ),
+    mMaxPayloadSize (350 * 4),
     mIOservice ( ),
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
-    mReplyMemory ( 1500 , 0x00000000 ),
+    mReplyMemory ( ),
     mIOserviceWork ( mIOservice ),
     mDispatchThread ( [this] () { mIOservice.run(); } ),
     mDispatchQueue(),
@@ -72,6 +73,23 @@ namespace uhal
     mAsynchronousException ( NULL )
   {
     mDeadlineTimer.async_wait ([this] (const boost::system::error_code&) { this->CheckDeadline(); });
+
+    // Extract value of 'max_payload_size' attribute, if present
+    for (const auto& lArg : aUri.mArguments) {
+      if (lArg.first == "max_payload_size") {
+        try {
+          mMaxPayloadSize = boost::lexical_cast<size_t>(lArg.second);
+        }
+        catch (const boost::bad_lexical_cast&) {
+          throw exception::InvalidURI("Client URI \"" + this->uri() + "\": Invalid value, \"" + lArg.second + "\", specified for attribute \"" + lArg.first + "\"");
+        }
+        log (Info(), "Client with URI ", Quote(this->uri()), ": Maximum UDP payload size set to ", std::to_string(mMaxPayloadSize), " bytes");
+      }
+      else
+        throw exception::InvalidURI("Client URI \"" + this->uri() + "\" has unexpected attribute \"" + lArg.first + "\"");
+    }
+
+    mReplyMemory.resize(mMaxPayloadSize + 20, 0x00000000);
   }
 
 
@@ -131,14 +149,14 @@ namespace uhal
   template < typename InnerProtocol >
   uint32_t UDP< InnerProtocol >::getMaxSendSize()
   {
-    return (350 * 4);
+    return mMaxPayloadSize;
   }
 
 
   template < typename InnerProtocol >
   uint32_t UDP< InnerProtocol >::getMaxReplySize()
   {
-    return (350 * 4);
+    return mMaxPayloadSize;
   }
 
 
@@ -326,16 +344,14 @@ namespace uhal
     std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( mReplyBuffers->getReplyBuffer() );
     uint8_t* lReplyBuf ( & ( mReplyMemory.at ( 0 ) ) );
 
-    for ( std::deque< std::pair< uint8_t* , uint32_t > >::iterator lIt = lReplyBuffers.begin() ; lIt != lReplyBuffers.end() ; ++lIt )
+    for (const auto& lBuffer: lReplyBuffers)
     {
       // Don't copy more of mReplyMemory than was written to, for cases when less data received than expected
       if ( static_cast<uint32_t> ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) >= aBytesTransferred )
-      {
         break;
-      }
 
-      uint32_t lNrBytesToCopy = std::min ( lIt->second , static_cast<uint32_t> ( aBytesTransferred - ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) ) );
-      memcpy ( lIt->first, lReplyBuf, lNrBytesToCopy );
+      uint32_t lNrBytesToCopy = std::min ( lBuffer.second , static_cast<uint32_t> ( aBytesTransferred - ( lReplyBuf - ( & mReplyMemory.at ( 0 ) ) ) ) );
+      memcpy ( lBuffer.first, lReplyBuf, lNrBytesToCopy );
       lReplyBuf += lNrBytesToCopy;
     }
 

@@ -30,7 +30,7 @@ if [ "$UNAME" == "Darwin" ]; then
   export DYLD_LIBRARY_PATH=$UHAL_BASE_DIR/tests/lib:$LD_LIBRARY_PATH
 fi
 
-export PYTHONPATH=$UHAL_BASE_DIR/pycohal/pkg:$PYTHONPATH
+export PYTHONPATH=$UHAL_BASE_DIR/python/pkg:$PYTHONPATH
 #export PYTHONPATH=$UHAL_BASE_DIR/gui:$PYTHONPATH
 
 export UHAL_ENABLE_IPBUS_MMAP=

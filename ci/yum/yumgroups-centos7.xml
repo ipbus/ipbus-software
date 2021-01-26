@@ -12,8 +12,8 @@
       <packagereq type="mandatory">cactuscore-uhal-log</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-uhal</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-tests</packagereq>
-      <packagereq type="mandatory">cactuscore-uhal-pycohal</packagereq>
-      <packagereq type="mandatory">cactuscore-uhal-gui</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-python27</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-python27-gui</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-tools</packagereq>
     </packagelist>
   </group>
@@ -42,8 +42,6 @@
       <packagereq type="mandatory">cactuscore-uhal-log-debuginfo</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-uhal-debuginfo</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-tests-debuginfo</packagereq>
-      <packagereq type="mandatory">cactuscore-uhal-pycohal-debuginfo</packagereq>
-      <packagereq type="mandatory">cactuscore-uhal-gui-debuginfo</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-tools-debuginfo</packagereq>
     </packagelist>
   </group>

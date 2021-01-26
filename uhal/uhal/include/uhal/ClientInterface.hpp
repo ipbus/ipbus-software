@@ -92,6 +92,8 @@ namespace uhal
     UHAL_DEFINE_EXCEPTION_CLASS ( ClientTimeout, "Base exception class covering timeouts when waiting for reply from device")
 
     UHAL_DEFINE_EXCEPTION_CLASS ( TransportLayerError, "Base exception class covering non-timeout transport-layer-specific errors.")
+
+    UHAL_DEFINE_EXCEPTION_CLASS ( InvalidURI, "Exception class for invalid URIs." )
   }
 
   //! An abstract base class for defining the interface to the various IPbus clients as well as providing the generalized packing functionality

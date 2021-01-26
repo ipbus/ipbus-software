@@ -8,14 +8,12 @@
     <uservisible>true</uservisible>
     <grouplist></grouplist>
     <packagelist>
-      <packagereq type="mandatory">cactuscore-extern-boost</packagereq>
-      <packagereq type="mandatory">cactuscore-extern-pugixml</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-grammars</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-log</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-uhal</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-tests</packagereq>
-      <packagereq type="mandatory">cactuscore-uhal-python27</packagereq>
-      <packagereq type="mandatory">cactuscore-uhal-python27-gui</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-python36</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-python36-gui</packagereq>
       <packagereq type="mandatory">cactuscore-uhal-tools</packagereq>
     </packagelist>
   </group>
