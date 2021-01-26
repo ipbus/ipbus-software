@@ -11,7 +11,7 @@
 
 build:centos7:static:
   extends: .template_build_simple
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-static:2020-06-13__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-static:2021-01-26__boost1.53.0_pugixml1.8
   variables:
     BUILD_STATIC: 1
 
@@ -19,10 +19,10 @@ build:fedora33:
   extends: .template_build_simple
   variables:
     PYTHON: python3.9
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:feature-update-alt-os__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:2021-01-26__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
 
 build:ubuntu20:
   extends: .template_build_simple
   variables:
     PYTHON: python3.8
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:feature-update-alt-os__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:2021-01-26__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10

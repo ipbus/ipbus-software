@@ -22,7 +22,7 @@ variables:
 
 .template_test:centos7:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2020-06-13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2021-01-26
   needs:
     - job: publish:yum:centos7
       artifacts: false
@@ -33,7 +33,7 @@ variables:
 
 .template_test:centos7:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2020-06-13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2021-01-26
   needs:
     - job: publish:yum:centos7
       artifacts: false
@@ -53,7 +53,7 @@ variables:
 
 .template_test:centos8:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2020-06-13
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2021-01-26
   needs:
     - job: publish:yum:centos8
       artifacts: false
@@ -73,7 +73,7 @@ variables:
 
 .template_test:fedora33:
   extends: .template_test_simpleInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:feature-update-alt-os__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-fedora33:2021-01-26__erlang23.2.1_gcc10.2.1_boost1.73.0_pugixml1.11.4
   needs:
     - build:fedora33
   variables:
@@ -82,7 +82,7 @@ variables:
 
 .template_test:ubuntu20:
   extends: .template_test_simpleInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:feature-update-alt-os__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-ubuntu20:2021-01-26__erlang22.2.7_gcc9.3.0_boost1.71.0_pugixml1.10
   needs:
     - build:ubuntu20
   variables:

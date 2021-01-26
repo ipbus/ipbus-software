@@ -39,7 +39,7 @@
 
 build:centos7:
   extends: .template_build_rpm_yumrepo
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7:feature-multiple-pythons__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7:2021-01-26__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
@@ -47,7 +47,7 @@ build:centos7:
 
 build:centos8:
   extends: .template_build_rpm_yumrepo
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:feature-multiple-pythons__boost1.66.0_pugixml1.11.4
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:2021-01-26__boost1.66.0_pugixml1.11.4
   variables:
     OUTPUT_REPO_SUBDIR: centos8/x86_64
     PYTHONS: "python3.6 python3.8"
@@ -56,7 +56,7 @@ build:centos8:
 
 build:centos7-gcc8:
   stage: build
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:feature-multiple-pythons
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:2021-01-26
   variables:
     OUTPUT_REPO_SUBDIR: centos7_gcc8/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
