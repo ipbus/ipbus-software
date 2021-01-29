@@ -31,7 +31,7 @@ PackageName = cactuscore-controlhub
 Packager = Tom Williams
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 7
+PACKAGE_VER_MINOR = 8
 PACKAGE_VER_PATCH = 0
 
 # This is the version number for the RPM packaging.

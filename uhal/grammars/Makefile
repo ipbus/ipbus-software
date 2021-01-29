@@ -9,8 +9,8 @@ PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-grammars
 
 PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 7
-PACKAGE_VER_PATCH = 9
+PACKAGE_VER_MINOR = 8
+PACKAGE_VER_PATCH = 0
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
 
 PackageSummary = uHAL Boost Spirit Grammars
