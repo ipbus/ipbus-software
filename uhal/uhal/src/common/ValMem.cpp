@@ -284,6 +284,13 @@ namespace uhal
 
 
   template< typename T >
+  T* ValVector< T >::data() const
+  {
+    return mMembers->value.data();
+  }
+
+
+  template< typename T >
   void ValVector< T >::clear()
   {
     mMembers->valid = false;
