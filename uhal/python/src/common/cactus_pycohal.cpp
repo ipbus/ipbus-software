@@ -260,7 +260,7 @@ PYBIND11_MODULE(_core, m)
     ;
 
   // Wrap uhal::ValVector<uint32_t>
-  py::class_<uhal::ValVector<uint32_t>>(m, "ValVector_uint32")
+  py::class_<uhal::ValVector<uint32_t>>(m, "ValVector_uint32", py::buffer_protocol())
     .def ( py::init<>() )
     .def ( py::init< const uhal::ValVector<uint32_t>& >() )
     .def ( "valid", static_cast< bool ( uhal::ValVector<uint32_t>::* ) () > ( &uhal::ValVector<uint32_t>::valid ) )
@@ -272,6 +272,13 @@ PYBIND11_MODULE(_core, m)
     .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getItem , pycohal::const_ref_return_policy )
     .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getSlice )
     .def ( "__iter__", [](const uhal::ValVector<uint32_t>& v) { return py::make_iterator ( v.begin() , v.end() ); })
+    .def_buffer([](const uhal::ValVector<uint32_t> &v) -> py::buffer_info {
+      return py::buffer_info(
+        v.data(),                    /* Pointer to buffer */
+        v.size(),                    /* Buffer size */
+        true                         /* Read-only */
+      );
+    })
     ;
 
   // Wrap uhal::Node
