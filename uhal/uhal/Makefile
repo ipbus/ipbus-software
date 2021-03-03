@@ -35,6 +35,7 @@ LibraryPaths = ${EXTERN_BOOST_LIB_PREFIX} \
 		${BUILD_HOME}/uhal/grammars/lib
 
 Libraries = pthread \
+		rt \
 		\
 		pugixml \
 		\
