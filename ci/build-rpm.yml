@@ -66,7 +66,7 @@ build:centos7-gcc8:
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
     - curl -L http://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.zip -o extern/pugixml/pugixml-1.9.zip
-    - curl -L https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2 -o extern/boost/boost_1_66_0.tar.bz2
+    - curl -L https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/boost_1_66_0.tar.bz2 -o extern/boost/boost_1_66_0.tar.bz2
     - sed -i "s/PACKAGE_VER_MINOR = 2/PACKAGE_VER_MINOR = 9/g" extern/pugixml/Makefile
     - sed -i "s/PACKAGE_VER_MINOR = 53/PACKAGE_VER_MINOR = 66/g" extern/boost/Makefile
     - sed -i 's|cd ${ZIP_NAME}|cd ${ZIP_NAME}/${ZIP_NAME}|g' extern/pugixml/Makefile
