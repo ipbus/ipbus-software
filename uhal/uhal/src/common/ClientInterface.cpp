@@ -421,7 +421,8 @@ namespace uhal
     if ( ( lBitShiftedSource >> lShiftSize ) != aSource )
     {
       exception::BitsSetWhichAreForbiddenByBitMask lExc;
-      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") has bits which would be shifted outside the register " );
+      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") for address " , Integer ( aAddr , IntFmt<hex,fixed>() ) ,
+            " has bits which would be shifted outside the register " );
       throw lExc;
     }
 
@@ -430,7 +431,7 @@ namespace uhal
     if ( lOverlap )
     {
       exception::BitsSetWhichAreForbiddenByBitMask lExc;
-      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ")"
+      log ( lExc , "Source data (" , Integer ( aSource , IntFmt<hex,fixed>() ) , ") for address " , Integer ( aAddr , IntFmt<hex,fixed>() ) ,
             " has the following bits set outside the bounds allowed by the bit-mask ( ", Integer ( aSource , IntFmt<hex,fixed>() ) , ") : " ,
             Integer ( lOverlap , IntFmt<hex,fixed>() )
           );
