@@ -14,15 +14,6 @@ except ImportError as e:
 
 
 ##################################################
-# Pythonic additions to uhal::exception API
-
-def _exception_to_string(self):
-   return self.what
-
-exception.__str__ = _exception_to_string
-
-
-##################################################
 # Pythonic additions to the ValWord_uint32 API
 
 if sys.version_info[0] <= 2:
