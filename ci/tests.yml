@@ -30,17 +30,7 @@ variables:
     REPO_URL_OS_SUBDIR: centos7/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
-
-.template_test:centos7:
-  extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos7:2021-01-26
-  needs:
-    - job: publish:yum:centos7
-      artifacts: false
-  variables:
-    REPO_URL_OS_SUBDIR: centos7/x86_64
-    TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
-    UHAL_GUI_DEPENDENCIES: "wxPython numpy"
+    UHAL_PYTHON_TEST_DEPENDENCIES: "python*numpy"
 
 .template_test:centos7-gcc8:
   extends: .template_test:centos7
@@ -61,6 +51,7 @@ variables:
     PYTHON: "python3.6"
     REPO_URL_OS_SUBDIR: centos8/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
+    UHAL_PYTHON_TEST_DEPENDENCIES: "python*numpy"
     YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
 
 
@@ -79,6 +70,7 @@ variables:
   variables:
     PYTHON: python3.9
     UHAL_GUI_DEPENDENCIES: python3-wxpython4
+    UHAL_PYTHON_TEST_DEPENDENCIES: python3-numpy
 
 .template_test:ubuntu20:
   extends: .template_test_simpleInstall
@@ -103,6 +95,7 @@ variables:
 
 .job_template: &test_python_jobScript
   script:
+    - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install ${UHAL_PYTHON_TEST_DEPENDENCIES} ; else sudo apt-get update && sudo apt-get -y install python3-numpy ; fi'
     - export PATH=/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - ${PYTHON} $(which uhal_test_suite.py) -v -s pycohal

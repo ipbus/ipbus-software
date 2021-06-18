@@ -272,11 +272,15 @@ PYBIND11_MODULE(_core, m)
     .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getItem , pycohal::const_ref_return_policy )
     .def ( "__getitem__", &pycohal::ValVectorIndexingSuite<uint32_t>::getSlice )
     .def ( "__iter__", [](const uhal::ValVector<uint32_t>& v) { return py::make_iterator ( v.begin() , v.end() ); })
-    .def_buffer([](const uhal::ValVector<uint32_t> &v) -> py::buffer_info {
+    .def_buffer([](uhal::ValVector<uint32_t> &v) -> py::buffer_info {
+      const uint32_t* lData(v.valid() ? v.data() : nullptr);
+      if (lData == nullptr) {
+        return py::buffer_info();
+      }
       return py::buffer_info(
-        v.data(),                    /* Pointer to buffer */
-        v.size(),                    /* Buffer size */
-        true                         /* Read-only */
+        lData,     /* Pointer to buffer */
+        v.size(),  /* Buffer size */
+        true       /* Read-only */
       );
     })
     ;
