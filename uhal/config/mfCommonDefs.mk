@@ -15,7 +15,7 @@ ARFLAGS = rc
 ifdef BUILD_STATIC
   LDFLAGS = -static -Wl,-Bstatic -shared-libgcc -Wall -g -O3 -fPIC
 else
-  LDFLAGS = -Wall -g -O3 -fPIC
+  LDFLAGS = -Wall -g -O3 -fPIC -Wl,--no-as-needed -lrt
 endif
 
 # Tools
