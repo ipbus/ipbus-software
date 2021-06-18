@@ -30,15 +30,16 @@
 ---------------------------------------------------------------------------
 */
 
-/**
-	@file
-	@author Andrew W. Rose
-	@date 2012
-*/
+#ifndef _uhal_version_hpp_
+#define _uhal_version_hpp_
 
-#include "uhal/definitions.hpp"
-#include "uhal/ValMem.hpp"
-#include "uhal/ConnectionManager.hpp"
-#include "uhal/HwInterface.hpp"
-#include "uhal/Node.hpp"
-#include "uhal/version.hpp"
+
+#define UHAL_VERSION_MAJOR 2
+#define UHAL_VERSION_MINOR 8
+#define UHAL_VERSION_PATCH 1
+
+#define UHAL_VERSION (10000 * UHAL_VERSION_MAJOR + 100 * UHAL_VERSION_MINOR + UHAL_VERSION_PATCH)
+
+
+#endif
+
