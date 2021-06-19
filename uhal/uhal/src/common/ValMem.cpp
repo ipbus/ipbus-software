@@ -284,6 +284,22 @@ namespace uhal
 
 
   template< typename T >
+  const T* ValVector< T >::data() const
+  {
+    if ( mMembers->valid )
+    {
+      return mMembers->value.data();
+    }
+    else
+    {
+      exception::NonValidatedMemory lExc;
+      log ( lExc , "Access attempted on non-validated memory" );
+      throw lExc;
+    }
+  }
+
+
+  template< typename T >
   void ValVector< T >::clear()
   {
     mMembers->valid = false;

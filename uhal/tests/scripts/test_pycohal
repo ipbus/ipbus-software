@@ -10,6 +10,8 @@ Mandatory option:
 """
 
 from random import randint
+import array
+import numpy
 import sys, os, getopt
 import unittest
 import uhal
@@ -470,6 +472,7 @@ class TestBlock(unittest.TestCase):
         xx = list_randuint32s(N)
         self.hw.getNode("MEM").writeBlock( xx )
         memVals = self.hw.getNode("MEM").readBlock(N)
+
         # Pre-dispatch tests
         self.assertEqual( memVals.valid(), False )
         self.assertEqual( memVals.size(), N )
@@ -481,26 +484,52 @@ class TestBlock(unittest.TestCase):
         self.assertRaises( uhal.NonValidatedMemory, memVals.__iter__ )
         self.assertRaises( IndexError , memVals.__getitem__ , (-N-1) )
         self.assertRaises( IndexError , memVals.__getitem__ , (N) )
+
+        memView = memoryview(memVals)
+        self.assertEqual( memView.format , '' )
+        self.assertEqual( memView.itemsize , 0 )
+        # self.assertEqual( memView.shape , None )
+        self.assertEqual( memView.ndim , 0 )
+
         # Dispatch & check values
         self.hw.dispatch()
         self.assertTrue( memVals.valid() )
         self.assertEqual( memVals.size(), N )
         self.assertEqual( len(memVals), N )
         self.assertEqual( xx , memVals.value() )
-        # Test ValVector_uint32 indexing
+
+        # Create array using Python Buffer Protocol (zero copy mechanism)
+        _ = memoryview(memVals) # memoryview function raises TypeError if buffer protocol not implemented
+        memView = numpy.array(memVals, copy = False)
+        with self.assertRaises(ValueError):
+            memView[0] = 42
+        self.assertEqual( len(memView), N )
+
+        # Test indexing directly with ValVector_uint32 API, and with zero-copy array
         for i in range(N):
-            self.assertEqual( xx[i], memVals[i] )
             self.assertEqual( xx[i], memVals.at(i) )
+            self.assertEqual( xx[i], memVals[i] )
             self.assertEqual( xx[i], memVals[i-N] )
-        # Test ValVector_uint32 iteration
+            self.assertEqual( xx[i], memView[i] )
+            self.assertEqual( xx[i], memView[i-N] )
+
+        # Test iteration directly with ValVector_uint32 API, and with zero-copy array
         self.assertEqual( xx, [x for x in memVals] )
-        # Test ValVector_uint32 slicing
+        self.assertEqual( xx, [x for x in memView] )
+
+        # Test slicing directly with ValVector_uint32 API, and with zero-copy array
         self.assertEqual( xx, memVals[:] )
+        self.assertEqual( xx, list(memView[:]) )
         self.assertEqual( xx[1:2], memVals[1:2] )
+        self.assertEqual( xx[1:2], list(memView[1:2]) )
         self.assertEqual( xx[1:100], memVals[1:100] )
+        self.assertEqual( xx[1:100], list(memView[1:100]) )
         self.assertEqual( xx[::2], memVals[::2] )
+        self.assertEqual( xx[::2], list(memView[::2]) )
         self.assertEqual( xx[::-1], memVals[::-1] )
+        self.assertEqual( xx[::-1], list(memView[::-1]) )
         self.assertEqual( xx[-12:-2], memVals[-12:-2] )
+        self.assertEqual( xx[-12:-2], list(memView[-12:-2]) )
 
 
     def test_block_write_read(self):

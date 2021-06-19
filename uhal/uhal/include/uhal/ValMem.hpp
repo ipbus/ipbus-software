@@ -354,6 +354,12 @@ namespace uhal
       */
       std::size_t size() const;
 
+      /**
+        Return the address of the underlying memory
+        @return the address of the underlying memory
+      */
+      const T* data() const;
+
       //! Clear the underlying memory and set Validity to false
       void clear();
 
