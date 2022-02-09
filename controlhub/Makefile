@@ -32,7 +32,7 @@ Packager = Tom Williams
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 8
-PACKAGE_VER_PATCH = 1
+PACKAGE_VER_PATCH = 2
 
 # This is the version number for the RPM packaging.
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
