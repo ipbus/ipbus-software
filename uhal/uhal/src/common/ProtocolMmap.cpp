@@ -263,13 +263,6 @@ Mmap::Mmap ( const std::string& aId, const URI& aUri ) :
   mReadReplyPageCount(0),
   mAsynchronousException ( NULL )
 {
-  if ( getenv("UHAL_ENABLE_IPBUS_MMAP") == NULL ) {
-    exception::ProtocolDoesNotExist lExc;
-    log(lExc, "The IPbus 2.0 mmap client is still an experimental feature, since the software-driver interface could change in the future.");
-    log(lExc, "In order to enable the IPbus 2.0 mmap client, you need to define the environment variable 'UHAL_ENABLE_IPBUS_MMAP'");
-    throw lExc;
-  }
-
   mSleepDuration = std::chrono::microseconds(50);
 
   for (const auto& lArg: aUri.mArguments) {
