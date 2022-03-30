@@ -32,7 +32,7 @@ Packager = Tom Williams
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 8
-PACKAGE_VER_PATCH = 2
+PACKAGE_VER_PATCH = 3
 
 # This is the version number for the RPM packaging.
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
@@ -88,6 +88,8 @@ else
 endif
 
 
+RPM_DIST = $(patsubst %.cern,%,$(shell rpm --eval "%{dist}"))
+
 rpm: _rpmall
 _rpmall: build
 	mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES/{lib,bin},SRPMS}
@@ -111,7 +113,7 @@ endif
 		--define "sources_dir ${RPMBUILD_SOURCES_DIR}" \
 		--define "name ${PackageName}" \
 		--define "version ${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}" \
-		--define "release ${PACKAGE_RELEASE}.${CACTUS_OS}" \
+		--define "release ${PACKAGE_RELEASE}${RPM_DIST}" \
 		--define "packager ${Packager}" \
 		${PackageName}.spec
 	find  ${RPMBUILD_DIR} -name "*.rpm" -exec mv {} $(PackagePath)/rpm \;
