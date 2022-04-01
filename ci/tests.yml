@@ -14,7 +14,7 @@ variables:
     - sudo cp ci/yum/ipbus-sw-ci.repo /etc/yum.repos.d/ipbus-sw-ci.repo
     - sudo sed -i -re "s|^baseurl=.*|baseurl=${OUTPUT_PIPELINE_URL}/repos/${REPO_URL_OS_SUBDIR}|g" /etc/yum.repos.d/ipbus-sw-ci.repo
     - cat /etc/yum.repos.d/ipbus-sw-ci.repo
-    - sudo rpm --rebuilddb && sudo yum clean all 
+    - sudo rpm --rebuilddb || sh -c 'sudo rm -rfv /var/lib/rpm && sudo rpm --rebuilddb'
     - sudo yum -y groupinstall ${YUM_GROUPINSTALL_ARGUMENTS} uhal controlhub
     - if [[ ! "$REPO_URL_OS_SUBDIR" =~ ^centos8.+ ]]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
     - if [[ -n "$UHAL_PYTHON_RPM" ]]; then sudo yum -y install $UHAL_PYTHON_RPM; fi
