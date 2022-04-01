@@ -10,7 +10,8 @@ PackageURL ?= None
 
 CACTUS_ROOT ?= /opt/cactus
 
-RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
+RPM_DIST = $(patsubst %.cern,%,$(shell rpm --eval "%{dist}"))
+RPM_RELEASE_SUFFIX = ${RPM_DIST}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
 
 PYTHON_MAJOR_COMMAND := $(shell ${PYTHON} -c "import sys; print('python{}'.format(sys.version_info.major))")
 PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "import sys; print('python{}.{}'.format(sys.version_info.major,sys.version_info.minor))")
@@ -45,7 +46,7 @@ _rpmbuild: _setup_update
 	cd ${RPMBUILD_DIR} && \
 	  LIB_REQUIRES=$$(find ${RPMBUILD_DIR} -type f -print0 | xargs -0 -n1 -I {} file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' ') && \
 	  ${PYTHON} ${PackageName}.py bdist_rpm --spec-only \
-	    --release ${PACKAGE_RELEASE}.${RPM_RELEASE_SUFFIX} \
+	    --release ${PACKAGE_RELEASE}${RPM_RELEASE_SUFFIX} \
 	    --requires "${PYTHON_RPM_CAPABILITY} $$LIB_REQUIRES" \
 	    --force-arch=${BUILD_ARCH} \
 	    --binary-only

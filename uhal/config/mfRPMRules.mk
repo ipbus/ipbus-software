@@ -8,7 +8,8 @@ PackageDescription := $(if ${PackageDescription}, ${PackageDescription}, None)
 BUILD_REQUIRES_TAG = $(if ${PackageBuildRequires} ,BuildRequires: ${PackageBuildRequires} ,\# No BuildRequires tag )
 REQUIRES_TAG = $(if ${PackageRequires} ,Requires: ${PackageRequires} ,\# No Requires tag )
 
-RPM_RELEASE_SUFFIX = ${CACTUS_OS}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
+RPM_DIST = $(patsubst %.cern,%,$(shell rpm --eval "%{dist}"))
+RPM_RELEASE_SUFFIX = ${RPM_DIST}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
 
 PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "from sys import version_info; print('python' + str(version_info[0]))")
 
@@ -31,11 +32,10 @@ _spec_update:
 	sed -i -e 's#__package__#${Package}#' \
 	       -e 's#__packagename__#${PackageName}#' \
 	       -e 's#__version__#$(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR).$(PACKAGE_VER_PATCH)#' \
-	       -e 's#__release__#${PACKAGE_RELEASE}.${RPM_RELEASE_SUFFIX}#' \
+	       -e 's#__release__#${PACKAGE_RELEASE}${RPM_RELEASE_SUFFIX}#' \
 	       -e 's#__prefix__#${CACTUS_ROOT}#' \
 	       -e 's#__sources_dir__#${RPMBUILD_DIR}/SOURCES#' \
 	       -e 's#__packagedir__#${PackagePath}#' \
-	       -e 's#__os__#${CACTUS_OS}#' \
 	       -e 's#__platform__#None#' \
 	       -e 's#__project__#${Project}#' \
 	       -e 's#__author__#${Packager}#' \

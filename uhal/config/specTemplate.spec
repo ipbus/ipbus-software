@@ -6,7 +6,6 @@
 %define _sources_dir __sources_dir__
 %define _tmppath /tmp
 %define _packagedir __packagedir__
-%define _os __os__
 %define _project __project__
 %define _author __author__
 %define _summary __summary__
@@ -25,7 +24,7 @@
 #
 Name: %{_packagename} 
 Version: %{_version} 
-Release: %{_release} 
+Release: %{_release}
 Packager: %{_author}
 Summary: %{_summary}
 License: GPLv3
@@ -131,8 +130,8 @@ find ./ -type d -exec chmod 755 {} \;
 %{_prefix}/include
 
 %if %{defined _build_debuginfo_package}
-# Temporary workaround for subpackages not being built on CentOS8
-%if %{_os} != centos8
+# Temporary workaround for subpackages not being built on RHEL8, CentOS8, etc.
+%if "%{dist}" != ".el8"
 %files debuginfo
 %defattr(-,root,root,-)
 %endif
