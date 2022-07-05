@@ -2,7 +2,8 @@
 
 namespace uhal {
   namespace tests {
-    UHAL_REGISTER_DERIVED_NODE(DummyParentNode)
+
+    UHAL_REGISTER_DERIVED_NODE(uhal::tests::DummyParentNode)
     UHAL_REGISTER_DERIVED_NODE(DummyChildNode)
 
     DummyParentNode::DummyParentNode(const uhal::Node& aNode) :

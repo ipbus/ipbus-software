@@ -43,28 +43,24 @@
 #include <type_traits>
 
 #include "uhal/Node.hpp"
-
+#include "uhal/DerivedNodeFactory.hpp"
 
 /**
   Macro which adds a Derived Node Class to the factory
   It takes a classname and then creates a registration helper object, with the classname as its template parameter
   and a stringified version of the classname as its constructor argument.
 */
-#define UHAL_REGISTER_DERIVED_NODE( classname ) \
-  uhal::RegistrationHelper< classname > classname##RegistrationHelper( #classname ); \
-  uhal::Node* classname::clone() const \
-  { \
-    static_assert((std::is_base_of<uhal::Node, classname>::value), "Derived node class must be a descendant of uhal::Node"); \
-    return new classname ( static_cast<const classname&> ( *this ) ); \
-  }
 
+
+#define UHAL_REGISTER_DERIVED_NODE(classname) \
+  template <> \
+  bool uhal::RegistrationHelper<classname>::sDone = uhal::RegistrationHelper<classname>::registerClass(#classname);
 
 //! Macro which adds the clone method implementation for derived classes
-#define UHAL_DERIVEDNODE(DerivedType) \
-protected: \
-  virtual uhal::Node* clone() const;
+#define UHAL_DERIVEDNODE(DerivedType)                                                                                        \
+protected:                                                                                                                   \
+  virtual uhal::Node *clone() const;
 
-  
 namespace uhal
 {
 
@@ -75,18 +71,20 @@ namespace uhal
     (for instance, in the file where the derived node is defined), rather than manually having to add entries in one file
     To make things even simpler, the REGISTER macro expands the template argument to a string and passes it to the constructor.
   */
-  template< typename T >
+  template <typename T>
   struct RegistrationHelper
   {
-    /**
-      Constructor
-      @param aDerivedClassName The name that will be used to identify this class in the factory
-    */
-    RegistrationHelper ( const std::string& aDerivedClassName );
+    //! initialisation target
+    static bool sDone;
+
+    static bool registerClass(const std::string &aDerivedClassName)
+    {
+      DerivedNodeFactory::getInstance().add<T>(aDerivedClassName);
+      return true;
+    }
   };
-  
 }
 
-#include "uhal/TemplateDefinitions/DerivedNode.hxx"
+// #include "uhal/TemplateDefinitions/DerivedNode.hxx"
 
 #endif

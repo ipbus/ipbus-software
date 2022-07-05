@@ -34,10 +34,12 @@
 
 namespace uhal
 {
-  template< typename T >
-  RegistrationHelper< T >::RegistrationHelper ( const std::string& aDerivedClassName )
+  template <typename T>
+
+  bool RegistrationHelper<T>::registerClass(const std::string &aDerivedClassName)
   {
     DerivedNodeFactory::getInstance().add< T > ( aDerivedClassName );
+    return true;
   }
 }
 
