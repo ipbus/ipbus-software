@@ -38,7 +38,7 @@ _rpmall: _all _setup_update _rpmbuild
 .PHONY: _rpmbuild
 _rpmbuild: _setup_update
 	find pkg -not -type d -printf '%P\0' | xargs -0 -n1 -I {} install -D pkg/{} ${RPMBUILD_DIR}/{}
-	find scripts etc -not -type d -printf '%p\0' | xargs -0 -n1 -I {} cp --parents {} ${RPMBUILD_DIR}
+	if [ -d etc -o -d scripts ]; then find scripts etc -not -type d -printf '%p\0' | xargs -0 -n1 -I {} cp --parents {} ${RPMBUILD_DIR}; fi
 	find ${RPMBUILD_DIR} -type f -exec sed -i "s|#!/usr/bin/env python|#!/usr/bin/env "${PYTHON_VERSIONED_COMMAND}"|" {} \;
 	# Add a manifest file
 	echo "include */*.so" > ${RPMBUILD_DIR}/MANIFEST.in
