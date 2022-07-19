@@ -81,7 +81,7 @@ else
 	REBAR=$(shell pwd)/legacy/rebar
 endif
 
-ifeq (${CACTUS_OS}, centos7)
+ifeq (${CACTUS_OS}, el7)
     RPMSPEC_SNIPPET_OS_TAG=rhel7
 else
     RPMSPEC_SNIPPET_OS_TAG=rhelLeq6
@@ -97,7 +97,7 @@ _rpmall: build
 	cp scripts/controlhub_* ${RPMBUILD_SOURCES_DIR}/bin
 	cp pkg/rsyslog.d.conf ${RPMBUILD_SOURCES_DIR}/ 
 	cp pkg/logrotate.d.conf ${RPMBUILD_SOURCES_DIR}/
-ifneq ($(CACTUS_OS),centos7)
+ifneq ($(CACTUS_OS),el7)
 	cp pkg/init.d ${RPMBUILD_SOURCES_DIR}/controlhub
 else
 	cp pkg/systemd/controlhub.service ${RPMBUILD_SOURCES_DIR}/

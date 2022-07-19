@@ -14,11 +14,11 @@ ifeq ($(UNAME),Linux)
     ifneq ($(findstring Scientific Linux CERN SLC release 6,$(CACTUS_PLATFORM)),)
         CACTUS_OS=slc6
     else ifneq ($(findstring CentOS Linux release 7,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=centos7
+        CACTUS_OS=el7
     else ifneq ($(findstring CentOS Linux release 8,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=centos8
+        CACTUS_OS=el8
     else ifneq ($(findstring CentOS Stream release 8,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=centos8
+        CACTUS_OS=el8
     endif
 else ifeq ($(UNAME),Darwin)
     CACTUS_OS=osx
