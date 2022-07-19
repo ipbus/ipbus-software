@@ -17,6 +17,8 @@ ifeq ($(UNAME),Linux)
         CACTUS_OS=centos7
     else ifneq ($(findstring CentOS Linux release 8,$(CACTUS_PLATFORM)),)
         CACTUS_OS=centos8
+    else ifneq ($(findstring CentOS Stream release 8,$(CACTUS_PLATFORM)),)
+        CACTUS_OS=centos8
     endif
 else ifeq ($(UNAME),Darwin)
     CACTUS_OS=osx

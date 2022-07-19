@@ -76,6 +76,9 @@ if [ "${#DEBUGDIR}" -gt "${#PKGDIR}" ]; then
 fi
 %endif
 
+# Change working directory to avoid "shell-init: error retrieving current directory: getcwd: cannot access parent directories: No such file or directory" error
+cd $RPM_BUILD_ROOT
+
 if [ -d %{_packagedir}/bin ]; then
   find %{_packagedir}/bin -type f -printf '%{percent}P\0' | xargs -0 -n1 -I {} $BUILD_HOME/uhal/config/install.sh %{_packagedir}/bin/{} %{_prefix}/bin/%{_project}/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}'
 fi
