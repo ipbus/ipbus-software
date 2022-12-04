@@ -28,3 +28,6 @@
 
 % Implies that device client probably died (i.e. a ControlHub problem).
 -define(ERRCODE_CH_DEVICE_CLIENT_TIMEOUT, 2).
+
+% Implies that sending IPbus request to a target that is not in the allow list.
+-define(ERRCODE_TARGET_BLOCKED, 7).

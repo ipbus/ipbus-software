@@ -38,6 +38,9 @@
           % The timeout (ms) used when waiting for a response from a hardware target.
           {device_response_timeout, 20},
           % The time (ms) after which a device client process will shut down if not communicating with board
-          {device_client_shutdown_after, 15000}]}
+          {device_client_shutdown_after, 15000},
+          % Device allowlist: File path and mode
+          {device_allowlist_mode, enforcing},
+          {device_allowlist_file, none}]}
  ]
 }.

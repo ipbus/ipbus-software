@@ -321,6 +321,9 @@ namespace uhal
       case 6:
         aStream << "request uses incorrect protocol version";
         break;
+      case 7:
+        aStream << "device is not in the ControlHub's allowlist";
+        break;
       default:
         aStream << "UNKNOWN";
     }

@@ -275,7 +275,9 @@ get_app_info() ->
      {tcp_socket_opts, ch_config:get(tcp_socket_opts)},
      {max_udp_in_flight, ch_config:get(max_udp_in_flight)},
      {device_response_timeout, ch_config:get(device_response_timeout)},
-     {device_client_shutdown_after, ch_config:get(device_client_shutdown_after)}
+     {device_client_shutdown_after, ch_config:get(device_client_shutdown_after)},
+     {device_allowlist_mode, ch_config:get(device_allowlist_mode)},
+     {device_allowlist_file, ch_config:get(device_allowlist_file)}
     ].
 
 

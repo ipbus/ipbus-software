@@ -149,8 +149,8 @@ init([IPaddrU32, PortU16, ChMaxInFlight]) ->
     IPTuple = ch_utils:ipv4_u32_addr_to_tuple(IPaddrU32),
     put(target_ip_tuple, IPTuple),   
     put(target_port, PortU16),
-    ch_utils:log(debug, "Initialising device client for target at ~w:~w. Absolute max nr packets in flight is ~w.", 
-                 [ChMaxInFlight]),
+    ch_utils:log(debug, "Initialising device client for target at ~w.~w.~w.~w:~w. Absolute max nr packets in flight is ~w.",
+                 [element(1, IPTuple), element(2, IPTuple), element(3, IPTuple), element(4, IPTuple), PortU16, ChMaxInFlight]),
 
     % Try opening ephemeral port and we want data delivered as a binary.
     case gen_udp:open(0, [binary, {active, true}, {buffer, 100000}, {recbuf, 100000}, {read_packets, 50}]) of   
