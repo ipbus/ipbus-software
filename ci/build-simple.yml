@@ -2,6 +2,8 @@
 .template_build_simple:
   stage: build
   script:
+    # Set safe.directory in order to avoid errors when CI generates list of untracked files 
+    - git config --global --add safe.directory ${GIT_CLONE_PATH}
     - make -k Set=all
   artifacts:
     untracked: true
