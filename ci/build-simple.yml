@@ -2,13 +2,18 @@
 .template_build_simple:
   stage: build
   script:
-    # Set safe.directory in order to avoid errors when CI generates list of untracked files 
-    - git config --global --add safe.directory ${GIT_CLONE_PATH}
     - make -k Set=all
   artifacts:
-    untracked: true
+    paths:
+      - '**/*.exe'
+      - '**/*.so'
+      - '**/rpm'
+      - controlhub/.rebar
+      - controlhub/deps
+      - controlhub/ebin
+      - controlhub/rel/controlhub
     when: always
-    expire_in: 1 day
+    expire_in: 1 week
 
 
 build:centos7:static:
