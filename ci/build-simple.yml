@@ -6,7 +6,7 @@
   artifacts:
     paths:
       - '**/*.exe'
-      - '**/*.so'
+      - '**/*.so*'
       - '**/rpm'
       - controlhub/.rebar
       - controlhub/deps
