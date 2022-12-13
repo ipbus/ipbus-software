@@ -82,15 +82,14 @@ variables:
 
 
 .job_template: &test_core_jobScript
-  tags:
-    - docker-cap-net-admin
   script:
     - export PATH=/opt/cactus/bin:/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
     - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
     - service controlhub stop || /opt/cactus/bin/controlhub_stop
-    - ${PYTHON} $(which uhal_test_suite.py) -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    # 2022/12/13 - Temporarily disable 'packet loss' tests (will reimplement to remove need for docker cap-net-admin capability)
+    # - ${PYTHON} $(which uhal_test_suite.py) -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
     - valgrind --error-exitcode=1 --tool=memcheck --leak-check=full --run-libc-freeres=no ${VALGRIND_ARGS} run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --t 10000 --quick --run_test=ipbusudp* --log_level=test_suite
 
 .job_template: &test_python_jobScript
@@ -155,15 +154,14 @@ test_controlhub:centos7:
 
 test_core:centos7-gcc8:
   extends: .template_test:centos7-gcc8
-  tags:
-    - docker-cap-net-admin
   script:
     - export PATH=/opt/cactus/bin:/opt/cactus/bin/uhal/tests:$PATH
     - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
     - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
     - service controlhub stop || /opt/cactus/bin/controlhub_stop
-    - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
+    # 2022/12/13 - Temporarily disable 'packet loss' tests (will reimplement to remove need for docker cap-net-admin capability)
+    # - uhal_test_suite.py -v -s "2.0 controlhub - light packet loss" ${TEST_SUITE_CONTROLHUB_PATH_ARGUMENT}
 
 test_python:centos7-gcc8:
   extends: .template_test:centos7-gcc8
