@@ -133,8 +133,8 @@ find ./ -type d -exec chmod 755 {} \;
 %{_prefix}/include
 
 %if %{defined _build_debuginfo_package}
-# Temporary workaround for subpackages not being built on RHEL8, CentOS8, etc.
-%if "%{dist}" != ".el8"
+# Temporary workaround for subpackages not being built on RHEL8, CentOS8, RHEL9, Alma9 etc.
+%if "%{dist}" != ".el8" && "%{dist}" != ".el9"
 %files debuginfo
 %defattr(-,root,root,-)
 %endif
