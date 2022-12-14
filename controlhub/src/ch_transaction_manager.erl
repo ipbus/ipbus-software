@@ -165,9 +165,15 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
             if
               (byte_size(RequestBin) rem 4) =:= 0 ->
                 ?CH_LOG_DEBUG("Received TCP chunk."),
-                {TargetIPU32, TargetPort, NrReqs} = unpack_and_enqueue(RequestBin, pid_unknown, 0, S#state.stats_table),
-                ch_stats:client_requests_in(S#state.stats_table, NrReqs),
-                transaction_manager_loop( S#state{target_ip_u32=TargetIPU32, target_port=TargetPort, nr_in_flight=(NrInFlight+NrReqs), q_nr_reqs_per_tcp=queue:in(NrReqs,QNrReqsPerTcp)} );
+                case unpack_and_enqueue(RequestBin, pid_unknown, 0, S#state.stats_table) of
+                    {error, Response} ->
+                        %ch_utils:log(error, "Sending to TCP PID message with TargetIPAddrArg=~w, TargetPortArg=~w, ErrorCode=~w", [TargetIPAddrArg, TargetPortArg, ErrorCode]),
+                        S#state.tcp_pid ! {send, Response},
+                        transaction_manager_loop( S );
+                    {TargetIPU32, TargetPort, NrReqs} ->
+                        ch_stats:client_requests_in(S#state.stats_table, NrReqs),
+                        transaction_manager_loop( S#state{target_ip_u32=TargetIPU32, target_port=TargetPort, nr_in_flight=(NrInFlight+NrReqs), q_nr_reqs_per_tcp=queue:in(NrReqs,QNrReqsPerTcp)} )
+                end;
               true ->
                 ch_utils:log(error, "Each TCP chunk should be an integer number of 32-bit words, but received chunk of length ~w bytes for ~s. This TCP chunk will be ignored.", [byte_size(RequestBin), ch_utils:ip_port_string(TargetIPAddrArg, TargetPortArg)]),
                 ch_stats:client_request_malformed(S#state.stats_table),
@@ -214,13 +220,17 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
 
 
 unpack_and_enqueue(<<TargetIPAddr:32, TargetPort:16, NrInstructions:16, IPbusReq:NrInstructions/binary-unit:32, Tail/binary>>, Pid, NrSent, StatsTable) ->
-    RetPid = enqueue_request(TargetIPAddr, TargetPort, Pid, IPbusReq),
-    if
-      byte_size(Tail) > 0 ->
-        unpack_and_enqueue(Tail, RetPid, NrSent+1, StatsTable);
-      true ->
-        ?CH_LOG_DEBUG("~w IPbus packets in last TCP chunk", [(NrSent+1)]),
-        {TargetIPAddr, TargetPort, NrSent+1}
+    case enqueue_request(TargetIPAddr, TargetPort, Pid, IPbusReq) of
+        {error, ErrorCode} ->
+            {error, <<8:32, TargetIPAddr:32, TargetPort:16, ErrorCode:16>>};
+        RetPid ->
+            if
+              byte_size(Tail) > 0 ->
+                unpack_and_enqueue(Tail, RetPid, NrSent+1, StatsTable);
+              true ->
+                ?CH_LOG_DEBUG("~w IPbus packets in last TCP chunk", [(NrSent+1)]),
+                {TargetIPAddr, TargetPort, NrSent+1}
+            end
     end;
 unpack_and_enqueue(Binary, _Pid, NrSent, StatsTable) when byte_size(Binary) < 12 ->
     ch_utils:log(error, "Binary nr ~w unpacked from TCP chunk (~w) contained less than three 32-bit words, which is invalid according to uHAL-ControlHub protocol. Ignoring remainder of this chunk and continuing.", [NrSent+1, Binary]),
@@ -238,8 +248,12 @@ enqueue_request(_IPaddrU32, _PortU16, DestPid, IPbusRequest) when is_pid(DestPid
     DestPid;
 enqueue_request(IPaddrU32, PortU16, _NotPid, IPbusRequest) ->
     ?CH_LOG_DEBUG("Looking up device_client PID"),
-    {ok, Pid} = ch_device_client_registry:get_pid(IPaddrU32, PortU16),
-    enqueue_request(IPaddrU32, PortU16, Pid, IPbusRequest).
+    case ch_device_client_registry:get_pid(IPaddrU32, PortU16) of
+        {ok, Pid} ->
+            enqueue_request(IPaddrU32, PortU16, Pid, IPbusRequest);
+        blocked ->
+            {error, ?ERRCODE_TARGET_BLOCKED}
+    end.
 
 
 

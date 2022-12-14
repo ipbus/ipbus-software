@@ -77,10 +77,16 @@ main(Args) ->
             io:format("Device client parameters ...~n"
                       "    max packets in flight to each board = ~w~n"
                       "    timeout for replies from board = ~wms~n"
-                      "    device client lifetime when inactive = ~wms~n~n",
+                      "    device client lifetime when inactive = ~wms~n",
                       [proplists:get_value(max_udp_in_flight, InfoList, unknown),
                        proplists:get_value(device_response_timeout, InfoList, unknown),
                        proplists:get_value(device_client_shutdown_after, InfoList, unknown)]),
+            case proplists:get_value(device_allowlist_file, InfoList, unknown) of
+                none ->
+                    io:format("    no allowlist defined~n~n");
+                FilePath ->
+                    io:format("    allowlist file \"~s\" (mode: ~w)~n~n", [FilePath, proplists:get_value(device_allowlist_mode, InfoList, unknown)])
+            end,
             io:format("TCP parameters ...~n"
                       "    Listening on port ~w~n",
                       [proplists:get_value(tcp_listen_port, InfoList, unknown)]);

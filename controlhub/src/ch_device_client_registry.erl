@@ -60,14 +60,28 @@ stop() -> gen_server:cast(?MODULE, stop).
 %%      Client yet exists for the given hardware target, a Device Client
 %%      will be created, registered, and its PID returned.
 %%
-%% @spec get_pid(IPaddr::integer(), Port::integer()) -> {ok, pid()} | {error, any()}
+%% @spec get_pid(IPaddr::integer(), Port::integer()) -> {ok, pid()} | blocked | {error, any()}
 %% @end
 %% ---------------------------------------------------------------------
 get_pid(IPaddr, Port) ->
     case ets:lookup(device_client_index, {IPaddr, Port}) of
-        [ { {IPaddr, Port}, Pid } ] -> {ok, Pid};
-        [ ] -> gen_server:call(?MODULE, {register, {IPaddr, Port}});
-        Error -> {error, Error}
+        [ { {IPaddr, Port}, Pid } ] ->
+            {ok, Pid};
+        [ ] ->
+            AllowlistMode = ch_config:get(device_allowlist_mode),
+            {IP1, IP2, IP3, IP4} = ch_utils:ipv4_u32_addr_to_tuple(IPaddr),
+            case {AllowlistMode, ch_config:get_device_access_status({IP1, IP2, IP3, IP4}, Port)} of
+                {_, allow} ->
+                    gen_server:call(?MODULE, {register, {IPaddr, Port}});
+                {permissive, deny} ->
+                    ch_utils:log(warning, "Packets are being sent to device at  ~w.~w.~w.~w:~w, which is not in the allowlist (running in permissive mode though, so still sending the packet). ", [IP1, IP2, IP3, IP4, Port]),
+                    gen_server:call(?MODULE, {register, {IPaddr, Port}});
+                {enforcing, deny} ->
+                    ch_utils:log(error, "Blocked attempt to send packet to device at ~w.~w.~w.~w:~w.", [IP1, IP2, IP3, IP4, Port]),
+                    blocked
+            end;
+        Error ->
+            {error, Error}
     end.
 
 
