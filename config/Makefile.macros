@@ -11,12 +11,9 @@ CACTUS_OS=unknown.os
 
 UNAME=$(strip $(shell uname -s))
 ifeq ($(UNAME),Linux)
-    ifneq ($(findstring Scientific Linux CERN SLC release 6,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=slc6
-    else ifneq ($(findstring CentOS Linux release 7,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=centos7
-    else ifneq ($(findstring CentOS Linux release 8,$(CACTUS_PLATFORM)),)
-        CACTUS_OS=centos8
+    CACTUS_OS_EL_MAJOR=$(shell cat /etc/system-release | sed 's/^\(CentOS Linux\|CentOS Stream\|AlmaLinux|Rocky Linux\) release \([0-9]\).*/\2/;t;d')
+    ifneq ($(CACTUS_OS_EL_MAJOR),)
+        CACTUS_OS=el$(CACTUS_OS_EL_MAJOR)
     endif
 else ifeq ($(UNAME),Darwin)
     CACTUS_OS=osx
