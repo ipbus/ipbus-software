@@ -53,6 +53,15 @@ build:centos8:
     YUMGROUPS_FILE: ci/yum/yumgroups-centos8.xml
 
 
+build:alma9:
+  extends: .template_build_rpm_yumrepo
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-alma9:2022-12-14__boost1.75.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma9/x86_64
+    PYTHONS: "python3.9"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
+
+
 build:centos7-gcc8:
   stage: build
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:2021-01-26
@@ -121,3 +130,11 @@ publish:yum:centos8:
     DEPLOY_SUBDIR: repos/centos8/x86_64
   needs:
     - build:centos8
+
+publish:yum:alma9:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma9/x86_64
+    DEPLOY_SUBDIR: repos/el9/x86_64
+  needs:
+    - build:alma9
