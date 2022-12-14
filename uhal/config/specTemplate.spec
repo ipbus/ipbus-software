@@ -80,27 +80,27 @@ fi
 cd $RPM_BUILD_ROOT
 
 if [ -d %{_packagedir}/bin ]; then
-  find %{_packagedir}/bin -type f -printf '%{percent}P\0' | xargs -0 -n1 -I {} $BUILD_HOME/uhal/config/install.sh %{_packagedir}/bin/{} %{_prefix}/bin/%{_project}/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}'
+  find %{_packagedir}/bin -type f -printf '%{percent}P\0' | xargs -0 -I {} $BUILD_HOME/uhal/config/install.sh %{_packagedir}/bin/{} %{_prefix}/bin/%{_project}/{} 755 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}'
 fi
 
 if [ -d %{_packagedir}/scripts ]; then
-  find %{_packagedir}/scripts -type f -printf '%{percent}P\0' | xargs -0 -n1 -I {} install -D -m 755 %{_packagedir}/scripts/{} $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/{}
-  find $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project} -type f -print0 | xargs -0 -n1 -I {} sed -i "s|#!/usr/bin/env python|#!/usr/bin/env "%{_python_versioned_command}"|" {}
+  find %{_packagedir}/scripts -type f -printf '%{percent}P\0' | xargs -0 -I {} install -D -m 755 %{_packagedir}/scripts/{} $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project}/{}
+  find $RPM_BUILD_ROOT/%{_prefix}/bin/%{_project} -type f -print0 | xargs -0 -I {} sed -i "s|#!/usr/bin/env python|#!/usr/bin/env "%{_python_versioned_command}"|" {}
 fi
 
 if [ -d %{_packagedir}/lib ]; then
-  find %{_packagedir}/lib -type f -printf '%{percent}P\0' | xargs -0 -n1 -I {} $BUILD_HOME/uhal/config/install.sh %{_packagedir}/lib/{} %{_prefix}/lib/{} 655 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
-  find %{_packagedir}/lib -type l -printf '%{percent}P\0' | xargs -0 -n1 -I {} sh -c 'ln -s -f %{_prefix}/lib/$(basename $(readlink %{_packagedir}/lib/$0)) $RPM_BUILD_ROOT/%{_prefix}/lib/$0' {}
+  find %{_packagedir}/lib -type f -printf '%{percent}P\0' | xargs -0 -I {} $BUILD_HOME/uhal/config/install.sh %{_packagedir}/lib/{} %{_prefix}/lib/{} 655 $RPM_BUILD_ROOT %{_packagedir} %{_packagename} %{_version} %{_prefix}/include '%{_includedirs}' \;
+  find %{_packagedir}/lib -type l -printf '%{percent}P\0' | xargs -0 -I {} sh -c 'ln -s -f %{_prefix}/lib/$(basename $(readlink %{_packagedir}/lib/$0)) $RPM_BUILD_ROOT/%{_prefix}/lib/$0' {}
 fi
 
 
 if [ -d %{_packagedir}/include ]; then
-  find %{_packagedir}/include -type f -printf '%{percent}P\0' | xargs -0 -n1 -I {} install -D -m 644 %{_packagedir}/include/{} $RPM_BUILD_ROOT/%{_prefix}/include/{}
+  find %{_packagedir}/include -type f -printf '%{percent}P\0' | xargs -0 -I {} install -D -m 644 %{_packagedir}/include/{} $RPM_BUILD_ROOT/%{_prefix}/include/{}
 fi
 
 
 if [ -d %{_packagedir}/etc ]; then
-  find %{_packagedir}/etc -type f -printf '%{percent}P\0' | xargs -0 -n1 -I {} install -D -m 644 %{_packagedir}/etc/{} $RPM_BUILD_ROOT/%{_prefix}/etc/{}
+  find %{_packagedir}/etc -type f -printf '%{percent}P\0' | xargs -0 -I {} install -D -m 644 %{_packagedir}/etc/{} $RPM_BUILD_ROOT/%{_prefix}/etc/{}
 fi
 
 #create debug.source - SLC6 beardy wierdo "feature"
