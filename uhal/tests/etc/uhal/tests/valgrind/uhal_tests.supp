@@ -27,7 +27,7 @@
    ...
    fun:_dl_allocate_tls
    ...
-   fun:pthread_create@@GLIBC_2.2.5
+   fun:pthread_create@@GLIBC_2.*
    fun:_ZNSt6thread15_M_start_threadESt10*
    ...
    fun:_ZN4uhal5tests19DummyHardwareRunnerC1EPNS0_22DummyHardwareInterfaceE
@@ -70,7 +70,7 @@
    ...
    fun:_dl_allocate_tls
    ...
-   fun:pthread_create@@GLIBC_2.2.5
+   fun:pthread_create@@GLIBC_2.*
    fun:_ZNSt6thread15_M_start_threadESt10*
    fun:thread<uhal::tests::ipbusudp_2_0::MultithreadedTestSuite::single_copied_hwinterface::test_method()::*lambda*>
    fun:_ZN4uhal5tests12*22MultithreadedTestSuite25single_copied_hwinterface11test_methodEv
@@ -124,14 +124,14 @@
 }
 
 {
-   uhal_tests__pthread_create_GLIBC2.2.5__*_MultithreadedTestSuite_multiple_hwinterfaces_fedora30
+   uhal_tests__pthread_create_GLIBC2.2.5__*_MultithreadedTestSuite_multiple_hwinterfaces_fedora30_alma9
    Memcheck:Leak
    match-leak-kinds: possible
    fun:calloc
    ...
    fun:_dl_allocate_tls
    ...
-   fun:pthread_create@@GLIBC_2.2.5
+   fun:pthread_create@@GLIBC_2.*
    fun:_ZNSt6thread15_M_start_threadESt10*
    fun:thread<void *>
    fun:_ZN4uhal5tests12*22MultithreadedTestSuite21multiple_hwinterfaces11test_methodEv
