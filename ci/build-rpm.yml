@@ -44,13 +44,22 @@ build:centos7:
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
 
-build:centos8:
+build:alma8:
   extends: .template_build_rpm_yumrepo
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos8:2021-01-26__boost1.66.0_pugixml1.11.4
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-alma8:2022-12-15__boost1.66.0_pugixml1.13
   variables:
-    OUTPUT_REPO_SUBDIR: centos8/x86_64
+    OUTPUT_REPO_SUBDIR: alma8/x86_64
     PYTHONS: "python3.6 python3.8"
-    YUMGROUPS_FILE: ci/yum/yumgroups-centos8.xml
+    YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
+
+
+build:alma9:
+  extends: .template_build_rpm_yumrepo
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-alma9:2022-12-15__boost1.75.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma9/x86_64
+    PYTHONS: "python3.9"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
 
 
 build:centos7-gcc8:
@@ -114,10 +123,19 @@ publish:yum:centos7-gcc8:
   needs:
     - build:centos7-gcc8
 
-publish:yum:centos8:
+publish:yum:alma8:
   extends: .template_publish
   variables:
-    CI_OUTPUT_DIR: ci_results/repos/centos8/x86_64
+    CI_OUTPUT_DIR: ci_results/repos/alma8/x86_64
+    # For backward compatibility: Keep YUM repo subdirectory as "centos8" (rather than "el8") until v2.9
     DEPLOY_SUBDIR: repos/centos8/x86_64
   needs:
-    - build:centos8
+    - build:alma8
+
+publish:yum:alma9:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma9/x86_64
+    DEPLOY_SUBDIR: repos/el9/x86_64
+  needs:
+    - build:alma9

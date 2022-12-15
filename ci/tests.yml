@@ -14,9 +14,8 @@ variables:
     - sudo cp ci/yum/ipbus-sw-ci.repo /etc/yum.repos.d/ipbus-sw-ci.repo
     - sudo sed -i -re "s|^baseurl=.*|baseurl=${OUTPUT_PIPELINE_URL}/repos/${REPO_URL_OS_SUBDIR}|g" /etc/yum.repos.d/ipbus-sw-ci.repo
     - cat /etc/yum.repos.d/ipbus-sw-ci.repo
-    - sudo rpm --rebuilddb || sh -c 'sudo rm -rfv /var/lib/rpm && sudo rpm --rebuilddb'
-    - sudo yum -y groupinstall ${YUM_GROUPINSTALL_ARGUMENTS} uhal controlhub
-    - if [[ ! "$REPO_URL_OS_SUBDIR" =~ ^centos8.+ ]]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
+    - sudo yum -y groupinstall uhal controlhub
+    - if [[ ! "$REPO_URL_OS_SUBDIR" =~ ^(centos8|el9).+ ]]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
     - if [[ -n "$UHAL_PYTHON_RPM" ]]; then sudo yum -y install $UHAL_PYTHON_RPM; fi
     - rpm -qa | grep cactus | sort
 
@@ -41,18 +40,30 @@ variables:
     REPO_URL_OS_SUBDIR: centos7_gcc8/x86_64
 
 
-.template_test:centos8:
+.template_test:alma8:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-centos8:2021-01-26
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-alma8:2022-12-15
   needs:
-    - job: publish:yum:centos8
+    - job: publish:yum:alma8
       artifacts: false
   variables:
     PYTHON: "python3.6"
     REPO_URL_OS_SUBDIR: centos8/x86_64
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
     UHAL_PYTHON_TEST_DEPENDENCIES: "python*numpy"
-    YUM_GROUPINSTALL_ARGUMENTS: "--enablerepo=PowerTools"
+
+
+.template_test:alma9:
+  extends: .template_test_rpmInstall
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-test-alma9:2022-12-15
+  needs:
+    - job: publish:yum:alma9
+      artifacts: false
+  variables:
+    PYTHON: "python3.9"
+    REPO_URL_OS_SUBDIR: el9/x86_64
+    TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
+    UHAL_PYTHON_TEST_DEPENDENCIES: "python*numpy"
 
 
 .template_test_simpleInstall:
@@ -188,12 +199,12 @@ test_controlhub:centos7-gcc8:
   <<: *test_controlhub_plainScripts_jobScript
 
 
-test_core:centos8:
-  extends: .template_test:centos8
+test_core:alma8:
+  extends: .template_test:alma8
   <<: *test_core_jobScript
 
-test_python:centos8:
-  extends: .template_test:centos8
+test_python:alma8:
+  extends: .template_test:alma8
   <<: *test_python_jobScript
   parallel:
     matrix:
@@ -202,12 +213,31 @@ test_python:centos8:
       - PYTHON: python3.8
         UHAL_PYTHON_RPM: cactuscore-uhal-python38
 
-test_tools:centos8:
-  extends: .template_test:centos8
+test_tools:alma8:
+  extends: .template_test:alma8
   <<: *test_tools_jobScript
 
-test_controlhub:centos8:
-  extends: .template_test:centos8
+test_controlhub:alma8:
+  extends: .template_test:alma8
+  <<: *test_controlhub_plainScripts_jobScript
+
+
+test_core:alma9:
+  extends: .template_test:alma9
+  <<: *test_core_jobScript
+
+test_python:alma9:
+  extends: .template_test:alma9
+  <<: *test_python_jobScript
+  variables:
+    UHAL_PYTHON_RPM: cactuscore-uhal-python39
+
+test_tools:alma9:
+  extends: .template_test:alma9
+  <<: *test_tools_jobScript
+
+test_controlhub:alma9:
+  extends: .template_test:alma9
   <<: *test_controlhub_plainScripts_jobScript
 
 

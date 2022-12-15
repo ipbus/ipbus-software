@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<comps>
+  <group>
+    <id>uhal</id>
+    <name>uhal</name>
+    <default>true</default>
+    <description>uHAL packages (IPbus software)</description>
+    <uservisible>true</uservisible>
+    <grouplist></grouplist>
+    <packagelist>
+      <packagereq type="mandatory">cactuscore-uhal-grammars</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-log</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-uhal</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-tests</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-python39</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-python39-gui</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-tools</packagereq>
+    </packagelist>
+  </group>
+
+  <group>
+    <id>controlhub</id>
+    <name>controlhub</name>
+    <default>true</default>
+    <description>ControlHub packages (IPbus software)</description>
+    <uservisible>true</uservisible>
+    <grouplist></grouplist>
+    <packagelist>
+      <packagereq type="mandatory">cactuscore-controlhub</packagereq>
+    </packagelist>
+  </group>
+
+  <group>
+    <id>uhal-debug</id>
+    <name>uhal-debug</name>
+    <default>true</default>
+    <description>uHAL debuginfo packages (IPbus software)</description>
+    <uservisible>true</uservisible>
+    <grouplist></grouplist>
+    <packagelist>
+      <packagereq type="mandatory">cactuscore-uhal-grammars-debuginfo</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-log-debuginfo</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-uhal-debuginfo</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-tests-debuginfo</packagereq>
+      <packagereq type="mandatory">cactuscore-uhal-tools-debuginfo</packagereq>
+    </packagelist>
+  </group>
+
+</comps>
