@@ -66,6 +66,7 @@
 #include "uhal/log/log.hpp"
 #include "uhal/Buffers.hpp"
 #include "uhal/ClientFactory.hpp"
+#include "uhal/SigBusGuard.hpp"
 
 
 namespace uhal {
@@ -196,11 +197,16 @@ void Mmap::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
   if (mFd == -1)
     open();
 
-  uint8_t* lVirtAddr = static_cast<uint8_t*>(mMmapIOPtr) + off_t(4*aAddr);
+  std::ostringstream lMessage;
+  lMessage << "SIGBUS received during " << 4*aNrWords << "-byte read @ 0x" << std::hex << 4*aAddr << " in " << mPath;
+  SigBusGuard lGuard;
+  lGuard.protect([&]{
+    uint8_t* lVirtAddr = static_cast<uint8_t*>(mMmapIOPtr) + off_t(4*aAddr);
 
-  for (size_t i=0; i<aNrWords; i++) {
-    aValues.push_back(*((uint32_t*) (lVirtAddr + 4 * i)));
-  }
+    for (size_t i=0; i<aNrWords; i++) {
+      aValues.push_back(*((uint32_t*) (lVirtAddr + 4 * i)));
+    }
+  }, lMessage.str());
 }
 
 
@@ -223,30 +229,34 @@ void Mmap::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
     throw lExc;
   }
 
-  // data to write to register address
-  char* buffer = allocated;
-  size_t lNrBytesCopied = 0;
-  for (size_t i = 0; i < aData.size(); i++) {
-    memcpy(buffer + lNrBytesCopied, aData.at(i).first, aData.at(i).second);
-    lNrBytesCopied += aData.at(i).second;
-  }
-
-//  memcpy(aMmapBaseAddress + aAddr, buffer, lNrBytes);
-  lNrBytesCopied = 0;
-  while (lNrBytesCopied < lNrBytes) {
-    char* lSrcPtr = buffer + lNrBytesCopied;
-    char* lVirtAddr = static_cast<char*>(mMmapIOPtr) + aAddr + lNrBytesCopied;
-    if ((lNrBytes - lNrBytesCopied) >= 8) {
-      *((uint64_t*) lVirtAddr) = *(uint64_t*) lSrcPtr;
-      lNrBytesCopied += 8;
+  std::ostringstream lMessage;
+  lMessage << "SIGBUS received during " << lNrBytes << "-byte write @ 0x" << std::hex << aAddr << " in " << mPath;
+  SigBusGuard lGuard;
+  lGuard.protect([&]{
+    // data to write to register address
+    char* buffer = allocated;
+    size_t lNrBytesCopied = 0;
+    for (size_t i = 0; i < aData.size(); i++) {
+      memcpy(buffer + lNrBytesCopied, aData.at(i).first, aData.at(i).second);
+      lNrBytesCopied += aData.at(i).second;
     }
-    else if ((lNrBytes - lNrBytesCopied) >= 4) {
-      *((uint64_t*) lVirtAddr) = uint64_t(*(uint32_t*) lSrcPtr);
-      lNrBytesCopied += 4;
-    }
-  }
 
-  free(allocated);
+    lNrBytesCopied = 0;
+    while (lNrBytesCopied < lNrBytes) {
+      char* lSrcPtr = buffer + lNrBytesCopied;
+      char* lVirtAddr = static_cast<char*>(mMmapIOPtr) + aAddr + lNrBytesCopied;
+      if ((lNrBytes - lNrBytesCopied) >= 8) {
+        *((uint64_t*) lVirtAddr) = *(uint64_t*) lSrcPtr;
+        lNrBytesCopied += 8;
+      }
+      else if ((lNrBytes - lNrBytesCopied) >= 4) {
+        *((uint64_t*) lVirtAddr) = uint64_t(*(uint32_t*) lSrcPtr);
+        lNrBytesCopied += 4;
+      }
+    }
+
+    free(allocated);
+  }, lMessage.str());
 }
 
 
