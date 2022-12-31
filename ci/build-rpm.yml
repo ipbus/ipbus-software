@@ -35,29 +35,72 @@
     when: always
     expire_in: 1 day
 
-
-build:centos7:
+.template_build_rpm_yumrepo:x86:
   extends: .template_build_rpm_yumrepo
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7:2021-01-26__boost1.53.0_pugixml1.8
+  variables:
+    GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}___
+  tags:
+    - docker
+
+.template_build_rpm_yumrepo:arm64:
+  extends: .template_build_rpm_yumrepo
+  # Increase path length within uhal directory for debuginfo builds, until docker-aarch64 supports GIT_CLONE_PATH
+  before_script:
+    - mkdir  /tmp/____________
+    - cp -r ${CI_BUILDS_DIR}/${CI_PROJECT_PATH} /tmp/____________/ipbus-software
+    - cd /tmp/____________/ipbus-software
+    - !reference [.template_build_rpm_yumrepo, before_script]
+  tags:
+    - docker-aarch64
+
+
+build:centos7:x86:
+  extends: .template_build_rpm_yumrepo:x86
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2022.12.30__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
 
-build:alma8:
-  extends: .template_build_rpm_yumrepo
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-alma8:2022-12-15__boost1.66.0_pugixml1.13
+build:centos7:arm64:
+  extends: .template_build_rpm_yumrepo:arm64
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2022.12.30__boost1.53.0_pugixml1.8
+  variables:
+    OUTPUT_REPO_SUBDIR: centos7/aarch64
+    PYTHONS: "python2.7 python3.4 python3.6"
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+
+
+build:alma8:x86:
+  extends: .template_build_rpm_yumrepo:x86
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2022.12.30__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/x86_64
     PYTHONS: "python3.6 python3.8"
     YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
 
+build:alma8:arm64:
+  extends: .template_build_rpm_yumrepo:arm64
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2022.12.30__boost1.66.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma8/aarch64
+    PYTHONS: "python3.6 python3.8"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
 
-build:alma9:
-  extends: .template_build_rpm_yumrepo
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-alma9:2022-12-15__boost1.75.0_pugixml1.13
+
+build:alma9:x86:
+  extends: .template_build_rpm_yumrepo:x86
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2022.12.30__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/x86_64
+    PYTHONS: "python3.9"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
+
+build:alma9:arm64:
+  extends: .template_build_rpm_yumrepo:arm64
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2022.12.30__boost1.75.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma9/aarch64
     PYTHONS: "python3.9"
     YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
 
@@ -66,6 +109,7 @@ build:centos7-gcc8:
   stage: build
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:2021-01-26
   variables:
+    GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}___
     OUTPUT_REPO_SUBDIR: centos7_gcc8/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7-gcc8.xml
@@ -107,13 +151,21 @@ build:centos7-gcc8:
     expire_in: 1 day
 
 
-publish:yum:centos7:
+publish:yum:centos7:x86:
   extends: .template_publish
   variables:
     CI_OUTPUT_DIR: ci_results/repos/centos7/x86_64
     DEPLOY_SUBDIR: repos/centos7/x86_64
   needs:
-    - build:centos7
+    - build:centos7:x86
+
+publish:yum:centos7:arm64:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/centos7/aarch64
+    DEPLOY_SUBDIR: repos/centos7/aarch64
+  needs:
+    - build:centos7:arm64
 
 publish:yum:centos7-gcc8:
   extends: .template_publish
@@ -123,19 +175,36 @@ publish:yum:centos7-gcc8:
   needs:
     - build:centos7-gcc8
 
-publish:yum:alma8:
+publish:yum:alma8:x86:
   extends: .template_publish
   variables:
     CI_OUTPUT_DIR: ci_results/repos/alma8/x86_64
     # For backward compatibility: Keep YUM repo subdirectory as "centos8" (rather than "el8") until v2.9
     DEPLOY_SUBDIR: repos/centos8/x86_64
   needs:
-    - build:alma8
+    - build:alma8:x86
 
-publish:yum:alma9:
+publish:yum:alma8:arm64:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma8/aarch64
+    # For backward compatibility: Keep YUM repo subdirectory as "centos8" (rather than "el8") until v2.9
+    DEPLOY_SUBDIR: repos/centos8/aarch64
+  needs:
+    - build:alma8:arm64
+
+publish:yum:alma9:x86:
   extends: .template_publish
   variables:
     CI_OUTPUT_DIR: ci_results/repos/alma9/x86_64
     DEPLOY_SUBDIR: repos/el9/x86_64
   needs:
-    - build:alma9
+    - build:alma9:x86
+
+publish:yum:alma9:arm64:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma9/aarch64
+    DEPLOY_SUBDIR: repos/el9/aarch64
+  needs:
+    - build:alma9:arm64
