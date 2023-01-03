@@ -15,7 +15,6 @@ stages:
   - final_report
 
 variables:
-  GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}___
   GIT_SUBMODULE_STRATEGY: normal
   GITHUB_REPO_API_URL: "https://api.github.com/repos/ipbus/ipbus-software"
   IPBUS_DOCKER_REGISTRY: "gitlab-registry.cern.ch/ipbus/ipbus-docker"
