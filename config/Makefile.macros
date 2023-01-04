@@ -11,7 +11,7 @@ CACTUS_OS=unknown.os
 
 UNAME=$(strip $(shell uname -s))
 ifeq ($(UNAME),Linux)
-    CACTUS_OS_EL_MAJOR=$(shell cat /etc/system-release | sed 's/^\(CentOS Linux\|CentOS Stream\|AlmaLinux|Rocky Linux\) release \([0-9]\).*/\2/;t;d')
+    CACTUS_OS_EL_MAJOR=$(shell cat /etc/system-release | sed 's/^\(CentOS Linux\|CentOS Stream\|AlmaLinux\|Rocky Linux\) release \([0-9]\).*/\2/;t;d')
     ifneq ($(CACTUS_OS_EL_MAJOR),)
         CACTUS_OS=el$(CACTUS_OS_EL_MAJOR)
     endif

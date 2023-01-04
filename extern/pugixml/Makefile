@@ -63,3 +63,4 @@ _rpmall:
 			--define "packager ${Packager}"					\
 			${PackageName}.spec
 
+check-version:

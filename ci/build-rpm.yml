@@ -7,6 +7,7 @@
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
   script:
+    - make -k Set=all check-version
     - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0
     - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - make -C uhal/log generate_files
@@ -124,6 +125,7 @@ build:centos7-gcc8:
     - sed -i 's|cd ${ZIP_NAME}|cd ${ZIP_NAME}/${ZIP_NAME}|g' extern/pugixml/Makefile
     - git diff
   script:
+    - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0 check-version
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - mkdir -p ${REPO_DIR}

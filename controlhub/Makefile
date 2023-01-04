@@ -32,7 +32,7 @@ Packager = Tom Williams
 
 PACKAGE_VER_MAJOR = 2
 PACKAGE_VER_MINOR = 8
-PACKAGE_VER_PATCH = 5
+PACKAGE_VER_PATCH = 6
 
 # This is the version number for the RPM packaging.
 PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
@@ -53,7 +53,7 @@ ifeq ($(BUILD_ERLANG), 1)
 endif
 ######################################################################################
 
-.PHONY: all _all clean  _cleanall build _buildall cleanrpm rpm _rpmall uninstall install _erlang
+.PHONY: all _all clean  _cleanall build _buildall cleanrpm rpm _rpmall uninstall install _erlang check-version
 
 default: build
 
@@ -185,3 +185,25 @@ uninstall:
 	rm -rf $(bindir)/controlhub*
 	rm -rf $(libdir)/controlhub
 	rm -rf /etc/rsyslog.d/controlhub.conf /etc/logrotate.d/controlhub.conf /etc/controlhub/default
+
+
+# Version check target
+RELTOOL_CONFIG_PATH = rel/reltool.config
+RELTOOL_CONFIG_VERSION_STRING = $(shell sed -e 's/.*rel, "controlhub", "\(.*\)",/\1/;t;d' ${RELTOOL_CONFIG_PATH})
+
+CONTROLHUB_APP_PATH = ebin/controlhub.app
+CONTROLHUB_APP_VERSION_STRING = $(shell sed -e 's/.*vsn, "\(.*\)".,/\1/;t;d' ${CONTROLHUB_APP_PATH})
+
+check-version:
+	$(info Checking ${RELTOOL_CONFIG_PATH})
+ifneq (${RELTOOL_CONFIG_VERSION_STRING},${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH})
+	$(error "${RELTOOL_CONFIG_PATH}: Value of version string "${RELTOOL_CONFIG_VERSION_STRING}" is inconsistent with PACKAGE_VER_ Makefile variables")
+endif
+	$(info Checking ${CONTROLHUB_APP_PATH})
+ifneq (${CONTROLHUB_APP_VERSION_STRING},${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH})
+	$(error "${CONTROLHUB_APP_PATH}: Value of version string "${CONTROLHUB_APP_VERSION_STRING}" is inconsistent with PACKAGE_VER_ Makefile variables")
+endif
+ifdef CI_COMMIT_TAG
+	@echo Detected GitLab CI env. Checking that tag name matches makefile variable values
+	@if ! [[ ${CI_COMMIT_TAG} =~ v${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}.* ]]; then echo "ERROR: Value of CI_COMMIT_TAG, \"${CI_COMMIT_TAG}\", inconsistent with PACKAGE_VER_ variables"; exit 1; fi
+endif

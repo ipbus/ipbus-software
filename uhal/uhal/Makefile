@@ -8,11 +8,6 @@ Package = uhal/uhal
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
 PackageName = cactuscore-uhal-uhal
 
-PACKAGE_VER_MAJOR = 2
-PACKAGE_VER_MINOR = 8
-PACKAGE_VER_PATCH = 5
-PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
-
 PackageSummary = uHAL Library
 PackageDescription = uHAL Library
 PackageURL = https://ipbus.web.cern.ch/ipbus
