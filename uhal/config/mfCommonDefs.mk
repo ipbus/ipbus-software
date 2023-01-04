@@ -37,3 +37,9 @@ CXX_VERSION_TAG := $(subst .,_,${CXX_VERSION_TAG})
 ifneq (,$(findstring gcc4,${CXX_VERSION_TAG})$(findstring gcc5,${CXX_VERSION_TAG})$(findstring gcc6_0,${CXX_VERSION_TAG}))
   CXXFLAGS += -std=c++11
 endif
+
+# Package version numbers
+PACKAGE_VER_MAJOR = 2
+PACKAGE_VER_MINOR = 8
+PACKAGE_VER_PATCH = 5
+PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}

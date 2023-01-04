@@ -25,7 +25,7 @@ TARBALL_FILE = ${TARBALL_DIR}.tar.gz
 
 RPMBUILD_DIR = ${PackagePath}/RPMBUILD
 
-.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update
+.PHONY: all _all clean _cleanall build _buildall install _installall rpm _rpmall test _testall spec_update check-version
 
 default: build
 
@@ -66,3 +66,4 @@ _rpmall:
 		--define "packager ${Packager}" \
 		${PackageName}.spec
 
+check-version:
