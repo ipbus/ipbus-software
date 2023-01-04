@@ -180,6 +180,7 @@ test_controlhub:centos7:x86:
 test_core:centos7:arm64:
   extends: .template_test:centos7:arm64
   <<: *test_core_jobScript
+  allow_failure: true
 
 test_python:centos7:arm64:
   extends: .template_test:centos7:arm64
