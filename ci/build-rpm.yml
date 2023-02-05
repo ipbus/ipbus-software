@@ -55,6 +55,38 @@
     - docker-aarch64
 
 
+.template_build_rpm_yumrepo:docker_buildx:
+  stage: build
+  image: jonoh/docker-buildx-qemu:19.03.8_0.3.1
+  tags:
+    - docker:dind
+    - multiarch:qemu
+  services:
+    - name: docker:19.03.11-dind
+      # Enable experimental features in Docker server (for 'docker run --platform ...')
+      command: ["--experimental", "--debug"]
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: "1"
+    DOCKER_CERT_PATH: "/certs/client"
+  before_script:
+    - docker info
+    - docker context create builder-context
+    - docker buildx create --driver docker-container --use builder-context
+    - docker buildx inspect --bootstrap
+    - update-binfmts --enable
+
+    - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
+    - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
+  script:
+    - docker buildx build --platform ${BUILD_PLATFORM} --target export --build-arg PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} -f ${DOCKERFILE} -t build-products-exporter --output type=local,dest=$(pwd)/build-products .
+    - ls -al build-products/rpms
+    - mkdir -vp $(dirname ${REPO_DIR})
+    - mv build-products/rpms ${REPO_DIR}
+  artifacts: !reference [.template_build_rpm_yumrepo, artifacts]
+
+
 build:centos7:x86:
   extends: .template_build_rpm_yumrepo:x86
   image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2022.12.30__boost1.53.0_pugixml1.8
@@ -70,6 +102,13 @@ build:centos7:arm64:
     OUTPUT_REPO_SUBDIR: centos7/aarch64
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+
+build:centos7:armv7:
+  extends: .template_build_rpm_yumrepo:docker_buildx
+  variables:
+    BUILD_PLATFORM: linux/arm/v7
+    DOCKERFILE: ci/ipbus-sw-builder-centos7.Dockerfile
+    OUTPUT_REPO_SUBDIR: centos7/armhfp
 
 
 build:alma8:x86:
@@ -168,6 +207,14 @@ publish:yum:centos7:arm64:
     DEPLOY_SUBDIR: repos/centos7/aarch64
   needs:
     - build:centos7:arm64
+
+publish:yum:centos7:armv7:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/centos7/armhfp
+    DEPLOY_SUBDIR: repos/centos7/armhfp
+  needs:
+    - build:centos7:armv7
 
 publish:yum:centos7-gcc8:
   extends: .template_publish
