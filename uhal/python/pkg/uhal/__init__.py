@@ -12,6 +12,11 @@ except ImportError as e:
     else:
         exec('raise type(e), message.format(e.message), sys.exc_info()[2]')
 
+# The new SigBusGuard functionality for mmap connections requires that
+# all threads block SIGBUS. This includes the main Python thread.
+import signal
+signal.pthread_sigmask(signal.SIG_BLOCK, [signal.SIGBUS])
+
 
 ##################################################
 # Pythonic additions to the ValWord_uint32 API
