@@ -49,10 +49,10 @@
 namespace uhal {
 
   namespace exception {
-    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( SigBusError , TransactionLevelError, "Exception caused by a SIGBUS signal." );
-    UHAL_DEFINE_EXCEPTION_CLASS ( SignalHandlerNotRegistered , "Exception associated with signal handler registration errors." );
-    UHAL_DEFINE_EXCEPTION_CLASS ( SignalMaskingFailure , "Exception associated with signal masking errors." );
-    UHAL_DEFINE_EXCEPTION_CLASS ( SignalNotBlocked , "Exception associated with SIGBUS not being masked when using uHAL." );
+    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( SigBusError , TransactionLevelError, "Exception caused by a SIGBUS signal." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( SignalHandlerNotRegistered , "Exception associated with signal handler registration errors." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( SignalMaskingFailure , "Exception associated with signal masking errors." )
+    UHAL_DEFINE_EXCEPTION_CLASS ( SignalNotBlocked , "Exception associated with SIGBUS not being masked when using uHAL." )
   }
 
   class SigBusGuard {
