@@ -903,6 +903,14 @@ class TestPrintValMem( unittest.TestCase ):
         self.exe_ValVector_test( list_randuint32s(1024*1024//4) )
 
 
+class TestSigBusBlocked( unittest.TestCase ):
+    """TestCase sub-class checking that 'import uhal' automatically blocks SIGBUS."""
+
+    def test_SigBusGuard_creation(self):
+        # If SIGBUS is not already blocked, then the SigBusGuard constructor (invoked by this funciton) will throw
+        uhal.tests.create_sigbus_guard()
+
+
 # Run the tests
 if __name__ == '__main__':
 
