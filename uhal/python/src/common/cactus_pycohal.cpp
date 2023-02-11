@@ -232,6 +232,9 @@ const uhal::Node& NextNodeConstIterator( uhal::Node::const_iterator& aIt )
 //          Otherwise, will get the error message "ImportError: dynamic module does not define init function (initmy_py_binds_module)
 PYBIND11_MODULE(_core, m)
 {
+  // Block SIGBUS, since required by SigBusGuard (used by mmap-based client)
+  uhal::SigBusGuard::blockSIGBUS();
+
   m.def("NOMASK", pycohal::defs_NOMASK);
 
   // ENUMS
