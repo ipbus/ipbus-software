@@ -15,6 +15,7 @@
 #include "uhal/ProtocolIPbus.hpp"
 #include "uhal/ProtocolTCP.hpp"
 #include "uhal/ProtocolUDP.hpp"
+#include "uhal/SigBusGuard.hpp"
 #include "uhal/Node.hpp"
 #include "uhal/tests/tools.hpp"
 
@@ -100,6 +101,12 @@ namespace pycohal
     return valWord;
   }
 
+  // Internally creates instance of SigBusGuard class - used to verify that SIGBUS is automatically blocked when uhal loaded
+  void create_sigbus_buard()
+  {
+    const uhal::SigBusGuard lGuard;
+  }
+
   /// Wraps functions that are only sed in unti tests. Puts them in "tests" sub-module.
   void wrap_test_functions(py::module_& aModule)
   {
@@ -115,6 +122,8 @@ namespace pycohal
     lSubModule.def ( "convert_str_to_vec_uint32", pycohal::convert_string_to_vector<uint32_t> );
     lSubModule.def ( "copy_vec_uint32", pycohal::copy_vector<uint32_t> );
     lSubModule.def ( "get_dummy_ValWord", pycohal::get_dummy_ValWord );
+
+    lSubModule.def ( "create_sigbus_guard", pycohal::create_sigbus_buard );
   }
 
 
@@ -223,6 +232,9 @@ const uhal::Node& NextNodeConstIterator( uhal::Node::const_iterator& aIt )
 //          Otherwise, will get the error message "ImportError: dynamic module does not define init function (initmy_py_binds_module)
 PYBIND11_MODULE(_core, m)
 {
+  // Block SIGBUS, since required by SigBusGuard (used by mmap-based client)
+  uhal::SigBusGuard::blockSIGBUS();
+
   m.def("NOMASK", pycohal::defs_NOMASK);
 
   // ENUMS
