@@ -202,6 +202,12 @@ void Mmap::File::read(const uint32_t aAddr, const uint32_t aNrWords, std::vector
   if (mFd == -1)
     open();
 
+  if (4 * aAddr + 4 * aNrWords > size_t(MAP_SIZE)) {
+    exception::MmapInitialisationError lExc;
+    log(lExc, "Attempted to read beyond the end of mapped memory for device file '" + mPath + "' (reading ", Integer(4 * aNrWords), " bytes from address ", Integer(4 * aAddr), ", i.e. ", Integer(uint32_t(4 * aAddr + 4 * aNrWords - MAP_SIZE)), " bytes beyond end of ", Integer(uint32_t(MAP_SIZE)), " mapped bytes.");
+    throw lExc;
+  }
+
   std::ostringstream lMessage;
   lMessage << "SIGBUS received during " << 4*aNrWords << "-byte read @ 0x" << std::hex << 4*aAddr << " in " << mPath;
   SigBusGuard lGuard;
@@ -225,6 +231,12 @@ void Mmap::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
     lNrBytes += aData.at(i).second;
 
   assert((lNrBytes % 4) == 0);
+
+  if (aAddr + lNrBytes > size_t(MAP_SIZE)) {
+    exception::MmapInitialisationError lExc;
+    log(lExc, "Attempted to write beyond the end of mapped memory for device file '" + mPath + "' (writing ", Integer(lNrBytes), " bytes at address ", Integer(aAddr), ", i.e. ", Integer(uint32_t(aAddr + lNrBytes - MAP_SIZE)), " bytes beyond end of ", Integer(uint32_t(MAP_SIZE)), " mapped bytes.");
+    throw lExc;
+  }
 
   char *allocated = NULL;
   posix_memalign((void **)&allocated, 4096/*alignment*/, lNrBytes + 4096);
