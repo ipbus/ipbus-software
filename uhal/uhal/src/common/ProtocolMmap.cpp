@@ -142,7 +142,12 @@ void Mmap::File::setOffset(size_t aOffset)
 }
 
 
-#define MAP_SIZE (32*1024UL)
+// The default version of ipbus_transport_axi_if uses four IPBus
+// transport buffers, each with a 2^11-bit address space. In
+// addition, the first four 32-bit words in the IPBus transport
+// address space contain status information. This means the
+// corresponding memory memory map needs to allocate 2^15 + 16 bytes.
+#define MAP_SIZE (32*1024UL + 16UL)
 #define MAP_MASK (MAP_SIZE - 1)
 
 
