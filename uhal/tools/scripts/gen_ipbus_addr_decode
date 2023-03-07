@@ -7,7 +7,7 @@ The script takes a uHAL-compliant XML address file and writes a VHDL module cont
 corresponding address decoder function to a file named 'ipbus_decode_<addr_table_name>.vhd'.
 
 Note that full address decoding is not performed (would be very inefficient with 32b address
-space), so slaves will appear at many locations.
+space), so endpoints will appear at many locations.
 """
 
 from __future__ import print_function
@@ -285,18 +285,18 @@ def main():
 
     or_prod = BitArray(0x0)
     and_prod = BitArray(0xffffffff)
-    slaves = []
+    endpoints = []
 
     for n, i in enumerate(endpoint_nodes):
         addr_bits = BitArray(i.addr)
         mask_bits = BitArray(2 ** i.width - 1)
-        log.info("uHAL slave %s,%s,0b%s,0b%s" % (n, i.name, addr_bits, mask_bits))
+        log.info("uHAL endpoint %s,%s,0b%s,0b%s" % (n, i.name, addr_bits, mask_bits))
         if (addr_bits & mask_bits).uint() != 0:
             log.error("Node <<" + i.name + ">> has a non-aligned address " + str(addr_bits) + " with respect to address bit mask " + str(mask_bits))
             error_count += 1
         or_prod = or_prod | (addr_bits & ~mask_bits)
         and_prod = and_prod & (addr_bits | mask_bits)
-        slaves.append((n, i.name, addr_bits, mask_bits))
+        endpoints.append((n, i.name, addr_bits, mask_bits))
 
     addr_mask = or_prod & ~and_prod
     log.info("Significant address bits 0b%s" % str(addr_mask))
@@ -308,7 +308,7 @@ def main():
 
 # FIXME: this algorithm leads to more than the required number of address bits being
 # compared in the VHDL in some circumstances. Could add a loop here to calculate the
-# number of address bits needed for a unique match for a given slave.
+# number of address bits needed for a unique match for a given endpoint.
 
 # Generate VHDL code
 
@@ -319,18 +319,18 @@ def main():
 
         # generate vhdl snippet with symbolic constants
         snippet1 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
-        slaveIds={}
+        endpointIds={}
         maxN=0
-        for n,id,addr_bits,mask_bits in slaves:
+        for n,id,addr_bits,mask_bits in endpoints:
             if n>maxN: maxN=n
-            slaveIds[n]="N_SLV_"+id.upper().replace(".","_")
-            snippet1 += "  constant "+slaveIds[n]+": integer := %i;\n"%n
-        snippet1 += "  constant N_SLAVES: integer := %i;\n"%(maxN+1)
+            endpointIds[n]="N_EPT_"+id.upper().replace(".","_")
+            snippet1 += "  constant "+endpointIds[n]+": integer := %i;\n"%n
+        snippet1 += "  constant N_ENDPOINTS: integer := %i;\n"%(maxN+1)
         snippet1 += "-- END automatically generated VHDL\n"
         
         # generate vhdl snippet with selection code
         snippet2 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
-        for n,id,addr_bits,mask_bits in slaves:
+        for n,id,addr_bits,mask_bits in endpoints:
             mask = addr_mask & ~mask_bits
             if n == 0:
                 snippet2 += "    if    "
@@ -347,7 +347,7 @@ def main():
                     snippet2 += "0"
             snippet2 += "\") then\n"
             
-            snippet2 += "      sel := ipbus_sel_t(to_unsigned(" + slaveIds[n] + ", IPBUS_SEL_WIDTH)); -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + mask.hex() + "\n"
+            snippet2 += "      sel := ipbus_sel_t(to_unsigned(" + endpointIds[n] + ", IPBUS_SEL_WIDTH)); -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + mask.hex() + "\n"
         snippet2 += "-- END automatically generated VHDL\n"
 
         # calculate required selector bit width

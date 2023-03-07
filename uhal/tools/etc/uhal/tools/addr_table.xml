@@ -1,4 +1,4 @@
-<node description="Example slaves file">
+<node description="Example endpoints file">
 	<node id="id" address="0x0" description="ID register" fwinfo="endpoint;width=0"/>
 	<node id="csr" address="0x2" description="ctrl/stat register" fwinfo="endpoint;width=1">
 		<node id="ctrl" address="0x0"/>

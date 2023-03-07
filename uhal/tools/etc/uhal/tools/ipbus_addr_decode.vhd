@@ -29,7 +29,7 @@ package body ipbus_decode_PACKAGENAME is
 
 -- INSERT_SELECTION_HERE
     else
-        sel := ipbus_sel_t(to_unsigned(N_SLAVES, IPBUS_SEL_WIDTH));
+        sel := ipbus_sel_t(to_unsigned(N_ENDPOINTS, IPBUS_SEL_WIDTH));
     end if;
 
     return sel;
