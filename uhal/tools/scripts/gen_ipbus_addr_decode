@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/libexec/platform-python
 
 """
 This script automatically generates address select logic for IPbus-based firmware designs.
@@ -318,47 +318,61 @@ def main():
         timestamp_suffix = "" if args.no_timestamp else (" (" + time.asctime() + ")" )
 
         # generate vhdl snippet with symbolic constants
+        numSlaves = len(slaves)
         snippet1 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
-        slaveIds={}
-        maxN=0
-        for n,id,addr_bits,mask_bits in slaves:
-            if n>maxN: maxN=n
-            slaveIds[n]="N_SLV_"+id.upper().replace(".","_")
-            snippet1 += "  constant "+slaveIds[n]+": integer := %i;\n"%n
-        snippet1 += "  constant N_SLAVES: integer := %i;\n"%(maxN+1)
-        snippet1 += "-- END automatically generated VHDL\n"
+        if numSlaves > 0:
+            slaveIds={}
+            for n,id,addr_bits,mask_bits in slaves:
+                slaveIds[n]="N_SLV_"+id.upper().replace(".","_")
+                snippet1 += "  constant "+slaveIds[n]+": integer := %i;\n"%n
+        snippet1 += "  constant N_SLAVES: integer := %i;\n"%(numSlaves)
+        snippet1 += "-- END automatically generated VHDL"
         
         # generate vhdl snippet with selection code
         snippet2 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
-        for n,id,addr_bits,mask_bits in slaves:
-            mask = addr_mask & ~mask_bits
-            if n == 0:
-                snippet2 += "    if    "
-            else:
-                snippet2 += "    elsif "
-    
-            snippet2 += "std_match(addr, \""
-            for i in range(31, -1, -1):
-                if not mask[i]:
-                    snippet2 += "-"
-                elif addr_bits[i]:
-                    snippet2 += "1"
+        if numSlaves == 0:
+            snippet2 += "  sel := ipbus_sel_t(to_unsigned(0, IPBUS_SEL_WIDTH));\n"
+        elif numSlaves == 1:
+            snippet2 += "  sel := ipbus_sel_t(to_unsigned(N_SLAVES, IPBUS_SEL_WIDTH));\n"
+        else:
+            for n,id,addr_bits,mask_bits in slaves:
+                mask = addr_mask & ~mask_bits
+                if n == 0:
+                    snippet2 += "    if    "
                 else:
-                    snippet2 += "0"
-            snippet2 += "\") then\n"
+                    snippet2 += "    elsif "
+
+                snippet2 += "std_match(addr, \""
+                for i in range(31, -1, -1):
+                    if not mask[i]:
+                        snippet2 += "-"
+                    elif addr_bits[i]:
+                        snippet2 += "1"
+                    else:
+                        snippet2 += "0"
+                snippet2 += "\") then\n"
             
-            snippet2 += "      sel := ipbus_sel_t(to_unsigned(" + slaveIds[n] + ", IPBUS_SEL_WIDTH)); -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + mask.hex() + "\n"
+                snippet2 += "      sel := ipbus_sel_t(to_unsigned(" + slaveIds[n] + ", IPBUS_SEL_WIDTH)); -- " + str(id) + " / base " + addr_bits.hex() + " / mask " + mask.hex() + "\n"
+            snippet2 += "    else\n"
+            snippet2 += "        sel := ipbus_sel_t(to_unsigned(N_SLAVES, IPBUS_SEL_WIDTH));\n"
+            snippet2 += "    end if;\n"
         snippet2 += "-- END automatically generated VHDL\n"
 
         # calculate required selector bit width
-        ipbus_sel_width = int(math.floor(math.log(maxN+1,2))+1)
+        ipbus_sel_width = 1
+        if len(slaves):
+            ipbus_sel_width = int(math.floor(math.log(numSlaves,2))+1)
+        snippet3 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
+        snippet3 += "  constant IPBUS_SEL_WIDTH: positive := " + str(ipbus_sel_width) + ";\n"
+        snippet3 += "-- END automatically generated VHDL\n"
 
         # print vhdl code
         vhdlfilename = "ipbus_decode_"+moduleName+".vhd"
         vhdlfile=open(vhdlfilename,"w")
-        vhdlfile.write(open(args.template).read().replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
+        vhdlfile.write(open(args.template).read()
+                       .replace("-- INSERT_SYMBOLIC_CONSTANTS_HERE",snippet1)\
                        .replace("-- INSERT_SELECTION_HERE",snippet2)\
-                       .replace("INSERT_SEL_WIDTH_HERE","%s"%ipbus_sel_width)\
+                       .replace("-- INSERT_SEL_WIDTH_HERE", snippet3)\
                        .replace("PACKAGENAME",moduleName))
         vhdlfile.close()
         print("VHDL decode file saved: ", vhdlfilename)
