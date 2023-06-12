@@ -3,9 +3,9 @@ BUILD_HOME = $(shell pwd)/../..
 include $(BUILD_HOME)/config/Makefile.macros
 include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
-PYTHON_VERSION_MAJOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major))")
+PYTHON_VERSION_LESS_THAN_36=$(shell ${PYTHON} -c "import sys; print('1' if (sys.version_info.major, sys.version_info.minor) < (3,6) else '0')")
 PYTHON_VERSION_MAJOR_MINOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
-ifeq (${PYTHON_VERSION_MAJOR},2)
+ifeq (${PYTHON_VERSION_LESS_THAN_36},1)
   EXTERN_PYBIND11_INCLUDE_PREFIX=pybind11-python2/include
 else
   EXTERN_PYBIND11_INCLUDE_PREFIX=pybind11/include
