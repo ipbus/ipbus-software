@@ -22,6 +22,9 @@ build:centos7:static:
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-static:2021-01-26__boost1.53.0_pugixml1.8
   variables:
     BUILD_STATIC: 1
+    BUILD_UHAL_PYTHON: 0
+    BUILD_UHAL_GUI: 0
+    BUILD_UHAL_TOOLS: 0
 
 build:fedora33:
   extends: .template_build_simple
