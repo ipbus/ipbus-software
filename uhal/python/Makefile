@@ -3,7 +3,13 @@ BUILD_HOME = $(shell pwd)/../..
 include $(BUILD_HOME)/config/Makefile.macros
 include $(BUILD_HOME)/uhal/config/mfCommonDefs.mk
 
+PYTHON_VERSION_MAJOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major))")
 PYTHON_VERSION_MAJOR_MINOR=$(shell ${PYTHON} -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
+ifeq (${PYTHON_VERSION_MAJOR},2)
+  EXTERN_PYBIND11_INCLUDE_PREFIX=pybind11-python2/include
+else
+  EXTERN_PYBIND11_INCLUDE_PREFIX=pybind11/include
+endif
 
 
 Project = uhal
@@ -22,7 +28,7 @@ LibraryFile = pkg/uhal/_core.so
 
 
 IncludePaths = include  \
-		pybind11/include \
+		${EXTERN_PYBIND11_INCLUDE_PREFIX} \
 		${EXTERN_BOOST_INCLUDE_PREFIX} \
 		${EXTERN_PUGIXML_INCLUDE_PREFIX} \
 		${PYTHON_INCLUDE_PREFIX} \
