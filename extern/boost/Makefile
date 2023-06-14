@@ -13,7 +13,7 @@ Packager = Andrew Rose, Marc Magrans de Abril
 PACKAGE_VER_MAJOR = 1
 PACKAGE_VER_MINOR = 53
 PACKAGE_VER_PATCH = 0
-PACKAGE_RELEASE = 1${PACKAGE_RELEASE_SUFFIX}
+PACKAGE_RELEASE = 2${PACKAGE_RELEASE_SUFFIX}
 
 TARBALL_NAME = boost_${PACKAGE_VER_MAJOR}_${PACKAGE_VER_MINOR}_${PACKAGE_VER_PATCH}
 TARBALL_FILE = ${TARBALL_NAME}.tar.bz2
@@ -33,21 +33,22 @@ all: _all
 build: _all
 buildall: _all
 _all:
-	if [ ! -f ${TARBALL_NAME}/.build_done ]; then                                                     \
+	if [ ! -f ${TARBALL_NAME}/.build_done ]; then \
 		mkdir -p ${RPMBUILD_DIR}/{RPMS/{i386,i586,i686,x86_64},SPECS,BUILD,SOURCES,SRPMS}; \
-		echo "Extracting: ${TARBALL_FILE}";												 \
-		source $(BUILD_HOME)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvjf ${TARBALL_FILE}';                         \
-		cd ${TARBALL_NAME};                                        \
-		./bootstrap.sh;                                           \
-		./b2                    -d0                                \
-					--without-mpi			\
-					--prefix=${RPMBUILD_DIR}/SOURCES	\
-					--exec-prefix=${RPMBUILD_DIR}/SOURCES	\
-					variant=release					\
-					link=shared					\
-					threading=multi					\
-					install;                                     \
-		date > .build_done;																	\
+		echo "Extracting: ${TARBALL_FILE}"; \
+		source $(BUILD_HOME)/config/progress.sh 'tar -tf ${TARBALL_FILE} | wc -l' 'tar -xvjf ${TARBALL_FILE}'; \
+		cd ${TARBALL_NAME}; \
+		./bootstrap.sh; \
+		./b2 -d0 \
+			-sNO_ZLIB=0 \
+			--without-mpi \
+			--prefix=${RPMBUILD_DIR}/SOURCES \
+			--exec-prefix=${RPMBUILD_DIR}/SOURCES \
+			variant=release \
+			link=shared \
+			threading=multi \
+			install; \
+		date > .build_done; \
 	fi;
 
 rpm: _rpmall
