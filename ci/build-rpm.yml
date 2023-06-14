@@ -130,18 +130,18 @@ build:alma8:arm64:
 
 build:alma9:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2022.12.30__boost1.75.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.06.12__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/x86_64
-    PYTHONS: "python3.9"
+    PYTHONS: "python3.9 python3.11"
     YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
 
 build:alma9:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2022.12.30__boost1.75.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.06.12__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/aarch64
-    PYTHONS: "python3.9"
+    PYTHONS: "python3.9 python3.11"
     YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
 
 
