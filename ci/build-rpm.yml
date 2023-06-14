@@ -163,6 +163,7 @@ build:centos7-gcc8:
     - sed -i "s/PACKAGE_VER_MINOR = 53/PACKAGE_VER_MINOR = 66/g" extern/boost/Makefile
     - sed -i 's|cd ${ZIP_NAME}|cd ${ZIP_NAME}/${ZIP_NAME}|g' extern/pugixml/Makefile
     - git diff
+    - sudo yum -y install zlib-devel
   script:
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0 check-version
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0
