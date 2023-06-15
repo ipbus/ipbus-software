@@ -1,0 +1,7 @@
+<node>
+  <node id="reg1" address="0x1" address="0x0000"/>
+  <node id="reg2" address="0x2">
+    <node id="upper" mask="0xffff0000"/>
+    <node id="lower" mask="0xffff"/>
+  </node>
+</node>

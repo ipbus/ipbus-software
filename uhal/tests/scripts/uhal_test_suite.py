@@ -163,6 +163,8 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_etc_path):
                "diff -I '^-- START' %s %s" % (join( uhal_tools_test_refs_dir, 'ipbus_decode_addr_table_a.vhd' ) , 'ipbus_decode_addr_table_a.vhd' ),
                sys.executable + " $(which gen_ipbus_addr_decode) -t %s %s" % (uhal_tools_template_vhdl, join( uhal_tools_test_inputs_dir, 'addr_table_b.xml')),
                "diff -I '^-- START' %s %s" % (join( uhal_tools_test_refs_dir, 'ipbus_decode_addr_table_b.vhd' ) , 'ipbus_decode_addr_table_b.vhd' ),
+               sys.executable + " $(which gen_ipbus_addr_decode) -t %s %s" % (uhal_tools_template_vhdl, join( uhal_tools_test_inputs_dir, 'addr_table_c.xml')),
+               "diff -I '^-- START' %s %s" % (join( uhal_tools_test_refs_dir, 'ipbus_decode_addr_table_c.vhd' ) , 'ipbus_decode_addr_table_c.vhd' ),
               ]
             ]]
 

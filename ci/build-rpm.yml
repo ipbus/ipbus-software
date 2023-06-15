@@ -89,7 +89,7 @@
 
 build:centos7:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2022.12.30__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2023.06.15__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
@@ -97,7 +97,7 @@ build:centos7:x86:
 
 build:centos7:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2022.12.30__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2023.06.15__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/aarch64
     PYTHONS: "python2.7 python3.4 python3.6"
@@ -113,7 +113,7 @@ build:centos7:armv7:
 
 build:alma8:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2022.12.30__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2023.06.15__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/x86_64
     PYTHONS: "python3.6 python3.8"
@@ -121,7 +121,7 @@ build:alma8:x86:
 
 build:alma8:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2022.12.30__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2023.06.15__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/aarch64
     PYTHONS: "python3.6 python3.8"
@@ -130,7 +130,7 @@ build:alma8:arm64:
 
 build:alma9:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.06.12__boost1.75.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.06.15__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/x86_64
     PYTHONS: "python3.9 python3.11"
@@ -138,7 +138,7 @@ build:alma9:x86:
 
 build:alma9:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.06.12__boost1.75.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.06.15__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/aarch64
     PYTHONS: "python3.9 python3.11"
