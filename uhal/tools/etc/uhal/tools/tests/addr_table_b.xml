@@ -1,0 +1,13 @@
+<node>
+  <node id="reg1" mode="single" address="0x0000" fwinfo="endpoint;width=0"/>
+  <node id="reg2" address="0x0002" fwinfo="endpoint;width=0">
+    <node id="upper" mask="0xffff0000"/>
+    <node id="lower" mask="0xffff"/>
+  </node>
+
+  <node id="mem1" address="0x1000" mode="incremental" size="1024" fwinfo="endpoint;width=10"/>
+  <node id="mem2" address="0x1400" mode="incremental" size="1024" fwinfo="endpoint;width=10"/>
+
+  <node id="submodule1" address="0x8000" module="file://addr_table_b_submodule.xml"/>
+  <node id="submodule2" address="0x8004" module="file://addr_table_b_submodule.xml"/>
+</node>
