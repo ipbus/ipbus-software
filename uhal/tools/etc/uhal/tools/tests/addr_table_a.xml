@@ -4,6 +4,6 @@
 		<node id="ctrl" address="0x0"/>
 		<node id="stat" address="0x1"/>
 	</node>
-	<node id="xpoint" address="0x4" size="0x4" fwinfo="endpoint;width=2"/>
+	<node id="xpoint" address="0x4" mode="block" size="0x4" fwinfo="endpoint;width=2"/>
 </node>
 

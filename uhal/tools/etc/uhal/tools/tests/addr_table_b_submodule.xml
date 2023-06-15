@@ -1,0 +1,5 @@
+<node id="submodule" fwinfo="endpoint;width=2">
+  <node id="reg1" address="0x0"/>
+  <node id="reg2" address="0x1"/>
+  <node id="reg3" address="0x2"/>
+</node>

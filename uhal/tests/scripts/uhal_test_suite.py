@@ -42,7 +42,7 @@ import platform
 SOFT_TIMEOUT_S = 570
 
 
-def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
+def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_etc_path):
     """Return full list of all sections/commands in this test suite."""
 
     if not conn_file.startswith("file://"):
@@ -154,9 +154,17 @@ def get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl):
               [sys.executable + " -c \"import uhal.gui.test.test_uhal_gui;uhal.gui.test.test_uhal_gui.main()\""]
             ]]
 
+    uhal_tools_template_vhdl = join( uhal_tools_etc_path, 'ipbus_addr_decode.vhd' )
+    uhal_tools_test_inputs_dir = join( uhal_tools_etc_path, 'tests' )
+    uhal_tools_test_refs_dir = join( uhal_tools_etc_path, 'tests', 'refs' )
     cmds += [["TEST uHAL TOOLS",
               [#uhal.tools.ipbus_addr_map
-               sys.executable + " $(which gen_ipbus_addr_decode) -t %s %s" % (uhal_tools_template_vhdl, join(os.path.split(uhal_tools_template_vhdl)[0],'addr_table.xml')),
+               sys.executable + " $(which gen_ipbus_addr_decode) -t %s %s" % (uhal_tools_template_vhdl, join( uhal_tools_test_inputs_dir, 'addr_table_a.xml')),
+               "diff -I '^-- START' %s %s" % (join( uhal_tools_test_refs_dir, 'ipbus_decode_addr_table_a.vhd' ) , 'ipbus_decode_addr_table_a.vhd' ),
+               sys.executable + " $(which gen_ipbus_addr_decode) -t %s %s" % (uhal_tools_template_vhdl, join( uhal_tools_test_inputs_dir, 'addr_table_b.xml')),
+               "diff -I '^-- START' %s %s" % (join( uhal_tools_test_refs_dir, 'ipbus_decode_addr_table_b.vhd' ) , 'ipbus_decode_addr_table_b.vhd' ),
+               sys.executable + " $(which gen_ipbus_addr_decode) -t %s %s" % (uhal_tools_template_vhdl, join( uhal_tools_test_inputs_dir, 'addr_table_c.xml')),
+               "diff -I '^-- START' %s %s" % (join( uhal_tools_test_refs_dir, 'ipbus_decode_addr_table_c.vhd' ) , 'ipbus_decode_addr_table_c.vhd' ),
               ]
             ]]
 
@@ -373,7 +381,7 @@ if __name__=="__main__":
         uhal_tools_dir = uhal_tools_dir[:-14]
     else: # Checked-out code
         uhal_tools_dir = os.path.split( uhal_tools_dir )[0]
-    uhal_tools_template_vhdl = join( uhal_tools_dir, 'etc', 'uhal', 'tools', 'ipbus_addr_decode.vhd' )
+    uhal_tools_etc_path = join( uhal_tools_dir, 'etc', 'uhal', 'tools')
 
     def skip_section(name):
         if (section_search_str is None):
@@ -382,8 +390,8 @@ if __name__=="__main__":
             return False
         else:
             return True
-    sections_cmds_to_run = [(name, cmds) for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl) if not skip_section(name)]
-    sections_skipped     = [name for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir, uhal_tools_template_vhdl) if skip_section(name)]
+    sections_cmds_to_run = [(name, cmds) for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir, uhal_tools_etc_path) if not skip_section(name)]
+    sections_skipped     = [name for (name, cmds) in get_commands(conn_file, controlhub_scripts_dir, uhal_tools_etc_path) if skip_section(name)]
 
     if run_cmds:
         for env_var in ["PATH", "LD_LIBRARY_PATH"]:
