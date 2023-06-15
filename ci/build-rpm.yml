@@ -39,7 +39,7 @@
 .template_build_rpm_yumrepo:x86:
   extends: .template_build_rpm_yumrepo
   variables:
-    GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}___
+    GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
   tags:
     - docker
 
@@ -149,7 +149,7 @@ build:centos7-gcc8:
   stage: build
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:2021-01-26
   variables:
-    GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}___
+    GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
     OUTPUT_REPO_SUBDIR: centos7_gcc8/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7-gcc8.xml
