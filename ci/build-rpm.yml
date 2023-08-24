@@ -191,6 +191,8 @@ build:centos7-gcc8:
       - ci_results/repos/${OUTPUT_REPO_SUBDIR}
     when: always
     expire_in: 1 day
+  tags:
+    - docker
 
 
 publish:yum:centos7:x86:
