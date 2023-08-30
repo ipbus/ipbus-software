@@ -2,6 +2,8 @@
 .template_build_simple:
   stage: build
   script:
+    # Fix for CERN k8s-provisioned shared runners: Limit number of opened file descriptors with ulimit
+    - ulimit -n 1048576
     - make -k Set=all check-version
     - make -k Set=all
   artifacts:
