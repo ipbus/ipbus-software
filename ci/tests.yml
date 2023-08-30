@@ -9,6 +9,8 @@ variables:
   stage: test
   dependencies: []
   before_script:
+    # Fix for CERN k8s-provisioned shared runners: Limit number of opened file descriptors with ulimit
+    - ulimit -n 1048576
     - export OUTPUT_PIPELINE_URL=${OUTPUT_ROOT_URL}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
     - if [ -n "${CI_COMMIT_TAG}" ]; then export OUTPUT_PIPELINE_URL=${OUTPUT_PIPELINE_URL/commits/tags} ; fi
     - sudo cp ci/yum/ipbus-sw-ci.repo /etc/yum.repos.d/ipbus-sw-ci.repo
