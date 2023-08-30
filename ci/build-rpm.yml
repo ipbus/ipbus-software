@@ -2,6 +2,8 @@
 .template_build_rpm_yumrepo:
   stage: build
   before_script:
+    # Fix for CERN k8s-provisioned shared runners: Limit number of opened file descriptors with ulimit
+    - ulimit -n 1048576
     - export PYTHON=$(echo $PYTHONS | head -n1 | awk '{print $1;}')
     - echo PYTHON=${PYTHON}
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
