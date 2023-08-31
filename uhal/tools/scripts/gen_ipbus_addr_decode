@@ -330,7 +330,9 @@ def main():
         
         # generate vhdl snippet with selection code
         snippet2 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
-        if numSlaves <= 1:
+        if numSlaves == 0:
+            snippet2 += "    sel := ipbus_sel_t(to_unsigned(0, IPBUS_SEL_WIDTH));\n"
+        elif numSlaves == 1:
             snippet2 += "    sel := ipbus_sel_t(to_unsigned(" + slaveIds[0] + ", IPBUS_SEL_WIDTH));\n"
         else:
             for n,id,addr_bits,mask_bits in slaves:

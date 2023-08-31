@@ -5,6 +5,7 @@ CACTUS_ROOT ?= /opt/cactus
 CACTUS_RPM_ROOT ?= $(BUILD_HOME)
 
 
+SHELL := /bin/bash
 PYTHON ?= python
 CACTUS_PLATFORM=$(shell if [ -f /etc/system-release ]; then cat /etc/system-release; fi)
 CACTUS_OS=unknown.os
