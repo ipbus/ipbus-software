@@ -58,7 +58,7 @@ variables:
 
 .template_test:alma8:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-test:2023.08.30
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-test:2024.03.06
   needs:
     - job: publish:yum:alma8:x86
       artifacts: false
@@ -258,6 +258,8 @@ test_python:alma8:
         UHAL_PYTHON_RPM: cactuscore-uhal-python36
       - PYTHON: python3.8
         UHAL_PYTHON_RPM: cactuscore-uhal-python38
+      - PYTHON: python3.9
+        UHAL_PYTHON_RPM: cactuscore-uhal-python39
       - PYTHON: python3.11
         UHAL_PYTHON_RPM: cactuscore-uhal-python311
 

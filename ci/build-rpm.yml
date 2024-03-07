@@ -115,18 +115,18 @@ build:centos7:armv7:
 
 build:alma8:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2023.08.30__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.03.06__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/x86_64
-    PYTHONS: "python3.6 python3.8 python3.11"
+    PYTHONS: "python3.6 python3.8 python3.9 python3.11"
     YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
 
 build:alma8:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2023.08.30__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.03.06__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/aarch64
-    PYTHONS: "python3.6 python3.8 python3.11"
+    PYTHONS: "python3.6 python3.8 python3.9 python3.11"
     YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
 
 
