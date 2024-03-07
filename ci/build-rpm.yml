@@ -4,6 +4,7 @@
   before_script:
     # Fix for CERN k8s-provisioned shared runners: Limit number of opened file descriptors with ulimit
     - ulimit -n 1048576
+    - ls -al
     - export PYTHON=$(echo $PYTHONS | head -n1 | awk '{print $1;}')
     - echo PYTHON=${PYTHON}
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
@@ -151,6 +152,7 @@ build:centos7-gcc8:
   stage: build
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:2023-08-30
   variables:
+    FF_KUBERNETES_HONOR_ENTRYPOINT: 1
     GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
     OUTPUT_REPO_SUBDIR: centos7_gcc8/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
