@@ -4,6 +4,7 @@
   before_script:
     # Fix for CERN k8s-provisioned shared runners: Limit number of opened file descriptors with ulimit
     - ulimit -n 1048576
+    - pwd
     - ls -al
     - export PYTHON=$(echo $PYTHONS | head -n1 | awk '{print $1;}')
     - echo PYTHON=${PYTHON}
@@ -14,6 +15,8 @@
     - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0
     - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
     - make -C uhal/log generate_files
+    - pwd
+    - ls -al
     - git diff --exit-code
     - mkdir -p ${REPO_DIR}
     - cp -v `find . -iname "*.rpm"` ${REPO_DIR}
