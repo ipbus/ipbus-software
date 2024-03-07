@@ -43,7 +43,7 @@
   variables:
     GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
   tags:
-    - docker
+    - k8s-default
 
 .template_build_rpm_yumrepo:arm64:
   extends: .template_build_rpm_yumrepo
@@ -194,7 +194,7 @@ build:centos7-gcc8:
     when: always
     expire_in: 1 day
   tags:
-    - docker
+    - k8s-default
 
 
 publish:yum:centos7:x86:

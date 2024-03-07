@@ -2,7 +2,7 @@ build:doxygen:
   stage: build
   image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2023.08.30__doxygen1.9.5
   tags:
-    - docker
+    - k8s-default
   script:
     - ./scripts/doxygen/api_uhal.sh "(${CI_COMMIT_TAG:-commit ${CI_COMMIT_SHA}})"
     - ls -al /tmp
