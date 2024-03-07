@@ -14,10 +14,6 @@
     - make -k Set=all check-version
     - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0
     - make -k Set=all BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
-    - make -C uhal/log generate_files
-    - pwd
-    - ls -al
-    - git diff --exit-code
     - mkdir -p ${REPO_DIR}
     - cp -v `find . -iname "*.rpm"` ${REPO_DIR}
     - cp -v ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
@@ -175,6 +171,8 @@ build:centos7-gcc8:
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0 check-version
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0 PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} rpm
+    - make -C uhal/log generate_files
+    - git diff --exit-code
     - mkdir -p ${REPO_DIR}
     - cp `find . -iname "*.rpm"` ${REPO_DIR}
     - cp ${YUMGROUPS_FILE} ${REPO_DIR}/yumgroups.xml
