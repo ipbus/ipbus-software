@@ -50,7 +50,7 @@ variables:
 .template_test:centos7-gcc8:
   extends: .template_test:centos7
   needs:
-    - job: publish:yum:centos7-gcc8
+    - job: publish:yum:centos7-gcc8:x86
       artifacts: false
   variables:
     REPO_URL_OS_SUBDIR: centos7_gcc8
