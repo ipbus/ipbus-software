@@ -149,7 +149,7 @@ build:alma9:arm64:
 
 .build:centos7-gcc8:
   stage: build
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-dev-centos7-gcc8:2024.04.27
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc8:2024.04.27
   variables:
     FF_KUBERNETES_HONOR_ENTRYPOINT: 1
     GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
