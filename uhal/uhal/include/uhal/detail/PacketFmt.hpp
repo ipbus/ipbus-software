@@ -12,6 +12,7 @@
 namespace uhal {
 namespace detail {
 
+//! Class used to display IPbus packet contents in human-readable format (e.g. in log messages)
 class PacketFmt {
 public:
   PacketFmt(const uint8_t* const, const size_t);
@@ -24,7 +25,7 @@ public:
 
 std::ostream& operator<<(std::ostream&, const PacketFmt&);
 
-} // end namespace 
+}
 }
 
 #endif
