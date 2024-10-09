@@ -1,4 +1,7 @@
 
+#ifndef _uhal_detail_SharedObject_hpp_
+#define _uhal_detail_SharedObject_hpp_
+
 #include <string>
 
 #include <boost/interprocess/managed_shared_memory.hpp>
@@ -30,3 +33,5 @@ private:
 
 }
 }
+
+#endif

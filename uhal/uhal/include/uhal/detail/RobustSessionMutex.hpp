@@ -1,4 +1,7 @@
 
+#ifndef _uhal_detail_RobustSessionMutex_hpp_
+#define _uhal_detail_RobustSessionMutex_hpp_
+
 #include <cstdint>
 #include <mutex>
 #include <pthread.h>
@@ -51,3 +54,5 @@ typedef std::unique_lock<RobustSessionMutex> ScopedSessionLock;
 
 }
 }
+
+#endif

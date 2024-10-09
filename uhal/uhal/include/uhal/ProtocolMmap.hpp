@@ -54,6 +54,8 @@
 #include <vector>                          // for vector
 
 #include "uhal/ClientInterface.hpp"
+#include "uhal/detail/RobustSessionMutex.hpp"
+#include "uhal/detail/SharedObject.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 
@@ -95,10 +97,17 @@ namespace uhal
 
         void write(const uint32_t aAddr, const std::vector<std::pair<const uint8_t*, size_t> >& aData);
 
+        bool haveLock() const;
+
+        void lock();
+
+        void unlock();
+
       private:
         std::string mPath;
         int mFd;
         int mFlags;
+        bool mLocked;
         off_t mOffset;
         void* mMmapPtr;
         void* mMmapIOPtr;
@@ -118,6 +127,8 @@ namespace uhal
       Mmap ( const Mmap& aMmap );
 
       Mmap& operator= ( const Mmap& aMmap );
+
+      static std::string getSharedMemName(const std::string& );
 
     public:
       /**
@@ -140,12 +151,10 @@ namespace uhal
       void implementDispatch ( std::shared_ptr< Buffers > aBuffers );
 
       //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
-      virtual void Flush( );
-
+      virtual void Flush();
 
       //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
-
 
       typedef IPbus< 2 , 0 > InnerProtocol;
 
@@ -166,6 +175,9 @@ namespace uhal
       //! Set up the connection to the device
       void connect();
 
+      //! Set up the connection to the device
+      void connect(detail::ScopedSessionLock& );
+
       //! Close the connection to the device
       void disconnect();
 
@@ -179,18 +191,16 @@ namespace uhal
 
       File mDeviceFile;
 
+      detail::SharedObject<detail::RobustSessionMutex> mIPCMutex;
+      bool mIPCExternalSessionActive;
+      uint64_t mIPCSessionCount;
+
       std::chrono::microseconds mSleepDuration;
 
-      uint32_t mNumberOfPages, mPageSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
+      uint32_t mNumberOfPages, mMaxInFlight, mPageSize, mMaxPacketSize, mIndexNextPage, mPublishedReplyPageCount, mReadReplyPageCount;
 
       //! The list of buffers still awaiting a reply
       std::deque < std::shared_ptr< Buffers > > mReplyQueue;
-
-      /**
-        A pointer to an exception object for passing exceptions from the worker thread to the main thread.
-        Exceptions must always be created on the heap (i.e. using `new`) and deletion will be handled in the main thread
-      */
-      uhal::exception::exception* mAsynchronousException;
   };
 
 

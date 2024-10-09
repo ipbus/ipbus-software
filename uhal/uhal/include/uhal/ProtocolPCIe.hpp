@@ -144,7 +144,7 @@ namespace uhal
       void implementDispatch ( std::shared_ptr< Buffers > aBuffers );
 
       //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
-      virtual void Flush( );
+      virtual void Flush();
 
       //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
