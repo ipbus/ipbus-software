@@ -59,6 +59,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
 
+#include "uhal/detail/PacketFmt.hpp"
 #include "uhal/grammars/URI.hpp"                            // for URI
 #include "uhal/log/LogLevels.hpp"                           // for BaseLogLevel
 #include "uhal/log/log_inserters.integer.hpp"               // for Integer
@@ -70,42 +71,6 @@
 
 
 namespace uhal {
-
-
-Mmap::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
-  mData(1, std::pair<const uint8_t*, size_t>(aPtr, aNrBytes))
-{
-}
-
-
-Mmap::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
-  mData(aData)
-{}
-
-
-Mmap::PacketFmt::~PacketFmt()
-{}
-
-
-std::ostream& operator<<(std::ostream& aStream, const Mmap::PacketFmt& aPacket)
-{
-  std::ios::fmtflags lOrigFlags( aStream.flags() );
-
-  size_t lNrBytesWritten = 0;
-  for (size_t i = 0; i < aPacket.mData.size(); i++) {
-    for (const uint8_t* lPtr = aPacket.mData.at(i).first; lPtr != (aPacket.mData.at(i).first + aPacket.mData.at(i).second); lPtr++, lNrBytesWritten++) {
-      if ((lNrBytesWritten & 3) == 0)
-        aStream << std::endl << "   @ " << std::setw(3) << std::dec << (lNrBytesWritten >> 2) << " :  x";
-      aStream << std::setw(2) << std::hex << uint16_t(*lPtr) << " ";
-    }
-  }
-
-  aStream.flags( lOrigFlags );
-  return aStream;
-}
-
-
-
 
 Mmap::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
@@ -373,7 +338,7 @@ void Mmap::connect()
   log ( Debug() , "mmap client is opening device file " , Quote ( mDeviceFile.getPath() ) );
   std::vector<uint32_t> lValues;
   mDeviceFile.read(0x0, 4, lValues);
-  log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+  log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
   mPageSize = std::min(uint32_t(4096), lValues.at(1));
@@ -415,7 +380,7 @@ void Mmap::write(const std::shared_ptr<Buffers>& aBuffers)
   lDataToWrite.push_back( std::make_pair(aBuffers->getSendBuffer(), aBuffers->sendCounter()) );
   mDeviceFile.write(mIndexNextPage * 4 * mPageSize, lDataToWrite);
 
-  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", PacketFmt(lDataToWrite));
+  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", detail::PacketFmt(lDataToWrite));
 
   mIndexNextPage = (mIndexNextPage + 1) % mNumberOfPages;
   mReplyQueue.push_back(aBuffers);
@@ -436,7 +401,7 @@ void Mmap::read()
       // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
       mDeviceFile.read(0, 4, lValues);
       lHwPublishedPageCount = lValues.at(3);
-      log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+      log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
       if (lHwPublishedPageCount != mPublishedReplyPageCount) {
         mPublishedReplyPageCount = lHwPublishedPageCount;
@@ -468,7 +433,7 @@ void Mmap::read()
  
   std::vector<uint32_t> lPageContents;
   mDeviceFile.read(4 + lPageIndexToRead * mPageSize, lNrWordsToRead , lPageContents);
-  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
+  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", detail::PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );

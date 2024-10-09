@@ -61,6 +61,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
 
+#include "uhal/detail/PacketFmt.hpp"
 #include "uhal/grammars/URI.hpp"                            // for URI
 #include "uhal/log/LogLevels.hpp"                           // for BaseLogLevel
 #include "uhal/log/log_inserters.integer.hpp"               // for Integer
@@ -71,41 +72,6 @@
 
 
 namespace uhal {
-
-
-PCIe::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
-  mData(1, std::pair<const uint8_t*, size_t>(aPtr, aNrBytes))
-{}
-
-
-PCIe::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
-  mData(aData)
-{}
-
-
-PCIe::PacketFmt::~PacketFmt()
-{}
-
-
-std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket)
-{
-  std::ios::fmtflags lOrigFlags( aStream.flags() );
-
-  size_t lNrBytesWritten = 0;
-  for (size_t i = 0; i < aPacket.mData.size(); i++) {
-    for (const uint8_t* lPtr = aPacket.mData.at(i).first; lPtr != (aPacket.mData.at(i).first + aPacket.mData.at(i).second); lPtr++, lNrBytesWritten++) {
-      if ((lNrBytesWritten & 3) == 0)
-        aStream << std::endl << "   @ " << std::setw(3) << std::dec << (lNrBytesWritten >> 2) << " :  x";
-      aStream << std::setw(2) << std::hex << uint16_t(*lPtr) << " ";
-    }
-  }
-
-  aStream.flags( lOrigFlags );
-  return aStream;
-}
-
-
-
 
 PCIe::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
@@ -615,7 +581,7 @@ void PCIe::connect(IPCScopedLock_t& aGuard)
   std::vector<uint32_t> lValues;
   mDeviceFileFPGAToHost.read(0x0, 4, lValues);
   aGuard.unlock();
-  log ( Debug(), "Read status info (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+  log ( Debug(), "Read status info (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
   if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
@@ -687,7 +653,7 @@ void PCIe::write(const std::shared_ptr<Buffers>& aBuffers)
 
   IPCScopedLock_t lGuard(*mIPCMutex);
   mDeviceFileHostToFPGA.write(mIndexNextPage * 4 * mPageSize, lDataToWrite);
-  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", PacketFmt(lDataToWrite));
+  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", detail::PacketFmt(lDataToWrite));
 
   mIndexNextPage = (mIndexNextPage + 1) % mNumberOfPages;
   mReplyQueue.push_back(aBuffers);
@@ -736,7 +702,7 @@ void PCIe::read()
         IPCScopedLock_t lGuard(*mIPCMutex);
         mDeviceFileFPGAToHost.read(0, (mXdma7seriesWorkaround ? 8 : 4), lValues);
         lHwPublishedPageCount = lValues.at(3);
-        log (Debug(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+        log (Debug(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
         if (lHwPublishedPageCount != mPublishedReplyPageCount) {
           mPublishedReplyPageCount = lHwPublishedPageCount;
@@ -774,7 +740,7 @@ void PCIe::read()
   IPCScopedLock_t lGuard(*mIPCMutex);
   mDeviceFileFPGAToHost.read(4 + lPageIndexToRead * mPageSize, lNrWordsToRead , lPageContents);
   lGuard.unlock();
-  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
+  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", detail::PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );
