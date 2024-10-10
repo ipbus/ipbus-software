@@ -49,6 +49,7 @@
 #include <fcntl.h>
 #include <iomanip>                                          // for operator<<
 #include <iostream>                                         // for operator<<
+#include <sys/file.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <stdlib.h>                                         // for size_t, free
@@ -59,6 +60,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>  // for time_dura...
 
+#include "uhal/detail/PacketFmt.hpp"
 #include "uhal/grammars/URI.hpp"                            // for URI
 #include "uhal/log/LogLevels.hpp"                           // for BaseLogLevel
 #include "uhal/log/log_inserters.integer.hpp"               // for Integer
@@ -70,42 +72,6 @@
 
 
 namespace uhal {
-
-
-Mmap::PacketFmt::PacketFmt(const uint8_t* const aPtr, const size_t aNrBytes) :
-  mData(1, std::pair<const uint8_t*, size_t>(aPtr, aNrBytes))
-{
-}
-
-
-Mmap::PacketFmt::PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData) :
-  mData(aData)
-{}
-
-
-Mmap::PacketFmt::~PacketFmt()
-{}
-
-
-std::ostream& operator<<(std::ostream& aStream, const Mmap::PacketFmt& aPacket)
-{
-  std::ios::fmtflags lOrigFlags( aStream.flags() );
-
-  size_t lNrBytesWritten = 0;
-  for (size_t i = 0; i < aPacket.mData.size(); i++) {
-    for (const uint8_t* lPtr = aPacket.mData.at(i).first; lPtr != (aPacket.mData.at(i).first + aPacket.mData.at(i).second); lPtr++, lNrBytesWritten++) {
-      if ((lNrBytesWritten & 3) == 0)
-        aStream << std::endl << "   @ " << std::setw(3) << std::dec << (lNrBytesWritten >> 2) << " :  x";
-      aStream << std::setw(2) << std::hex << uint16_t(*lPtr) << " ";
-    }
-  }
-
-  aStream.flags( lOrigFlags );
-  return aStream;
-}
-
-
-
 
 Mmap::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
@@ -277,18 +243,54 @@ void Mmap::File::write(const uint32_t aAddr, const std::vector<std::pair<const u
 }
 
 
+bool Mmap::File::haveLock() const
+{
+  return mLocked;
+}
+
+
+void Mmap::File::lock()
+{
+  if ( flock(mFd, LOCK_EX) == -1 ) {
+    detail::MutexError lExc;
+    log(lExc, "Failed to lock device file ", Quote(mPath), "; errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
+    throw lExc;
+  }
+  mLocked = true;
+}
+
+
+void Mmap::File::unlock()
+{
+  if ( flock(mFd, LOCK_UN) == -1 ) {
+    log(Warning(), "Failed to unlock device file ", Quote(mPath), "; errno=", Integer(errno), ", meaning ", Quote (strerror(errno)));
+  }
+  else
+    mLocked = false;
+}
+
+
+std::string Mmap::getSharedMemName(const std::string& aPath)
+{
+  std::string lSanitizedPath(aPath);
+  std::replace(lSanitizedPath.begin(), lSanitizedPath.end(), '/', ':');
+
+  return "/uhal::ipbusmmap-2.0::" + lSanitizedPath;
+}
 
 
 Mmap::Mmap ( const std::string& aId, const URI& aUri ) :
   IPbus< 2 , 0 > ( aId , aUri ),
   mConnected(false),
   mDeviceFile(aUri.mHostname, O_RDWR | O_SYNC),
+  mIPCMutex(getSharedMemName(mDeviceFile.getPath())),
   mNumberOfPages(0),
+  mMaxInFlight(0),
   mPageSize(0),
+  mMaxPacketSize(0),
   mIndexNextPage(0),
   mPublishedReplyPageCount(0),
-  mReadReplyPageCount(0),
-  mAsynchronousException ( NULL )
+  mReadReplyPageCount(0)
 {
   mSleepDuration = std::chrono::microseconds(50);
 
@@ -302,6 +304,14 @@ Mmap::Mmap ( const std::string& aId, const URI& aUri ) :
       const size_t lOffset = (lIsHex ? boost::lexical_cast<HexTo<size_t> >(lArg.second) : boost::lexical_cast<size_t>(lArg.second));
       mDeviceFile.setOffset(lOffset);
       log (Notice(), "mmap client with URI ", Quote (uri()), " : Address offset set to ", Integer(lOffset, IntFmt<hex>()));
+    }
+    else if (lArg.first == "max_in_flight") {
+      mMaxInFlight = boost::lexical_cast<size_t>(lArg.second);
+      log (Notice() , "mmap client with URI ", Quote (uri()), " : 'Maximum number of packets in flight' set to ", boost::lexical_cast<size_t>(lArg.second), " by URI 'max_in_flight' attribute");
+    }
+    else if (lArg.first == "max_packet_size") {
+      mMaxPacketSize = boost::lexical_cast<size_t>(lArg.second);
+      log (Notice() , "mmap client with URI ", Quote (uri()), " : 'Maximum packet size (in 32-bit words) set to ", boost::lexical_cast<size_t>(lArg.second), " by URI 'max_packet_size' attribute");
     }
     else {
       log (Warning() , "Unknown attribute ", Quote (lArg.first), " used in URI ", Quote(uri()));
@@ -335,15 +345,21 @@ void Mmap::Flush( )
   while ( !mReplyQueue.empty() )
     read();
 
+  mDeviceFile.unlock();
+
+  detail::ScopedSessionLock lLockGuard(*mIPCMutex);
+  mIPCMutex->endSession();
 }
 
 
 void Mmap::dispatchExceptionHandler()
 {
-  // FIXME: Adapt to PCIe implementation
   log(Notice(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
+
+  mDeviceFile.unlock();
+
   disconnect();
 
   InnerProtocol::dispatchExceptionHandler();
@@ -355,7 +371,7 @@ uint32_t Mmap::getMaxSendSize()
   if ( ! mConnected )
     connect();
 
-  return (mPageSize - 1) * 4;
+  return mMaxPacketSize * 4;
 }
 
 
@@ -364,19 +380,35 @@ uint32_t Mmap::getMaxReplySize()
   if ( ! mConnected )
     connect();
 
-  return (mPageSize - 1) * 4;
+  return mMaxPacketSize * 4;
 }
 
 
 void Mmap::connect()
 {
+  detail::ScopedSessionLock lLockGuard(*mIPCMutex);
+  connect(lLockGuard);
+}
+
+
+void Mmap::connect(detail::ScopedSessionLock& aGuard)
+{
+  // Read current value of session counter when reading status info from FPGA
+  // (So that can check whether this info is up-to-date later on, when sending next request packet)
+  mIPCExternalSessionActive = mIPCMutex->isActive() and (not mDeviceFile.haveLock());
+  mIPCSessionCount = mIPCMutex->getCounter();
+
   log ( Debug() , "mmap client is opening device file " , Quote ( mDeviceFile.getPath() ) );
   std::vector<uint32_t> lValues;
   mDeviceFile.read(0x0, 4, lValues);
-  log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+  log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
+  if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
+    mMaxInFlight = mNumberOfPages;
   mPageSize = std::min(uint32_t(4096), lValues.at(1));
+  if ( (mMaxPacketSize == 0) or (mMaxPacketSize >= mPageSize) )
+    mMaxPacketSize = mPageSize - 1;
   mIndexNextPage = lValues.at(2);
   mPublishedReplyPageCount = lValues.at(3);
   mReadReplyPageCount = mPublishedReplyPageCount;
@@ -407,15 +439,30 @@ void Mmap::disconnect()
 
 void Mmap::write(const std::shared_ptr<Buffers>& aBuffers)
 {
+  if (not mDeviceFile.haveLock()) {
+    mDeviceFile.lock();
+
+    detail::ScopedSessionLock lGuard(*mIPCMutex);
+    mIPCMutex->startSession();
+    mIPCSessionCount++;
+
+    // If these two numbers don't match, another client/process has sent packets
+    // more recently than this client has, so must re-read status info
+    if (mIPCExternalSessionActive or (mIPCMutex->getCounter() != mIPCSessionCount)) {
+      connect(lGuard);
+    }
+  }
+
   log (Info(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFile.getPath()));
 
   const uint32_t lHeaderWord = (0x10000 | (((aBuffers->sendCounter() / 4) - 1) & 0xFFFF));
   std::vector<std::pair<const uint8_t*, size_t> > lDataToWrite;
   lDataToWrite.push_back( std::make_pair(reinterpret_cast<const uint8_t*>(&lHeaderWord), sizeof lHeaderWord) );
   lDataToWrite.push_back( std::make_pair(aBuffers->getSendBuffer(), aBuffers->sendCounter()) );
-  mDeviceFile.write(mIndexNextPage * 4 * mPageSize, lDataToWrite);
 
-  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", PacketFmt(lDataToWrite));
+  detail::ScopedSessionLock lGuard(*mIPCMutex);
+  mDeviceFile.write(mIndexNextPage * 4 * mPageSize, lDataToWrite);
+  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", detail::PacketFmt(lDataToWrite));
 
   mIndexNextPage = (mIndexNextPage + 1) % mNumberOfPages;
   mReplyQueue.push_back(aBuffers);
@@ -431,12 +478,13 @@ void Mmap::read()
   {
     uint32_t lHwPublishedPageCount = 0x0;
 
+    std::vector<uint32_t> lValues;
     while ( true ) {
-      std::vector<uint32_t> lValues;
       // FIXME : Improve by simply adding dmaWrite method that takes uint32_t ref as argument (or returns uint32_t)
+      detail::ScopedSessionLock lGuard(*mIPCMutex);
       mDeviceFile.read(0, 4, lValues);
       lHwPublishedPageCount = lValues.at(3);
-      log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+      log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
       if (lHwPublishedPageCount != mPublishedReplyPageCount) {
         mPublishedReplyPageCount = lHwPublishedPageCount;
@@ -453,6 +501,7 @@ void Mmap::read()
       log(Debug(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
       if (mSleepDuration > std::chrono::microseconds(0))
         std::this_thread::sleep_for( mSleepDuration );
+      lValues.clear();
     }
 
     log(Info(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");
@@ -467,8 +516,10 @@ void Mmap::read()
   lNrWordsToRead += 1;
  
   std::vector<uint32_t> lPageContents;
+  detail::ScopedSessionLock lGuard(*mIPCMutex);
   mDeviceFile.read(4 + lPageIndexToRead * mPageSize, lNrWordsToRead , lPageContents);
-  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
+  lGuard.unlock();
+  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", detail::PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );
@@ -490,24 +541,20 @@ void Mmap::read()
 
 
   // PART 3 : Validate the packet contents
-  mAsynchronousException = NULL;
+  uhal::exception::exception* lExc = NULL;
   try
   {
-    if ( uhal::exception::exception* lExc = ClientInterface::validate ( lBuffers ) ) //Control of the pointer has been passed back to the client interface
-    {
-      mAsynchronousException = lExc;
-    }
+    lExc = ClientInterface::validate ( lBuffers );
   }
   catch ( exception::exception& aExc )
   {
-    mAsynchronousException = new exception::ValidationError ();
-    log ( *mAsynchronousException , "Exception caught during reply validation for mmap device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
+    exception::ValidationError lExc2;
+    log ( lExc2 , "Exception caught during reply validation for mmap device with URI " , Quote ( this->uri() ) , "; what returned: " , Quote ( aExc.what() ) );
+    throw lExc2;
   }
 
-  if ( mAsynchronousException )
-  {
-    mAsynchronousException->throwAsDerivedType();
-  }
+  if (lExc != NULL)
+    lExc->throwAsDerivedType();
 }
 
 

@@ -53,9 +53,9 @@
 #include <utility>                         // for pair
 #include <vector>                          // for vector
 
-#include <boost/interprocess/managed_shared_memory.hpp>
-
 #include "uhal/ClientInterface.hpp"
+#include "uhal/detail/RobustSessionMutex.hpp"
+#include "uhal/detail/SharedObject.hpp"
 #include "uhal/log/exception.hpp"
 #include "uhal/ProtocolIPbus.hpp"
 
@@ -73,23 +73,12 @@ namespace uhal
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeInitialisationError , TransportLayerError , "Exception class to handle a failure to read from the specified device files during initialisation." )
     //! Exception class to handle a low-level seek/read/write error after initialisation
     UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( PCIeCommunicationError , TransportLayerError , "Exception class to handle a low-level seek/read/write error after initialisation." )
-    //! Exception class to handle errors from pthread mutex-related functions
-    UHAL_DEFINE_DERIVED_EXCEPTION_CLASS ( MutexError , TransportLayerError , "Exception class to handle errors from pthread mutex-related functions." )
   }
 
   //! Transport protocol to transfer an IPbus buffer via PCIe
   class PCIe : public IPbus< 2 , 0 >
   {
     public:
-      class PacketFmt {
-      public:
-        PacketFmt(const uint8_t* const, const size_t);
-        PacketFmt(const std::vector< std::pair<const uint8_t*, size_t> >& aData);
-        ~PacketFmt();
-
-        const std::vector< std::pair<const uint8_t*, size_t> > mData;
-      };
-
       class File {
       public:
         File(const std::string& aPath, int aFlags);
@@ -128,55 +117,7 @@ namespace uhal
 
     private:
 
-      class RobustMutex {
-      public:
-        RobustMutex();
-        ~RobustMutex();
-
-        void lock();
-
-        void unlock();
-
-        uint64_t getCounter() const;
-
-        bool isActive() const;
-
-        void startSession();
-
-        void endSession();
-
-      private:
-        RobustMutex(const RobustMutex&);
-
-        pthread_mutex_t mMutex;
-        uint64_t mCount;
-        bool mSessionActive;
-      };
-
-      template <class T>
-      class SharedObject {
-      public:
-
-        SharedObject(const SharedObject<T>&) = delete;
-        SharedObject<T>& operator=(const SharedObject<T>&) = delete;
-
-        SharedObject(const std::string& aName);
-        ~SharedObject();
-
-        T* operator->();
-
-        T& operator*();
-
-      private:
-        std::string mName;
-        boost::interprocess::managed_shared_memory mSharedMem;
-        T* mObj;
-      };
-
       static std::string getSharedMemName(const std::string& );
-
-      typedef RobustMutex IPCMutex_t;
-      typedef std::unique_lock<IPCMutex_t> IPCScopedLock_t;
 
     public:
       /**
@@ -203,7 +144,7 @@ namespace uhal
       void implementDispatch ( std::shared_ptr< Buffers > aBuffers );
 
       //! Concrete implementation of the synchronization function to block until all buffers have been sent, all replies received and all data validated
-      virtual void Flush( );
+      virtual void Flush();
 
       //! Function which tidies up this protocol layer in the event of an exception
       virtual void dispatchExceptionHandler();
@@ -228,7 +169,7 @@ namespace uhal
       void connect();
 
       //! Set up the connection to the device
-      void connect(IPCScopedLock_t& );
+      void connect(detail::ScopedSessionLock& );
 
       //! Close the connection to the device
       void disconnect();
@@ -248,7 +189,7 @@ namespace uhal
       //! FPGA-to-host interrupt (event) file
       File mDeviceFileFPGAEvent;
 
-      SharedObject<IPCMutex_t> mIPCMutex;
+      detail::SharedObject<detail::RobustSessionMutex> mIPCMutex;
       bool mIPCExternalSessionActive;
       uint64_t mIPCSessionCount;
 
@@ -263,8 +204,6 @@ namespace uhal
       //! The list of buffers still awaiting a reply
       std::deque < std::shared_ptr< Buffers > > mReplyQueue;
   };
-
-  std::ostream& operator<<(std::ostream& aStream, const PCIe::PacketFmt& aPacket);
 
 }
 
