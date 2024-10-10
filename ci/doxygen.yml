@@ -1,6 +1,6 @@
 build:doxygen:
   stage: build
-  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2023.08.30__doxygen1.9.5
+  image: ${IPBUS_DOCKER_REGISTRY}/ipbus-sw-doxygen:2024.10.10__doxygen1.9.5
   tags:
     - k8s-default
   script:

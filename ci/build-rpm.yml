@@ -91,7 +91,7 @@
 
 build:centos7:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2023.08.30__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2024.10.10__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
@@ -99,23 +99,16 @@ build:centos7:x86:
 
 build:centos7:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2023.08.30__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2024.10.10__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/aarch64
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
 
-build:centos7:armv7:
-  extends: .template_build_rpm_yumrepo:docker_buildx
-  variables:
-    BUILD_PLATFORM: linux/arm/v7
-    DOCKERFILE: ci/ipbus-sw-builder-centos7.Dockerfile
-    OUTPUT_REPO_SUBDIR: centos7/armhfp
-
 
 build:alma8:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.04.27__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.10.10__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/x86_64
     PYTHONS: "python3.6 python3.8 python3.9 python3.11"
@@ -123,7 +116,7 @@ build:alma8:x86:
 
 build:alma8:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.04.27__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.10.10__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/aarch64
     PYTHONS: "python3.6 python3.8 python3.9 python3.11"
@@ -149,7 +142,7 @@ build:alma9:arm64:
 
 .build:centos7-gcc8:
   stage: build
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc8:2024.04.27
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc8:2024.10.10
   variables:
     FF_KUBERNETES_HONOR_ENTRYPOINT: 1
     GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
@@ -226,14 +219,6 @@ publish:yum:centos7:arm64:
     DEPLOY_SUBDIR: repos/centos7/aarch64
   needs:
     - build:centos7:arm64
-
-publish:yum:centos7:armv7:
-  extends: .template_publish
-  variables:
-    CI_OUTPUT_DIR: ci_results/repos/centos7/armhfp
-    DEPLOY_SUBDIR: repos/centos7/armhfp
-  needs:
-    - build:centos7:armv7
 
 publish:yum:centos7-gcc8:x86:
   extends: .template_publish

@@ -3,6 +3,9 @@
   stage: publish
   image: gitlab-registry.cern.ch/ci-tools/ci-web-deployer:latest
   before_script:
+    # Adapt CentOS7 image to new EPEL repo location following CentOS7 EOL - see https://linux.web.cern.ch/els7/#i-get-yum-errors-relating-to-epel-is-this-expected
+    #   Should remove when ci-web-deployer image moved to Alma
+    - sed -i 's#http://linuxsoft.cern.ch/epel/7/#http://linuxsoft.cern.ch/internal/archive/epel/7/#g' /etc/yum.repos.d/epel.repo
     - yum -y install openssh-clients
     - export EOS_BASE_PATH=${OUTPUT_ROOT_DIR}/commits/${CI_COMMIT_TAG:-${CI_COMMIT_SHA}}/pipeline${CI_PIPELINE_ID}
     - if [ -n "${CI_COMMIT_TAG}" ]; then export EOS_BASE_PATH=${EOS_BASE_PATH/commits/tags} ; fi
