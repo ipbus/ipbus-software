@@ -4,8 +4,11 @@ FROM centos:7.9.2009 as builder
 ARG TARGETPLATFORM
 
 
+ADD ci/fix-centos7-yum-repo-files.sh /tmp/
+
 # Install dependencies
 RUN \
+  /tmp/fix-centos7-yum-repo-files.sh && \
   if [ "${TARGETPLATFORM}" == "linux/arm/v7" ]; then \
     echo "armhfp" > /etc/yum/vars/basearch; \
     echo "armv7hl" > /etc/yum/vars/arch; \
@@ -15,9 +18,10 @@ RUN \
   else \
     yum -y install epel-release; \
   fi && \
+  /tmp/fix-centos7-yum-repo-files.sh && \
   (for PACKAGE in \
     make rpm-build createrepo git-core \
-    erlang gcc-c++-4.8.5 \
+    gcc-c++-4.8.5 \
     boost-devel-1.53.0 pugixml-devel-1.8 \
     python-devel \
     python3-devel \
