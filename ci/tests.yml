@@ -23,7 +23,7 @@ variables:
 
 .template_test:centos7:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-test:2023.08.30
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-test:2024.10.10
   variables:
     REPO_URL_OS_SUBDIR: centos7
     TEST_SUITE_CONTROLHUB_PATH_ARGUMENT: "-p /opt/cactus/bin"
@@ -58,7 +58,7 @@ variables:
 
 .template_test:alma8:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-test:2024.03.06
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-test:2024.10.10
   needs:
     - job: publish:yum:alma8:x86
       artifacts: false
@@ -71,7 +71,7 @@ variables:
 
 .template_test:alma9:
   extends: .template_test_rpmInstall
-  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-test:2023.08.30
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-test:2024.10.10
   needs:
     - job: publish:yum:alma9:x86
       artifacts: false
