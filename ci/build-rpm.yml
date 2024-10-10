@@ -105,13 +105,6 @@ build:centos7:arm64:
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
 
-build:centos7:armv7:
-  extends: .template_build_rpm_yumrepo:docker_buildx
-  variables:
-    BUILD_PLATFORM: linux/arm/v7
-    DOCKERFILE: ci/ipbus-sw-builder-centos7.Dockerfile
-    OUTPUT_REPO_SUBDIR: centos7/armhfp
-
 
 build:alma8:x86:
   extends: .template_build_rpm_yumrepo:x86
@@ -226,14 +219,6 @@ publish:yum:centos7:arm64:
     DEPLOY_SUBDIR: repos/centos7/aarch64
   needs:
     - build:centos7:arm64
-
-publish:yum:centos7:armv7:
-  extends: .template_publish
-  variables:
-    CI_OUTPUT_DIR: ci_results/repos/centos7/armhfp
-    DEPLOY_SUBDIR: repos/centos7/armhfp
-  needs:
-    - build:centos7:armv7
 
 publish:yum:centos7-gcc8:x86:
   extends: .template_publish
