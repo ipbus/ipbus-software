@@ -410,7 +410,7 @@ void PCIe::Flush( )
 
 void PCIe::dispatchExceptionHandler()
 {
-  log(Notice(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
+  log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
 

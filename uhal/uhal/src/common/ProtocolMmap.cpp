@@ -354,7 +354,7 @@ void Mmap::Flush( )
 
 void Mmap::dispatchExceptionHandler()
 {
-  log(Notice(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
+  log(Info(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
 
@@ -401,7 +401,7 @@ void Mmap::connect(detail::ScopedSessionLock& aGuard)
   log ( Debug() , "mmap client is opening device file " , Quote ( mDeviceFile.getPath() ) );
   std::vector<uint32_t> lValues;
   mDeviceFile.read(0x0, 4, lValues);
-  log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+  log ( Debug(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
   if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
@@ -484,7 +484,7 @@ void Mmap::read()
       detail::ScopedSessionLock lGuard(*mIPCMutex);
       mDeviceFile.read(0, 4, lValues);
       lHwPublishedPageCount = lValues.at(3);
-      log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+      log (Debug(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
       if (lHwPublishedPageCount != mPublishedReplyPageCount) {
         mPublishedReplyPageCount = lHwPublishedPageCount;
