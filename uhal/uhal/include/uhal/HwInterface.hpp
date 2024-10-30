@@ -118,6 +118,8 @@ namespace uhal
       */
       const Node& getNode () const;
 
+      bool hasNode ( const std::string& aId ) const;
+
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the top-level node
       	@param aId a full-stop delimeted name path to a node, relative to the top-level node

@@ -408,6 +408,36 @@ namespace uhal
   }
 
 
+  bool Node::hasNode ( const std::string& aId ) const
+  {
+    if ( aId.size() == 0 )
+    {
+      return true;
+    }
+
+    size_t lStartIdx = 0;
+    size_t lDotIdx = 0;
+
+    const Node* lDescendant = this;
+
+    do {
+      lDotIdx = aId.find('.', lStartIdx);
+      std::unordered_map< std::string , Node* >::const_iterator lIt = lDescendant->mChildrenMap.find ( aId.substr(lStartIdx, lDotIdx - lStartIdx) );
+
+      if (lIt != lDescendant->mChildrenMap.end()) {
+        lDescendant = lIt->second;
+      }
+      else {
+        return false;
+      }
+
+      lStartIdx = lDotIdx + 1;
+    } while (lDotIdx != std::string::npos);
+
+    return true;
+  }
+
+
   const Node& Node::getNode ( const std::string& aId ) const
   {
     if ( aId.size() == 0 )

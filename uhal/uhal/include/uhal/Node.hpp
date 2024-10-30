@@ -158,6 +158,8 @@ namespace uhal
       */
       bool operator == ( const Node& aNode ) const;
 
+      bool hasNode ( const std::string& aId ) const;
+
       /**
       	Retrieve the Node given by a full-stop delimeted name path relative, to the current node
       	@param aId a full-stop delimeted name path to a node, relative to the current node
