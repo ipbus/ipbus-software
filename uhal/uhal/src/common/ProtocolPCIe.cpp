@@ -384,7 +384,7 @@ PCIe::~PCIe()
 
 void PCIe::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
 {
-  log(Debug(), "PCIe client (URI: ", Quote(uri()), ") : implementDispatch method called");
+  log(Debug(), "PCIe client ", Quote(id()), ": implementDispatch method called");
 
   if ( ! mConnected )
     connect();
@@ -397,7 +397,7 @@ void PCIe::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
 
 void PCIe::Flush( )
 {
-  log(Debug(), "PCIe client (URI: ", Quote(uri()), ") : Flush method called");
+  log(Debug(), "PCIe client ", Quote(id()), ": Flush method called");
   while ( !mReplyQueue.empty() )
     read();
 
@@ -410,7 +410,7 @@ void PCIe::Flush( )
 
 void PCIe::dispatchExceptionHandler()
 {
-  log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
+  log(Info(), "PCIe client ", Quote(id()), ": closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
 
@@ -454,13 +454,13 @@ void PCIe::connect(detail::ScopedSessionLock& aGuard)
   mIPCExternalSessionActive = mIPCMutex->isActive() and (not mDeviceFileHostToFPGA.haveLock());
   mIPCSessionCount = mIPCMutex->getCounter();
 
-  log ( Debug() , "PCIe client is opening device file " , Quote ( mDeviceFileFPGAToHost.getPath() ) , " (device-to-client)" );
+  log ( Debug() , "PCIe client ", Quote(id()), ": Opening device file " , Quote ( mDeviceFileFPGAToHost.getPath() ) , " (device-to-client)" );
   mDeviceFileFPGAToHost.open();
 
   std::vector<uint32_t> lValues;
   mDeviceFileFPGAToHost.read(0x0, 4, lValues);
   aGuard.unlock();
-  log ( Debug(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+  log ( Debug(), "PCIe client ", Quote(id()), ": Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
   if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
@@ -484,7 +484,7 @@ void PCIe::connect(detail::ScopedSessionLock& aGuard)
     throw lExc;
   }
 
-  log ( Debug() , "PCIe client is opening device file " , Quote ( mDeviceFileHostToFPGA.getPath() ) , " (client-to-device)" );
+  log ( Debug() , "PCIe client ", Quote(id()), ": Opening device file " , Quote ( mDeviceFileHostToFPGA.getPath() ) , " (client-to-device)" );
   mDeviceFileHostToFPGA.open();
 
   mDeviceFileFPGAToHost.createBuffer(4 * mPageSize);
@@ -494,7 +494,7 @@ void PCIe::connect(detail::ScopedSessionLock& aGuard)
     mDeviceFileFPGAEvent.open();
 
   mConnected = true;
-  log ( Info() , "PCIe client connected to device at ", Quote(mDeviceFileHostToFPGA.getPath()), ", ", Quote(mDeviceFileFPGAToHost.getPath()), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
+  log ( Info() , "PCIe client ", Quote(id()), ": Connected to device at ", Quote(mDeviceFileHostToFPGA.getPath()), ", ", Quote(mDeviceFileFPGAToHost.getPath()), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
 }
 
 
@@ -523,7 +523,7 @@ void PCIe::write(const std::shared_ptr<Buffers>& aBuffers)
     }
   }
 
-  log (Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFileHostToFPGA.getPath()));
+  log (Info(), "PCIe client ", Quote(id()), ": Writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFileHostToFPGA.getPath()));
 
   const uint32_t lHeaderWord = (0x10000 | (((aBuffers->sendCounter() / 4) - 1) & 0xFFFF));
   std::vector<std::pair<const uint8_t*, size_t> > lDataToWrite;
@@ -532,7 +532,7 @@ void PCIe::write(const std::shared_ptr<Buffers>& aBuffers)
 
   detail::ScopedSessionLock lGuard(*mIPCMutex);
   mDeviceFileHostToFPGA.write(mIndexNextPage * 4 * mPageSize, lDataToWrite);
-  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", detail::PacketFmt(lDataToWrite));
+  log (Debug(), "PCIe client ", Quote(id()), ": Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", detail::PacketFmt(lDataToWrite));
 
   mIndexNextPage = (mIndexNextPage + 1) % mNumberOfPages;
   mReplyQueue.push_back(aBuffers);
@@ -563,13 +563,13 @@ void PCIe::read()
           throw lExc;
         }
 
-        log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Waiting for interrupt; sleeping for ", mSleepDuration.count(), "us");
+        log(Debug(), "PCIe client ", Quote(id()), ": Waiting for interrupt; sleeping for ", mSleepDuration.count(), "us");
         if (mSleepDuration > std::chrono::microseconds(0))
           std::this_thread::sleep_for( mSleepDuration );
 
       } // end of while (true)
 
-      log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (interrupt received)");
+      log(Info(), "PCIe client ", Quote(id()), ": Reading page ", Integer(lPageIndexToRead), " (interrupt received)");
     }
     else
     {
@@ -595,13 +595,13 @@ void PCIe::read()
           throw lExc;
         }
 
-        log(Debug(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
+        log(Debug(), "PCIe client ", Quote(id()), ": Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
         if (mSleepDuration > std::chrono::microseconds(0))
           std::this_thread::sleep_for( mSleepDuration );
         lValues.clear();
       }
 
-      log(Info(), "PCIe client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");
+      log(Info(), "PCIe client ", Quote(id()), ": Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");
     }
   }
   mReadReplyPageCount++;
@@ -619,13 +619,13 @@ void PCIe::read()
   detail::ScopedSessionLock lGuard(*mIPCMutex);
   mDeviceFileFPGAToHost.read(4 + lPageIndexToRead * mPageSize, lNrWordsToRead , lPageContents);
   lGuard.unlock();
-  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", detail::PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
+  log (Debug(), "PCIe client ", Quote(id()), ": Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", detail::PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );
   size_t lNrWordsInPacket = (lPageContents.at(0) >> 16) + (lPageContents.at(0) & 0xFFFF);
   if (lNrWordsInPacket != (lBuffers->replyCounter() >> 2))
-    log (Warning(), "Expected reply packet to contain ", Integer(lBuffers->replyCounter() >> 2), " words, but it actually contains ", Integer(lNrWordsInPacket), " words");
+    log (Warning(), "PCIe client ", Quote(id()), ": Expected reply packet to contain ", Integer(lBuffers->replyCounter() >> 2), " words, but it actually contains ", Integer(lNrWordsInPacket), " words");
 
   size_t lNrBytesCopied = 0;
   for (const auto& lBuffer: lReplyBuffers)
