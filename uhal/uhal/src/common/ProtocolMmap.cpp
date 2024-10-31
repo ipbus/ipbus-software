@@ -328,7 +328,7 @@ Mmap::~Mmap()
 
 void Mmap::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
 {
-  log(Debug(), "mmap client (URI: ", Quote(uri()), ") : implementDispatch method called");
+  log(Debug(), "mmap client ", Quote(id()), ": implementDispatch method called");
 
   if ( ! mConnected )
     connect();
@@ -341,7 +341,7 @@ void Mmap::implementDispatch ( std::shared_ptr< Buffers > aBuffers )
 
 void Mmap::Flush( )
 {
-  log(Debug(), "mmap client (URI: ", Quote(uri()), ") : Flush method called");
+  log(Debug(), "mmap client ", Quote(id()), ": Flush method called");
   while ( !mReplyQueue.empty() )
     read();
 
@@ -354,7 +354,7 @@ void Mmap::Flush( )
 
 void Mmap::dispatchExceptionHandler()
 {
-  log(Notice(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : closing device files since exception detected");
+  log(Info(), "mmap client ", Quote(id()), " : Closing device files since exception detected");
 
   ClientInterface::returnBufferToPool ( mReplyQueue );
 
@@ -401,7 +401,7 @@ void Mmap::connect(detail::ScopedSessionLock& aGuard)
   log ( Debug() , "mmap client is opening device file " , Quote ( mDeviceFile.getPath() ) );
   std::vector<uint32_t> lValues;
   mDeviceFile.read(0x0, 4, lValues);
-  log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+  log ( Debug(), "mmap client ", Quote(id()), ": Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
   mNumberOfPages = lValues.at(0);
   if ( (mMaxInFlight == 0) or (mMaxInFlight > mNumberOfPages) )
@@ -426,7 +426,7 @@ void Mmap::connect(detail::ScopedSessionLock& aGuard)
   }
 
   mConnected = true;
-  log ( Info() , "mmap client connected to device at ", Quote(mDeviceFile.getPath()), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next" );
+  log ( Info() , "mmap client ", Quote(id()), ": Connected to device at ", Quote(mDeviceFile.getPath()), "; FPGA has ", Integer(mNumberOfPages), " pages, each of size ", Integer(mPageSize), " words, index ", Integer(mIndexNextPage), " should be filled next (URI: ", Quote(uri()), ")" );
 }
 
 
@@ -453,7 +453,7 @@ void Mmap::write(const std::shared_ptr<Buffers>& aBuffers)
     }
   }
 
-  log (Info(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", Quote(mDeviceFile.getPath()));
+  log (Info(), "mmap client ", Quote(id()), ": Writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", mDeviceFile.getPath());
 
   const uint32_t lHeaderWord = (0x10000 | (((aBuffers->sendCounter() / 4) - 1) & 0xFFFF));
   std::vector<std::pair<const uint8_t*, size_t> > lDataToWrite;
@@ -462,7 +462,7 @@ void Mmap::write(const std::shared_ptr<Buffers>& aBuffers)
 
   detail::ScopedSessionLock lGuard(*mIPCMutex);
   mDeviceFile.write(mIndexNextPage * 4 * mPageSize, lDataToWrite);
-  log (Debug(), "Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", detail::PacketFmt(lDataToWrite));
+  log (Debug(), "mmap client ", Quote(id()), ": Wrote " , Integer((aBuffers->sendCounter() / 4) + 1), " 32-bit words at address " , Integer(mIndexNextPage * 4 * mPageSize), " ... ", detail::PacketFmt(lDataToWrite));
 
   mIndexNextPage = (mIndexNextPage + 1) % mNumberOfPages;
   mReplyQueue.push_back(aBuffers);
@@ -484,7 +484,7 @@ void Mmap::read()
       detail::ScopedSessionLock lGuard(*mIPCMutex);
       mDeviceFile.read(0, 4, lValues);
       lHwPublishedPageCount = lValues.at(3);
-      log (Info(), "Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
+      log (Debug(), "mmap client ", Quote(id()), ": Read status info from addr 0 (", Integer(lValues.at(0)), ", ", Integer(lValues.at(1)), ", ", Integer(lValues.at(2)), ", ", Integer(lValues.at(3)), "): ", detail::PacketFmt((const uint8_t*)lValues.data(), 4 * lValues.size()));
 
       if (lHwPublishedPageCount != mPublishedReplyPageCount) {
         mPublishedReplyPageCount = lHwPublishedPageCount;
@@ -498,13 +498,13 @@ void Mmap::read()
         throw lExc;
       }
 
-      log(Debug(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
+      log(Debug(), "mmap client ", Quote(id()), ": Trying to read page index ", Integer(lPageIndexToRead), " = count ", Integer(mReadReplyPageCount+1), "; published page count is ", Integer(lHwPublishedPageCount), "; sleeping for ", mSleepDuration.count(), "us");
       if (mSleepDuration > std::chrono::microseconds(0))
         std::this_thread::sleep_for( mSleepDuration );
       lValues.clear();
     }
 
-    log(Info(), "mmap client ", Quote(id()), " (URI: ", Quote(uri()), ") : Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");
+    log(Info(), "mmap client ", Quote(id()), ": Reading page ", Integer(lPageIndexToRead), " (published count ", Integer(lHwPublishedPageCount), ", surpasses required, ", Integer(mReadReplyPageCount + 1), ")");
   }
   mReadReplyPageCount++;
   
@@ -519,13 +519,13 @@ void Mmap::read()
   detail::ScopedSessionLock lGuard(*mIPCMutex);
   mDeviceFile.read(4 + lPageIndexToRead * mPageSize, lNrWordsToRead , lPageContents);
   lGuard.unlock();
-  log (Debug(), "Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", detail::PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
+  log (Debug(), "mmap client ", Quote(id()), ": Read " , Integer(lNrWordsToRead), " 32-bit words from address " , Integer(16 + lPageIndexToRead * 4 * mPageSize), " ... ", detail::PacketFmt((const uint8_t*)lPageContents.data(), 4 * lPageContents.size()));
 
   // PART 2 : Transfer to reply buffer
   const std::deque< std::pair< uint8_t* , uint32_t > >& lReplyBuffers ( lBuffers->getReplyBuffer() );
   size_t lNrWordsInPacket = (lPageContents.at(0) >> 16) + (lPageContents.at(0) & 0xFFFF);
   if (lNrWordsInPacket != (lBuffers->replyCounter() >> 2))
-    log (Warning(), "Expected reply packet to contain ", Integer(lBuffers->replyCounter() >> 2), " words, but it actually contains ", Integer(lNrWordsInPacket), " words");
+    log (Warning(), "mmap client ", Quote(id()), ": Expected reply packet to contain ", Integer(lBuffers->replyCounter() >> 2), " words, but it actually contains ", Integer(lNrWordsInPacket), " words");
 
   size_t lNrBytesCopied = 0;
   for (const auto& lBuffers: lReplyBuffers)
