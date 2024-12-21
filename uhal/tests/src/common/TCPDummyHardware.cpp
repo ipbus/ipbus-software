@@ -13,7 +13,7 @@ void uhal::tests::TCPDummyHardware< IPbus_major , IPbus_minor >::run()
     mAcceptor.async_accept ( mSocket, [&] (const boost::system::error_code& e) {this->handle_accept(e);} );
 
     mIOservice.run();  
-    mIOservice.restart()();
+    mIOservice.restart();
 }
 
 

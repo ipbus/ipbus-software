@@ -45,6 +45,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -176,7 +177,7 @@ namespace uhal
 
       try
       {
-        socket.connect ( results, lErrorCode );
+          boost::asio::connect ( socket, results, lErrorCode );
 
         if ( lErrorCode )
         {
