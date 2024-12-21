@@ -194,7 +194,7 @@ namespace uhal
       boost::asio::ip::tcp::socket mSocket;
 
       //! A shared pointer to a boost::asio tcp endpoint - used by the delayed (open-on-first-use) connect
-      boost::asio::ip::tcp::resolver::iterator mEndpoint;
+      boost::asio::ip::tcp::resolver::results_type mEndpoint;
 
       //! The mechanism for providing the time-out
       boost::asio::deadline_timer mDeadlineTimer;

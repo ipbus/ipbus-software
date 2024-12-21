@@ -61,7 +61,7 @@ namespace uhal
     mMaxPayloadSize (350 * 4),
     mIOservice ( ),
     mSocket ( mIOservice , boost::asio::ip::udp::endpoint ( boost::asio::ip::udp::v4(), 0 ) ),
-    mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ) ),
+    mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ),
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( ),
     mIOserviceWork ( mIOservice.get_executor() ),
@@ -195,7 +195,7 @@ namespace uhal
       mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     }
 
-    mSocket.async_send_to ( lAsioSendBuffer , mEndpoint , [&] (const boost::system::error_code& e, std::size_t n) { this->write_callback(e, n); });
+    mSocket.async_send_to ( lAsioSendBuffer , *mEndpoint.begin() , [&] (const boost::system::error_code& e, std::size_t n) { this->write_callback(e, n); });
     mPacketsInFlight++;
   }
 

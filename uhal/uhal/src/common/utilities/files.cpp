@@ -170,19 +170,13 @@ namespace uhal
       boost::asio::io_context io_service;
       // Get a list of endpoints corresponding to the server name.
       boost::asio::ip::tcp::resolver resolver ( io_service );
-      boost::asio::ip::tcp::resolver::query query ( lURLPair.first , "http" );
-      boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve ( query );
-      boost::asio::ip::tcp::resolver::iterator end;
+      boost::asio::ip::tcp::resolver::results_type results = resolver.resolve ( lURLPair.first , "http" );
       // Try each endpoint until we successfully establish a connection.
       boost::asio::ip::tcp::socket socket ( io_service );
 
       try
       {
-        while ( lErrorCode && endpoint_iterator != end )
-        {
-          socket.close();
-          socket.connect ( *endpoint_iterator++, lErrorCode );
-        }
+        socket.connect ( results, lErrorCode );
 
         if ( lErrorCode )
         {
