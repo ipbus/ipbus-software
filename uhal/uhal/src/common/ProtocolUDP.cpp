@@ -64,7 +64,7 @@ namespace uhal
     mEndpoint ( *boost::asio::ip::udp::resolver ( mIOservice ).resolve ( boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
     mReplyMemory ( ),
-    mIOserviceWork ( mIOservice ),
+    mIOserviceWork ( mIOservice.get_executor() ),
     mDispatchThread ( [this] () { mIOservice.run(); } ),
     mDispatchQueue(),
     mReplyQueue(),

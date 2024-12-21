@@ -44,7 +44,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/asio/error.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -167,7 +167,7 @@ namespace uhal
 
       boost::system::error_code lErrorCode ( boost::asio::error::host_not_found );
       // The IO service everything will go through
-      boost::asio::io_service io_service;
+      boost::asio::io_context io_service;
       // Get a list of endpoints corresponding to the server name.
       boost::asio::ip::tcp::resolver resolver ( io_service );
       boost::asio::ip::tcp::resolver::query query ( lURLPair.first , "http" );
