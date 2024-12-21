@@ -66,7 +66,7 @@ namespace uhal
     mSocket ( mIOservice ),
     mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aUri.mHostname , aUri.mPort ) ) ),
     mDeadlineTimer ( mIOservice ),
-    mIOserviceWork ( mIOservice ),
+    mIOserviceWork ( mIOservice.get_executor() ),
     mDispatchThread ( [this] () { mIOservice.run(); } ),
     mDispatchQueue(),
     mReplyQueue(),

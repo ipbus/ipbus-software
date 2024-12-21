@@ -50,7 +50,8 @@
 #include <thread>
 #include <vector>
 
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/deadline_timer.hpp>
 
@@ -186,8 +187,8 @@ namespace uhal
       //! The maximum UDP payload size (in bytes)
       size_t mMaxPayloadSize;
 
-      //! The boost::asio::io_service used to create the connections
-      boost::asio::io_service mIOservice;
+      //! The boost::asio::io_context used to create the connections
+      boost::asio::io_context mIOservice;
 
       //! A shared pointer to a boost::asio tcp socket through which the operation will be performed
       boost::asio::ip::tcp::socket mSocket;
@@ -198,8 +199,8 @@ namespace uhal
       //! The mechanism for providing the time-out
       boost::asio::deadline_timer mDeadlineTimer;
 
-      /// Needed when multi-threading to stop the boost::asio::io_service thinking it has nothing to do and so close the socket
-      boost::asio::io_service::work mIOserviceWork;
+      /// Needed when multi-threading to stop the boost::asio::io_context thinking it has nothing to do and so close the socket
+      boost::asio::executor_work_guard<boost::asio::io_context::executor_type> mIOserviceWork;
 
       //! The Worker thread in Multi-threaded mode
       std::thread mDispatchThread;
