@@ -77,6 +77,7 @@ Mmap::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
   mFd(-1),
   mFlags(aFlags),
+  mLocked(false),
   mOffset(0),
   mMmapPtr(NULL),
   mMmapIOPtr(NULL)

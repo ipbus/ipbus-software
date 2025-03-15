@@ -45,7 +45,9 @@ namespace uhal {
   volatile sig_atomic_t SigBusGuard::sProtected = 0;
 
   SigBusGuard::SigBusGuard() :
-    mLockGuard(sMutex)
+    mLockGuard(sMutex),
+    mAction({0}),
+    mOriginalAction({0})
   {
     // 1) Register our signal handler for SIGBUS, saving original in mOriginalAction
     log(Debug(), "Registering uHAL SIGBUS handler");
