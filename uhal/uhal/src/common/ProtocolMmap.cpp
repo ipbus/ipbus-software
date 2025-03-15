@@ -77,6 +77,7 @@ Mmap::File::File(const std::string& aPath, int aFlags) :
   mPath(aPath),
   mFd(-1),
   mFlags(aFlags),
+  mLocked(false),
   mOffset(0),
   mMmapPtr(NULL),
   mMmapIOPtr(NULL)
@@ -292,6 +293,7 @@ Mmap::Mmap ( const std::string& aId, const URI& aUri ) :
   mPublishedReplyPageCount(0),
   mReadReplyPageCount(0)
 {
+  std::cout << "Mmap<" << this << ">: Constructor (mDeviceFile=" << aUri.mHostname << ")" << std::endl;
   mSleepDuration = std::chrono::microseconds(50);
 
   for (const auto& lArg: aUri.mArguments) {
@@ -393,10 +395,12 @@ void Mmap::connect()
 
 void Mmap::connect(detail::ScopedSessionLock& aGuard)
 {
+  std::cout << "Mmap<" << this << ">: connect" << std::endl;
   // Read current value of session counter when reading status info from FPGA
   // (So that can check whether this info is up-to-date later on, when sending next request packet)
   mIPCExternalSessionActive = mIPCMutex->isActive() and (not mDeviceFile.haveLock());
   mIPCSessionCount = mIPCMutex->getCounter();
+  std::cout << "                    mIPCExternalSessionActive=" << mIPCExternalSessionActive << ", mIPCMutex->getCounter()=" << mIPCMutex->getCounter() << ", mIPCSessionCount=" << mIPCSessionCount << std::endl;
 
   log ( Debug() , "mmap client is opening device file " , Quote ( mDeviceFile.getPath() ) );
   std::vector<uint32_t> lValues;
@@ -449,10 +453,14 @@ void Mmap::write(const std::shared_ptr<Buffers>& aBuffers)
     // If these two numbers don't match, another client/process has sent packets
     // more recently than this client has, so must re-read status info
     if (mIPCExternalSessionActive or (mIPCMutex->getCounter() != mIPCSessionCount)) {
+      std::cout << "Mmap<" << this << ">: Detected that connect required" << std::endl;
+      std::cout << "                    mIPCExternalSessionActive=" << mIPCExternalSessionActive << ", mIPCMutex->getCounter()=" << mIPCMutex->getCounter() << ", mIPCSessionCount=" << mIPCSessionCount << std::endl;
       connect(lGuard);
     }
   }
 
+  std::cout << "Mmap<" << this << ">: Writing " << Integer(aBuffers->sendCounter() / 4) << "-word packet to page " << mIndexNextPage << " in " << mDeviceFile.getPath() << std::endl;
+  std::cout << "                    mIPCExternalSessionActive=" << mIPCExternalSessionActive << ", mIPCMutex->getCounter()=" << mIPCMutex->getCounter() << ", mIPCSessionCount=" << mIPCSessionCount << std::endl;
   log (Info(), "mmap client ", Quote(id()), ": Writing ", Integer(aBuffers->sendCounter() / 4), "-word packet to page ", Integer(mIndexNextPage), " in ", mDeviceFile.getPath());
 
   const uint32_t lHeaderWord = (0x10000 | (((aBuffers->sendCounter() / 4) - 1) & 0xFFFF));

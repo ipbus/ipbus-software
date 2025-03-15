@@ -88,12 +88,14 @@ bool RobustSessionMutex::isActive() const
 
 void RobustSessionMutex::startSession()
 {
+  std::cout << "RobustSessionMutex<" << this << ">::startSession()   [" << mCount << " -> " << mCount + 1 << "]" << std::endl;
   mCount++;
   mSessionActive = true;
 }
 
 void RobustSessionMutex::endSession()
 {
+  std::cout << "RobustSessionMutex<" << this << ">::endSession()   [mCount=" << mCount << "]" << std::endl;
   mSessionActive = false;
 }
 
