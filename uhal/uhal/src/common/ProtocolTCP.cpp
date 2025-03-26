@@ -64,9 +64,9 @@ namespace uhal
     mMaxPayloadSize (350 * 4),
     mIOservice ( ),
     mSocket ( mIOservice ),
-    mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( boost::asio::ip::tcp::resolver::query ( aUri.mHostname , aUri.mPort ) ) ),
+    mEndpoint ( boost::asio::ip::tcp::resolver ( mIOservice ).resolve ( aUri.mHostname , aUri.mPort ) ),
     mDeadlineTimer ( mIOservice ),
-    mIOserviceWork ( mIOservice ),
+    mIOserviceWork ( mIOservice.get_executor() ),
     mDispatchThread ( [this] () { mIOservice.run(); } ),
     mDispatchQueue(),
     mReplyQueue(),
@@ -160,7 +160,7 @@ namespace uhal
   template < typename InnerProtocol , std::size_t nr_buffers_per_send >
   void TCP< InnerProtocol , nr_buffers_per_send >::connect()
   {
-    log ( Info() , "Attempting to create TCP connection to '" , mEndpoint->host_name() , "' port " , mEndpoint->service_name() , "." );
+      log ( Info() , "Attempting to create TCP connection to '" , mEndpoint.begin()->host_name() , "' port " , mEndpoint.begin()->service_name() , "." );
     mDeadlineTimer.expires_from_now ( this->getBoostTimeoutPeriod() );
     boost::system::error_code lErrorCode;
     boost::asio::connect ( mSocket , mEndpoint , lErrorCode );

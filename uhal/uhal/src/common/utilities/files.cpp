@@ -44,7 +44,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/asio/error.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -167,22 +168,16 @@ namespace uhal
 
       boost::system::error_code lErrorCode ( boost::asio::error::host_not_found );
       // The IO service everything will go through
-      boost::asio::io_service io_service;
+      boost::asio::io_context io_service;
       // Get a list of endpoints corresponding to the server name.
       boost::asio::ip::tcp::resolver resolver ( io_service );
-      boost::asio::ip::tcp::resolver::query query ( lURLPair.first , "http" );
-      boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve ( query );
-      boost::asio::ip::tcp::resolver::iterator end;
+      boost::asio::ip::tcp::resolver::results_type results = resolver.resolve ( lURLPair.first , "http" );
       // Try each endpoint until we successfully establish a connection.
       boost::asio::ip::tcp::socket socket ( io_service );
 
       try
       {
-        while ( lErrorCode && endpoint_iterator != end )
-        {
-          socket.close();
-          socket.connect ( *endpoint_iterator++, lErrorCode );
-        }
+          boost::asio::connect ( socket, results, lErrorCode );
 
         if ( lErrorCode )
         {

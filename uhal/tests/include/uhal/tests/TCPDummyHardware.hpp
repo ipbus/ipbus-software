@@ -84,8 +84,8 @@ namespace uhal {
 
         void handle_read_chunk_payload(const boost::system::error_code& ec, std::size_t length);
 
-        //! The BOOST ASIO io_service used by the TCP server
-        boost::asio::io_service mIOservice;
+        //! The BOOST ASIO io_cpmtext used by the TCP server
+        boost::asio::io_context mIOservice;
         //! The TCP acceptor which opens the TCP port and handles the connection
         boost::asio::ip::tcp::acceptor mAcceptor;
         //! The socket opened by the TCP server 
