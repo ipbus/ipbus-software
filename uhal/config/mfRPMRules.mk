@@ -13,6 +13,9 @@ RPM_RELEASE_SUFFIX = ${RPM_DIST}$(if ${CXX_VERSION_TAG},.${CXX_VERSION_TAG},)
 
 PYTHON_VERSIONED_COMMAND := $(shell ${PYTHON} -c "from sys import version_info; print('python' + str(version_info[0]))")
 
+RPM_POST := $(if $(RPM_POST),$(RPM_POST),%{nil})
+RPM_POSTUN := $(if $(RPM_POSTUN),$(RPM_POSTUN),%{nil})
+
 export BUILD_HOME
 
 .PHONY: rpm _rpmall
@@ -47,6 +50,8 @@ _spec_update:
 	       -e 's|^.*__requires__.*|${REQUIRES_TAG}|' \
 	       -e 's|^BuildArch:.*|$(if ${PackageBuildArch},BuildArch: ${PackageBuildArch},\# BuildArch not specified)|' \
 	       -e 's#__python_versioned_command__#${PYTHON_VERSIONED_COMMAND}#' \
+	       -e 's#__rpm_post__#${RPM_POST}#' \
+	       -e 's#__rpm_postun__#${RPM_POSTUN}#' \
 	       ${PackagePath}/rpm/${PackageName}.spec
 	if [ "${BuildDebuginfoRPM}" == "1" ]; then sed -i '1 i\%define _build_debuginfo_package %{nil}' ${PackagePath}/rpm/${PackageName}.spec; fi
 

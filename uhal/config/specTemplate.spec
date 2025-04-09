@@ -11,6 +11,8 @@
 %define _summary __summary__
 %define _url __url__
 %define _python_versioned_command __python_versioned_command__
+%define _rpm_post __rpm_post__
+%define _rpm_postun __rpm_postun__
 
 
 %define percent %( echo "%" )
@@ -120,9 +122,11 @@ find ./ -type d -exec chmod 755 {} \;
 
 %clean
 
-%post 
+%post
+%{_rpm_post}
 
-%postun 
+%postun
+%{_rpm_postun}
 
 
 %files 
