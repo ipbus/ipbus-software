@@ -14,10 +14,6 @@ PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Kristian Harder, Dave Newbold, Tom Williams
 PackageBuildArch = noarch
 
-LD_CONF_FILE = /etc/ld.so.conf.d/uhal.conf
-RPM_POST := echo $(CACTUS_ROOT)/lib > $(LD_CONF_FILE); ldconfig
-RPM_POSTUN := if [ $$1 == 0 ]; then rm $(LD_CONF_FILE); ldconfig; fi
-
 .PHONY: _all build clean
 clean: ;
 _all: ;
