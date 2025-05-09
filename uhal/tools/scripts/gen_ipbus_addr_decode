@@ -100,8 +100,8 @@ class node(object):
         
 class nodetree(object):
 
-    def __init__(self):
-        self.root = node("TOP")
+    def __init__(self, width = None):
+        self.root = node("TOP", width=width)
 
 # Add a node to the tree
 
@@ -251,7 +251,9 @@ def main():
         
 # Build the node tree
 
-    t = nodetree()
+    f = device.getNode().getFirmwareInfo()
+    w = int(f["width"]) if "width" in f else None
+    t = nodetree(w)
     for i in device.getNodes():
         d = device.getNode(i)
         if d.getMask() == 0xffffffff:
