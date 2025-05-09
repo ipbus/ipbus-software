@@ -256,12 +256,11 @@ def main():
     t = nodetree(w)
     for i in device.getNodes():
         d = device.getNode(i)
-        if d.getMask() == 0xffffffff:
-            f = d.getFirmwareInfo()
-            p = "type" in f and f["type"] == "endpoint"
-            s = d.getSize() if d.getMode() == uhal.BlockReadWriteMode.INCREMENTAL else 1
-            w = int(f["width"]) if "width" in f else None
-            t.add(node(i, d.getAddress(), p, s, w))
+        f = d.getFirmwareInfo()
+        p = "type" in f and f["type"] == "endpoint"
+        s = d.getSize() if d.getMode() == uhal.BlockReadWriteMode.INCREMENTAL else 1
+        w = int(f["width"]) if "width" in f else None
+        t.add(node(i, d.getAddress(), p, s, w))
 
 
     for l in str(t).splitlines():
