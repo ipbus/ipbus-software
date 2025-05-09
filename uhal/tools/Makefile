@@ -14,7 +14,6 @@ PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Kristian Harder, Dave Newbold, Tom Williams
 PackageBuildArch = noarch
 
-
 .PHONY: _all build clean
 clean: ;
 _all: ;
