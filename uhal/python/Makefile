@@ -15,7 +15,7 @@ endif
 Project = uhal
 Package = uhal/python
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
-PackageName = cactuscore-uhal-python${PYTHON_VERSION_MAJOR_MINOR}
+PackageName = cactuscore_uhal_python${PYTHON_VERSION_MAJOR_MINOR}
 
 PackageDescription = Python bindings for the uHAL library
 PackageURL = https://ipbus.web.cern.ch/ipbus
