@@ -91,7 +91,7 @@
 
 build:centos7:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2024.10.10__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:python-setuptools-cf83d57f__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/x86_64
     PYTHONS: "python2.7 python3.4 python3.6"
@@ -99,7 +99,7 @@ build:centos7:x86:
 
 build:centos7:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2024.10.10__boost1.53.0_pugixml1.8
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:python-setuptools-cf83d57f__boost1.53.0_pugixml1.8
   variables:
     OUTPUT_REPO_SUBDIR: centos7/aarch64
     PYTHONS: "python2.7 python3.4 python3.6"
@@ -108,41 +108,41 @@ build:centos7:arm64:
 
 build:alma8:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.10.10__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:python-setuptools-cf83d57f__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/x86_64
-    PYTHONS: "python3.6 python3.8 python3.9 python3.11"
+    PYTHONS: "python3.6 python3.8 python3.9 python3.11 python3.12"
     YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
 
 build:alma8:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2024.10.10__boost1.66.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:python-setuptools-cf83d57f__boost1.66.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma8/aarch64
-    PYTHONS: "python3.6 python3.8 python3.9 python3.11"
+    PYTHONS: "python3.6 python3.8 python3.9 python3.11 python3.12"
     YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
 
 
 build:alma9:x86:
   extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.08.30__boost1.75.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:python-setuptools-cf83d57f__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/x86_64
-    PYTHONS: "python3.9 python3.11"
+    PYTHONS: "python3.9 python3.11 python3.12 python3.13"
     YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
 
 build:alma9:arm64:
   extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2023.08.30__boost1.75.0_pugixml1.13
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:python-setuptools-cf83d57f__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/aarch64
-    PYTHONS: "python3.9 python3.11"
+    PYTHONS: "python3.9 python3.11 python3.12 python3.13"
     YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
 
 
 .build:centos7-gcc8:
   stage: build
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc8:2024.10.10
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc8:python-setuptools-cf83d57f
   variables:
     FF_KUBERNETES_HONOR_ENTRYPOINT: 1
     GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
