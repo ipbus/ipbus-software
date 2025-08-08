@@ -262,6 +262,8 @@ test_python:alma8:
         UHAL_PYTHON_RPM: cactuscore-uhal-python39
       - PYTHON: python3.11
         UHAL_PYTHON_RPM: cactuscore-uhal-python311
+      - PYTHON: python3.12
+        UHAL_PYTHON_RPM: cactuscore-uhal-python312
 
 test_tools:alma8:
   extends: .template_test:alma8
@@ -285,6 +287,10 @@ test_python:alma9:
         UHAL_PYTHON_RPM: cactuscore-uhal-python39
       - PYTHON: python3.11
         UHAL_PYTHON_RPM: cactuscore-uhal-python311
+      - PYTHON: python3.12
+        UHAL_PYTHON_RPM: cactuscore-uhal-python312
+      - PYTHON: python3.13
+        UHAL_PYTHON_RPM: cactuscore-uhal-python313
 
 test_tools:alma9:
   extends: .template_test:alma9

@@ -45,21 +45,25 @@ _rpmbuild: _setup_update
 	# Change into rpm/pkg to finally run the customized setup.py
 	cd ${RPMBUILD_DIR} && \
 	  LIB_REQUIRES=$$(find ${RPMBUILD_DIR} -type f -print0 | xargs -0 -n1 -I {} file {} \; | grep -v text | cut -d: -f1 | /usr/lib/rpm/find-requires | tr '\n' ' ') && \
-	  ${PYTHON} ${PackageName}.py bdist_rpm --spec-only \
+	  ${PYTHON} ${PythonDistName}.py bdist_rpm --spec-only \
 	    --release ${PACKAGE_RELEASE}${RPM_RELEASE_SUFFIX} \
 	    --requires "${PYTHON_RPM_CAPABILITY} $$LIB_REQUIRES" \
 	    --force-arch=${BUILD_ARCH} \
 	    --binary-only
-	sed -i "s|^"${PYTHON_MAJOR_COMMAND}" |"${PYTHON_VERSIONED_COMMAND}" |" ${RPMBUILD_DIR}/dist/*.spec
 	cd ${RPMBUILD_DIR} && \
-	  bindir=$(bindir) ${PYTHON} ${PackageName}.py sdist
+	  bindir=$(bindir) ${PYTHON} ${PythonDistName}.py sdist
+	# Patch the RPM name, Python command and build directory in the specfile
+	# (Alternative for '%{name}' & build dir patches: Change 'Name: ' line so that it doesn't use '%{name}')
+	sed -i "s|^"${PYTHON_MAJOR_COMMAND}" |"${PYTHON_VERSIONED_COMMAND}" |" ${RPMBUILD_DIR}/dist/*.spec
+	sed -i "s|^%define name "${PythonDistName}"|%define name "${PackageName}" |" ${RPMBUILD_DIR}/dist/*.spec
+	sed -i "s|^%setup -n %{name}-%{unmangled_version}.*|%setup -n ${PythonDistName}-%{unmangled_version}|" ${RPMBUILD_DIR}/dist/*.spec
 	mkdir -p ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES
-	cp ${RPMBUILD_DIR}/dist/${PackageName}-*.tar.gz ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES/
+	cp ${RPMBUILD_DIR}/dist/${PythonDistName}-*.tar.gz ${RPMBUILD_DIR}/build/bdist.linux-${BUILD_ARCH}/rpm/SOURCES/${PackageName}-${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}.tar.gz
 	cd ${RPMBUILD_DIR} && \
 	  bindir=$(bindir) rpmbuild -bb \
 	    --define 'debug_package %{nil}' \
 	    --define '_topdir '${RPMBUILD_DIR}'/build/bdist.linux-${BUILD_ARCH}/rpm' \
-	    --clean dist/${PackageName}.spec
+	    --clean dist/${PythonDistName}.spec
 	# Harvest the crop
 	find ${RPMBUILD_DIR} -name "*.rpm" -print0 | xargs -0 -n1 -I {} mv {} rpm/
 
@@ -67,9 +71,9 @@ _rpmbuild: _setup_update
 .PHONY: _setup_update	
 _setup_update:
 	${MakeDir} ${RPMBUILD_DIR}
-	cp ${BUILD_UTILS_DIR}/setupTemplate.py ${RPMBUILD_DIR}/${PackageName}.py
+	cp ${BUILD_UTILS_DIR}/setupTemplate.py ${RPMBUILD_DIR}/${PythonDistName}.py
 	sed -i -e 's#__python_packages__#${PythonModules}#' \
-	       -e 's#__packagename__#${PackageName}#' \
+	       -e 's#__packagename__#${PythonDistName}#' \
 	       -e 's#__version__#${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}#' \
 	       -e 's#__author__#${Packager}#' \
 	       -e 's#__description__#${PackageDescription}#' \
@@ -77,7 +81,7 @@ _setup_update:
 	       -e 's#__project__#${Project}#' \
 	       -e 's#__install_dir__#${CACTUS_ROOT}#' \
 	       -e 's#__package_build_dir__#${RPMBUILD_DIR}#' \
-	       ${RPMBUILD_DIR}/${PackageName}.py
+	       ${RPMBUILD_DIR}/${PythonDistName}.py
 
 
 .PHONY: cleanrpm _cleanrpm
