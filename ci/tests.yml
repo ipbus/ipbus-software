@@ -289,8 +289,9 @@ test_python:alma9:
         UHAL_PYTHON_RPM: cactuscore-uhal-python311
       - PYTHON: python3.12
         UHAL_PYTHON_RPM: cactuscore-uhal-python312
-      - PYTHON: python3.13
-        UHAL_PYTHON_RPM: cactuscore-uhal-python313
+      # Temporarily dropping the Python 3.13 test job, since python3.13-numpy RPM hasn't been aded to EPEL yet.
+      # - PYTHON: python3.13
+      #   UHAL_PYTHON_RPM: cactuscore-uhal-python313
 
 test_tools:alma9:
   extends: .template_test:alma9
