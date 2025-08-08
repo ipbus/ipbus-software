@@ -144,7 +144,6 @@ build:alma9:arm64:
   stage: build
   image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc8:2025.08.08
   variables:
-    FF_KUBERNETES_HONOR_ENTRYPOINT: 1
     GIT_CLONE_PATH: ${CI_BUILDS_DIR}/${CI_PROJECT_PATH}_____
     PYTHONS: "python2.7 python3.4 python3.6"
     YUMGROUPS_FILE: ci/yum/yumgroups-centos7-gcc8.xml
@@ -159,6 +158,7 @@ build:alma9:arm64:
     - sed -i 's|cd ${ZIP_NAME}|cd ${ZIP_NAME}/${ZIP_NAME}|g' extern/pugixml/Makefile
     - git diff
     - sudo yum -y install zlib-devel
+    - source /opt/rh/devtoolset-8/enable
   script:
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0 check-version
     - make -k Set=all BUILD_BOOST=1 BUILD_PUGIXML=1 BUILD_UHAL_PYTHON=0
