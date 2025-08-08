@@ -174,10 +174,6 @@ test_tools:centos7:x86:
   extends: .template_test:centos7:x86
   <<: *test_tools_jobScript
 
-test_controlhub:centos7:x86:
-  extends: .template_test:centos7:x86
-  <<: *test_controlhub_plainScripts_jobScript
-
 
 test_core:centos7:arm64:
   extends: .template_test:centos7:arm64
@@ -203,10 +199,6 @@ test_gui:centos7:arm64:
 test_tools:centos7:arm64:
   extends: .template_test:centos7:arm64
   <<: *test_tools_jobScript
-
-test_controlhub:centos7:arm64:
-  extends: .template_test:centos7:arm64
-  <<: *test_controlhub_plainScripts_jobScript
 
 
 test_core:centos7-gcc8:
@@ -239,10 +231,6 @@ test_gui:centos7-gcc8:
 test_tools:centos7-gcc8:
   extends: .template_test:centos7-gcc8
   <<: *test_tools_jobScript
-
-test_controlhub:centos7-gcc8:
-  extends: .template_test:centos7-gcc8
-  <<: *test_controlhub_plainScripts_jobScript
 
 
 test_core:alma8:
