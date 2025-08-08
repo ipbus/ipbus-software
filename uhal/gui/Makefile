@@ -9,7 +9,7 @@ PYTHON_VERSION_MAJOR_MINOR=$(shell ${PYTHON} -c "import sys; print(str(sys.versi
 Project = uhal
 Package = uhal/gui
 PackagePath = $(CACTUS_RPM_ROOT)/${Package}
-PackageName = cactuscore-uhal-python${PYTHON_VERSION_MAJOR_MINOR}-gui
+PackageName = cactuscore_uhal_python${PYTHON_VERSION_MAJOR_MINOR}_gui
 
 PackageDescription = Python GUI for uTCA HW access based on uHAL
 PackageURL = https://ipbus.web.cern.ch/ipbus
