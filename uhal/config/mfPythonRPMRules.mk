@@ -100,4 +100,4 @@ install: _setup_update
 	# Change into rpm/pkg to finally run the customized setup.py
 	if [ -f setup.cfg ]; then cp setup.cfg ${RPMBUILD_DIR}/ ; fi
 	cd ${RPMBUILD_DIR} && \
-	  $(if ${CUSTOM_INSTALL_PREFIX},PYTHONPATH=${prefix}/lib/python${PYTHON_VERSION}/site-packages,) bindir=$(bindir) ${PYTHON} ${PackageName}.py install $(if ${CUSTOM_INSTALL_PREFIX},--prefix=${prefix},) $(if ${CUSTOM_INSTALL_PREFIX}${CUSTOM_INSTALL_EXEC_PREFIX},--exec-prefix=${exec_prefix},)
+	  $(if ${CUSTOM_INSTALL_PREFIX},PYTHONPATH=${prefix}/lib/python${PYTHON_VERSION}/site-packages,) bindir=$(bindir) ${PYTHON} ${PythonDistName}.py install $(if ${CUSTOM_INSTALL_PREFIX},--prefix=${prefix},) $(if ${CUSTOM_INSTALL_PREFIX}${CUSTOM_INSTALL_EXEC_PREFIX},--exec-prefix=${exec_prefix},)

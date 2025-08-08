@@ -1,11 +1,13 @@
 
 .template_build_simple:
   stage: build
+  variables:
+    IPBUS_BUILD_SET: all
   script:
     # Fix for CERN k8s-provisioned shared runners: Limit number of opened file descriptors with ulimit
     - ulimit -n 1048576
-    - make -k Set=all check-version
-    - make -k Set=all
+    - make -k Set=${IPBUS_BUILD_SET} check-version
+    - make -k Set=${IPBUS_BUILD_SET}
   artifacts:
     paths:
       - '**/*.exe'
@@ -23,6 +25,7 @@ build:centos7:static:
   extends: .template_build_simple
   image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-static:2024.10.10__boost1.53.0_pugixml1.8
   variables:
+    IPBUS_BUILD_SET: uhal
     BUILD_STATIC: 1
     BUILD_UHAL_PYTHON: 0
     BUILD_UHAL_GUI: 0
