@@ -125,6 +125,16 @@ tcp_proc_init() ->
     end.
 
 
+-ifdef(bypass_gen_tcp_send).
+-define(TCP_SEND(SOCKET, PACKET),
+        true = erlang:port_command(SOCKET, PACKET, [])
+       ).
+-else.
+-define(TCP_SEND(SOCKET, PACKET),
+        ok = gen_tcp:send(SOCKET, PACKET)
+       ).
+-endif.
+
 %% Tail-recursive loop function for TCP receive/send process
 tcp_proc_loop(Socket, ParentPid) ->
     % Give priority to receiving packets off TCP stream (wrt sending back to uHAL client)
@@ -134,7 +144,7 @@ tcp_proc_loop(Socket, ParentPid) ->
     after 0 ->
         receive
             {send, Pkt} ->
-                true = erlang:port_command(Socket, Pkt, []);
+                ?TCP_SEND(Socket, Pkt);
             {inet_reply, Socket, ok} ->
                 void;
             {inet_reply, Socket, SendError} ->
@@ -184,7 +194,7 @@ transaction_manager_loop( S = #state{ socket=Socket, target_ip_u32=TargetIPAddrA
             NrRepliesToSend = element(2, queue:peek(QNrReqsPerTcp)),
             case (S#state.nr_replies_acc + 1) of
                 NrRepliesToSend ->
-                    ?CH_LOG_DEBUG("Sending ~w IPbus response packets over TCP.", [NrRepliesToSend]),
+                    ?CH_LOG_DEBUG("Sending ~w IPbus response packets over TCP. TargetIPAddrArg=~w", [NrRepliesToSend, TargetIPAddrArg]),
                     S#state.tcp_pid ! {send, [ReplyIoList, <<(iolist_size(ReplyIoData) + 8):32, TargetIPAddrArg:32, TargetPortArg:16, ErrorCode:16>>, ReplyIoData]},
                     ch_stats:client_responses_sent(S#state.stats_table, NrRepliesToSend),
                     transaction_manager_loop( S#state{nr_in_flight=(NrInFlight-1), q_nr_reqs_per_tcp=queue:drop(QNrReqsPerTcp), reply_io_list=[], nr_replies_acc=0} );
