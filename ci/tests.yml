@@ -87,6 +87,7 @@ variables:
   before_script:
     - sudo make -k Set=all install PYTHON=${PYTHON}
     - ls -al /opt/cactus /opt/cactus/*
+    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - export TEST_SUITE_CONTROLHUB_PATH_ARGUMENT="-p /opt/cactus/bin"
 
 .template_test:fedora33:
@@ -111,7 +112,6 @@ variables:
 .job_template: &test_core_jobScript
   script:
     - export PATH=/opt/cactus/bin:/opt/cactus/bin/uhal/tests:$PATH
-    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
     - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
     - service controlhub stop || /opt/cactus/bin/controlhub_stop
@@ -123,20 +123,17 @@ variables:
   script:
     - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install ${UHAL_PYTHON_TEST_DEPENDENCIES} ; else sudo apt-get update && sudo apt-get -y install python3-numpy ; fi'
     - export PATH=/opt/cactus/bin/uhal/tests:$PATH
-    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - ${PYTHON} $(which uhal_test_suite.py) -v -s pycohal
 
 .job_template: &test_gui_jobScript
   script:
     - 'if [ -x "$(command -v yum)" ]; then sudo yum -y install ${UHAL_GUI_DEPENDENCIES} ; else sudo apt-get update && sudo apt-get -y install python-wx* ; fi'
     - export PATH=/opt/cactus/bin/uhal/tests:$PATH
-    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - ${PYTHON} $(which uhal_test_suite.py) -v -s gui
 
 .job_template: &test_tools_jobScript
   script:
     - export PATH=/opt/cactus/bin/uhal/tests:/opt/cactus/bin/uhal/tools:$PATH
-    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - ${PYTHON} $(which uhal_test_suite.py) -v -s tools
 
 .job_template: &test_controlhub_service_jobScript
@@ -170,10 +167,6 @@ test_gui:centos7:x86:
   extends: .template_test:centos7:x86
   <<: *test_gui_jobScript
 
-test_tools:centos7:x86:
-  extends: .template_test:centos7:x86
-  <<: *test_tools_jobScript
-
 
 test_core:centos7:arm64:
   extends: .template_test:centos7:arm64
@@ -196,16 +189,11 @@ test_gui:centos7:arm64:
   extends: .template_test:centos7:arm64
   <<: *test_gui_jobScript
 
-test_tools:centos7:arm64:
-  extends: .template_test:centos7:arm64
-  <<: *test_tools_jobScript
-
 
 test_core:centos7-gcc8:
   extends: .template_test:centos7-gcc8
   script:
     - export PATH=/opt/cactus/bin:/opt/cactus/bin/uhal/tests:$PATH
-    - export LD_LIBRARY_PATH=/opt/cactus/lib:$LD_LIBRARY_PATH
     - /opt/cactus/bin/controlhub_status || service controlhub start || /opt/cactus/bin/controlhub_start
     - run_uhal_tests.exe -c file:///opt/cactus/etc/uhal/tests/dummy_connections.xml --log_level=test_suite
     - service controlhub stop || /opt/cactus/bin/controlhub_stop
@@ -227,10 +215,6 @@ test_python:centos7-gcc8:
 test_gui:centos7-gcc8:
   extends: .template_test:centos7-gcc8
   <<: *test_gui_jobScript
-
-test_tools:centos7-gcc8:
-  extends: .template_test:centos7-gcc8
-  <<: *test_tools_jobScript
 
 
 test_core:alma8:

@@ -13,6 +13,9 @@ PackageDescription = uHAL Library
 PackageURL = https://ipbus.web.cern.ch/ipbus
 Packager = Andrew Rose, Tom Williams
 
+LD_CONF_FILE = /etc/ld.so.conf.d/uhal.conf
+RPM_POST := echo $(CACTUS_ROOT)/lib > $(LD_CONF_FILE); ldconfig
+RPM_POSTUN := if [ $$1 == 0 ]; then rm $(LD_CONF_FILE); ldconfig; fi
 
 Library = cactus_uhal_uhal
 LIBRARY_VER_ABI = $(PACKAGE_VER_MAJOR).$(PACKAGE_VER_MINOR)
