@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/libexec/platform-python
 
 """
 This script automatically generates address select logic for IPbus-based firmware designs.
@@ -297,7 +297,7 @@ def main():
             error_count += 1
         or_prod = or_prod | (addr_bits & ~mask_bits)
         and_prod = and_prod & (addr_bits | mask_bits)
-        slaves.append((n, i.name, addr_bits, mask_bits))
+        slaves.append((n, i.name, addr_bits, mask_bits, i.width))
 
     addr_mask = or_prod & ~and_prod
     log.info("Significant address bits 0b%s" % str(addr_mask))
@@ -323,9 +323,10 @@ def main():
         snippet1 = "-- START automatically generated VHDL" + timestamp_suffix + "\n"
         if numSlaves > 0:
             slaveIds={}
-            for n,id,addr_bits,mask_bits in slaves:
+            for n,id,addr_bits,mask_bits,width in slaves:
                 slaveIds[n]="N_SLV_"+id.upper().replace(".","_")
                 snippet1 += "  constant "+slaveIds[n]+": integer := %i;\n"%n
+                snippet1 += "  constant "+slaveIds[n]+"_ADDR_WIDTH: integer := %i;\n"%width
         snippet1 += "  constant N_SLAVES: integer := %i;\n"%(numSlaves)
         snippet1 += "-- END automatically generated VHDL"
         
@@ -336,7 +337,7 @@ def main():
         elif numSlaves == 1:
             snippet2 += "    sel := ipbus_sel_t(to_unsigned(" + slaveIds[0] + ", IPBUS_SEL_WIDTH));\n"
         else:
-            for n,id,addr_bits,mask_bits in slaves:
+            for n,id,addr_bits,mask_bits,width in slaves:
                 mask = addr_mask & ~mask_bits
                 if n == 0:
                     snippet2 += "    if    "
