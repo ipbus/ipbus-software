@@ -76,8 +76,8 @@ namespace uhal {
     private:
       void handle_receive(const boost::system::error_code& ec, std::size_t length);
 
-      //! The BOOST ASIO io_service used by the UDP server
-      boost::asio::io_service mIOservice;
+      //! The BOOST ASIO io_context used by the UDP server
+      boost::asio::io_context mIOservice;
       //! The socket opened by the UDP server 
       boost::asio::ip::udp::socket mSocket;
       //! The endpoint which sent the UDP datagram

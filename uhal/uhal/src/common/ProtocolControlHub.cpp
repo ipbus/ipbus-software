@@ -94,13 +94,11 @@ namespace uhal
 
     try
     {
-      boost::asio::io_service lService;
+      boost::asio::io_context lService;
       boost::asio::ip::udp::endpoint lEndpoint (
-        *boost::asio::ip::udp::resolver::iterator (
-          boost::asio::ip::udp::resolver ( lService ).resolve (
-            boost::asio::ip::udp::resolver::query ( boost::asio::ip::udp::v4() , lIP.first , lIP.second )
-          )
-        )
+        *boost::asio::ip::udp::resolver ( lService ).resolve (
+            boost::asio::ip::udp::v4() , lIP.first , lIP.second
+         ).begin()
       );
       lAddr = lEndpoint.address().to_string();
       lPort = lEndpoint.port();

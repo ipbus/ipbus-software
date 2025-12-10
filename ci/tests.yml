@@ -30,22 +30,6 @@ variables:
     UHAL_GUI_DEPENDENCIES: "wxPython numpy"
     UHAL_PYTHON_TEST_DEPENDENCIES: "python*numpy"
 
-.template_test:centos7:x86:
-  extends: .template_test:centos7
-  needs:
-    - job: publish:yum:centos7:x86
-      artifacts: false
-  tags:
-    - k8s-default
-
-.template_test:centos7:arm64:
-  extends: .template_test:centos7
-  needs:
-    - job: publish:yum:centos7:arm64
-      artifacts: false
-  tags:
-    - docker-aarch64
-
 
 .template_test:centos7-gcc8:
   extends: .template_test:centos7
@@ -145,49 +129,6 @@ variables:
   script:
     - /opt/cactus/bin/controlhub_stop || true
     - 'for i in `seq 1 50`; do /opt/cactus/bin/controlhub_start; if [ "$?" != "0" ]; then echo "ERROR IN STARTING CONTROLHUB"; fi; /opt/cactus/bin/controlhub_status; if [ "$?" != "0" ]; then echo "ERROR: CONTROLHUB SHOULD HAVE ALREADY STARTED"; fi; /opt/cactus/bin/controlhub_stop; done'
-
-
-test_core:centos7:x86:
-  extends: .template_test:centos7:x86
-  <<: *test_core_jobScript
-
-test_python:centos7:x86:
-  extends: .template_test:centos7:x86
-  <<: *test_python_jobScript
-  parallel:
-    matrix:
-      - PYTHON: python2.7
-        UHAL_PYTHON_RPM: cactuscore-uhal-python27
-      - PYTHON: python3.4
-        UHAL_PYTHON_RPM: cactuscore-uhal-python34
-      - PYTHON: python3.6
-        UHAL_PYTHON_RPM: cactuscore-uhal-python36
-
-test_gui:centos7:x86:
-  extends: .template_test:centos7:x86
-  <<: *test_gui_jobScript
-
-
-test_core:centos7:arm64:
-  extends: .template_test:centos7:arm64
-  <<: *test_core_jobScript
-  allow_failure: true
-
-test_python:centos7:arm64:
-  extends: .template_test:centos7:arm64
-  <<: *test_python_jobScript
-  parallel:
-    matrix:
-      - PYTHON: python2.7
-        UHAL_PYTHON_RPM: cactuscore-uhal-python27
-      - PYTHON: python3.4
-        UHAL_PYTHON_RPM: cactuscore-uhal-python34
-      - PYTHON: python3.6
-        UHAL_PYTHON_RPM: cactuscore-uhal-python36
-
-test_gui:centos7:arm64:
-  extends: .template_test:centos7:arm64
-  <<: *test_gui_jobScript
 
 
 test_core:centos7-gcc8:
