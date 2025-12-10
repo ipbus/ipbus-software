@@ -21,16 +21,6 @@
     expire_in: 1 week
 
 
-build:centos7:static:
-  extends: .template_build_simple
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-static:2024.10.10__boost1.53.0_pugixml1.8
-  variables:
-    IPBUS_BUILD_SET: uhal
-    BUILD_STATIC: 1
-    BUILD_UHAL_PYTHON: 0
-    BUILD_UHAL_GUI: 0
-    BUILD_UHAL_TOOLS: 0
-
 build:fedora33:
   extends: .template_build_simple
   variables:

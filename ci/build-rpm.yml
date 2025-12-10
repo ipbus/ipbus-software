@@ -91,25 +91,6 @@
   artifacts: !reference [.template_build_rpm_yumrepo, artifacts]
 
 
-build:centos7:x86:
-  extends: .template_build_rpm_yumrepo:x86
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2025.08.08__boost1.53.0_pugixml1.8
-  variables:
-    IPBUS_BUILD_SET: uhal
-    OUTPUT_REPO_SUBDIR: centos7/x86_64
-    PYTHONS: "python2.7 python3.4 python3.6"
-    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
-
-build:centos7:arm64:
-  extends: .template_build_rpm_yumrepo:arm64
-  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev:2025.08.08__boost1.53.0_pugixml1.8
-  variables:
-    IPBUS_BUILD_SET: uhal
-    OUTPUT_REPO_SUBDIR: centos7/aarch64
-    PYTHONS: "python2.7 python3.4 python3.6"
-    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
-
-
 build:alma8:x86:
   extends: .template_build_rpm_yumrepo:x86
   image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev:2025.08.08__boost1.66.0_pugixml1.13
@@ -207,22 +188,6 @@ build:centos7-gcc8:arm64:
   tags:
     - docker-aarch64
 
-
-publish:yum:centos7:x86:
-  extends: .template_publish
-  variables:
-    CI_OUTPUT_DIR: ci_results/repos/centos7/x86_64
-    DEPLOY_SUBDIR: repos/centos7/x86_64
-  needs:
-    - build:centos7:x86
-
-publish:yum:centos7:arm64:
-  extends: .template_publish
-  variables:
-    CI_OUTPUT_DIR: ci_results/repos/centos7/aarch64
-    DEPLOY_SUBDIR: repos/centos7/aarch64
-  needs:
-    - build:centos7:arm64
 
 publish:yum:centos7-gcc8:x86:
   extends: .template_publish
