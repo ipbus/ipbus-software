@@ -89,12 +89,18 @@ namespace uhal
       friend class DerivedNodeFactory;
 
     public:
-      class const_iterator : public std::iterator< std::forward_iterator_tag , Node , ptrdiff_t, const Node* , const Node& >
+      class const_iterator
       {
           friend class Node;
           typedef std::deque< std::vector< Node* >::const_iterator > stack;
 
         public:
+          using iterator_category = std::forward_iterator_tag;
+          using value_type = Node;
+          using difference_type = ptrdiff_t;
+          using pointer = const Node*;
+          using reference = const Node&;
+
           const_iterator();
           virtual ~const_iterator();
 
