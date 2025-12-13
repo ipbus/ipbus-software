@@ -101,48 +101,6 @@ namespace uhal
   }
 
 
-  Node& Node::operator= ( const Node& aNode )
-  {
-    mHw = aNode.mHw;
-    mUid = aNode.mUid ;
-    mPartialAddr = aNode.mPartialAddr;
-    mAddr = aNode.mAddr;
-    mMask = aNode.mMask;
-    mPermission = aNode.mPermission;
-    mMode = aNode.mMode;
-    mSize = aNode.mSize;
-    mTags = aNode.mTags;
-    mDescription = aNode.mDescription;
-    mModule = aNode.mModule;
-    mClassName = aNode.mClassName;
-    mParameters = aNode.mParameters;
-
-    for (Node* lChild: mChildren)
-    {
-      if (lChild)
-      {
-        delete lChild;
-        lChild = NULL;
-      }
-    }
-
-    mChildren.clear();
-    mChildrenMap.clear();
-
-    mChildren.reserve(aNode.mChildren.size());
-    for (Node* lNode: aNode.mChildren)
-      mChildren.push_back ( lNode->clone() );
-
-    for (Node* lNode: mChildren)
-    {
-      lNode->mParent = this;
-      mChildrenMap.insert ( std::make_pair ( lNode->mUid , lNode ) );
-    }
-
-    return *this;
-  }
-
-
   Node* Node::clone ( ) const
   {
     return new Node ( *this );
