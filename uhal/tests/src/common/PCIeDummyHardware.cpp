@@ -70,7 +70,7 @@ PCIeDummyHardware::PCIeDummyHardware(const std::string& aDevicePathHostToFPGA, c
   log(Debug(), "PCIe dummy hardware is creating client-to-device named PIPE ", Quote (mDevicePathHostToFPGA));
   int rc = mkfifo(mDevicePathHostToFPGA.c_str(), 0666);
   if ( rc != 0 ) {
-    std::runtime_error lExc("Cannot create FIFO; mkfifo returned " + std::to_string(rc) + ", errno=" + std::to_string(errno));
+    std::runtime_error lExc("Cannot create FIFO; mkfifo returned " + std::to_string(rc) + ", errno=" + std::to_string(errno) + " meaning \"" + strerror(errno) + "\"");
     throw lExc;
   }
 
@@ -85,9 +85,9 @@ PCIeDummyHardware::PCIeDummyHardware(const std::string& aDevicePathHostToFPGA, c
   fcntl(mDeviceFileHostToFPGA, F_SETFL, lFileFlags & ~O_NONBLOCK);
 
   log(Debug(), "PCIe dummy hardware is creating device-to-client file ", Quote (mDevicePathFPGAToHost));
-  mDeviceFileFPGAToHost = open(mDevicePathFPGAToHost.c_str(), O_RDWR | O_CREAT | O_DIRECTORY, 0666 /* permission */);
+  mDeviceFileFPGAToHost = open(mDevicePathFPGAToHost.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP /* permission */);
   if ( mDeviceFileFPGAToHost < 0 ) {
-    std::runtime_error lExc("Cannot open FPGA-to-host device file '" + mDevicePathFPGAToHost + "' (dummy hw)");
+    std::runtime_error lExc("Cannot open FPGA-to-host device file '" + mDevicePathFPGAToHost + "' (dummy hw), errno=" + std::to_string(errno) + " meaning \"" + strerror(errno) + "\"");
     throw lExc;
   }
 
