@@ -108,24 +108,16 @@ namespace uhal
       */
       ClientInterface ( const std::string& aId, const URI& aUri , const boost::posix_time::time_duration& aTimeoutPeriod );
 
-    private:
-      //! Default Constructor
-      ClientInterface ();
-
-      /**
-      	Copy Constructor
-      	@param aClientInterface a ClientInterface to copy
-      */
-      ClientInterface ( const ClientInterface& aClientInterface );
-
-      /**
-      	Assignment operator
-      	@param aClientInterface a ClientInterface to copy
-      	@return reference to this object for chained assignment
-      */
-      virtual ClientInterface& operator= ( const ClientInterface& aClientInterface );
-
     public:
+      // Disable default constructor
+      ClientInterface () = delete;
+
+      // Client classes should not be copied or moved
+      ClientInterface(const ClientInterface&) = delete;
+      ClientInterface(ClientInterface&&) = delete;
+      ClientInterface& operator=(const ClientInterface&) = delete;
+      ClientInterface& operator=(ClientInterface&&) = delete;
+
       //! Destructor
       virtual ~ClientInterface();
 
