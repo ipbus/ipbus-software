@@ -12,7 +12,7 @@
     - echo PYTHON=${PYTHON}
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
-    - if [ -f /development_env.sh ]; then echo "Sourcing development env script"; source /development_env.sh; fi
+    - if [ -f /development_env.sh ]; then echo "Sourcing development env script"; source /development_env.sh; sudo yum -y install pugixml-devel; fi
   script:
     - make -k Set=${IPBUS_BUILD_SET} check-version
     - make -k Set=${IPBUS_BUILD_SET} BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0
