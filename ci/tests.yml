@@ -213,10 +213,6 @@ test_tools:centos7-gcc10:
   extends: .template_test:centos7-gcc10
   <<: *test_tools_jobScript
 
-test_controlhub:centos7-gcc10:
-  extends: .template_test:centos7-gcc10
-  <<: *test_controlhub_plainScripts_jobScript
-
 
 test_core:alma8:
   extends: .template_test:alma8
