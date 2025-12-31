@@ -17,7 +17,7 @@ variables:
     - sudo sed -i -re "s|^baseurl=.*|baseurl=${OUTPUT_PIPELINE_URL}/repos/${REPO_URL_OS_SUBDIR}/"'$basearch|g' /etc/yum.repos.d/ipbus-sw-ci.repo
     - cat /etc/yum.repos.d/ipbus-sw-ci.repo
     - sudo yum -y groupinstall uhal controlhub
-    - if [[ ! "$REPO_URL_OS_SUBDIR" =~ ^(centos8|el9) ]]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
+    # - if [[ ! "$REPO_URL_OS_SUBDIR" =~ ^(centos8|el9) ]]; then sudo yum -y install 'cactuscore-uhal-*-debuginfo'; fi
     - if [[ -n "$UHAL_PYTHON_RPM" ]]; then sudo yum -y install $UHAL_PYTHON_RPM; fi
     - rpm -qa | grep cactus | sort
 
