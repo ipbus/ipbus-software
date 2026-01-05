@@ -103,7 +103,7 @@ namespace uhal
 
     void exception::append ( const char* aCStr ) throw()
     {
-      strncat ( mString, aCStr , 65536-strlen ( mString ) );
+      strncat ( mString, aCStr , 65536-strlen ( mString ) - 1 );
     }
 
   }
