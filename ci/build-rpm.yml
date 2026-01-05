@@ -12,6 +12,7 @@
     - echo PYTHON=${PYTHON}
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
+    - if [ -f /development_env.sh ]; then echo "Sourcing development env script"; source /development_env.sh; fi
   script:
     - make -k Set=${IPBUS_BUILD_SET} check-version
     - make -k Set=${IPBUS_BUILD_SET} BUILD_UHAL_PYTHON=0 BUILD_UHAL_GUI=0
@@ -83,12 +84,32 @@
 
     - export REPO_DIR=${CI_PROJECT_DIR}/ci_results/repos/${OUTPUT_REPO_SUBDIR}
     - if [ -z "${CI_COMMIT_TAG}" ]; then export PACKAGE_RELEASE_SUFFIX=.autobuild_$(git log --pretty=format:'%h' -1) ; fi
+    - if [ -f /development_env.sh ]; then echo "Sourcing development env script"; source /development_env.sh; fi
   script:
     - docker buildx build --platform ${BUILD_PLATFORM} --target export --build-arg PACKAGE_RELEASE_SUFFIX=${PACKAGE_RELEASE_SUFFIX} -f ${DOCKERFILE} -t build-products-exporter --output type=local,dest=$(pwd)/build-products .
     - ls -al build-products/rpms
     - mkdir -vp $(dirname ${REPO_DIR})
     - mv build-products/rpms ${REPO_DIR}
   artifacts: !reference [.template_build_rpm_yumrepo, artifacts]
+
+
+build:centos7-gcc10:x86:
+  extends: .template_build_rpm_yumrepo:x86
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc10:2025.12.31__boost1.69.0_pugixml1.8
+  variables:
+    IPBUS_BUILD_SET: uhal
+    OUTPUT_REPO_SUBDIR: centos7_gcc10/x86_64
+    PYTHONS: "python2.7 python3.4 python3.6"
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
+
+build:centos7-gcc10:arm64:
+  extends: .template_build_rpm_yumrepo:arm64
+  image: ${IPBUS_DOCKER_REGISTRY}/centos7/ipbus-sw-dev-gcc10:2025.12.31__boost1.69.0_pugixml1.8
+  variables:
+    IPBUS_BUILD_SET: uhal
+    OUTPUT_REPO_SUBDIR: centos7_gcc10/aarch64
+    PYTHONS: "python2.7 python3.4 python3.6"
+    YUMGROUPS_FILE: ci/yum/yumgroups-centos7.xml
 
 
 build:alma8:x86:
@@ -108,6 +129,23 @@ build:alma8:arm64:
     YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
 
 
+build:alma8-gcc15:x86:
+  extends: .template_build_rpm_yumrepo:x86
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev-gcc15:2025.12.31__boost1.78.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma8_gcc15/x86_64
+    PYTHONS: "python3.6 python3.8 python3.9 python3.11 python3.12"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
+
+build:alma8-gcc15:arm64:
+  extends: .template_build_rpm_yumrepo:arm64
+  image: ${IPBUS_DOCKER_REGISTRY}/alma8/ipbus-sw-dev-gcc15:2025.12.31__boost1.78.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma8_gcc15/aarch64
+    PYTHONS: "python3.6 python3.8 python3.9 python3.11 python3.12"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el8.xml
+
+
 build:alma9:x86:
   extends: .template_build_rpm_yumrepo:x86
   image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2025.08.08__boost1.75.0_pugixml1.13
@@ -121,6 +159,23 @@ build:alma9:arm64:
   image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev:2025.08.08__boost1.75.0_pugixml1.13
   variables:
     OUTPUT_REPO_SUBDIR: alma9/aarch64
+    PYTHONS: "python3.9 python3.11 python3.12 python3.13"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
+
+
+build:alma9-gcc15:x86:
+  extends: .template_build_rpm_yumrepo:x86
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev-gcc15:2025.12.31__boost1.78.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma9_gcc15/x86_64
+    PYTHONS: "python3.9 python3.11 python3.12 python3.13"
+    YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
+
+build:alma9-gcc15:arm64:
+  extends: .template_build_rpm_yumrepo:arm64
+  image: ${IPBUS_DOCKER_REGISTRY}/alma9/ipbus-sw-dev-gcc15:2025.12.31__boost1.78.0_pugixml1.13
+  variables:
+    OUTPUT_REPO_SUBDIR: alma9_gcc15/aarch64
     PYTHONS: "python3.9 python3.11 python3.12 python3.13"
     YUMGROUPS_FILE: ci/yum/yumgroups-el9.xml
 
@@ -189,6 +244,22 @@ build:centos7-gcc8:arm64:
     - docker-aarch64
 
 
+publish:yum:centos7-gcc10:x86:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/centos7_gcc10/x86_64
+    DEPLOY_SUBDIR: repos/el7_gcc10/x86_64
+  needs:
+    - build:centos7-gcc10:x86
+
+publish:yum:centos7-gcc10:arm64:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/centos7_gcc10/aarch64
+    DEPLOY_SUBDIR: repos/el7_gcc10/aarch64
+  needs:
+    - build:centos7-gcc10:arm64
+
 publish:yum:centos7-gcc8:x86:
   extends: .template_publish
   variables:
@@ -223,6 +294,22 @@ publish:yum:alma8:arm64:
   needs:
     - build:alma8:arm64
 
+publish:yum:alma8-gcc15:x86:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma8_gcc15/x86_64
+    DEPLOY_SUBDIR: repos/el8_gcc15/x86_64
+  needs:
+    - build:alma8-gcc15:x86
+
+publish:yum:alma8-gcc15:arm64:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma8_gcc15/aarch64
+    DEPLOY_SUBDIR: repos/el8_gcc15/aarch64
+  needs:
+    - build:alma8-gcc15:arm64
+
 publish:yum:alma9:x86:
   extends: .template_publish
   variables:
@@ -238,3 +325,19 @@ publish:yum:alma9:arm64:
     DEPLOY_SUBDIR: repos/el9/aarch64
   needs:
     - build:alma9:arm64
+
+publish:yum:alma9-gcc15:x86:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma9_gcc15/x86_64
+    DEPLOY_SUBDIR: repos/el9_gcc15/x86_64
+  needs:
+    - build:alma9-gcc15:x86
+
+publish:yum:alma9-gcc15:arm64:
+  extends: .template_publish
+  variables:
+    CI_OUTPUT_DIR: ci_results/repos/alma9_gcc15/aarch64
+    DEPLOY_SUBDIR: repos/el9_gcc15/aarch64
+  needs:
+    - build:alma9-gcc15:arm64
