@@ -72,25 +72,6 @@ uninstall:
 	rm -rf $(PYTHON_DIRECTORIES)
 
 
-# Version check target
-include ${CONFIG_DIR}/mfCommonDefs.mk
-VERSION_HPP_MAJOR = $(shell sed -n -e "s/\#define UHAL_VERSION_MAJOR //p" uhal/include/uhal/version.hpp)
-VERSION_HPP_MINOR = $(shell sed -n -e "s/\#define UHAL_VERSION_MINOR //p" uhal/include/uhal/version.hpp)
-VERSION_HPP_PATCH = $(shell sed -n -e "s/\#define UHAL_VERSION_PATCH //p" uhal/include/uhal/version.hpp)
-
+# Version check target (now empty, since macros auto-generated)
 .PHONY: check-version
 check-version:
-	@echo Checking version.hpp
-ifneq (${VERSION_HPP_MAJOR},${PACKAGE_VER_MAJOR})
-	$(error "version.hpp: UHAL_VERSION_MAJOR has incorrect value")
-endif
-ifneq (${VERSION_HPP_MINOR},${PACKAGE_VER_MINOR})
-	$(error "version.hpp: UHAL_VERSION_MINOR has incorrect value")
-endif
-ifneq (${VERSION_HPP_PATCH},${PACKAGE_VER_PATCH})
-	$(error "version.hpp: UHAL_VERSION_PATCH has incorrect value")
-endif
-ifdef CI_COMMIT_TAG
-	@echo Detected GitLab CI env. Checking that tag name matches makefile variable values
-	@if ! [[ ${CI_COMMIT_TAG} =~ v${PACKAGE_VER_MAJOR}.${PACKAGE_VER_MINOR}.${PACKAGE_VER_PATCH}.* ]]; then echo "ERROR: Value of CI_COMMIT_TAG, \"${CI_COMMIT_TAG}\", inconsistent with PACKAGE_VER_ variables"; exit 1; fi
-endif

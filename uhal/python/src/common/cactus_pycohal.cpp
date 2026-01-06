@@ -22,6 +22,7 @@
 // pycohal includes
 #include "uhal/pycohal/enums_logging.hpp"
 #include "uhal/pycohal/exceptions.hpp"
+#include "uhal/pycohal/version.hpp"
 
 
 namespace py = pybind11;
@@ -245,6 +246,9 @@ PYBIND11_MODULE(_core, m)
 
   // EXCEPTIONS
   pycohal::wrap_exceptions(m);
+
+  // VERSION & BUILD INFO
+  pycohal::wrap_version_and_build_info(m);
 
   // TEST FUNCTIONS
   pycohal::wrap_test_functions(m);

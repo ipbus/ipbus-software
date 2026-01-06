@@ -74,3 +74,13 @@ _add_int_method_to_ValWord('__bool__' if (sys.version_info[0] > 2) else '__nonze
 # Binary comparison operators
 _add_int_methods_to_ValWord(['__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__'] if (sys.version_info[0] > 2) else ['__cmp__'])
 
+
+# Add PackageInfo.{Local,GitLab}Build functions that convert from epoch time to an 'aware' datetime object in local timezone
+if (sys.version_info[0], sys.version_info[1]) > (3, 5):
+    from datetime import datetime
+    _LOCAL_TZ = datetime.utcnow().astimezone().tzinfo
+    def _getAwareDateTimeObject(x):
+        return datetime.fromtimestamp(x._epochTime, tz=_LOCAL_TZ)
+
+    PackageInfo.LocalBuild.time = property(_getAwareDateTimeObject)
+    PackageInfo.GitLabBuild.time = property(_getAwareDateTimeObject)
