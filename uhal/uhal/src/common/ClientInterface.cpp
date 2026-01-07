@@ -60,43 +60,6 @@ namespace uhal
   }
 
 
-  ClientInterface::ClientInterface ( ) :
-    mBuffers(),
-#ifdef NO_PREEMPTIVE_DISPATCH
-    mNoPreemptiveDispatchBuffers(),
-#endif
-    mId ( ),
-    mTimeoutPeriod ( boost::posix_time::pos_infin ),
-    mUri ( ),
-    mUriString( "" )
-  {
-  }
-
-
-  ClientInterface::ClientInterface ( const ClientInterface& aClientInterface ) :
-    mBuffers(),
-#ifdef NO_PREEMPTIVE_DISPATCH
-    mNoPreemptiveDispatchBuffers(),
-#endif
-    mId ( aClientInterface.mId ),
-    mTimeoutPeriod ( aClientInterface.mTimeoutPeriod ),
-    mUri ( aClientInterface.mUri ),
-    mUriString( aClientInterface.mUriString )
-  {
-  }
-
-
-  ClientInterface& ClientInterface::operator= ( const ClientInterface& aClientInterface )
-  {
-    deleteBuffers();
-    mId  = aClientInterface.mId;
-    mUri = aClientInterface.mUri;
-    mUriString = aClientInterface.mUriString;
-    mTimeoutPeriod = aClientInterface.mTimeoutPeriod;
-    return *this;
-  }
-
-
   ClientInterface::~ClientInterface()
   {
     deleteBuffers();

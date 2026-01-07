@@ -89,12 +89,18 @@ namespace uhal
       friend class DerivedNodeFactory;
 
     public:
-      class const_iterator : public std::iterator< std::forward_iterator_tag , Node , ptrdiff_t, const Node* , const Node& >
+      class const_iterator
       {
           friend class Node;
           typedef std::deque< std::vector< Node* >::const_iterator > stack;
 
         public:
+          using iterator_category = std::forward_iterator_tag;
+          using value_type = Node;
+          using difference_type = ptrdiff_t;
+          using pointer = const Node*;
+          using reference = const Node&;
+
           const_iterator();
           virtual ~const_iterator();
 
@@ -130,12 +136,10 @@ namespace uhal
       */
       Node ( const Node& aNode );
 
-      /**
-      	Assignment operator
-      	@param aNode a Node to copy
-      	@return reference to this object for chained assignment
-      */
-      virtual Node& operator= ( const Node& aNode );
+      // Node classes should not be assigned or moved (and only copied by derived classes, for their clone methods)
+      Node(Node&&) = delete;
+      Node& operator=(const Node&) = delete;
+      Node& operator=(Node&&) = delete;
 
       /**
       	Function to produce a new copy of the current Node
