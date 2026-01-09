@@ -44,7 +44,6 @@ Libraries = \
 		boost_program_options \
 		boost_unit_test_framework \
 		boost_regex \
-		boost_system \
 		\
 		pugixml \
 		\
